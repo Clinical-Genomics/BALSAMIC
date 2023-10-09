@@ -136,8 +136,8 @@ rule finalize_gens_outputfiles:
         gens_baf_bed_tbi = cnv_dir + "{sample}.baf.bed.gz.tbi",
         gens_cov_bed_tbi = cnv_dir + "{sample}.cov.bed.gz.tbi"
     params:
-        sample="{sample}",
-        housekeeper_id= {"id": "{sample}", "tags": "gens"}
+        sample_id="{sample}",
+        housekeeper_id={"id": "{sample}", "tags": "gens"}
     benchmark:
         Path(benchmark_dir,'finalize_gens_outputfiles' + "{sample}.tsv").as_posix()
     singularity:
@@ -145,7 +145,7 @@ rule finalize_gens_outputfiles:
     threads:
         get_threads(cluster_config, 'bgzip')
     message:
-        "Formatting output for GENS for sample: {params.sample}."
+        "Formatting output for GENS for sample: {params.sample_id}."
     shell:
         """
 bgzip {input.gens_baf_bed}
