@@ -13,7 +13,7 @@ rule bam_compress_tumor:
         Path(singularity_image, config["bioinfo_tools"].get("compress") + ".sif").as_posix()
     params:
         sample_id = "{sample}",
-        housekeeper_id= {"id": tumor_sample, "tags": "tumor"}
+        housekeeper_id= {"id": "{sample}", "tags": "tumor"}
     threads:
         get_threads(cluster_config, "bam_compress")
     message:
@@ -36,7 +36,7 @@ rule bam_compress_normal:
         Path(singularity_image, config["bioinfo_tools"].get("compress") + ".sif").as_posix()
     params:
         sample_id = "{sample}",
-        housekeeper_id= {"id": normal_sample, "tags": "normal"}
+        housekeeper_id= {"id": "{sample}", "tags": "normal"}
     threads:
         get_threads(cluster_config, "bam_compress")
     message:
