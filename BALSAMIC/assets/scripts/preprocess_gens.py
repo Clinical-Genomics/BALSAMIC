@@ -283,6 +283,48 @@ def mean(nums: list) -> float:
     """
     return sum(nums) / len(nums)
 
+def check_if_start_new_region(prefix, window_size, chrom, region_chrom, region_start, region_end, reg_ratios, cov_out):
+
+    start_new_region: bool = False
+    region_size: int = region_end - region_start + 1
+    if region_size == window_size:
+        # Region size matches window size
+        write_coverage_region(
+            prefix, region_chrom, region_start, region_end, reg_ratios, cov_out
+        )
+        start_new_region: bool = True
+
+    if chrom != region_chrom:
+        # New chromosome
+        write_coverage_region(
+            prefix, region_chrom, region_start, region_end, reg_ratios, cov_out
+        )
+        start_new_region: bool = True
+
+    if region_size > window_size:
+        # Region size larger due to incomplete genome reference
+        # example: window_size = 300:
+        # start1 -- 100bases -- end1 + (region_start = start1)
+        # start2 -- 100bases -- end2 + (region_end = end2)
+        # -- gap 500 bases --
+        # start3 -- 100bases -- end3 (region_end = end3)
+        # start4 -- 100bases -- end4
+        # Step 1: Revert values to before incompleteness and write
+        # Step 2: Start current region from previous cov element
+        # end_lists = [x, y, z, before_gap (-3), after_gap (-2), current (-1)]
+        previous_region_end: int = region_end_list[-3]
+        previous_end: int = region_end_list[-2]
+        previous_ratio: float = reg_ratios.pop()
+        write_coverage_region(
+            prefix, region_chrom, region_start, previous_region_end, reg_ratios, cov_out
+        )
+        region_start: int = region_start_list[-2]
+        reg_ratios: List = [previous_ratio]
+        region_end_list, region_start_list = [previous_end, end], [region_start, start]
+        start_new_region: bool = False
+
+    return start_new_region
+
 
 def generate_cov_bed(
     normalised_coverage_path: Path,
@@ -306,11 +348,12 @@ def generate_cov_bed(
     normalised_coverage: List = normalised_coverage_path.read_text().splitlines()
 
     first_cov_line: bool = True
+    start_new_region: bool = False
     for coverage_line in normalised_coverage:
         if coverage_line.startswith("@") or coverage_line.startswith("CONTIG"):
             continue
 
-        if first_cov_line:
+        if first_cov_line or start_new_region:
             (
                 region_chrom,
                 region_start,
@@ -320,17 +363,45 @@ def generate_cov_bed(
             reg_ratios: List = [log2_ratio]
             first_cov_line: bool = False
             start_new_region: bool = False
+            if window_size == 100:
+                write_coverage_region(
+                    prefix, region_chrom, region_start, region_end, reg_ratios, cov_out
+                )
+                start_new_region: bool = True
             continue
         else:
-            chrom, _, end, log2_ratio = extract_coverage_line_values(coverage_line)
+            chrom, start, end, log2_ratio = extract_coverage_line_values(coverage_line)
 
-        if region_end - region_start + 1 >= window_size:
+        region_size: int = end - region_start + 1
+        if region_size == window_size:
+            # Region size matches window size
+            # Step 1: Write region from current line
+            # Step 2: Start new region from new line
+            reg_ratios.append(log2_ratio)
+            write_coverage_region(
+                prefix, region_chrom, region_start, end, reg_ratios, cov_out
+            )
+            start_new_region: bool = True
+            continue
+
+        if region_size > window_size:
+            # Region size larger due to incomplete genome reference
+            # Step 1:  Write region from previous line
+            # Step 2: Start new region from current line
+            # Conceptual example: window_size = 300:
+            # start1 -- 100bases -- end1 + (region_start = start1, region_end = end1)
+            # start2 -- 100bases -- end2 + (region_start = start1, region_end = end2)
+            # -- gap 500 bases --
+            # start3 -- 100bases -- end3
             write_coverage_region(
                 prefix, region_chrom, region_start, region_end, reg_ratios, cov_out
             )
             start_new_region: bool = True
 
         if chrom != region_chrom:
+            # New chromosome:
+            # Step 1: Write region from previous line
+            # Step 2: Start new region from current line
             write_coverage_region(
                 prefix, region_chrom, region_start, region_end, reg_ratios, cov_out
             )
@@ -344,9 +415,8 @@ def generate_cov_bed(
                 log2_ratio,
             ) = extract_coverage_line_values(coverage_line)
             reg_ratios: List = [log2_ratio]
-            start_new_region: bool = False
         else:
-            region_end = end
+            region_end: int = end
             reg_ratios.append(log2_ratio)
 
     # Output last line:
