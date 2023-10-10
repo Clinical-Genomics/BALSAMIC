@@ -265,10 +265,10 @@ def extract_coverage_line_values(coverage_line: str) -> Tuple[str, int, int, flo
     """
     # Extract coverage region values
     chr_start_stop_ratio: List = coverage_line.strip().split("\t")
-    chr: str = chr_start_stop_ratio[0]
+    chrom: str = chr_start_stop_ratio[0]
     start, end = int(chr_start_stop_ratio[1]), int(chr_start_stop_ratio[2])
     log2_ratio: float = float(chr_start_stop_ratio[3])
-    return chr, start, end, log2_ratio
+    return chrom, start, end, log2_ratio
 
 
 def mean(nums: list) -> float:
@@ -282,6 +282,7 @@ def mean(nums: list) -> float:
         Mean value.
     """
     return sum(nums) / len(nums)
+
 
 def generate_cov_bed(
     normalised_coverage_path: Path,
@@ -303,6 +304,7 @@ def generate_cov_bed(
     """
 
     normalised_coverage: List = normalised_coverage_path.read_text().splitlines()
+
 
     first_cov_line: bool = True
     start_new_region: bool = False
@@ -327,7 +329,7 @@ def generate_cov_bed(
                 start_new_region: bool = True
             continue
         else:
-            chrom, start, end, log2_ratio = extract_coverage_line_values(coverage_line)
+            chrom, _, end, log2_ratio = extract_coverage_line_values(coverage_line)
 
         region_size: int = end - region_start + 1
         if region_size == window_size:
