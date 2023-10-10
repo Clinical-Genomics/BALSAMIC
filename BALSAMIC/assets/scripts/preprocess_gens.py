@@ -283,8 +283,17 @@ def mean(nums: list) -> float:
     """
     return sum(nums) / len(nums)
 
-def check_if_start_new_region(prefix, window_size, chrom, region_chrom, region_start, region_end, reg_ratios, cov_out):
 
+def check_if_start_new_region(
+    prefix,
+    window_size,
+    chrom,
+    region_chrom,
+    region_start,
+    region_end,
+    reg_ratios,
+    cov_out,
+):
     start_new_region: bool = False
     region_size: int = region_end - region_start + 1
     if region_size == window_size:
