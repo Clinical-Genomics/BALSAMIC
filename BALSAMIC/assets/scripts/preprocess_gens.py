@@ -305,7 +305,6 @@ def generate_cov_bed(
 
     normalised_coverage: List = normalised_coverage_path.read_text().splitlines()
 
-
     first_cov_line: bool = True
     start_new_region: bool = False
     for coverage_line in normalised_coverage:
