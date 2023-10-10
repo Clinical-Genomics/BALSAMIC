@@ -137,7 +137,7 @@ rule finalize_gens_outputfiles:
         gens_cov_bed_tbi = cnv_dir + "{sample}.cov.bed.gz.tbi"
     params:
         sample_id="{sample}",
-        housekeeper_id= {"id": "{wildcards.sample}", "tags": "gens"}
+        housekeeper_id= {"id": f"{wildcards.sample}", "tags": "gens"}
     benchmark:
         Path(benchmark_dir,'finalize_gens_outputfiles' + "{sample}.tsv").as_posix()
     singularity:
