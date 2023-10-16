@@ -9,6 +9,7 @@ import click
 
 from BALSAMIC.commands.options import (
     OPTION_GENOME_VERSION,
+    OPTION_GENOME_INTERVAL,
     OPTION_ADAPTER_TRIM,
     OPTION_ANALYSIS_DIR,
     OPTION_BALSAMIC_CACHE,
@@ -47,6 +48,7 @@ LOG = logging.getLogger(__name__)
 @OPTION_CASE_ID
 @OPTION_FASTQ_PATH
 @OPTION_GENOME_VERSION
+@OPTION_GENOME_INTERVAL
 @OPTION_PANEL_BED
 @OPTION_PON_TYPE
 @OPTION_PON_VERSION
@@ -63,6 +65,7 @@ def pon_config(
     case_id: str,
     fastq_path: Path,
     genome_version: GenomeVersion,
+    genome_interval: Path,
     panel_bed: Path,
     pon_creation_type: PONType,
     quality_trim: bool,
@@ -70,6 +73,17 @@ def pon_config(
     umi_trim_length: bool,
     version: str,
 ):
+    if pon_creation_type in [PONType.GENS_MALE, PONType.GENS_FEMALE]:
+        if not genome_interval:
+            raise click.BadParameter(
+                "Argument: genome_interval is required for GENS PON creation."
+            )
+    if pon_creation_type == PONType.CNVKIT:
+        if not panel_bed:
+            raise click.BadParameter(
+                "Argument: panel_bed is required for CNVkit PON creation."
+            )
+
     references_path: Path = Path(balsamic_cache, cache_version, genome_version)
     references: Dict[str, Path] = get_absolute_paths_dict(
         base_path=references_path,
