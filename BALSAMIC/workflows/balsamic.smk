@@ -374,6 +374,7 @@ if "dragen" in config:
 
 # Add rule for GENS
 if "gens_coverage_pon" in config["reference"]:
+    rules_to_include.append("snakemake_rules/variant_calling/gatk_read_counts.rule")
     rules_to_include.append("snakemake_rules/variant_calling/gens_preprocessing.rule")
 
 LOG.info(f"The following rules will be included in the workflow: {rules_to_include}")

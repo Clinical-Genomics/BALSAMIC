@@ -4,6 +4,7 @@
 rule sentieon_DNAscope_gnomad:
     input:
         ref = config["reference"]["reference_genome"],
+        gnomad_af5= config["reference"]["gnomad_min_af5"],
         bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample)
     output:
         gnomad_af5_vcf = cnv_dir + "SNV.germline.{sample}.dnascope_gnomad_af5.vcf.gz",
@@ -13,7 +14,6 @@ rule sentieon_DNAscope_gnomad:
         sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
         sentieon_ml_dnascope = config["SENTIEON_DNASCOPE"],
-        gnomad_af5 = config["reference"]["gnomad_min_af5"],
         sample = "{sample}"
     benchmark:
         Path(benchmark_dir, 'sentieon_DNAscope_' + "{sample}.tsv").as_posix()
@@ -40,77 +40,14 @@ export SENTIEON_DNASCOPE={params.sentieon_ml_dnascope};
 rm -rf {params.tmpdir};
       """
 
-rule gatk_collectreadcounts:
-    input:
-        bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample),
-        genome_interval = config["reference"]["genome_interval"]
-    output:
-        readcounts_hdf5 = cnv_dir + "{sample}.collectreadcounts.hdf5"
-    params:
-        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-        sample = "{sample}"
-    benchmark:
-        Path(benchmark_dir, 'gatk_collectreadcounts_' + "{sample}.tsv").as_posix()
-    singularity:
-        Path(singularity_image,config["bioinfo_tools"].get("gatk") + ".sif").as_posix()
-    threads:
-        get_threads(cluster_config, 'gatk_collectreadcounts')
-    message:
-        "Running GATK CollectReadCounts on {params.sample} for GENS."
-    shell:
-      """
-mkdir -p {params.tmpdir};
-export TMPDIR={params.tmpdir};  
-    
-gatk --java-options "-XX:-UseLargePages -Xmx20g" CollectReadCounts -I {input.bam} \
--L {input.genome_interval} \
---tmp-dir {params.tmpdir} \
---interval-merging-rule OVERLAPPING_ONLY \
--O {output.readcounts_hdf5}
-
-rm -rf {params.tmpdir}
-      """
-
-rule gatk_create_readcount_pon:
-    input:
-        readcounts_hdf5s = expand(cnv_dir + "{sample}.collectreadcounts.hdf5", sample=sample_names)
-    output:
-        pon_hdf5 = cnv_dir + "balsamic_pon_100bp.{gender}.{version}.hdf5"
-    params:
-        tmpdir=tempfile.mkdtemp(prefix=tmp_dir),
-        gender="{gender}"
-    benchmark:
-        Path(benchmark_dir, "gatk_create_readcount_pon.{gender}.{version}.tsv").as_posix()
-    singularity:
-        Path(singularity_image,config["bioinfo_tools"].get("gatk") + ".sif").as_posix()
-    threads:
-        get_threads(cluster_config,'gatk_create_readcount_pon')
-    message:
-        "Running GATK CreateReadCountPanelOfNormals for {params.gender} PON for GENS."
-    shell:
-        """
-mkdir -p {params.tmpdir};
-export TMPDIR={params.tmpdir};  
-  
-shell_readcounts_hdf5s=$(echo {input.readcounts_hdf5s} | sed 's/ / -I /g') ;
-
-gatk --java-options "-Xmx120000m" CreateReadCountPanelOfNormals \
---minimum-interval-median-percentile 10.0  \
---maximum-chunk-size 29349635 \
--O {output.pon_hdf5} \
--I $shell_readcounts_hdf5s
-  
-rm -rf {params.tmpdir}
-        """
-
 rule gatk_denoisereadcounts:
     input:
+        gens_pon = config["reference"]["gens_coverage_pon"],
         readcounts_hdf5 = cnv_dir + "{sample}.collectreadcounts.hdf5"
     output:
         denoised_cr = cnv_dir + "{sample}.denoisedCR.tsv",
         standardized_cr = cnv_dir + "{sample}.standardizedCR.tsv"
     params:
-        gens_pon = config["reference"]["gens_coverage_pon"],
         tmpdir=tempfile.mkdtemp(prefix=tmp_dir),
         sample="{sample}"
     benchmark:
