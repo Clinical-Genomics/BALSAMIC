@@ -71,6 +71,38 @@ gatk --java-options "-XX:-UseLargePages -Xmx20g" CollectReadCounts -I {input.bam
 rm -rf {params.tmpdir}
       """
 
+rule gatk_create_readcount_pon:
+    input:
+        readcounts_hdf5s = expand(cnv_dir + "{sample}.collectreadcounts.hdf5", sample=sample_names)
+    output:
+        pon_hdf5 = cnv_dir + "balsamic_pon_100bp.{gender}.{version}.hdf5"
+    params:
+        tmpdir=tempfile.mkdtemp(prefix=tmp_dir),
+        gender="{gender}"
+    benchmark:
+        Path(benchmark_dir, "gatk_create_readcount_pon.{gender}.{version}.tsv").as_posix()
+    singularity:
+        Path(singularity_image,config["bioinfo_tools"].get("gatk") + ".sif").as_posix()
+    threads:
+        get_threads(cluster_config,'gatk_create_readcount_pon')
+    message:
+        "Running GATK CreateReadCountPanelOfNormals for {params.gender} PON for GENS."
+    shell:
+        """
+mkdir -p {params.tmpdir};
+export TMPDIR={params.tmpdir};  
+  
+shell_readcounts_hdf5s=$(echo {input.readcounts_hdf5s} | sed 's/ / -I /g') ;
+
+gatk --java-options "-Xmx120000m" CreateReadCountPanelOfNormals \
+--minimum-interval-median-percentile 10.0  \
+--maximum-chunk-size 29349635 \
+-O {output.pon_hdf5} \
+-I $shell_readcounts_hdf5s
+  
+rm -rf {params.tmpdir}
+        """
+
 rule gatk_denoisereadcounts:
     input:
         readcounts_hdf5 = cnv_dir + "{sample}.collectreadcounts.hdf5",

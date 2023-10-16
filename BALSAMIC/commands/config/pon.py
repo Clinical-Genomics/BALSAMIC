@@ -15,13 +15,14 @@ from BALSAMIC.commands.options import (
     OPTION_CASE_ID,
     OPTION_FASTQ_PATH,
     OPTION_PANEL_BED,
+    OPTION_PON_TYPE,
     OPTION_PON_VERSION,
     OPTION_QUALITY_TRIM,
     OPTION_UMI,
     OPTION_UMI_TRIM_LENGTH,
     OPTION_CACHE_VERSION,
 )
-from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV
+from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV, PONType
 from BALSAMIC.constants.cache import GenomeVersion
 from BALSAMIC.constants.constants import FileType
 from BALSAMIC.constants.paths import CONTAINERS_DIR
@@ -47,6 +48,7 @@ LOG = logging.getLogger(__name__)
 @OPTION_FASTQ_PATH
 @OPTION_GENOME_VERSION
 @OPTION_PANEL_BED
+@OPTION_PON_TYPE
 @OPTION_PON_VERSION
 @OPTION_QUALITY_TRIM
 @OPTION_UMI
@@ -62,6 +64,7 @@ def pon_config(
     fastq_path: Path,
     genome_version: GenomeVersion,
     panel_bed: Path,
+    pon_creation_type: PONType,
     quality_trim: bool,
     umi: bool,
     umi_trim_length: bool,
@@ -87,6 +90,7 @@ def pon_config(
             "analysis_dir": analysis_dir,
             "fastq_path": fastq_path,
             "analysis_type": "pon",
+            "pon_creation_type": PONType,
             "pon_version": version,
             "analysis_workflow": "balsamic",
             "sequencing_type": "targeted" if panel_bed else "wgs",
