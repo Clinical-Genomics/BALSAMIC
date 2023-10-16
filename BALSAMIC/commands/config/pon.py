@@ -90,7 +90,7 @@ def pon_config(
             "analysis_dir": analysis_dir,
             "fastq_path": fastq_path,
             "analysis_type": "pon",
-            "pon_creation_type": PONType,
+            "pon_creation_type": pon_creation_type,
             "pon_version": version,
             "analysis_workflow": "balsamic",
             "sequencing_type": "targeted" if panel_bed else "wgs",

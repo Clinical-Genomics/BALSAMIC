@@ -3,6 +3,7 @@ import graphviz
 import logging
 from unittest import mock
 from pathlib import Path
+from BALSAMIC.constants.analysis import PONType
 
 
 def test_pon_config(
@@ -12,6 +13,7 @@ def test_pon_config(
     panel_bed_file: str,
     fastq_dir_pon: str,
     case_id_pon: str,
+    cnvkit_pon_type: PONType
 ):
     """Test balsamic PON config case command."""
 
@@ -34,6 +36,8 @@ def test_pon_config(
             "v5",
             "--balsamic-cache",
             balsamic_cache,
+            "--pon-creation-type",
+            cnvkit_pon_type
         ]
     )
 

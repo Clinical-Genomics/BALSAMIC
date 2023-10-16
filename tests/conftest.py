@@ -14,7 +14,7 @@ from pydantic_core import Url
 
 from BALSAMIC import __version__ as balsamic_version
 from BALSAMIC.commands.base import cli
-from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV, RunMode, AnalysisWorkflow
+from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV, RunMode, AnalysisWorkflow, PONType
 from BALSAMIC.constants.cache import DockerContainers, GenomeVersion, REFERENCE_FILES
 from BALSAMIC.constants.cluster import (
     ClusterConfigType,
@@ -196,6 +196,19 @@ def case_id_pon() -> str:
     """
     return "sample_pon_creation"
 
+@pytest.fixture(scope="session")
+def cnvkit_pon_type() -> str:
+    """
+    Returns PONtype for CNVkit PON creation
+    """
+    return PONType.CNVKIT
+
+@pytest.fixture(scope="session")
+def gens_male_pon_type() -> str:
+    """
+    Returns PONtype for GENS PON creation for gender male
+    """
+    return PONType.GENS_MALE
 
 def case_id_tumor_only_pon() -> str:
     """Create mock case-id for TGA PON tumor-only."""
