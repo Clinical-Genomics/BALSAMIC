@@ -14,7 +14,12 @@ from pydantic_core import Url
 
 from BALSAMIC import __version__ as balsamic_version
 from BALSAMIC.commands.base import cli
-from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV, RunMode, AnalysisWorkflow, PONType
+from BALSAMIC.constants.analysis import (
+    BIOINFO_TOOL_ENV,
+    RunMode,
+    AnalysisWorkflow,
+    PONType,
+)
 from BALSAMIC.constants.cache import DockerContainers, GenomeVersion, REFERENCE_FILES
 from BALSAMIC.constants.cluster import (
     ClusterConfigType,
@@ -196,12 +201,14 @@ def case_id_pon() -> str:
     """
     return "sample_pon_creation"
 
+
 @pytest.fixture(scope="session")
 def case_id_gens_pon() -> str:
     """
     Creates mock case-id for PON creation workflow
     """
     return "genscreation"
+
 
 @pytest.fixture(scope="session")
 def cnvkit_pon_type() -> str:
@@ -210,12 +217,14 @@ def cnvkit_pon_type() -> str:
     """
     return PONType.CNVKIT
 
+
 @pytest.fixture(scope="session")
 def gens_male_pon_type() -> str:
     """
     Returns PONtype for GENS PON creation for gender male
     """
     return PONType.GENS_MALE
+
 
 def case_id_tumor_only_pon() -> str:
     """Create mock case-id for TGA PON tumor-only."""
@@ -771,8 +780,11 @@ def fastq_dir_pon(analysis_dir: str, case_id_pon: str, pon_fastq_list: list) -> 
 
     yield fastq_dir.as_posix()
 
+
 @pytest.fixture(scope="session")
-def fastq_dir_gens_pon(analysis_dir: str, case_id_gens_pon: str, pon_fastq_list: list) -> str:
+def fastq_dir_gens_pon(
+    analysis_dir: str, case_id_gens_pon: str, pon_fastq_list: list
+) -> str:
     """
     Creates and returns the directory containing the FASTQs for PON creation workflow.
     """
@@ -784,6 +796,7 @@ def fastq_dir_gens_pon(analysis_dir: str, case_id_gens_pon: str, pon_fastq_list:
         Path(fastq_dir, fastq).touch()
 
     yield fastq_dir.as_posix()
+
 
 @pytest.fixture(scope="session")
 def empty_fastq_dir(analysis_dir: str, case_id_tumor_normal: str) -> str:
@@ -1680,13 +1693,14 @@ def cnvkit_pon_creation_config(
                 "--balsamic-cache",
                 balsamic_cache,
                 "--pon-creation-type",
-                cnvkit_pon_type
+                cnvkit_pon_type,
             ],
         )
 
     return Path(
         analysis_dir, case_id_pon, f"{case_id_pon}_PON.{FileType.JSON}"
     ).as_posix()
+
 
 @pytest.fixture(scope="session")
 def GENS_pon_creation_config(
@@ -1727,13 +1741,14 @@ def GENS_pon_creation_config(
                 "--pon-creation-type",
                 gens_male_pon_type,
                 "--genome-interval",
-                gens_hg19_interval_list
+                gens_hg19_interval_list,
             ],
         )
 
     return Path(
         analysis_dir, case_id_gens_pon, f"{case_id_gens_pon}_PON.{FileType.JSON}"
     ).as_posix()
+
 
 @pytest.fixture(scope="session")
 def sample_config(

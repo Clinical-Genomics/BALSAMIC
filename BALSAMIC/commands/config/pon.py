@@ -73,7 +73,6 @@ def pon_config(
     umi_trim_length: bool,
     version: str,
 ):
-
     references_path: Path = Path(balsamic_cache, cache_version, genome_version)
     references: Dict[str, Path] = get_absolute_paths_dict(
         base_path=references_path,

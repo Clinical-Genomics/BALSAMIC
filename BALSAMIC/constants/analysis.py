@@ -83,9 +83,11 @@ class WorkflowSolution(StrEnum):
 
 class PONType(StrEnum):
     """Panel Of Normal creation workflow type."""
+
     CNVKIT: str = "CNVkit"
     GENS_MALE: str = "GENS_male"
     GENS_FEMALE: str = "GENS_female"
+
 
 class RuleDeliveryMode(StrEnum):
     """Rules to deliver mode."""

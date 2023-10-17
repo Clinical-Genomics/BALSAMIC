@@ -13,7 +13,7 @@ def test_cnvkit_pon_config(
     panel_bed_file: str,
     fastq_dir_pon: str,
     case_id_pon: str,
-    cnvkit_pon_type: PONType
+    cnvkit_pon_type: PONType,
 ):
     """Test balsamic PON config case command."""
 
@@ -37,13 +37,14 @@ def test_cnvkit_pon_config(
             "--balsamic-cache",
             balsamic_cache,
             "--pon-creation-type",
-            cnvkit_pon_type
+            cnvkit_pon_type,
         ]
     )
 
     # THEN a config should be created and exist
     assert result.exit_code == 0
     assert Path(analysis_dir, case_id_pon, case_id_pon + "_PON.json").exists()
+
 
 def test_GENS_pon_config(
     invoke_cli,
@@ -76,7 +77,7 @@ def test_GENS_pon_config(
             "--pon-creation-type",
             gens_male_pon_type,
             "--genome-interval",
-            gens_hg19_interval_list
+            gens_hg19_interval_list,
         ]
     )
 
@@ -119,12 +120,14 @@ def test_dag_graph_success_cnvkit_pon(cnvkit_pon_creation_config: str):
     # THEN DAG graph should be created successfully
     assert Path(json.load(open(cnvkit_pon_creation_config))["analysis"]["dag"]).exists()
 
+
 def test_dag_graph_success_GENS_pon(GENS_pon_creation_config: str):
     """Test DAG graph building success."""
     # WHEN creating config using standard CLI input and setting Sentieon env vars
 
     # THEN DAG graph should be created successfully
     assert Path(json.load(open(GENS_pon_creation_config))["analysis"]["dag"]).exists()
+
 
 def test_cnvkit_pon_config_graph_failed(
     invoke_cli,
