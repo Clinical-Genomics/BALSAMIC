@@ -197,6 +197,13 @@ def case_id_pon() -> str:
     return "sample_pon_creation"
 
 @pytest.fixture(scope="session")
+def case_id_gens_pon() -> str:
+    """
+    Creates mock case-id for PON creation workflow
+    """
+    return "genscreation"
+
+@pytest.fixture(scope="session")
 def cnvkit_pon_type() -> str:
     """
     Returns PONtype for CNVkit PON creation
@@ -764,6 +771,19 @@ def fastq_dir_pon(analysis_dir: str, case_id_pon: str, pon_fastq_list: list) -> 
 
     yield fastq_dir.as_posix()
 
+@pytest.fixture(scope="session")
+def fastq_dir_gens_pon(analysis_dir: str, case_id_gens_pon: str, pon_fastq_list: list) -> str:
+    """
+    Creates and returns the directory containing the FASTQs for PON creation workflow.
+    """
+
+    fastq_dir: Path = Path(analysis_dir, case_id_gens_pon, "fastq")
+    fastq_dir.mkdir(parents=True, exist_ok=True)
+
+    for fastq in pon_fastq_list:
+        Path(fastq_dir, fastq).touch()
+
+    yield fastq_dir.as_posix()
 
 @pytest.fixture(scope="session")
 def empty_fastq_dir(analysis_dir: str, case_id_tumor_normal: str) -> str:
@@ -1622,7 +1642,7 @@ def tumor_only_pon_config(
 
 
 @pytest.fixture(scope="session")
-def pon_creation_config(
+def cnvkit_pon_creation_config(
     case_id_pon: str,
     analysis_dir: str,
     fastq_dir_pon: str,
@@ -1630,8 +1650,9 @@ def pon_creation_config(
     balsamic_cache: str,
     sentieon_license: str,
     sentieon_install_dir: str,
+    cnvkit_pon_type: PONType,
 ) -> str:
-    """Invoke PON creation config configuration file for PON workflow."""
+    """Invoke PON creation config configuration file for CNVkit PON workflow."""
 
     with mock.patch.dict(
         MOCKED_OS_ENVIRON,
@@ -1658,6 +1679,8 @@ def pon_creation_config(
                 "v5",
                 "--balsamic-cache",
                 balsamic_cache,
+                "--pon-creation-type",
+                cnvkit_pon_type
             ],
         )
 
@@ -1665,6 +1688,52 @@ def pon_creation_config(
         analysis_dir, case_id_pon, f"{case_id_pon}_PON.{FileType.JSON}"
     ).as_posix()
 
+@pytest.fixture(scope="session")
+def GENS_pon_creation_config(
+    case_id_gens_pon: str,
+    analysis_dir: str,
+    fastq_dir_gens_pon: str,
+    balsamic_cache: str,
+    sentieon_license: str,
+    sentieon_install_dir: str,
+    gens_male_pon_type: PONType,
+    gens_hg19_interval_list: str,
+) -> str:
+    """Invoke PON creation config configuration file for GENS PON workflow."""
+
+    with mock.patch.dict(
+        MOCKED_OS_ENVIRON,
+        {
+            "SENTIEON_LICENSE": sentieon_license,
+            "SENTIEON_INSTALL_DIR": sentieon_install_dir,
+        },
+    ):
+        runner = CliRunner()
+        runner.invoke(
+            cli,
+            [
+                "config",
+                "pon",
+                "--case-id",
+                case_id_gens_pon,
+                "--analysis-dir",
+                analysis_dir,
+                "--fastq-path",
+                fastq_dir_gens_pon,
+                "--version",
+                "v5",
+                "--balsamic-cache",
+                balsamic_cache,
+                "--pon-creation-type",
+                gens_male_pon_type,
+                "--genome-interval",
+                gens_hg19_interval_list
+            ],
+        )
+
+    return Path(
+        analysis_dir, case_id_gens_pon, f"{case_id_gens_pon}_PON.{FileType.JSON}"
+    ).as_posix()
 
 @pytest.fixture(scope="session")
 def sample_config(
