@@ -79,7 +79,7 @@
 	},
 	"gatk_create_readcount_pon":{
 		"time": "60:00:00",
-		"n": 100
+		"n": 36
 	},
 	"manta_germline": {
 		"time": "05:00:00",
