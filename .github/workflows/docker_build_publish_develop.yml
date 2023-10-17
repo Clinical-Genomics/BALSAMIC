@@ -15,7 +15,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        container-name: [align_qc, annotate, ascatNgs, cadd, cnvpytor, coverage_qc, delly, htslib, somalier, varcall_cnvkit, varcall_py3, varcall_py27, vcf2cytosure]
+        container-name: [align_qc, annotate, ascatNgs, cadd, cnvkit, cnvpytor, coverage_qc, delly, gatk, htslib, purecn, somalier, varcall_cnvkit, varcall_py3, varcall_py27, vcf2cytosure]
     steps:
       - name: Git checkout
         id: git_checkout

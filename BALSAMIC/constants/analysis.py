@@ -123,6 +123,7 @@ class BioinfoTools(StrEnum):
     VCF2CYTOSURE: str = "vcf2cytosure"
     VCFANNO: str = "vcfanno"
     CADD: str = "cadd"
+    PURECN: str = "purecn"
 
 
 class FastqName(StrEnum):
@@ -162,7 +163,6 @@ BIOINFO_TOOL_ENV: Dict[str, str] = {
     BioinfoTools.BCFTOOLS.value: DockerContainers.PYTHON_3.value,
     BioinfoTools.TABIX.value: DockerContainers.PYTHON_3.value,
     BioinfoTools.BGZIP.value: DockerContainers.PYTHON_3.value,
-    BioinfoTools.GATK.value: DockerContainers.PYTHON_3.value,
     BioinfoTools.VARDICT.value: DockerContainers.PYTHON_3.value,
     BioinfoTools.SVDB.value: DockerContainers.PYTHON_3.value,
     BioinfoTools.TIDDIT.value: DockerContainers.PYTHON_3.value,
@@ -174,4 +174,6 @@ BIOINFO_TOOL_ENV: Dict[str, str] = {
     BioinfoTools.VCF2CYTOSURE.value: DockerContainers.VCF2CYTOSURE.value,
     BioinfoTools.SOMALIER.value: DockerContainers.SOMALIER.value,
     BioinfoTools.CADD.value: DockerContainers.CADD.value,
+    BioinfoTools.PURECN.value: DockerContainers.PURECN.value,
+    BioinfoTools.GATK.value: DockerContainers.GATK.value,
 }

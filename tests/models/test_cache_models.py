@@ -35,7 +35,7 @@ def test_analysis_references(analysis_references_data: Dict[str, Path]):
     model: AnalysisReferences = AnalysisReferences(**analysis_references_data)
 
     # THEN the model should have been correctly built
-    assert model.dict() == analysis_references_data
+    assert model.model_dump() == analysis_references_data
 
 
 def test_analysis_references_empty():
@@ -60,7 +60,7 @@ def test_analysis_references_canfam(analysis_references_data: Dict[str, Path]):
     )
 
     # THEN the model should have been correctly built
-    assert model.dict() == analysis_references_data
+    assert model.model_dump() == analysis_references_data
 
 
 def test_analysis_references_canfam_empty():
@@ -83,7 +83,7 @@ def test_analysis_references_hg(analysis_references_hg_data: Dict[str, Path]):
     model: AnalysisReferencesHg = AnalysisReferencesHg(**analysis_references_hg_data)
 
     # THEN the model should have been correctly built
-    assert model.dict() == analysis_references_hg_data
+    assert model.model_dump() == analysis_references_hg_data
 
 
 def test_analysis_references_hg_empty():
@@ -106,7 +106,7 @@ def test_reference_url(reference_url_data: Dict[str, Any]):
     model: ReferenceUrl = ReferenceUrl(**reference_url_data)
 
     # THEN the model should have been correctly built
-    assert model.dict() == reference_url_data
+    assert model.model_dump() == reference_url_data
 
 
 def test_reference_url_empty():
@@ -120,7 +120,7 @@ def test_reference_url_empty():
         ReferenceUrl()
 
 
-def test_references(references_data: Dict[str, dict]):
+def test_references(references_data: Dict[str, dict], references: References):
     """Test references model."""
 
     # GIVEN an input for the reference model
@@ -129,7 +129,7 @@ def test_references(references_data: Dict[str, dict]):
     model: References = References(**references_data)
 
     # THEN the model should have been correctly built
-    assert model.dict() == references_data
+    assert model == references
 
 
 def test_references_empty():
@@ -219,7 +219,7 @@ def test_get_refgene_bed_file_path(references: References, refgene_bed_file: Pat
     assert refgene_output_file == refgene_bed_file.as_posix()
 
 
-def test_references_canfam(references_data: Dict[str, dict]):
+def test_references_canfam(references_data: Dict[str, dict], references: References):
     """Test canine references model."""
 
     # GIVEN an input for the canine reference model
@@ -228,7 +228,7 @@ def test_references_canfam(references_data: Dict[str, dict]):
     model: ReferencesCanFam = ReferencesCanFam(**references_data)
 
     # THEN the model should have been correctly built
-    assert model.dict() == references_data
+    assert model.model_dump() == references.model_dump()
 
 
 def test_references_canfam_empty():
@@ -242,7 +242,9 @@ def test_references_canfam_empty():
         ReferencesCanFam()
 
 
-def test_references_hg(references_hg_data: Dict[str, dict]):
+def test_references_hg(
+    references_hg_data: Dict[str, dict], references_hg: ReferencesHg
+):
     """Test human genome references model."""
 
     # GIVEN an input for the human genome reference model
@@ -251,7 +253,7 @@ def test_references_hg(references_hg_data: Dict[str, dict]):
     model: ReferencesHg = ReferencesHg(**references_hg_data)
 
     # THEN the model should have been correctly built
-    assert model.dict() == references_hg_data
+    assert model == references_hg
 
 
 def test_references_hg_empty():
@@ -353,7 +355,7 @@ def test_cache_analysis(cache_analysis_data: Dict[str, str]):
     model: CacheAnalysis = CacheAnalysis(**cache_analysis_data)
 
     # THEN the model should have been correctly built
-    assert model.dict() == cache_analysis_data
+    assert model.model_dump() == cache_analysis_data
 
 
 def test_cache_analysis_empty():
@@ -591,6 +593,7 @@ def test_get_reference_output_paths(cache_config: CacheConfig):
 def test_get_analysis_references_hg(
     cache_config: CacheConfig,
     analysis_references_hg_data: Dict[str, Path],
+    analysis_references_hg: AnalysisReferences,
 ):
     """Test analysis references retrieval to be used for Balsamic human genome analyses."""
 
@@ -602,7 +605,7 @@ def test_get_analysis_references_hg(
 
     # THEN the retrieved analysis references should match the mocked one
     assert type(analysis_references) is AnalysisReferencesHg
-    assert analysis_references.dict() == analysis_references_hg_data
+    assert analysis_references == analysis_references_hg
 
 
 def test_get_analysis_references_canfam(
@@ -620,4 +623,4 @@ def test_get_analysis_references_canfam(
 
     # THEN the retrieved analysis references should match the mocked one
     assert type(analysis_references) is AnalysisReferencesCanFam
-    assert analysis_references.dict() == analysis_references_data
+    assert analysis_references.model_dump() == analysis_references_data

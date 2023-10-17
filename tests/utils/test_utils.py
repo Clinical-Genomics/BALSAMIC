@@ -4,20 +4,19 @@ import logging
 import subprocess
 import sys
 from pathlib import Path
-from unittest import mock
 from typing import List, Dict
+from unittest import mock
 
 import click
 import pytest
 from _pytest.logging import LogCaptureFixture
 from _pytest.tmpdir import TempPathFactory
 
-from BALSAMIC.models.analysis import FastqInfoModel, ConfigModel
-
 from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV, SampleType, SequencingType
 from BALSAMIC.constants.cache import CacheVersion
 from BALSAMIC.constants.cluster import ClusterConfigType
 from BALSAMIC.constants.paths import CONTAINERS_DIR
+from BALSAMIC.models.analysis import FastqInfoModel, ConfigModel
 from BALSAMIC.utils.cli import (
     CaptureStdout,
     get_snakefile,
@@ -39,10 +38,8 @@ from BALSAMIC.utils.cli import (
     get_analysis_fastq_files_directory,
     validate_cache_version,
 )
-
 from BALSAMIC.utils.exc import BalsamicError, WorkflowRunError
 from BALSAMIC.utils.io import read_json, write_json, read_yaml, write_finish_file
-
 from BALSAMIC.utils.rule import (
     get_vcf,
     get_variant_callers,
@@ -54,7 +51,11 @@ from BALSAMIC.utils.rule import (
     get_sample_type_from_sample_name,
     get_fastp_parameters,
 )
-from BALSAMIC.utils.utils import remove_unnecessary_spaces
+from BALSAMIC.utils.utils import (
+    remove_unnecessary_spaces,
+    get_relative_paths_dict,
+    get_absolute_paths_dict,
+)
 
 
 def test_remove_unnecessary_spaces():
@@ -68,6 +69,36 @@ def test_remove_unnecessary_spaces():
 
     # THEN the extra spaces are removed
     assert formatted_string == "Developing Balsamic brings me joy"
+
+
+def test_relative_paths_dict(session_tmp_path: Path, reference_file: Path):
+    """Test return of a dictionary with relative paths to a provided base path."""
+
+    # GIVEN a base path and a dictionary with absolute paths
+    absolute_paths: Dict[str, Path] = {"reference": reference_file}
+
+    # WHEN generating the relative paths dictionary
+    relative_paths: Dict[str, str] = get_relative_paths_dict(
+        base_path=session_tmp_path, data=absolute_paths
+    )
+
+    # THEN a dictionary with relative paths should be returned
+    assert relative_paths == {"reference": reference_file.name}
+
+
+def test_absolute_paths_dict(session_tmp_path: Path, reference_file: Path):
+    """Test return of a dictionary with relative paths to a provided base path."""
+
+    # GIVEN a base path and a dictionary with relative paths
+    relative_paths: Dict[str, Path] = {"reference": Path(reference_file.name)}
+
+    # WHEN generating the resolved paths dictionary
+    absolute_paths: Dict[str, Path] = get_absolute_paths_dict(
+        base_path=session_tmp_path, data=relative_paths
+    )
+
+    # THEN a dictionary with relative paths should be returned
+    assert absolute_paths == {"reference": reference_file}
 
 
 def test_get_pon_sample_dict(pon_config_dict_w_fastq: Dict):
@@ -854,10 +885,25 @@ def test_get_fastq_info(tumor_sample_name: str, fastq_dir_tumor_only: str):
 
     # THEN check that the fastq_dict matches the expected fastq_dict
     expected_fastq_dict = {
-        "1_171015_HJ7TLDSX5_ACC1_XXXXXX": fastq_info1_expected,
-        "2_171015_HJ7TLDSX5_ACC1_XXXXXX": fastq_info2_expected,
+        "1_171015_HJ7TLDSX5_ACC1_XXXXXX": fastq_info1_expected.dict(exclude_none=True),
+        "2_171015_HJ7TLDSX5_ACC1_XXXXXX": fastq_info2_expected.dict(exclude_none=True),
     }
     assert fastq_dict == expected_fastq_dict
+
+
+def test_get_fastq_info_symlink(tumor_sample_name: str, fastq_dir_symlinked: str):
+    """Test symlinked fast info included in samples dictionary."""
+
+    # GIVEN a fastq_dir and sample name
+
+    # WHEN calling the get_fastq_info function
+    fastq_dict: Dict[str, FastqInfoModel] = get_fastq_info(
+        tumor_sample_name, fastq_dir_symlinked
+    )
+
+    # THEN verify that the resolved file links have been included in the samples dictionary
+    assert "fwd_resolved" in next(iter(fastq_dict.values()))
+    assert "rev_resolved" in next(iter(fastq_dict.values()))
 
 
 def test_get_fastq_info_empty_fastq_dir(tumor_sample_name: str, empty_fastq_dir: str):

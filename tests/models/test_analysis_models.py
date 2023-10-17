@@ -1,6 +1,13 @@
 """Test module for Balsamic common models."""
-import pytest
+import copy
+import os
+from pathlib import Path
+from typing import List, Dict
 
+import pytest
+from pydantic.v1 import ValidationError
+
+from BALSAMIC.constants.analysis import FastqName, SampleType, SequencingType
 from BALSAMIC.models.analysis import (
     VCFAttributes,
     VarCallerFilter,
@@ -14,16 +21,8 @@ from BALSAMIC.models.analysis import (
     UMIParamsTNscope,
     ParamsVardict,
     ParamsVEP,
-    FastqInfoModel,
     ConfigModel,
 )
-from pydantic import ValidationError
-from BALSAMIC.utils.exc import BalsamicError
-from typing import List, Dict
-from BALSAMIC.constants.analysis import FastqName, SampleType
-import os
-import copy
-from pathlib import Path
 
 
 def test_vcfattributes():
@@ -147,7 +146,7 @@ def test_sample_instance_model(config_dict_w_fastqs: Dict):
             values["rev"] = Path(values["rev"]).resolve().as_posix()
 
         # THEN the sample model should be correctly initialised
-        assert sample.dict() == sample_dict_copy
+        assert sample.dict(exclude_none=True) == sample_dict_copy
 
 
 def test_sample_instance_model_sample_type_error(tumor_normal_fastq_info_correct: Dict):
@@ -550,9 +549,18 @@ def test_get_final_bam_name(balsamic_model: ConfigModel):
     )
 
     # Then retrieved final bam names should match the expected format and be identical regardless of request parameter
-    expected_final_bam_name = f"{bam_dir}{sample_type}.{sample_name}.dedup.realign.bam"
+    expected_final_bam_name = f"{bam_dir}{sample_type}.{sample_name}.dedup.bam"
     assert expected_final_bam_name == bam_name_sample_name
     assert bam_name_sample_name == bam_name_sample_type
+
+    # WHEN changing sequencing_type to WGS
+    balsamic_model.analysis.sequencing_type = SequencingType.WGS
+    # Then retrieved final bam names should have realignment suffix
+    expected_final_bam_name = f"{bam_dir}{sample_type}.{sample_name}.dedup.realign.bam"
+    bam_name_sample_type = balsamic_model.get_final_bam_name(
+        bam_dir, sample_type=sample_type
+    )
+    assert expected_final_bam_name == bam_name_sample_type
 
 
 def test_no_info_error_get_final_bam_name(balsamic_model: ConfigModel):

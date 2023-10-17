@@ -1,9 +1,9 @@
 """Snakemake related models."""
 import sys
 from pathlib import Path
-from typing import Dict, Optional, List
+from typing import Optional, List
 
-from pydantic import BaseModel, FilePath, DirectoryPath, validator
+from pydantic import BaseModel, FilePath, DirectoryPath, field_validator, Field
 
 from BALSAMIC.constants.analysis import RunMode
 from BALSAMIC.constants.cluster import ClusterMailType, QOS, ClusterProfile, MAX_JOBS
@@ -53,38 +53,38 @@ class SnakemakeExecutable(BaseModel):
 
     """
 
-    account: Optional[str]
+    account: Optional[str] = None
     benchmark: bool = False
     case_id: str
-    cluster_config_path: Optional[FilePath]
+    cluster_config_path: Optional[FilePath] = None
     config_path: FilePath
-    disable_variant_caller: Optional[str]
+    disable_variant_caller: Optional[str] = Field(default=None, validate_default=True)
     dragen: bool = False
     force: bool = False
-    log_dir: Optional[DirectoryPath]
-    mail_type: Optional[ClusterMailType]
-    mail_user: Optional[str]
-    profile: Optional[ClusterProfile]
-    qos: Optional[QOS]
+    log_dir: Optional[DirectoryPath] = None
+    mail_type: Optional[ClusterMailType] = None
+    mail_user: Optional[str] = Field(default=None, validate_default=True)
+    profile: Optional[ClusterProfile] = None
+    qos: Optional[QOS] = None
     quiet: bool = False
-    report_path: Optional[Path]
-    result_dir: Optional[DirectoryPath]
+    report_path: Optional[Path] = None
+    result_dir: Optional[DirectoryPath] = None
     run_analysis: bool = False
     run_mode: RunMode
-    script_dir: Optional[DirectoryPath]
-    singularity_bind_paths: Optional[List[SingularityBindPath]]
+    script_dir: Optional[DirectoryPath] = None
+    singularity_bind_paths: Optional[List[SingularityBindPath]] = None
     snakefile: FilePath
-    snakemake_options: Optional[List[str]]
+    snakemake_options: Optional[List[str]] = None
     working_dir: Path
 
-    @validator("disable_variant_caller", always=True)
+    @field_validator("disable_variant_caller")
     def get_disable_variant_caller_option(cls, disable_variant_caller: str) -> str:
         """Return string representation of the disable_variant_caller option."""
         if disable_variant_caller:
             return f"disable_variant_caller={disable_variant_caller}"
         return ""
 
-    @validator("mail_user", always=True)
+    @field_validator("mail_user")
     def get_mail_user_option(cls, mail_user: Optional[str]) -> str:
         """Return string representation of the mail_user option."""
         if mail_user:

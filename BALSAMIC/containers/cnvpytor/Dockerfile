@@ -13,7 +13,7 @@ RUN python -m pip install --upgrade --no-cache-dir pip
 RUN python -m venv ${VENV}
 ENV PATH="${VENV}/bin:$PATH"
 
-RUN pip install --no-cache-dir seaborn==0.12.2
+RUN pip install --no-cache-dir seaborn==0.12.2 numpy==1.23.5
 
 RUN cd ${WORK_DIR} && \
     git clone https://github.com/abyzovlab/CNVpytor.git && \
