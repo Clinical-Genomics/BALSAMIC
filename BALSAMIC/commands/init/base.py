@@ -170,6 +170,13 @@ LOG = logging.getLogger(__name__)
     is_flag=True,
     help="Instruct snakemake to be quiet! No output will be printed",
 )
+@click.option(
+    "-u",
+    "--unlock",
+    default=False,
+    is_flag=True,
+    help="Reuse balsamic cache directory. Remove a lock on the snakemake working directory",
+)
 @click.pass_context
 def initialize(
     context,
@@ -190,6 +197,7 @@ def initialize(
     mail_type,
     force_all,
     quiet,
+    unlock,
     snakemake_opt,
 ):
     """
@@ -319,6 +327,7 @@ def initialize(
     balsamic_run.result_path = reference_outdir
     balsamic_run.case_name = config_dict["analysis"]["case_id"]
     balsamic_run.quiet = quiet
+    balsamic_run.unlock = unlock
     if mail_type:
         balsamic_run.mail_type = mail_type
     balsamic_run.mail_user = mail_user
