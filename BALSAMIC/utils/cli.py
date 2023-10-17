@@ -60,6 +60,7 @@ class SnakeMake:
     use_singularity - To use singularity
     singularity_bind- Singularity bind path
     quiet           - Quiet mode for snakemake
+    unlock          - To reuse a cache directory
     singularity_arg - Singularity arguments to pass to snakemake
     sm_opt          - snakemake additional options
     disable_variant_caller - Disable variant caller
@@ -86,6 +87,7 @@ class SnakeMake:
         self.forceall = False
         self.run_analysis = False
         self.quiet = False
+        self.unlock = False
         self.report = str()
         self.use_singularity = True
         self.singularity_bind = str()
@@ -98,6 +100,7 @@ class SnakeMake:
     def build_cmd(self):
         forceall = str()
         quiet_mode = str()
+        unlock_cache_dir = str()
         sm_opt = str()
         cluster_cmd = str()
         dryrun = str()
@@ -112,6 +115,9 @@ class SnakeMake:
 
         if self.quiet:
             quiet_mode = " --quiet "
+
+        if self.unlock:
+            unlock_cache_dir = " --unlock "
 
         if self.sm_opt:
             sm_opt = " ".join(self.sm_opt)
@@ -180,7 +186,7 @@ class SnakeMake:
         sm_cmd = (
             f" snakemake --notemp -p "
             f" --directory {self.working_dir} --snakefile {self.snakefile} --configfiles {self.configfile} "
-            f" {self.cluster_config} {self.singularity_arg} {quiet_mode} "
+            f" {self.cluster_config} {self.singularity_arg} {quiet_mode} {unlock_cache_dir}"
             f" {forceall} {dryrun} {cluster_cmd} "
             f" {report} {snakemake_config_key_value} {sm_opt}"
         )
