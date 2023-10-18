@@ -36,7 +36,7 @@ rule cnvkit_segment_CNV_research:
         normal_id = "NORMAL",
         tumor_name = "tumor.merged",
         min_mapq = params.common.min_mapq,
-        pon = " " if pon_cnn is None else pon_cnn,
+        pon = pon_cnn,
     message:
         "Segmenting genomic regions using CNVkit for {params.case_name}"
     shell:
@@ -219,8 +219,6 @@ rule cnvkit_call_CNV_research:
         vcf = temp(vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".cnvkit.vcf.gz"),
         diagram= cnv_dir + "tumor.merged-diagram.pdf",
         scatter= cnv_dir + "tumor.merged-scatter.pdf",
-        TP53= cnv_dir + config["analysis"]["case_id"] + "_TP53.pdf",
-        KMT2A= cnv_dir + config["analysis"]["case_id"] + "_KMT2A.pdf",
     benchmark:
         Path(benchmark_dir + "cnvkit_call_CNV_research" + config["analysis"]["case_id"] + ".tsv").as_posix()
     singularity:
