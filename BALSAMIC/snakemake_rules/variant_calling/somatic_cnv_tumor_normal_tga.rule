@@ -24,7 +24,7 @@ rule cnvkit_segment_CNV_research:
         snv_merged = cnv_dir + "SNV.merged.vcf.gz",
         segment = cnv_dir + "tumor.seg",
     benchmark:
-        Path(benchmark_dir + "cnvkit_segment_" + config["analysis"]["case_id"] + ".tsv").as_posix()
+        Path(f"{benchmark_dir}/cnvkit_segment_{config['analysis']['case_id']}.tsv").as_posix()
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("cnvkit") + ".sif").as_posix()
     threads:
@@ -135,7 +135,6 @@ rule purecn_call_CNV_research:
         snv_merged = cnv_dir + "SNV.merged.vcf.gz",
         segment = cnv_dir + "tumor.seg",
         cnr = cnv_dir + "tumor.merged.cnr",
-        genomic_repeats = config["reference"]["simple_repeat"]
     output:
         purity_ploidy = cnv_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".purecn.purity.csv",
         purity_pdf = cnv_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".purecn.purity.pdf",
@@ -143,7 +142,7 @@ rule purecn_call_CNV_research:
         loh_genes = cnv_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".purecn.LOHgenes.csv",
         cnv_csv = cnv_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".purecn.cnv.csv"
     benchmark:
-        Path(benchmark_dir + "purecn_call_" + config["analysis"]["case_id"] + ".tsv").as_posix()
+        Path(f"{benchmark_dir}/purecn_call_{config['analysis']['case_id']}.tsv").as_posix()
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("purecn") + ".sif").as_posix()
     threads:
@@ -284,20 +283,6 @@ cnvkit.py export vcf {output.cns} \
 -o {output.vcf} \
 --sample-id {params.tumor_sample_id} \
 --sample-sex {params.gender};
-
-cnvkit.py scatter \
--s {params.cnv_dir}/{params.cnsr} \
--v {input.snv_merged} \
--g TP53 \
--w 1000 \
--o {output.TP53};
-
-cnvkit.py scatter \
--s {params.cnv_dir}/{params.cnsr} \
--v {input.snv_merged} \
--g KMT2A \
--w 1000 \
--o {output.KMT2A};
         """
 
 rule bcftools_sort_cnvkitCNV_research:
@@ -307,7 +292,7 @@ rule bcftools_sort_cnvkitCNV_research:
         namemap = temp(vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".cnvkit.sample_name_map"),
         vcf = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".cnvkit.vcf.gz"
     benchmark:
-        Path(benchmark_dir, 'bcftools_sort_cnvkitCNV_research_' + config["analysis"]["case_id"] + ".tsv").as_posix()
+        Path(f"{benchmark_dir}/bcftools_sort_cnvkitCNV_research_{config['analysis']['case_id']}.tsv").as_posix()
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
     threads:
