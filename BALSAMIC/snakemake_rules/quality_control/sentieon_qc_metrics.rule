@@ -72,7 +72,7 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 GCBias -o {output.plot_gc_bias_metrics} {output.gc_bias_metrics} ;
 
 {params.sentieon_exec} plot \
-QualDistribution -o {output.plot_mean_qual_metrics} {output.mean_qual_metrics} ;
+QualDistribution -o {output.plot_mean_qual_metrics} {output.qual_dist_metrics} ;
 
 {params.sentieon_exec} plot \
 MeanQualityByCycle -o {output.plot_mean_qual_metrics} {output.mean_qual_metrics} ;
