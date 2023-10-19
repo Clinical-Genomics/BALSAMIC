@@ -327,7 +327,7 @@ def generate_cov_bed(
             reg_ratios: List = [log2_ratio]
             first_cov_line: bool = False
             start_new_region: bool = False
-            if region_size == minimum_region_size:
+            if region_size_requested == minimum_region_size:
                 write_coverage_region(
                     prefix, region_chrom, region_start, region_end, reg_ratios, cov_out
                 )

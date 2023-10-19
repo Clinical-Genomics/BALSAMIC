@@ -1703,7 +1703,7 @@ def cnvkit_pon_creation_config(
 
 
 @pytest.fixture(scope="session")
-def GENS_pon_creation_config(
+def gens_pon_creation_config(
     case_id_gens_pon: str,
     analysis_dir: str,
     fastq_dir_gens_pon: str,
