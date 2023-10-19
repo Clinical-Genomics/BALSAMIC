@@ -124,11 +124,10 @@ def case_config(
     if cadd_annotations:
         references.update(cadd_annotations_path)
 
-    if any([genome_interval, gens_coverage_pon, gnomad_min_af5]):
-        if not all([genome_interval, gens_coverage_pon, gnomad_min_af5]):
-            raise click.BadParameter(
-                "All three arguments (genome_interval gens_coverage_pon, gnomad_min_af5) are required for GENS."
-            )
+    if any([genome_interval, gens_coverage_pon, gnomad_min_af5]) and not all([genome_interval, gens_coverage_pon, gnomad_min_af5]):
+        raise click.BadParameter(
+            "All three arguments (genome_interval gens_coverage_pon, gnomad_min_af5) are required for GENS."
+        )
 
         gens_ref_files = {
             "genome_interval": genome_interval,
