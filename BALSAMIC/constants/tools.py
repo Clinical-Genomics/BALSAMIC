@@ -3,6 +3,7 @@ from BALSAMIC.constants.analysis import SequencingType
 
 # GENS parameters
 GENS_PARAMS = {
+    "MINIMUM_WINDOW_SIZE": 100,
     "ALLOWED_CHR_LIST": [
         "1",
         "2",

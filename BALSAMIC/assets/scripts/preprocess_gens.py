@@ -230,7 +230,7 @@ def create_coverage_regions(ctx: click.Context, normalised_coverage_path: str) -
     Calculate coverage data.
 
     Args:
-        normalised_coverage: Path to normalised coverage file.
+        normalised_coverage_path: Path to normalised coverage file.
 
     Returns:
         None
@@ -238,9 +238,11 @@ def create_coverage_regions(ctx: click.Context, normalised_coverage_path: str) -
     LOG.info("Calculating coverage data")
     normalised_coverage_path = Path(normalised_coverage_path)
     output_file: Path = ctx.obj["output_file"]
+    sequencing_type: SequencingType = ctx.obj["sequencing_type"]
+    SEQ_GENS_PARAMS: Dict = GENS_PARAMS["SEQUENCING_TYPE"][sequencing_type]
+    COV_WINDOW_SIZES: Dict = SEQ_GENS_PARAMS["COV_WINDOW_SIZES"]
     with open(output_file.as_posix(), "w") as cov_out:
-        for prefix in COV_WINDOW_SIZES:
-            window_size = COV_WINDOW_SIZES[prefix]
+        for prefix, window_size in COV_WINDOW_SIZES.items():
             generate_cov_bed(normalised_coverage_path, window_size, prefix, cov_out)
 
 
@@ -300,7 +302,7 @@ def generate_cov_bed(
     Merge coverage data into coverage regions for GENS.
 
     Args:
-        normalised_coverage: Path to normalised coverage file.
+        normalised_coverage_path: Path to normalised coverage file.
         window_size: Size of the coverage window.
         prefix: Prefix for the output.
         cov_out: Output file.
@@ -310,6 +312,7 @@ def generate_cov_bed(
     """
 
     normalised_coverage: List = normalised_coverage_path.read_text().splitlines()
+    minimum_window_size: int = GENS_PARAMS["MINIMUM_WINDOW_SIZE"]
 
     first_cov_line: bool = True
     start_new_region: bool = False
@@ -327,7 +330,7 @@ def generate_cov_bed(
             reg_ratios: List = [log2_ratio]
             first_cov_line: bool = False
             start_new_region: bool = False
-            if window_size == 100:
+            if window_size == minimum_window_size:
                 write_coverage_region(
                     prefix, region_chrom, region_start, region_end, reg_ratios, cov_out
                 )
