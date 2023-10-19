@@ -87,6 +87,7 @@ swegen_sv = ""
 singularity_image: str = config_model.singularity['image']
 sample_names: List[str] = config_model.get_all_sample_names()
 tumor_sample: str = config_model.get_sample_name_by_type(SampleType.TUMOR)
+sequencing_type = config_model.analysis.sequencing_type
 if config_model.analysis.analysis_type == "paired":
     normal_sample: str = config_model.get_sample_name_by_type(SampleType.NORMAL)
 

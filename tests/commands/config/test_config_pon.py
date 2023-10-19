@@ -92,7 +92,7 @@ def test_cnvkit_pon_config_failed(invoke_cli, tmp_path, balsamic_cache, panel_be
     test_analysis_dir.mkdir()
     case_id = "sample_pon"
 
-    # WHEN creating a case analysis
+    # WHEN creating a case analolysis
     result = invoke_cli(
         [
             "config",

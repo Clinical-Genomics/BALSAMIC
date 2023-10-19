@@ -1,38 +1,17 @@
 #!/usr/bin/env python
 import click
-import gzip
 import io
+import logging
 from pathlib import Path
 from typing import Dict, List, Tuple
+from statistics import mean
 
-# Chromosome names allowed in baf files
-ALLOWED_CHR_LIST = [
-    "1",
-    "2",
-    "3",
-    "4",
-    "5",
-    "6",
-    "7",
-    "8",
-    "9",
-    "10",
-    "11",
-    "12",
-    "13",
-    "14",
-    "15",
-    "16",
-    "17",
-    "18",
-    "19",
-    "20",
-    "21",
-    "22",
-    "X",
-    "Y",
-    "MT",
-]
+from BALSAMIC.constants.analysis import SequencingType
+from BALSAMIC.constants.tools import GENS_PARAMS
+from BALSAMIC.utils.io import read_vcf_file
+
+logging.basicConfig(level=logging.INFO)
+LOG = logging.getLogger(__name__)
 
 # How many variants to skip per zoom-level
 BAF_SKIP_N = {"o": 135, "a": 30, "b": 8, "c": 3, "d": 1}
@@ -49,22 +28,31 @@ COV_WINDOW_SIZES = {"o": 100000, "a": 25000, "b": 5000, "c": 1000, "d": 100}
     type=click.Path(exists=False),
     help="Name of output-file.",
 )
-def cli(output_file):
-    """
-    GENS pre-processing tool
-    """
-    pass
+@click.option(
+    "-s",
+    "--sequencing-type",
+    required=True,
+    type=click.Choice([SequencingType.WGS]),
+    help="Sequencing type used.",
+)
+@click.pass_context
+def cli(ctx: click.Context, output_file: str, sequencing_type: SequencingType):
+    """GENS pre-processing tool."""
+    ctx.ensure_object(dict)
+    ctx.obj["output_file"] = output_file
+    ctx.obj["sequencing_type"] = sequencing_type
 
 
 @cli.command()
+@click.pass_context
 @click.option(
     "-v",
-    "--vcf-file",
+    "--vcf-file-path",
     required=True,
     type=click.Path(exists=True),
     help="Input VCF from germline-caller with SNVs & InDels from DNAscope, called with --given gnomad_af_0.05.vcf ",
 )
-def calc_bafs(vcf_file: str):
+def calculate_bafs(ctx: click.Context, vcf_file_path: str):
     """
     Processes vcf-file from DNAscope into a bed-file format for GENS, with different number of variants for each zoom-level.
 
@@ -73,39 +61,19 @@ def calc_bafs(vcf_file: str):
 
     Outputs bed-file in file-name specified in output-file.
     """
-    print("Calculating BAFs from VCF...")
-    # Step 1: Read file
-    vcf_file_path: Path = Path(vcf_file)
-    if vcf_file_path.suffix == ".gz":
-        with gzip.open(vcf_file_path, "rt") as file:
-            vcf_lines = file.read().splitlines()
-    else:
-        vcf_lines: List = vcf_file.read_text().splitlines()
 
-    # Step 2: Processing each variant
-    variants: Dict = process_variants(vcf_lines)
-
-    # Step 3: Writing output to a file
-    output_file: str = click.get_current_context().parent.params["output_file"]
-    with open(output_file, "w") as baf_out:
-        for prefix in BAF_SKIP_N:
-            req_skip_count = int(BAF_SKIP_N[prefix])
-            skip_count = int(req_skip_count)
-            for variant_id in variants:
-                variant: Dict = variants[variant_id]
-                if skip_count == req_skip_count:
-                    v_start: int = int(variant["start"])
-                    v_chrom: str = variant["chr"]
-                    v_af: float = variant["af"]
-                    baf_out.write(
-                        f"{prefix}_{v_chrom}\t{v_start}\t{v_start + 1}\t{v_af}\n"
-                    )
-                    skip_count = 0
-                else:
-                    skip_count += 1
+    LOG.info("Calculating BAFs from VCF.")
+    LOG.info("Reading VCF file...")
+    vcf_lines: List = read_vcf_file(vcf_file_path)
+    LOG.info("Extracting and processing variant info...")
+    variants: Dict = get_valid_variants(vcf_lines)
+    LOG.info("Writing variant b-allele-frequencies to output...")
+    output_file: Path = Path(ctx.obj["output_file"])
+    sequencing_type: SequencingType = ctx.obj["sequencing_type"]
+    write_b_allele_output(variants, output_file, sequencing_type)
 
 
-def process_variants(vcf_lines):
+def get_valid_variants(vcf_lines: List[str]) -> Dict:
     """
     Process VCF lines to extract valid variants.
 
@@ -121,7 +89,7 @@ def process_variants(vcf_lines):
 
     Example usage:
         vcf_lines: List = [...]  # List of VCF lines
-        valid_variants: Dict = process_variants(vcf_lines)
+        valid_variants: Dict = get_valid_variants(vcf_lines)
     """
     count_invalid_vars: int = 0
     illegal_chromosomes: Dict = {}
@@ -137,7 +105,7 @@ def process_variants(vcf_lines):
             continue
 
         v_chrom = variant["chr"]
-        if v_chrom not in ALLOWED_CHR_LIST:
+        if v_chrom not in GENS_PARAMS["ALLOWED_CHR_LIST"]:
             illegal_chromosomes[v_chrom] = illegal_chromosomes.get(v_chrom, 0) + 1
             continue
 
@@ -145,15 +113,17 @@ def process_variants(vcf_lines):
         variant_id += 1
 
     if count_invalid_vars:
-        print(f"Warning: Can't calc AF for a number of variants: {count_invalid_vars}.")
+        LOG.warning(
+            f"Warning: Can't calc AF for a number of variants: {count_invalid_vars}."
+        )
     if illegal_chromosomes:
-        print(
+        LOG.warning(
             f"Warning: A number of variants have illegal chromosomes and will be skipped: {illegal_chromosomes}."
         )
     return variants
 
 
-def extract_variant_info(variant: str):
+def extract_variant_info(variant: str) -> Dict:
     """
     Extracts genetic variant information.
 
@@ -172,7 +142,7 @@ def extract_variant_info(variant: str):
         extract_variant_info(variant_string)
         {'chr': 'chr1', 'start': '1000', 'ref': 'A', 'alt': 'T', 'sample': '0/1:10,5:15:45:45,0,20', 'af': 0.333333}
     """
-    fields: List = variant.split("\t")
+    fields: List[str] = variant.split("\t")
     try:
         variant_info = {
             "chr": fields[0],
@@ -182,23 +152,72 @@ def extract_variant_info(variant: str):
             "sample": fields[9],
         }
     except IndexError:
-        raise ValueError("Invalid variant string format")
+        error_message = "Invalid variant string format"
+        LOG.error(f"{error_message}")
+        raise ValueError(f"{error_message}")
 
     if variant_info["sample"].split(":")[0] == "./.":
         return None
 
     try:
-        allele_depths = variant_info["sample"].split(":")[1]
+        allele_depths: List[str] = variant_info["sample"].split(":")[1]
         VD = int(allele_depths.split(",")[1])
         DP = int(variant_info["sample"].split(":")[2])
         variant_info["af"] = round(VD / DP, 6)
+
     except (ValueError, ZeroDivisionError, IndexError):
         return None
 
     return variant_info
 
 
+def write_b_allele_output(variants: Dict, output_file: Path, sequencing_type: SequencingType):
+    """
+    Writes B-allele frequency (BAF) output to a file for each level of GENS zoom specified in prefix of BAF_SKIP_N.
+
+    Args:
+        variants (Dict): A dictionary containing variant information. Each variant should have the following keys:
+            - 'start' (int): The start position of the variant.
+            - 'chr' (str): The chromosome where the variant is located.
+            - 'af' (float): The allele frequency of the variant.
+
+        output_file (Path): The file path where the BAF output will be written.
+
+        sequencing_type (SequencingType): The sequencing type used in analysis.
+
+    Returns:
+        None
+
+    Writes BAF information for each variant in the provided `variants` dictionary to the specified `output_file`.
+    The output is formatted as follows:
+        <prefix>_<chromosome>    <start>    <end>    <allele_frequency>
+
+    Note:
+        This function uses a predefined constant BAF_SKIP_N, which determines how many variants to skip before writing.
+    """
+    SEQ_GENS_PARAMS: Dict = GENS_PARAMS["SEQUENCING_TYPE"][sequencing_type]
+    BAF_SKIP_N: Dict = SEQ_GENS_PARAMS["BAF_SKIP_N"]
+
+    with open(output_file.as_posix(), "w") as baf_out:
+        for prefix in BAF_SKIP_N:
+            req_skip_count = int(BAF_SKIP_N[prefix])
+            skip_count = int(req_skip_count)
+            for variant_id in variants:
+                variant: Dict = variants[variant_id]
+                if skip_count == req_skip_count:
+                    v_start: int = int(variant["start"])
+                    v_chrom: str = variant["chr"]
+                    v_af: float = variant["af"]
+                    baf_out.write(
+                        f"{prefix}_{v_chrom}\t{v_start}\t{v_start + 1}\t{v_af}\n"
+                    )
+                    skip_count = 0
+                else:
+                    skip_count += 1
+
+
 @cli.command()
+@click.pass_context
 @click.option(
     "-c",
     "--normalised-coverage-path",
@@ -206,7 +225,7 @@ def extract_variant_info(variant: str):
     type=click.Path(exists=True),
     help="Input normalised coverage from GATK DenoiseReadCounts.",
 )
-def calc_cov(normalised_coverage_path: str) -> None:
+def create_coverage_regions(ctx: click.Context, normalised_coverage_path: str) -> None:
     """
     Calculate coverage data.
 
@@ -216,10 +235,10 @@ def calc_cov(normalised_coverage_path: str) -> None:
     Returns:
         None
     """
-    print("Calculating coverage data")
+    LOG.info("Calculating coverage data")
     normalised_coverage_path = Path(normalised_coverage_path)
-    output_file = click.get_current_context().parent.params["output_file"]
-    with open(output_file, "w") as cov_out:
+    output_file: Path = ctx.obj["output_file"]
+    with open(output_file.as_posix(), "w") as cov_out:
         for prefix in COV_WINDOW_SIZES:
             window_size = COV_WINDOW_SIZES[prefix]
             generate_cov_bed(normalised_coverage_path, window_size, prefix, cov_out)
@@ -269,19 +288,6 @@ def extract_coverage_line_values(coverage_line: str) -> Tuple[str, int, int, flo
     start, end = int(chr_start_stop_ratio[1]), int(chr_start_stop_ratio[2])
     log2_ratio: float = float(chr_start_stop_ratio[3])
     return chrom, start, end, log2_ratio
-
-
-def mean(nums: list) -> float:
-    """
-    Calculate the mean of a list of numbers.
-
-    Args:
-        nums: List of numbers.
-
-    Returns:
-        Mean value.
-    """
-    return sum(nums) / len(nums)
 
 
 def generate_cov_bed(
