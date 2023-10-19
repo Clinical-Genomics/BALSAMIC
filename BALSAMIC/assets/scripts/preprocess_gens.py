@@ -13,12 +13,6 @@ from BALSAMIC.utils.io import read_vcf_file
 logging.basicConfig(level=logging.INFO)
 LOG = logging.getLogger(__name__)
 
-# How many variants to skip per zoom-level
-BAF_SKIP_N = {"o": 135, "a": 30, "b": 8, "c": 3, "d": 1}
-
-# The size of each coverage region per zoom-level
-COV_WINDOW_SIZES = {"o": 100000, "a": 25000, "b": 5000, "c": 1000, "d": 100}
-
 
 @click.group()
 @click.option(
@@ -201,8 +195,7 @@ def write_b_allele_output(
     BAF_SKIP_N: Dict = SEQ_GENS_PARAMS["BAF_SKIP_N"]
 
     with open(output_file.as_posix(), "w") as baf_out:
-        for prefix in BAF_SKIP_N:
-            req_skip_count = int(BAF_SKIP_N[prefix])
+        for prefix, req_skip_count in BAF_SKIP_N.items():
             skip_count = int(req_skip_count)
             for variant_id in variants:
                 variant: Dict = variants[variant_id]
@@ -299,7 +292,7 @@ def extract_coverage_line_values(coverage_line: str) -> Tuple[str, int, int, flo
 
 def generate_cov_bed(
     normalised_coverage_path: Path,
-    region_size: int,
+    region_size_requested: int,
     prefix: str,
     cov_out: io.TextIOWrapper,
 ) -> None:
@@ -308,7 +301,7 @@ def generate_cov_bed(
 
     Args:
         normalised_coverage_path: Path to normalised coverage file.
-        region_size: Size of the coverage region.
+        region_size_requested: Size of the coverage region.
         prefix: Prefix for the output.
         cov_out: Output file.
 
@@ -345,8 +338,8 @@ def generate_cov_bed(
             chrom, _, end, log2_ratio = extract_coverage_line_values(coverage_line)
 
         region_size: int = end - region_start + 1
-        if region_size == region_size:
-            # Region size matches window size
+        if region_size == region_size_requested:
+            # Region size matches requested region size
             # Step 1: Write region from current line
             # Step 2: Start new region from new line
             reg_ratios.append(log2_ratio)
@@ -356,7 +349,7 @@ def generate_cov_bed(
             start_new_region: bool = True
             continue
 
-        if region_size > region_size:
+        if region_size > region_size_requested:
             # Region size larger due to incomplete genome reference
             # Step 1:  Write region from previous line
             # Step 2: Start new region from current line
