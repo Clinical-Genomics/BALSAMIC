@@ -3,7 +3,7 @@ import click
 import io
 import logging
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Union
 from statistics import mean
 
 from BALSAMIC.constants.analysis import SequencingType
@@ -116,7 +116,7 @@ def get_valid_variants(vcf_lines: List[str]) -> Dict:
     return variants
 
 
-def extract_variant_info(variant: str) -> Dict:
+def extract_variant_info(variant: str) -> Union[Dict, None]:
     """
     Extracts genetic variant information.
 

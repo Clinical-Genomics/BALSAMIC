@@ -87,11 +87,10 @@ def pon_config(
         else:
             references["genome_interval"] = genome_interval
 
-    if pon_creation_type == PONType.CNVKIT:
-        if not panel_bed:
-            raise click.BadParameter(
-                "Argument: panel_bed is required for CNVkit PON creation."
-            )
+    if pon_creation_type == PONType.CNVKIT and not panel_bed:
+        raise click.BadParameter(
+            "Argument: panel_bed is required for CNVkit PON creation."
+        )
 
     fastq_path: str = get_analysis_fastq_files_directory(
         case_dir=Path(analysis_dir, case_id).as_posix(), fastq_path=fastq_path
