@@ -171,7 +171,9 @@ def extract_variant_info(variant: str) -> Dict:
     return variant_info
 
 
-def write_b_allele_output(variants: Dict, output_file: Path, sequencing_type: SequencingType):
+def write_b_allele_output(
+    variants: Dict, output_file: Path, sequencing_type: SequencingType
+):
     """
     Writes B-allele frequency (BAF) output to a file for each level of GENS zoom specified in prefix of BAF_SKIP_N.
 
@@ -235,15 +237,18 @@ def create_coverage_regions(ctx: click.Context, normalised_coverage_path: str) -
     Returns:
         None
     """
-    LOG.info("Calculating coverage data")
+    LOG.info("Creating coverage regions for GENS.")
     normalised_coverage_path = Path(normalised_coverage_path)
-    output_file: Path = ctx.obj["output_file"]
+    output_file: Path = Path(ctx.obj["output_file"])
     sequencing_type: SequencingType = ctx.obj["sequencing_type"]
     SEQ_GENS_PARAMS: Dict = GENS_PARAMS["SEQUENCING_TYPE"][sequencing_type]
-    COV_WINDOW_SIZES: Dict = SEQ_GENS_PARAMS["COV_WINDOW_SIZES"]
+    COV_REGION_SIZES: Dict = SEQ_GENS_PARAMS["COV_REGION_SIZES"]
     with open(output_file.as_posix(), "w") as cov_out:
-        for prefix, window_size in COV_WINDOW_SIZES.items():
-            generate_cov_bed(normalised_coverage_path, window_size, prefix, cov_out)
+        for prefix, region_size in COV_REGION_SIZES.items():
+            LOG.info(
+                f"Creating regions for prefix: {prefix}, region_size: {region_size}."
+            )
+            generate_cov_bed(normalised_coverage_path, region_size, prefix, cov_out)
 
 
 def write_coverage_region(
@@ -294,7 +299,7 @@ def extract_coverage_line_values(coverage_line: str) -> Tuple[str, int, int, flo
 
 def generate_cov_bed(
     normalised_coverage_path: Path,
-    window_size: int,
+    region_size: int,
     prefix: str,
     cov_out: io.TextIOWrapper,
 ) -> None:
@@ -303,7 +308,7 @@ def generate_cov_bed(
 
     Args:
         normalised_coverage_path: Path to normalised coverage file.
-        window_size: Size of the coverage window.
+        region_size: Size of the coverage region.
         prefix: Prefix for the output.
         cov_out: Output file.
 
@@ -312,7 +317,7 @@ def generate_cov_bed(
     """
 
     normalised_coverage: List = normalised_coverage_path.read_text().splitlines()
-    minimum_window_size: int = GENS_PARAMS["MINIMUM_WINDOW_SIZE"]
+    minimum_region_size: int = GENS_PARAMS["MINIMUM_REGION_SIZE"]
 
     first_cov_line: bool = True
     start_new_region: bool = False
@@ -330,7 +335,7 @@ def generate_cov_bed(
             reg_ratios: List = [log2_ratio]
             first_cov_line: bool = False
             start_new_region: bool = False
-            if window_size == minimum_window_size:
+            if region_size == minimum_region_size:
                 write_coverage_region(
                     prefix, region_chrom, region_start, region_end, reg_ratios, cov_out
                 )
@@ -340,7 +345,7 @@ def generate_cov_bed(
             chrom, _, end, log2_ratio = extract_coverage_line_values(coverage_line)
 
         region_size: int = end - region_start + 1
-        if region_size == window_size:
+        if region_size == region_size:
             # Region size matches window size
             # Step 1: Write region from current line
             # Step 2: Start new region from new line
@@ -351,7 +356,7 @@ def generate_cov_bed(
             start_new_region: bool = True
             continue
 
-        if region_size > window_size:
+        if region_size > region_size:
             # Region size larger due to incomplete genome reference
             # Step 1:  Write region from previous line
             # Step 2: Start new region from current line
