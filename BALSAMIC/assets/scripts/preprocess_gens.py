@@ -10,8 +10,9 @@ from BALSAMIC.constants.analysis import SequencingType
 from BALSAMIC.constants.tools import GENS_PARAMS
 from BALSAMIC.utils.io import read_vcf_file
 
-logging.basicConfig(encoding='utf-8', level=logging.DEBUG)
+logging.basicConfig(encoding="utf-8", level=logging.DEBUG)
 LOG = logging.getLogger(__name__)
+
 
 @click.group()
 @click.option(
