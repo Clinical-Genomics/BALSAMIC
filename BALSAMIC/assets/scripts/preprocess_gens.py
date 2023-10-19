@@ -13,6 +13,7 @@ from BALSAMIC.utils.io import read_vcf_file
 LOG = logging.getLogger(__name__)
 LOG.setLevel(logging.INFO)
 
+
 @click.group()
 @click.option(
     "-o",
