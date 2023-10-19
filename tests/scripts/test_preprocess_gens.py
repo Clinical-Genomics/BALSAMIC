@@ -4,9 +4,7 @@ from BALSAMIC.assets.scripts.preprocess_gens import (
     extract_coverage_line_values,
 )
 
-import logging
 from typing import Dict
-from io import StringIO
 
 
 def test_extract_variant_info():
