@@ -73,6 +73,7 @@ class VarCallerFilter(BaseModel):
     AD: Optional[VCFAttributes]
     AF_min: Optional[VCFAttributes]
     AF_max: Optional[VCFAttributes]
+    high_normal_frac: Optional[VCFAttributes]
     MQ: Optional[VCFAttributes]
     DP: Optional[VCFAttributes]
     pop_freq: Optional[VCFAttributes]
