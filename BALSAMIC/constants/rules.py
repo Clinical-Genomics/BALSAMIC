@@ -38,6 +38,7 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
         ],
         "align": [
             "snakemake_rules/align/sentieon_alignment.rule",
+            "snakemake_rules/align/sentieon_bam_postprocess.rule",
             "snakemake_rules/align/bam_compress.rule",
         ],
         "varcall": [
