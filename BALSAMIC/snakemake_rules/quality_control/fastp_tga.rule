@@ -1,52 +1,46 @@
 """Rules for TGA fastq pre-processing: removal UMIs and quality and adapter-trimming."""
 
-rule fastp_umi_trim:
-    """Fastq TGA data pre-processing to remove UMIs."""
+
+rule sentieon_umiextract_tga:
+    """Extract UMIs into tags in read header."""
     input:
-        fastq_r1 = lambda wildcards: config_model.get_fastq_by_fastq_pattern(wildcards.fastq_pattern, FastqName.FWD),
+        fastq_r1 =  lambda wildcards: config_model.get_fastq_by_fastq_pattern(wildcards.fastq_pattern, FastqName.FWD),
         fastq_r2 = lambda wildcards: config_model.get_fastq_by_fastq_pattern(wildcards.fastq_pattern, FastqName.REV)
     output:
-        fastq_r1 = temp(fastq_dir + "{fastq_pattern}_1.umi_removed.fastq.gz"),
-        fastq_r2 = temp(fastq_dir + "{fastq_pattern}_2.umi_removed.fastq.gz"),
-        json = qc_dir + "fastp/{fastq_pattern}_umi_removed_fastp.json",
-        html = qc_dir + "fastp/{fastq_pattern}_umi_removed_fastp.html",
+        ds_umi = temp(umi_dir + "{fastq_pattern}_umiextract__interleaved.fastq.gz")
     benchmark:
-        Path(benchmark_dir, "fastp_remove_umi" + "{fastq_pattern}.tsv").as_posix()
-    singularity:
-        Path(singularity_image, config["bioinfo_tools"].get("fastp") + ".sif").as_posix()
+        Path(benchmark_dir, "sentieon_umiextract_tga_{fastq_pattern}.tsv").as_posix()
     params:
-        tmpdir = tmp_dir,
-        fastp_trim_umi = " ".join(fastp_parameters["fastp_trim_umi"]),
-        fastq_pattern = "{fastq_pattern}",
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
+        sentieon_install_dir = config["SENTIEON_INSTALL_DIR"],
+        sentieon_exec = config["SENTIEON_EXEC"],
+        sentieon_lic = config["SENTIEON_LICENSE"],
+        ds_params = params.umiextract.read_structure,
+        fastq_pattern = "{fastq_pattern}"
     threads:
-        get_threads(cluster_config, 'fastp_remove_umi')
+        get_threads(cluster_config, "sentieon_umiextract")
     message:
-        "Trimming away UMI sequences for fastqs in fastq pattern: {params.fastq_pattern}"
+        "Extracing UMI tags using sentieon for {params.fastq_pattern}"
     shell:
         """
-export TMPDIR={params.tmpdir};
+export LD_PRELOAD={params.sentieon_install_dir}/lib/libjemalloc.so.1
+export MALLOC_CONF=lg_dirty_mult:-1
 
-fastp \
---thread {threads} \
---in1 {input.fastq_r1} \
---in2 {input.fastq_r2} \
---out1 {output.fastq_r1} \
---out2 {output.fastq_r2} \
---json {output.json} \
---html {output.html} \
---disable_adapter_trimming \
---disable_quality_filtering \
---disable_length_filtering \
---disable_trim_poly_g \
-{params.fastp_trim_umi};
+mkdir -p {params.tmpdir};
+export TMPDIR={params.tmpdir};
+export SENTIEON_TMPDIR={params.tmpdir};
+export SENTIEON_LICENSE={params.sentieon_lic};
+
+{params.sentieon_exec} umi extract \
+{params.ds_params} {input.fastq_r1} {input.fastq_r2} \
+-o {output.ds_umi};
         """
 
 
 rule fastp_quality_trim_tga:
-    """Fastq data pre-processing after removal of UMIs."""
+    """Fastq data pre-processing after extraction of UMIs."""
     input:
-        fastq_r1 = fastq_dir + "{fastq_pattern}_1.umi_removed.fastq.gz",
-        fastq_r2 = fastq_dir + "{fastq_pattern}_2.umi_removed.fastq.gz"
+        interleaved_fastq = umi_dir + "{fastq_pattern}_umiextract__interleaved.fastq.gz"
     output:
         fastq_r1 = temp(fastq_dir + "{fastq_pattern}_1.fp.fastq.gz"),
         fastq_r2 = temp(fastq_dir + "{fastq_pattern}_2.fp.fastq.gz"),
@@ -71,8 +65,8 @@ export TMPDIR={params.tmpdir};
 
 fastp \
 --thread {threads} \
---in1 {input.fastq_r1} \
---in2 {input.fastq_r2} \
+--in1 {input.interleaved_fastq} \
+--interleaved_in \
 --out1 {output.fastq_r1} \
 --out2 {output.fastq_r2} \
 --json {output.json} \
