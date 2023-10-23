@@ -24,7 +24,7 @@ export TMPDIR={params.tmpdir};
   
 shell_readcounts_hdf5s=$(echo {input.readcounts_hdf5s} | sed 's/ / -I /g') ;
 
-gatk --java-options "-Xmx120000m" CreateReadCountPanelOfNormals \
+gatk --java-options "-Xmx170000m" CreateReadCountPanelOfNormals \
 --minimum-interval-median-percentile 10.0  \
 --maximum-chunk-size 29349635 \
 -O {output.pon_hdf5} \

@@ -42,7 +42,6 @@ ANALYSIS_WORKFLOWS: List[AnalysisWorkflow] = [
     workflow.value for workflow in AnalysisWorkflow
 ]
 
-
 class SequencingType(StrEnum):
     """Sequencing carried out."""
 
@@ -88,6 +87,9 @@ class PONType(StrEnum):
     GENS_MALE: str = "GENS_male"
     GENS_FEMALE: str = "GENS_female"
 
+PON_TYPES: List[PONType] = [
+    pon_type.value for pon_type in PONType
+]
 
 class RuleDeliveryMode(StrEnum):
     """Rules to deliver mode."""

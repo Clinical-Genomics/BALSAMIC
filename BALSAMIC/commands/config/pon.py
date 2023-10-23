@@ -84,8 +84,7 @@ def pon_config(
             raise click.BadParameter(
                 "Argument: genome_interval is required for GENS PON creation."
             )
-        else:
-            references["genome_interval"] = genome_interval
+        references["genome_interval"] = genome_interval
 
     if pon_creation_type == PONType.CNVKIT and not panel_bed:
         raise click.BadParameter(
