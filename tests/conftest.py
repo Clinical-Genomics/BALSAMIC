@@ -18,7 +18,7 @@ from BALSAMIC.constants.analysis import (
     BIOINFO_TOOL_ENV,
     RunMode,
     AnalysisWorkflow,
-    PONType,
+    PONWorkflow,
 )
 from BALSAMIC.constants.cache import DockerContainers, GenomeVersion, REFERENCE_FILES
 from BALSAMIC.constants.cluster import (
@@ -213,17 +213,17 @@ def case_id_gens_pon() -> str:
 @pytest.fixture(scope="session")
 def cnvkit_pon_type() -> str:
     """
-    Returns PONtype for CNVkit PON creation
+    Returns PONWorkflow for CNVkit PON creation
     """
-    return PONType.CNVKIT
+    return PONWorkflow.CNVKIT
 
 
 @pytest.fixture(scope="session")
 def gens_male_pon_type() -> str:
     """
-    Returns PONtype for GENS PON creation for gender male
+    Returns PONWorkflow for GENS PON creation for gender male
     """
-    return PONType.GENS_MALE
+    return PONWorkflow.GENS_MALE
 
 
 def case_id_tumor_only_pon() -> str:
@@ -1663,7 +1663,7 @@ def cnvkit_pon_creation_config(
     balsamic_cache: str,
     sentieon_license: str,
     sentieon_install_dir: str,
-    cnvkit_pon_type: PONType,
+    cnvkit_pon_type: PONWorkflow,
 ) -> str:
     """Invoke PON creation config configuration file for CNVkit PON workflow."""
 
@@ -1710,7 +1710,7 @@ def gens_pon_creation_config(
     balsamic_cache: str,
     sentieon_license: str,
     sentieon_install_dir: str,
-    gens_male_pon_type: PONType,
+    gens_male_pon_type: PONWorkflow,
     gens_hg19_interval_list: str,
 ) -> str:
     """Invoke PON creation config configuration file for GENS PON workflow."""

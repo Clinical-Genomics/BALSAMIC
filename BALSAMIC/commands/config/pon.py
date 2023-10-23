@@ -23,7 +23,7 @@ from BALSAMIC.commands.options import (
     OPTION_UMI_TRIM_LENGTH,
     OPTION_CACHE_VERSION,
 )
-from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV, PONType
+from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV, PONWorkflow
 from BALSAMIC.constants.cache import GenomeVersion
 from BALSAMIC.constants.constants import FileType
 from BALSAMIC.constants.paths import CONTAINERS_DIR
@@ -67,7 +67,7 @@ def pon_config(
     genome_version: GenomeVersion,
     genome_interval: Path,
     panel_bed: Path,
-    pon_creation_type: PONType,
+    pon_creation_type: PONWorkflow,
     quality_trim: bool,
     umi: bool,
     umi_trim_length: bool,
@@ -79,14 +79,14 @@ def pon_config(
         data=read_json(Path(references_path, f"reference.{FileType.JSON}").as_posix()),
     )
 
-    if pon_creation_type in [PONType.GENS_MALE, PONType.GENS_FEMALE]:
+    if pon_creation_type in [PONWorkflow.GENS_MALE, PONWorkflow.GENS_FEMALE]:
         if not genome_interval:
             raise click.BadParameter(
                 "Argument: genome_interval is required for GENS PON creation."
             )
         references["genome_interval"] = genome_interval
 
-    if pon_creation_type == PONType.CNVKIT and not panel_bed:
+    if pon_creation_type == PONWorkflow.CNVKIT and not panel_bed:
         raise click.BadParameter(
             "Argument: panel_bed is required for CNVkit PON creation."
         )

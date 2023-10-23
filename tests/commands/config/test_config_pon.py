@@ -3,7 +3,7 @@ import graphviz
 import logging
 from unittest import mock
 from pathlib import Path
-from BALSAMIC.constants.analysis import PONType
+from BALSAMIC.constants.analysis import PONWorkflow
 
 
 def test_cnvkit_pon_config(
@@ -13,7 +13,7 @@ def test_cnvkit_pon_config(
     panel_bed_file: str,
     fastq_dir_pon: str,
     case_id_pon: str,
-    cnvkit_pon_type: PONType,
+    cnvkit_pon_type: PONWorkflow,
 ):
     """Test balsamic PON config case command."""
 
@@ -52,7 +52,7 @@ def test_gens_pon_config(
     balsamic_cache: str,
     fastq_dir_gens_pon: str,
     case_id_gens_pon: str,
-    gens_male_pon_type: PONType,
+    gens_male_pon_type: PONWorkflow,
     gens_hg19_interval_list: str,
 ):
     """Test balsamic PON config case command."""
@@ -134,7 +134,7 @@ def test_cnvkit_pon_config_graph_failed(
     analysis_dir: str,
     balsamic_cache: str,
     panel_bed_file: str,
-    cnvkit_pon_type: PONType,
+    cnvkit_pon_type: PONWorkflow,
 ):
     """Test DAG graph building failure."""
 

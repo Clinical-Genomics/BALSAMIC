@@ -12,7 +12,7 @@ from BALSAMIC.utils.exc import BalsamicError
 
 
 from BALSAMIC.constants.paths import BALSAMIC_DIR
-from BALSAMIC.constants.analysis import FastqName, SampleType, SequencingType, PONType, Gender
+from BALSAMIC.constants.analysis import FastqName, SampleType, SequencingType, PONWorkflow, Gender
 from BALSAMIC.utils.io import write_finish_file
 from BALSAMIC.utils.rule import get_fastp_parameters, get_threads, get_result_dir
 from BALSAMIC.constants.workflow_params import WORKFLOW_PARAMS
@@ -89,7 +89,7 @@ else:
 
 rules_to_include.append("snakemake_rules/align/sentieon_alignment.rule")
 
-if pon_creation_type == PONType.CNVKIT:
+if pon_creation_type == PONWorkflow.CNVKIT:
     reffasta: str = config_model.reference["reference_genome"]
     refgene_flat: str = config_model.reference["refgene_flat"]
     access_5kb_hg19: str = config_model.reference["access_regions"]
@@ -99,16 +99,16 @@ if pon_creation_type == PONType.CNVKIT:
                                                                                                       'antitarget'])
     baited_beds = expand(cnv_dir + "{cov}.bed",cov=['target', 'antitarget'])
     pon_reference = expand(cnv_dir + panel_name + "_CNVkit_PON_reference_" + version + ".cnn")
-    rules_to_include.append("snakemake_rules/variant_calling/cnvkit_pon_creation.rule")
+    rules_to_include.append("snakemake_rules/pon/cnvkit_create_pon.rule")
 
-if pon_creation_type in [PONType.GENS_MALE, PONType.GENS_FEMALE]:
-    if pon_creation_type == PONType.GENS_MALE:
+if pon_creation_type in [PONWorkflow.GENS_MALE, PONWorkflow.GENS_FEMALE]:
+    if pon_creation_type == PONWorkflow.GENS_MALE:
         gender = Gender.MALE
     else:
         gender = Gender.FEMALE
     pon_reference = expand(cnv_dir + "balsamic_pon_100bp.{gender}.{version}.hdf5", gender=gender, version=version)
     rules_to_include.append("snakemake_rules/variant_calling/gatk_read_counts.rule")
-    rules_to_include.append("snakemake_rules/variant_calling/gens_create_pon.rule")
+    rules_to_include.append("snakemake_rules/pon/gens_create_pon.rule")
 
 pon_finish = expand(analysis_dir + "analysis_PON_finish")
 

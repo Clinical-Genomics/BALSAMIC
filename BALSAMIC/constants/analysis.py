@@ -81,7 +81,7 @@ class WorkflowSolution(StrEnum):
     SENTIEON_UMI: str = "Sentieon_umi"
 
 
-class PONType(StrEnum):
+class PONWorkflow(StrEnum):
     """Panel Of Normal creation workflow type."""
 
     CNVKIT: str = "CNVkit"
@@ -89,7 +89,7 @@ class PONType(StrEnum):
     GENS_FEMALE: str = "GENS_female"
 
 
-PON_TYPES: List[PONType] = [pon_type.value for pon_type in PONType]
+PON_TYPES: List[PONWorkflow] = [pon_type.value for pon_type in PONWorkflow]
 
 
 class RuleDeliveryMode(StrEnum):
