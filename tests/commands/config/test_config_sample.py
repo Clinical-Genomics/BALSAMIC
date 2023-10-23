@@ -355,7 +355,7 @@ def test_missing_required_gens_arguments(
     )
 
 
-def test_config_w_gens_arguments(
+def test_config_with_gens_arguments(
     invoke_cli,
     tumor_sample_name: str,
     analysis_dir: str,

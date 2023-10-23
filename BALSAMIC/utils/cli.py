@@ -107,6 +107,7 @@ def find_file_index(file_path):
         ".cram": [".cram.crai", ".crai"],
         ".vcf.gz": [".vcf.gz.tbi"],
         ".vcf": [".vcf.tbi"],
+        ".bed.gz": [".bed.gz.tbi"],
     }
 
     file_path_index = set()

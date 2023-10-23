@@ -294,8 +294,8 @@ OPTION_PON_CNN = click.option(
     help="Panel of normal reference (.cnn) for CNVkit",
 )
 
-OPTION_PON_TYPE = click.option(
-    "--pon-creation-type",
+OPTION_PON_WORKFLOW = click.option(
+    "--pon-workflow",
     type=click.Choice(PON_TYPES),
     default=PONWorkflow.CNVKIT,
     required=True,

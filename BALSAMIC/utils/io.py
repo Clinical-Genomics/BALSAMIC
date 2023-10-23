@@ -91,7 +91,6 @@ def read_vcf_file(vcf_file_path: str) -> List[str]:
     return vcf_file_path.read_text().splitlines()
 
 
-
 def write_finish_file(file_path: str) -> None:
     """Write finish file indicating the analysis completion."""
     with open(file_path, mode="w") as finish_file:

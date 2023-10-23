@@ -13,7 +13,6 @@ def test_cnvkit_pon_config(
     panel_bed_file: str,
     fastq_dir_pon: str,
     case_id_pon: str,
-    cnvkit_pon_type: PONWorkflow,
 ):
     """Test balsamic PON config case command."""
 
@@ -36,8 +35,8 @@ def test_cnvkit_pon_config(
             "v5",
             "--balsamic-cache",
             balsamic_cache,
-            "--pon-creation-type",
-            cnvkit_pon_type,
+            "--pon-workflow",
+            PONWorkflow.CNVKIT,
         ]
     )
 
@@ -52,14 +51,13 @@ def test_gens_pon_config(
     balsamic_cache: str,
     fastq_dir_gens_pon: str,
     case_id_gens_pon: str,
-    gens_male_pon_type: PONWorkflow,
     gens_hg19_interval_list: str,
 ):
     """Test balsamic PON config case command."""
 
     # GIVEN a case ID, fastq files, and an analysis dir
 
-    # WHEN creating a case config
+    # WHEN creating a config for GENS pon creation workflow
     result = invoke_cli(
         [
             "config",
@@ -74,8 +72,8 @@ def test_gens_pon_config(
             "v5",
             "--balsamic-cache",
             balsamic_cache,
-            "--pon-creation-type",
-            gens_male_pon_type,
+            "--pon-workflow",
+            PONWorkflow.GENS_MALE,
             "--genome-interval",
             gens_hg19_interval_list,
         ]
@@ -92,7 +90,7 @@ def test_cnvkit_pon_config_failed(invoke_cli, tmp_path, balsamic_cache, panel_be
     test_analysis_dir.mkdir()
     case_id = "sample_pon"
 
-    # WHEN creating a case analolysis
+    # WHEN creating config for cnvkit pon creation workflow
     result = invoke_cli(
         [
             "config",
@@ -134,7 +132,6 @@ def test_cnvkit_pon_config_graph_failed(
     analysis_dir: str,
     balsamic_cache: str,
     panel_bed_file: str,
-    cnvkit_pon_type: PONWorkflow,
 ):
     """Test DAG graph building failure."""
 
@@ -161,8 +158,8 @@ def test_cnvkit_pon_config_graph_failed(
                 "v5",
                 "--balsamic-cache",
                 balsamic_cache,
-                "--pon-creation-type",
-                cnvkit_pon_type,
+                "--pon-workflow",
+                PONWorkflow.CNVKIT,
             ]
         )
 

@@ -136,8 +136,30 @@ def sample_list_duplicate_assigned_fastq_patterns_model(
 
 @pytest.fixture(scope="session")
 def tumor_normal_fastq_info_correct(load_test_fastq_data) -> Dict[str, Dict]:
-    """Mock tumor normal fastq info in sample_dict"""
+    """Mock tumor normal fastq info in sample_dict."""
     return load_test_fastq_data["test_fastq_info"]
+
+
+@pytest.fixture(scope="session")
+def valid_dnascope_variant() -> str:
+    """Mock valid DNAscope variant."""
+    return (
+        "1\t100\trs1\tT\tC\t389.77\t.\tINFO\tGT:AD:DP:GQ:PL\t0/1:9,14:23:99:418,0,257"
+    )
+
+
+@pytest.fixture(scope="session")
+def invalid_dnascope_variant_no_ad() -> str:
+    """Mock invalid DNAscope variant without any read support."""
+    return "1\t200\t.\tCAAA\tCAAAA,C\t0.00\tLowQual\tINFO\tGT:AD:DP:GQ:PL\t0/0:0,0,0:0:0:0,0,0,3,3,19"
+
+
+@pytest.fixture(scope="session")
+def invalid_dnascope_variant_illegal_chrom() -> str:
+    """Mock invalid DNAscope variant with non-standard chromosome."""
+    return (
+        "25\t100\trs1\tT\tC\t389.77\t.\tINFO\tGT:AD:DP:GQ:PL\t0/1:9,14:23:99:418,0,257"
+    )
 
 
 @pytest.fixture(scope="session")
@@ -208,22 +230,6 @@ def case_id_gens_pon() -> str:
     Creates mock case-id for PON creation workflow
     """
     return "genscreation"
-
-
-@pytest.fixture(scope="session")
-def cnvkit_pon_type() -> str:
-    """
-    Returns PONWorkflow for CNVkit PON creation
-    """
-    return PONWorkflow.CNVKIT
-
-
-@pytest.fixture(scope="session")
-def gens_male_pon_type() -> str:
-    """
-    Returns PONWorkflow for GENS PON creation for gender male
-    """
-    return PONWorkflow.GENS_MALE
 
 
 def case_id_tumor_only_pon() -> str:
@@ -1663,7 +1669,6 @@ def cnvkit_pon_creation_config(
     balsamic_cache: str,
     sentieon_license: str,
     sentieon_install_dir: str,
-    cnvkit_pon_type: PONWorkflow,
 ) -> str:
     """Invoke PON creation config configuration file for CNVkit PON workflow."""
 
@@ -1692,8 +1697,8 @@ def cnvkit_pon_creation_config(
                 "v5",
                 "--balsamic-cache",
                 balsamic_cache,
-                "--pon-creation-type",
-                cnvkit_pon_type,
+                "--pon-workflow",
+                PONWorkflow.CNVKIT,
             ],
         )
 
@@ -1710,7 +1715,6 @@ def gens_pon_creation_config(
     balsamic_cache: str,
     sentieon_license: str,
     sentieon_install_dir: str,
-    gens_male_pon_type: PONWorkflow,
     gens_hg19_interval_list: str,
 ) -> str:
     """Invoke PON creation config configuration file for GENS PON workflow."""
@@ -1738,8 +1742,8 @@ def gens_pon_creation_config(
                 "v5",
                 "--balsamic-cache",
                 balsamic_cache,
-                "--pon-creation-type",
-                gens_male_pon_type,
+                "--pon-workflow",
+                PONWorkflow.GENS_MALE,
                 "--genome-interval",
                 gens_hg19_interval_list,
             ],
