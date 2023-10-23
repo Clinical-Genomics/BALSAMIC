@@ -66,7 +66,7 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 --algo GCBias --summary {output.gc_bias_summary} {output.gc_bias_metrics} \
 --algo AlignmentStat --adapter_seq '' {output.align_metrics} \
 --algo InsertSizeMetricAlgo {output.insert_size_metrics} \
---algo SequenceArtifactMetricsAlgo {output.seq_artifact_metrics};
+--algo SequenceArtifactMetricsAlgo {output.seq_artifact_metrics} ;
 
 {params.sentieon_exec} plot \
 GCBias -o {output.plot_gc_bias_metrics} {output.gc_bias_metrics} ;
@@ -87,7 +87,7 @@ InsertSizeMetricAlgo -o {output.plot_insert_size_metrics} {output.insert_size_me
 --gene_list {params.gene_list} {params.cov_threshold} \
 {output.coverage_metrics}_tmp;
 
-gzip -c {output.coverage_metrics}_tmp > {output.coverage_metrics};
-rm {output.coverage_metrics}_tmp;
-rm -rf {params.tmpdir};
+gzip -c {output.coverage_metrics}_tmp > {output.coverage_metrics} ;
+rm {output.coverage_metrics}_tmp ;
+rm -rf {params.tmpdir} ;
         """
