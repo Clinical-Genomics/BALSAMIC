@@ -11,10 +11,13 @@
 		"time": "00:15:00",
 		"n": 1
 	},
-	"bgzip": {
-		"mail_type": "END",
+	"gens_preprocessing": {
 		"time": "01:00:00",
 		"n": 1
+	},
+	"finalize_gens_outputfiles": {
+		"time": "01:00:00",
+		"n": 2
 	},
 	"CollectAlignmentSummaryMetrics": {
 		"time": "03:30:00",
@@ -118,6 +121,10 @@
 		"n": 16
 	},
 	"sentieon_DNAscope": {
+		"time": "24:00:00",
+		"n": 36
+	},
+	"sentieon_DNAscope_gnomad": {
 		"time": "24:00:00",
 		"n": 36
 	},

@@ -16,9 +16,9 @@ rule sentieon_DNAscope_gnomad:
         sentieon_ml_dnascope = config["SENTIEON_DNASCOPE"],
         sample = "{sample}"
     benchmark:
-        Path(benchmark_dir, 'sentieon_DNAscope_' + "{sample}.tsv").as_posix()
+        Path(benchmark_dir, 'sentieon_DNAscope_gnomad' + "{sample}.tsv").as_posix()
     threads:
-        get_threads(cluster_config, 'sentieon_DNAscope')
+        get_threads(cluster_config, 'sentieon_DNAscope_gnomad')
     message:
         "Calling germline variants on positions in Gnomad AF > 0.05 using Sentieon DNAscope for {params.sample}"
     shell:
@@ -87,7 +87,7 @@ rule gens_preprocessing:
     benchmark:
         Path(benchmark_dir,'gens_preprocessing_' + "{sample}.tsv").as_posix()
     threads:
-        get_threads(cluster_config,'gatk_denoisereadcounts')
+        get_threads(cluster_config,'gens_preprocessing')
     message:
         "Formatting output for GENS for sample: {params.sample}."
     shell:
@@ -113,9 +113,9 @@ rule finalize_gens_outputfiles:
     singularity:
         Path(singularity_image,config["bioinfo_tools"].get("bgzip") + ".sif").as_posix()
     threads:
-        get_threads(cluster_config, 'bgzip')
+        get_threads(cluster_config, 'finalize_gens_outputfiles')
     message:
-        "Formatting output for GENS for sample: {params.sample_id}."
+        "Bgzip and index GENS output for sample: {params.sample_id}."
     shell:
         """
 bgzip {input.gens_baf_bed}

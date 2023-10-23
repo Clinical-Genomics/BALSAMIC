@@ -312,6 +312,7 @@ def generate_cov_bed(
     normalised_coverage: List = normalised_coverage_path.read_text().splitlines()
     minimum_region_size: int = GENS_PARAMS["MINIMUM_REGION_SIZE"]
 
+    region_chrom, chrom, region_start, region_end, end, log2_ratio = None
     first_cov_line: bool = True
     start_new_region: bool = False
     for coverage_line in normalised_coverage:

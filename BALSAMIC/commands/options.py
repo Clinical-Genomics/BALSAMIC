@@ -11,6 +11,7 @@ from BALSAMIC.constants.analysis import (
     RULE_DELIVERY_MODES,
     RuleDeliveryMode,
     PON_TYPES,
+    PONType,
 )
 from BALSAMIC.constants.cache import GenomeVersion, CacheVersion, GENOME_VERSIONS
 from BALSAMIC.constants.cluster import (
@@ -296,6 +297,7 @@ OPTION_PON_CNN = click.option(
 OPTION_PON_TYPE = click.option(
     "--pon-creation-type",
     type=click.Choice(PON_TYPES),
+    default=PONType.CNVKIT,
     required=True,
     help="Specify which PON to create.",
 )
