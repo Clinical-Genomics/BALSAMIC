@@ -25,7 +25,6 @@ rule sentieon_wgs_metrics:
         gc_bias_metrics = qc_dir + "{sample}_sentieon_gc_metrics.txt",
         align_metrics = qc_dir + "{sample}_sentieon_aln_metrics.txt",
         insert_size_metrics = qc_dir + "{sample}_sentieon_insertsize_metrics.txt",
-        seq_artifact_metrics = qc_dir + "{sample}_sentieon_seqartifact_metrics.txt",
         plot_gc_bias_metrics = qc_dir + "{sample}_sentieon_gc_metrics.pdf",
         plot_qual_dist_metrics = qc_dir + "{sample}_sentieon_qd_metrics.pdf",
         plot_mean_qual_metrics = qc_dir + "{sample}_sentieon_mq_metrics.pdf",
@@ -65,8 +64,7 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 --algo QualDistribution {output.qual_dist_metrics} \
 --algo GCBias --summary {output.gc_bias_summary} {output.gc_bias_metrics} \
 --algo AlignmentStat --adapter_seq '' {output.align_metrics} \
---algo InsertSizeMetricAlgo {output.insert_size_metrics} \
---algo SequenceArtifactMetricsAlgo {output.seq_artifact_metrics} ;
+--algo InsertSizeMetricAlgo {output.insert_size_metrics} ;
 
 {params.sentieon_exec} plot \
 GCBias -o {output.plot_gc_bias_metrics} {output.gc_bias_metrics} ;
