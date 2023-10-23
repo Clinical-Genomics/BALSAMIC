@@ -14,7 +14,7 @@ rule gatk_create_readcount_pon:
     singularity:
         Path(singularity_image,config["bioinfo_tools"].get("gatk") + ".sif").as_posix()
     threads:
-        get_threads(cluster_config,'gatk_create_readcount_pon')
+        get_threads(cluster_config, "gatk_create_readcount_pon")
     message:
         "Running GATK CreateReadCountPanelOfNormals for {params.gender} PON for GENS."
     shell:

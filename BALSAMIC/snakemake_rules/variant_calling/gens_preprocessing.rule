@@ -16,9 +16,9 @@ rule sentieon_DNAscope_gnomad:
         sentieon_ml_dnascope = config["SENTIEON_DNASCOPE"],
         sample = "{sample}"
     benchmark:
-        Path(benchmark_dir, 'sentieon_DNAscope_gnomad' + "{sample}.tsv").as_posix()
+        Path(benchmark_dir, "sentieon_DNAscope_gnomad_{sample}.tsv").as_posix()
     threads:
-        get_threads(cluster_config, 'sentieon_DNAscope_gnomad')
+        get_threads(cluster_config, "sentieon_DNAscope_gnomad")
     message:
         "Calling germline variants on positions in Gnomad AF > 0.05 using Sentieon DNAscope for {params.sample}"
     shell:
@@ -51,11 +51,11 @@ rule gatk_denoisereadcounts:
         tmpdir=tempfile.mkdtemp(prefix=tmp_dir),
         sample="{sample}"
     benchmark:
-        Path(benchmark_dir,'gatk_denoisereadcounts_' + "{sample}.tsv").as_posix()
+        Path(benchmark_dir, "gatk_denoisereadcounts_{sample}.tsv").as_posix()
     singularity:
         Path(singularity_image,config["bioinfo_tools"].get("gatk") + ".sif").as_posix()
     threads:
-        get_threads(cluster_config,'gatk_denoisereadcounts')
+        get_threads(cluster_config,"gatk_denoisereadcounts")
     message:
         "Running GATK DenoiseReadCounts on {params.sample} for GENS."
     shell:
@@ -85,9 +85,9 @@ rule gens_preprocessing:
         sequencing_type = sequencing_type,
         sample="{sample}"
     benchmark:
-        Path(benchmark_dir,'gens_preprocessing_' + "{sample}.tsv").as_posix()
+        Path(benchmark_dir, "gens_preprocessing_{sample}.tsv").as_posix()
     threads:
-        get_threads(cluster_config,'gens_preprocessing')
+        get_threads(cluster_config, "gens_preprocessing")
     message:
         "Formatting output for GENS for sample: {params.sample}."
     shell:
@@ -109,11 +109,11 @@ rule finalize_gens_outputfiles:
         sample_id="{sample}",
         housekeeper_id= {"id": "{sample}", "tags": "gens"}
     benchmark:
-        Path(benchmark_dir,'finalize_gens_outputfiles' + "{sample}.tsv").as_posix()
+        Path(benchmark_dir, "finalize_gens_outputfiles_{sample}.tsv").as_posix()
     singularity:
         Path(singularity_image,config["bioinfo_tools"].get("bgzip") + ".sif").as_posix()
     threads:
-        get_threads(cluster_config, 'finalize_gens_outputfiles')
+        get_threads(cluster_config, "finalize_gens_outputfiles")
     message:
         "Bgzip and index GENS output for sample: {params.sample_id}."
     shell:
