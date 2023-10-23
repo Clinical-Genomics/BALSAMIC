@@ -71,6 +71,5 @@ fastp \
 --json {output.json} \
 --html {output.html} \
 --overrepresentation_analysis \
-{params.quality_trim} \
-{params.adapter_trim};
+{params.quality_trim}
         """
