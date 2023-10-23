@@ -492,16 +492,7 @@ if config['analysis']['analysis_type'] == "single":
 # GENS Outputs
 if config["analysis"]["sequencing_type"] == "wgs" and "gens_coverage_pon" in config["reference"]:
     analysis_specific_results.extend(
-        expand(cnv_dir + "{sample}.baf.bed.gz", sample=sample_names)
-    )
-    analysis_specific_results.extend(
-        expand(cnv_dir + "{sample}.cov.bed.gz", sample=sample_names)
-    )
-    analysis_specific_results.extend(
-        expand(cnv_dir + "{sample}.baf.bed.gz.tbi", sample=sample_names)
-    )
-    analysis_specific_results.extend(
-        expand(cnv_dir + "{sample}.cov.bed.gz.tbi", sample=sample_names)
+        expand(cnv_dir + "{sample}.{gens_input}.bed.gz", sample=sample_names, gens_input=["cov", "baf"])
     )
 
 # Dragen

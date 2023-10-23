@@ -96,29 +96,24 @@ rule gens_preprocessing:
 
 rule finalize_gens_outputfiles:
     input:
-        gens_baf_bed = cnv_dir + "{sample}.baf.bed",
-        gens_cov_bed = cnv_dir + "{sample}.cov.bed"
+        gens_input = cnv_dir + "{sample}.{gens_input}.bed"
     output:
-        gens_baf_bed_bgz = cnv_dir + "{sample}.baf.bed.gz",
-        gens_cov_bed_bgz = cnv_dir + "{sample}.cov.bed.gz",
-        gens_baf_bed_tbi = cnv_dir + "{sample}.baf.bed.gz.tbi",
-        gens_cov_bed_tbi = cnv_dir + "{sample}.cov.bed.gz.tbi"
+        gens_input_bgz = cnv_dir + "{sample}.{gens_input}.bed.gz",
     params:
         sample_id="{sample}",
+        gens_output="{gens_input}",
         housekeeper_id= {"id": "{sample}", "tags": "gens"}
     benchmark:
-        Path(benchmark_dir, "finalize_gens_outputfiles_{sample}.tsv").as_posix()
+        Path(benchmark_dir, "finalize_gens_outputfiles_{sample}_{gens_input}.tsv").as_posix()
     singularity:
         Path(singularity_image,config["bioinfo_tools"].get("bgzip") + ".sif").as_posix()
     threads:
         get_threads(cluster_config, "finalize_gens_outputfiles")
     message:
-        "Bgzip and index GENS output for sample: {params.sample_id}."
+        "Bgzip and index GENS output: {params.gens_input} for sample: {params.sample_id}."
     shell:
         """
-bgzip {input.gens_baf_bed}
-bgzip {input.gens_cov_bed}
-tabix {input.gens_baf_bed}.gz
-tabix {input.gens_cov_bed}.gz
+bgzip {input.gens_input}
+tabix {input.gens_input}.gz
         """
 

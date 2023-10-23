@@ -87,10 +87,9 @@ def read_vcf_file(vcf_file_path: str) -> List[str]:
     vcf_file_path: Path = Path(vcf_file_path)
     if vcf_file_path.suffix == ".gz":
         with gzip.open(vcf_file_path, "rt") as vcf_file:
-            vcf_lines: List[str] = vcf_file.read().splitlines()
-    else:
-        vcf_lines: List[str] = vcf_file_path.read_text().splitlines()
-    return vcf_lines
+            return vcf_file.read().splitlines()
+    return vcf_file_path.read_text().splitlines()
+
 
 
 def write_finish_file(file_path: str) -> None:

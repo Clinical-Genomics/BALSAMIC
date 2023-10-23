@@ -67,7 +67,7 @@ def pon_config(
     genome_version: GenomeVersion,
     genome_interval: Path,
     panel_bed: Path,
-    pon_creation_type: PONWorkflow,
+    pon_workflow: PONWorkflow,
     quality_trim: bool,
     umi: bool,
     umi_trim_length: bool,
@@ -79,14 +79,14 @@ def pon_config(
         data=read_json(Path(references_path, f"reference.{FileType.JSON}").as_posix()),
     )
 
-    if pon_creation_type in [PONWorkflow.GENS_MALE, PONWorkflow.GENS_FEMALE]:
+    if pon_workflow in [PONWorkflow.GENS_MALE, PONWorkflow.GENS_FEMALE]:
         if not genome_interval:
             raise click.BadParameter(
                 "Argument: genome_interval is required for GENS PON creation."
             )
         references["genome_interval"] = genome_interval
 
-    if pon_creation_type == PONWorkflow.CNVKIT and not panel_bed:
+    if pon_workflow == PONWorkflow.CNVKIT and not panel_bed:
         raise click.BadParameter(
             "Argument: panel_bed is required for CNVkit PON creation."
         )
@@ -106,7 +106,7 @@ def pon_config(
             "analysis_dir": analysis_dir,
             "fastq_path": fastq_path,
             "analysis_type": "pon",
-            "pon_creation_type": pon_creation_type,
+            "pon_workflow": pon_workflow,
             "pon_version": version,
             "analysis_workflow": "balsamic",
             "sequencing_type": "targeted" if panel_bed else "wgs",

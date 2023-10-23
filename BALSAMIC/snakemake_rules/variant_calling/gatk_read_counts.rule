@@ -20,14 +20,13 @@ rule gatk_collectreadcounts:
         "Running GATK CollectReadCounts on {params.sample} for GENS."
     shell:
       """
-mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};  
     
 gatk --java-options "-XX:-UseLargePages -Xmx20g" CollectReadCounts -I {input.bam} \
--L {input.genome_interval} \
---tmp-dir {params.tmpdir} \
---interval-merging-rule OVERLAPPING_ONLY \
--O {output.readcounts_hdf5}
+    -L {input.genome_interval} \
+    --tmp-dir {params.tmpdir} \
+    --interval-merging-rule OVERLAPPING_ONLY \
+    -O {output.readcounts_hdf5}
 
 rm -rf {params.tmpdir}
       """

@@ -51,7 +51,7 @@ cnv_dir: str = Path(result_dir, "cnv", "").as_posix() + "/"
 qc_dir: str = Path(result_dir, "qc", "").as_posix() + "/"
 
 # PON setting
-pon_creation_type = config_model.analysis.pon_creation_type
+pon_workflow: PONWorkflow = config_model.analysis.pon_workflow
 
 # Run information
 version: str = config_model.analysis.pon_version
@@ -89,7 +89,7 @@ else:
 
 rules_to_include.append("snakemake_rules/align/sentieon_alignment.rule")
 
-if pon_creation_type == PONWorkflow.CNVKIT:
+if pon_workflow == PONWorkflow.CNVKIT:
     reffasta: str = config_model.reference["reference_genome"]
     refgene_flat: str = config_model.reference["refgene_flat"]
     access_5kb_hg19: str = config_model.reference["access_regions"]
@@ -101,8 +101,8 @@ if pon_creation_type == PONWorkflow.CNVKIT:
     pon_reference = expand(cnv_dir + panel_name + "_CNVkit_PON_reference_" + version + ".cnn")
     rules_to_include.append("snakemake_rules/pon/cnvkit_create_pon.rule")
 
-if pon_creation_type in [PONWorkflow.GENS_MALE, PONWorkflow.GENS_FEMALE]:
-    if pon_creation_type == PONWorkflow.GENS_MALE:
+if pon_workflow in [PONWorkflow.GENS_MALE, PONWorkflow.GENS_FEMALE]:
+    if pon_workflow == PONWorkflow.GENS_MALE:
         gender = Gender.MALE
     else:
         gender = Gender.FEMALE
