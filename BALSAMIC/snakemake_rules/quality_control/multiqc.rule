@@ -57,7 +57,6 @@ if config["analysis"]["sequencing_type"] == 'wgs':
     multiqc_input.extend(expand(qc_dir + "{sample}_sentieon_gc_metrics.txt", sample=sample_names))
     multiqc_input.extend(expand(qc_dir + "{sample}_sentieon_aln_metrics.txt", sample=sample_names))
     multiqc_input.extend(expand(qc_dir + "{sample}_sentieon_insertsize_metrics.txt", sample=sample_names))
-    multiqc_input.extend(expand(qc_dir + "{sample}_sentieon_seqartifact_metrics.txt", sample=sample_names))
     multiqc_input.extend(expand(qc_dir + "{sample}_sentieon_gc_metrics.pdf", sample=sample_names))
     multiqc_input.extend(expand(qc_dir + "{sample}_sentieon_qd_metrics.pdf", sample=sample_names))
     multiqc_input.extend(expand(qc_dir + "{sample}_sentieon_mq_metrics.pdf", sample=sample_names))
