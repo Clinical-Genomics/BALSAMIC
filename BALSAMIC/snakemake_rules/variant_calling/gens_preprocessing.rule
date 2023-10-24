@@ -101,7 +101,7 @@ rule finalize_gens_outputfiles:
         gens_input_bgz = cnv_dir + "{sample}.{gens_input}.bed.gz",
     params:
         sample_id="{sample}",
-        gens_output="{gens_input}",
+        gens_input="{gens_input}",
         housekeeper_id= {"id": "{sample}", "tags": "gens"}
     benchmark:
         Path(benchmark_dir, "finalize_gens_outputfiles_{sample}_{gens_input}.tsv").as_posix()
