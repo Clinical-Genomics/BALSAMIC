@@ -397,6 +397,7 @@ def test_config_with_gens_arguments(
     assert result.exit_code == 0
     assert Path(analysis_dir, case_id_tumor_only, case_id_tumor_only + ".json").exists()
 
+
 def test_config_with_gens_arguments_for_TGA(
     invoke_cli,
     tumor_sample_name: str,
@@ -435,9 +436,11 @@ def test_config_with_gens_arguments_for_TGA(
             "--genome-interval",
             gens_hg19_interval_list,
             "-p",
-            panel_bed_file
+            panel_bed_file,
         ],
     )
     # THEN a config should be created and exist
     assert result.exit_code == 2
-    assert "GENS is currently not compatible with TGA analysis, only WGS." in result.output
+    assert (
+        "GENS is currently not compatible with TGA analysis, only WGS." in result.output
+    )

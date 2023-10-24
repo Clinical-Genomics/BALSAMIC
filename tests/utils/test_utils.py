@@ -39,7 +39,13 @@ from BALSAMIC.utils.cli import (
     validate_cache_version,
 )
 from BALSAMIC.utils.exc import BalsamicError, WorkflowRunError
-from BALSAMIC.utils.io import read_json, write_json, read_yaml, write_finish_file, read_vcf_file
+from BALSAMIC.utils.io import (
+    read_json,
+    write_json,
+    read_yaml,
+    write_finish_file,
+    read_vcf_file,
+)
 from BALSAMIC.utils.rule import (
     get_vcf,
     get_variant_callers,
@@ -1015,6 +1021,7 @@ def test_validate_cache_version_wrong_format():
     # THEN a bad parameter error should be raised
     with pytest.raises(click.BadParameter):
         validate_cache_version(click.Context, click.Parameter, cli_version)
+
 
 def test_read_vcf(vcf_file_path, vcf_file_gz_path):
     """Test correct reading of VCF files."""

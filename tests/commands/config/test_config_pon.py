@@ -116,12 +116,15 @@ def test_gens_pon_config(
     )
 
     # THEN command should exit with error
-    assert "Argument: genome_interval is required for GENS PON creation." in result.output
+    assert (
+        "Argument: genome_interval is required for GENS PON creation." in result.output
+    )
     assert result.exit_code == 2
 
 
-
-def test_cnvkit_pon_config_failed(invoke_cli, tmp_path: str, balsamic_cache: str, panel_bed_file: str):
+def test_cnvkit_pon_config_failed(
+    invoke_cli, tmp_path: str, balsamic_cache: str, panel_bed_file: str
+):
     """Test detection of missing option for a PON config without required arguments.."""
     # GIVEN a case ID, fastq files, and an analysis dir
     test_analysis_dir = tmp_path / "test_analysis_dir"
@@ -148,7 +151,10 @@ def test_cnvkit_pon_config_failed(invoke_cli, tmp_path: str, balsamic_cache: str
     assert "Error: Missing option" in result.output
     assert result.exit_code == 2
 
-def test_cnvkit_pon_config_missing_panel(invoke_cli, tmp_path: str, balsamic_cache: str, fastq_dir_pon: str):
+
+def test_cnvkit_pon_config_missing_panel(
+    invoke_cli, tmp_path: str, balsamic_cache: str, fastq_dir_pon: str
+):
     """Test detection of missing panel which is optional but required for CNVkit."""
 
     # GIVEN a case ID, fastq files, and an analysis dir
