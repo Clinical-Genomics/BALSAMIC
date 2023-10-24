@@ -398,7 +398,7 @@ def test_config_with_gens_arguments(
     assert Path(analysis_dir, case_id_tumor_only, case_id_tumor_only + ".json").exists()
 
 
-def test_config_with_gens_arguments_for_TGA(
+def test_config_with_gens_arguments_for_tga(
     invoke_cli,
     tumor_sample_name: str,
     analysis_dir: str,
