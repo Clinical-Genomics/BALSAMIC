@@ -401,6 +401,19 @@ def cadd_annotations(test_data_dir: str) -> str:
     """Return path for CADD annotations."""
     return Path(test_data_dir, "references", "cadd").as_posix()
 
+@pytest.fixture(scope="session")
+def vcf_file_path(test_data_dir: str) -> str:
+    """Return path for minimal VCF."""
+    return Path(
+        test_data_dir, "vcfs", "SNV.germline.sample.dnascope.vcf"
+    ).as_posix()
+
+@pytest.fixture(scope="session")
+def vcf_file_gz_path(test_data_dir: str) -> str:
+    """Return path for minimal gzipped VCF."""
+    return Path(
+        test_data_dir, "vcfs", "SNV.germline.sample.dnascope.vcf.gz"
+    ).as_posix()
 
 @pytest.fixture(scope="session")
 def gens_cov_pon_file(test_data_dir: str) -> str:

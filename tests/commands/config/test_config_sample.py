@@ -396,3 +396,48 @@ def test_config_with_gens_arguments(
     # THEN a config should be created and exist
     assert result.exit_code == 0
     assert Path(analysis_dir, case_id_tumor_only, case_id_tumor_only + ".json").exists()
+
+def test_config_with_gens_arguments_for_TGA(
+    invoke_cli,
+    tumor_sample_name: str,
+    analysis_dir: str,
+    balsamic_cache: str,
+    fastq_dir_tumor_only: str,
+    case_id_tumor_only: str,
+    gens_cov_pon_file: str,
+    gens_min_5_af_gnomad_file: str,
+    gens_hg19_interval_list: str,
+    panel_bed_file: str,
+):
+    """Test balsamic config case with GENS arguments for TGA."""
+
+    # GIVEN CLI arguments including optional GENS input-files
+
+    # WHEN invoking the config case command
+    result = invoke_cli(
+        [
+            "config",
+            "case",
+            "--case-id",
+            case_id_tumor_only,
+            "--analysis-dir",
+            analysis_dir,
+            "--fastq-path",
+            fastq_dir_tumor_only,
+            "--balsamic-cache",
+            balsamic_cache,
+            "--tumor-sample-name",
+            tumor_sample_name,
+            "--gens-coverage-pon",
+            gens_cov_pon_file,
+            "--gnomad-min-af5",
+            gens_min_5_af_gnomad_file,
+            "--genome-interval",
+            gens_hg19_interval_list,
+            "-p",
+            panel_bed_file
+        ],
+    )
+    # THEN a config should be created and exist
+    assert result.exit_code == 2
+    assert "GENS is currently not compatible with TGA analysis, only WGS." in result.output

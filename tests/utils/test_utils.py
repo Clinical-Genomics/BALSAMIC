@@ -39,7 +39,7 @@ from BALSAMIC.utils.cli import (
     validate_cache_version,
 )
 from BALSAMIC.utils.exc import BalsamicError, WorkflowRunError
-from BALSAMIC.utils.io import read_json, write_json, read_yaml, write_finish_file
+from BALSAMIC.utils.io import read_json, write_json, read_yaml, write_finish_file, read_vcf_file
 from BALSAMIC.utils.rule import (
     get_vcf,
     get_variant_callers,
@@ -1015,3 +1015,23 @@ def test_validate_cache_version_wrong_format():
     # THEN a bad parameter error should be raised
     with pytest.raises(click.BadParameter):
         validate_cache_version(click.Context, click.Parameter, cli_version)
+
+def test_read_vcf(vcf_file_path, vcf_file_gz_path):
+    """Test correct reading of VCF files."""
+    # GIVEN a path to two identical VCF files, one gzipped and one not
+
+    # WHEN reading VCF file into list of strings
+    vcf_contents: List[str] = read_vcf_file(vcf_file_path)
+    vcf_contents_from_gz: List[str] = read_vcf_file(vcf_file_gz_path)
+
+    # THEN first and last line of the list should match the expected values
+    first_line = vcf_contents[0]
+    last_line = vcf_contents[-1]
+    first_line_expect = "##fileformat=VCFv4.2"
+    last_line_expect = "20\t13417\t.\tC\tCGAGA\t-0.00\tLowQual\tAC=0;AF=0;AN=2;DP=46;ExcessHet=3.0103;FS=0.000;MLEAC=0;MLEAF=0;MQ=30.92;SOR=0.307\tGT:AD:DP:GQ:PL\t0/0:46,0:46:99:0,139,2084"
+
+    assert first_line == first_line_expect
+    assert last_line == last_line_expect
+
+    # THEN the contents from the gzipped VCF should match the non-gzipped VCF
+    assert vcf_contents == vcf_contents_from_gz
