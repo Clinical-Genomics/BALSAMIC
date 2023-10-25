@@ -51,16 +51,6 @@ if config["analysis"]["sequencing_type"] == 'wgs':
     multiqc_input.extend(expand(qc_dir + "{sample}_sentieon_wgs_metrics.txt", sample=sample_names))
     multiqc_input.extend(expand(qc_dir + "{sample}_coverage.gz", sample=sample_names))
 
-    multiqc_input.extend(expand(qc_dir + "{sample}_sentieon_mq_metrics.txt", sample=sample_names))
-    multiqc_input.extend(expand( qc_dir + "{sample}_sentieon_qd_metrics.txt", sample=sample_names))
-    multiqc_input.extend(expand(qc_dir + "{sample}_sentieon_gc_summary.txt", sample=sample_names))
-    multiqc_input.extend(expand(qc_dir + "{sample}_sentieon_gc_metrics.txt", sample=sample_names))
-    multiqc_input.extend(expand(qc_dir + "{sample}_sentieon_aln_metrics.txt", sample=sample_names))
-    multiqc_input.extend(expand(qc_dir + "{sample}_sentieon_insertsize_metrics.txt", sample=sample_names))
-    multiqc_input.extend(expand(qc_dir + "{sample}_sentieon_gc_metrics.pdf", sample=sample_names))
-    multiqc_input.extend(expand(qc_dir + "{sample}_sentieon_qd_metrics.pdf", sample=sample_names))
-    multiqc_input.extend(expand(qc_dir + "{sample}_sentieon_mq_metrics.pdf", sample=sample_names))
-    multiqc_input.extend(expand(qc_dir + "{sample}_sentieon_insertsize_metrics.pdf", sample=sample_names))
 
     if config["analysis"]["analysis_workflow"] != "balsamic-qc":
         multiqc_input.append(bam_dir + "tumor.recal_data.table")
@@ -75,17 +65,17 @@ else:
         fastq_pattern=config_model.get_fastq_patterns_by_sample(sample_names = sample_names)))
 
     # picard metrics
-    multiqc_input.extend(expand(bam_dir + "{sample}.dedup.realign.insertsizemetric", sample=tumor_sample))
-    multiqc_input.extend(expand(bam_dir + "{sample}.dedup.realign.alignmetric", sample=tumor_sample))
+    multiqc_input.extend(expand(bam_dir + "{sample}.dedup.insertsizemetric", sample=tumor_sample))
+    multiqc_input.extend(expand(bam_dir + "{sample}.dedup.alignmetric", sample=tumor_sample))
     if config['analysis']['analysis_type'] == "paired":
-        multiqc_input.extend(expand(bam_dir + "{sample}.dedup.realign.insertsizemetric", sample=normal_sample))
-        multiqc_input.extend(expand(bam_dir + "{sample}.dedup.realign.alignmetric", sample=normal_sample))
+        multiqc_input.extend(expand(bam_dir + "{sample}.dedup.insertsizemetric", sample=normal_sample))
+        multiqc_input.extend(expand(bam_dir + "{sample}.dedup.alignmetric", sample=normal_sample))
 
-    multiqc_input.extend(expand(bam_dir + "{sample}.dedup.realign.hsmetric", sample=sample_names))
+    multiqc_input.extend(expand(bam_dir + "{sample}.dedup.hsmetric", sample=sample_names))
 
     # sambamba metrics
-    multiqc_input.extend(expand(bam_dir + "{sample}.dedup.realign.cov.bed", sample=sample_names))
-    multiqc_input.extend(expand(bam_dir + "{sample}.dedup.realign.exon.cov.bed", sample=sample_names))
+    multiqc_input.extend(expand(bam_dir + "{sample}.dedup.cov.bed", sample=sample_names))
+    multiqc_input.extend(expand(bam_dir + "{sample}.dedup.exon.cov.bed", sample=sample_names))
 
     # mosdepth metrics
     mosdepth_metrics_wildcard = ["mosdepth.global.dist.txt", "mosdepth.region.dist.txt",

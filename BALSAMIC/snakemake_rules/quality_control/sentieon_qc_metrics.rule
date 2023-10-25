@@ -10,25 +10,13 @@ def repeat(param, values):
     return " ".join(param_values)
 
 
-
-
 rule sentieon_wgs_metrics:
     input:
         bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample),
         reference = config["reference"]["reference_genome"]
     output:
         wgs_metrics = qc_dir + "{sample}_sentieon_wgs_metrics.txt",
-        coverage_metrics = qc_dir + "{sample}_coverage.gz",
-        mean_qual_metrics = qc_dir + "{sample}_sentieon_mq_metrics.txt",
-        qual_dist_metrics = qc_dir + "{sample}_sentieon_qd_metrics.txt",
-        gc_bias_summary = qc_dir + "{sample}_sentieon_gc_summary.txt",
-        gc_bias_metrics = qc_dir + "{sample}_sentieon_gc_metrics.txt",
-        align_metrics = qc_dir + "{sample}_sentieon_aln_metrics.txt",
-        insert_size_metrics = qc_dir + "{sample}_sentieon_insertsize_metrics.txt",
-        plot_gc_bias_metrics = qc_dir + "{sample}_sentieon_gc_metrics.pdf",
-        plot_qual_dist_metrics = qc_dir + "{sample}_sentieon_qd_metrics.pdf",
-        plot_mean_qual_metrics = qc_dir + "{sample}_sentieon_mq_metrics.pdf",
-        plot_insert_size_metrics = qc_dir + "{sample}_sentieon_insertsize_metrics.pdf"
+        coverage_metrics = qc_dir + "{sample}_coverage.gz"
     benchmark:
         Path(benchmark_dir,'sentieon_wgs_metrics_' + "{sample}.tsv").as_posix()
     params:
@@ -45,7 +33,6 @@ rule sentieon_wgs_metrics:
         "Calculate coverage metrics for wgs cases using sentieon tools for sample {params.sample}"
     shell:
         """
-mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
 export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
@@ -56,27 +43,6 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 --algo WgsMetricsAlgo \
 --min_base_qual {params.min_base_qual} \
 {output.wgs_metrics};
-
-{params.sentieon_exec} driver \
--i {input.bam} \
--r {input.reference} \
---algo MeanQualityByCycle {output.mean_qual_metrics} \
---algo QualDistribution {output.qual_dist_metrics} \
---algo GCBias --summary {output.gc_bias_summary} {output.gc_bias_metrics} \
---algo AlignmentStat --adapter_seq '' {output.align_metrics} \
---algo InsertSizeMetricAlgo {output.insert_size_metrics} ;
-
-{params.sentieon_exec} plot \
-GCBias -o {output.plot_gc_bias_metrics} {output.gc_bias_metrics} ;
-
-{params.sentieon_exec} plot \
-QualDistribution -o {output.plot_qual_dist_metrics} {output.qual_dist_metrics} ;
-
-{params.sentieon_exec} plot \
-MeanQualityByCycle -o {output.plot_mean_qual_metrics} {output.mean_qual_metrics} ;
-
-{params.sentieon_exec} plot \
-InsertSizeMetricAlgo -o {output.plot_insert_size_metrics} {output.insert_size_metrics} ;
 
 {params.sentieon_exec} driver \
 -i {input.bam} \
