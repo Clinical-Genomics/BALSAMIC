@@ -566,7 +566,7 @@ if 'delivery' in config:
 
         LOG.info("Delivering step (rule) {} {}.".format(my_rule, housekeeper_id))
         files_to_deliver = get_rule_output(rules=rules, rule_name=my_rule, output_file_wildcards=wildcard_dict)
-        LOG.debug("The following files added to delivery: {}".format(files_to_deliver))
+        LOG.info("The following files added to delivery: {}".format(files_to_deliver))
         output_files_ready.extend(files_to_deliver)
 
     output_files_ready = [dict(zip(output_files_ready[0], value)) for value in output_files_ready[1:]]
