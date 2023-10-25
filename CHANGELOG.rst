@@ -78,6 +78,7 @@ Removed:
 * Balsamic container https://github.com/Clinical-Genomics/BALSAMIC/pull/1230
 * Plugin CLI https://github.com/Clinical-Genomics/BALSAMIC/pull/1245
 * Realignment step for TGA workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1272
+* Archived/outdated workflows and scripts https://github.com/Clinical-Genomics/BALSAMIC/pull/1296
 
 [12.0.2]
 --------
