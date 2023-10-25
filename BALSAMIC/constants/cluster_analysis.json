@@ -13,7 +13,7 @@
 	},
 	"gens_preprocessing": {
 		"time": "01:00:00",
-		"n": 1
+		"n": 4
 	},
 	"finalize_gens_outputfiles": {
 		"time": "01:00:00",
