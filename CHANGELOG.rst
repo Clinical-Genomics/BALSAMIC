@@ -25,6 +25,7 @@ Added:
 * `PureCN` container https://github.com/Clinical-Genomics/BALSAMIC/pull/1255
 * `GATK` container https://github.com/Clinical-Genomics/BALSAMIC/pull/1266
 * Resolved FASTQ paths to sample dictionary (balsamic logging) https://github.com/Clinical-Genomics/BALSAMIC/pull/1275
+* Picard HsMetrics and CollectGcBiasMetrics for WGS https://github.com/Clinical-Genomics/BALSAMIC/pull/1288
 
 Changed:
 ^^^^^^^^
