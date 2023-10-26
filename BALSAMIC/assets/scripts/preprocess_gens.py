@@ -3,7 +3,7 @@ import click
 import io
 import logging
 from pathlib import Path
-from typing import Dict, List, Tuple, Union
+from typing import Dict, List, Tuple, Union, Optional
 from statistics import mean
 
 from BALSAMIC.constants.analysis import SequencingType
@@ -64,7 +64,9 @@ def calculate_bafs(ctx: click.Context, vcf_file_path: str):
     LOG.info("Writing variant b-allele-frequencies to output...")
     output_file: Path = Path(ctx.obj["output_file"])
     sequencing_type: SequencingType = ctx.obj["sequencing_type"]
-    write_b_allele_output(variants, output_file, sequencing_type)
+    write_b_allele_output(
+        variants=variants, output_file=output_file, sequencing_type=sequencing_type
+    )
 
 
 def get_valid_variants(vcf_lines: List[str]) -> Dict:
@@ -86,14 +88,14 @@ def get_valid_variants(vcf_lines: List[str]) -> Dict:
         valid_variants: Dict = get_valid_variants(vcf_lines)
     """
     count_invalid_vars: int = 0
-    illegal_chromosomes: Dict = {}
-    variants = {}
+    illegal_chromosomes: dict = {}
+    variants: dict = {}
     variant_id: int = 0
     for variant_line in vcf_lines:
         if variant_line.startswith("#"):
             continue
 
-        variant: Dict = extract_variant_info(variant_line)
+        variant: Dict[str, Union[str, float]] = extract_variant_info(variant_line)
         if not variant:
             count_invalid_vars += 1
             continue
@@ -117,7 +119,7 @@ def get_valid_variants(vcf_lines: List[str]) -> Dict:
     return variants
 
 
-def extract_variant_info(variant: str) -> Union[Dict, None]:
+def extract_variant_info(variant: str) -> Optional[Dict[str, Union[str, float]]]:
     """
     Extracts genetic variant information.
 
@@ -137,18 +139,13 @@ def extract_variant_info(variant: str) -> Union[Dict, None]:
         {'chr': 'chr1', 'start': '1000', 'ref': 'A', 'alt': 'T', 'sample': '0/1:10,5:15:45:45,0,20', 'af': 0.333333}
     """
     fields: List[str] = variant.split("\t")
-    try:
-        variant_info = {
-            "chr": fields[0],
-            "start": fields[1],
-            "ref": fields[3],
-            "alt": fields[4],
-            "sample": fields[9],
-        }
-    except IndexError:
-        error_message = "Invalid variant string format"
-        LOG.error(f"{error_message}")
-        raise ValueError(f"{error_message}")
+    variant_info = {
+        "chr": fields[0],
+        "start": fields[1],
+        "ref": fields[3],
+        "alt": fields[4],
+        "sample": fields[9],
+    }
 
     if variant_info["sample"].split(":")[0] == "./.":
         return None
@@ -158,7 +155,6 @@ def extract_variant_info(variant: str) -> Union[Dict, None]:
         VD = int(allele_depths.split(",")[1])
         DP = int(variant_info["sample"].split(":")[2])
         variant_info["af"] = round(VD / DP, 6)
-
     except (ValueError, ZeroDivisionError, IndexError):
         return None
 
@@ -167,7 +163,7 @@ def extract_variant_info(variant: str) -> Union[Dict, None]:
 
 def write_b_allele_output(
     variants: Dict, output_file: Path, sequencing_type: SequencingType
-):
+) -> None:
     """
     Writes B-allele frequency (BAF) output to a file for each level of GENS zoom specified in prefix of BAF_SKIP_N.
 
@@ -191,12 +187,13 @@ def write_b_allele_output(
     Note:
         This function uses a predefined constant BAF_SKIP_N, which determines how many variants to skip before writing.
     """
-    SEQ_GENS_PARAMS: Dict = GENS_PARAMS["SEQUENCING_TYPE"][sequencing_type]
-    BAF_SKIP_N: Dict = SEQ_GENS_PARAMS["BAF_SKIP_N"]
+    BAF_SKIP_N: Dict[str, int] = GENS_PARAMS["SEQUENCING_TYPE"][sequencing_type][
+        "BAF_SKIP_N"
+    ]
 
     with open(output_file.as_posix(), "w") as baf_out:
         for prefix, req_skip_count in BAF_SKIP_N.items():
-            skip_count = int(req_skip_count)
+            skip_count: int = req_skip_count
             for variant_id in variants:
                 variant: Dict = variants[variant_id]
                 if skip_count == req_skip_count:
@@ -234,19 +231,25 @@ def create_coverage_regions(ctx: click.Context, normalised_coverage_path: str) -
     normalised_coverage_path = Path(normalised_coverage_path)
     output_file: Path = Path(ctx.obj["output_file"])
     sequencing_type: SequencingType = ctx.obj["sequencing_type"]
-    SEQ_GENS_PARAMS: Dict = GENS_PARAMS["SEQUENCING_TYPE"][sequencing_type]
-    COV_REGION_SIZES: Dict = SEQ_GENS_PARAMS["COV_REGION_SIZES"]
+    COV_REGION_SIZES: Dict[str, int] = GENS_PARAMS["SEQUENCING_TYPE"][sequencing_type][
+        "COV_REGION_SIZES"
+    ]
     with open(output_file.as_posix(), "w") as cov_out:
-        for prefix, region_size in COV_REGION_SIZES.items():
+        for prefix, region_size_requested in COV_REGION_SIZES.items():
             LOG.info(
-                f"Creating regions for prefix: {prefix}, region_size: {region_size}."
+                f"Creating regions for prefix: {prefix}, region_size_requested: {region_size_requested}."
             )
-            generate_cov_bed(normalised_coverage_path, region_size, prefix, cov_out)
+            generate_cov_bed(
+                normalised_coverage_path=normalised_coverage_path,
+                region_size_requested=region_size_requested,
+                prefix=prefix,
+                cov_out=cov_out,
+            )
 
 
 def write_coverage_region(
     prefix: str,
-    region_chr: str,
+    region_chrom: str,
     region_start: int,
     region_end: int,
     reg_ratios: List[float],
@@ -257,7 +260,7 @@ def write_coverage_region(
 
     Args:
         prefix (str): Prefix for the output.
-        region_chr (str): Chromosome for the region.
+        region_chrom (str): Chromosome for the region.
         region_start (int): Start position of the region.
         region_end (int): End position of the region.
         reg_ratios (List[float]): List of log2 ratios.
@@ -268,7 +271,7 @@ def write_coverage_region(
     """
     mid_point = region_start + (region_end - region_start) // 2
     cov_out.write(
-        f"{prefix}_{region_chr}\t{mid_point - 1}\t{mid_point}\t{mean(reg_ratios)}\n"
+        f"{prefix}_{region_chrom}\t{mid_point - 1}\t{mid_point}\t{mean(reg_ratios)}\n"
     )
 
 
@@ -309,7 +312,7 @@ def generate_cov_bed(
         None
     """
 
-    normalised_coverage: List = normalised_coverage_path.read_text().splitlines()
+    normalised_coverage: List[str] = normalised_coverage_path.read_text().splitlines()
     minimum_region_size: int = GENS_PARAMS["MINIMUM_REGION_SIZE"]
 
     region_chrom, chrom, region_start, region_end, end, log2_ratio = [None] * 6
@@ -331,7 +334,12 @@ def generate_cov_bed(
             start_new_region: bool = False
             if region_size_requested == minimum_region_size:
                 write_coverage_region(
-                    prefix, region_chrom, region_start, region_end, reg_ratios, cov_out
+                    prefix=prefix,
+                    region_chrom=region_chrom,
+                    region_start=region_start,
+                    region_end=region_end,
+                    reg_ratios=reg_ratios,
+                    cov_out=cov_out,
                 )
                 start_new_region: bool = True
             continue
@@ -345,7 +353,12 @@ def generate_cov_bed(
             # Step 2: Start new region from new line
             reg_ratios.append(log2_ratio)
             write_coverage_region(
-                prefix, region_chrom, region_start, end, reg_ratios, cov_out
+                prefix=prefix,
+                region_chrom=region_chrom,
+                region_start=region_start,
+                region_end=end,
+                reg_ratios=reg_ratios,
+                cov_out=cov_out,
             )
             start_new_region: bool = True
             continue
@@ -360,7 +373,12 @@ def generate_cov_bed(
             # -- gap 500 bases --
             # start3 -- 100bases -- end3
             write_coverage_region(
-                prefix, region_chrom, region_start, region_end, reg_ratios, cov_out
+                prefix=prefix,
+                region_chrom=region_chrom,
+                region_start=region_start,
+                region_end=region_end,
+                reg_ratios=reg_ratios,
+                cov_out=cov_out,
             )
             start_new_region: bool = True
 
@@ -369,7 +387,12 @@ def generate_cov_bed(
             # Step 1: Write region from previous line
             # Step 2: Start new region from current line
             write_coverage_region(
-                prefix, region_chrom, region_start, region_end, reg_ratios, cov_out
+                prefix=prefix,
+                region_chrom=region_chrom,
+                region_start=region_start,
+                region_end=region_end,
+                reg_ratios=reg_ratios,
+                cov_out=cov_out,
             )
             start_new_region: bool = True
 
@@ -387,7 +410,12 @@ def generate_cov_bed(
 
     # Output last line:
     write_coverage_region(
-        prefix, region_chrom, region_start, region_end, reg_ratios, cov_out
+        prefix=prefix,
+        region_chrom=region_chrom,
+        region_start=region_start,
+        region_end=region_end,
+        reg_ratios=reg_ratios,
+        cov_out=cov_out,
     )
 
 

@@ -89,7 +89,7 @@ class PONWorkflow(StrEnum):
     GENS_FEMALE: str = "GENS_female"
 
 
-PON_TYPES: List[PONWorkflow] = [pon_type.value for pon_type in PONWorkflow]
+PON_WORKFLOWS: List[PONWorkflow] = [workflow.value for workflow in PONWorkflow]
 
 
 class RuleDeliveryMode(StrEnum):

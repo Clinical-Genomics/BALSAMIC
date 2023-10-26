@@ -10,7 +10,7 @@ from BALSAMIC.constants.analysis import (
     Gender,
     RULE_DELIVERY_MODES,
     RuleDeliveryMode,
-    PON_TYPES,
+    PON_WORKFLOWS,
     PONWorkflow,
 )
 from BALSAMIC.constants.cache import GenomeVersion, CacheVersion, GENOME_VERSIONS
@@ -296,7 +296,7 @@ OPTION_PON_CNN = click.option(
 
 OPTION_PON_WORKFLOW = click.option(
     "--pon-workflow",
-    type=click.Choice(PON_TYPES),
+    type=click.Choice(PON_WORKFLOWS),
     default=PONWorkflow.CNVKIT,
     required=True,
     help="Specify which PON to create.",

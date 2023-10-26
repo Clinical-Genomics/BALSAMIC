@@ -19,7 +19,6 @@ rule gatk_create_readcount_pon:
         "Running GATK CreateReadCountPanelOfNormals for {params.gender} PON for GENS."
     shell:
         """
-mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};  
   
 shell_readcounts_hdf5s=$(echo {input.readcounts_hdf5s} | sed 's/ / -I /g') ;
