@@ -42,10 +42,10 @@ if config["analysis"]["sequencing_type"] == 'wgs':
         sample=sample_names))
     multiqc_input.extend(expand(qc_dir + "{sample}.multiple_metrics.{metrics_wc}",
         sample=sample_names, metrics_wc=picard_metrics_wildcard))
-    multiqc_input.extend(expand(qc_dir + "{sample}.dedup.realign.hsmetric", sample=sample_names))
-    multiqc_input.extend(expand(qc_dir + "{sample}.dedup.realign.gc_bias_metrics", sample=sample_names))
-    multiqc_input.extend(expand(qc_dir + "{sample}.dedup.realign.gc_bias_metrics.sum_metrics", sample=sample_names))
-    multiqc_input.extend(expand(qc_dir + "{sample}.dedup.realign.gc_bias_metrics.chart", sample=sample_names))
+    multiqc_input.extend(expand(qc_dir + "{sample}.dedup.realign.hsmetric.txt", sample=sample_names))
+    multiqc_input.extend(expand(qc_dir + "{sample}.dedup.realign.gc_bias_metrics.txt", sample=sample_names))
+    multiqc_input.extend(expand(qc_dir + "{sample}.dedup.realign.gc_bias_metrics.sum_metrics.txt", sample=sample_names))
+    multiqc_input.extend(expand(qc_dir + "{sample}.dedup.realign.gc_bias_metrics.chart.pdf", sample=sample_names))
 
     # Sentieon metrics
     multiqc_input.extend(expand(qc_dir + "{sample}_sentieon_wgs_metrics.txt", sample=sample_names))
@@ -65,13 +65,13 @@ else:
         fastq_pattern=config_model.get_fastq_patterns_by_sample(sample_names = sample_names)))
 
     # picard metrics
-    multiqc_input.extend(expand(bam_dir + "{sample}.dedup.insertsizemetric", sample=tumor_sample))
-    multiqc_input.extend(expand(bam_dir + "{sample}.dedup.alignmetric", sample=tumor_sample))
+    multiqc_input.extend(expand(bam_dir + "{sample}.dedup.insertsizemetric.txt", sample=tumor_sample))
+    multiqc_input.extend(expand(bam_dir + "{sample}.dedup.alignmetric.txt", sample=tumor_sample))
     if config['analysis']['analysis_type'] == "paired":
-        multiqc_input.extend(expand(bam_dir + "{sample}.dedup.insertsizemetric", sample=normal_sample))
-        multiqc_input.extend(expand(bam_dir + "{sample}.dedup.alignmetric", sample=normal_sample))
+        multiqc_input.extend(expand(bam_dir + "{sample}.dedup.insertsizemetric.txt", sample=normal_sample))
+        multiqc_input.extend(expand(bam_dir + "{sample}.dedup.alignmetric.txt", sample=normal_sample))
 
-    multiqc_input.extend(expand(bam_dir + "{sample}.dedup.hsmetric", sample=sample_names))
+    multiqc_input.extend(expand(bam_dir + "{sample}.dedup.hsmetric.txt", sample=sample_names))
 
     # sambamba metrics
     multiqc_input.extend(expand(bam_dir + "{sample}.dedup.cov.bed", sample=sample_names))
@@ -88,8 +88,8 @@ else:
 
     if config["analysis"]["analysis_workflow"]=="balsamic-umi":
         # UMI picard metrics
-        multiqc_input.extend(expand(umi_qc_dir + "{sample}.umi.collect_hsmetric", sample=sample_names))
-        multiqc_input.extend(expand(umi_qc_dir + "{sample}.umi.metrics", sample=sample_names))
+        multiqc_input.extend(expand(umi_qc_dir + "{sample}.umi.collect_hsmetric.txt", sample=sample_names))
+        multiqc_input.extend(expand(umi_qc_dir + "{sample}.umi.metrics.txt", sample=sample_names))
 
 
 rule multiqc:
