@@ -81,6 +81,17 @@ class WorkflowSolution(StrEnum):
     SENTIEON_UMI: str = "Sentieon_umi"
 
 
+class PONWorkflow(StrEnum):
+    """Panel Of Normal creation workflow type."""
+
+    CNVKIT: str = "CNVkit"
+    GENS_MALE: str = "GENS_male"
+    GENS_FEMALE: str = "GENS_female"
+
+
+PON_WORKFLOWS: List[PONWorkflow] = [workflow.value for workflow in PONWorkflow]
+
+
 class RuleDeliveryMode(StrEnum):
     """Rules to deliver mode."""
 

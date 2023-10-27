@@ -26,6 +26,8 @@ Added:
 * `GATK` container https://github.com/Clinical-Genomics/BALSAMIC/pull/1266
 * Resolved FASTQ paths to sample dictionary (balsamic logging) https://github.com/Clinical-Genomics/BALSAMIC/pull/1275
 * Picard HsMetrics and CollectGcBiasMetrics for WGS https://github.com/Clinical-Genomics/BALSAMIC/pull/1288
+* Command-line arguments and rules for creation of GENS files https://github.com/Clinical-Genomics/BALSAMIC/pull/1279
+
 
 Changed:
 ^^^^^^^^
@@ -54,6 +56,8 @@ Changed:
 * Migrate Metrics models to pydantic v2 https://github.com/Clinical-Genomics/BALSAMIC/pull/1270
 * Migrate Snakemake models to pydantic v2 https://github.com/Clinical-Genomics/BALSAMIC/pull/1268
 * Migrate Cache models to pydantic v2 https://github.com/Clinical-Genomics/BALSAMIC/pull/1274
+* Made BALSAMIC compatible with multiple PON creation workflows https://github.com/Clinical-Genomics/BALSAMIC/pull/1279
+
 
 Fixed:
 ^^^^^^
@@ -67,6 +71,7 @@ Fixed:
 * CNVpytor container https://github.com/Clinical-Genomics/BALSAMIC/pull/1246
 * Restored balsamic container in UMI concatenation rule https://github.com/Clinical-Genomics/BALSAMIC/pull/1261
 * CNVpytor container, fixing numpy version https://github.com/Clinical-Genomics/BALSAMIC/pull/1273
+* QC workflow store https://github.com/Clinical-Genomics/BALSAMIC/pull/1295
 
 Removed:
 ^^^^^^^^

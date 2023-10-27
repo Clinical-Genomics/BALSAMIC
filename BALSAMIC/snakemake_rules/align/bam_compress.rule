@@ -8,12 +8,12 @@ rule bam_compress_tumor:
     output:
         cram = Path(bam_dir + "tumor.{sample}.{final_bam_suffix}.cram").as_posix()
     benchmark:
-        Path(benchmark_dir, "bam_compress_{final_bam_suffix}_" + "{sample}.tsv").as_posix()
+        Path(benchmark_dir, "bam_compress_{final_bam_suffix}_{sample}.tsv").as_posix()
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("compress") + ".sif").as_posix()
     params:
         sample_id = "{sample}",
-        housekeeper_id= {"id": "{sample}", "tags": "tumor"}
+        housekeeper_id= {"id": case_id, "tags": "tumor"}
     threads:
         get_threads(cluster_config, "bam_compress")
     message:
@@ -31,12 +31,12 @@ rule bam_compress_normal:
     output:
         cram = Path(bam_dir, "normal.{sample}.{final_bam_suffix}.cram").as_posix()
     benchmark:
-        Path(benchmark_dir, "bam_compress_{final_bam_suffix}_" + "{sample}.tsv").as_posix()
+        Path(benchmark_dir, "bam_compress_{final_bam_suffix}_{sample}.tsv").as_posix()
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("compress") + ".sif").as_posix()
     params:
         sample_id = "{sample}",
-        housekeeper_id= {"id": "{sample}", "tags": "normal"}
+        housekeeper_id= {"id": case_id, "tags": "normal"}
     threads:
         get_threads(cluster_config, "bam_compress")
     message:

@@ -87,6 +87,7 @@ swegen_sv = ""
 singularity_image: str = config_model.singularity['image']
 sample_names: List[str] = config_model.get_all_sample_names()
 tumor_sample: str = config_model.get_sample_name_by_type(SampleType.TUMOR)
+sequencing_type = config_model.analysis.sequencing_type
 if config_model.analysis.analysis_type == "paired":
     normal_sample: str = config_model.get_sample_name_by_type(SampleType.NORMAL)
 
@@ -372,6 +373,11 @@ if config["analysis"]["analysis_workflow"] == "balsamic":
 if "dragen" in config:
     rules_to_include.append("snakemake_rules/concatenation/concatenation.rule")
 
+# Add rule for GENS
+if "gens_coverage_pon" in config["reference"]:
+    rules_to_include.append("snakemake_rules/variant_calling/gatk_read_counts.rule")
+    rules_to_include.append("snakemake_rules/variant_calling/gens_preprocessing.rule")
+
 LOG.info(f"The following rules will be included in the workflow: {rules_to_include}")
 LOG.info(f"The following Germline variant callers will be included in the workflow: {germline_caller}")
 LOG.info(f"The following somatic variant callers will be included in the workflow: {somatic_caller}")
@@ -396,7 +402,7 @@ analysis_specific_results.extend(
 )
 
 # Germline SNVs specifically for genotype
-if config["analysis"]["analysis_type"]=="paired":
+if config["analysis"]["analysis_type"] == "paired":
     analysis_specific_results.append(vep_dir + "SNV.genotype.normal.dnascope.vcf.gz")
 
 # Raw VCFs
@@ -442,7 +448,7 @@ if config["analysis"]["sequencing_type"] != "wgs":
         expand(vep_dir + "{vcf}.research.filtered.pass.ranked.vcf.gz", vcf=get_vcf(config, ["vardict"], [case_id]))
     )
     # UMI
-    if config["analysis"]["analysis_workflow"]=="balsamic-umi":
+    if config["analysis"]["analysis_workflow"] == "balsamic-umi":
         analysis_specific_results.extend(expand(umi_qc_dir + "{sample}.umi.mean_family_depth", sample=config_model.get_all_sample_names()))
         if background_variant_file:
             analysis_specific_results.extend(
@@ -481,6 +487,12 @@ if config['analysis']['sequencing_type'] == "wgs" and config['analysis']['analys
 if config['analysis']['analysis_type'] == "single":
     analysis_specific_results.extend(
         expand(vcf_dir + "{vcf}.cov.gz",vcf=get_vcf(config,["dellycnv"],[case_id]))
+    )
+
+# GENS Outputs
+if config["analysis"]["sequencing_type"] == "wgs" and "gens_coverage_pon" in config["reference"]:
+    analysis_specific_results.extend(
+        expand(cnv_dir + "{sample}.{gens_input}.bed.gz", sample=sample_names, gens_input=["cov", "baf"])
     )
 
 # Dragen
@@ -554,7 +566,7 @@ if 'delivery' in config:
 
         LOG.info("Delivering step (rule) {} {}.".format(my_rule, housekeeper_id))
         files_to_deliver = get_rule_output(rules=rules, rule_name=my_rule, output_file_wildcards=wildcard_dict)
-        LOG.debug("The following files added to delivery: {}".format(files_to_deliver))
+        LOG.info("The following files added to delivery: {}".format(files_to_deliver))
         output_files_ready.extend(files_to_deliver)
 
     output_files_ready = [dict(zip(output_files_ready[0], value)) for value in output_files_ready[1:]]
