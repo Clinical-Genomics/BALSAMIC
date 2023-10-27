@@ -45,7 +45,7 @@ OPTION_ANALYSIS_DIR = click.option(
 OPTION_ANALYSIS_WORKFLOW = click.option(
     "-w",
     "--analysis-workflow",
-    default=AnalysisWorkflow.BALSAMIC.value,
+    default=AnalysisWorkflow.BALSAMIC,
     show_default=True,
     type=click.Choice(ANALYSIS_WORKFLOWS),
     help="Balsamic analysis workflow to be executed",
@@ -183,10 +183,10 @@ OPTION_DELIVERY_MODE = click.option(
     "-m",
     "--delivery-mode",
     type=click.Choice(RULE_DELIVERY_MODES),
-    default=RuleDeliveryMode.APPEND.value,
+    default=RuleDeliveryMode.APPEND,
     show_default=True,
-    help=f"Append rules to deliver to the current delivery option ({RuleDeliveryMode.APPEND.value}) or deliver only "
-    f"the ones specified ({RuleDeliveryMode.RESET.value})",
+    help=f"Append rules to deliver to the current delivery option ({RuleDeliveryMode.APPEND}) or deliver only "
+    f"the ones specified ({RuleDeliveryMode.RESET})",
 )
 
 OPTION_DISABLE_VARIANT_CALLER = click.option(
@@ -221,7 +221,7 @@ OPTION_GENDER = click.option(
     "--gender",
     required=False,
     type=click.Choice([Gender.FEMALE, Gender.MALE]),
-    default=Gender.FEMALE.value,
+    default=Gender.FEMALE,
     show_default=True,
     help="Sample associated gender",
 )
@@ -258,7 +258,7 @@ OPTION_GNOMAD_AF5 = click.option(
 
 OPTION_LOG_LEVEL = click.option(
     "--log-level",
-    default=LogLevel.INFO.value,
+    default=LogLevel.INFO,
     type=click.Choice(LOG_LEVELS),
     help="Logging level in terms of urgency",
     show_default=True,
