@@ -1,8 +1,8 @@
 """Balsamic analysis workflow constants."""
+from enum import StrEnum
 from typing import Dict, List
 
 from BALSAMIC.constants.cache import DockerContainers
-from BALSAMIC.utils.class_types import StrEnum
 
 
 class RunMode(StrEnum):

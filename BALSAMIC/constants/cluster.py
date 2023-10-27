@@ -1,8 +1,6 @@
 """Balsamic cluster and submission specific constants."""
+from enum import StrEnum
 from typing import List
-
-from BALSAMIC.utils.class_types import StrEnum
-
 
 MAX_JOBS: int = 999
 

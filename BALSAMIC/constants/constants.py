@@ -1,7 +1,6 @@
 """General use constants."""
+from enum import StrEnum
 from typing import List
-
-from BALSAMIC.utils.class_types import StrEnum
 
 EXIT_SUCCESS: int = 0
 EXIT_FAIL: int = 1
