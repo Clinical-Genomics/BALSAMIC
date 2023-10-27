@@ -1986,21 +1986,21 @@ def fixture_cosmic_key() -> str:
 def fixture_develop_containers() -> Dict[str, str]:
     """Return a dictionary of docker hub containers for develop branch."""
     return {
-        DockerContainers.ASCAT.value: "docker://clinicalgenomics/balsamic:develop-ascatNgs",
-        DockerContainers.VCF2CYTOSURE.value: "docker://clinicalgenomics/balsamic:develop-vcf2cytosure",
-        DockerContainers.PYTHON_3.value: "docker://clinicalgenomics/balsamic:develop-varcall_py3",
-        DockerContainers.SOMALIER.value: "docker://clinicalgenomics/balsamic:develop-somalier",
-        DockerContainers.CNVPYTOR.value: "docker://clinicalgenomics/balsamic:develop-cnvpytor",
-        DockerContainers.ALIGN_QC.value: "docker://clinicalgenomics/balsamic:develop-align_qc",
-        DockerContainers.ANNOTATE.value: "docker://clinicalgenomics/balsamic:develop-annotate",
-        DockerContainers.PYTHON_27.value: "docker://clinicalgenomics/balsamic:develop-varcall_py27",
-        DockerContainers.CNVKIT.value: "docker://clinicalgenomics/balsamic:develop-varcall_cnvkit",
-        DockerContainers.COVERAGE_QC.value: "docker://clinicalgenomics/balsamic:develop-coverage_qc",
-        DockerContainers.DELLY.value: "docker://clinicalgenomics/balsamic:develop-delly",
-        DockerContainers.CADD.value: "docker://clinicalgenomics/balsamic:develop-cadd",
-        DockerContainers.HTSLIB.value: "docker://clinicalgenomics/balsamic:develop-htslib",
-        DockerContainers.PURECN.value: "docker://clinicalgenomics/balsamic:develop-purecn",
-        DockerContainers.GATK.value: "docker://clinicalgenomics/balsamic:develop-gatk",
+        DockerContainers.ASCAT: "docker://clinicalgenomics/balsamic:develop-ascatNgs",
+        DockerContainers.VCF2CYTOSURE: "docker://clinicalgenomics/balsamic:develop-vcf2cytosure",
+        DockerContainers.PYTHON_3: "docker://clinicalgenomics/balsamic:develop-varcall_py3",
+        DockerContainers.SOMALIER: "docker://clinicalgenomics/balsamic:develop-somalier",
+        DockerContainers.CNVPYTOR: "docker://clinicalgenomics/balsamic:develop-cnvpytor",
+        DockerContainers.ALIGN_QC: "docker://clinicalgenomics/balsamic:develop-align_qc",
+        DockerContainers.ANNOTATE: "docker://clinicalgenomics/balsamic:develop-annotate",
+        DockerContainers.PYTHON_27: "docker://clinicalgenomics/balsamic:develop-varcall_py27",
+        DockerContainers.CNVKIT: "docker://clinicalgenomics/balsamic:develop-varcall_cnvkit",
+        DockerContainers.COVERAGE_QC: "docker://clinicalgenomics/balsamic:develop-coverage_qc",
+        DockerContainers.DELLY: "docker://clinicalgenomics/balsamic:develop-delly",
+        DockerContainers.CADD: "docker://clinicalgenomics/balsamic:develop-cadd",
+        DockerContainers.HTSLIB: "docker://clinicalgenomics/balsamic:develop-htslib",
+        DockerContainers.PURECN: "docker://clinicalgenomics/balsamic:develop-purecn",
+        DockerContainers.GATK: "docker://clinicalgenomics/balsamic:develop-gatk",
     }
 
 
@@ -2331,7 +2331,7 @@ def fixture_snakemake_executable_data(
 ) -> Dict[str, Any]:
     """Return snakemake executable model data."""
     return {
-        "account": ClusterAccount.DEVELOPMENT.value,
+        "account": ClusterAccount.DEVELOPMENT,
         "case_id": case_id_tumor_only,
         "cluster_config_path": reference_file,
         "config_path": reference_file,
@@ -2371,7 +2371,7 @@ def fixture_snakemake_executable_validated_data(
 ) -> Dict[str, Any]:
     """Return snakemake model expected data."""
     return {
-        "account": ClusterAccount.DEVELOPMENT.value,
+        "account": ClusterAccount.DEVELOPMENT,
         "benchmark": False,
         "case_id": case_id_tumor_only,
         "cluster_config_path": reference_file,
