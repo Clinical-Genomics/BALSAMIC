@@ -42,6 +42,8 @@ from BALSAMIC.models.snakemake import SingularityBindPath, SnakemakeExecutable
 from BALSAMIC.utils.io import read_json, read_yaml, write_json
 from .helpers import ConfigHelper, Map
 
+from BALSAMIC.assets.scripts.preprocess_gens import cli as gens_preprocessing_cli
+
 MOCKED_OS_ENVIRON = "os.environ"
 
 
@@ -292,6 +294,12 @@ def invoke_cli(cli_runner):
     return partial(cli_runner.invoke, cli)
 
 
+@pytest.fixture
+def invoke_gens_cli(cli_runner):
+    """Invoke cli commands with options."""
+    return partial(cli_runner.invoke, gens_preprocessing_cli)
+
+
 @pytest.fixture(scope="session")
 def environ():
     """Create operating system's environment object."""
@@ -440,6 +448,44 @@ def gens_hg19_interval_list(test_data_dir: str) -> str:
         "grch37_gens_targets_preprocessed_100bp.interval_list",
     ).as_posix()
 
+
+@pytest.fixture(scope="session")
+def gens_dummy_gnomad_baf_bed(test_data_dir: str) -> str:
+    """Return path expected dummy result-file created from GENS pre-processing test."""
+    return Path(
+        test_data_dir,
+        "gens_files",
+        "dummy.baf.bed",
+    ).as_posix()
+
+
+@pytest.fixture(scope="session")
+def gens_dummy_gnomad_vcf(test_data_dir: str) -> str:
+    """Return path dummy vcf called in given gnomad for GENS pre-processing test."""
+    return Path(
+        test_data_dir,
+        "gens_files",
+        "SNV.germline.dummy.dnascope_gnomad_af5.vcf",
+    ).as_posix()
+
+@pytest.fixture(scope="session")
+def gens_dummy_cov_bed(test_data_dir: str) -> str:
+    """Return path expected dummy result-file created from GENS pre-processing test."""
+    return Path(
+        test_data_dir,
+        "gens_files",
+        "dummy.cov.bed",
+    ).as_posix()
+
+
+@pytest.fixture(scope="session")
+def gens_dummy_denoised_cov(test_data_dir: str) -> str:
+    """Return path dummy coverage file for GENS pre-processing test."""
+    return Path(
+        test_data_dir,
+        "gens_files",
+        "dummy.denoisedCR.tsv",
+    ).as_posix()
 
 @pytest.fixture(scope="session")
 def panel_bed_file(reference_panel_dir_path: str) -> str:
