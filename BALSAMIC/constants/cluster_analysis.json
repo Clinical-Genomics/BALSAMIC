@@ -39,20 +39,24 @@
 		"time": "00:30:00",
 		"n": 1
 	},
+	"bcftools_merge_germlineSNV_research": {
+		"time": "4:00:00",
+		"n": 18
+	},
 	"cnvkit_segment_CNV_research": {
-		"time": "12:00:00",
-		"n": 10
+		"time": "6:00:00",
+		"n": 18
 	},
 	"purecn_call_CNV_research": {
-		"time": "12:00:00",
+		"time": "6:00:00",
 		"n": 10
 	},
 	"cnvkit_call_CNV_research": {
-		"time": "12:00:00",
+		"time": "6:00:00",
 		"n": 10
 	},
 	"bcftools_sort_cnvkitCNV_research": {
-		"time": "12:00:00",
+		"time": "4:00:00",
 		"n": 10
 	},
 	"dragen_align_call_tumor_only": {
