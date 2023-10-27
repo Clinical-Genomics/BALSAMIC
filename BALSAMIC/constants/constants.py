@@ -16,7 +16,7 @@ class LogLevel(StrEnum):
     CRITICAL = "CRITICAL"
 
 
-LOG_LEVELS: List[LogLevel] = [level.value for level in LogLevel]
+LOG_LEVELS: List[LogLevel] = [level for level in LogLevel]
 
 
 class FileType(StrEnum):

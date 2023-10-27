@@ -12,7 +12,7 @@ class RunMode(StrEnum):
     LOCAL: str = "local"
 
 
-RUN_MODES: List[RunMode] = [mode.value for mode in RunMode]
+RUN_MODES: List[RunMode] = [mode for mode in RunMode]
 
 
 class Gender(StrEnum):
@@ -38,9 +38,7 @@ class AnalysisWorkflow(StrEnum):
     BALSAMIC_UMI: str = "balsamic-umi"
 
 
-ANALYSIS_WORKFLOWS: List[AnalysisWorkflow] = [
-    workflow.value for workflow in AnalysisWorkflow
-]
+ANALYSIS_WORKFLOWS: List[AnalysisWorkflow] = [workflow for workflow in AnalysisWorkflow]
 
 
 class SequencingType(StrEnum):
@@ -89,7 +87,7 @@ class PONWorkflow(StrEnum):
     GENS_FEMALE: str = "GENS_female"
 
 
-PON_WORKFLOWS: List[PONWorkflow] = [workflow.value for workflow in PONWorkflow]
+PON_WORKFLOWS: List[PONWorkflow] = [workflow for workflow in PONWorkflow]
 
 
 class RuleDeliveryMode(StrEnum):
@@ -99,7 +97,7 @@ class RuleDeliveryMode(StrEnum):
     RESET: str = "reset"
 
 
-RULE_DELIVERY_MODES: List[RuleDeliveryMode] = [mode.value for mode in RuleDeliveryMode]
+RULE_DELIVERY_MODES: List[RuleDeliveryMode] = [mode for mode in RuleDeliveryMode]
 
 
 class BioinfoTools(StrEnum):
@@ -157,34 +155,34 @@ class PonParams:
 
 
 BIOINFO_TOOL_ENV: Dict[str, str] = {
-    BioinfoTools.BEDTOOLS.value: DockerContainers.ALIGN_QC.value,
-    BioinfoTools.BWA.value: DockerContainers.ALIGN_QC.value,
-    BioinfoTools.COMPRESS.value: DockerContainers.ALIGN_QC.value,
-    BioinfoTools.FASTQC.value: DockerContainers.ALIGN_QC.value,
-    BioinfoTools.SAMTOOLS.value: DockerContainers.ALIGN_QC.value,
-    BioinfoTools.PICARD.value: DockerContainers.ALIGN_QC.value,
-    BioinfoTools.MULTIQC.value: DockerContainers.ALIGN_QC.value,
-    BioinfoTools.FASTP.value: DockerContainers.ALIGN_QC.value,
-    BioinfoTools.CSVKIT.value: DockerContainers.ALIGN_QC.value,
-    BioinfoTools.VEP.value: DockerContainers.ANNOTATE.value,
-    BioinfoTools.GENMOD.value: DockerContainers.ANNOTATE.value,
-    BioinfoTools.VCFANNO.value: DockerContainers.ANNOTATE.value,
-    BioinfoTools.SAMBAMBA.value: DockerContainers.COVERAGE_QC.value,
-    BioinfoTools.MOSDEPTH.value: DockerContainers.COVERAGE_QC.value,
-    BioinfoTools.BCFTOOLS.value: DockerContainers.PYTHON_3.value,
-    BioinfoTools.TABIX.value: DockerContainers.PYTHON_3.value,
-    BioinfoTools.BGZIP.value: DockerContainers.PYTHON_3.value,
-    BioinfoTools.VARDICT.value: DockerContainers.PYTHON_3.value,
-    BioinfoTools.SVDB.value: DockerContainers.PYTHON_3.value,
-    BioinfoTools.TIDDIT.value: DockerContainers.PYTHON_3.value,
-    BioinfoTools.CNVPYTOR.value: DockerContainers.CNVPYTOR.value,
-    BioinfoTools.MANTA.value: DockerContainers.PYTHON_27.value,
-    BioinfoTools.CNVKIT.value: DockerContainers.CNVKIT.value,
-    BioinfoTools.DELLY.value: DockerContainers.DELLY.value,
-    BioinfoTools.ASCAT.value: DockerContainers.ASCAT.value,
-    BioinfoTools.VCF2CYTOSURE.value: DockerContainers.VCF2CYTOSURE.value,
-    BioinfoTools.SOMALIER.value: DockerContainers.SOMALIER.value,
-    BioinfoTools.CADD.value: DockerContainers.CADD.value,
-    BioinfoTools.PURECN.value: DockerContainers.PURECN.value,
-    BioinfoTools.GATK.value: DockerContainers.GATK.value,
+    BioinfoTools.BEDTOOLS: DockerContainers.ALIGN_QC,
+    BioinfoTools.BWA: DockerContainers.ALIGN_QC,
+    BioinfoTools.COMPRESS: DockerContainers.ALIGN_QC,
+    BioinfoTools.FASTQC: DockerContainers.ALIGN_QC,
+    BioinfoTools.SAMTOOLS: DockerContainers.ALIGN_QC,
+    BioinfoTools.PICARD: DockerContainers.ALIGN_QC,
+    BioinfoTools.MULTIQC: DockerContainers.ALIGN_QC,
+    BioinfoTools.FASTP: DockerContainers.ALIGN_QC,
+    BioinfoTools.CSVKIT: DockerContainers.ALIGN_QC,
+    BioinfoTools.VEP: DockerContainers.ANNOTATE,
+    BioinfoTools.GENMOD: DockerContainers.ANNOTATE,
+    BioinfoTools.VCFANNO: DockerContainers.ANNOTATE,
+    BioinfoTools.SAMBAMBA: DockerContainers.COVERAGE_QC,
+    BioinfoTools.MOSDEPTH: DockerContainers.COVERAGE_QC,
+    BioinfoTools.BCFTOOLS: DockerContainers.PYTHON_3,
+    BioinfoTools.TABIX: DockerContainers.PYTHON_3,
+    BioinfoTools.BGZIP: DockerContainers.PYTHON_3,
+    BioinfoTools.VARDICT: DockerContainers.PYTHON_3,
+    BioinfoTools.SVDB: DockerContainers.PYTHON_3,
+    BioinfoTools.TIDDIT: DockerContainers.PYTHON_3,
+    BioinfoTools.CNVPYTOR: DockerContainers.CNVPYTOR,
+    BioinfoTools.MANTA: DockerContainers.PYTHON_27,
+    BioinfoTools.CNVKIT: DockerContainers.CNVKIT,
+    BioinfoTools.DELLY: DockerContainers.DELLY,
+    BioinfoTools.ASCAT: DockerContainers.ASCAT,
+    BioinfoTools.VCF2CYTOSURE: DockerContainers.VCF2CYTOSURE,
+    BioinfoTools.SOMALIER: DockerContainers.SOMALIER,
+    BioinfoTools.CADD: DockerContainers.CADD,
+    BioinfoTools.PURECN: DockerContainers.PURECN,
+    BioinfoTools.GATK: DockerContainers.GATK,
 }
