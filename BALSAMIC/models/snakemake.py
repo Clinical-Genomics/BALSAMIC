@@ -119,7 +119,7 @@ class SnakemakeExecutable(BaseModel):
     def get_mail_type_option(self) -> str:
         """Return string representation of the mail_type option."""
         if self.mail_type:
-            return f"--mail-type {self.mail_type.value}"
+            return f"--mail-type {self.mail_type}"
         return ""
 
     def get_quiet_flag(self) -> str:
@@ -198,9 +198,9 @@ class SnakemakeExecutable(BaseModel):
         cluster_submit_command: str = (
             f"'{sys.executable} {SCHEDULER_PATH.as_posix()} "
             f"--sample-config {self.config_path.as_posix()} "
-            f"--profile {self.profile.value} "
+            f"--profile {self.profile} "
             f"--account {self.account} "
-            f"--qos {self.qos.value} "
+            f"--qos {self.qos} "
             f"--log-dir {self.log_dir.as_posix()} "
             f"--script-dir {self.script_dir.as_posix()} "
             f"--result-dir {self.result_dir.as_posix()} "

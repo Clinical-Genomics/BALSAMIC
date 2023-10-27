@@ -250,8 +250,8 @@ def test_get_snakemake_command(
         f"--use-singularity --singularity-args '--cleanenv --bind {session_tmp_path.as_posix()}:/' --quiet "
         f"--immediate-submit -j {MAX_JOBS} --jobname BALSAMIC.{case_id_tumor_only}.{{rulename}}.{{jobid}}.sh "
         f"--cluster-config {reference_file.as_posix()} --cluster '{sys.executable} {SCHEDULER_PATH} "
-        f"--sample-config {reference_file.as_posix()} --profile {ClusterProfile.SLURM.value} "
-        f"--account {ClusterAccount.DEVELOPMENT.value} --qos {QOS.HIGH.value} --log-dir {session_tmp_path} "
+        f"--sample-config {reference_file.as_posix()} --profile {ClusterProfile.SLURM} "
+        f"--account {ClusterAccount.DEVELOPMENT} --qos {QOS.HIGH} --log-dir {session_tmp_path} "
         f"--script-dir {session_tmp_path} --result-dir {session_tmp_path} --mail-user {mail_user_option} "
         f"{{dependencies}} ' --config disable_variant_caller=tnscope,vardict --cores 36"
     )
@@ -278,8 +278,8 @@ def test_get_snakemake_cluster_options(
         snakemake_cluster_options
         == f"--immediate-submit -j {MAX_JOBS} --jobname BALSAMIC.{case_id_tumor_only}.{{rulename}}.{{jobid}}.sh "
         f"--cluster-config {reference_file.as_posix()} --cluster '{sys.executable} {SCHEDULER_PATH.as_posix()} "
-        f"--sample-config {reference_file.as_posix()} --profile {ClusterProfile.SLURM.value} "
-        f"--account {ClusterAccount.DEVELOPMENT.value} --qos {QOS.HIGH.value} --log-dir {session_tmp_path} "
+        f"--sample-config {reference_file.as_posix()} --profile {ClusterProfile.SLURM} "
+        f"--account {ClusterAccount.DEVELOPMENT} --qos {QOS.HIGH} --log-dir {session_tmp_path} "
         f"--script-dir {session_tmp_path} --result-dir {session_tmp_path} --mail-user {mail_user_option} "
         "{dependencies} '"
     )
@@ -303,8 +303,8 @@ def test_get_cluster_submit_command(
     # THEN the expected format should be returned
     assert snakemake_cluster_submit_command == (
         f"'{sys.executable} {SCHEDULER_PATH.as_posix()} "
-        f"--sample-config {reference_file.as_posix()} --profile {ClusterProfile.SLURM.value} "
-        f"--account {ClusterAccount.DEVELOPMENT.value} --qos {QOS.HIGH.value} --log-dir {session_tmp_path} "
+        f"--sample-config {reference_file.as_posix()} --profile {ClusterProfile.SLURM} "
+        f"--account {ClusterAccount.DEVELOPMENT} --qos {QOS.HIGH} --log-dir {session_tmp_path} "
         f"--script-dir {session_tmp_path} --result-dir {session_tmp_path} --mail-user {mail_user_option} "
         "{dependencies} '"
     )
