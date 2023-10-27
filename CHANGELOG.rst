@@ -56,6 +56,7 @@ Changed:
 * Migrate Snakemake models to pydantic v2 https://github.com/Clinical-Genomics/BALSAMIC/pull/1268
 * Migrate Cache models to pydantic v2 https://github.com/Clinical-Genomics/BALSAMIC/pull/1274
 * Made BALSAMIC compatible with multiple PON creation workflows https://github.com/Clinical-Genomics/BALSAMIC/pull/1279
+* Use StrEnum from python enum https://github.com/Clinical-Genomics/BALSAMIC/pull/1303
 
 
 Fixed:
