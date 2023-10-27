@@ -244,7 +244,7 @@ def test_get_snakemake_command(
     # THEN the expected format should be returned
     assert (
         snakemake_command
-        == f"snakemake --notemp --delete-temp-output --rerun-trigger mtime -p --directory {session_tmp_path.as_posix()} "
+        == f"snakemake --delete-temp-output --rerun-trigger mtime -p --directory {session_tmp_path.as_posix()} "
         f"--snakefile {reference_file.as_posix()} "
         f"--configfiles {reference_file.as_posix()} {reference_file.as_posix()} "
         f"--use-singularity --singularity-args '--cleanenv --bind {session_tmp_path.as_posix()}:/' --quiet "
