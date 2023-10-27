@@ -19,6 +19,7 @@ from BALSAMIC.constants.analysis import (
     MutationType,
     WorkflowSolution,
     FastqName,
+    PONWorkflow,
 )
 
 LOG = logging.getLogger(__name__)
@@ -254,6 +255,7 @@ class AnalysisModel(BaseModel):
     BALSAMIC_version: str = balsamic_version
     config_creation_date: Optional[str]
     pon_version: Optional[str]
+    pon_workflow: Optional[PONWorkflow]
 
     class Config:
         validate_all = True

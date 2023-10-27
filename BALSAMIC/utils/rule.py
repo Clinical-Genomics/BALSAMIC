@@ -226,9 +226,9 @@ def get_rule_output(rules, rule_name, output_file_wildcards):
             # replace all instances of "_" with "-", since housekeeper doesn't like _
             file_tags = [t.replace("_", "-") for t in file_tags]
 
-            LOG.debug("Found the following delivery id: {}".format(delivery_id))
-            LOG.debug("Found the following file to store: {}".format(file_to_store))
-            LOG.debug("Above file is in the following rule: {}".format(rule_name))
+            LOG.info("Found the following delivery id: {}".format(delivery_id))
+            LOG.info("Found the following file to store: {}".format(file_to_store))
+            LOG.info("Above file is in the following rule: {}".format(rule_name))
             output_files.append(
                 (
                     file_to_store,

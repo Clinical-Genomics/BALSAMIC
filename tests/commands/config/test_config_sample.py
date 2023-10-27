@@ -310,3 +310,137 @@ def test_config_graph_failed(
 
     # THEN the graph should not have been built
     assert case_result.exit_code == 1
+
+
+def test_missing_required_gens_arguments(
+    invoke_cli,
+    tumor_sample_name: str,
+    analysis_dir: str,
+    balsamic_cache: str,
+    fastq_dir_tumor_only: str,
+    case_id_tumor_only: str,
+    gens_cov_pon_file: str,
+    gens_min_5_af_gnomad_file: str,
+):
+    """Test balsamic config case with 2 out of 3 required GENS arguments."""
+
+    # GIVEN CLI arguments including optional GENS input-files
+
+    # WHEN invoking the config case command
+    result = invoke_cli(
+        [
+            "config",
+            "case",
+            "--case-id",
+            case_id_tumor_only,
+            "--analysis-dir",
+            analysis_dir,
+            "--fastq-path",
+            fastq_dir_tumor_only,
+            "--balsamic-cache",
+            balsamic_cache,
+            "--tumor-sample-name",
+            tumor_sample_name,
+            "--gens-coverage-pon",
+            gens_cov_pon_file,
+            "--gnomad-min-af5",
+            gens_min_5_af_gnomad_file,
+        ],
+    )
+    # THEN the CLI should exit code 2 and display an informative error message
+    assert result.exit_code == 2
+    assert (
+        "All three arguments (genome_interval gens_coverage_pon, gnomad_min_af5) are required for GENS."
+        in result.output
+    )
+
+
+def test_config_with_gens_arguments(
+    invoke_cli,
+    tumor_sample_name: str,
+    analysis_dir: str,
+    balsamic_cache: str,
+    fastq_dir_tumor_only: str,
+    case_id_tumor_only: str,
+    gens_cov_pon_file: str,
+    gens_min_5_af_gnomad_file: str,
+    gens_hg19_interval_list: str,
+):
+    """Test balsamic config case with GENS arguments."""
+
+    # GIVEN CLI arguments including optional GENS input-files
+
+    # WHEN invoking the config case command
+    result = invoke_cli(
+        [
+            "config",
+            "case",
+            "--case-id",
+            case_id_tumor_only,
+            "--analysis-dir",
+            analysis_dir,
+            "--fastq-path",
+            fastq_dir_tumor_only,
+            "--balsamic-cache",
+            balsamic_cache,
+            "--tumor-sample-name",
+            tumor_sample_name,
+            "--gens-coverage-pon",
+            gens_cov_pon_file,
+            "--gnomad-min-af5",
+            gens_min_5_af_gnomad_file,
+            "--genome-interval",
+            gens_hg19_interval_list,
+        ],
+    )
+    # THEN a config should be created and exist
+    assert result.exit_code == 0
+    assert Path(analysis_dir, case_id_tumor_only, case_id_tumor_only + ".json").exists()
+
+
+def test_config_with_gens_arguments_for_tga(
+    invoke_cli,
+    tumor_sample_name: str,
+    analysis_dir: str,
+    balsamic_cache: str,
+    fastq_dir_tumor_only: str,
+    case_id_tumor_only: str,
+    gens_cov_pon_file: str,
+    gens_min_5_af_gnomad_file: str,
+    gens_hg19_interval_list: str,
+    panel_bed_file: str,
+):
+    """Test balsamic config case with GENS arguments for TGA."""
+
+    # GIVEN CLI arguments including optional GENS input-files
+
+    # WHEN invoking the config case command
+    result = invoke_cli(
+        [
+            "config",
+            "case",
+            "--case-id",
+            case_id_tumor_only,
+            "--analysis-dir",
+            analysis_dir,
+            "--fastq-path",
+            fastq_dir_tumor_only,
+            "--balsamic-cache",
+            balsamic_cache,
+            "--tumor-sample-name",
+            tumor_sample_name,
+            "--gens-coverage-pon",
+            gens_cov_pon_file,
+            "--gnomad-min-af5",
+            gens_min_5_af_gnomad_file,
+            "--genome-interval",
+            gens_hg19_interval_list,
+            "-p",
+            panel_bed_file,
+        ],
+    )
+    # THEN a config should be created and exist
+    assert result.exit_code == 2
+    assert (
+        "GENS is currently not compatible with TGA analysis, only WGS." in result.output
+    )
