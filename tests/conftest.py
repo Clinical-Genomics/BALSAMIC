@@ -468,6 +468,7 @@ def gens_dummy_gnomad_vcf(test_data_dir: str) -> str:
         "SNV.germline.dummy.dnascope_gnomad_af5.vcf",
     ).as_posix()
 
+
 @pytest.fixture(scope="session")
 def gens_dummy_cov_bed(test_data_dir: str) -> str:
     """Return path expected dummy result-file created from GENS pre-processing test."""
@@ -486,6 +487,7 @@ def gens_dummy_denoised_cov(test_data_dir: str) -> str:
         "gens_files",
         "dummy.denoisedCR.tsv",
     ).as_posix()
+
 
 @pytest.fixture(scope="session")
 def panel_bed_file(reference_panel_dir_path: str) -> str:

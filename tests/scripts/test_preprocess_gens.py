@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Dict
 from BALSAMIC.constants.analysis import SequencingType
 
+
 def test_calculate_bafs(
     tmp_path, gens_dummy_gnomad_vcf, gens_dummy_gnomad_baf_bed, invoke_gens_cli
 ):
@@ -34,10 +35,14 @@ def test_calculate_bafs(
     # THEN the output file should be created
     assert Path(output_path).exists()
     # THEN the output file should be identical to the expected
-    assert filecmp.cmp(gens_dummy_gnomad_baf_bed, output_path, shallow=False), f"{gens_dummy_gnomad_baf_bed} and {output_path} are not identical"
+    assert filecmp.cmp(
+        gens_dummy_gnomad_baf_bed, output_path, shallow=False
+    ), f"{gens_dummy_gnomad_baf_bed} and {output_path} are not identical"
 
 
-def test_create_coverage_regions(tmp_path, gens_dummy_denoised_cov, gens_dummy_cov_bed, invoke_gens_cli):
+def test_create_coverage_regions(
+    tmp_path, gens_dummy_denoised_cov, gens_dummy_cov_bed, invoke_gens_cli
+):
     """Test creation of cov file for GENS pre-processing."""
 
     # GIVEN the dummy gnomad vcf
@@ -61,8 +66,9 @@ def test_create_coverage_regions(tmp_path, gens_dummy_denoised_cov, gens_dummy_c
     # THEN the output file should be created
     assert Path(output_path).exists()
     # THEN the output file should be identical to the expected
-    assert filecmp.cmp(gens_dummy_cov_bed, output_path, shallow=False), f"{gens_dummy_cov_bed} and {output_path} are not identical"
-
+    assert filecmp.cmp(
+        gens_dummy_cov_bed, output_path, shallow=False
+    ), f"{gens_dummy_cov_bed} and {output_path} are not identical"
 
 
 def test_extract_variant_info(valid_dnascope_variant, invalid_dnascope_variant_no_ad):
