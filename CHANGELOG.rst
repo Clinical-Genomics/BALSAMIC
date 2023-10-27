@@ -67,6 +67,7 @@ Fixed:
 * CNVpytor container https://github.com/Clinical-Genomics/BALSAMIC/pull/1246
 * Restored balsamic container in UMI concatenation rule https://github.com/Clinical-Genomics/BALSAMIC/pull/1261
 * CNVpytor container, fixing numpy version https://github.com/Clinical-Genomics/BALSAMIC/pull/1273
+* QC workflow store https://github.com/Clinical-Genomics/BALSAMIC/pull/1295
 
 Removed:
 ^^^^^^^^
@@ -75,6 +76,7 @@ Removed:
 * Balsamic container https://github.com/Clinical-Genomics/BALSAMIC/pull/1230
 * Plugin CLI https://github.com/Clinical-Genomics/BALSAMIC/pull/1245
 * Realignment step for TGA workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1272
+* Archived/outdated workflows and scripts https://github.com/Clinical-Genomics/BALSAMIC/pull/1296
 
 [12.0.2]
 --------

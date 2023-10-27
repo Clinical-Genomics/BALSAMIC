@@ -13,7 +13,7 @@ rule picard_CollectMultipleMetrics:
         bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample),
         reference = config["reference"]["reference_genome"]
     output:
-        expand(qc_dir + "{{sample}}.multiple_metrics.{metrics_wc}", sample = config["samples"], metrics_wc = picard_metrics_wildcard)
+        expand(qc_dir + "{{sample}}.multiple_metrics.{metrics_wc}", metrics_wc = picard_metrics_wildcard)
     benchmark:
         Path(benchmark_dir, "picard_CollectMultipleMetrics_" + "{sample}.tsv").as_posix()
     singularity:
