@@ -133,10 +133,11 @@ quality_control_results = [
 ]
 
 if 'delivery' in config:
-    wildcard_dict = {"sample": list(config["samples"].keys())+["tumor", "normal"],
-                     "case_name": case_id,
-                     "allow_missing": True
-                     }
+    wildcard_dict = {
+        "sample": config_model.get_all_sample_names() + ["tumor", "normal"],
+        "case_name": case_id,
+        "allow_missing": True
+    }
 
     if 'rules_to_deliver' in config:
         rules_to_deliver = config['rules_to_deliver'].split(",")

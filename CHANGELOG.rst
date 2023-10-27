@@ -70,6 +70,7 @@ Fixed:
 * CNVpytor container https://github.com/Clinical-Genomics/BALSAMIC/pull/1246
 * Restored balsamic container in UMI concatenation rule https://github.com/Clinical-Genomics/BALSAMIC/pull/1261
 * CNVpytor container, fixing numpy version https://github.com/Clinical-Genomics/BALSAMIC/pull/1273
+* QC workflow store https://github.com/Clinical-Genomics/BALSAMIC/pull/1295
 
 Removed:
 ^^^^^^^^

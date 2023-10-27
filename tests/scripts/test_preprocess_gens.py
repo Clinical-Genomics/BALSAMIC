@@ -11,7 +11,7 @@ from BALSAMIC.constants.analysis import SequencingType
 def test_calculate_bafs(
     tmp_path, gens_dummy_gnomad_vcf, gens_dummy_gnomad_baf_bed, invoke_gens_cli
 ):
-    """Test creation of baf file for GENS pre processing."""
+    """Test creation of baf file for GENS pre-processing."""
 
     # GIVEN the dummy gnomad vcf
 
@@ -38,7 +38,7 @@ def test_calculate_bafs(
 
 
 def test_create_coverage_regions(tmp_path, gens_dummy_denoised_cov, gens_dummy_cov_bed, invoke_gens_cli):
-    """Test creation of cov file for GENS pre processing."""
+    """Test creation of cov file for GENS pre-processing."""
 
     # GIVEN the dummy gnomad vcf
 

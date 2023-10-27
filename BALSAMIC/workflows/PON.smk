@@ -80,6 +80,7 @@ if not Path(config["SENTIEON_EXEC"]).exists():
     LOG.error("Sentieon executable not found {}".format(Path(config["SENTIEON_EXEC"]).as_posix()))
     raise BalsamicError
 
+
 sequence_type = config['analysis']["sequencing_type"]
 rules_to_include = []
 if sequence_type == SequencingType.TARGETED:
@@ -95,9 +96,7 @@ if pon_workflow == PONWorkflow.CNVKIT:
     access_5kb_hg19: str = config_model.reference["access_regions"]
     target_bed: str = config_model.panel.capture_kit
     panel_name = os.path.split(target_bed)[1].replace('.bed','')
-    coverage_references = expand(cnv_dir + "{sample}.{cov}coverage.cnn", sample=config["samples"], cov=['target',
-                                                                                                      'antitarget'])
-    baited_beds = expand(cnv_dir + "{cov}.bed",cov=['target', 'antitarget'])
+
     pon_reference = expand(cnv_dir + panel_name + "_CNVkit_PON_reference_" + version + ".cnn")
     rules_to_include.append("snakemake_rules/pon/cnvkit_create_pon.rule")
 
