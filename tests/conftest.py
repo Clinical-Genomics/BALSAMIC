@@ -14,7 +14,12 @@ from pydantic_core import Url
 
 from BALSAMIC import __version__ as balsamic_version
 from BALSAMIC.commands.base import cli
-from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV, RunMode, AnalysisWorkflow
+from BALSAMIC.constants.analysis import (
+    BIOINFO_TOOL_ENV,
+    RunMode,
+    AnalysisWorkflow,
+    PONWorkflow,
+)
 from BALSAMIC.constants.cache import DockerContainers, GenomeVersion, REFERENCE_FILES
 from BALSAMIC.constants.cluster import (
     ClusterConfigType,
@@ -36,6 +41,8 @@ from BALSAMIC.models.cache import (
 from BALSAMIC.models.snakemake import SingularityBindPath, SnakemakeExecutable
 from BALSAMIC.utils.io import read_json, read_yaml, write_json
 from .helpers import ConfigHelper, Map
+
+from BALSAMIC.assets.scripts.preprocess_gens import cli as gens_preprocessing_cli
 
 MOCKED_OS_ENVIRON = "os.environ"
 
@@ -131,8 +138,30 @@ def sample_list_duplicate_assigned_fastq_patterns_model(
 
 @pytest.fixture(scope="session")
 def tumor_normal_fastq_info_correct(load_test_fastq_data) -> Dict[str, Dict]:
-    """Mock tumor normal fastq info in sample_dict"""
+    """Mock tumor normal fastq info in sample_dict."""
     return load_test_fastq_data["test_fastq_info"]
+
+
+@pytest.fixture(scope="session")
+def valid_dnascope_variant() -> str:
+    """Mock valid DNAscope variant."""
+    return (
+        "1\t100\trs1\tT\tC\t389.77\t.\tINFO\tGT:AD:DP:GQ:PL\t0/1:9,14:23:99:418,0,257"
+    )
+
+
+@pytest.fixture(scope="session")
+def invalid_dnascope_variant_no_ad() -> str:
+    """Mock invalid DNAscope variant without any read support."""
+    return "1\t200\t.\tCAAA\tCAAAA,C\t0.00\tLowQual\tINFO\tGT:AD:DP:GQ:PL\t0/0:0,0,0:0:0:0,0,0,3,3,19"
+
+
+@pytest.fixture(scope="session")
+def invalid_dnascope_variant_illegal_chrom() -> str:
+    """Mock invalid DNAscope variant with non-standard chromosome."""
+    return (
+        "25\t100\trs1\tT\tC\t389.77\t.\tINFO\tGT:AD:DP:GQ:PL\t0/1:9,14:23:99:418,0,257"
+    )
 
 
 @pytest.fixture(scope="session")
@@ -197,6 +226,14 @@ def case_id_pon() -> str:
     return "sample_pon_creation"
 
 
+@pytest.fixture(scope="session")
+def case_id_gens_pon() -> str:
+    """
+    Creates mock case-id for PON creation workflow
+    """
+    return "genscreation"
+
+
 def case_id_tumor_only_pon() -> str:
     """Create mock case-id for TGA PON tumor-only."""
     return "sample_tumor_only_pon"
@@ -255,6 +292,12 @@ def cli_runner():
 def invoke_cli(cli_runner):
     """Invoke cli commands with options."""
     return partial(cli_runner.invoke, cli)
+
+
+@pytest.fixture
+def invoke_gens_cli(cli_runner):
+    """Invoke cli commands with options."""
+    return partial(cli_runner.invoke, gens_preprocessing_cli)
 
 
 @pytest.fixture(scope="session")
@@ -366,6 +409,85 @@ def pon_config_dict_w_singularity(pon_config_dict: str, balsamic_cache: str) -> 
 def cadd_annotations(test_data_dir: str) -> str:
     """Return path for CADD annotations."""
     return Path(test_data_dir, "references", "cadd").as_posix()
+
+
+@pytest.fixture(scope="session")
+def vcf_file_path(test_data_dir: str) -> str:
+    """Return path for minimal VCF."""
+    return Path(test_data_dir, "vcfs", "SNV.germline.sample.dnascope.vcf").as_posix()
+
+
+@pytest.fixture(scope="session")
+def vcf_file_gz_path(test_data_dir: str) -> str:
+    """Return path for minimal gzipped VCF."""
+    return Path(test_data_dir, "vcfs", "SNV.germline.sample.dnascope.vcf.gz").as_posix()
+
+
+@pytest.fixture(scope="session")
+def gens_cov_pon_file(test_data_dir: str) -> str:
+    """Return path for dummy GENS male PON file."""
+    return Path(
+        test_data_dir, "references", "gens", "grch37_gens_male_pon_100bp.hdf5"
+    ).as_posix()
+
+
+@pytest.fixture(scope="session")
+def gens_min_5_af_gnomad_file(test_data_dir: str) -> str:
+    """Return path for dummy GENS minimum af 5 gnomad file."""
+    return Path(
+        test_data_dir, "references", "gens", "gnomad.genomes.r2.1.1.sites_0.05AF.vcf.gz"
+    ).as_posix()
+
+
+@pytest.fixture(scope="session")
+def gens_hg19_interval_list(test_data_dir: str) -> str:
+    """Return path for dummy hg19 genome 100bp interval list used in GENS."""
+    return Path(
+        test_data_dir,
+        "references",
+        "gens",
+        "grch37_gens_targets_preprocessed_100bp.interval_list",
+    ).as_posix()
+
+
+@pytest.fixture(scope="session")
+def gens_dummy_gnomad_baf_bed(test_data_dir: str) -> str:
+    """Return path expected dummy result-file created from GENS pre-processing test."""
+    return Path(
+        test_data_dir,
+        "gens_files",
+        "dummy.baf.bed",
+    ).as_posix()
+
+
+@pytest.fixture(scope="session")
+def gens_dummy_gnomad_vcf(test_data_dir: str) -> str:
+    """Return path dummy vcf called in given gnomad for GENS pre-processing test."""
+    return Path(
+        test_data_dir,
+        "gens_files",
+        "SNV.germline.dummy.dnascope_gnomad_af5.vcf",
+    ).as_posix()
+
+
+@pytest.fixture(scope="session")
+def gens_dummy_cov_bed(test_data_dir: str) -> str:
+    """Return path expected dummy result-file created from GENS pre-processing test."""
+    return Path(
+        test_data_dir,
+        "gens_files",
+        "dummy.cov.bed",
+    ).as_posix()
+
+
+@pytest.fixture(scope="session")
+def gens_dummy_denoised_cov(test_data_dir: str) -> str:
+    """Return path dummy coverage file for GENS pre-processing test."""
+    return Path(
+        test_data_dir,
+        "gens_files",
+        "dummy.denoisedCR.tsv",
+    ).as_posix()
 
 
 @pytest.fixture(scope="session")
@@ -718,6 +840,23 @@ def fastq_dir_pon(analysis_dir: str, case_id_pon: str, pon_fastq_list: list) -> 
     """
 
     fastq_dir: Path = Path(analysis_dir, case_id_pon, "fastq")
+    fastq_dir.mkdir(parents=True, exist_ok=True)
+
+    for fastq in pon_fastq_list:
+        Path(fastq_dir, fastq).touch()
+
+    yield fastq_dir.as_posix()
+
+
+@pytest.fixture(scope="session")
+def fastq_dir_gens_pon(
+    analysis_dir: str, case_id_gens_pon: str, pon_fastq_list: list
+) -> str:
+    """
+    Creates and returns the directory containing the FASTQs for PON creation workflow.
+    """
+
+    fastq_dir: Path = Path(analysis_dir, case_id_gens_pon, "fastq")
     fastq_dir.mkdir(parents=True, exist_ok=True)
 
     for fastq in pon_fastq_list:
@@ -1583,7 +1722,7 @@ def tumor_only_pon_config(
 
 
 @pytest.fixture(scope="session")
-def pon_creation_config(
+def cnvkit_pon_creation_config(
     case_id_pon: str,
     analysis_dir: str,
     fastq_dir_pon: str,
@@ -1592,7 +1731,7 @@ def pon_creation_config(
     sentieon_license: str,
     sentieon_install_dir: str,
 ) -> str:
-    """Invoke PON creation config configuration file for PON workflow."""
+    """Invoke PON creation config configuration file for CNVkit PON workflow."""
 
     with mock.patch.dict(
         MOCKED_OS_ENVIRON,
@@ -1619,11 +1758,60 @@ def pon_creation_config(
                 "v5",
                 "--balsamic-cache",
                 balsamic_cache,
+                "--pon-workflow",
+                PONWorkflow.CNVKIT,
             ],
         )
 
     return Path(
         analysis_dir, case_id_pon, f"{case_id_pon}_PON.{FileType.JSON}"
+    ).as_posix()
+
+
+@pytest.fixture(scope="session")
+def gens_pon_creation_config(
+    case_id_gens_pon: str,
+    analysis_dir: str,
+    fastq_dir_gens_pon: str,
+    balsamic_cache: str,
+    sentieon_license: str,
+    sentieon_install_dir: str,
+    gens_hg19_interval_list: str,
+) -> str:
+    """Invoke PON creation config configuration file for GENS PON workflow."""
+
+    with mock.patch.dict(
+        MOCKED_OS_ENVIRON,
+        {
+            "SENTIEON_LICENSE": sentieon_license,
+            "SENTIEON_INSTALL_DIR": sentieon_install_dir,
+        },
+    ):
+        runner = CliRunner()
+        runner.invoke(
+            cli,
+            [
+                "config",
+                "pon",
+                "--case-id",
+                case_id_gens_pon,
+                "--analysis-dir",
+                analysis_dir,
+                "--fastq-path",
+                fastq_dir_gens_pon,
+                "--version",
+                "v5",
+                "--balsamic-cache",
+                balsamic_cache,
+                "--pon-workflow",
+                PONWorkflow.GENS_MALE,
+                "--genome-interval",
+                gens_hg19_interval_list,
+            ],
+        )
+
+    return Path(
+        analysis_dir, case_id_gens_pon, f"{case_id_gens_pon}_PON.{FileType.JSON}"
     ).as_posix()
 
 
@@ -1799,21 +1987,21 @@ def fixture_cosmic_key() -> str:
 def fixture_develop_containers() -> Dict[str, str]:
     """Return a dictionary of docker hub containers for develop branch."""
     return {
-        DockerContainers.ASCAT.value: "docker://clinicalgenomics/balsamic:develop-ascatNgs",
-        DockerContainers.VCF2CYTOSURE.value: "docker://clinicalgenomics/balsamic:develop-vcf2cytosure",
-        DockerContainers.PYTHON_3.value: "docker://clinicalgenomics/balsamic:develop-varcall_py3",
-        DockerContainers.SOMALIER.value: "docker://clinicalgenomics/balsamic:develop-somalier",
-        DockerContainers.CNVPYTOR.value: "docker://clinicalgenomics/balsamic:develop-cnvpytor",
-        DockerContainers.ALIGN_QC.value: "docker://clinicalgenomics/balsamic:develop-align_qc",
-        DockerContainers.ANNOTATE.value: "docker://clinicalgenomics/balsamic:develop-annotate",
-        DockerContainers.PYTHON_27.value: "docker://clinicalgenomics/balsamic:develop-varcall_py27",
-        DockerContainers.CNVKIT.value: "docker://clinicalgenomics/balsamic:develop-cnvkit",
-        DockerContainers.COVERAGE_QC.value: "docker://clinicalgenomics/balsamic:develop-coverage_qc",
-        DockerContainers.DELLY.value: "docker://clinicalgenomics/balsamic:develop-delly",
-        DockerContainers.CADD.value: "docker://clinicalgenomics/balsamic:develop-cadd",
-        DockerContainers.HTSLIB.value: "docker://clinicalgenomics/balsamic:develop-htslib",
-        DockerContainers.PURECN.value: "docker://clinicalgenomics/balsamic:develop-purecn",
-        DockerContainers.GATK.value: "docker://clinicalgenomics/balsamic:develop-gatk",
+        DockerContainers.ASCAT: "docker://clinicalgenomics/balsamic:develop-ascatNgs",
+        DockerContainers.VCF2CYTOSURE: "docker://clinicalgenomics/balsamic:develop-vcf2cytosure",
+        DockerContainers.PYTHON_3: "docker://clinicalgenomics/balsamic:develop-varcall_py3",
+        DockerContainers.SOMALIER: "docker://clinicalgenomics/balsamic:develop-somalier",
+        DockerContainers.CNVPYTOR: "docker://clinicalgenomics/balsamic:develop-cnvpytor",
+        DockerContainers.ALIGN_QC: "docker://clinicalgenomics/balsamic:develop-align_qc",
+        DockerContainers.ANNOTATE: "docker://clinicalgenomics/balsamic:develop-annotate",
+        DockerContainers.PYTHON_27: "docker://clinicalgenomics/balsamic:develop-varcall_py27",
+        DockerContainers.CNVKIT: "docker://clinicalgenomics/balsamic:develop-varcall_cnvkit",
+        DockerContainers.COVERAGE_QC: "docker://clinicalgenomics/balsamic:develop-coverage_qc",
+        DockerContainers.DELLY: "docker://clinicalgenomics/balsamic:develop-delly",
+        DockerContainers.CADD: "docker://clinicalgenomics/balsamic:develop-cadd",
+        DockerContainers.HTSLIB: "docker://clinicalgenomics/balsamic:develop-htslib",
+        DockerContainers.PURECN: "docker://clinicalgenomics/balsamic:develop-purecn",
+        DockerContainers.GATK: "docker://clinicalgenomics/balsamic:develop-gatk",
     }
 
 
@@ -2145,7 +2333,7 @@ def fixture_snakemake_executable_data(
 ) -> Dict[str, Any]:
     """Return snakemake executable model data."""
     return {
-        "account": ClusterAccount.DEVELOPMENT.value,
+        "account": ClusterAccount.DEVELOPMENT,
         "case_id": case_id_tumor_only,
         "cluster_config_path": reference_file,
         "config_path": reference_file,
@@ -2185,7 +2373,7 @@ def fixture_snakemake_executable_validated_data(
 ) -> Dict[str, Any]:
     """Return snakemake model expected data."""
     return {
-        "account": ClusterAccount.DEVELOPMENT.value,
+        "account": ClusterAccount.DEVELOPMENT,
         "benchmark": False,
         "case_id": case_id_tumor_only,
         "cluster_config_path": reference_file,

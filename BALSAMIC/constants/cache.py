@@ -1,8 +1,8 @@
 """Balsamic cache specific constants."""
+from enum import StrEnum
 from typing import Dict, List
 
 from BALSAMIC.constants.constants import FileType
-from BALSAMIC.utils.class_types import StrEnum
 
 DOCKER_URL: str = "docker://clinicalgenomics/balsamic"
 VEP_PLUGINS: str = "all"
@@ -16,7 +16,7 @@ class GenomeVersion(StrEnum):
     CanFam3: str = "canfam3"
 
 
-GENOME_VERSIONS: List[GenomeVersion] = [version.value for version in GenomeVersion]
+GENOME_VERSIONS: List[GenomeVersion] = [version for version in GenomeVersion]
 
 
 class GRCHVersion(StrEnum):

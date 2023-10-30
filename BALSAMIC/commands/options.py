@@ -10,6 +10,8 @@ from BALSAMIC.constants.analysis import (
     Gender,
     RULE_DELIVERY_MODES,
     RuleDeliveryMode,
+    PON_WORKFLOWS,
+    PONWorkflow,
 )
 from BALSAMIC.constants.cache import GenomeVersion, CacheVersion, GENOME_VERSIONS
 from BALSAMIC.constants.cluster import (
@@ -23,6 +25,7 @@ from BALSAMIC.constants.constants import LogLevel, LOG_LEVELS
 from BALSAMIC.constants.rules import DELIVERY_RULES
 from BALSAMIC.constants.workflow_params import VCF_DICT
 from BALSAMIC.utils.cli import validate_cache_version
+
 
 OPTION_ADAPTER_TRIM = click.option(
     "--adapter-trim/--no-adapter-trim",
@@ -42,7 +45,7 @@ OPTION_ANALYSIS_DIR = click.option(
 OPTION_ANALYSIS_WORKFLOW = click.option(
     "-w",
     "--analysis-workflow",
-    default=AnalysisWorkflow.BALSAMIC.value,
+    default=AnalysisWorkflow.BALSAMIC,
     show_default=True,
     type=click.Choice(ANALYSIS_WORKFLOWS),
     help="Balsamic analysis workflow to be executed",
@@ -180,10 +183,10 @@ OPTION_DELIVERY_MODE = click.option(
     "-m",
     "--delivery-mode",
     type=click.Choice(RULE_DELIVERY_MODES),
-    default=RuleDeliveryMode.APPEND.value,
+    default=RuleDeliveryMode.APPEND,
     show_default=True,
-    help=f"Append rules to deliver to the current delivery option ({RuleDeliveryMode.APPEND.value}) or deliver only "
-    f"the ones specified ({RuleDeliveryMode.RESET.value})",
+    help=f"Append rules to deliver to the current delivery option ({RuleDeliveryMode.APPEND}) or deliver only "
+    f"the ones specified ({RuleDeliveryMode.RESET})",
 )
 
 OPTION_DISABLE_VARIANT_CALLER = click.option(
@@ -218,7 +221,7 @@ OPTION_GENDER = click.option(
     "--gender",
     required=False,
     type=click.Choice([Gender.FEMALE, Gender.MALE]),
-    default=Gender.FEMALE.value,
+    default=Gender.FEMALE,
     show_default=True,
     help="Sample associated gender",
 )
@@ -232,9 +235,30 @@ OPTION_GENOME_VERSION = click.option(
     help="Type and build version of the reference genome",
 )
 
+OPTION_GENOME_INTERVAL = click.option(
+    "--genome-interval",
+    required=False,
+    type=click.Path(exists=True, resolve_path=True),
+    help="Genome 100 bp interval-file (created with gatk PreprocessIntervals), used for GENS pre-processing.",
+)
+
+OPTION_GENS_COV_PON = click.option(
+    "--gens-coverage-pon",
+    required=False,
+    type=click.Path(exists=True, resolve_path=True),
+    help="GENS PON file, either male or female (created with gatk CreateReadCountPanelOfNormals), used for GENS pre-processing.",
+)
+
+OPTION_GNOMAD_AF5 = click.option(
+    "--gnomad-min-af5",
+    required=False,
+    type=click.Path(exists=True, resolve_path=True),
+    help="Gnomad VCF filtered to keep >= 0.05 AF, used for GENS pre-processing.",
+)
+
 OPTION_LOG_LEVEL = click.option(
     "--log-level",
-    default=LogLevel.INFO.value,
+    default=LogLevel.INFO,
     type=click.Choice(LOG_LEVELS),
     help="Logging level in terms of urgency",
     show_default=True,
@@ -268,6 +292,14 @@ OPTION_PON_CNN = click.option(
     type=click.Path(exists=True, resolve_path=True),
     required=False,
     help="Panel of normal reference (.cnn) for CNVkit",
+)
+
+OPTION_PON_WORKFLOW = click.option(
+    "--pon-workflow",
+    type=click.Choice(PON_WORKFLOWS),
+    default=PONWorkflow.CNVKIT,
+    required=True,
+    help="Specify which PON to create.",
 )
 
 OPTION_PON_VERSION = click.option(

@@ -168,8 +168,6 @@ DELIVERY_RULES: List[str] = [
     "mergeBam_normal_umiconsensus",
     "bam_compress_tumor",
     "bam_compress_normal",
-    "bam_compress_tumor_wgs",
-    "bam_compress_normal_wgs",
     # Germline
     "vcfheader_rename_germline",
     "vep_annotate_germlineVAR_tumor",
@@ -207,6 +205,7 @@ DELIVERY_RULES: List[str] = [
     "somatic_cnv_tumor_only_tga",
     "somatic_cnv_tumor_normal_tga",
     "vcf2cytosure_convert",
+    "finalize_gens_outputfiles",
     # TMB
     "tmb_calculation",
 ]

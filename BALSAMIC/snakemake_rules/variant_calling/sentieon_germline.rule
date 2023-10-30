@@ -2,7 +2,6 @@
 # coding: utf-8
 
 
-
 rule sentieon_DNAscope:
     input:
         ref = config["reference"]["reference_genome"],
@@ -26,7 +25,6 @@ rule sentieon_DNAscope:
         "Calling germline variants using Sentieon DNAscope for {params.sample}"
     shell:
       """
-mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
 export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};

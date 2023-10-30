@@ -11,6 +11,14 @@
 		"time": "00:15:00",
 		"n": 1
 	},
+	"gens_preprocessing": {
+		"time": "01:00:00",
+		"n": 4
+	},
+	"finalize_gens_outputfiles": {
+		"time": "01:00:00",
+		"n": 2
+	},
 	"CollectAlignmentSummaryMetrics": {
 		"time": "03:30:00",
 		"n": 8
@@ -76,6 +84,18 @@
 		"time": "12:00:00",
 		"n": 4
 	},
+	"gatk_collectreadcounts":{
+		"time": "10:00:00",
+		"n": 5
+	},
+	"gatk_denoisereadcounts":{
+		"time": "10:00:00",
+		"n": 10
+	},
+	"gatk_create_readcount_pon":{
+		"time": "60:00:00",
+		"n": 86
+	},
 	"manta_germline": {
 		"time": "05:00:00",
 		"n": 16
@@ -113,6 +133,10 @@
 		"n": 16
 	},
 	"sentieon_DNAscope": {
+		"time": "24:00:00",
+		"n": 36
+	},
+	"sentieon_DNAscope_gnomad": {
 		"time": "24:00:00",
 		"n": 36
 	},

@@ -3,9 +3,10 @@ import graphviz
 import logging
 from unittest import mock
 from pathlib import Path
+from BALSAMIC.constants.analysis import PONWorkflow
 
 
-def test_pon_config(
+def test_cnvkit_pon_config(
     invoke_cli,
     analysis_dir: str,
     balsamic_cache: str,
@@ -13,7 +14,7 @@ def test_pon_config(
     fastq_dir_pon: str,
     case_id_pon: str,
 ):
-    """Test balsamic PON config case command."""
+    """Test balsamic PON config case command for CNVkit."""
 
     # GIVEN a case ID, fastq files, and an analysis dir
 
@@ -34,6 +35,8 @@ def test_pon_config(
             "v5",
             "--balsamic-cache",
             balsamic_cache,
+            "--pon-workflow",
+            PONWorkflow.CNVKIT,
         ]
     )
 
@@ -42,13 +45,93 @@ def test_pon_config(
     assert Path(analysis_dir, case_id_pon, case_id_pon + "_PON.json").exists()
 
 
-def test_pon_config_failed(invoke_cli, tmp_path, balsamic_cache, panel_bed_file):
+def test_gens_pon_config(
+    invoke_cli,
+    analysis_dir: str,
+    balsamic_cache: str,
+    fastq_dir_gens_pon: str,
+    case_id_gens_pon: str,
+    gens_hg19_interval_list: str,
+):
+    """Test balsamic PON config case command for GENS."""
+
+    # GIVEN a case ID, fastq files, and an analysis dir
+
+    # WHEN creating a config for GENS pon creation workflow
+    result = invoke_cli(
+        [
+            "config",
+            "pon",
+            "--case-id",
+            case_id_gens_pon,
+            "--analysis-dir",
+            analysis_dir,
+            "--fastq-path",
+            fastq_dir_gens_pon,
+            "--version",
+            "v5",
+            "--balsamic-cache",
+            balsamic_cache,
+            "--pon-workflow",
+            PONWorkflow.GENS_MALE,
+            "--genome-interval",
+            gens_hg19_interval_list,
+        ]
+    )
+
+    # THEN a config should be created and exist
+    assert result.exit_code == 0
+    assert Path(analysis_dir, case_id_gens_pon, case_id_gens_pon + "_PON.json").exists()
+
+
+def test_gens_pon_config(
+    invoke_cli,
+    analysis_dir: str,
+    balsamic_cache: str,
+    fastq_dir_gens_pon: str,
+    case_id_gens_pon: str,
+):
+    """Test detection of missing genome_interval file which is optional but required for GENS."""
+
+    # GIVEN a case ID, fastq files, and an analysis dir
+
+    # WHEN creating a config for GENS pon creation workflow without required genome_interval file
+    result = invoke_cli(
+        [
+            "config",
+            "pon",
+            "--case-id",
+            case_id_gens_pon,
+            "--analysis-dir",
+            analysis_dir,
+            "--fastq-path",
+            fastq_dir_gens_pon,
+            "--version",
+            "v5",
+            "--balsamic-cache",
+            balsamic_cache,
+            "--pon-workflow",
+            PONWorkflow.GENS_MALE,
+        ]
+    )
+
+    # THEN command should exit with error
+    assert (
+        "Argument: genome_interval is required for GENS PON creation." in result.output
+    )
+    assert result.exit_code == 2
+
+
+def test_cnvkit_pon_config_failed(
+    invoke_cli, tmp_path: str, balsamic_cache: str, panel_bed_file: str
+):
+    """Test detection of missing option for a PON config without required arguments.."""
     # GIVEN a case ID, fastq files, and an analysis dir
     test_analysis_dir = tmp_path / "test_analysis_dir"
     test_analysis_dir.mkdir()
     case_id = "sample_pon"
 
-    # WHEN creating a case analysis
+    # WHEN creating config for cnvkit pon creation workflow
     result = invoke_cli(
         [
             "config",
@@ -69,15 +152,58 @@ def test_pon_config_failed(invoke_cli, tmp_path, balsamic_cache, panel_bed_file)
     assert result.exit_code == 2
 
 
-def test_dag_graph_success_pon(pon_creation_config: str):
+def test_cnvkit_pon_config_missing_panel(
+    invoke_cli, tmp_path: str, balsamic_cache: str, fastq_dir_pon: str
+):
+    """Test detection of missing panel which is optional but required for CNVkit."""
+
+    # GIVEN a case ID, fastq files, and an analysis dir
+    test_analysis_dir = tmp_path / "test_analysis_dir"
+    test_analysis_dir.mkdir()
+    case_id = "sample_pon"
+
+    # WHEN creating config for cnvkit pon creation workflow
+    result = invoke_cli(
+        [
+            "config",
+            "pon",
+            "--case-id",
+            case_id,
+            "--analysis-dir",
+            test_analysis_dir,
+            "--balsamic-cache",
+            balsamic_cache,
+            "--fastq-path",
+            fastq_dir_pon,
+            "--pon-workflow",
+            PONWorkflow.CNVKIT,
+            "--version",
+            "v5",
+        ]
+    )
+
+    # THEN a config should not be created and exit
+    assert "Argument: panel_bed is required for CNVkit PON creation." in result.output
+    assert result.exit_code == 2
+
+
+def test_dag_graph_success_cnvkit_pon(cnvkit_pon_creation_config: str):
     """Test DAG graph building success."""
     # WHEN creating config using standard CLI input and setting Sentieon env vars
 
     # THEN DAG graph should be created successfully
-    assert Path(json.load(open(pon_creation_config))["analysis"]["dag"]).exists()
+    assert Path(json.load(open(cnvkit_pon_creation_config))["analysis"]["dag"]).exists()
 
 
-def test_pon_config_graph_failed(
+def test_dag_graph_success_gens_pon(gens_pon_creation_config: str):
+    """Test DAG graph building success."""
+    # WHEN creating config using standard CLI input and setting Sentieon env vars
+
+    # THEN DAG graph should be created successfully
+    assert Path(json.load(open(gens_pon_creation_config))["analysis"]["dag"]).exists()
+
+
+def test_cnvkit_pon_config_graph_failed(
     invoke_cli,
     analysis_dir: str,
     balsamic_cache: str,
@@ -108,6 +234,8 @@ def test_pon_config_graph_failed(
                 "v5",
                 "--balsamic-cache",
                 balsamic_cache,
+                "--pon-workflow",
+                PONWorkflow.CNVKIT,
             ]
         )
 
