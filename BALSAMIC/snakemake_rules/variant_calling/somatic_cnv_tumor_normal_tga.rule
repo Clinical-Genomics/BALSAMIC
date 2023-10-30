@@ -171,7 +171,6 @@ rule purecn_call_CNV_research:
         get_threads(cluster_config, "purecn_call_CNV_research")
     params:
         cnv_dir = cnv_dir,
-        housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "cnv"},
         name = config["analysis"]["case_id"],
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         tumor_name = "tumor.merged",
@@ -331,7 +330,6 @@ rule bcftools_sort_cnvkitCNV_research:
     threads:
         get_threads(cluster_config, "bcftools_sort_cnvkitCNV_research")
     params:
-        housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "cnv"},
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         cnv_dir = cnv_dir,
         case_name = config["analysis"]["case_id"],

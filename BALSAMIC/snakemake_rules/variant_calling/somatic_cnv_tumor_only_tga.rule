@@ -108,7 +108,6 @@ rule purecn_call_CNV_research:
     threads:
         get_threads(cluster_config, "purecn_call_CNV_research")
     params:
-        housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "cnv"},
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         tumor_name = "tumor.merged",
         cnv_dir = cnv_dir,
