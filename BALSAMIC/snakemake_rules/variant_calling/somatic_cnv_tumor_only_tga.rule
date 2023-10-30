@@ -100,7 +100,7 @@ rule purecn_call_CNV_research:
         segment= cnv_dir + "tumor.seg",
         cnr = cnv_dir + "tumor.merged.cnr",
     output:
-        purity_ploidy = cnv_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".purecn.purity.csv",
+        purecn_purity = cnv_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".purecn.purity.csv",
     benchmark:
         Path(f"{benchmark_dir}/purecn_call_{config['analysis']['case_id']}.tsv").as_posix()
     singularity:
@@ -109,11 +109,8 @@ rule purecn_call_CNV_research:
         get_threads(cluster_config, "purecn_call_CNV_research")
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-        tumor_name = "tumor.merged",
         cnv_dir = cnv_dir,
-        min_mapq= params.common.min_mapq,
         case_name = config["analysis"]["case_id"],
-        gender = config["analysis"]["gender"],
         sample_id = "TUMOR",
         genome = config["reference"]["genome_version"],
         purity_pdf= cnv_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".purecn.purity.pdf",
@@ -162,10 +159,10 @@ mv {params.tmpdir}/{params.sample_id}.vcf.gz {params.purecn_vcf};
 fi;
 
 if [[ -f "{params.tmpdir}/{params.sample_id}.csv" ]];  then
-mv {params.tmpdir}/{params.sample_id}.csv {output.purity_ploidy};
+mv {params.tmpdir}/{params.sample_id}.csv {output.purecn_purity};
 else
 echo '"Sampleid","Purity","Ploidy","Sex","Contamination","Flagged","Failed","Curated","Comment"
-"tumor.initial",0.02,2,"?",0,FALSE,FALSE,FALSE,NA' > {output.purity_ploidy};
+"tumor.initial",0.02,2,"?",0,FALSE,FALSE,FALSE,NA' > {output.purecn_purity};
 fi;
 
 rm -rf {params.tmpdir};
@@ -197,10 +194,8 @@ rule cnvkit_call_CNV_research:
         get_threads(cluster_config, "cnvkit_call_CNV_research")
     params:
         housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "cnv"},
-        tumor_name = "tumor.merged",
         cnv_dir = cnv_dir,
         cnsr = lambda wc: "tumor.merged.cn{s,r}",
-        min_mapq= params.common.min_mapq,
         case_name = config["analysis"]["case_id"],
         gender = config["analysis"]["gender"],
         sample_id = "TUMOR",
