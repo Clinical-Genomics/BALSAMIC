@@ -202,8 +202,8 @@ DELIVERY_RULES: List[str] = [
     "ascat_tumor_normal",
     "vcf2cytosure_convert_tumor_only",
     "vcf2cytosure_convert_tumor_normal",
-    "somatic_cnv_tumor_only_tga",
-    "somatic_cnv_tumor_normal_tga",
+    "cnvkit_segment_CNV_research",
+    "cnvkit_call_CNV_research",
     "vcf2cytosure_convert",
     "finalize_gens_outputfiles",
     # TMB

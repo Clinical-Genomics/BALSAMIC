@@ -9,7 +9,7 @@ rule cnvkit_segment_CNV_research:
         refgene_flat = config["reference"]["refgene_flat"],
         bamT = config_model.get_final_bam_name(bam_dir = bam_dir,sample_name=tumor_sample),
     output:
-        cns = cnv_dir + "tumor.initial.cns",
+        cns_initial = cnv_dir + "tumor.initial.cns",
         cnr = cnv_dir + "tumor.merged.cnr",
         targets = cnv_dir + "targets.bed",
         antitargets = cnv_dir + "antitarget.bed",
@@ -23,6 +23,7 @@ rule cnvkit_segment_CNV_research:
     threads:
         get_threads(cluster_config,"cnvkit_segment_CNV_research")
     params:
+        housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "cnv"},
         min_mapq = params.common.min_mapq,
         case_name = config["analysis"]["case_id"],
         sample_id = "TUMOR",
@@ -83,13 +84,13 @@ fi
 # drop bins with 0  read depth and bins whose log2 values deviating from avg
 cnvkit.py segment {output.cnr} \
 --sample-id {params.sample_id} \
---output {output.cns} \
+--output {output.cns_initial} \
 --method cbs \
 --drop-low-coverage \
 --processes {threads};
 
-# Convert copy number segments (.cns) to standard SEG format to be used for PureCN
-cnvkit.py export seg {output.cns} --output {output.segment};
+# Convert copy number segments (initial.cns) to standard SEG format to be used for PureCN
+cnvkit.py export seg {output.cns_initial} --output {output.segment};
       """
 
 rule purecn_call_CNV_research:
@@ -97,7 +98,7 @@ rule purecn_call_CNV_research:
         fasta = config["reference"]["reference_genome"],
         refgene_flat = config["reference"]["refgene_flat"],
         snv_vcf = vcf_dir + "SNV.germline.tumor.dnascope.vcf.gz",
-        segment= cnv_dir + "tumor.seg",
+        segment = cnv_dir + "tumor.seg",
         cnr = cnv_dir + "tumor.merged.cnr",
     output:
         purecn_purity = cnv_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".purecn.purity.csv",
@@ -113,11 +114,11 @@ rule purecn_call_CNV_research:
         case_name = config["analysis"]["case_id"],
         sample_id = "TUMOR",
         genome = config["reference"]["genome_version"],
-        purity_pdf= cnv_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".purecn.purity.pdf",
-        loh_regions= cnv_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".purecn.LOHregions.csv",
-        loh_genes= cnv_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".purecn.LOHgenes.csv",
-        cnv_csv= cnv_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".purecn.cnv.csv",
-        purecn_vcf= cnv_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".purecn.vcf.gz",
+        purity_pdf = cnv_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".purecn.purity.pdf",
+        loh_regions = cnv_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".purecn.LOHregions.csv",
+        loh_genes = cnv_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".purecn.LOHgenes.csv",
+        cnv_csv = cnv_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".purecn.cnv.csv",
+        purecn_vcf = cnv_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".purecn.vcf.gz",
     message:
         ("Computing tumor purity and ploidy values using PureCN for {params.case_name}")
     shell:
@@ -175,7 +176,7 @@ rule cnvkit_call_CNV_research:
         baits_bed = config["panel"]["capture_kit"],
         refgene_flat = config["reference"]["refgene_flat"],
         purity_ploidy = cnv_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".purecn.purity.csv",
-        cns= cnv_dir + "tumor.initial.cns",
+        cns_initial= cnv_dir + "tumor.initial.cns",
         cnr = cnv_dir + "tumor.merged.cnr",
         snv_vcf = vcf_dir + "SNV.germline.tumor.dnascope.vcf.gz",
         bamT = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
@@ -208,7 +209,7 @@ purity=$(awk -F\\, 'NR>1 {{print $2}}' {input.purity_ploidy})
 ploidy=$(awk -F\\, 'NR>1 {{printf int($3)}}' {input.purity_ploidy})
 
 # Call copy number variants from segmented log2 ratios
-cnvkit.py call {input.cns} \
+cnvkit.py call {input.cns_initial} \
 --vcf {input.snv_vcf} \
 --sample-sex {params.gender} \
 --method clonal \

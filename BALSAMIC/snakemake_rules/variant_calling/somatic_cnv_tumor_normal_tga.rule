@@ -49,7 +49,7 @@ rule cnvkit_segment_CNV_research:
         bamT = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
         bamN = config_model.get_final_bam_name(bam_dir = bam_dir,sample_name = normal_sample),
     output:
-        cns = cnv_dir + "tumor.initial.cns",
+        cns_initial = cnv_dir + "tumor.initial.cns",
         cnr = cnv_dir + "tumor.merged.cnr",
         targets = cnv_dir + "targets.bed",
         antitargets = cnv_dir + "antitarget.bed",
@@ -65,6 +65,7 @@ rule cnvkit_segment_CNV_research:
     threads:
         get_threads(cluster_config, "cnvkit_segment_CNV_research")
     params:
+        housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "cnv"},
         cnv_dir = cnv_dir,
         case_name = config["analysis"]["case_id"],
         sample_id = "TUMOR",
@@ -143,13 +144,13 @@ fi
 cnvkit.py segment {output.cnr} \
 --sample-id {params.sample_id} \
 --normal-id {params.normal_id} \
---output {output.cns} \
+--output {output.cns_initial} \
 --method cbs \
 --drop-low-coverage \
 --processes {threads};
 
-# Convert copy number segments (.cns) to standard SEG format to be used in PureCN
-cnvkit.py export seg {output.cns} \
+# Convert copy number segments (initial.cns) to standard SEG format to be used in PureCN
+cnvkit.py export seg {output.cns_initial} \
 --output {output.segment};
         """
 
@@ -237,18 +238,18 @@ rule cnvkit_call_CNV_research:
         baits_bed = config["panel"]["capture_kit"],
         refgene_flat = config["reference"]["refgene_flat"],
         purity_ploidy = cnv_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".purecn.purity.csv",
-        cns= cnv_dir + "tumor.initial.cns",
-        cnr= cnv_dir + "tumor.merged.cnr",
+        cns_initial = cnv_dir + "tumor.initial.cns",
+        cnr = cnv_dir + "tumor.merged.cnr",
         snv_merged = vcf_dir + "SNV.germline.merged.dnascope.vcf.gz",
         bamT = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
-        bamN= config_model.get_final_bam_name(bam_dir = bam_dir,sample_name=normal_sample),
+        bamN = config_model.get_final_bam_name(bam_dir = bam_dir,sample_name=normal_sample),
     output:
         cns = cnv_dir + "tumor.merged.cns",
         gene_breaks = cnv_dir + config["analysis"]["case_id"] + ".gene_breaks",
         gene_metrics = cnv_dir + config["analysis"]["case_id"] + ".gene_metrics",
         vcf = cnv_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".cnvkit.vcf",
-        diagram= cnv_dir + "tumor.merged-diagram.pdf",
-        scatter= cnv_dir + "tumor.merged-scatter.pdf",
+        diagram = cnv_dir + "tumor.merged-diagram.pdf",
+        scatter = cnv_dir + "tumor.merged-scatter.pdf",
     benchmark:
         Path(benchmark_dir + "cnvkit_call_CNV_research" + config["analysis"]["case_id"] + ".tsv").as_posix()
     singularity:
@@ -258,11 +259,11 @@ rule cnvkit_call_CNV_research:
     params:
         housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "cnv"},
         cnv_dir = cnv_dir,
-        cnsr= lambda wc: "tumor.merged.cn{s,r}",
+        cnsr = lambda wc: "tumor.merged.cn{s,r}",
         case_name = config["analysis"]["case_id"],
         gender = config["analysis"]["gender"],
-        tumor_sample_id= "TUMOR",
-        normal_sample_id= "NORMAL",
+        tumor_sample_id = "TUMOR",
+        normal_sample_id = "NORMAL",
     message:
         "Computing tumor purity and ploidy using PureCN for {params.case_name}"
     shell:
@@ -271,7 +272,7 @@ purity=$(awk -F\\, 'NR>1 {{print $2}}' {input.purity_ploidy})
 ploidy=$(awk -F\\, 'NR>1 {{printf int($3)}}' {input.purity_ploidy})
 
 # Call copy number variants from segmented log2 ratios
-cnvkit.py call {input.cns} \
+cnvkit.py call {input.cns_initial} \
 --vcf {input.snv_merged} \
 --sample-sex {params.gender} \
 --method clonal \
