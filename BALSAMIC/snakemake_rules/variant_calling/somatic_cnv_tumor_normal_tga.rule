@@ -21,9 +21,6 @@ rule bcftools_merge_germlineSNV_research:
         "Merging germline SNVs using bcftools for {params.case_name}"
     shell:
         """
-mkdir -p {params.tmpdir};
-export TMPDIR={params.tmpdir};
-
 # merge the tumor and normal VCF 
 bcftools merge \
 --threads {threads} \
@@ -39,7 +36,7 @@ bcftools sort \
 
 tabix -p vcf -f {output.snv_merged};
 
-#rm -rf {params.tmpdir};
+rm -rf {params.tmpdir};
        """
 
 
@@ -192,8 +189,6 @@ rule purecn_call_CNV_research:
         "Computing tumor purity and ploidy using PureCN for {params.case_name}"
     shell:
         """
-mkdir -p {params.tmpdir};
-export TMPDIR={params.tmpdir};
 export PURECN='/opt/PureCN/PureCN.R'
 
 # Run PureCN to estimate tumor-purity and ploidy
@@ -344,9 +339,6 @@ rule bcftools_sort_cnvkitCNV_research:
         "Sorting CNVs using bcftools for {params.case_name}"
     shell:
       """
-mkdir -p {params.tmpdir};
-export TMPDIR={params.tmpdir};
-
 bgzip -l 9 {input.vcf};
 
 tabix -p vcf -f {input.vcf}.gz;

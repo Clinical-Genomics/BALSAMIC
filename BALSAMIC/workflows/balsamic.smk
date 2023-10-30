@@ -84,7 +84,7 @@ somatic_sv = ""
 swegen_sv = ""
 
 if config["analysis"]["sequencing_type"] != "wgs":
-    pon_cnn: str = get_pon_cnn(config) if "pon_cnn" in config["panel"] else " "
+    pon_cnn: str = get_pon_cnn(config)
 
 # Run information
 singularity_image: str = config_model.singularity['image']
