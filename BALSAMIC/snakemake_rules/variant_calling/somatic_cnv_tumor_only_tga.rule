@@ -27,7 +27,7 @@ rule cnvkit_segment_CNV_research:
         case_name = config["analysis"]["case_id"],
         sample_id = "TUMOR",
         flat_reference_cnn = cnv_dir + "flat_reference.cnn",
-        pon = " " if pon_cnn is None else pon_cnn,
+        pon = pon_cnn,
     message:
         ("Segmenting genomic regions using CNVkit for {params.case_name}")
     shell:
@@ -117,7 +117,6 @@ rule purecn_call_CNV_research:
         gender = config["analysis"]["gender"],
         sample_id = "TUMOR",
         genome = config["reference"]["genome_version"],
-        pon = " " if pon_cnn is None else pon_cnn,
         purity_pdf= cnv_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".purecn.purity.pdf",
         loh_regions= cnv_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".purecn.LOHregions.csv",
         loh_genes= cnv_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".purecn.LOHgenes.csv",
@@ -207,7 +206,6 @@ rule cnvkit_call_CNV_research:
         gender = config["analysis"]["gender"],
         sample_id = "TUMOR",
         genome_version = config["reference"]["genome_version"],
-        pon = pon_cnn,
     message:
         ("Calling CNVs using CNVkit for {params.case_name}")
     shell:
@@ -266,7 +264,6 @@ rule bcftools_sort_cnvkitCNV_research:
     threads:
         get_threads(cluster_config, "bcftools_sort_cnvkitCNV_research")
     params:
-        housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "cnv"},
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         cnv_dir = cnv_dir,
         case_name = config["analysis"]["case_id"],
