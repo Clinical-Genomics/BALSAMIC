@@ -58,7 +58,7 @@ Changed:
 * Made BALSAMIC compatible with multiple PON creation workflows https://github.com/Clinical-Genomics/BALSAMIC/pull/1279
 * Use StrEnum from python enum https://github.com/Clinical-Genomics/BALSAMIC/pull/1303
 * Migrate analysis models to pydantic v2 https://github.com/Clinical-Genomics/BALSAMIC/pull/1306
-
+* Split analysis model into config and params models https://github.com/Clinical-Genomics/BALSAMIC/pull/1306
 
 Fixed:
 ^^^^^^
