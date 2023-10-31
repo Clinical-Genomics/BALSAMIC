@@ -6,18 +6,18 @@ rule bam_compress_tumor:
         bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample),
         fasta = config_model.reference["reference_genome"]
     output:
-        cram = Path(bam_dir + "tumor.{sample}.{final_bam_suffix}.cram").as_posix()
+        cram = Path(bam_dir + "tumor.{sample}.cram").as_posix()
     benchmark:
-        Path(benchmark_dir, "bam_compress_{final_bam_suffix}_{sample}.tsv").as_posix()
+        Path(benchmark_dir, "bam_compress_tumor_{sample}.tsv").as_posix()
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("compress") + ".sif").as_posix()
     params:
         sample_id = "{sample}",
-        housekeeper_id= {"id": case_id, "tags": "tumor"}
+        housekeeper_id= {"id": {sample}, "tags": "tumor"}
     threads:
         get_threads(cluster_config, "bam_compress")
     message:
-        "Compressing bam ({final_bam_suffix}) to cram for {params.sample_id}"
+        "Compressing bam to cram for {params.sample_id}"
     shell:
         """
 samtools view -h -T {input.fasta} --threads {threads} -C -o {output.cram} {input.bam}; 
@@ -29,18 +29,18 @@ rule bam_compress_normal:
         bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample),
         fasta = config_model.reference["reference_genome"]
     output:
-        cram = Path(bam_dir, "normal.{sample}.{final_bam_suffix}.cram").as_posix()
+        cram = Path(bam_dir, "normal.{sample}.cram").as_posix()
     benchmark:
-        Path(benchmark_dir, "bam_compress_{final_bam_suffix}_{sample}.tsv").as_posix()
+        Path(benchmark_dir, "bam_compress_normal_{sample}.tsv").as_posix()
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("compress") + ".sif").as_posix()
     params:
         sample_id = "{sample}",
-        housekeeper_id= {"id": case_id, "tags": "normal"}
+        housekeeper_id= {"id": {sample}, "tags": "normal"}
     threads:
         get_threads(cluster_config, "bam_compress")
     message:
-        "Compressing bam ({final_bam_suffix}) to cram for {params.sample_id}"
+        "Compressing bam to cram for {params.sample_id}"
     shell:
         """
 samtools view -h -T {input.fasta} --threads {threads} -C -o {output.cram} {input.bam}; 
