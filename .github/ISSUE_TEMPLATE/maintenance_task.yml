@@ -1,0 +1,63 @@
+name: Maintenance task
+description: A maintenance task
+title: "[Maintenance] <title>"
+labels: ["Maintenance"]
+projects: ["Clinical-Genomics/46"]
+body:
+- type: textarea
+  attributes:
+    label: Task
+    description: Describe the task needed to be performed
+  validations:
+    required: false
+- type: textarea
+  attributes:
+    label: Suggested approach
+    description: A few sentences about the intended solution
+  validations:
+    required: false
+- type: input
+  attributes:
+    label: Deviation
+    description: If there is a deviation, add a link to it here
+    placeholder: Link to deviation
+  validations:
+    required: false
+- type: checkboxes
+  attributes:
+    label: Risk assessment
+    description: Is a risk assessment needed or not for this task?
+    options:
+      - label: Needed
+      - label: Not needed
+- type: input
+  attributes:
+    label: Risk assessment link
+    description: If a risk assessment is needed, link to it here
+    placeholder: Link to risk assessment
+  validations:
+    required: false
+- type: checkboxes
+  attributes:
+    label: System requirements assessed
+    description: Have you reviewed the existing system requirements if they are affected by this change?
+    options:
+      - label: Yes, I have reviewed the system requirements
+- type: textarea
+  attributes:
+    label: Requirements affected
+    description: Link any requirements affected
+  validations:
+    required: false
+- type: textarea
+  attributes:
+    label: Can be closed when
+    description: Link the issues/PRs needed to be closed for this to be implemented
+  validations:
+    required: false
+- type: textarea
+  attributes:
+    label: Blockers
+    description: Anything preventing this from happening?
+  validations:
+    required: false
