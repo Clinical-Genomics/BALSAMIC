@@ -20,6 +20,7 @@
         "ascat_gc_correction": "tests/test_data/references/genome/GRCh37_SnpGcCorrections.tsv",
         "ascat_chr_y_loci": "tests/test_data/references/genome/GRCh37_Y.loci",
         "clinvar": "tests/test_data/references/genome/clinvar.vcf.gz",
-        "cadd_snv": "tests/test_data/references/variants/hg19.cadd_snv.tsv.gz"
+        "cadd_snv": "tests/test_data/references/variants/hg19.cadd_snv.tsv.gz",
+        "simple_repeat": "tests/test_data/references/genome/simpleRepeat.txt.gz"
     }
 }
