@@ -11,10 +11,10 @@ from BALSAMIC.constants.metrics import METRICS
 from BALSAMIC.models.metrics import Metric
 from BALSAMIC.utils.io import read_json
 from BALSAMIC.utils.rule import (
-    get_capture_kit,
-    get_sequencing_type,
-    get_sample_type_from_sample_name,
     get_analysis_type,
+    get_capture_kit,
+    get_sample_type_from_sample_name,
+    get_sequencing_type,
 )
 
 
@@ -131,7 +131,7 @@ def get_relatedness_metrics(multiqc_data: dict) -> list:
                 step=step,
                 value=metric_value,
                 condition=METRICS["paired"]["RELATEDNESS"]["condition"],
-            ).dict()
+            ).model_dump()
 
             return [output_metrics]
 
@@ -218,7 +218,7 @@ def get_multiqc_metrics(config: dict, multiqc_data: dict) -> list:
                                     sample.split(".")[1].split("_")[0],
                                     k,
                                 ),
-                            ).dict()
+                            ).model_dump()
                         )
                     extract(data[k], output_metrics, k, sample)
 
@@ -262,7 +262,7 @@ def get_variant_metrics(counts_path: list) -> list:
                 step="collect_custom_qc_metrics",
                 value=variant_metrics[metric],
                 condition=requested_metrics[metric]["condition"],
-            ).dict()
+            ).model_dump()
         )
 
     return output_metrics

@@ -1,23 +1,22 @@
+import logging
 import os
 import re
-
-import toml
-import glob
-from typing import List, Dict
-import logging
 from pathlib import Path
+from typing import Dict
+
 import snakemake
-from BALSAMIC.utils.cli import get_file_extension
-from BALSAMIC.utils.cli import find_file_index
+import toml
+
 from BALSAMIC.constants.analysis import (
     AnalysisType,
-    SequencingType,
     MutationOrigin,
     MutationType,
+    SequencingType,
     WorkflowSolution,
 )
-from BALSAMIC.utils.exc import WorkflowRunError, BalsamicError
 from BALSAMIC.models.analysis import ConfigModel
+from BALSAMIC.utils.cli import find_file_index, get_file_extension
+from BALSAMIC.utils.exc import WorkflowRunError
 
 LOG = logging.getLogger(__name__)
 

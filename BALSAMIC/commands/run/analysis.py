@@ -10,27 +10,27 @@ from typing import List
 import click
 
 from BALSAMIC.commands.options import (
-    OPTION_SNAKEFILE,
-    OPTION_SAMPLE_CONFIG,
-    OPTION_RUN_MODE,
-    OPTION_CLUSTER_PROFILE,
-    OPTION_RUN_ANALYSIS,
-    OPTION_CLUSTER_QOS,
-    OPTION_FORCE_ALL,
-    OPTION_SNAKEMAKE_OPT,
+    OPTION_BENCHMARK,
     OPTION_CLUSTER_ACCOUNT,
+    OPTION_CLUSTER_CONFIG,
     OPTION_CLUSTER_MAIL,
     OPTION_CLUSTER_MAIL_TYPE,
-    OPTION_QUIET,
+    OPTION_CLUSTER_PROFILE,
+    OPTION_CLUSTER_QOS,
     OPTION_DISABLE_VARIANT_CALLER,
-    OPTION_BENCHMARK,
-    OPTION_CLUSTER_CONFIG,
     OPTION_DRAGEN,
+    OPTION_FORCE_ALL,
+    OPTION_QUIET,
+    OPTION_RUN_ANALYSIS,
+    OPTION_RUN_MODE,
+    OPTION_SAMPLE_CONFIG,
+    OPTION_SNAKEFILE,
+    OPTION_SNAKEMAKE_OPT,
 )
 from BALSAMIC.constants.analysis import RunMode
 from BALSAMIC.constants.cluster import (
-    ClusterConfigType,
     QOS,
+    ClusterConfigType,
     ClusterMailType,
     ClusterProfile,
 )
@@ -39,9 +39,9 @@ from BALSAMIC.models.snakemake import SnakemakeExecutable
 from BALSAMIC.utils.analysis import get_singularity_bind_paths
 from BALSAMIC.utils.cli import (
     createDir,
+    get_config_path,
     get_snakefile,
     job_id_dump_to_yaml,
-    get_config_path,
 )
 
 LOG = logging.getLogger(__name__)
@@ -102,7 +102,7 @@ def analysis(
         sample_config = json.load(sample_fh)
 
     # Initialize balsamic model to run validation tests
-    config_model = ConfigModel.parse_obj(sample_config)
+    config_model = ConfigModel.model_validate(sample_config)
 
     case_name = config_model.analysis.case_id
 
