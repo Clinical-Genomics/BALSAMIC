@@ -1,25 +1,29 @@
 import glob
 import logging
 import re
-from datetime import datetime
 from pathlib import Path
-from typing import Optional, List, Dict
+from typing import Annotated, Dict, List, Optional
 
-from pydantic.v1.types import DirectoryPath, FilePath
-from pydantic.v1 import BaseModel, validator, Field, root_validator
+from pydantic import (
+    AfterValidator,
+    BaseModel,
+    ConfigDict,
+    field_validator,
+    model_validator,
+)
 
 from BALSAMIC import __version__ as balsamic_version
 from BALSAMIC.constants.analysis import (
-    Gender,
     AnalysisType,
     AnalysisWorkflow,
-    SequencingType,
-    SampleType,
+    FastqName,
+    Gender,
     MutationOrigin,
     MutationType,
-    WorkflowSolution,
-    FastqName,
     PONWorkflow,
+    SampleType,
+    SequencingType,
+    WorkflowSolution,
 )
 
 LOG = logging.getLogger(__name__)
@@ -71,20 +75,20 @@ class VarCallerFilter(BaseModel):
         description: str (required); comment section for description
     """
 
-    AD: Optional[VCFAttributes]
-    AF_min: Optional[VCFAttributes]
-    AF_max: Optional[VCFAttributes]
-    MQ: Optional[VCFAttributes]
-    DP: Optional[VCFAttributes]
-    pop_freq: Optional[VCFAttributes]
-    pop_freq_umi: Optional[VCFAttributes]
-    strand_reads: Optional[VCFAttributes]
-    qss: Optional[VCFAttributes]
-    sor: Optional[VCFAttributes]
-    swegen_snv_freq: Optional[VCFAttributes]
-    swegen_sv_freq: Optional[VCFAttributes]
-    loqusdb_clinical_snv_freq: Optional[VCFAttributes]
-    loqusdb_clinical_sv_freq: Optional[VCFAttributes]
+    AD: Optional[VCFAttributes] = None
+    AF_min: Optional[VCFAttributes] = None
+    AF_max: Optional[VCFAttributes] = None
+    MQ: Optional[VCFAttributes] = None
+    DP: Optional[VCFAttributes] = None
+    pop_freq: Optional[VCFAttributes] = None
+    pop_freq_umi: Optional[VCFAttributes] = None
+    strand_reads: Optional[VCFAttributes] = None
+    qss: Optional[VCFAttributes] = None
+    sor: Optional[VCFAttributes] = None
+    swegen_snv_freq: Optional[VCFAttributes] = None
+    swegen_sv_freq: Optional[VCFAttributes] = None
+    loqusdb_clinical_snv_freq: Optional[VCFAttributes] = None
+    loqusdb_clinical_sv_freq: Optional[VCFAttributes] = None
     varcaller_name: str
     filter_type: str
     analysis_type: str
@@ -110,21 +114,15 @@ class QCModel(BaseModel):
 
     """
 
+    model_config = ConfigDict(coerce_numbers_to_str=True)
     picard_rmdup: bool = False
     adapter: str = "AATGATACGGCGACCACCGAGATCTACACTCTTTCCCTACACGACGCTCTTCCGATCT"
     quality_trim: bool = True
     adapter_trim: bool = False
     umi_trim: bool = False
-    min_seq_length: int = 25
-    umi_trim_length: int = 5
-    n_base_limit: int = 50
-
-    @validator("min_seq_length", "umi_trim_length", "n_base_limit")
-    def coerce_int_as_str(cls, value):
-        return str(value)
-
-    class Config:
-        validate_all = True
+    min_seq_length: str = "25"
+    umi_trim_length: str = "5"
+    n_base_limit: str = "50"
 
 
 class VarcallerAttribute(BaseModel):
@@ -143,47 +141,11 @@ class VarcallerAttribute(BaseModel):
 
     """
 
-    mutation: str
-    mutation_type: str = Field(alias="type")
-    analysis_type: Optional[list]
-    sequencing_type: Optional[list]
-    workflow_solution: Optional[list]
-
-    @validator("workflow_solution", check_fields=False)
-    def workflow_solution_literal(cls, value) -> str:
-        """Validate workflow solution"""
-        assert set(value).issubset(
-            set(WorkflowSolution)
-        ), f"{value} is not valid workflow solution."
-        return value
-
-    @validator("analysis_type", check_fields=False)
-    def annotation_type_literal(cls, value) -> str:
-        """Validate analysis types"""
-        assert set(value).issubset(
-            set(AnalysisType)
-        ), f"{value} is not a valid analysis type."
-        return value
-
-    @validator("mutation", check_fields=False)
-    def mutation_literal(cls, value) -> str:
-        """Validate mutation class"""
-        assert value in set(MutationOrigin), f"{value} is not a valid mutation type."
-        return value
-
-    @validator("mutation_type", check_fields=False)
-    def mutation_type_literal(cls, value) -> str:
-        """Validate mutation type"""
-        assert value in set(MutationType), f"{value} is not not a valid mutation class"
-        return value
-
-    @validator("sequencing_type", check_fields=False)
-    def sequencing_type_literal(cls, value) -> str:
-        """Validate sequencing type"""
-        assert set(value).issubset(
-            set(SequencingType)
-        ), f"{value} is not not a valid sequencing type."
-        return value
+    mutation: MutationOrigin
+    mutation_type: MutationType
+    analysis_type: Optional[List[AnalysisType]] = None
+    sequencing_type: Optional[List[SequencingType]] = None
+    workflow_solution: Optional[List[WorkflowSolution]] = None
 
 
 class VCFModel(BaseModel):
@@ -202,6 +164,24 @@ class VCFModel(BaseModel):
     tiddit: VarcallerAttribute
     cnvpytor: VarcallerAttribute
     svdb: VarcallerAttribute
+
+
+def is_file(file_path: Optional[str]) -> str:
+    """Validate file path existence."""
+    if file_path:
+        if Path(file_path).is_file():
+            return file_path
+        raise ValueError(f"The supplied file path {file_path} does not exist")
+    return file_path
+
+
+def is_dir(dir_path: Optional[str]) -> str:
+    """Validate directory path existence."""
+    if dir_path:
+        if Path(dir_path).is_dir():
+            return dir_path
+        raise ValueError(f"The supplied directory path {dir_path} does not exist")
+    return dir_path
 
 
 class AnalysisModel(BaseModel):
@@ -241,135 +221,39 @@ class AnalysisModel(BaseModel):
     """
 
     case_id: str
-    analysis_type: str
-    gender: Optional[str]
-    sequencing_type: str
-    analysis_workflow: str
-    analysis_dir: DirectoryPath
-    fastq_path: Optional[DirectoryPath]
-    script: Optional[DirectoryPath]
-    log: Optional[DirectoryPath]
-    result: Optional[DirectoryPath]
-    benchmark: Optional[DirectoryPath]
-    dag: Optional[str]
+    analysis_type: AnalysisType
+    gender: Optional[Gender] = None
+    sequencing_type: SequencingType
+    analysis_workflow: AnalysisWorkflow
+    analysis_dir: Annotated[str, AfterValidator(is_dir)]
+    fastq_path: Annotated[str, AfterValidator(is_dir)]
+    log: Annotated[str, AfterValidator(is_dir)]
+    script: Annotated[str, AfterValidator(is_dir)]
+    result: Annotated[str, AfterValidator(is_dir)]
+    benchmark: Annotated[str, AfterValidator(is_dir)]
+    dag: str
     BALSAMIC_version: str = balsamic_version
-    config_creation_date: Optional[str]
-    pon_version: Optional[str]
-    pon_workflow: Optional[PONWorkflow]
+    config_creation_date: str
+    pon_version: Optional[str] = None
+    pon_workflow: Optional[PONWorkflow] = None
 
-    class Config:
-        validate_all = True
-
-    @validator("analysis_type")
-    def analysis_type_literal(cls, value) -> str:
-        if value not in set(AnalysisType):
+    @field_validator("pon_version")
+    def validate_pon_version(cls, pon_version: Optional[str]):
+        """Checks that the PON version matches the following syntax: v<int>"""
+        if pon_version and not re.fullmatch("^v[1-9]\d*$", pon_version):
             raise ValueError(
-                f"Provided analysis type ({value}) not supported in BALSAMIC!"
+                f"The provided PON version ({pon_version}) does not follow the defined syntax (v<int>)"
             )
-        return value
-
-    @validator("gender")
-    def gender_literal(cls, value, values) -> Optional[str]:
-        if value not in set(Gender) and values.get("analysis_type") != "pon":
-            raise ValueError(
-                f"Provided gender type ({value}) is not supported in BALSAMIC!"
-            )
-        return value
-
-    @validator("sequencing_type")
-    def sequencing_type_literal(cls, value) -> str:
-        if value not in set(SequencingType):
-            raise ValueError(
-                f"Provided sequencing type ({value}) not supported in BALSAMIC!"
-            )
-        return value
-
-    @validator("analysis_workflow", check_fields=True)
-    def analysis_workflow_literal(cls, value) -> str:
-        if value not in set(AnalysisWorkflow):
-            raise ValueError(
-                f"Provided analysis workflow ({value} not supported in BALSAMIC"
-            )
-        return value
-
-    @validator("analysis_dir")
-    def dirpath_always_abspath(cls, value) -> str:
-        return Path(value).resolve().as_posix()
-
-    @validator("fastq_path")
-    def fastq_path_as_abspath(cls, value, values, **kwargs) -> str:
-        return Path(value).resolve().as_posix()
-
-    @validator("log")
-    def parse_analysis_to_log_path(cls, value, values, **kwargs) -> str:
-        return (
-            Path(values.get("analysis_dir"), values.get("case_id"), "logs").as_posix()
-            + "/"
-        )
-
-    @validator("script")
-    def parse_analysis_to_script_path(cls, value, values, **kwargs) -> str:
-        return (
-            Path(
-                values.get("analysis_dir"), values.get("case_id"), "scripts"
-            ).as_posix()
-            + "/"
-        )
-
-    @validator("result")
-    def parse_analysis_to_result_path(cls, value, values, **kwargs) -> str:
-        return Path(
-            values.get("analysis_dir"), values.get("case_id"), "analysis"
-        ).as_posix()
-
-    @validator("benchmark")
-    def parse_analysis_to_benchmark_path(cls, value, values, **kwargs) -> str:
-        return (
-            Path(
-                values.get("analysis_dir"), values.get("case_id"), "benchmarks"
-            ).as_posix()
-            + "/"
-        )
-
-    @validator("dag")
-    def parse_analysis_to_dag_path(cls, value, values, **kwargs) -> str:
-        return (
-            Path(
-                values.get("analysis_dir"), values.get("case_id"), values.get("case_id")
-            ).as_posix()
-            + f"_BALSAMIC_{balsamic_version}_graph.pdf"
-        )
-
-    @validator("config_creation_date")
-    def datetime_as_string(cls, value):
-        return datetime.now().strftime("%Y-%m-%d %H:%M")
-
-    @validator("pon_version")
-    def validate_pon_version(cls, value):
-        """Checks that the version matches the following syntax: v<int>"""
-        if value is None:
-            return value
-
-        match = re.fullmatch("^v[1-9]\d*$", value)
-        if not match:
-            raise ValueError(
-                f"The provided version ({value}) does not follow the defined syntax (v<int>)"
-            )
-
-        return value
+        return pon_version
 
 
 class FastqInfoModel(BaseModel):
     """Holds filepaths for forward and reverse reads for a fastq_pattern."""
 
-    fwd: FilePath
-    rev: FilePath
-    fwd_resolved: Optional[FilePath]
-    rev_resolved: Optional[FilePath]
-
-    @validator("fwd", "rev", "fwd_resolved", "rev_resolved")
-    def fastq_path_as_abspath_str(cls, value):
-        return Path(value).as_posix()
+    fwd: Annotated[str, AfterValidator(is_file)]
+    rev: Annotated[str, AfterValidator(is_file)]
+    fwd_resolved: Annotated[Optional[str], AfterValidator(is_file)] = None
+    rev_resolved: Annotated[Optional[str], AfterValidator(is_file)] = None
 
 
 class SampleInstanceModel(BaseModel):
@@ -399,16 +283,9 @@ class PanelModel(BaseModel):
 
     """
 
-    capture_kit: Optional[FilePath]
-    chrom: Optional[List[str]]
-    pon_cnn: Optional[FilePath]
-
-    @validator("pon_cnn", "capture_kit")
-    def file_abspath_as_str(cls, value):
-        """Converts path to string."""
-        if value:
-            return Path(value).resolve().as_posix()
-        return None
+    capture_kit: Annotated[Optional[str], AfterValidator(is_file)] = None
+    chrom: Optional[List[str]] = None
+    pon_cnn: Annotated[Optional[str], AfterValidator(is_file)] = None
 
 
 class ConfigModel(BaseModel):
@@ -444,34 +321,34 @@ class ConfigModel(BaseModel):
     QC: QCModel
     samples: List[SampleInstanceModel]
     reference: Dict[str, Path]
-    singularity: Dict[str, DirectoryPath]
+    singularity: Dict[str, str]
     bioinfo_tools: Dict
     bioinfo_tools_version: Dict
-    panel: Optional[PanelModel]
-    vcf: Optional[VCFModel]
-    background_variants: Optional[FilePath]
+    panel: Optional[PanelModel] = None
+    vcf: Optional[VCFModel] = None
+    background_variants: Optional[str] = None
     analysis: AnalysisModel
 
-    @validator("reference")
+    @field_validator("reference")
     def abspath_as_str(cls, reference: Dict[str, Path]):
         for k, v in reference.items():
             reference[k] = Path(v).resolve().as_posix()
         return reference
 
-    @validator("singularity")
-    def transform_path_to_dict(cls, singularity: Dict[str, DirectoryPath]):
+    @field_validator("singularity")
+    def transform_path_to_dict(cls, singularity: Dict[str, str]):
         for k, v in singularity.items():
             singularity[k] = Path(v).resolve().as_posix()
         return singularity
 
-    @validator("background_variants")
-    def background_variants_abspath_as_str(cls, background_variants: FilePath):
+    @field_validator("background_variants")
+    def background_variants_abspath_as_str(cls, background_variants: str):
         """Converts FilePath to string."""
         if background_variants:
             return Path(background_variants).resolve().as_posix()
         return None
 
-    @validator("samples")
+    @field_validator("samples")
     def no_duplicate_fastq_patterns(cls, samples):
         """Validate that no duplicate fastq patterns have been assigned in dict."""
         fastq_pattern_counts = {}
@@ -497,7 +374,7 @@ class ConfigModel(BaseModel):
 
         return samples
 
-    @root_validator(pre=True)
+    @model_validator(mode="before")
     def no_unassigned_fastqs_in_fastq_dir(cls, values):
         """All fastq files in the supplied fastq-dir must have been assigned to the sample-dict."""
 
