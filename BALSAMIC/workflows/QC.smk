@@ -10,7 +10,8 @@ from BALSAMIC.constants.analysis import AnalysisType, FastqName, SampleType
 from BALSAMIC.constants.paths import BALSAMIC_DIR
 from BALSAMIC.constants.rules import SNAKEMAKE_RULES
 from BALSAMIC.constants.workflow_params import WORKFLOW_PARAMS
-from BALSAMIC.models.analysis import BalsamicWorkflowConfig, ConfigModel
+from BALSAMIC.models.config import ConfigModel
+from BALSAMIC.models.params import BalsamicWorkflowConfig
 from BALSAMIC.utils.cli import check_executable, generate_h5
 from BALSAMIC.utils.exc import BalsamicError
 from BALSAMIC.utils.io import write_finish_file, write_json

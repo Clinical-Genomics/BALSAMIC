@@ -34,7 +34,7 @@ from BALSAMIC.constants.cluster import (
     ClusterMailType,
     ClusterProfile,
 )
-from BALSAMIC.models.analysis import ConfigModel
+from BALSAMIC.models.config import ConfigModel
 from BALSAMIC.models.snakemake import SnakemakeExecutable
 from BALSAMIC.utils.analysis import get_singularity_bind_paths
 from BALSAMIC.utils.cli import (

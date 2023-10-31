@@ -18,7 +18,8 @@ from BALSAMIC.constants.variant_filters import (
     VARDICT_SETTINGS,
 )
 from BALSAMIC.constants.workflow_params import VARCALL_PARAMS, WORKFLOW_PARAMS
-from BALSAMIC.models.analysis import BalsamicWorkflowConfig, ConfigModel, VarCallerFilter
+from BALSAMIC.models.config import ConfigModel
+from BALSAMIC.models.params import BalsamicWorkflowConfig, VarCallerFilter
 from BALSAMIC.utils.cli import check_executable, generate_h5
 from BALSAMIC.utils.exc import BalsamicError
 from BALSAMIC.utils.io import read_yaml, write_finish_file, write_json

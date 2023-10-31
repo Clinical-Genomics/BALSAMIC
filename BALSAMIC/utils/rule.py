@@ -14,7 +14,7 @@ from BALSAMIC.constants.analysis import (
     SequencingType,
     WorkflowSolution,
 )
-from BALSAMIC.models.analysis import ConfigModel
+from BALSAMIC.models.config import ConfigModel
 from BALSAMIC.utils.cli import find_file_index, get_file_extension
 from BALSAMIC.utils.exc import WorkflowRunError
 

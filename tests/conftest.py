@@ -31,7 +31,6 @@ from BALSAMIC.constants.cluster import (
 from BALSAMIC.constants.constants import FileType
 from BALSAMIC.constants.paths import CONSTANTS_DIR, FASTQ_TEST_INFO, TEST_DATA_DIR
 from BALSAMIC.constants.workflow_params import VCF_DICT
-from BALSAMIC.models.analysis import ConfigModel
 from BALSAMIC.models.cache import (
     AnalysisReferencesHg,
     CacheAnalysis,
@@ -39,6 +38,7 @@ from BALSAMIC.models.cache import (
     References,
     ReferencesHg,
 )
+from BALSAMIC.models.config import ConfigModel
 from BALSAMIC.models.snakemake import SingularityBindPath, SnakemakeExecutable
 from BALSAMIC.utils.io import read_json, read_yaml, write_json
 from .helpers import ConfigHelper, Map

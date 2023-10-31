@@ -11,7 +11,8 @@ from typing import Dict, List
 from BALSAMIC.constants.analysis import FastqName, Gender, PONWorkflow, SampleType, SequencingType
 from BALSAMIC.constants.paths import BALSAMIC_DIR
 from BALSAMIC.constants.workflow_params import WORKFLOW_PARAMS
-from BALSAMIC.models.analysis import BalsamicWorkflowConfig, ConfigModel
+from BALSAMIC.models.config import ConfigModel
+from BALSAMIC.models.params import BalsamicWorkflowConfig
 from BALSAMIC.utils.exc import BalsamicError
 from BALSAMIC.utils.io import write_finish_file
 from BALSAMIC.utils.rule import get_fastp_parameters, get_result_dir, get_threads

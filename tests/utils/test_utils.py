@@ -16,7 +16,7 @@ from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV, SampleType, Sequencing
 from BALSAMIC.constants.cache import CacheVersion
 from BALSAMIC.constants.cluster import ClusterConfigType
 from BALSAMIC.constants.paths import CONTAINERS_DIR
-from BALSAMIC.models.analysis import ConfigModel, FastqInfoModel
+from BALSAMIC.models.config import ConfigModel, FastqInfoModel
 from BALSAMIC.utils.cli import (
     CaptureStdout,
     check_executable,
