@@ -1,4 +1,6 @@
 """Tests for Balsamic analysis params models."""
+from math import isclose
+
 import pytest
 from pydantic import ValidationError
 
@@ -31,8 +33,8 @@ def test_params_vardict():
     test_vardict_built = ParamsVardict(**test_vardict_params)
 
     # THEN assert values
-    assert test_vardict_built.allelic_frequency == 0.01
-    assert test_vardict_built.max_pval == 0.5
+    assert isclose(test_vardict_built.allelic_frequency, 0.01)
+    assert isclose(test_vardict_built.max_pval, 0.5)
     assert test_vardict_built.max_mm == 2
     assert test_vardict_built.column_info == "-a 1 -b 2 -c 3"
 
@@ -76,7 +78,7 @@ def test_vcfattributes():
     dummy_attribute_built = VCFAttributes(**dummy_attribute)
 
     # THEN assert values can be reterived currently
-    assert dummy_attribute_built.tag_value == 5.0
+    assert isclose(dummy_attribute_built.tag_value, 5.0)
     assert dummy_attribute_built.field == "INFO"
     assert dummy_attribute_built.filter_name == "dummy_filter_name"
 
@@ -103,8 +105,8 @@ def test_varcallerfilter():
     dummy_varcaller_filter = VarCallerFilter(**dummy_varcaller)
 
     # THEN assert required values are set
-    assert dummy_varcaller_filter.AD.tag_value == 5.0
-    assert dummy_varcaller_filter.DP.tag_value == 100.0
+    assert isclose(dummy_varcaller_filter.AD.tag_value, 5.0)
+    assert isclose(dummy_varcaller_filter.DP.tag_value, 100.0)
     assert dummy_varcaller_filter.analysis_type == "dummy_tumor_only"
 
 
@@ -134,7 +136,7 @@ def test_umiparams_common():
     test_commonparams_built = UMIParamsCommon(**test_commonparams)
     # THEN assert values
     assert test_commonparams_built.align_header == "test_header_name"
-    assert test_commonparams_built.filter_tumor_af == 0.01
+    assert isclose(test_commonparams_built.filter_tumor_af, 0.01)
     assert test_commonparams_built.align_intbases == 100
 
 
@@ -188,7 +190,7 @@ def test_umiparams_tnscope():
 
     # THEN assert values
     assert test_tnscope_params_built.algo == "algoname"
-    assert test_tnscope_params_built.init_tumorLOD == 0.5
+    assert isclose(test_tnscope_params_built.init_tumorLOD, 0.5)
     assert test_tnscope_params_built.min_tumorLOD == 6
     assert test_tnscope_params_built.error_rate == 5
     assert test_tnscope_params_built.prunefactor == 3
