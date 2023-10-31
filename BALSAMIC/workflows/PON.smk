@@ -117,4 +117,3 @@ rule all:
         pon_finish_file = pon_finish
     run:
         write_finish_file(file_path=output.pon_finish_file)
-

@@ -31,6 +31,7 @@ from BALSAMIC.utils.rule import (
     get_clinical_snv_observations,
     get_clinical_sv_observations,
     get_fastp_parameters,
+    get_pon_cnn,
     get_result_dir,
     get_rule_output,
     get_script_path,
@@ -92,6 +93,9 @@ swegen_snv = ""
 clinical_sv = ""
 somatic_sv = ""
 swegen_sv = ""
+
+if config["analysis"]["sequencing_type"] != "wgs":
+    pon_cnn: str = get_pon_cnn(config)
 
 # Run information
 singularity_image: str = config_model.singularity['image']
@@ -464,6 +468,8 @@ if config["analysis"]["sequencing_type"] != "wgs":
             analysis_specific_results.extend(
                 expand(umi_qc_dir + "{case_name}.{var_caller}.AFtable.txt", case_name=case_id, var_caller=["tnscope_umi"])
         )
+
+
 
 if config["analysis"]["sequencing_type"] == "wgs" and config['analysis']['analysis_type'] == "paired":
     analysis_specific_results.extend(

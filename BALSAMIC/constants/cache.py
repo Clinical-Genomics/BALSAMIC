@@ -45,7 +45,7 @@ class DockerContainers(StrEnum):
     ANNOTATE: str = "annotate"
     ASCAT: str = "ascatNgs"
     CADD: str = "cadd"
-    CNVKIT: str = "varcall_cnvkit"
+    CNVKIT: str = "cnvkit"
     CNVPYTOR: str = "cnvpytor"
     COVERAGE_QC: str = "coverage_qc"
     DELLY: str = "delly"
@@ -228,6 +228,13 @@ REFERENCE_FILES: Dict[GenomeVersion, Dict[str, dict]] = {
             "file_name": "hg19.cadd_snv.tsv.gz",
             "dir_name": "variants",
         },
+        "simple_repeat": {
+            "url": "https://hgdownload.soe.ucsc.edu/goldenPath/hg19/database/simpleRepeat.txt.gz",
+            "file_type": FileType.TSV,
+            "gzip": False,
+            "file_name": "hg19.simple_repeat.txt.gz",
+            "dir_name": "variants",
+        },
     },
     GenomeVersion.HG38: {
         "reference_genome": {
@@ -396,6 +403,13 @@ REFERENCE_FILES: Dict[GenomeVersion, Dict[str, dict]] = {
             "file_type": FileType.TSV,
             "gzip": False,
             "file_name": "hg38.cadd_snv.tsv.gz",
+            "dir_name": "variants",
+        },
+        "simple_repeat": {
+            "url": "https://hgdownload.soe.ucsc.edu/goldenPath/hg38/database/simpleRepeat.txt.gz",
+            "file_type": FileType.TSV,
+            "gzip": False,
+            "file_name": "hg38.simple_repeat.txt.gz",
             "dir_name": "variants",
         },
     },
