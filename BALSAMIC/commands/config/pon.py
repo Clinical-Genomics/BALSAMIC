@@ -1,27 +1,27 @@
 """Balsamic panel of normals config case CLI."""
-import json
 import logging
-import os
+from datetime import datetime
 from pathlib import Path
 from typing import Dict
 
 import click
 
+from BALSAMIC import __version__ as balsamic_version
 from BALSAMIC.commands.options import (
-    OPTION_GENOME_VERSION,
-    OPTION_GENOME_INTERVAL,
     OPTION_ADAPTER_TRIM,
     OPTION_ANALYSIS_DIR,
     OPTION_BALSAMIC_CACHE,
+    OPTION_CACHE_VERSION,
     OPTION_CASE_ID,
     OPTION_FASTQ_PATH,
+    OPTION_GENOME_INTERVAL,
+    OPTION_GENOME_VERSION,
     OPTION_PANEL_BED,
-    OPTION_PON_WORKFLOW,
     OPTION_PON_VERSION,
+    OPTION_PON_WORKFLOW,
     OPTION_QUALITY_TRIM,
     OPTION_UMI,
     OPTION_UMI_TRIM_LENGTH,
-    OPTION_CACHE_VERSION,
 )
 from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV, PONWorkflow
 from BALSAMIC.constants.cache import GenomeVersion
@@ -30,11 +30,11 @@ from BALSAMIC.constants.paths import CONTAINERS_DIR
 from BALSAMIC.models.analysis import ConfigModel
 from BALSAMIC.utils.cli import (
     generate_graph,
+    get_analysis_fastq_files_directory,
     get_bioinfo_tools_version,
     get_pon_sample_list,
-    get_analysis_fastq_files_directory,
 )
-from BALSAMIC.utils.io import write_json, read_json
+from BALSAMIC.utils.io import read_json, write_json
 from BALSAMIC.utils.utils import get_absolute_paths_dict
 
 LOG = logging.getLogger(__name__)
@@ -94,6 +94,16 @@ def pon_config(
     fastq_path: str = get_analysis_fastq_files_directory(
         case_dir=Path(analysis_dir, case_id).as_posix(), fastq_path=fastq_path
     )
+    result_dir: Path = Path(analysis_dir, case_id, "analysis")
+    log_dir: Path = Path(analysis_dir, case_id, "logs")
+    script_dir: Path = Path(analysis_dir, case_id, "scripts")
+    benchmark_dir: Path = Path(analysis_dir, case_id, "benchmarks")
+    dag_path: Path = Path(
+        analysis_dir, case_id, f"{case_id}_BALSAMIC_{balsamic_version}_graph.pdf"
+    )
+    for directory in [result_dir, log_dir, script_dir, benchmark_dir]:
+        directory.mkdir(exist_ok=True)
+
     config_collection_dict = ConfigModel(
         QC={
             "adapter_trim": adapter_trim,
@@ -105,11 +115,17 @@ def pon_config(
             "case_id": case_id,
             "analysis_dir": analysis_dir,
             "fastq_path": fastq_path,
+            "log": log_dir.as_posix(),
+            "script": script_dir.as_posix(),
+            "result": result_dir.as_posix(),
+            "benchmark": benchmark_dir.as_posix(),
+            "dag": dag_path.as_posix(),
             "analysis_type": "pon",
             "pon_workflow": pon_workflow,
             "pon_version": version,
             "analysis_workflow": "balsamic",
             "sequencing_type": "targeted" if panel_bed else "wgs",
+            "config_creation_date": datetime.now().strftime("%Y-%m-%d %H:%M"),
         },
         samples=get_pon_sample_list(fastq_path),
         reference=references,
@@ -122,19 +138,8 @@ def pon_config(
             container_conda_env_path=CONTAINERS_DIR,
         ),
         panel={"capture_kit": panel_bed} if panel_bed else None,
-    ).dict(by_alias=True, exclude_none=True)
+    ).model_dump(by_alias=True, exclude_none=True)
     LOG.info("PON config model instantiated successfully")
-
-    result_path: Path = Path(config_collection_dict["analysis"]["result"])
-    log_path: Path = Path(config_collection_dict["analysis"]["log"])
-    script_path: Path = Path(config_collection_dict["analysis"]["script"])
-    benchmark_path: Path = Path(config_collection_dict["analysis"]["benchmark"])
-
-    # Create directories for results, logs, scripts and benchmark files
-    analysis_directories_list = [result_path, log_path, script_path, benchmark_path]
-
-    for analysis_sub_dir in analysis_directories_list:
-        analysis_sub_dir.mkdir(exist_ok=True)
 
     config_path = Path(analysis_dir, case_id, case_id + "_PON.json").as_posix()
     write_json(json_obj=config_collection_dict, path=config_path)
