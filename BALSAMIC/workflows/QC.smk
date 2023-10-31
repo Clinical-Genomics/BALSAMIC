@@ -1,33 +1,33 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
-import os
 import logging
+import os
 import tempfile
-
 from pathlib import Path
-from typing import List, Dict
+from typing import Dict, List
+
+from BALSAMIC.constants.analysis import AnalysisType, FastqName, SampleType
+from BALSAMIC.constants.paths import BALSAMIC_DIR
+from BALSAMIC.constants.rules import SNAKEMAKE_RULES
+from BALSAMIC.constants.workflow_params import WORKFLOW_PARAMS
+from BALSAMIC.models.analysis import BalsamicWorkflowConfig, ConfigModel
+from BALSAMIC.utils.cli import check_executable, generate_h5
+from BALSAMIC.utils.exc import BalsamicError
+from BALSAMIC.utils.io import write_finish_file, write_json
+from BALSAMIC.utils.rule import (
+    get_capture_kit,
+    get_fastp_parameters,
+    get_result_dir,
+    get_rule_output,
+    get_script_path,
+    get_sequencing_type,
+    get_threads,
+)
+from snakemake.exceptions import RuleException, WorkflowError
 from yapf.yapflib.yapf_api import FormatFile
 
-from snakemake.exceptions import RuleException, WorkflowError
-
-from BALSAMIC.constants.rules import SNAKEMAKE_RULES
-from BALSAMIC.constants.paths import BALSAMIC_DIR
-from BALSAMIC.constants.analysis import FastqName, SampleType, AnalysisType
-from BALSAMIC.utils.exc import BalsamicError
-
-from BALSAMIC.utils.cli import check_executable, generate_h5
-from BALSAMIC.utils.io import write_json, write_finish_file
-
-from BALSAMIC.models.analysis import BalsamicWorkflowConfig, ConfigModel
-
-from BALSAMIC.utils.rule import (get_fastp_parameters, get_rule_output, get_result_dir,
-                                 get_script_path, get_threads,
-                                 get_sequencing_type, get_capture_kit)
-
-from BALSAMIC.constants.workflow_params import WORKFLOW_PARAMS
-
 # Initialize ConfigModel
-config_model = ConfigModel.parse_obj(config)
+config_model = ConfigModel.model_validate(config)
 
 shell.executable("/bin/bash")
 shell.prefix("set -eo pipefail; ")
@@ -65,7 +65,7 @@ if config_model.analysis.analysis_type == AnalysisType.PAIRED:
     normal_sample: str = config_model.get_sample_name_by_type(SampleType.NORMAL)
 
 # parse parameters as constants to workflows
-params = BalsamicWorkflowConfig.parse_obj(WORKFLOW_PARAMS)
+params = BalsamicWorkflowConfig.model_validate(WORKFLOW_PARAMS)
 
 # Fastp parameters
 fastp_parameters: Dict = get_fastp_parameters(config_model)
