@@ -32,7 +32,7 @@ def get_vcf(config, var_caller, sample):
     for v in var_caller:
         for s in sample:
             vcf.append(
-                config["vcf"][v]["type"]
+                config["vcf"][v]["mutation_type"]
                 + "."
                 + config["vcf"][v]["mutation"]
                 + "."
@@ -86,7 +86,7 @@ def get_variant_callers(
 
     for variant_caller_name, variant_caller_params in config["vcf"].items():
         if (
-            mutation_type in variant_caller_params.get("type")
+            mutation_type in variant_caller_params.get("mutation_type")
             and mutation_class in variant_caller_params.get("mutation")
             and analysis_type in variant_caller_params.get("analysis_type")
             and workflow_solution in variant_caller_params.get("workflow_solution")
