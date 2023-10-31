@@ -242,7 +242,7 @@ rule cnvkit_call_CNV_research:
         cnr = cnv_dir + "tumor.merged.cnr",
         snv_merged = vcf_dir + "SNV.germline.merged.dnascope.vcf.gz",
         bamT = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
-        bamN = config_model.get_final_bam_name(bam_dir = bam_dir,sample_name=normal_sample),
+        bamN = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = normal_sample),
     output:
         cns = cnv_dir + "tumor.merged.cns",
         gene_breaks = cnv_dir + config["analysis"]["case_id"] + ".gene_breaks",
@@ -328,6 +328,8 @@ rule bcftools_sort_cnvkitCNV_research:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         cnv_dir = cnv_dir,
         case_name = config["analysis"]["case_id"],
+        tumor = tumor_sample,
+        normal = normal_sample,
     message:
         "Sorting CNVs using bcftools for {params.case_name}"
     shell:
@@ -343,7 +345,7 @@ bcftools sort \
 
 tabix -p vcf -f {output.vcf};
 
-echo -e \"TUMOR\\tTUMOR\" > {output.namemap};
+echo -e \"{params.tumor}\\tTUMOR\\n{params.normal}\\tNORMAL\" > {output.namemap};
 
 rm -rf {params.tmpdir};
       """

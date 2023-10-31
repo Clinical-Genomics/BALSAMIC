@@ -262,6 +262,7 @@ rule bcftools_sort_cnvkitCNV_research:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         cnv_dir = cnv_dir,
         case_name = config["analysis"]["case_id"],
+        tumor = tumor_sample,
     message:
         ("Sorting CNVs using bcftools for {params.case_name}")
     shell:
@@ -277,7 +278,7 @@ bcftools sort \
 
 tabix -p vcf -f {output.vcf};
 
-echo -e \"TUMOR\\tTUMOR\" > {output.namemap};
+echo -e \"{params.tumor}\\tTUMOR\" > {output.namemap}; 
 
 rm -rf {params.tmpdir};
       """
