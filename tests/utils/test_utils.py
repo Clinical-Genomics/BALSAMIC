@@ -4,7 +4,7 @@ import logging
 import subprocess
 import sys
 from pathlib import Path
-from typing import List, Dict
+from typing import Dict, List
 from unittest import mock
 
 import click
@@ -16,51 +16,51 @@ from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV, SampleType, Sequencing
 from BALSAMIC.constants.cache import CacheVersion
 from BALSAMIC.constants.cluster import ClusterConfigType
 from BALSAMIC.constants.paths import CONTAINERS_DIR
-from BALSAMIC.models.analysis import FastqInfoModel, ConfigModel
+from BALSAMIC.models.analysis import ConfigModel, FastqInfoModel
 from BALSAMIC.utils.cli import (
     CaptureStdout,
-    get_snakefile,
-    createDir,
-    get_file_status_string,
-    find_file_index,
-    get_panel_chrom,
-    get_file_extension,
-    get_bioinfo_tools_version,
-    convert_deliverables_tags,
     check_executable,
-    job_id_dump_to_yaml,
+    convert_deliverables_tags,
+    createDir,
+    find_file_index,
     generate_h5,
-    get_pon_sample_list,
-    get_sample_list,
-    get_fastq_info,
-    get_config_path,
-    get_resolved_fastq_files_directory,
     get_analysis_fastq_files_directory,
+    get_bioinfo_tools_version,
+    get_config_path,
+    get_fastq_info,
+    get_file_extension,
+    get_file_status_string,
+    get_panel_chrom,
+    get_pon_sample_list,
+    get_resolved_fastq_files_directory,
+    get_sample_list,
+    get_snakefile,
+    job_id_dump_to_yaml,
     validate_cache_version,
 )
 from BALSAMIC.utils.exc import BalsamicError, WorkflowRunError
 from BALSAMIC.utils.io import (
     read_json,
-    write_json,
+    read_vcf_file,
     read_yaml,
     write_finish_file,
-    read_vcf_file,
+    write_json,
 )
 from BALSAMIC.utils.rule import (
-    get_vcf,
-    get_variant_callers,
-    get_script_path,
-    get_result_dir,
-    get_threads,
     get_delivery_id,
+    get_fastp_parameters,
+    get_result_dir,
     get_rule_output,
     get_sample_type_from_sample_name,
-    get_fastp_parameters,
+    get_script_path,
+    get_threads,
+    get_variant_callers,
+    get_vcf,
 )
 from BALSAMIC.utils.utils import (
-    remove_unnecessary_spaces,
-    get_relative_paths_dict,
     get_absolute_paths_dict,
+    get_relative_paths_dict,
+    remove_unnecessary_spaces,
 )
 
 
@@ -891,8 +891,12 @@ def test_get_fastq_info(tumor_sample_name: str, fastq_dir_tumor_only: str):
 
     # THEN check that the fastq_dict matches the expected fastq_dict
     expected_fastq_dict = {
-        "1_171015_HJ7TLDSX5_ACC1_XXXXXX": fastq_info1_expected.dict(exclude_none=True),
-        "2_171015_HJ7TLDSX5_ACC1_XXXXXX": fastq_info2_expected.dict(exclude_none=True),
+        "1_171015_HJ7TLDSX5_ACC1_XXXXXX": fastq_info1_expected.model_dump(
+            exclude_none=True
+        ),
+        "2_171015_HJ7TLDSX5_ACC1_XXXXXX": fastq_info2_expected.model_dump(
+            exclude_none=True
+        ),
     }
     assert fastq_dict == expected_fastq_dict
 

@@ -1,27 +1,28 @@
 """Test module for Balsamic common models."""
 import copy
 import os
+from datetime import datetime
 from pathlib import Path
-from typing import List, Dict
+from typing import Dict, List
 
 import pytest
-from pydantic.v1 import ValidationError
+from pydantic import ValidationError
 
 from BALSAMIC.constants.analysis import FastqName, SampleType, SequencingType
 from BALSAMIC.models.analysis import (
-    VCFAttributes,
-    VarCallerFilter,
-    QCModel,
-    VarcallerAttribute,
     AnalysisModel,
-    SampleInstanceModel,
-    UMIParamsCommon,
-    UMIParamsUMIextract,
-    UMIParamsConsensuscall,
-    UMIParamsTNscope,
+    ConfigModel,
     ParamsVardict,
     ParamsVEP,
-    ConfigModel,
+    QCModel,
+    SampleInstanceModel,
+    UMIParamsCommon,
+    UMIParamsConsensuscall,
+    UMIParamsTNscope,
+    UMIParamsUMIextract,
+    VarcallerAttribute,
+    VarCallerFilter,
+    VCFAttributes,
 )
 
 
@@ -80,24 +81,23 @@ def test_qc_model():
         "umi_trim_length": 5,
         "n_base_limit": 50,
     }
-    assert QCModel.parse_obj(valid_args)
+    assert QCModel.model_validate(valid_args)
 
 
 def test_varcaller_attribute():
     # GIVEN valid input arguments
-    valid_args = {"mutation": "somatic", "type": "SNV"}
+    valid_args = {"mutation": "somatic", "mutation_type": "SNV"}
     # THEN we can successully create a config dict
-    assert VarcallerAttribute.parse_obj(valid_args)
+    assert VarcallerAttribute.model_validate(valid_args)
     # GIVEN invalid input arguments
-    invalid_args = {"mutation": "strange", "type": "unacceptable"}
+    invalid_args = {"mutation": "strange", "mutation_type": "unacceptable"}
     # THEN should trigger ValueError
     with pytest.raises(ValidationError) as excinfo:
-        VarcallerAttribute.parse_obj(invalid_args)
-    assert "strange is not a valid mutation type" in str(excinfo.value)
-    assert "unacceptable is not not a valid mutation class" in str(excinfo.value)
+        VarcallerAttribute.model_validate(invalid_args)
+    assert "2 validation errors" in str(excinfo.value)
 
 
-def test_analysis_model(test_data_dir: str):
+def test_analysis_model(test_data_dir: Path, timestamp_now: datetime):
     """Test analysis model instantiation."""
 
     # GIVEN valid input arguments
@@ -106,13 +106,19 @@ def test_analysis_model(test_data_dir: str):
         "gender": "female",
         "analysis_type": "paired",
         "sequencing_type": "targeted",
-        "analysis_dir": test_data_dir,
-        "fastq_path": test_data_dir,
+        "analysis_dir": test_data_dir.as_posix(),
+        "fastq_path": test_data_dir.as_posix(),
+        "log": test_data_dir.as_posix(),
+        "result": test_data_dir.as_posix(),
+        "script": test_data_dir.as_posix(),
+        "benchmark": test_data_dir.as_posix(),
+        "dag": test_data_dir.as_posix(),
+        "config_creation_date": str(timestamp_now),
         "analysis_workflow": "balsamic-umi",
     }
 
     # THEN we can successfully create a config dict
-    assert AnalysisModel.parse_obj(valid_args)
+    assert AnalysisModel.model_validate(valid_args)
 
     # GIVEN invalid input arguments
     invalid_args = {
@@ -125,9 +131,8 @@ def test_analysis_model(test_data_dir: str):
     }
 
     # THEN should trigger ValueError
-    with pytest.raises(ValueError) as excinfo:
-        AnalysisModel.parse_obj(invalid_args)
-    assert "not supported" in str(excinfo.value)
+    with pytest.raises(ValueError):
+        AnalysisModel.model_validate(invalid_args)
 
 
 def test_sample_instance_model(config_dict_w_fastqs: Dict):
@@ -138,7 +143,7 @@ def test_sample_instance_model(config_dict_w_fastqs: Dict):
 
     # WHEN parsing the sample dictionary
     for idx, sample in enumerate(sample_list):
-        sample: SampleInstanceModel = SampleInstanceModel.parse_obj(sample)
+        sample: SampleInstanceModel = SampleInstanceModel.model_validate(sample)
 
         sample_dict_copy = sample_list[idx].copy()
         for fastq_pattern, values in sample_dict_copy["fastq_info"].items():
@@ -146,7 +151,7 @@ def test_sample_instance_model(config_dict_w_fastqs: Dict):
             values["rev"] = Path(values["rev"]).resolve().as_posix()
 
         # THEN the sample model should be correctly initialised
-        assert sample.dict(exclude_none=True) == sample_dict_copy
+        assert sample.model_dump(exclude_none=True) == sample_dict_copy
 
 
 def test_sample_instance_model_sample_type_error(tumor_normal_fastq_info_correct: Dict):
@@ -161,7 +166,7 @@ def test_sample_instance_model_sample_type_error(tumor_normal_fastq_info_correct
     # WHEN parsing the sample dictionary
     # THEN a ValueError should be triggered
     with pytest.raises(ValueError) as exc:
-        SampleInstanceModel.parse_obj(tumor_dict)
+        SampleInstanceModel.model_validate(tumor_dict)
         assert (
             f"The provided sample type ({illegal_sample_type}) is not supported in BALSAMIC"
             in exc.value
@@ -277,7 +282,7 @@ def test_params_vep():
     assert test_vep_built.vep_filters == "all defaults params"
 
 
-def test_analysis_model_for_pon(test_data_dir: str):
+def test_analysis_model_for_pon(test_data_dir: Path, timestamp_now: datetime):
     """Tests PON model parsing."""
 
     # GIVEN valid input arguments
@@ -285,14 +290,20 @@ def test_analysis_model_for_pon(test_data_dir: str):
         "case_id": "case_id",
         "analysis_type": "pon",
         "sequencing_type": "targeted",
-        "analysis_dir": test_data_dir,
-        "fastq_path": test_data_dir,
+        "analysis_dir": test_data_dir.as_posix(),
+        "fastq_path": test_data_dir.as_posix(),
+        "log": test_data_dir.as_posix(),
+        "result": test_data_dir.as_posix(),
+        "script": test_data_dir.as_posix(),
+        "benchmark": test_data_dir.as_posix(),
+        "dag": test_data_dir.as_posix(),
         "analysis_workflow": "balsamic",
+        "config_creation_date": str(timestamp_now),
         "pon_version": "v1",
     }
 
     # THEN we can successfully create a config dict
-    assert AnalysisModel.parse_obj(valid_args)
+    assert AnalysisModel.model_validate(valid_args)
 
     # GIVEN an invalid version argument
     invalid_args = {
@@ -307,10 +318,10 @@ def test_analysis_model_for_pon(test_data_dir: str):
 
     # THEN should trigger ValueError
     with pytest.raises(ValidationError) as excinfo:
-        AnalysisModel.parse_obj(invalid_args)
+        AnalysisModel.model_validate(invalid_args)
 
     assert (
-        f"The provided version ({invalid_args['pon_version']}) does not follow the defined syntax (v<int>)"
+        f"The provided PON version ({invalid_args['pon_version']}) does not follow the defined syntax (v<int>)"
         in str(excinfo.value)
     )
 
@@ -322,7 +333,7 @@ def test_detect_duplicate_fastq_pattern(
     config_dict = config_w_fastq_dir_for_duplicate_fastq_patterns_model
     # Initialize balsamic model
     with pytest.raises(ValueError) as exc:
-        ConfigModel.parse_obj(config_dict)
+        ConfigModel.model_validate(config_dict)
 
     assert (
         "Duplicate FastqPattern(s) found: ACC1_S1_L001_R across multiple samples"
@@ -334,7 +345,7 @@ def test_detection_unassigned_fastq_file(config_tumor_normal_extrafile: Dict):
     """Test instantiating balsamic model with fastq dir containing unassigned fastq-files."""
     # Initialize balsamic model
     with pytest.raises(ValueError) as exc:
-        ConfigModel.parse_obj(config_tumor_normal_extrafile)
+        ConfigModel.model_validate(config_tumor_normal_extrafile)
 
     assert "Fastqs in fastq-dir not assigned to sample config:" in str(exc.value)
 
