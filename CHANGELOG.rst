@@ -29,6 +29,8 @@ Added:
 * CNVs from PureCN to TGA workflow https://Clinical-Genomics/BALSAMIC/pull/1278
 * CNVkit Panel of Normal for gmsmyeloid_5.3 to TGA workflow https://Clinical-Genomics/BALSAMIC/pull/1278
 * Command-line arguments and rules for creation of GENS files https://github.com/Clinical-Genomics/BALSAMIC/pull/1279
+* Sleep rule before start to fix key_error https://github.com/Clinical-Genomics/BALSAMIC/pull/1310
+
 
 
 Changed:
