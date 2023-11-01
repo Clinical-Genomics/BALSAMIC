@@ -97,7 +97,7 @@ requirements: List[str] = [
     "six==1.16.0",
     "smart-open==6.3.0",
     "smmap==5.0.0",
-    "snakemake==7.32.0",
+    "snakemake==7.32.4",
     "stopit==1.1.2",
     "tabulate==0.9.0",
     "throttler==1.2.2",
