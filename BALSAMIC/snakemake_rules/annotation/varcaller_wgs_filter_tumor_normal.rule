@@ -38,6 +38,7 @@ bcftools +counts {output.vcf_pass_tnscope} > {output.bcftools_counts_research};
 rule bcftools_filter_tnscope_clinical_tumor_normal:
   input:
     vcf_snv_clinical = vep_dir + "{var_type}.somatic.{case_name}.tnscope.clinical.vcf.gz",
+    namemap = vep_dir + "status_to_sampleid_namemap"
   output:
     vcf_pass_tnscope = vep_dir + "{var_type}.somatic.{case_name}.tnscope.clinical.filtered.pass.vcf.gz",
     bcftools_counts_clinical = vep_dir + "{var_type}.somatic.{case_name}.tnscope.clinical.filtered.pass.stats"
@@ -50,7 +51,7 @@ rule bcftools_filter_tnscope_clinical_tumor_normal:
     swegen_freq = [SENTIEON_CALLER.swegen_snv_freq.tag_value, SENTIEON_CALLER.swegen_snv_freq.filter_name],
     loqusdb_clinical_freq = [SENTIEON_CALLER.loqusdb_clinical_snv_freq.tag_value, SENTIEON_CALLER.loqusdb_clinical_snv_freq.filter_name],
     housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "clinical"},
-    case_name = '{case_name}'
+    case_name = '{case_name}',
   threads:
     get_threads(cluster_config, 'bcftools_filter_tnscope_clinical_tumor_normal')
   message:
@@ -61,7 +62,8 @@ bcftools view  -f PASS,triallelic_site --threads {threads} {input.vcf_snv_clinic
 bcftools filter --threads {threads} --include 'INFO/GNOMADAF_popmax <= {params.pop_freq[0]} || INFO/GNOMADAF_popmax == \".\"' --soft-filter '{params.pop_freq[1]}' --mode '+' | \
 bcftools filter --threads {threads} --include 'INFO/SWEGENAF <= {params.swegen_freq[0]} || INFO/SWEGENAF == \".\"' --soft-filter '{params.swegen_freq[1]}' --mode '+' |\
 bcftools filter --threads {threads} --include 'INFO/Frq <= {params.loqusdb_clinical_freq[0]} || INFO/Frq == \".\"' --soft-filter '{params.loqusdb_clinical_freq[1]}' --mode '+' |\
-bcftools view --threads {threads} -i 'FILTER == "PASS" || FILTER == "triallelic_site"' -o {output.vcf_pass_tnscope} -O z;
+bcftools view --threads {threads} -i 'FILTER == "PASS" || FILTER == "triallelic_site"' |\
+bcftools reheader -s {input.namemap} -o {output.vcf_pass_tnscope} -O z;
 
 tabix -p vcf -f {output.vcf_pass_tnscope};
 

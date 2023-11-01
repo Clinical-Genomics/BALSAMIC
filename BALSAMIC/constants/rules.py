@@ -52,6 +52,7 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
             "snakemake_rules/annotation/germline_annotation.rule",
             "snakemake_rules/annotation/varcaller_sv_filter.rule",
             "snakemake_rules/annotation/vcf2cytosure_convert.rule",
+            "snakemake_rules/annotation/final_vcf_reheader.rule",
         ],
     },
     "single_targeted": {

@@ -36,6 +36,7 @@ bcftools +counts {output.vcf_pass_svdb} > {output.bcftools_counts};
 rule bcftools_filter_sv_clinical:
   input:
     vcf_sv_clinical = vep_dir + "SV.somatic.{case_name}.svdb.clinical.vcf.gz",
+    namemap = vep_dir + "status_to_sampleid_namemap"
   output:
     vcf_pass_svdb = vep_dir + "SV.somatic.{case_name}.svdb.clinical.filtered.pass.vcf.gz",
     bcftools_counts = vep_dir + "SV.somatic.{case_name}.svdb.clinical.filtered.pass.stats"
@@ -57,7 +58,8 @@ rule bcftools_filter_sv_clinical:
 bcftools view --threads {threads} -f .,PASS,MaxDepth {input.vcf_sv_clinical} |\
 bcftools filter --threads {threads} --include 'INFO/SWEGENAF <= {params.swegen_freq[0]} || INFO/SWEGENAF == \".\"' --soft-filter '{params.swegen_freq[1]}' --mode '+' |\
 bcftools filter --threads {threads} --include 'INFO/Frq <= {params.loqusdb_clinical_freq[0]} || INFO/Frq == \".\"' --soft-filter '{params.loqusdb_clinical_freq[1]}' --mode '+' |\
-bcftools view --threads {threads} -f .,PASS,MaxDepth  -O z -o {output.vcf_pass_svdb};
+bcftools view --threads {threads} -f .,PASS,MaxDepth \|
+bcftools reheader -s {input.namemap} -O z -o {output.vcf_pass_svdb};
 
 tabix -p vcf -f {output.vcf_pass_svdb};
 
