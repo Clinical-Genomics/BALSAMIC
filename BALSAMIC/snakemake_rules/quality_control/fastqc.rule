@@ -4,8 +4,7 @@
 rule fastqc:
     """Perform quality control checks on raw sequence data."""
     input:
-        fastq = input_fastq_dir + "{fastq_file_names}.fastq.gz",
-        wake_up = result_dir + "start_analysis"
+        fastq = input_fastq_dir + "{fastq_file_names}.fastq.gz"
     output:
         fastqc_zip = fastqc_dir + "{fastq_file_names}_fastqc.zip"
     benchmark:

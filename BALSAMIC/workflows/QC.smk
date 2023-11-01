@@ -24,7 +24,7 @@ from BALSAMIC.utils.rule import (get_fastp_parameters, get_rule_output, get_resu
                                  get_script_path, get_threads,
                                  get_sequencing_type, get_capture_kit)
 
-from BALSAMIC.constants.workflow_params import WORKFLOW_PARAMS, SLEEP_BEFORE_START
+from BALSAMIC.constants.workflow_params import WORKFLOW_PARAMS
 
 # Initialize ConfigModel
 config_model = ConfigModel.parse_obj(config)
@@ -55,9 +55,6 @@ fastqc_dir: str = Path(result_dir, "fastqc").as_posix() + "/"
 vcf_dir: str = Path(result_dir, "vcf").as_posix() + "/"
 qc_dir: str = Path(result_dir, "qc").as_posix() + "/"
 delivery_dir: str = Path(result_dir, "delivery").as_posix() + "/"
-
-# Pre run parameters
-seconds_before_start: int = SLEEP_BEFORE_START
 
 # Run information
 singularity_image: str = config_model.singularity['image']
@@ -114,7 +111,7 @@ sequence_type = config['analysis']["sequencing_type"]
 rules_to_include = []
 for workflow_type, value in SNAKEMAKE_RULES.items():
     if workflow_type in ["common", analysis_type + "_" + sequence_type]:
-        rules_to_include.extend(value.get("misc", []) + value.get("qc", []) + value.get("align", []))
+        rules_to_include.extend(value.get("qc", []) + value.get("align", []))
 rules_to_include = [rule for rule in rules_to_include if "umi" not in rule]
 if "snakemake_rules/quality_control/report.rule" in rules_to_include:
     rules_to_include = [rule for rule in rules_to_include if "quality_control/report.rule" not in rule]

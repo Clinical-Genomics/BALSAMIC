@@ -15,7 +15,7 @@ from BALSAMIC.constants.paths import BALSAMIC_DIR
 from BALSAMIC.constants.analysis import FastqName, SampleType, SequencingType, PONWorkflow, Gender
 from BALSAMIC.utils.io import write_finish_file
 from BALSAMIC.utils.rule import get_fastp_parameters, get_threads, get_result_dir
-from BALSAMIC.constants.workflow_params import WORKFLOW_PARAMS, SLEEP_BEFORE_START
+from BALSAMIC.constants.workflow_params import WORKFLOW_PARAMS
 from BALSAMIC.models.analysis import BalsamicWorkflowConfig, ConfigModel
 
 
@@ -53,9 +53,6 @@ qc_dir: str = Path(result_dir, "qc", "").as_posix() + "/"
 # PON setting
 pon_workflow: PONWorkflow = config_model.analysis.pon_workflow
 
-# Pre run parameters
-seconds_before_start: int = SLEEP_BEFORE_START
-
 # Run information
 version: str = config_model.analysis.pon_version
 singularity_image: str = config_model.singularity['image']
@@ -86,7 +83,6 @@ if not Path(config["SENTIEON_EXEC"]).exists():
 
 sequence_type = config['analysis']["sequencing_type"]
 rules_to_include = []
-rules_to_include.append("snakemake_rules/misc/sleep.rule")
 if sequence_type == SequencingType.TARGETED:
     rules_to_include.append("snakemake_rules/quality_control/fastp_tga.rule")
 else:
