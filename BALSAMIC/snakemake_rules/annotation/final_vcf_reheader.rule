@@ -2,6 +2,8 @@
 # coding: utf-8
 
 rule create_final_vcf_namemap:
+    input:
+        wake_up = result_dir + "start_analysis"
     output:
         namemap = vep_dir + "status_to_sampleid_namemap"
     params:
