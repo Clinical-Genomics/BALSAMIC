@@ -8,7 +8,9 @@ rule create_final_vcf_namemap:
         status_to_sampleid = status_to_sampleid
     message:
         "Creating final vcf namemap."
+    threads:
+        get_threads(cluster_config, "create_final_vcf_namemap")
     shell:
-    """
+        """
 echo -e {params.status_to_sampleid} > {output.namemap};
-    """
+        """
