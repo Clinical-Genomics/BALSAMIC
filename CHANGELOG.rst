@@ -60,6 +60,7 @@ Changed:
 * Made BALSAMIC compatible with multiple PON creation workflows https://github.com/Clinical-Genomics/BALSAMIC/pull/1279
 * Use StrEnum from python enum https://github.com/Clinical-Genomics/BALSAMIC/pull/1303
 * Renamed name in sample column of final clincial vcfs https://github.com/Clinical-Genomics/BALSAMIC/pull/1310
+* Renamed final cram bamfile to format [tumor/normal].LIMSID.cram https://github.com/Clinical-Genomics/BALSAMIC/pull/1307
 
 Fixed:
 ^^^^^^
