@@ -34,7 +34,7 @@ from BALSAMIC.utils.rule import (get_fastp_parameters, get_variant_callers, get_
 from BALSAMIC.constants.analysis import MutationType, FastqName, SampleType
 from BALSAMIC.constants.variant_filters import (COMMON_SETTINGS, VARDICT_SETTINGS, SENTIEON_VARCALL_SETTINGS,
                                                 SVDB_FILTER_SETTINGS)
-from BALSAMIC.constants.workflow_params import (WORKFLOW_PARAMS, VARCALL_PARAMS)
+from BALSAMIC.constants.workflow_params import (WORKFLOW_PARAMS, VARCALL_PARAMS, SLEEP_BEFORE_START)
 from BALSAMIC.constants.rules import SNAKEMAKE_RULES
 
 # Initialize ConfigModel
@@ -85,6 +85,9 @@ swegen_sv = ""
 
 if config["analysis"]["sequencing_type"] != "wgs":
     pon_cnn: str = get_pon_cnn(config)
+
+# Pre run parameters
+seconds_before_start: int = SLEEP_BEFORE_START
 
 # Run information
 singularity_image: str = config_model.singularity['image']
