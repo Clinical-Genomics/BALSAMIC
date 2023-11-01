@@ -29,6 +29,7 @@ Added:
 * CNVs from PureCN to TGA workflow https://Clinical-Genomics/BALSAMIC/pull/1278
 * CNVkit Panel of Normal for gmsmyeloid_5.3 to TGA workflow https://Clinical-Genomics/BALSAMIC/pull/1278
 * Command-line arguments and rules for creation of GENS files https://github.com/Clinical-Genomics/BALSAMIC/pull/1279
+* Sleep rule before start to fix key_error https://github.com/Clinical-Genomics/BALSAMIC/pull/1310
 
 
 Changed:
@@ -60,7 +61,7 @@ Changed:
 * Migrate Cache models to pydantic v2 https://github.com/Clinical-Genomics/BALSAMIC/pull/1274
 * Made BALSAMIC compatible with multiple PON creation workflows https://github.com/Clinical-Genomics/BALSAMIC/pull/1279
 * Use StrEnum from python enum https://github.com/Clinical-Genomics/BALSAMIC/pull/1303
-
+* Renamed name in sample column of final clincial vcfs https://github.com/Clinical-Genomics/BALSAMIC/pull/1310
 
 Fixed:
 ^^^^^^
