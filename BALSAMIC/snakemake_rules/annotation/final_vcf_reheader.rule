@@ -2,8 +2,6 @@
 # coding: utf-8
 
 rule create_final_vcf_namemap:
-    input:
-        qc_dir + "multiqc_data/multiqc_data.json"
     output:
         namemap = vep_dir + "status_to_sampleid_namemap"
     params:
