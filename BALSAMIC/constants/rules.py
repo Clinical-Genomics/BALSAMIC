@@ -72,7 +72,7 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
         "varcall": [
             "snakemake_rules/variant_calling/germline.rule",
             "snakemake_rules/variant_calling/split_bed.rule",
-            "snakemake_rules/variant_calling/cnvkit_single.rule",
+            "snakemake_rules/variant_calling/somatic_cnv_tumor_only_tga.rule",
             "snakemake_rules/variant_calling/somatic_tumor_only.rule",
             "snakemake_rules/variant_calling/somatic_sv_tumor_only.rule",
             "snakemake_rules/umi/sentieon_varcall_tnscope.rule",
@@ -105,7 +105,7 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
             "snakemake_rules/variant_calling/split_bed.rule",
             "snakemake_rules/variant_calling/somatic_tumor_normal.rule",
             "snakemake_rules/variant_calling/somatic_sv_tumor_normal.rule",
-            "snakemake_rules/variant_calling/cnvkit_paired.rule",
+            "snakemake_rules/variant_calling/somatic_cnv_tumor_normal_tga.rule",
             "snakemake_rules/umi/sentieon_varcall_tnscope_tn.rule",
         ],
         "annotate": [
@@ -202,8 +202,8 @@ DELIVERY_RULES: List[str] = [
     "ascat_tumor_normal",
     "vcf2cytosure_convert_tumor_only",
     "vcf2cytosure_convert_tumor_normal",
-    "cnvkit_single",
-    "cnvkit_paired",
+    "cnvkit_segment_CNV_research",
+    "cnvkit_call_CNV_research",
     "vcf2cytosure_convert",
     "finalize_gens_outputfiles",
     # TMB
