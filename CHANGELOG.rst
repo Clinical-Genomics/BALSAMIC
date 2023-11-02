@@ -30,7 +30,7 @@ Added:
 * CNVs from PureCN to TGA workflow https://Clinical-Genomics/BALSAMIC/pull/1278
 * CNVkit Panel of Normal for gmsmyeloid_5.3 to TGA workflow https://Clinical-Genomics/BALSAMIC/pull/1278
 * Command-line arguments and rules for creation of GENS files https://github.com/Clinical-Genomics/BALSAMIC/pull/1279
-
+* Somatic and germline loqusDB annotation to ReadtheDocs https://github.com/Clinical-Genomics/BALSAMIC/pull/12
 
 Changed:
 ^^^^^^^^
