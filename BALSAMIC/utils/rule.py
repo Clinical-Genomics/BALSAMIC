@@ -1,23 +1,22 @@
+import logging
 import os
 import re
-
-import toml
-import glob
-from typing import List, Dict
-import logging
 from pathlib import Path
+from typing import Dict
+
 import snakemake
-from BALSAMIC.utils.cli import get_file_extension
-from BALSAMIC.utils.cli import find_file_index
+import toml
+
 from BALSAMIC.constants.analysis import (
     AnalysisType,
-    SequencingType,
     MutationOrigin,
     MutationType,
+    SequencingType,
     WorkflowSolution,
 )
-from BALSAMIC.utils.exc import WorkflowRunError, BalsamicError
-from BALSAMIC.models.analysis import ConfigModel
+from BALSAMIC.models.config import ConfigModel
+from BALSAMIC.utils.cli import find_file_index, get_file_extension
+from BALSAMIC.utils.exc import WorkflowRunError
 
 LOG = logging.getLogger(__name__)
 
@@ -32,7 +31,7 @@ def get_vcf(config, var_caller, sample):
     for v in var_caller:
         for s in sample:
             vcf.append(
-                config["vcf"][v]["type"]
+                config["vcf"][v]["mutation_type"]
                 + "."
                 + config["vcf"][v]["mutation"]
                 + "."
@@ -86,7 +85,7 @@ def get_variant_callers(
 
     for variant_caller_name, variant_caller_params in config["vcf"].items():
         if (
-            mutation_type in variant_caller_params.get("type")
+            mutation_type in variant_caller_params.get("mutation_type")
             and mutation_class in variant_caller_params.get("mutation")
             and analysis_type in variant_caller_params.get("analysis_type")
             and workflow_solution in variant_caller_params.get("workflow_solution")
