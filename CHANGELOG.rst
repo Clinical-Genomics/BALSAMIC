@@ -30,7 +30,6 @@ Added:
 * CNVkit Panel of Normal for gmsmyeloid_5.3 to TGA workflow https://Clinical-Genomics/BALSAMIC/pull/1278
 * Command-line arguments and rules for creation of GENS files https://github.com/Clinical-Genomics/BALSAMIC/pull/1279
 
-
 Changed:
 ^^^^^^^^
 * Changed CN header field in cnvpytor in cnvpytor_tumor_only to be Float instead of Integer https://github.com/Clinical-Genomics/BALSAMIC/pull/1182
@@ -60,6 +59,7 @@ Changed:
 * Migrate Cache models to pydantic v2 https://github.com/Clinical-Genomics/BALSAMIC/pull/1274
 * Made BALSAMIC compatible with multiple PON creation workflows https://github.com/Clinical-Genomics/BALSAMIC/pull/1279
 * Use StrEnum from python enum https://github.com/Clinical-Genomics/BALSAMIC/pull/1303
+* Renamed final cram bamfile to format [tumor/normal].LIMSID.cram https://github.com/Clinical-Genomics/BALSAMIC/pull/1307
 * Migrate analysis models to pydantic v2 https://github.com/Clinical-Genomics/BALSAMIC/pull/1306
 * Split analysis model into config and params models https://github.com/Clinical-Genomics/BALSAMIC/pull/1306
 
