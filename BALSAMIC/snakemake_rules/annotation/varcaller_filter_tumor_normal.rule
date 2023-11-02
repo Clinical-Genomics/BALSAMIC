@@ -153,12 +153,11 @@ rule bcftools_filter_vardict_clinical_tumor_normal:
     "adding FOUND_IN tags to the output VCF for {params.case_name} "
   shell:
     """
-bcftools view {input.vcf_snv_clinical} | \
+bcftools reheader --threads {threads} -s {input.namemap} {input.vcf_snv_clinical} |\
 bcftools filter --threads {threads} --include 'INFO/GNOMADAF_popmax <= {params.pop_freq[0]} || INFO/GNOMADAF_popmax == \".\"' --soft-filter '{params.pop_freq[1]}' --mode '+' | \
 bcftools filter --threads {threads} --include 'INFO/SWEGENAF <= {params.swegen_freq[0]} || INFO/SWEGENAF == \".\"' --soft-filter '{params.swegen_freq[1]}' --mode '+' |\
 bcftools filter --threads {threads} --include 'INFO/Frq <= {params.loqusdb_clinical_freq[0]} || INFO/Frq == \".\"' --soft-filter '{params.loqusdb_clinical_freq[1]}' --mode '+' |\
-bcftools view --threads {threads} -f PASS |\
-bcftools reheader -s {input.namemap} -o {output.vcf_pass_vardict}.temp1;
+bcftools view --threads {threads} -f PASS -O z -o {output.vcf_pass_vardict}.temp1;
 
 python {params.edit_vcf_script} \
 --input_vcf {output.vcf_pass_vardict}.temp1 \
@@ -203,12 +202,12 @@ rule bcftools_filter_TNscope_umi_clinical_tumor_normal:
     "adding FOUND_IN tags to the output VCF file for {params.case_name} "
   shell:
     """
-bcftools view --threads {threads} -f PASS,triallelic_site {input.vcf_snv_clinical} | \
+bcftools reheader --threads {threads} -s {input.namemap} {input.vcf_snv_clinical} |\
+bcftools view --threads {threads} -f PASS,triallelic_site | \
 bcftools filter --threads {threads} --include 'INFO/GNOMADAF_popmax <= {params.pop_freq[0]} || INFO/GNOMADAF_popmax == \".\"' --soft-filter '{params.pop_freq[1]}' --mode '+' | \
 bcftools filter --threads {threads} --include 'INFO/SWEGENAF <= {params.swegen_freq[0]} || INFO/SWEGENAF == \".\"' --soft-filter '{params.swegen_freq[1]}' --mode '+' |\
 bcftools filter --threads {threads} --include 'INFO/Frq <= {params.loqusdb_clinical_freq[0]} || INFO/Frq == \".\"' --soft-filter '{params.loqusdb_clinical_freq[1]}' --mode '+' |\
-bcftools view --threads {threads} -i 'FILTER == "PASS" || FILTER == "triallelic_site"' |\
-bcftools reheader -s {input.namemap} -o {output.vcf_pass_tnscope_umi}.temp1;
+bcftools view --threads {threads} -i 'FILTER == "PASS" || FILTER == "triallelic_site"' -O z -o {output.vcf_pass_tnscope_umi}.temp1;
 
 python {params.edit_vcf_script} \
 --input_vcf {output.vcf_pass_tnscope_umi}.temp1 \

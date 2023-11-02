@@ -63,12 +63,12 @@ rule bcftools_filter_tnscope_clinical_tumor_only:
     """
 grep -v '^@' {input.wgs_calling_file} > {input.wgs_calling_file}.bed
 
-bcftools view -f PASS,triallelic_site --threads {threads} --regions-file {input.wgs_calling_file}.bed {input.vcf_snv_clinical} | \
+bcftools reheader --threads {threads} -s {input.namemap} {input.vcf_snv_clinical} |\
+bcftools view -f PASS,triallelic_site --threads {threads} --regions-file {input.wgs_calling_file}.bed | \
 bcftools filter --threads {threads} --include 'INFO/GNOMADAF_popmax <= {params.pop_freq[0]} || INFO/GNOMADAF_popmax == \".\"' --soft-filter '{params.pop_freq[1]}' --mode '+' | \
 bcftools filter --threads {threads} --include 'INFO/SWEGENAF <= {params.swegen_freq[0]} || INFO/SWEGENAF == \".\"' --soft-filter '{params.swegen_freq[1]}' --mode '+' |\
 bcftools filter --threads {threads} --include 'INFO/Frq <= {params.loqusdb_clinical_freq[0]} || INFO/Frq == \".\"' --soft-filter '{params.loqusdb_clinical_freq[1]}' --mode '+' |\
-bcftools view --threads {threads} -i 'FILTER == "PASS" || FILTER == "triallelic_site"' |\
-bcftools reheader -s {input.namemap} -o {output.vcf_pass_tnscope};
+bcftools view --threads {threads} -i 'FILTER == "PASS" || FILTER == "triallelic_site"' -O z -o {output.vcf_pass_tnscope}
 
 tabix -p vcf -f {output.vcf_pass_tnscope};
 
