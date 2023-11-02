@@ -40,7 +40,8 @@ bcftools +counts {output.vcf_pass_tnscope} > {output.bcftools_counts_research};
 rule bcftools_filter_tnscope_clinical_tumor_only:
   input:
     vcf_snv_clinical = vep_dir + "{var_type}.somatic.{case_name}.tnscope.clinical.vcf.gz",
-    wgs_calling_file = config["reference"]["wgs_calling_regions"]
+    wgs_calling_file = config["reference"]["wgs_calling_regions"],
+    namemap = vep_dir + "status_to_sampleid_namemap"
   output:
     vcf_pass_tnscope = vep_dir + "{var_type}.somatic.{case_name}.tnscope.clinical.filtered.pass.vcf.gz",
     bcftools_counts_clinical = vep_dir + "{var_type}.somatic.{case_name}.tnscope.clinical.filtered.pass.stats"
@@ -66,7 +67,8 @@ bcftools view -f PASS,triallelic_site --threads {threads} --regions-file {input.
 bcftools filter --threads {threads} --include 'INFO/GNOMADAF_popmax <= {params.pop_freq[0]} || INFO/GNOMADAF_popmax == \".\"' --soft-filter '{params.pop_freq[1]}' --mode '+' | \
 bcftools filter --threads {threads} --include 'INFO/SWEGENAF <= {params.swegen_freq[0]} || INFO/SWEGENAF == \".\"' --soft-filter '{params.swegen_freq[1]}' --mode '+' |\
 bcftools filter --threads {threads} --include 'INFO/Frq <= {params.loqusdb_clinical_freq[0]} || INFO/Frq == \".\"' --soft-filter '{params.loqusdb_clinical_freq[1]}' --mode '+' |\
-bcftools view --threads {threads} -i 'FILTER == "PASS" || FILTER == "triallelic_site"' -o {output.vcf_pass_tnscope} -O z;
+bcftools view --threads {threads} -i 'FILTER == "PASS" || FILTER == "triallelic_site"' |\
+bcftools reheader -s {input.namemap} -o {output.vcf_pass_tnscope};
 
 tabix -p vcf -f {output.vcf_pass_tnscope};
 

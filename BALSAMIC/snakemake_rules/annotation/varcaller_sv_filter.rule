@@ -59,7 +59,7 @@ bcftools view --threads {threads} -f .,PASS,MaxDepth {input.vcf_sv_clinical} |\
 bcftools filter --threads {threads} --include 'INFO/SWEGENAF <= {params.swegen_freq[0]} || INFO/SWEGENAF == \".\"' --soft-filter '{params.swegen_freq[1]}' --mode '+' |\
 bcftools filter --threads {threads} --include 'INFO/Frq <= {params.loqusdb_clinical_freq[0]} || INFO/Frq == \".\"' --soft-filter '{params.loqusdb_clinical_freq[1]}' --mode '+' |\
 bcftools view --threads {threads} -f .,PASS,MaxDepth |\
-bcftools reheader -s {input.namemap} -O z -o {output.vcf_pass_svdb};
+bcftools reheader -s {input.namemap} -o {output.vcf_pass_svdb};
 
 tabix -p vcf -f {output.vcf_pass_svdb};
 

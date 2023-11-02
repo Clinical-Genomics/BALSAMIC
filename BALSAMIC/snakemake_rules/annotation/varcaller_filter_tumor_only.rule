@@ -158,7 +158,7 @@ bcftools filter --include 'INFO/GNOMADAF_popmax <= {params.pop_freq[0]} || INFO/
 bcftools filter --threads {threads} --include 'INFO/SWEGENAF <= {params.swegen_freq[0]} || INFO/SWEGENAF == \".\"' --soft-filter '{params.swegen_freq[1]}' --mode '+' |\
 bcftools filter --threads {threads} --include 'INFO/Frq <= {params.loqusdb_clinical_freq[0]} || INFO/Frq == \".\"' --soft-filter '{params.loqusdb_clinical_freq[1]}' --mode '+' |\
 bcftools view --threads {threads} -f PASS |\
-bcftools reheader -s {input.namemap} -o {output.vcf_pass_vardict}.temp1 -O z;
+bcftools reheader -s {input.namemap} -o {output.vcf_pass_vardict}.temp1;
 
 python {params.edit_vcf_script} \
 --input_vcf {output.vcf_pass_vardict}.temp1 \
@@ -208,7 +208,7 @@ bcftools filter --threads {threads} --include 'INFO/GNOMADAF_popmax <= {params.p
 bcftools filter --threads {threads} --include 'INFO/SWEGENAF <= {params.swegen_freq[0]} || INFO/SWEGENAF == \".\"' --soft-filter '{params.swegen_freq[1]}' --mode '+' |\
 bcftools filter --threads {threads} --include 'INFO/Frq <= {params.loqusdb_clinical_freq[0]} || INFO/Frq == \".\"' --soft-filter '{params.loqusdb_clinical_freq[1]}' --mode '+' |\
 bcftools view --threads {threads} -i 'FILTER == "PASS" || FILTER == "triallelic_site"' |\
-bcftools reheader -s {input.namemap} -o {output.vcf_pass_tnscope_umi}.temp1 -O z;
+bcftools reheader -s {input.namemap} -o {output.vcf_pass_tnscope_umi}.temp1;
 
 python {params.edit_vcf_script} \
 --input_vcf {output.vcf_pass_tnscope_umi}.temp1 \
