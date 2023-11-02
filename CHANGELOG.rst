@@ -60,6 +60,7 @@ Changed:
 * Migrate Cache models to pydantic v2 https://github.com/Clinical-Genomics/BALSAMIC/pull/1274
 * Made BALSAMIC compatible with multiple PON creation workflows https://github.com/Clinical-Genomics/BALSAMIC/pull/1279
 * Use StrEnum from python enum https://github.com/Clinical-Genomics/BALSAMIC/pull/1303
+* Renamed final cram bamfile to format `<tumor/normal>.<LIMS_ID>.cram` https://github.com/Clinical-Genomics/BALSAMIC/pull/1307
 * Updated snakemake version to 7.32.4 https://github.com/Clinical-Genomics/BALSAMIC/pull/1308
 
 
