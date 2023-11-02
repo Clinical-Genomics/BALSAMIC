@@ -25,6 +25,7 @@ Added:
 * `PureCN` container https://github.com/Clinical-Genomics/BALSAMIC/pull/1255
 * `GATK` container https://github.com/Clinical-Genomics/BALSAMIC/pull/1266
 * Resolved FASTQ paths to sample dictionary (balsamic logging) https://github.com/Clinical-Genomics/BALSAMIC/pull/1275
+* Picard HsMetrics and CollectGcBiasMetrics for WGS https://github.com/Clinical-Genomics/BALSAMIC/pull/1288
 * `LOH` to TGA workflow https://Clinical-Genomics/BALSAMIC/pull/1278
 * CNVs from PureCN to TGA workflow https://Clinical-Genomics/BALSAMIC/pull/1278
 * CNVkit Panel of Normal for gmsmyeloid_5.3 to TGA workflow https://Clinical-Genomics/BALSAMIC/pull/1278

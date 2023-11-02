@@ -10,8 +10,6 @@ def repeat(param, values):
     return " ".join(param_values)
 
 
-
-
 rule sentieon_wgs_metrics:
     input:
         bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample),
@@ -35,7 +33,6 @@ rule sentieon_wgs_metrics:
         "Calculate coverage metrics for wgs cases using sentieon tools for sample {params.sample}"
     shell:
         """
-mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
 export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
@@ -54,7 +51,7 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 --gene_list {params.gene_list} {params.cov_threshold} \
 {output.coverage_metrics}_tmp;
 
-gzip -c {output.coverage_metrics}_tmp > {output.coverage_metrics};
-rm {output.coverage_metrics}_tmp;
-rm -rf {params.tmpdir};
+gzip -c {output.coverage_metrics}_tmp > {output.coverage_metrics} ;
+rm {output.coverage_metrics}_tmp ;
+rm -rf {params.tmpdir} ;
         """
