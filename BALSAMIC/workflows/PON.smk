@@ -101,7 +101,7 @@ if pon_workflow == PONWorkflow.CNVKIT:
 if pon_workflow in [PONWorkflow.GENS_MALE, PONWorkflow.GENS_FEMALE]:
     gender = Gender.MALE if pon_workflow == PONWorkflow.GENS_MALE else Gender.FEMALE
 
-    pon_reference = expand(cnv_dir + "balsamic_pon_100bp.{gender}.{version}.hdf5", gender=gender, version=version)
+    pon_reference = expand(cnv_dir + "gens_pon_100bp.{gender}.{version}.hdf5", gender=gender, version=version)
     rules_to_include.append("snakemake_rules/variant_calling/gatk_read_counts.rule")
     rules_to_include.append("snakemake_rules/pon/gens_create_pon.rule")
 
