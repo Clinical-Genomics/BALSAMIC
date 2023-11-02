@@ -42,7 +42,7 @@ tmp_dir: str = Path(result_dir, "tmp").as_posix() + "/"
 Path.mkdir(Path(tmp_dir), parents=True, exist_ok=True)
 
 # Directories
-benchmark_dir: str = config_model.analysis.benchmark
+benchmark_dir: str = config_model.analysis.benchmark + "/"
 fastq_dir: str = Path(result_dir, "fastq").as_posix() + "/"
 bam_dir: str = Path(result_dir, "bam", "").as_posix() + "/"
 cnv_dir: str = Path(result_dir, "cnv", "").as_posix() + "/"

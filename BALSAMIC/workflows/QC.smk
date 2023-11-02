@@ -49,7 +49,7 @@ Path.mkdir(Path(tmp_dir), parents=True, exist_ok=True)
 
 # Directories
 input_fastq_dir: str = config_model.analysis.fastq_path + "/"
-benchmark_dir: str = config_model.analysis.benchmark
+benchmark_dir: str = config_model.analysis.benchmark + "/"
 fastq_dir: str = Path(result_dir, "fastq").as_posix() + "/"
 bam_dir: str = Path(result_dir, "bam").as_posix() + "/"
 fastqc_dir: str = Path(result_dir, "fastqc").as_posix() + "/"
