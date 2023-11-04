@@ -2,7 +2,7 @@
 import os
 from typing import List
 
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
 NAME: str = "BALSAMIC"
 AUTHOR: str = "Clinical Genomics"
@@ -78,7 +78,7 @@ requirements: List[str] = [
     "pyasn1==0.5.0",
     "pyasn1-modules==0.3.0",
     "pycparser==2.21",
-    "pydantic>=2.0",
+    "pydantic>=2.4",
     "Pygments==2.15.1",
     "pyOpenSSL==23.2.0",
     "pyparsing==3.0.9",
@@ -97,7 +97,7 @@ requirements: List[str] = [
     "six==1.16.0",
     "smart-open==6.3.0",
     "smmap==5.0.0",
-    "snakemake==7.32.0",
+    "snakemake==7.32.4",
     "stopit==1.1.2",
     "tabulate==0.9.0",
     "throttler==1.2.2",
