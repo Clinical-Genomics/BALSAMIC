@@ -88,6 +88,7 @@ Removed:
 * Plugin CLI https://github.com/Clinical-Genomics/BALSAMIC/pull/1245
 * Realignment step for TGA workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1272
 * Archived/outdated workflows and scripts https://github.com/Clinical-Genomics/BALSAMIC/pull/1296
+* Sed command to convert CNVpytor integer to float, deprecated by updated CNVpytor version https://github.com/Clinical-Genomics/BALSAMIC/pull/1310
 
 [12.0.2]
 --------
