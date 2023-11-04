@@ -25,7 +25,7 @@ rule bcftools_filter_sv_research:
     """
 bcftools view --threads {threads} -f .,PASS,MaxDepth {input.vcf_sv_research} |\
 bcftools filter --threads {threads} --include 'INFO/SWEGENAF <= {params.swegen_freq[0]} || INFO/SWEGENAF == \".\"' --soft-filter '{params.swegen_freq[1]}' --mode '+' |\
-bcftools view --threads {threads} -f .,PASS,MaxDepth  -O z -o {output.vcf_pass_svdb};
+bcftools view --threads {threads} -f .,PASS,MaxDepth -O z -o {output.vcf_pass_svdb};
 
 tabix -p vcf -f {output.vcf_pass_svdb};
 

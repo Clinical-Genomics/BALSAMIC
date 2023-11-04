@@ -7,7 +7,7 @@ rule create_final_vcf_namemap:
     output:
         namemap = vep_dir + "status_to_sampleid_namemap"
     params:
-        status_to_sampleid = status_to_sampleid
+        status_to_sample_id = status_to_sample_id
     message:
         "Creating final vcf namemap."
     threads:

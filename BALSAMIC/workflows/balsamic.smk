@@ -96,9 +96,9 @@ if config_model.analysis.analysis_type == "paired":
 
 # Sample status to sampleID namemap
 if config_model.analysis.analysis_type == "paired":
-    status_to_sampleid = "TUMOR" + "\\\\t" + tumor_sample + "\\\\n" + "NORMAL" + "\\\\t" + normal_sample
+    status_to_sample_id = "TUMOR" + "\\\\t" + tumor_sample + "\\\\n" + "NORMAL" + "\\\\t" + normal_sample
 else:
-    status_to_sampleid = "TUMOR" + "\\\\t" + tumor_sample
+    status_to_sample_id = "TUMOR" + "\\\\t" + tumor_sample
 
 
 # vcfanno annotations
