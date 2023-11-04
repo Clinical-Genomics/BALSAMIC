@@ -58,7 +58,7 @@ rule bcftools_filter_tnscope_clinical_tumor_normal:
     "Filtering WGS tumor-normal tnscope annotated clinical variants using bcftools for {params.case_name}"
   shell:
     """
-bcftools reheader --threads {threads} -s {input.namemap} {input.vcf_snv_clinical} |\
+bcftools reheader --threads {threads} -s {input.namemap} {input.vcf_snv_clinical} | \
 bcftools view -f PASS,triallelic_site --threads {threads} | \
 bcftools filter --threads {threads} --include 'INFO/GNOMADAF_popmax <= {params.pop_freq[0]} || INFO/GNOMADAF_popmax == \".\"' --soft-filter '{params.pop_freq[1]}' --mode '+' | \
 bcftools filter --threads {threads} --include 'INFO/SWEGENAF <= {params.swegen_freq[0]} || INFO/SWEGENAF == \".\"' --soft-filter '{params.swegen_freq[1]}' --mode '+' |\
