@@ -130,7 +130,7 @@ rm {output.vcf_pass_tnscope_umi}.temp2;
 rule bcftools_filter_vardict_clinical_tumor_only:
   input:
     vcf_snv_clinical = vep_dir + "{var_type}.somatic.{case_name}.vardict.clinical.vcf.gz",
-    namemap = vep_dir + "status_to_sampleid_namemap"
+    namemap = vep_dir + "status_to_sample_id_namemap"
   output:
     vcf_pass_vardict = vep_dir + "{var_type}.somatic.{case_name}.vardict.clinical.filtered.pass.vcf.gz",
     bcftools_counts_clinical = vep_dir + "{var_type}.somatic.{case_name}.vardict.clinical.filtered.pass.stats"
@@ -180,7 +180,7 @@ rm {output.vcf_pass_vardict}.temp2;
 rule bcftools_filter_TNscope_umi_clinical_tumor_only:
   input:
     vcf_snv_clinical = vep_dir + "{var_type}.somatic.{case_name}.tnscope_umi.clinical.vcf.gz",
-    namemap = vep_dir + "status_to_sampleid_namemap"
+    namemap = vep_dir + "status_to_sample_id_namemap"
   output:
     vcf_pass_tnscope_umi = vep_dir + "{var_type}.somatic.{case_name}.tnscope_umi.clinical.filtered.pass.vcf.gz",
     bcftools_counts_clinical = vep_dir + "{var_type}.somatic.{case_name}.tnscope_umi.clinical.filtered.pass.stats"

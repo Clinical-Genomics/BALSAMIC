@@ -41,7 +41,7 @@ rule bcftools_filter_tnscope_clinical_tumor_only:
   input:
     vcf_snv_clinical = vep_dir + "{var_type}.somatic.{case_name}.tnscope.clinical.vcf.gz",
     wgs_calling_file = config["reference"]["wgs_calling_regions"],
-    namemap = vep_dir + "status_to_sampleid_namemap"
+    namemap = vep_dir + "status_to_sample_id_namemap"
   output:
     vcf_pass_tnscope = vep_dir + "{var_type}.somatic.{case_name}.tnscope.clinical.filtered.pass.vcf.gz",
     bcftools_counts_clinical = vep_dir + "{var_type}.somatic.{case_name}.tnscope.clinical.filtered.pass.stats"
