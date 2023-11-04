@@ -64,6 +64,7 @@ Changed:
 * Updated snakemake version to 7.32.4 https://github.com/Clinical-Genomics/BALSAMIC/pull/1308
 * Migrate analysis models to pydantic v2 https://github.com/Clinical-Genomics/BALSAMIC/pull/1306
 * Split analysis model into config and params models https://github.com/Clinical-Genomics/BALSAMIC/pull/1306
+* Renamed name in sample column of final clincial vcfs https://github.com/Clinical-Genomics/BALSAMIC/pull/1310
 
 Fixed:
 ^^^^^^
@@ -87,6 +88,7 @@ Removed:
 * Plugin CLI https://github.com/Clinical-Genomics/BALSAMIC/pull/1245
 * Realignment step for TGA workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1272
 * Archived/outdated workflows and scripts https://github.com/Clinical-Genomics/BALSAMIC/pull/1296
+* Sed command to convert CNVpytor integer to float, deprecated by updated CNVpytor version https://github.com/Clinical-Genomics/BALSAMIC/pull/1310
 
 [12.0.2]
 --------

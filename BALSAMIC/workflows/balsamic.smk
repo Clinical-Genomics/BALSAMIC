@@ -105,6 +105,12 @@ sequencing_type = config_model.analysis.sequencing_type
 if config_model.analysis.analysis_type == "paired":
     normal_sample: str = config_model.get_sample_name_by_type(SampleType.NORMAL)
 
+# Sample status to sampleID namemap
+if config_model.analysis.analysis_type == "paired":
+    status_to_sample_id = "TUMOR" + "\\\\t" + tumor_sample + "\\\\n" + "NORMAL" + "\\\\t" + normal_sample
+else:
+    status_to_sample_id = "TUMOR" + "\\\\t" + tumor_sample
+
 
 # vcfanno annotations
 research_annotations.append( {

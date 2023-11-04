@@ -57,7 +57,6 @@ vcf_dir: str = Path(result_dir, "vcf").as_posix() + "/"
 qc_dir: str = Path(result_dir, "qc").as_posix() + "/"
 delivery_dir: str = Path(result_dir, "delivery").as_posix() + "/"
 
-
 # Run information
 singularity_image: str = config_model.singularity['image']
 sample_names: List[str] = config_model.get_all_sample_names()
