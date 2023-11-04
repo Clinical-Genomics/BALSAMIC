@@ -61,17 +61,18 @@ rule bcftools_filter_tnscope_clinical_tumor_only:
     "Filtering WGS tumor-only tnscope annotated clinical variants using bcftools for {params.case_name}"
   shell:
     """
-grep -v '^@' {input.wgs_calling_file} > {input.wgs_calling_file}.bed
+grep -v '^@' {input.wgs_calling_file} > {input.wgs_calling_file}.bed;
 
-bcftools reheader --threads {threads} -s {input.namemap} {input.vcf_snv_clinical} |\
+bcftools reheader --threads {threads} -s {input.namemap} {input.vcf_snv_clinical} | \
 bcftools view -f PASS,triallelic_site --threads {threads} --regions-file {input.wgs_calling_file}.bed | \
 bcftools filter --threads {threads} --include 'INFO/GNOMADAF_popmax <= {params.pop_freq[0]} || INFO/GNOMADAF_popmax == \".\"' --soft-filter '{params.pop_freq[1]}' --mode '+' | \
-bcftools filter --threads {threads} --include 'INFO/SWEGENAF <= {params.swegen_freq[0]} || INFO/SWEGENAF == \".\"' --soft-filter '{params.swegen_freq[1]}' --mode '+' |\
-bcftools filter --threads {threads} --include 'INFO/Frq <= {params.loqusdb_clinical_freq[0]} || INFO/Frq == \".\"' --soft-filter '{params.loqusdb_clinical_freq[1]}' --mode '+' |\
-bcftools view --threads {threads} -i 'FILTER == "PASS" || FILTER == "triallelic_site"' -O z -o {output.vcf_pass_tnscope};
+bcftools filter --threads {threads} --include 'INFO/SWEGENAF <= {params.swegen_freq[0]} || INFO/SWEGENAF == \".\"' --soft-filter '{params.swegen_freq[1]}' --mode '+' | \
+bcftools filter --threads {threads} --include 'INFO/Frq <= {params.loqusdb_clinical_freq[0]} || INFO/Frq == \".\"' --soft-filter '{params.loqusdb_clinical_freq[1]}' --mode '+' | \
+bcftools view --threads {threads} -i 'FILTER == "PASS" || FILTER == "triallelic_site"' -o {output.vcf_pass_tnscope} -O z;
 
 tabix -p vcf -f {output.vcf_pass_tnscope};
 
 bcftools +counts {output.vcf_pass_tnscope} > {output.bcftools_counts_clinical};
     """
+
 
