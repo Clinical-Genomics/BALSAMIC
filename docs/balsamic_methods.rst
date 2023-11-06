@@ -20,7 +20,7 @@ Only those variants that fulfilled the filtering criteria and scored as `PASS` i
 Structural variants (SV) were called using Manta v1.6.0 :superscript:`9` and Dellyv1.0.3 :superscript:`10`.
 Copy number variations (CNV) were called using CNVkit v0.9.9 :superscript:`11`.
 The variant calls from CNVkit, Manta and Delly were merged using SVDB v2.8.1 :superscript:`12`.
-The clinical set of SNV and SV is also annotated and filtered against loqusDB curated frequency of observed variants (frequency < 0.01) from normal samples.
+The clinical set of SNV and SV is also annotated and filtered against loqusDB curated frequency of observed variants (frequency < 0.01) from non-cancer cases and only annotated using frequency of observed variants from cancer cases (somatic and germline).
 All variants were annotated using Ensembl VEP v104.3 :superscript:`13`. We used vcfanno v0.3.3 :superscript:`14`
 to annotate somatic variants for their population allele frequency from gnomAD v2.1.1 :superscript:`18`, CADD v1.6 :superscript:`24`, SweGen :superscript:`22` and frequency of observed variants in normal samples.
 
@@ -40,7 +40,7 @@ The called-variants were also further second filtered using the criteria (DP(tum
 Structural variants were called using Manta v1.6.0 :superscript:`9`, Delly v1.0.3 :superscript:`10` and TIDDIT v3.3.2 :superscript:`12`.
 Copy number variations (CNV) were called using ascatNgs v4.5.0 :superscript:`17` (tumor-normal), Delly v1.0.3 :superscript:`10` and CNVpytor v1.3.1 :superscript:`22` (tumor-only) and converted from CNV to deletions (DEL) and duplications (DUP).
 The structural variant (SV) calls from Manta, Delly, TIDDIT ascatNgs (tumor-normal) and CNVpytor (tumor-only) were merged using SVDB v2.8.1 :superscript:`12`
-The clinical set of SNV and SV is also annotated and filtered against loqusDB curated frequency of observed variants (frequency < 0.01) from normal samples.
+The clinical set of SNV and SV is also annotated and filtered against loqusDB curated frequency of observed variants (frequency < 0.01) from non-cancer cases and only annotated using frequency of observed variants from cancer cases (somatic and germline).
 All variants were annotated using Ensembl VEP v104.3 :superscript:`13`. We used vcfanno v0.3.3 :superscript:`14`
 to annotate somatic single nucleotide variants for their population allele frequency from gnomAD v2.1.1 :superscript:`18`, CADD v1.6 :superscript:`24`, SweGen :superscript:`22`  and frequency of observed variants in normal samples.
 
@@ -58,7 +58,7 @@ where a minimum of at least one UMI tag group should exist in each single-strand
 The filtered consensus reads were quality controlled using Picard CollectHsMetrics v2.27.1 :superscript:`5`. Results of the quality controlled steps were summarized by MultiQC v1.12 :superscript:`6`.
 For each sample, somatic mutations were called using Sentieon TNscope :superscript:`16`, with non-default parameters for passing the final list of variants
 (--min_tumor_allele_frac 0.0005, --filter_t_alt_frac 0.0005, --min_init_tumor_lod 0.5, min_tumor_lod 4, --max_error_per_read 5  --pcr_indel_model NONE, GNOMADAF_popmax <= 0.02).
-The clinical set of SNV and SV is also annotated and filtered against loqusDB curated frequency of observed variants (frequency < 0.01) from normal samples.
+The clinical set of SNV and SV is also annotated and filtered against loqusDB curated frequency of observed variants (frequency < 0.01) from non-cancer cases and only annotated using frequency of observed variants from cancer cases (somatic and germline).
 All variants were annotated using Ensembl VEP v104.3 :superscript:`7`. We used vcfanno v0.3.3 :superscript:`8` to annotate somatic variants for their population allele frequency from gnomAD v2.1.1 :superscript:`18`, CADD v1.6 :superscript:`24`, SweGen :superscript:`22` and frequency of observed variants in normal samples.
 For exact parameters used for each software, please refer to  https://github.com/Clinical-Genomics/BALSAMIC.
 We used three commercially available products from SeraCare [Material numbers: 0710-067110 :superscript:`19`, 0710-067211 :superscript:`20`, 0710-067312 :superscript:`21`] for validating the efficiency of the UMI workflow in identifying 14 mutation sites at known allelic frequencies.
