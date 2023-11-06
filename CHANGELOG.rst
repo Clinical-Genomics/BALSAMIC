@@ -66,6 +66,7 @@ Changed:
 * Migrate analysis models to pydantic v2 https://github.com/Clinical-Genomics/BALSAMIC/pull/1306
 * Split analysis model into config and params models https://github.com/Clinical-Genomics/BALSAMIC/pull/1306
 * Renamed name in sample column of final clincial vcfs https://github.com/Clinical-Genomics/BALSAMIC/pull/1310
+* Update Gens HK tags https://github.com/Clinical-Genomics/BALSAMIC/pull/1319
 
 Fixed:
 ^^^^^^
