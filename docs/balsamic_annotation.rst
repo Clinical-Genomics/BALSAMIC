@@ -9,7 +9,7 @@ gnomAD
 
 `BALSAMIC` adds the following annotation from `gnomAD` database using ``vcfanno``.
 
-.. list-table:: gnomAD
+.. list-table:: gnomAD annotations
    :widths: 50 50
    :header-rows: 1
 
@@ -25,7 +25,7 @@ ClinVar
 
 `BALSAMIC` adds the following annotation from `ClinVar` database using ``vcfanno``.
 
-.. list-table:: ClinVar
+.. list-table:: ClinVar annotations
    :widths: 50 50
    :header-rows: 1
 
@@ -46,7 +46,7 @@ ClinVar
 
 The values for `ORIGIN` are described below:
 
-.. list-table:: ORIGIN
+.. list-table:: ClinVar ORIGIN
    :widths: 25 25
    :header-rows: 1
 
@@ -82,7 +82,7 @@ COSMIC
 
 `BALSAMIC` uses `ensembl-vep` to add the following annotation from `COSMIC` database.
 
-.. list-table:: COSMIC
+.. list-table:: COSMIC annotations
    :widths: 50 50
    :header-rows: 1
 
@@ -104,7 +104,7 @@ CADD
 
 `BALSAMIC` adds the following annotation for SNVs from `CADD` database using ``vcfanno``.
 
-.. list-table:: CADD
+.. list-table:: CADD annotations
    :widths: 50 50
    :header-rows: 1
 
