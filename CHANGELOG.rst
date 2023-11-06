@@ -61,8 +61,11 @@ Changed:
 * Migrate Cache models to pydantic v2 https://github.com/Clinical-Genomics/BALSAMIC/pull/1274
 * Made BALSAMIC compatible with multiple PON creation workflows https://github.com/Clinical-Genomics/BALSAMIC/pull/1279
 * Use StrEnum from python enum https://github.com/Clinical-Genomics/BALSAMIC/pull/1303
-* Renamed final cram bamfile to format [tumor/normal].LIMSID.cram https://github.com/Clinical-Genomics/BALSAMIC/pull/1307
-
+* Renamed final cram bamfile to format `<tumor/normal>.<LIMS_ID>.cram` https://github.com/Clinical-Genomics/BALSAMIC/pull/1307
+* Updated snakemake version to 7.32.4 https://github.com/Clinical-Genomics/BALSAMIC/pull/1308
+* Migrate analysis models to pydantic v2 https://github.com/Clinical-Genomics/BALSAMIC/pull/1306
+* Split analysis model into config and params models https://github.com/Clinical-Genomics/BALSAMIC/pull/1306
+* Renamed name in sample column of final clincial vcfs https://github.com/Clinical-Genomics/BALSAMIC/pull/1310
 
 Fixed:
 ^^^^^^
@@ -86,6 +89,7 @@ Removed:
 * Plugin CLI https://github.com/Clinical-Genomics/BALSAMIC/pull/1245
 * Realignment step for TGA workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1272
 * Archived/outdated workflows and scripts https://github.com/Clinical-Genomics/BALSAMIC/pull/1296
+* Sed command to convert CNVpytor integer to float, deprecated by updated CNVpytor version https://github.com/Clinical-Genomics/BALSAMIC/pull/1310
 
 [12.0.2]
 --------

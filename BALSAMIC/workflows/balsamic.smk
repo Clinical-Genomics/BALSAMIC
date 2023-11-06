@@ -1,44 +1,55 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
+import glob
+import logging
 import os
 import re
-import logging
 import tempfile
-import glob
-
 from pathlib import Path
-from typing import List, Dict
+from typing import Dict, List
+
+from BALSAMIC.constants.analysis import FastqName, MutationType, SampleType
+from BALSAMIC.constants.paths import BALSAMIC_DIR, SENTIEON_DNASCOPE_DIR, SENTIEON_TNSCOPE_DIR
+from BALSAMIC.constants.rules import SNAKEMAKE_RULES
+from BALSAMIC.constants.variant_filters import (
+    COMMON_SETTINGS,
+    SENTIEON_VARCALL_SETTINGS,
+    SVDB_FILTER_SETTINGS,
+    VARDICT_SETTINGS,
+)
+from BALSAMIC.constants.workflow_params import VARCALL_PARAMS, WORKFLOW_PARAMS
+from BALSAMIC.models.config import ConfigModel
+from BALSAMIC.models.params import BalsamicWorkflowConfig, VarCallerFilter
+from BALSAMIC.utils.cli import check_executable, generate_h5
+from BALSAMIC.utils.exc import BalsamicError
+from BALSAMIC.utils.io import read_yaml, write_finish_file, write_json
+from BALSAMIC.utils.rule import (
+    dump_toml,
+    get_cancer_germline_snv_observations,
+    get_cancer_somatic_snv_observations,
+    get_capture_kit,
+    get_clinical_snv_observations,
+    get_clinical_sv_observations,
+    get_fastp_parameters,
+    get_pon_cnn,
+    get_result_dir,
+    get_rule_output,
+    get_script_path,
+    get_sequencing_type,
+    get_somatic_sv_observations,
+    get_swegen_snv,
+    get_swegen_sv,
+    get_threads,
+    get_variant_callers,
+    get_vcf,
+)
+from BALSAMIC.utils.workflowscripts import plot_analysis
+from PyPDF2 import PdfFileMerger
+from snakemake.exceptions import RuleException, WorkflowError
 from yapf.yapflib.yapf_api import FormatFile
 
-from snakemake.exceptions import RuleException, WorkflowError
-
-from PyPDF2 import PdfFileMerger
-
-from BALSAMIC.constants.paths import SENTIEON_DNASCOPE_DIR, SENTIEON_TNSCOPE_DIR, BALSAMIC_DIR
-from BALSAMIC.utils.exc import BalsamicError
-
-from BALSAMIC.utils.cli import (check_executable, generate_h5)
-from BALSAMIC.utils.io import write_json, read_yaml, write_finish_file
-
-from BALSAMIC.models.analysis import VarCallerFilter, BalsamicWorkflowConfig, ConfigModel
-
-from BALSAMIC.utils.workflowscripts import plot_analysis
-
-from BALSAMIC.utils.rule import (get_fastp_parameters, get_variant_callers, get_rule_output, get_result_dir, get_vcf,
-                                 get_threads, get_script_path, get_sequencing_type,
-                                 get_capture_kit, get_pon_cnn,
-                                 get_clinical_snv_observations, get_clinical_sv_observations, get_swegen_snv,
-                                 get_swegen_sv, dump_toml, get_cancer_germline_snv_observations,
-                                 get_cancer_somatic_snv_observations, get_somatic_sv_observations)
-
-from BALSAMIC.constants.analysis import MutationType, FastqName, SampleType
-from BALSAMIC.constants.variant_filters import (COMMON_SETTINGS, VARDICT_SETTINGS, SENTIEON_VARCALL_SETTINGS,
-                                                SVDB_FILTER_SETTINGS)
-from BALSAMIC.constants.workflow_params import (WORKFLOW_PARAMS, VARCALL_PARAMS)
-from BALSAMIC.constants.rules import SNAKEMAKE_RULES
-
 # Initialize ConfigModel
-config_model = ConfigModel.parse_obj(config)
+config_model = ConfigModel.model_validate(config)
 
 shell.executable("/bin/bash")
 shell.prefix("set -eo pipefail; ")
@@ -59,7 +70,7 @@ Path.mkdir(Path(tmp_dir), parents=True, exist_ok=True)
 
 # Directories
 input_fastq_dir: str = config_model.analysis.fastq_path + "/"
-benchmark_dir: str = config_model.analysis.benchmark
+benchmark_dir: str = config_model.analysis.benchmark + "/"
 fastq_dir: str = Path(result_dir, "fastq").as_posix() + "/"
 bam_dir: str = Path(result_dir, "bam").as_posix() + "/"
 cnv_dir: str = Path(result_dir, "cnv").as_posix() + "/"
@@ -93,6 +104,12 @@ tumor_sample: str = config_model.get_sample_name_by_type(SampleType.TUMOR)
 sequencing_type = config_model.analysis.sequencing_type
 if config_model.analysis.analysis_type == "paired":
     normal_sample: str = config_model.get_sample_name_by_type(SampleType.NORMAL)
+
+# Sample status to sampleID namemap
+if config_model.analysis.analysis_type == "paired":
+    status_to_sample_id = "TUMOR" + "\\\\t" + tumor_sample + "\\\\n" + "NORMAL" + "\\\\t" + normal_sample
+else:
+    status_to_sample_id = "TUMOR" + "\\\\t" + tumor_sample
 
 
 # vcfanno annotations
@@ -186,16 +203,16 @@ if "swegen_sv_frequency" in config["reference"]:
 
 
 # Varcaller filter settings
-COMMON_FILTERS = VarCallerFilter.parse_obj(COMMON_SETTINGS)
-VARDICT = VarCallerFilter.parse_obj(VARDICT_SETTINGS)
-SENTIEON_CALLER = VarCallerFilter.parse_obj(SENTIEON_VARCALL_SETTINGS)
-SVDB_FILTERS = VarCallerFilter.parse_obj(SVDB_FILTER_SETTINGS)
+COMMON_FILTERS = VarCallerFilter.model_validate(COMMON_SETTINGS)
+VARDICT = VarCallerFilter.model_validate(VARDICT_SETTINGS)
+SENTIEON_CALLER = VarCallerFilter.model_validate(SENTIEON_VARCALL_SETTINGS)
+SVDB_FILTERS = VarCallerFilter.model_validate(SVDB_FILTER_SETTINGS)
 
 # Fastp parameters
 fastp_parameters: Dict = get_fastp_parameters(config_model)
 
 # parse parameters as constants to workflows
-params = BalsamicWorkflowConfig.parse_obj(WORKFLOW_PARAMS)
+params = BalsamicWorkflowConfig.model_validate(WORKFLOW_PARAMS)
 
 # Capture kit name
 if config["analysis"]["sequencing_type"] != "wgs":

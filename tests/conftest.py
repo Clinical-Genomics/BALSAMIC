@@ -4,7 +4,7 @@ import shutil
 from datetime import datetime
 from functools import partial
 from pathlib import Path
-from typing import Dict, Any, List
+from typing import Any, Dict, List
 from unittest import mock
 
 import pytest
@@ -13,36 +13,35 @@ from click.testing import CliRunner
 from pydantic_core import Url
 
 from BALSAMIC import __version__ as balsamic_version
+from BALSAMIC.assets.scripts.preprocess_gens import cli as gens_preprocessing_cli
 from BALSAMIC.commands.base import cli
 from BALSAMIC.constants.analysis import (
     BIOINFO_TOOL_ENV,
-    RunMode,
     AnalysisWorkflow,
     PONWorkflow,
+    RunMode,
 )
-from BALSAMIC.constants.cache import DockerContainers, GenomeVersion, REFERENCE_FILES
+from BALSAMIC.constants.cache import REFERENCE_FILES, DockerContainers, GenomeVersion
 from BALSAMIC.constants.cluster import (
-    ClusterConfigType,
-    ClusterAccount,
     QOS,
+    ClusterAccount,
+    ClusterConfigType,
     ClusterProfile,
 )
 from BALSAMIC.constants.constants import FileType
 from BALSAMIC.constants.paths import CONSTANTS_DIR, FASTQ_TEST_INFO, TEST_DATA_DIR
 from BALSAMIC.constants.workflow_params import VCF_DICT
-from BALSAMIC.models.analysis import ConfigModel
 from BALSAMIC.models.cache import (
+    AnalysisReferencesHg,
     CacheAnalysis,
     CacheConfig,
     References,
     ReferencesHg,
-    AnalysisReferencesHg,
 )
+from BALSAMIC.models.config import ConfigModel
 from BALSAMIC.models.snakemake import SingularityBindPath, SnakemakeExecutable
 from BALSAMIC.utils.io import read_json, read_yaml, write_json
 from .helpers import ConfigHelper, Map
-
-from BALSAMIC.assets.scripts.preprocess_gens import cli as gens_preprocessing_cli
 
 MOCKED_OS_ENVIRON = "os.environ"
 
@@ -1131,7 +1130,7 @@ def balsamic_model(
 ) -> ConfigModel:
     """Return ConfigModel parsed from static tumor normal config dict."""
     # Initialize balsamic model
-    balsamic_config = ConfigModel.parse_obj(config_dict_w_fastqs)
+    balsamic_config = ConfigModel.model_validate(config_dict_w_fastqs)
     return balsamic_config
 
 
@@ -1141,7 +1140,7 @@ def balsamic_pon_model(
 ) -> ConfigModel:
     """Return ConfigModel parsed from static PON config dict."""
     # Initialize ConfigModel
-    balsamic_pon_config = ConfigModel.parse_obj(pon_config_dict_w_fastq)
+    balsamic_pon_config = ConfigModel.model_validate(pon_config_dict_w_fastq)
     return balsamic_pon_config
 
 
