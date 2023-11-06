@@ -102,7 +102,7 @@ rule finalize_gens_outputfiles:
     params:
         sample_id="{sample}",
         gens_input="{gens_input}",
-        housekeeper_id= {"id": "{sample}", "tags": "clinical"}
+        housekeeper_id= {"id": "{sample}", "tags": "cnv"}
     benchmark:
         Path(benchmark_dir, "finalize_gens_outputfiles_{sample}_{gens_input}.tsv").as_posix()
     singularity:
