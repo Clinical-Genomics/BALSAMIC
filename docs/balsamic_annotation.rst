@@ -113,7 +113,7 @@ CADD
    * - CADD
      - Combined Annotation Dependent Depletion
 
-LoqusDB somatic frequencies (Cancer cases)
+LoqusDB somatic frequencies (cancer cases)
 ------------------------------------------
 
 .. list-table:: loqusDB somatic SNV annotations
@@ -136,7 +136,7 @@ LoqusDB somatic frequencies (Cancer cases)
      - allele counts
      - SV
 
-LoqusDB germline frequencies (Cancer cases)
+LoqusDB germline frequencies (cancer cases)
 -------------------------------------------
 
 .. list-table:: loqusDB germline SNV annotations
@@ -184,7 +184,7 @@ LoqusDB germline frequencies (non-cancer cases)
 SWEGEN
 ------
 
-`BALSAMIC` adds the following annotation from `Swegen` database using ``vcfanno`` for SNVs and SVDB for SVs.
+`BALSAMIC` adds the following annotation from `SWEGEN` database using ``vcfanno`` for SNVs and SVDB for SVs.
 
 .. list-table:: Swegen SNV annotations
    :widths: 50 150 50
