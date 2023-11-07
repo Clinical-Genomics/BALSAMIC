@@ -1,6 +1,7 @@
 from unittest import mock
 import snakemake
 
+from BALSAMIC.constants.analysis import AnalysisWorkflow
 from BALSAMIC.utils.cli import get_snakefile
 
 MOCKED_OS_ENVIRON = "os.environ"
@@ -91,11 +92,11 @@ def test_workflow_tumor_normal_wgs_hg19(
 
 
 def test_workflow_qc_tumor_only_hg19(
-    tumor_only_config_qc, sentieon_install_dir, sentieon_license, analysis_workflow_qc
+    tumor_only_config_qc, sentieon_install_dir, sentieon_license
 ):
     # GIVEN a sample config dict and a snakefile
     workflow = "single"
-    snakefile = get_snakefile(workflow, analysis_workflow_qc)
+    snakefile = get_snakefile(workflow, AnalysisWorkflow.BALSAMIC_QC)
     config_json = tumor_only_config_qc
 
     # WHEN invoking snakemake module with dry run option
@@ -111,11 +112,11 @@ def test_workflow_qc_tumor_only_hg19(
 
 
 def test_workflow_qc_tumor_normal_hg19(
-    tumor_normal_config_qc, sentieon_install_dir, sentieon_license, analysis_workflow_qc
+    tumor_normal_config_qc, sentieon_install_dir, sentieon_license
 ):
     # GIVEN a sample config dict and a snakefile
     workflow = "paired"
-    snakefile = get_snakefile(workflow, analysis_workflow_qc)
+    snakefile = get_snakefile(workflow, AnalysisWorkflow.BALSAMIC_QC)
     config_json = tumor_normal_config_qc
 
     # WHEN invoking snakemake module with dry run option
