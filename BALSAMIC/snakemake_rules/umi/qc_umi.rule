@@ -7,7 +7,7 @@ rule picard_umiaware:
         bam = umi_dir + "{sample}_consensusfiltered_umi.bam"
     output:
         bam = umi_qc_dir + "{sample}.picard.umiaware.bam",
-        duplicates = umi_qc_dir + "{sample}.umi.duplicatemetrics",
+        duplicates = umi_qc_dir + "{sample}.umi.duplicatemetrics.txt",
         umimetrics = umi_qc_dir + "{sample}.umi.metrics.txt"
     benchmark:
         Path(benchmark_dir, "picard_umiaware_{sample}.tsv").as_posix()
