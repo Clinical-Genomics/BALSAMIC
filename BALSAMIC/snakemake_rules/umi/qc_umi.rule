@@ -8,10 +8,10 @@ rule picard_umiaware:
     output:
         bam = umi_qc_dir + "{sample}.picard.umiaware.bam",
         duplicates = umi_qc_dir + "{sample}.umi.duplicatemetrics",
-        umimetrics = umi_qc_dir + "{sample}.umi.metrics"
+        umimetrics = umi_qc_dir + "{sample}.umi.metrics.txt"
     benchmark:
         Path(benchmark_dir, "picard_umiaware_{sample}.tsv").as_posix()
-    singularity: 
+    singularity:
         Path(singularity_image, config["bioinfo_tools"].get("picard") + ".sif").as_posix()
     params:
         sample_id = "{sample}"
@@ -36,7 +36,7 @@ rule picard_collecthsmetrics_umi:
         fa = config["reference"]["reference_genome"],
         fadict = (config["reference"]["reference_genome"]).replace(".fasta",".dict"),
     output:
-        mrkdup = umi_qc_dir + "{sample}.umi.collect_hsmetric"
+        mrkdup = umi_qc_dir + "{sample}.umi.collect_hsmetric.txt"
     benchmark:
         Path(benchmark_dir, "picard_collecthsmetrics_umi_{sample}.tsv").as_posix()
     singularity:
@@ -44,7 +44,7 @@ rule picard_collecthsmetrics_umi:
     params:
         baitsetname = os.path.basename(config["panel"]["capture_kit"]),
         sample_id = "{sample}"
-    threads: 
+    threads:
         get_threads(cluster_config, "CollectHsMetrics")
     message:
         "Collecting HSmetrics using Picardtools for {params.sample_id}"
