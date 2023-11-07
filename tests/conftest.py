@@ -245,6 +245,12 @@ def case_id_tumor_only_umi() -> str:
 
 
 @pytest.fixture(scope="session")
+def case_id_tumor_normal_umi() -> str:
+    """Creates mock case-id for TGA tumor-only UMI workflow."""
+    return "sample_tumor_normal_umi"
+
+
+@pytest.fixture(scope="session")
 def case_id_tumor_normal_fastqdir() -> str:
     """Mock case ID for dummy fastqdir."""
     return "sample_tumor_normal_fastqdir"
@@ -1359,6 +1365,163 @@ def tumor_normal_config_qc(
         analysis_dir,
         case_id_tumor_normal_qc,
         f"{case_id_tumor_normal_qc}.{FileType.JSON}",
+    ).as_posix()
+
+
+@pytest.fixture(scope="session")
+def tumor_only_umi_config(
+    case_id_tumor_only_umi: str,
+    tumor_sample_name: str,
+    balsamic_cache: str,
+    analysis_dir: str,
+    fastq_dir_tumor_only: str,
+    panel_bed_file: str,
+    background_variant_file: str,
+    sentieon_license: str,
+    sentieon_install_dir: str,
+    cadd_annotations: str,
+    swegen_snv_frequency_path: str,
+    swegen_sv_frequency_path: str,
+    clinical_snv_observations_path: str,
+    clinical_sv_observations_path: str,
+    somatic_sv_observations_path: str,
+    cancer_germline_snv_observations_path: str,
+    cancer_somatic_snv_observations_path: str,
+) -> str:
+    """Invoke balsamic config sample to create sample configuration file for tumor-only TGA."""
+
+    with mock.patch.dict(
+        MOCKED_OS_ENVIRON,
+        {
+            "SENTIEON_LICENSE": sentieon_license,
+            "SENTIEON_INSTALL_DIR": sentieon_install_dir,
+        },
+    ):
+        runner = CliRunner()
+        runner.invoke(
+            cli,
+            [
+                "config",
+                "case",
+                "--case-id",
+                case_id_tumor_only_umi,
+                "--analysis-workflow",
+                AnalysisWorkflow.BALSAMIC_UMI,
+                "--analysis-dir",
+                analysis_dir,
+                "--fastq-path",
+                fastq_dir_tumor_only,
+                "-p",
+                panel_bed_file,
+                "--balsamic-cache",
+                balsamic_cache,
+                "--background-variants",
+                background_variant_file,
+                "--tumor-sample-name",
+                tumor_sample_name,
+                "--cadd-annotations",
+                cadd_annotations,
+                "--swegen-snv",
+                swegen_snv_frequency_path,
+                "--swegen-sv",
+                swegen_sv_frequency_path,
+                "--clinical-snv-observations",
+                clinical_snv_observations_path,
+                "--clinical-sv-observations",
+                clinical_sv_observations_path,
+                "--cancer-somatic-sv-observations",
+                somatic_sv_observations_path,
+                "--cancer-germline-snv-observations",
+                cancer_germline_snv_observations_path,
+                "--cancer-somatic-snv-observations",
+                cancer_somatic_snv_observations_path,
+            ],
+        )
+
+    return Path(
+        analysis_dir,
+        case_id_tumor_only_umi,
+        f"{case_id_tumor_only_umi}.{FileType.JSON}",
+    ).as_posix()
+
+
+@pytest.fixture(scope="session")
+def tumor_normal_umi_config(
+    case_id_tumor_normal_umi: str,
+    tumor_sample_name: str,
+    normal_sample_name: str,
+    analysis_dir: str,
+    fastq_dir_tumor_normal: str,
+    balsamic_cache: str,
+    background_variant_file: str,
+    panel_bed_file: str,
+    sentieon_license: str,
+    sentieon_install_dir: str,
+    cadd_annotations: str,
+    swegen_snv_frequency_path: str,
+    swegen_sv_frequency_path: str,
+    clinical_snv_observations_path: str,
+    clinical_sv_observations_path: str,
+    somatic_sv_observations_path: str,
+    cancer_germline_snv_observations_path: str,
+    cancer_somatic_snv_observations_path: str,
+) -> str:
+    """Invoke balsamic config sample to create sample configuration file for tumor-normal TGA."""
+
+    with mock.patch.dict(
+        MOCKED_OS_ENVIRON,
+        {
+            "SENTIEON_LICENSE": sentieon_license,
+            "SENTIEON_INSTALL_DIR": sentieon_install_dir,
+        },
+    ):
+        runner = CliRunner()
+        runner.invoke(
+            cli,
+            [
+                "config",
+                "case",
+                "-p",
+                panel_bed_file,
+                "--case-id",
+                case_id_tumor_normal_umi,
+                "--analysis-workflow",
+                AnalysisWorkflow.BALSAMIC_UMI,
+                "--analysis-dir",
+                analysis_dir,
+                "--fastq-path",
+                fastq_dir_tumor_normal,
+                "--background-variants",
+                background_variant_file,
+                "--balsamic-cache",
+                balsamic_cache,
+                "--tumor-sample-name",
+                tumor_sample_name,
+                "--normal-sample-name",
+                normal_sample_name,
+                "--cadd-annotations",
+                cadd_annotations,
+                "--swegen-snv",
+                swegen_snv_frequency_path,
+                "--swegen-sv",
+                swegen_sv_frequency_path,
+                "--clinical-snv-observations",
+                clinical_snv_observations_path,
+                "--clinical-sv-observations",
+                clinical_sv_observations_path,
+                "--cancer-somatic-sv-observations",
+                somatic_sv_observations_path,
+                "--cancer-germline-snv-observations",
+                cancer_germline_snv_observations_path,
+                "--cancer-somatic-snv-observations",
+                cancer_somatic_snv_observations_path,
+            ],
+        )
+
+    return Path(
+        analysis_dir,
+        case_id_tumor_normal_umi,
+        f"{case_id_tumor_normal_umi}.{FileType.JSON}",
     ).as_posix()
 
 

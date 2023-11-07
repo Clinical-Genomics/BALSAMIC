@@ -255,6 +255,22 @@ def test_dag_graph_success_tumor_normal(tumor_normal_config: str):
     assert Path(json.load(open(tumor_normal_config))["analysis"]["dag"]).exists()
 
 
+def test_dag_graph_success_tumor_only_umi(tumor_only_umi_config: str):
+    """Test DAG graph building success."""
+    # WHEN creating config using standard CLI input and setting Sentieon env vars
+
+    # THEN DAG graph should be created successfully
+    assert Path(json.load(open(tumor_only_umi_config))["analysis"]["dag"]).exists()
+
+
+def test_dag_graph_success_tumor_normal_umi(tumor_normal_umi_config: str):
+    """Test DAG graph building success."""
+    # WHEN creating config using standard CLI input and setting Sentieon env vars
+
+    # THEN DAG graph should be created successfully
+    assert Path(json.load(open(tumor_normal_umi_config))["analysis"]["dag"]).exists()
+
+
 def test_dag_graph_success_tumor_only_wgs(
     tumor_only_wgs_config: str,
 ):
