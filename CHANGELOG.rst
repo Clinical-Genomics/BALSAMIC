@@ -82,6 +82,7 @@ Fixed:
 * CNVpytor container, fixing numpy version https://github.com/Clinical-Genomics/BALSAMIC/pull/1273
 * QC workflow store https://github.com/Clinical-Genomics/BALSAMIC/pull/1295
 * MultiQC rule missing input files https://github.com/Clinical-Genomics/BALSAMIC/pull/1321
+* `gens_preprocessing` rule missing python directive https://github.com/Clinical-Genomics/BALSAMIC/pull/1322
 
 Removed:
 ^^^^^^^^
