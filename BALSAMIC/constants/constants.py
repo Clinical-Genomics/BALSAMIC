@@ -26,6 +26,7 @@ class FileType(StrEnum):
     DICT: str = "dict"
     FAI: str = "fai"
     FASTA: str = "fasta"
+    FASTQ: str = "fastq"
     FLAT: str = "flat"
     GFF: str = "gff"
     GTF: str = "gtf"
