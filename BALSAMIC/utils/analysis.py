@@ -1,12 +1,11 @@
 """Utility functions for Balsamic analysis."""
 import os
 from pathlib import Path
-from typing import List, Any, Dict
+from typing import Any, Dict, List
 
 from BALSAMIC.constants.paths import (
     ASSETS_DIR,
     BALSAMIC_DIR,
-    CADD_ANNOTATIONS_DIR,
     CADD_ANNOTATIONS_CONTAINER_DIR,
 )
 from BALSAMIC.models.cache import CacheConfig
