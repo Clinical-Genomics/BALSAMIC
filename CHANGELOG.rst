@@ -6,16 +6,16 @@ Added:
 * Fastq concatenation https://github.com/Clinical-Genomics/BALSAMIC/pull/1069
 * `CADD` SNV references https://github.com/Clinical-Genomics/BALSAMIC/pull/1126
 * `CADD` SNV annotation https://github.com/Clinical-Genomics/BALSAMIC/pull/1150
-* Samtools stats, flagstat, idxstat to WGS workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1176
+* Samtools `stats`, `flagstat`, `idxstat` to WGS workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1176
 * Functionality for dynamically assigning fastq-info to sample dict in config from input fastq-dir https://github.com/Clinical-Genomics/BALSAMIC/pull/1176
-* Annotate SNVs with cancer germline SNV observations from loqusDB https://github.com/Clinical-Genomics/BALSAMIC/pull/1178
-* Annotate SNVs with somatic SNV observations from loqusDB https://github.com/Clinical-Genomics/BALSAMIC/pull/1187
+* Annotate SNVs with cancer germline SNV observations from Loqusdb https://github.com/Clinical-Genomics/BALSAMIC/pull/1178
+* Annotate SNVs with somatic SNV observations from Loqusdb https://github.com/Clinical-Genomics/BALSAMIC/pull/1187
 * Tests for Annotation with Cancer germline, somatic and clinical observations, and swegen frequencies https://github/Clinical-Genomics/BALSAMIC/pull/1190
-* Annotate SVs with somatic SV observations from loqusDB https://github.com/Clinical-Genomics/BALSAMIC/pull/1194
+* Annotate SVs with somatic SV observations from Loqusdb https://github.com/Clinical-Genomics/BALSAMIC/pull/1194
 * Support singularity bind paths with different destination directories https://github/Clinical-Genomics/BALSAMIC/pull/1211
 * Added `--rerun-trigger mtime` option to Snakemake command https://github.com/Clinical-Genomics/BALSAMIC/pull/1217
 * `CADD` container https://github.com/Clinical-Genomics/BALSAMIC/pull/1222
-* `Container ettiquette` to ReadtheDocs https://github.com/Clinical-Genomics/BALSAMIC/pull/1132
+* Container ettiquette to ReadtheDocs https://github.com/Clinical-Genomics/BALSAMIC/pull/1232
 * `htslib` (samtools, bcftools tabix) container https://github.com/Clinical-Genomics/BALSAMIC/pull/1234
 * Release version support for cache generation https://github.com/Clinical-Genomics/BALSAMIC/pull/1231
 * `CADD` scores for INDELs https://github.com/Clinical-Genomics/BALSAMIC/pull/1238
@@ -28,9 +28,8 @@ Added:
 * Picard HsMetrics and CollectGcBiasMetrics for WGS https://github.com/Clinical-Genomics/BALSAMIC/pull/1288
 * `LOH` to TGA workflow https://Clinical-Genomics/BALSAMIC/pull/1278
 * CNVs from PureCN to TGA workflow https://Clinical-Genomics/BALSAMIC/pull/1278
-* CNVkit Panel of Normal for gmsmyeloid_5.3 to TGA workflow https://Clinical-Genomics/BALSAMIC/pull/1278
 * Command-line arguments and rules for creation of GENS files https://github.com/Clinical-Genomics/BALSAMIC/pull/1279
-* Somatic and germline loqusDB annotation to ReadtheDocs https://github.com/Clinical-Genomics/BALSAMIC/pull/1317
+* Somatic and germline Loqusdb annotation to ReadtheDocs https://github.com/Clinical-Genomics/BALSAMIC/pull/1317
 
 Changed:
 ^^^^^^^^
