@@ -15,6 +15,7 @@ from _pytest.tmpdir import TempPathFactory
 from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV, SampleType, SequencingType
 from BALSAMIC.constants.cache import CacheVersion
 from BALSAMIC.constants.cluster import ClusterConfigType
+from BALSAMIC.constants.constants import FileType
 from BALSAMIC.constants.paths import CONTAINERS_DIR
 from BALSAMIC.models.config import ConfigModel, FastqInfoModel
 from BALSAMIC.utils.cli import (
@@ -279,8 +280,8 @@ def test_get_file_extension_get_any_ext():
 
 def test_get_file_extension_known_ext():
     # GIVEN a dummy file string with a known string
-    dummy_file = "hassan.fastq.gz"
-    actual_extension = "fastq.gz"
+    dummy_file = f"dummy.{FileType.FASTQ}.{FileType.GZ}"
+    actual_extension = f"{FileType.FASTQ}.{FileType.GZ}"
 
     # WHEN extracting the extension
     file_extension = get_file_extension(dummy_file)
@@ -316,7 +317,7 @@ def test_get_snakefile():
     ]
 
     # WHEN asking to see snakefile for paired
-    for reference_genome in ["hg19", "hg38", "canfam3"]:
+    for _reference_genome in ["hg19", "hg38", "canfam3"]:
         for analysis_type, analysis_workflow in workflow:
             snakefile = get_snakefile(analysis_type, analysis_workflow)
 
