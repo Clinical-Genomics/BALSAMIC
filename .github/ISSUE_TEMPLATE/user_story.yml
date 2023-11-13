@@ -44,7 +44,7 @@ body:
     required: false
 - type: checkboxes
   attributes:
-    label: Risk assessment
+    label: Risk assessment needed
     description: Is a risk assessment needed or not for this user story?
     options:
       - label: Needed
