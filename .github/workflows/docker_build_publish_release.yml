@@ -3,6 +3,13 @@ on:
   pull_request:
     branches:
       - "master"
+    types: [opened, reopened]
+  push:
+    branches:
+      - "release_v**"
+    paths:
+      - "BALSAMIC/containers/**"
+
 jobs:
   main:
     name: Build and publish
