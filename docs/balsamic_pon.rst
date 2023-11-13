@@ -1,6 +1,14 @@
 Panel of Normals (PON)
 ======================
 
+Currently two PON-methods are implemented in BALSAMIC to correct for biases and normalise coverage values:
+- For producing more accurate CNV variant-calls using ``CNVkit`` for TGA cases.
+- To produce normalised CN-profiles for WGS cases visualised in ``GENS``.
+
+
+CNVkit PON
+--------------
+
 BALSAMIC provides a functionality to generate a Panel of Normals (PON) for more accurate copy-number filtering of false positives and that can be used as an input for the ``CNVkit`` variant caller.
 
 For a more detailed PON use case, please refer to the following documentation:
@@ -57,4 +65,5 @@ BALSAMIC can use a PON reference file if its provided while running CNVkit analy
 .. note::
 
     In the absence of a PON reference file, CNVkit is capable of generating a flat reference (tumor-only) or normal reference (tumor-normal) file on its own to correct for GC content and regional coverage
+
 
