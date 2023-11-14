@@ -7,8 +7,8 @@ rule bcftools_filter_tnscope_research_tumor_normal:
   input:
     vcf_snv_research = vep_dir + "{var_type}.somatic.{case_name}.tnscope.research.vcf.gz",
   output:
-    vcf_pass_tnscope = vep_dir + "{var_type}.somatic.{case_name}.tnscope.research.filtered.pass.vcf.gz",
-    bcftools_counts_research = vep_dir + "{var_type}.somatic.{case_name}.tnscope.research.filtered.pass.stats"
+    vcf_pass_tnscope = vep_dir + "{var_type}.somatic.{case_name}.tnscope.research.filtered.vcf.gz",
+    bcftools_counts_research = vep_dir + "{var_type}.somatic.{case_name}.tnscope.research.filtered.stats"
   benchmark:
     Path(benchmark_dir, 'bcftools_filter_tnscope_research_tumor_normal_' + "{var_type}.somatic.{case_name}.tsv").as_posix()
   singularity:
@@ -26,8 +26,7 @@ rule bcftools_filter_tnscope_research_tumor_normal:
     """
 bcftools view  -f PASS,triallelic_site --threads {threads} {input.vcf_snv_research} |\
 bcftools filter --threads {threads} --include 'INFO/GNOMADAF_popmax <= {params.pop_freq[0]} || INFO/GNOMADAF_popmax == \".\"' --soft-filter '{params.pop_freq[1]}' --mode '+' |\
-bcftools filter --threads {threads} --include 'INFO/SWEGENAF <= {params.swegen_freq[0]} || INFO/SWEGENAF == \".\"' --soft-filter '{params.swegen_freq[1]}' --mode '+' |\
-bcftools view --threads {threads} -i 'FILTER == "PASS" || FILTER == "triallelic_site"' -o {output.vcf_pass_tnscope} -O z;
+bcftools filter --threads {threads} --include 'INFO/SWEGENAF <= {params.swegen_freq[0]} || INFO/SWEGENAF == \".\"' --soft-filter '{params.swegen_freq[1]}' --mode '+' -o {output.vcf_pass_tnscope} -O z;
 
 tabix -p vcf -f {output.vcf_pass_tnscope};
 
@@ -40,8 +39,8 @@ rule bcftools_filter_tnscope_clinical_tumor_normal:
     vcf_snv_clinical = vep_dir + "{var_type}.somatic.{case_name}.tnscope.clinical.vcf.gz",
     namemap = vep_dir + "status_to_sample_id_namemap"
   output:
-    vcf_pass_tnscope = vep_dir + "{var_type}.somatic.{case_name}.tnscope.clinical.filtered.pass.vcf.gz",
-    bcftools_counts_clinical = vep_dir + "{var_type}.somatic.{case_name}.tnscope.clinical.filtered.pass.stats"
+    vcf_pass_tnscope = vep_dir + "{var_type}.somatic.{case_name}.tnscope.clinical.filtered.vcf.gz",
+    bcftools_counts_clinical = vep_dir + "{var_type}.somatic.{case_name}.tnscope.clinical.filtered.stats"
   benchmark:
     Path(benchmark_dir, 'bcftools_filter_tnscope_clinical_tumor_normal_' + "{var_type}.somatic.{case_name}.tsv").as_posix()
   singularity:
@@ -62,8 +61,7 @@ bcftools reheader --threads {threads} -s {input.namemap} {input.vcf_snv_clinical
 bcftools view -f PASS,triallelic_site --threads {threads} | \
 bcftools filter --threads {threads} --include 'INFO/GNOMADAF_popmax <= {params.pop_freq[0]} || INFO/GNOMADAF_popmax == \".\"' --soft-filter '{params.pop_freq[1]}' --mode '+' | \
 bcftools filter --threads {threads} --include 'INFO/SWEGENAF <= {params.swegen_freq[0]} || INFO/SWEGENAF == \".\"' --soft-filter '{params.swegen_freq[1]}' --mode '+' |\
-bcftools filter --threads {threads} --include 'INFO/Frq <= {params.loqusdb_clinical_freq[0]} || INFO/Frq == \".\"' --soft-filter '{params.loqusdb_clinical_freq[1]}' --mode '+' |\
-bcftools view --threads {threads} -i 'FILTER == "PASS" || FILTER == "triallelic_site"' -O z -o {output.vcf_pass_tnscope};
+bcftools filter --threads {threads} --include 'INFO/Frq <= {params.loqusdb_clinical_freq[0]} || INFO/Frq == \".\"' --soft-filter '{params.loqusdb_clinical_freq[1]}' --mode '+' -O z -o {output.vcf_pass_tnscope};
 
 tabix -p vcf -f {output.vcf_pass_tnscope};
 

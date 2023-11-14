@@ -432,12 +432,12 @@ analysis_specific_results.extend(
 
 # Filtered and passed post annotation research VCFs
 analysis_specific_results.extend(
-    expand(vep_dir + "{vcf}.research.filtered.pass.vcf.gz", vcf=get_vcf(config, somatic_caller, [case_id]))
+    expand(vep_dir + "{vcf}.research.final.vcf.gz", vcf=get_vcf(config, somatic_caller, [case_id]))
 )
 
 # Filtered and passed post annotation clinical VCFs
 analysis_specific_results.extend(
-    expand(vep_dir + "{vcf}.clinical.filtered.pass.vcf.gz", vcf=get_vcf(config, somatic_caller, [case_id]))
+    expand(vep_dir + "{vcf}.clinical.final.vcf.gz", vcf=get_vcf(config, somatic_caller, [case_id]))
 )
 
 

@@ -1,0 +1,22 @@
+
+rule bcftools_filter_qual:
+  input:
+    vep_dir + "{vcf}.research.filtered.vcf.gz"
+  output:
+    vep_dir + "{vcf}.research.filtered.qual.vcf.gz"
+  benchmark:
+      Path(benchmark_dir,'bcftools_filter_tnscope_clinical_tumor_only_' + "{var_type}.somatic.{case_name}.tsv").as_posix()
+  singularity:
+      Path(singularity_image,config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
+  params:
+      case_name='{case_name}'
+  threads:
+    get_threads(cluster_config,'bcftools_filter_tnscope_clinical_tumor_only')
+  message:
+    "Filtering WGS tumor-only tnscope annotated clinical variants using bcftools for {params.case_name}"
+  shell:
+    """
+  grep -v '^@' {input.wgs_calling_file} > {input.wgs_calling_file}.bed;
+
+  bcftools view --regions-file {input.wgs_calling_file}.bed {input.vcf_snv_clinical}
+    """
