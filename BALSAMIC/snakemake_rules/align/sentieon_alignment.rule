@@ -107,7 +107,7 @@ rule samtools_sort_index:
     shell:
         """
 samtools sort --threads {threads} -o {output.bam} {input.bam};
-samtools index --threads {threads} {output.bam};
+samtools index -@ {threads} {output.bam};
         """
 
 
