@@ -26,8 +26,8 @@ Added:
 * `GATK` container https://github.com/Clinical-Genomics/BALSAMIC/pull/1266
 * Resolved FASTQ paths to sample dictionary (balsamic logging) https://github.com/Clinical-Genomics/BALSAMIC/pull/1275
 * Picard HsMetrics and CollectGcBiasMetrics for WGS https://github.com/Clinical-Genomics/BALSAMIC/pull/1288
-* `LOH` to TGA workflow https://Clinical-Genomics/BALSAMIC/pull/1278
-* CNVs from PureCN to TGA workflow https://Clinical-Genomics/BALSAMIC/pull/1278
+* `LOH` to TGA workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1278
+* CNVs from PureCN to TGA workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1278
 * Command-line arguments and rules for creation of GENS files https://github.com/Clinical-Genomics/BALSAMIC/pull/1279
 * Somatic and germline Loqusdb annotation to ReadtheDocs https://github.com/Clinical-Genomics/BALSAMIC/pull/1317
 
