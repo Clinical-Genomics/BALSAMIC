@@ -82,6 +82,7 @@ requirements: List[str] = [
     "Pygments==2.15.1",
     "pyOpenSSL==23.2.0",
     "pyparsing==3.0.9",
+    "pypdf==3.17.1",
     "PyPDF2==3.0.1",
     "pytest==7.4.0",
     "python-dateutil==2.8.2",
