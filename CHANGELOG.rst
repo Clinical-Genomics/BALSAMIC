@@ -30,10 +30,6 @@ Added:
 * CNVs from PureCN to TGA workflow https://Clinical-Genomics/BALSAMIC/pull/1278
 * Command-line arguments and rules for creation of GENS files https://github.com/Clinical-Genomics/BALSAMIC/pull/1279
 * Somatic and germline Loqusdb annotation to ReadtheDocs https://github.com/Clinical-Genomics/BALSAMIC/pull/1317
-* Sleep rule before start to fix key_error https://github.com/Clinical-Genomics/BALSAMIC/pull/1310
-
-
->>>>>>> add_sleep_rule_before_start
 
 Changed:
 ^^^^^^^^
