@@ -364,7 +364,7 @@ def test_get_final_bam_name(balsamic_model: ConfigModel):
     )
 
     # Then retrieved final bam names should match the expected format and be identical regardless of request parameter
-    expected_final_bam_name = f"{bam_dir}{sample_type}.{sample_name}.dedup.bam"
+    expected_final_bam_name = f"{bam_dir}{sample_type}.{sample_name}.dedup_sorted.bam"
     assert expected_final_bam_name == bam_name_sample_name
     assert bam_name_sample_name == bam_name_sample_type
 
