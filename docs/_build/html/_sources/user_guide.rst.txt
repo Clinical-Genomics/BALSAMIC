@@ -11,7 +11,7 @@ Previous versions of BALSAMIC only accepted one fastq-pair per sample, which req
 
 The current version BALSAMIC takes ``--fastq-path`` instead which is a path to a directory containing ALL fastq-files you want to include in the analysis, for tumor and normal (if it exists for the analysis).
 
-**NOTE**: The fastq-files in ``--fastq-path`` need to contain the names from ``--tumor-sample-name [sample_name]`` and ``--normal-sample-name [sample_name]`` as a sub-string in the fastq-names to correctly assign them to their respective sample.
+**NOTE**: The fastq-files in ``--fastq-path`` need to contain the names from ``--tumor-sample-name [sample_name]`` and ``--normal-sample-name [sample_name]`` as a sub-string in the fastq-names to identify and correctly assign them to their correct sample.
 
 Running a test sample
 ---------------------
