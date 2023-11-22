@@ -88,7 +88,7 @@ To create a GENS PON using the BALSAMIC workflow you need to follow these steps:
 
 1. Create a genome-interval file.
 
-.. note::
+**Note:**
 
     These are the genome bins within which the coverage will be calculated, and consequently is the lowest resolution of viewing the CN-profile.
 
