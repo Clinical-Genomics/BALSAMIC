@@ -113,7 +113,7 @@ This is the setting we used:
 
 3. Run the BALSAMIC PON workflow:
 
-.. note::
+**Note:**
     If you are following these instructions using 100 WGS samples, you require access to compute-nodes with a lot of memory (one of our jobs crashed at 117GB).
 
 .. code-block::
