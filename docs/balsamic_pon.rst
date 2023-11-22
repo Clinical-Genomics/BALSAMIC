@@ -88,7 +88,7 @@ To create a GENS PON using the BALSAMIC workflow you need to follow these steps:
 
 1. Create a genome-interval file.
 
-.. note::
+**Note:**
 
     These are the genome bins within which the coverage will be calculated, and consequently is the lowest resolution of viewing the CN-profile.
 
@@ -101,7 +101,7 @@ This is the setting we used:
 
 2. Identify the samples to be included in the PON and add or link their ``fastq`` files to the ``fastq`` directory
 
-.. note::
+**Note:**
 
     It is recommended to include approximately 100 samples of the same gender, using the same library preparation and sequencing method as your intended analysis-samples.
 
@@ -113,7 +113,7 @@ This is the setting we used:
 
 3. Run the BALSAMIC PON workflow:
 
-.. note::
+**Note:**
     If you are following these instructions using 100 WGS samples, you require access to compute-nodes with a lot of memory (one of our jobs crashed at 117GB).
 
 .. code-block::
