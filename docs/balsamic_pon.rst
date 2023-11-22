@@ -101,7 +101,7 @@ This is the setting we used:
 
 2. Identify the samples to be included in the PON and add or link their ``fastq`` files to the ``fastq`` directory
 
-.. note::
+**Note:**
 
     It is recommended to include approximately 100 samples of the same gender, using the same library preparation and sequencing method as your intended analysis-samples.
 
