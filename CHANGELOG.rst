@@ -66,6 +66,7 @@ Changed:
 * Split analysis model into config and params models https://github.com/Clinical-Genomics/BALSAMIC/pull/1306
 * Renamed name in sample column of final clincial vcfs https://github.com/Clinical-Genomics/BALSAMIC/pull/1310
 * Update Gens HK tags https://github.com/Clinical-Genomics/BALSAMIC/pull/1319
+* Updated ReadtheDocs with GENS and structural pipeline changes https://github.com/Clinical-Genomics/BALSAMIC/pull/1327
 
 Fixed:
 ^^^^^^
