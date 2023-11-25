@@ -37,7 +37,6 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
             "snakemake_rules/quality_control/samtools_qc.rule",
         ],
         "align": [
-            "snakemake_rules/align/sentieon_alignment.rule",
             "snakemake_rules/align/bam_compress.rule",
         ],
         "varcall": [
@@ -66,7 +65,11 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
             "snakemake_rules/umi/mergetype_tumor_umi.rule",
             "snakemake_rules/umi/generate_AF_tables.rule",
         ],
+        "concatenation": [
+            "snakemake_rules/concatenation/concatenation.rule",
+        ],
         "align": [
+            "snakemake_rules/align/bwa_mem_picard.rule",
             "snakemake_rules/umi/sentieon_umiextract.rule",
             "snakemake_rules/umi/sentieon_consensuscall.rule",
         ],
@@ -97,7 +100,11 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
             "snakemake_rules/quality_control/contest.rule",
             "snakemake_rules/umi/generate_AF_tables.rule",
         ],
+        "concatenation": [
+            "snakemake_rules/concatenation/concatenation.rule",
+        ],
         "align": [
+            "snakemake_rules/align/bwa_mem_picard.rule",
             "snakemake_rules/umi/sentieon_umiextract.rule",
             "snakemake_rules/umi/sentieon_consensuscall.rule",
         ],
@@ -116,6 +123,9 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
         ],
     },
     "single_wgs": {
+        "align": [
+            "snakemake_rules/align/sentieon_alignment.rule"
+        ],
         "qc": [
             "snakemake_rules/quality_control/fastp_wgs.rule",
             "snakemake_rules/quality_control/sentieon_qc_metrics.rule",
@@ -134,6 +144,9 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
         ],
     },
     "paired_wgs": {
+        "align": [
+            "snakemake_rules/align/sentieon_alignment.rule"
+        ],
         "qc": [
             "snakemake_rules/quality_control/fastp_wgs.rule",
             "snakemake_rules/quality_control/sentieon_qc_metrics.rule",
