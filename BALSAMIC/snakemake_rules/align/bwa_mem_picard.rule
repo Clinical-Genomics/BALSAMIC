@@ -72,13 +72,35 @@ export TMPDIR={params.tmpdir};
 picard -Djava.io.tmpdir={params.tmpdir} -Xmx{params.mem} \
 MarkDuplicates \
 INPUT={input} \
-OUTPUT={output.mrkdup} \
+OUTPUT={output.mrkdup}_markdup.bam \
 VALIDATION_STRINGENCY=SILENT \
 MAX_FILE_HANDLES_FOR_READ_ENDS_MAP=1000 \
 REMOVE_DUPLICATES=FALSE \
 METRICS_FILE='{output.picard_stats}';
 
-samtools index {output.mrkdup};
+samtools index {output.mrkdup}_markdup.bam ;
+
+picard -Xmx150g FixMateInformation -ADD_MATE_CIGAR true -MAX_RECORDS_IN_RAM 10000000 -CREATE_INDEX true -CREATE_MD5_FILE true" \
+-TMP_DIR {params.tmpdir} \
+-INPUT {output.mrkdup}_markdup.bam \
+-OUTPUT {params.tmpdir}/{wildcards.sample_type}.fixed.bam;
+
+samtools view --threads {threads} -O BAM -f 4 {params.tmpdir}/{wildcards.sample_type}.fixed.bam \
+-o {params.tmpdir}/{wildcards.sample_type}.fixed.um.bam;
+
+samtools index {params.tmpdir}/{wildcards.sample_type}.fixed.um.bam;
+
+samtools view --threads {threads} -O BAM -F 4 {params.tmpdir}/{wildcards.sample_type}.fixed.bam \
+-o {params.tmpdir}/{wildcards.sample_type}.fixed.m.bam;
+
+samtools index {params.tmpdir}/{wildcards.sample_type}.fixed.m.bam;
+
+picard -Xmx150g AddOrReplaceReadGroups -RGPU ILLUMINAi -RGID {wildcards.sample_type} -RGSM {wildcards.sample_type} -RGPL ILLUMINAi -RGLB ILLUMINAi -MAX_RECORDS_IN_RAM 1000000 -CREATE_INDEX true -CREATE_MD5_FILE true \
+-TMP_DIR {params.tmpdir} \
+-INPUT {params.tmpdir}/{wildcards.sample_type}.fixed.m.bam \
+-OUTPUT {output.mrkdup}; 
+
+samtools index {output.mrkdup}; 
 
 rm -rf {params.tmpdir};
         """
