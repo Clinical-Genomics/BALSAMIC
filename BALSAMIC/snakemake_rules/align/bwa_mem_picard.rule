@@ -80,7 +80,7 @@ METRICS_FILE='{output.picard_stats}';
 
 samtools index {output.mrkdup}_markdup.bam ;
 
-picard -Xmx150g FixMateInformation -ADD_MATE_CIGAR true -MAX_RECORDS_IN_RAM 10000000 -CREATE_INDEX true -CREATE_MD5_FILE true" \
+picard -Xmx150g FixMateInformation -ADD_MATE_CIGAR true -MAX_RECORDS_IN_RAM 10000000 -CREATE_INDEX true -CREATE_MD5_FILE true \
 -TMP_DIR {params.tmpdir} \
 -INPUT {output.mrkdup}_markdup.bam \
 -OUTPUT {params.tmpdir}/{wildcards.sample_type}.fixed.bam;
