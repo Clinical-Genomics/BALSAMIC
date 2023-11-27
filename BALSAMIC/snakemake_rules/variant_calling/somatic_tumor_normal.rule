@@ -6,8 +6,8 @@
 rule vardict_tumor_normal:
     input:
         fa = config["reference"]["reference_genome"],
-        bamN = expand(bam_dir + "normal.{sample}.dedup_sorted_postprocessed.bam", sample=normal_sample),
-        bamT = expand(bam_dir + "tumor.{sample}.dedup_sorted_postprocessed.bam", sample=tumor_sample),
+        bamN = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = normal_sample),
+        bamT = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
         bed = vcf_dir + "split_bed/{bedchrom}." + capture_kit,
     output:
         temp(vcf_dir + "vardict/split_vcf/{bedchrom}_vardict.vcf.gz")
