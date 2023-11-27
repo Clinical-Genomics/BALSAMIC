@@ -39,7 +39,7 @@ samtools index {params.tmpdir}/{wildcards.sample_type}.m.bam ;
 picard -Xmx75g AddOrReplaceReadGroups -RGPU ILLUMINAi -RGID {wildcards.sample_type} -RGSM {wildcards.sample_type} -RGPL ILLUMINAi -RGLB ILLUMINAi -MAX_RECORDS_IN_RAM 1000000 -CREATE_INDEX true -CREATE_MD5_FILE true \
 -TMP_DIR {params.tmpdir} \
 -INPUT {params.tmpdir}/{wildcards.sample_type}.m.bam  \
--OUTPUT {output.mrkdup}; 
+-OUTPUT {output.postprocessed_bam}; 
 
 samtools index {output.postprocessed_bam}; 
 
