@@ -15,10 +15,6 @@
 		"time": "01:00:00",
 		"n": 4
 	},
-	"postprocess_bam": {
-		"time": "03:00:00",
-		"n": 12
-	},
 	"finalize_gens_outputfiles": {
 		"time": "01:00:00",
 		"n": 2

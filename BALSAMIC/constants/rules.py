@@ -69,7 +69,6 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
         "align": [
             "snakemake_rules/umi/sentieon_umiextract.rule",
             "snakemake_rules/umi/sentieon_consensuscall.rule",
-            "snakemake_rules/align/postprocess_bam.rule",
         ],
         "varcall": [
             "snakemake_rules/variant_calling/germline.rule",
@@ -101,7 +100,6 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
         "align": [
             "snakemake_rules/umi/sentieon_umiextract.rule",
             "snakemake_rules/umi/sentieon_consensuscall.rule",
-            "snakemake_rules/align/postprocess_bam.rule",
         ],
         "varcall": [
             "snakemake_rules/variant_calling/germline.rule",
