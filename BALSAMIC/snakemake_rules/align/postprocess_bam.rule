@@ -1,0 +1,47 @@
+# vim: syntax=python tabstop=4 expandtab
+# coding: utf-8
+
+# Following rule will take input fastq files, align them using bwa mem, and convert the output to sam format
+
+
+
+rule postprocess_bam:
+    input:
+        bam = Path(bam_dir,"{sample_type}.{sample}.dedup_sorted.bam").as_posix()
+    output:
+        postprocessed_bam = Path(bam_dir, "{sample_type}.{sample}.dedup_sorted_postprocessed.bam").as_posix(),
+    benchmark:
+        Path(benchmark_dir,"postprocess_bam_{sample_type}.{sample}.tsv").as_posix()
+    singularity:
+        Path(singularity_image,config["bioinfo_tools"].get("picard") + ".sif").as_posix()
+    params:
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
+        sample_id = "{sample}"
+    threads:
+        get_threads(cluster_config, "postprocess_bam")
+    message:
+        "Samtools remove unmapped reads and collapse readgroups for sample: {params.sample_id}"
+    shell:
+        """
+mkdir -p {params.tmpdir};
+export TMPDIR={params.tmpdir};
+
+samtools view --threads {threads} -O BAM -f 4 {input.bam} \
+-o {params.tmpdir}/{wildcards.sample_type}.um.bam ;
+
+samtools index {params.tmpdir}/{wildcards.sample_type}.um.bam ;
+
+samtools view --threads {threads} -O BAM -F 4 {params.tmpdir}/{wildcards.sample_type}.um.bam \
+-o {params.tmpdir}/{wildcards.sample_type}.m.bam ;
+
+samtools index {params.tmpdir}/{wildcards.sample_type}.m.bam ;
+
+picard -Xmx75g AddOrReplaceReadGroups -RGPU ILLUMINAi -RGID {wildcards.sample_type} -RGSM {wildcards.sample_type} -RGPL ILLUMINAi -RGLB ILLUMINAi -MAX_RECORDS_IN_RAM 1000000 -CREATE_INDEX true -CREATE_MD5_FILE true \
+-TMP_DIR {params.tmpdir} \
+-INPUT {params.tmpdir}/{wildcards.sample_type}.m.bam  \
+-OUTPUT {output.mrkdup}; 
+
+samtools index {output.postprocessed_bam}; 
+
+rm -rf {params.tmpdir};
+        """

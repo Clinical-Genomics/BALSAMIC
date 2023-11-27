@@ -4,7 +4,7 @@
 rule vardict_tumor_only:
     input:
         fa = config["reference"]["reference_genome"],
-        bamT = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
+        bamT = expand(bam_dir + "tumor.{sample}.dedup_sorted_postprocessed.bam", sample=tumor_sample),
         bed = vcf_dir + "split_bed/{bedchrom}." + capture_kit,
     output:
         temp(vcf_dir + "vardict/split_vcf/{bedchrom}_vardict.vcf.gz")
@@ -29,7 +29,7 @@ export PERL5LIB=;
 
 mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
-export VAR_DICT_OPTS='\"-Djava.io.tmpdir={params.tmpdir}\" \"-Xmx48G\"'; 
+export VAR_DICT_OPTS='\"-Djava.io.tmpdir={params.tmpdir}\" \"-Xmx45G\"'; 
 
 vardict-java -u -I 600 \
 -G {input.fa} \

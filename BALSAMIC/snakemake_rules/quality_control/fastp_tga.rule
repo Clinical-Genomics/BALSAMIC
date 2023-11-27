@@ -3,33 +3,33 @@
 rule fastp_umi_trim:
     """Fastq TGA data pre-processing to remove UMIs."""
     input:
-        concat_fwd=fastq_dir + "{sample}_concat_R_1.fp.fastq.gz",
-        concat_rev=fastq_dir + "{sample}_concat_R_2.fp.fastq.gz"
+        fastq_r1 = lambda wildcards: config_model.get_fastq_by_fastq_pattern(wildcards.fastq_pattern, FastqName.FWD),
+        fastq_r2 = lambda wildcards: config_model.get_fastq_by_fastq_pattern(wildcards.fastq_pattern, FastqName.REV)
     output:
-        fastq_r1 = temp(fastq_dir + "{sample}_1.umi_removed.fastq.gz"),
-        fastq_r2 = temp(fastq_dir + "{sample}_2.umi_removed.fastq.gz"),
-        json = qc_dir + "fastp/{sample}_umi_removed_fastp.json",
-        html = qc_dir + "fastp/{sample}_umi_removed_fastp.html",
+        fastq_r1 = temp(fastq_dir + "{fastq_pattern}_1.umi_removed.fastq.gz"),
+        fastq_r2 = temp(fastq_dir + "{fastq_pattern}_2.umi_removed.fastq.gz"),
+        json = qc_dir + "fastp/{fastq_pattern}_umi_removed_fastp.json",
+        html = qc_dir + "fastp/{fastq_pattern}_umi_removed_fastp.html",
     benchmark:
-        Path(benchmark_dir, "fastp_remove_umi" + "{sample}.tsv").as_posix()
+        Path(benchmark_dir, "fastp_remove_umi" + "{fastq_pattern}.tsv").as_posix()
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("fastp") + ".sif").as_posix()
     params:
         tmpdir = tmp_dir,
         fastp_trim_umi = " ".join(fastp_parameters["fastp_trim_umi"]),
-        sample = "{sample}",
+        fastq_pattern = "{fastq_pattern}",
     threads:
         get_threads(cluster_config, 'fastp_remove_umi')
     message:
-        "Trimming away UMI sequences for fastqs in sample: {params.sample}"
+        "Trimming away UMI sequences for fastqs in fastq pattern: {params.fastq_pattern}"
     shell:
         """
 export TMPDIR={params.tmpdir};
 
 fastp \
 --thread {threads} \
---in1 {input.concat_fwd} \
---in2 {input.concat_rev} \
+--in1 {input.fastq_r1} \
+--in2 {input.fastq_r2} \
 --out1 {output.fastq_r1} \
 --out2 {output.fastq_r2} \
 --json {output.json} \
@@ -45,26 +45,26 @@ fastp \
 rule fastp_quality_trim_tga:
     """Fastq data pre-processing after removal of UMIs."""
     input:
-        fastq_r1 = fastq_dir + "{sample}_1.umi_removed.fastq.gz",
-        fastq_r2 = fastq_dir + "{sample}_2.umi_removed.fastq.gz"
+        fastq_r1 = fastq_dir + "{fastq_pattern}_1.umi_removed.fastq.gz",
+        fastq_r2 = fastq_dir + "{fastq_pattern}_2.umi_removed.fastq.gz"
     output:
-        fastq_r1 = temp(fastq_dir + "{sample}_1.fp.fastq.gz"),
-        fastq_r2 = temp(fastq_dir + "{sample}_2.fp.fastq.gz"),
-        json = qc_dir + "fastp/{sample}_fastp.json",
-        html = qc_dir + "fastp/{sample}_fastp.html"
+        fastq_r1 = temp(fastq_dir + "{fastq_pattern}_1.fp.fastq.gz"),
+        fastq_r2 = temp(fastq_dir + "{fastq_pattern}_2.fp.fastq.gz"),
+        json = qc_dir + "fastp/{fastq_pattern}_fastp.json",
+        html = qc_dir + "fastp/{fastq_pattern}_fastp.html"
     benchmark:
-        Path(benchmark_dir, "fastp_quality_trim" + "{sample}.tsv").as_posix()
+        Path(benchmark_dir, "fastp_quality_trim" + "{fastq_pattern}.tsv").as_posix()
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("fastp") + ".sif").as_posix()
     params:
         tmpdir = tmp_dir,
         quality_trim = " ".join(fastp_parameters["fastp_trim_qual"]),
         adapter_trim = " ".join(fastp_parameters["fastp_trim_adapter"]),
-        sample = "{sample}"
+        fastq_pattern = "{fastq_pattern}"
     threads:
         get_threads(cluster_config, 'fastp_quality_trim')
     message:
-        "Quality and adapter trimming for fastqs for fastq pattern: {params.sample}"
+        "Quality and adapter trimming for fastqs for fastq pattern: {params.fastq_pattern}"
     shell:
         """
 export TMPDIR={params.tmpdir};
