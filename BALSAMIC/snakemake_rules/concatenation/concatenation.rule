@@ -4,10 +4,12 @@
 rule concatenate:
     """Merge fastq files per lane into a single forward and reverse fastq."""
     input:
-        fwd_fastqs = lambda wildcards: config_model.get_all_fastqs_for_sample(
-            sample_name = wildcards.sample, fastq_types = [FastqName.FWD]),
-        rev_fastqs = lambda wildcards: config_model.get_all_fastqs_for_sample(
-            sample_name = wildcards.sample, fastq_types = [FastqName.REV])
+        fastqs_fwd=lambda wildcards: config_model.get_all_fastqs_for_sample(
+            sample_name=wildcards.sample, fastq_types=[FastqName.FWD]
+        ),
+        fastqs_rev=lambda wildcards: config_model.get_all_fastqs_for_sample(
+            sample_name=wildcards.sample, fastq_types=[FastqName.REV]
+        ),
     output:
         concat_fwd = fastq_dir + "{sample}_concat_R_1.fp.fastq.gz",
         concat_rev = fastq_dir + "{sample}_concat_R_2.fp.fastq.gz"
@@ -16,13 +18,12 @@ rule concatenate:
     params:
         fastq_dir = fastq_dir,
         sample = "{sample}",
-        read = "{read}"
     threads:
         get_threads(cluster_config, "concatenate")
     message:
-        "Sample {params.sample} and read {params.read} FASTQ concatenation"
+        "Sample {params.sample} FASTQ concatenation"
     shell:
         """
-        cat {input.fwd_fastqs} > {output.concat_fwd}
-        cat {input.rev_fastqs} > {output.concat_rev}
+        cat {input.fastqs_fwd} > {output.concat_fwd}
+        cat {input.fastqs_rev} > {output.concat_rev}
         """

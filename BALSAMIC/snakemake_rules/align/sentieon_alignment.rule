@@ -85,7 +85,29 @@ shell_bam_files=$(echo {input.bam_files} | sed 's/ / -i /g') ;
 --metrics {output.metrics} \
 {output.bam};
 
+
 sed 's/^LIBRARY/\\n## METRICS CLASS\tpicard\.sam\.DuplicationMetrics\\nLIBRARY/' -i {output.metrics}
+        """
+
+rule samtools_sort_index:
+    input:
+        bam = Path(bam_dir,"{sample_type}.{sample}.dedup.bam").as_posix(),
+    output:
+        bam = Path(bam_dir,"{sample_type}.{sample}.dedup_sorted.bam").as_posix(),
+    benchmark:
+        Path(benchmark_dir,"samtools_sort_index_{sample_type}_{sample}.tsv").as_posix()
+    singularity:
+        Path(singularity_image,config["bioinfo_tools"].get("samtools") + ".sif").as_posix()
+    params:
+        sample_id="{sample}"
+    threads:
+        get_threads(cluster_config,"samtools_qc")
+    message:
+        "Calculating alignment stats for sample: {params.sample_id}"
+    shell:
+        """
+samtools sort --threads {threads} -o {output.bam} {input.bam};
+samtools index -@ {threads} {output.bam};
         """
 
 
@@ -93,7 +115,7 @@ rule sentieon_realign:
     input:
         ref = config["reference"]["reference_genome"],
         mills = config["reference"]["mills_1kg"],
-        bam = Path(bam_dir, "{sample_type}.{sample}.dedup.bam").as_posix(),
+        bam = Path(bam_dir, "{sample_type}.{sample}.dedup_sorted.bam").as_posix(),
         indel_1kg = config["reference"]["known_indel_1kg"]
     output:
         bam = Path(bam_dir, "{sample_type}.{sample}.dedup.realign.bam").as_posix()
@@ -110,18 +132,18 @@ rule sentieon_realign:
         "INDEL realignment using sentieon realigner for sample: {params.sample_id}"
     shell:
         """
-mkdir -p {params.tmpdir};
-export TMPDIR={params.tmpdir};
-export SENTIEON_TMPDIR={params.tmpdir};
-export SENTIEON_LICENSE={params.sentieon_lic};
-
-{params.sentieon_exec} driver \
--r {input.ref} \
--t {threads} \
--i {input.bam} \
---algo Realigner \
--k {input.mills} \
--k {input.indel_1kg} \
-{output}; 
-        """
+    mkdir -p {params.tmpdir};
+    export TMPDIR={params.tmpdir};
+    export SENTIEON_TMPDIR={params.tmpdir};
+    export SENTIEON_LICENSE={params.sentieon_lic};
+    
+    {params.sentieon_exec} driver \
+    -r {input.ref} \
+    -t {threads} \
+    -i {input.bam} \
+    --algo Realigner \
+    -k {input.mills} \
+    -k {input.indel_1kg} \
+    {output}; 
+            """
 
