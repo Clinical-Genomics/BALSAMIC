@@ -23,7 +23,6 @@ rule postprocess_bam:
         "Collapse readgroups for sample: {params.sample_id}"
     shell:
         """
-mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
 
 picard -Xmx75g AddOrReplaceReadGroups  \
