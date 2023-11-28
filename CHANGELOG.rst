@@ -30,6 +30,7 @@ Added:
 * CNVs from PureCN to TGA workflow https://Clinical-Genomics/BALSAMIC/pull/1278
 * Command-line arguments and rules for creation of GENS files https://github.com/Clinical-Genomics/BALSAMIC/pull/1279
 * Somatic and germline Loqusdb annotation to ReadtheDocs https://github.com/Clinical-Genomics/BALSAMIC/pull/1317
+* Postprocess step before VarDict in TGA https://github.com/Clinical-Genomics/BALSAMIC/pull/1332
 
 Changed:
 ^^^^^^^^
@@ -66,6 +67,7 @@ Changed:
 * Split analysis model into config and params models https://github.com/Clinical-Genomics/BALSAMIC/pull/1306
 * Renamed name in sample column of final clincial vcfs https://github.com/Clinical-Genomics/BALSAMIC/pull/1310
 * Update Gens HK tags https://github.com/Clinical-Genomics/BALSAMIC/pull/1319
+* Increased memory and threads for VarDict https://github.com/Clinical-Genomics/BALSAMIC/pull/1332
 
 Fixed:
 ^^^^^^
