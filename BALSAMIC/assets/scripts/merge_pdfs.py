@@ -15,7 +15,7 @@ from pypdf import PdfWriter
 @click.argument(
     "output_pdf", nargs=1, required=True, type=click.Path(resolve_path=True)
 )
-def merge_pdfs(input_pdfs: List[str], output_pdf: str):
+def merge_pdfs(input_pdfs: List[str], output_pdf: str) -> None:
     """Merge PDFs into a single file."""
     merger: PdfWriter = PdfWriter()
     for pdf in input_pdfs:
