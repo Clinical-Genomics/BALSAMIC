@@ -2,7 +2,7 @@
 from pathlib import Path
 from typing import List
 
-from click.testing import CliRunner
+from click.testing import CliRunner, Result
 from pypdf import PdfReader, PdfWriter
 
 from BALSAMIC.assets.scripts.merge_pdfs import merge_pdfs
@@ -24,7 +24,7 @@ def test_merge_pdfs(tmp_path: Path, cli_runner: CliRunner) -> None:
     output_pdf: str = Path(tmp_path, "output.pdf").as_posix()
 
     # WHEN merging multiple PDFs
-    result = cli_runner.invoke(merge_pdfs, input_pdfs + [output_pdf])
+    result: Result = cli_runner.invoke(merge_pdfs, input_pdfs + [output_pdf])
 
     # THEN the output file should contain all the PDF files
     pdf_reader = PdfReader(output_pdf)
