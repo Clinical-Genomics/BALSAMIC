@@ -1,6 +1,5 @@
 """Test converting CSV to PDF."""
 from pathlib import Path
-from typing import List
 
 from click.testing import CliRunner, Result
 from pypdf import PdfReader
