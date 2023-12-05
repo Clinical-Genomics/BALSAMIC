@@ -211,4 +211,6 @@ DELIVERY_RULES: List[str] = [
     "finalize_gens_outputfiles",
     # TMB
     "tmb_calculation",
+    # Scripts
+    "merge_cnv_pdf_reports",
 ]

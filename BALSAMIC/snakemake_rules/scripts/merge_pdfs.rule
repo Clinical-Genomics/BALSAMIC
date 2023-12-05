@@ -4,17 +4,19 @@
 rule merge_cnv_pdf_reports:
     """Rule for merging CNV PDF reports."""
     input:
-        cnv_report_paths=cnv_report_paths
+        report_paths=cnv_report_paths,
     output:
-        cnv_report=f"{cnv_dir}CNV.somatic.{config['analysis']['case_id']}.report.pdf",
+        report_pdf=f"{cnv_dir}CNV.somatic.{config['analysis']['case_id']}.report.pdf",
     params:
-        cnv_report_script=get_script_path("merge_pdfs.py"),
-    threads: get_threads(cluster_config=cluster_config, rule_name="merge_cnv_pdf_reports")
+        housekeeper_id={"id": config["analysis"]["case_id"], "tags": "cnv"},
+        merge_pdfs_script=get_script_path("merge_pdfs.py"),
+    threads:
+        get_threads(cluster_config=cluster_config, rule_name="merge_cnv_pdf_reports")
     message:
-        "Merging CNV PDF reports {output.cnv_report}"
+        "Merging CNV PDF reports {output.report_pdf}"
     benchmark:
         Path(benchmark_dir, f"merge_cnv_pdf_reports_{config['analysis']['case_id']}.tsv").as_posix()
     shell:
         """
-python {params.cnv_report_script} {input.cnv_report_paths} {output.cnv_report}
+python {params.merge_pdfs_script} {input.report_paths} {output.report_pdf}
         """
