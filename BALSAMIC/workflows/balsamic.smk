@@ -446,10 +446,8 @@ analysis_specific_results.extend(
     expand(vep_dir + "{vcf}.balsamic_stat", vcf=get_vcf(config, somatic_caller_tmb, [case_id]))
 )
 
-# WGS specific files
-if config["analysis"]["sequencing_type"] == "wgs":
-    # CNV report
-    analysis_specific_results.append(vcf_dir + "CNV.somatic." + case_id + ".report.pdf"),
+# CNV report
+analysis_specific_results.append(vcf_dir + "CNV.somatic." + case_id + ".report.pdf"),
 
 # TGA specific files
 if config["analysis"]["sequencing_type"] != "wgs":
