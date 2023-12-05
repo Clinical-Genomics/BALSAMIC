@@ -290,10 +290,7 @@ if config["analysis"]["sequencing_type"] == "wgs":
         ))
 else:
     cnv_report_paths.extend(expand(f"{cnv_dir}tumor.merged-{{plot}}.pdf",plot=["diagram", "scatter"]))
-    cnv_report_paths.extend(expand(
-        f"{cnv_dir}CNV.somatic.{config['analysis']['case_id']}.purecn.{{dataframe}}.pdf",
-        dataframe=["purity", "LOHregions", "LOHgenes"],
-    ))
+    cnv_report_paths.extend(config_model.get_purecn_csv_paths(cnv_dir))
 
 # Extract variant callers for the workflow
 germline_caller = []

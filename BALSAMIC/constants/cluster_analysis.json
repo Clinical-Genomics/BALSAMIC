@@ -284,6 +284,10 @@
 		"time": "00:15:00",
 		"n": 1
 	},
+	"csv_to_pdf": {
+		"time": "00:15:00",
+		"n": 1
+	},
 	"merge_cnv_pdf_reports": {
 		"time": "00:15:00",
 		"n": 1
