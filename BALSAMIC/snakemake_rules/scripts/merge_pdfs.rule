@@ -4,11 +4,7 @@
 rule merge_cnv_pdf_reports:
     """Rule for merging CNV PDF reports."""
     input:
-        cnvkit_reports=expand(f"{cnv_dir}tumor.merged-{{plot}}.pdf", plot=["diagram", "scatter"]),
-        purecn_reports=expand(
-            f"{cnv_dir}CNV.somatic.{config['analysis']['case_id']}.purecn.{{dataframe}}.pdf",
-            dataframe=["purity", "LOHregions", "LOHgenes"],
-        ),
+        cnv_report_paths=cnv_report_paths
     output:
         cnv_report=f"{cnv_dir}CNV.somatic.{config['analysis']['case_id']}.report.pdf",
     params:
@@ -20,5 +16,5 @@ rule merge_cnv_pdf_reports:
         Path(benchmark_dir, f"merge_cnv_pdf_reports_{config['analysis']['case_id']}.tsv").as_posix()
     shell:
         """
-python {params.cnv_report_script} {input.cnvkit_reports} {input.purecn_reports} {output.cnv_report}
+python {params.cnv_report_script} {input.cnv_report_paths} {output.cnv_report}
         """

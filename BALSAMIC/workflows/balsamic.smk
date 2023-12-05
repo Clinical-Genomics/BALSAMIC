@@ -275,18 +275,24 @@ os.environ["SENTIEON_TMPDIR"] = result_dir
 os.environ['TMPDIR'] = get_result_dir(config)
 
 # CNV report input files
-cnv_data_paths = []
-if config["analysis"]["sequencing_type"] == "wgs" and config['analysis']['analysis_type'] == "paired":
-    cnv_data_paths.append(vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.samplestatistics.txt")
-    cnv_data_paths.extend(expand(
-        vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat." + "{output_suffix}" + ".png",
-        output_suffix=["ascatprofile", "rawprofile", "ASPCF", "tumor", "germline", "sunrise"]
-    ))
-
-if config["analysis"]["sequencing_type"] == "wgs" and config['analysis']['analysis_type'] == "single":
-    cnv_data_paths.extend(expand(
-        vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".cnvpytor." + "{output_suffix}" + ".png",
-        output_suffix=["circular", "scatter"]
+cnv_report_paths = []
+if config["analysis"]["sequencing_type"] == "wgs":
+    if config['analysis']['analysis_type'] == "paired":
+        cnv_report_paths.append(vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.samplestatistics.txt")
+        cnv_report_paths.extend(expand(
+            vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat." + "{output_suffix}" + ".png",
+            output_suffix=["ascatprofile", "rawprofile", "ASPCF", "tumor", "germline", "sunrise"]
+        ))
+    else:
+        cnv_report_paths.extend(expand(
+            vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".cnvpytor." + "{output_suffix}" + ".png",
+            output_suffix=["circular", "scatter"]
+        ))
+else:
+    cnv_report_paths.extend(expand(f"{cnv_dir}tumor.merged-{{plot}}.pdf",plot=["diagram", "scatter"]))
+    cnv_report_paths.extend(expand(
+        f"{cnv_dir}CNV.somatic.{config['analysis']['case_id']}.purecn.{{dataframe}}.pdf",
+        dataframe=["purity", "LOHregions", "LOHgenes"],
     ))
 
 # Extract variant callers for the workflow
