@@ -1,0 +1,24 @@
+"""Rules for merging PDF reports."""
+
+
+rule merge_cnv_pdf_reports:
+    """Rule for merging CNV PDF reports."""
+    input:
+        cnvkit_reports=expand(f"{cnv_dir}tumor.merged-{{plot}}.pdf", plot=["diagram", "scatter"]),
+        purecn_reports=expand(
+            f"{cnv_dir}CNV.somatic.{config['analysis']['case_id']}.purecn.{{dataframe}}.pdf",
+            dataframe=["purity", "LOHregions", "LOHgenes"],
+        ),
+    output:
+        cnv_report=f"{cnv_dir}CNV.somatic.{config['analysis']['case_id']}.report.pdf",
+    params:
+        cnv_report_script=get_script_path("merge_pdfs.py"),
+    threads: get_threads(cluster_config=cluster_config, rule_name="merge_cnv_pdf_reports")
+    message:
+        "Merging CNV PDF reports {output.cnv_report}"
+    benchmark:
+        Path(benchmark_dir, f"merge_cnv_pdf_reports_{config['analysis']['case_id']}.tsv").as_posix()
+    shell:
+        """
+python {params.cnv_report_script} {input.cnvkit_reports} {input.purecn_reports} {output.cnv_report}
+        """
