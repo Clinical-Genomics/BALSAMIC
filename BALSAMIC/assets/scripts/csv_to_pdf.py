@@ -20,7 +20,15 @@ def csv_to_pdf(csv_path: str, pdf_path: str) -> None:
     html_page: str = get_table_html_page(
         html_table=html_table, table_name=Path(csv_path).stem
     )
-    pdfkit.from_string(input=html_page, output_path=pdf_path)
+    pdfkit.from_string(
+        input=html_page,
+        output_path=pdf_path,
+        options={
+            "page-size": "A4",
+            "orientation": "landscape",
+            "enable-local-file-access": None,
+        },
+    )
 
 
 def get_table_html_page(html_table: str, table_name: str) -> str:
@@ -31,7 +39,7 @@ def get_table_html_page(html_table: str, table_name: str) -> str:
         <head>
             <style>
                 h2 {{text-align: center; padding: 10px;}}
-                table {{border: 1px solid black; border-collapse: collapse; text-align: center;}}
+                table {{margin: 0 auto; border: 1px solid black; border-collapse: collapse; text-align: center;}}
                 th {{font-size: 12pt; padding: 5px; background: #cccccc;}}
                 td {{font-size: 10pt; padding: 5px;}}
                 tr:nth-child(even) {{background: #eeeeee;}}
