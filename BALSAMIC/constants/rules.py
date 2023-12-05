@@ -35,8 +35,6 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
             "snakemake_rules/quality_control/multiqc.rule",
             "snakemake_rules/quality_control/qc_metrics.rule",
             "snakemake_rules/quality_control/samtools_qc.rule",
-            "snakemake_rules/scripts/generate_pdf.rule",
-            "snakemake_rules/scripts/merge_pdfs.rule",
         ],
         "align": [
             "snakemake_rules/align/sentieon_alignment.rule",
@@ -67,6 +65,8 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
             "snakemake_rules/umi/qc_umi.rule",
             "snakemake_rules/umi/mergetype_tumor_umi.rule",
             "snakemake_rules/umi/generate_AF_tables.rule",
+            "snakemake_rules/scripts/generate_pdf.rule",
+            "snakemake_rules/scripts/merge_pdfs.rule",
         ],
         "align": [
             "snakemake_rules/umi/sentieon_umiextract.rule",
@@ -99,6 +99,8 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
             "snakemake_rules/umi/mergetype_normal_umi.rule",
             "snakemake_rules/quality_control/contest.rule",
             "snakemake_rules/umi/generate_AF_tables.rule",
+            "snakemake_rules/scripts/generate_pdf.rule",
+            "snakemake_rules/scripts/merge_pdfs.rule",
         ],
         "align": [
             "snakemake_rules/umi/sentieon_umiextract.rule",
