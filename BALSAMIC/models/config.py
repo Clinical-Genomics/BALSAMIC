@@ -410,8 +410,8 @@ class ConfigModel(BaseModel):
 
         return f"{bam_dir}{sample_type}.{sample_name}.{final_bam_suffix}.bam"
 
-    def get_purecn_csv_paths(self, cnv_dir: str) -> List[str]:
-        """Return a list of LOH CSV paths."""
+    def get_purecn_pdf_paths(self, cnv_dir: str) -> List[str]:
+        """Return a list of LOH pdf paths."""
         return [
             f"{cnv_dir}CNV.somatic.{self.analysis.case_id}.purecn.{dataframe}.pdf"
             for dataframe in ["purity", "LOHregions", "LOHgenes"]

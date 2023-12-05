@@ -4,19 +4,17 @@
 rule csv_to_pdf:
     """Converting LOH report CSV files to PDF format."""
     input:
-        csv_path="{csv_path}",
+        csv_path="{pdf_path}".replace(FileType.PDF, FileType.CSV),
     output:
-        pdf_path="{csv_path}".replace(FileType.CSV, FileType.PDF),
+        pdf_path="{pdf_path}",
     wildcard_constraints:
-        csv_path="|".join(config_model.get_purecn_csv_paths(cnv_dir)),
+        pdf_path="|".join(config_model.get_purecn_pdf_paths(cnv_dir)),
     params:
         csv_to_pdf_script=get_script_path("csv_to_pdf.py"),
     threads:
         get_threads(cluster_config=cluster_config, rule_name="csv_to_pdf")
     message:
         "Converting CSV file to PDF {output.pdf_path}"
-    benchmark:
-        Path(benchmark_dir, f"csv_to_pdf_{config['analysis']['case_id']}.tsv").as_posix()
     shell:
         """
 python {params.csv_to_pdf_script} {input.csv_path} {output.pdf_path}

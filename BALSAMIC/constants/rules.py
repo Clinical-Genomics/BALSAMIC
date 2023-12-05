@@ -35,6 +35,8 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
             "snakemake_rules/quality_control/multiqc.rule",
             "snakemake_rules/quality_control/qc_metrics.rule",
             "snakemake_rules/quality_control/samtools_qc.rule",
+            "snakemake_rules/scripts/generate_pdf.rule",
+            "snakemake_rules/scripts/merge_pdfs.rule",
         ],
         "align": [
             "snakemake_rules/align/sentieon_alignment.rule",

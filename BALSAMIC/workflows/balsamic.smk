@@ -8,6 +8,7 @@ import tempfile
 from pathlib import Path
 from typing import Dict, List
 
+from BALSAMIC.constants.constants import FileType
 from BALSAMIC.constants.analysis import FastqName, MutationType, SampleType
 from BALSAMIC.constants.paths import BALSAMIC_DIR, SENTIEON_DNASCOPE_DIR, SENTIEON_TNSCOPE_DIR
 from BALSAMIC.constants.rules import SNAKEMAKE_RULES
@@ -290,7 +291,7 @@ if config["analysis"]["sequencing_type"] == "wgs":
         ))
 else:
     cnv_report_paths.extend(expand(f"{cnv_dir}tumor.merged-{{plot}}.pdf",plot=["diagram", "scatter"]))
-    cnv_report_paths.extend(config_model.get_purecn_csv_paths(cnv_dir))
+    cnv_report_paths.extend(config_model.get_purecn_pdf_paths(cnv_dir))
 
 # Extract variant callers for the workflow
 germline_caller = []
@@ -450,7 +451,7 @@ analysis_specific_results.extend(
 )
 
 # CNV report
-analysis_specific_results.append(vcf_dir + "CNV.somatic." + case_id + ".report.pdf"),
+analysis_specific_results.append(cnv_dir + "CNV.somatic." + case_id + ".report.pdf"),
 
 # TGA specific files
 if config["analysis"]["sequencing_type"] != "wgs":
