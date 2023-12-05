@@ -4,18 +4,22 @@
 rule csv_to_pdf:
     """Converting LOH report CSV files to PDF format."""
     input:
-        csv_path="{pdf_path}".replace(FileType.PDF, FileType.CSV),
+        purity_csv=f"{cnv_dir}CNV.somatic.{config['analysis']['case_id']}.purecn.purity.csv",
     output:
-        pdf_path="{pdf_path}",
-    wildcard_constraints:
-        pdf_path="|".join(config_model.get_purecn_pdf_paths(cnv_dir)),
+        loh_pdfs=expand(
+            f"{cnv_dir}.CNV.somatic.{config['analysis']['case_id']}.purecn.{{dataframe}}.csv.pdf",
+            dataframe=["purity", "LOHregions", "LOHgenes"],
+        ),
     params:
         csv_to_pdf_script=get_script_path("csv_to_pdf.py"),
-    threads:
-        get_threads(cluster_config=cluster_config, rule_name="csv_to_pdf")
+        loh_regions=f"{cnv_dir}.CNV.somatic.{config['analysis']['case_id']}.purecn.LOHregions.csv",
+        loh_genes=f"{cnv_dir}.CNV.somatic.{config['analysis']['case_id']}.purecn.LOHgenes.csv",
+    threads: get_threads(cluster_config=cluster_config, rule_name="csv_to_pdf")
     message:
-        "Converting CSV file to PDF {output.pdf_path}"
+        "Converting CSV files to PDF"
     shell:
         """
-python {params.csv_to_pdf_script} {input.csv_path} {output.pdf_path}
+python {params.csv_to_pdf_script} {input.purity_csv} {input.purity_csv}.pdf
+python {params.csv_to_pdf_script} {params.loh_regions} {params.loh_regions}.pdf
+python {params.csv_to_pdf_script} {params.loh_genes} {params.loh_genes}.pdf
         """
