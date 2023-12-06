@@ -62,6 +62,7 @@ def get_table_html_page(html_table: str, table_name: str) -> str:
                 table {{margin: 0 auto; border: 1px solid black; border-collapse: collapse; text-align: center;}}
                 th {{font-size: 12pt; padding: 5px; background: #cccccc;}}
                 td {{font-size: 10pt; padding: 5px;}}
+                tr {{page-break-inside: avoid;}}
                 tr:nth-child(even) {{background: #eeeeee;}}
             </style>
         </head>
