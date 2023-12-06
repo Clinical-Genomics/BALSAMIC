@@ -20,12 +20,32 @@ def csv_to_pdf(csv_path: str, pdf_path: str) -> None:
     html_page: str = get_table_html_page(
         html_table=html_table, table_name=Path(csv_path).stem
     )
+    html_to_pdf(html_string=html_page, pdf_path=pdf_path)
+
+
+def html_to_pdf(
+    html_string: str,
+    pdf_path: str,
+    orientation: str = "landscape",
+    margin_top: str = "1.5cm",
+    margin_bottom: str = "1cm",
+    margin_left: str = "1cm",
+    margin_right: str = "1cm",
+    zoom: int = 1,
+) -> None:
+    """Create a PDF file from the content of an HTML string."""
     pdfkit.from_string(
-        input=html_page,
+        input=html_string,
         output_path=pdf_path,
         options={
             "page-size": "A4",
-            "orientation": "landscape",
+            "encoding": "UTF-8",
+            "orientation": orientation,
+            "zoom": zoom,
+            "margin-top": margin_top,
+            "margin-bottom": margin_bottom,
+            "margin-left": margin_left,
+            "margin-right": margin_right,
             "enable-local-file-access": None,
         },
     )
