@@ -6,9 +6,9 @@ rule merge_cnv_pdf_reports:
     input:
         report_paths=cnv_report_paths,
     output:
-        report_pdf=f"{cnv_dir}CNV.somatic.{config['analysis']['case_id']}.report.pdf",
+        cnv_report_pdf=f"{cnv_dir}CNV.somatic.{config['analysis']['case_id']}.report.pdf",
     params:
-        housekeeper_id={"id": config["analysis"]["case_id"], "tags": "cnv"},
+        housekeeper_id={"id": config["analysis"]["case_id"], "tags": "clinical"},
         merge_pdfs_script=get_script_path("merge_pdfs.py"),
     threads:
         get_threads(cluster_config=cluster_config, rule_name="merge_cnv_pdf_reports")
