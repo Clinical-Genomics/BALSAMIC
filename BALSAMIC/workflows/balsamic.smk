@@ -292,7 +292,7 @@ if config["analysis"]["sequencing_type"] == "wgs":
 else:
     cnv_report_paths.extend(expand(f"{cnv_dir}tumor.merged-{{plot}}.pdf",plot=["diagram", "scatter"]))
     cnv_report_paths.append(expand(
-        f"{cnv_dir}.CNV.somatic.{config['analysis']['case_id']}.purecn.{{dataframe}}.csv.pdf",
+        f"{cnv_dir}CNV.somatic.{config['analysis']['case_id']}.purecn.{{dataframe}}.csv.pdf",
         dataframe=["purity", "LOHregions", "LOHgenes"]
     ))
 
