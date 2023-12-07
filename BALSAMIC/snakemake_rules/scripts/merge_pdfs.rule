@@ -13,10 +13,10 @@ rule merge_cnv_pdf_reports:
     threads:
         get_threads(cluster_config=cluster_config, rule_name="merge_cnv_pdf_reports")
     message:
-        "Merging CNV PDF reports {output.report_pdf}"
+        "Merging CNV PDF reports {output.cnv_report_pdf}"
     benchmark:
         Path(benchmark_dir, f"merge_cnv_pdf_reports_{config['analysis']['case_id']}.tsv").as_posix()
     shell:
         """
-python {params.merge_pdfs_script} {input.report_paths} {output.report_pdf}
+python {params.merge_pdfs_script} {input.report_paths} {output.cnv_report_pdf}
         """
