@@ -19,7 +19,7 @@ rule csv_to_pdf:
         "Converting CSV files to PDF"
     shell:
         """
-python {params.csv_to_pdf_script} {input.purity_csv} {input.purity_csv}.pdf
-python {params.csv_to_pdf_script} {params.loh_regions} {params.loh_regions}.pdf
-python {params.csv_to_pdf_script} {params.loh_genes} {params.loh_genes}.pdf
+for file in {input.purity_csv} {params.loh_regions} {params.loh_genes}; do
+    python {params.csv_to_pdf_script} $file $file.pdf
+done
         """
