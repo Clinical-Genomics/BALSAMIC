@@ -58,6 +58,13 @@ body:
     required: false
 - type: textarea
   attributes:
+    label: SOUPs
+    description: Does this user story introduce or modify any SOUPs? If so, link to the SOUP(s) here.
+    placeholder: 
+  validations:
+    required: false
+- type: textarea
+  attributes:
     label: Can be closed when
     description: Link the issues/PRs needed to be closed for this to be implemented
   validations:
