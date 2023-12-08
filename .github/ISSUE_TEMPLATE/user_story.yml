@@ -32,28 +32,35 @@ body:
     required: false
 - type: checkboxes
   attributes:
-    label: Risk assessment
-    description: Is a risk assessment needed or not for this user story?
-    options:
-      - label: Needed
-      - label: Not needed
-- type: input
-  attributes:
-    label: Risk assessment link
-    description: If a risk assessment is needed, link to it here
-    placeholder: Link to risk assessment
-  validations:
-    required: false
-- type: checkboxes
-  attributes:
     label: System requirements assessed
-    description: Have you reviewed the existing system requirements if they are affected by this change?
+    description: Have you reviewed if the existing system requirements are affected by this change?
     options:
       - label: Yes, I have reviewed the system requirements
 - type: textarea
   attributes:
     label: Requirements affected by this story
-    description: Link any requirements affected
+    description: Link any requirements affected, or motivate why no requirements are affected.
+  validations:
+    required: false
+- type: checkboxes
+  attributes:
+    label: Risk assessment needed
+    description: Is a risk assessment needed or not for this user story?
+    options:
+      - label: Needed
+      - label: Not needed
+- type: textarea
+  attributes:
+    label: Risk assessment
+    description: If a risk assessment is needed, link to it here. If no, motivate why not.
+    placeholder: 
+  validations:
+    required: false
+- type: textarea
+  attributes:
+    label: SOUPs
+    description: Does this user story introduce or modify any SOUPs? If so, link to the SOUP(s) here.
+    placeholder: 
   validations:
     required: false
 - type: textarea
