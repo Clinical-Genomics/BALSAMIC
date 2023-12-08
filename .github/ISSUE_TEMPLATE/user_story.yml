@@ -59,7 +59,7 @@ body:
 - type: textarea
   attributes:
     label: SOUPs
-    description: Does this user story introduce or modify an SOUPs? If so, link to the SOUP(s) here.
+    description: Does this user story introduce or modify any SOUPs? If so, link to the SOUP(s) here.
     placeholder: 
   validations:
     required: false
