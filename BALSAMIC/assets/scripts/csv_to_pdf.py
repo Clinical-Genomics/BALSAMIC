@@ -4,7 +4,7 @@ from pathlib import Path
 import click
 from pandas import DataFrame, read_csv
 
-from BALSAMIC.utils.pdf_report import get_table_html_page, html_to_pdf
+from BALSAMIC.utils.pdf_report import get_table_html, html_to_pdf
 
 
 @click.command()
@@ -18,7 +18,7 @@ def csv_to_pdf(csv_path: str, pdf_path: str) -> None:
     html_table: str = df.to_html(
         index=False, na_rep="NA", justify="center", escape=False
     )
-    html_page: str = get_table_html_page(
+    html_page: str = get_table_html(
         html_table=html_table, table_name=Path(csv_path).stem
     )
     html_to_pdf(html_string=html_page, pdf_path=pdf_path)

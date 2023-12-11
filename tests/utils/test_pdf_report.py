@@ -46,7 +46,7 @@ def test_html_to_pdf(tmp_path: Path):
     """
 
     # GIVEN an output PDF file
-    pdf_path: Path = Path(tmp_path, "csv_to_pdf.pdf")
+    pdf_path: Path = Path(tmp_path, "test_pdf.pdf")
 
     # WHEN generating the pdf file
     html_to_pdf(html_string=html_string, pdf_path=pdf_path)
