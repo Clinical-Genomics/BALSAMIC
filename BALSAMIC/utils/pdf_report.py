@@ -1,8 +1,10 @@
 """PDF report generation utility methods."""
+from pathlib import Path
+
 import pdfkit
 
 
-def get_table_html_page(html_table: str, table_name: str) -> str:
+def get_table_html(html_table: str, table_name: str) -> str:
     """Return HTML-rendered content with the provided HTML table."""
     return f"""
         <!DOCTYPE html>
@@ -20,6 +22,28 @@ def get_table_html_page(html_table: str, table_name: str) -> str:
         <body>
             <h2>{table_name}</h2>
             {html_table}
+        </body>
+        </html>
+    """
+
+
+def get_image_html(image_path: Path, image_name: str) -> str:
+    """Return HTML-rendered content with the provided image."""
+    return f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <style>
+                h1, {{ padding: 10px;}}
+                h1, div {{text-align: center;}}
+                img {{max-height: 800px;}}
+            </style>
+        </head>
+        <body>
+            <h1>{image_name}</h1>
+            <div>
+                <img src="{image_path.as_posix()}">
+            </div>
         </body>
         </html>
     """

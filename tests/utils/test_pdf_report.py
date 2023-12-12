@@ -3,10 +3,10 @@ from pathlib import Path
 
 from pypdf import PdfReader
 
-from BALSAMIC.utils.pdf_report import get_table_html_page, html_to_pdf
+from BALSAMIC.utils.pdf_report import get_table_html, html_to_pdf
 
 
-def test_get_table_html_page():
+def test_get_table_html():
     """Test table insertion in an HTML page"""
 
     # GIVEN an HTML table and a test table name
@@ -25,7 +25,7 @@ def test_get_table_html_page():
     table_name: str = "Test Table"
 
     # WHEN adding the table to an HTML page
-    html_page: str = get_table_html_page(html_table=html_table, table_name=table_name)
+    html_page: str = get_table_html(html_table=html_table, table_name=table_name)
 
     # THEN the table HTML page should be successfully created
     assert "<html>" in html_page

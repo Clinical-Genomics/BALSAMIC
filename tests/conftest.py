@@ -613,6 +613,16 @@ def purity_csv_path(test_data_dir) -> Path:
 
 
 @pytest.fixture(scope="session")
+def cnv_plot_path(test_data_dir) -> Path:
+    """Return an AscatNgs CNV plot path."""
+    return Path(
+        test_data_dir,
+        "cnv_report",
+        "CNV.somatic.sample_tumor_normal_wgs.ascat.ASPCF.png",
+    )
+
+
+@pytest.fixture(scope="session")
 def balsamic_cache(
     tmp_path_factory: TempPathFactory, reference: Dict[str, Path], references_dir: Path
 ) -> str:
