@@ -1,103 +1,16 @@
-"""Test module for Balsamic common models."""
 import copy
-import os
+from datetime import datetime
 from pathlib import Path
-from typing import List, Dict
+from typing import Dict, List
 
 import pytest
-from pydantic.v1 import ValidationError
+from pydantic import ValidationError
 
 from BALSAMIC.constants.analysis import FastqName, SampleType, SequencingType
-from BALSAMIC.models.analysis import (
-    VCFAttributes,
-    VarCallerFilter,
-    QCModel,
-    VarcallerAttribute,
-    AnalysisModel,
-    SampleInstanceModel,
-    UMIParamsCommon,
-    UMIParamsUMIextract,
-    UMIParamsConsensuscall,
-    UMIParamsTNscope,
-    ParamsVardict,
-    ParamsVEP,
-    ConfigModel,
-)
+from BALSAMIC.models.config import AnalysisModel, ConfigModel, SampleInstanceModel
 
 
-def test_vcfattributes():
-    """test VCFAttributes model for correct validation"""
-
-    # GIVEN a VCF attribute
-    dummy_attribute = {
-        "tag_value": 5.0,
-        "filter_name": "dummy_filter_name",
-        "field": "INFO",
-    }
-
-    # WHEN building the model
-    dummy_attribute_built = VCFAttributes(**dummy_attribute)
-
-    # THEN assert values can be reterived currently
-    assert dummy_attribute_built.tag_value == 5.0
-    assert dummy_attribute_built.field == "INFO"
-    assert dummy_attribute_built.filter_name == "dummy_filter_name"
-
-
-def test_varcallerfilter():
-    """test required VarCallerFilters for being set correctly"""
-
-    # GIVEN a VarCallerFilter
-    dummy_varcaller = {
-        "AD": {"tag_value": 5.0, "filter_name": "dummy_alt_depth", "field": "INFO"},
-        "DP": {"tag_value": 100.0, "filter_name": "dummy_depth", "field": "INFO"},
-        "pop_freq": {
-            "tag_value": 0.005,
-            "filter_name": "dummy_pop_freq",
-            "field": "INFO",
-        },
-        "varcaller_name": "dummy_varcaller",
-        "filter_type": "dummy_ffpe_filter",
-        "analysis_type": "dummy_tumor_only",
-        "description": "dummy description of this filter",
-    }
-
-    # WHEN building the model
-    dummy_varcaller_filter = VarCallerFilter(**dummy_varcaller)
-
-    # THEN assert required values are set
-    assert dummy_varcaller_filter.AD.tag_value == 5.0
-    assert dummy_varcaller_filter.DP.tag_value == 100.0
-    assert dummy_varcaller_filter.analysis_type == "dummy_tumor_only"
-
-
-def test_qc_model():
-    # GIVEN valid input arguments
-    # THEN we can successully create a config dict
-    valid_args = {
-        "umi_trim": True,
-        "min_seq_length": 25,
-        "umi_trim_length": 5,
-        "n_base_limit": 50,
-    }
-    assert QCModel.parse_obj(valid_args)
-
-
-def test_varcaller_attribute():
-    # GIVEN valid input arguments
-    valid_args = {"mutation": "somatic", "type": "SNV"}
-    # THEN we can successully create a config dict
-    assert VarcallerAttribute.parse_obj(valid_args)
-    # GIVEN invalid input arguments
-    invalid_args = {"mutation": "strange", "type": "unacceptable"}
-    # THEN should trigger ValueError
-    with pytest.raises(ValidationError) as excinfo:
-        VarcallerAttribute.parse_obj(invalid_args)
-    assert "strange is not a valid mutation type" in str(excinfo.value)
-    assert "unacceptable is not not a valid mutation class" in str(excinfo.value)
-
-
-def test_analysis_model(test_data_dir: str):
+def test_analysis_model(test_data_dir: Path, timestamp_now: datetime):
     """Test analysis model instantiation."""
 
     # GIVEN valid input arguments
@@ -106,13 +19,19 @@ def test_analysis_model(test_data_dir: str):
         "gender": "female",
         "analysis_type": "paired",
         "sequencing_type": "targeted",
-        "analysis_dir": test_data_dir,
-        "fastq_path": test_data_dir,
+        "analysis_dir": test_data_dir.as_posix(),
+        "fastq_path": test_data_dir.as_posix(),
+        "log": test_data_dir.as_posix(),
+        "result": test_data_dir.as_posix(),
+        "script": test_data_dir.as_posix(),
+        "benchmark": test_data_dir.as_posix(),
+        "dag": test_data_dir.as_posix(),
+        "config_creation_date": str(timestamp_now),
         "analysis_workflow": "balsamic-umi",
     }
 
     # THEN we can successfully create a config dict
-    assert AnalysisModel.parse_obj(valid_args)
+    assert AnalysisModel.model_validate(valid_args)
 
     # GIVEN invalid input arguments
     invalid_args = {
@@ -125,9 +44,8 @@ def test_analysis_model(test_data_dir: str):
     }
 
     # THEN should trigger ValueError
-    with pytest.raises(ValueError) as excinfo:
-        AnalysisModel.parse_obj(invalid_args)
-    assert "not supported" in str(excinfo.value)
+    with pytest.raises(ValueError):
+        AnalysisModel.model_validate(invalid_args)
 
 
 def test_sample_instance_model(config_dict_w_fastqs: Dict):
@@ -138,7 +56,7 @@ def test_sample_instance_model(config_dict_w_fastqs: Dict):
 
     # WHEN parsing the sample dictionary
     for idx, sample in enumerate(sample_list):
-        sample: SampleInstanceModel = SampleInstanceModel.parse_obj(sample)
+        sample: SampleInstanceModel = SampleInstanceModel.model_validate(sample)
 
         sample_dict_copy = sample_list[idx].copy()
         for fastq_pattern, values in sample_dict_copy["fastq_info"].items():
@@ -146,7 +64,7 @@ def test_sample_instance_model(config_dict_w_fastqs: Dict):
             values["rev"] = Path(values["rev"]).resolve().as_posix()
 
         # THEN the sample model should be correctly initialised
-        assert sample.dict(exclude_none=True) == sample_dict_copy
+        assert sample.model_dump(exclude_none=True) == sample_dict_copy
 
 
 def test_sample_instance_model_sample_type_error(tumor_normal_fastq_info_correct: Dict):
@@ -161,123 +79,14 @@ def test_sample_instance_model_sample_type_error(tumor_normal_fastq_info_correct
     # WHEN parsing the sample dictionary
     # THEN a ValueError should be triggered
     with pytest.raises(ValueError) as exc:
-        SampleInstanceModel.parse_obj(tumor_dict)
+        SampleInstanceModel.model_validate(tumor_dict)
         assert (
             f"The provided sample type ({illegal_sample_type}) is not supported in BALSAMIC"
             in exc.value
         )
 
 
-def test_umiparams_common():
-    """test UMIParamsCommon model for correct validation"""
-
-    # GIVEN a UMI workflow common params
-    test_commonparams = {
-        "align_header": "test_header_name",
-        "align_intbases": 100,
-        "filter_tumor_af": 0.01,
-    }
-    # WHEN building the model
-    test_commonparams_built = UMIParamsCommon(**test_commonparams)
-    # THEN assert values
-    assert test_commonparams_built.align_header == "test_header_name"
-    assert test_commonparams_built.filter_tumor_af == 0.01
-    assert test_commonparams_built.align_intbases == 100
-
-
-def test_umiparams_umiextract():
-    """test UMIParamsUMIextract model for correct validation"""
-    # GIVEN umiextract params
-    test_umiextractparams = {"read_structure": "['mode', 'r1,r2']"}
-
-    # WHEN building the model
-    test_umiextractparams_built = UMIParamsUMIextract(**test_umiextractparams)
-
-    # THEN assert values
-    assert test_umiextractparams_built.read_structure == "['mode', 'r1,r2']"
-
-
-def test_umiparams_consensuscall():
-    """test UMIParamsConsensuscall model for correct validation"""
-
-    # GIVEN consensuscall params
-    test_consensuscall = {
-        "align_format": "BAM",
-        "filter_minreads": "6,3,3",
-        "tag": "XZ",
-    }
-
-    # WHEN building the model
-    test_consensuscall_built = UMIParamsConsensuscall(**test_consensuscall)
-
-    # THEN assert values
-    assert test_consensuscall_built.align_format == "BAM"
-    assert test_consensuscall_built.filter_minreads == "6,3,3"
-    assert test_consensuscall_built.tag == "XZ"
-
-
-def test_umiparams_tnscope():
-    """test UMIParamsTNscope model for correct validation"""
-
-    # GIVEN tnscope params
-    test_tnscope_params = {
-        "algo": "algoname",
-        "init_tumorLOD": 0.5,
-        "min_tumorLOD": 6,
-        "error_rate": 5,
-        "prunefactor": 3,
-        "padding": 30,
-        "disable_detect": "abc",
-    }
-
-    # WHEN building the model
-    test_tnscope_params_built = UMIParamsTNscope(**test_tnscope_params)
-
-    # THEN assert values
-    assert test_tnscope_params_built.algo == "algoname"
-    assert test_tnscope_params_built.init_tumorLOD == 0.5
-    assert test_tnscope_params_built.min_tumorLOD == 6
-    assert test_tnscope_params_built.error_rate == 5
-    assert test_tnscope_params_built.prunefactor == 3
-    assert test_tnscope_params_built.disable_detect == "abc"
-    assert test_tnscope_params_built.padding == 30
-
-
-def test_params_vardict():
-    """test UMIParamsVardict model for correct validation"""
-
-    # GIVEN vardict params
-    test_vardict_params = {
-        "allelic_frequency": 0.01,
-        "max_pval": 0.5,
-        "max_mm": 2,
-        "column_info": "-a 1 -b 2 -c 3",
-    }
-
-    # WHEN building the model
-    test_vardict_built = ParamsVardict(**test_vardict_params)
-
-    # THEN assert values
-    assert test_vardict_built.allelic_frequency == 0.01
-    assert test_vardict_built.max_pval == 0.5
-    assert test_vardict_built.max_mm == 2
-    assert test_vardict_built.column_info == "-a 1 -b 2 -c 3"
-
-
-def test_params_vep():
-    """test UMIParamsVEP model for correct validation"""
-
-    # GIVEN vardict params
-    test_vep = {"vep_filters": "all defaults params"}
-
-    # WHEN building the model
-    test_vep_built = ParamsVEP(**test_vep)
-
-    # THEN assert values
-    assert test_vep_built.vep_filters == "all defaults params"
-
-
-def test_analysis_model_for_pon(test_data_dir: str):
+def test_analysis_model_for_pon(test_data_dir: Path, timestamp_now: datetime):
     """Tests PON model parsing."""
 
     # GIVEN valid input arguments
@@ -285,14 +94,20 @@ def test_analysis_model_for_pon(test_data_dir: str):
         "case_id": "case_id",
         "analysis_type": "pon",
         "sequencing_type": "targeted",
-        "analysis_dir": test_data_dir,
-        "fastq_path": test_data_dir,
+        "analysis_dir": test_data_dir.as_posix(),
+        "fastq_path": test_data_dir.as_posix(),
+        "log": test_data_dir.as_posix(),
+        "result": test_data_dir.as_posix(),
+        "script": test_data_dir.as_posix(),
+        "benchmark": test_data_dir.as_posix(),
+        "dag": test_data_dir.as_posix(),
         "analysis_workflow": "balsamic",
+        "config_creation_date": str(timestamp_now),
         "pon_version": "v1",
     }
 
     # THEN we can successfully create a config dict
-    assert AnalysisModel.parse_obj(valid_args)
+    assert AnalysisModel.model_validate(valid_args)
 
     # GIVEN an invalid version argument
     invalid_args = {
@@ -307,10 +122,10 @@ def test_analysis_model_for_pon(test_data_dir: str):
 
     # THEN should trigger ValueError
     with pytest.raises(ValidationError) as excinfo:
-        AnalysisModel.parse_obj(invalid_args)
+        AnalysisModel.model_validate(invalid_args)
 
     assert (
-        f"The provided version ({invalid_args['pon_version']}) does not follow the defined syntax (v<int>)"
+        f"The provided PON version ({invalid_args['pon_version']}) does not follow the defined syntax (v<int>)"
         in str(excinfo.value)
     )
 
@@ -322,7 +137,7 @@ def test_detect_duplicate_fastq_pattern(
     config_dict = config_w_fastq_dir_for_duplicate_fastq_patterns_model
     # Initialize balsamic model
     with pytest.raises(ValueError) as exc:
-        ConfigModel.parse_obj(config_dict)
+        ConfigModel.model_validate(config_dict)
 
     assert (
         "Duplicate FastqPattern(s) found: ACC1_S1_L001_R across multiple samples"
@@ -334,7 +149,7 @@ def test_detection_unassigned_fastq_file(config_tumor_normal_extrafile: Dict):
     """Test instantiating balsamic model with fastq dir containing unassigned fastq-files."""
     # Initialize balsamic model
     with pytest.raises(ValueError) as exc:
-        ConfigModel.parse_obj(config_tumor_normal_extrafile)
+        ConfigModel.model_validate(config_tumor_normal_extrafile)
 
     assert "Fastqs in fastq-dir not assigned to sample config:" in str(exc.value)
 
@@ -390,7 +205,7 @@ def test_get_all_fastqs_for_sample(balsamic_model: ConfigModel, tumor_sample_nam
     def compare_fastq_file_lists(expected: List[str], found: List[str]):
         found_file_names = []
         for found_file in found:
-            found_file_names.append(os.path.basename(found_file))
+            found_file_names.append(Path(found_file).name)
         assert all(
             fastq_file in found_file_names for fastq_file in expected
         ), f"Not all expected fastq files found. {expected}: {found_file_names}"
@@ -465,8 +280,8 @@ def test_fastq_by_fastq_pattern(balsamic_model: ConfigModel):
     fwd_fastq = balsamic_model.get_fastq_by_fastq_pattern(fastq_pattern, FastqName.FWD)
     rev_fastq = balsamic_model.get_fastq_by_fastq_pattern(fastq_pattern, FastqName.REV)
 
-    assert os.path.basename(fwd_fastq) == expected_fwd
-    assert os.path.basename(rev_fastq) == expected_rev
+    assert Path(fwd_fastq).name == expected_fwd
+    assert Path(rev_fastq).name == expected_rev
 
 
 def test_sample_name_by_type(balsamic_model: ConfigModel):
@@ -515,7 +330,7 @@ def test_get_bam_name_per_lane(balsamic_model: ConfigModel):
     # Given bam_dir path and sample name
     normal_name = "ACC2"
     result_dir = balsamic_model.analysis.result
-    bam_dir = os.path.join(result_dir, "bam", "")
+    bam_dir = Path(result_dir, "bam", "").as_posix()
 
     # When retrieving all per lane bam names for sample
     bam_names = balsamic_model.get_bam_name_per_lane(bam_dir, normal_name)
@@ -538,7 +353,7 @@ def test_get_final_bam_name(balsamic_model: ConfigModel):
     sample_name = "ACC1"
     sample_type = SampleType.TUMOR
     result_dir = balsamic_model.analysis.result
-    bam_dir = os.path.join(result_dir, "bam", "")
+    bam_dir = Path(result_dir, "bam", "").as_posix()
 
     # When retrieving final bam file name by sample name or sample type
     bam_name_sample_name = balsamic_model.get_final_bam_name(
@@ -549,7 +364,7 @@ def test_get_final_bam_name(balsamic_model: ConfigModel):
     )
 
     # Then retrieved final bam names should match the expected format and be identical regardless of request parameter
-    expected_final_bam_name = f"{bam_dir}{sample_type}.{sample_name}.dedup.bam"
+    expected_final_bam_name = f"{bam_dir}{sample_type}.{sample_name}.dedup_sorted.bam"
     assert expected_final_bam_name == bam_name_sample_name
     assert bam_name_sample_name == bam_name_sample_type
 
@@ -568,7 +383,7 @@ def test_no_info_error_get_final_bam_name(balsamic_model: ConfigModel):
 
     # Given bam_dir path
     result_dir = balsamic_model.analysis.result
-    bam_dir = os.path.join(result_dir, "bam", "")
+    bam_dir = Path(result_dir, "bam").as_posix()
 
     # When retrieving final bam file name without supplying sample name or sample type
     # ValueError should be raised
@@ -587,7 +402,7 @@ def test_get_final_bam_name_pon(balsamic_pon_model: ConfigModel):
     sample_name = "ACCN6"
     sample_type = SampleType.NORMAL
     result_dir = balsamic_pon_model.analysis.result
-    bam_dir = os.path.join(result_dir, "bam", "")
+    bam_dir = Path(result_dir, "bam").as_posix()
 
     # When retrieving final bam file name by sample name or sample type
     bam_name_sample_name = balsamic_pon_model.get_final_bam_name(

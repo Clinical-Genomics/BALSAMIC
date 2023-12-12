@@ -7,18 +7,14 @@ multiqc_input.append(qc_dir + "tumor.{}.dedup.metrics".format(tumor_sample))
 multiqc_input.extend(expand(bam_dir + "{sample}.samtools.{stats}.txt",
     sample=sample_names, stats=['flagstats', 'idxstats', 'stats']))
 
-if config["analysis"]["sequencing_type"] == 'wgs':
-    final_bam_suffix = "dedup.realign"
-else:
-    final_bam_suffix = "dedup"
 
-multiqc_input.extend(expand(bam_dir + "tumor.{sample}.{final_bam_suffix}.cram", sample=tumor_sample, final_bam_suffix=final_bam_suffix))
+multiqc_input.extend(expand(bam_dir + "tumor.{sample}.cram", sample=tumor_sample))
 
 # fastqc metrics
 multiqc_input.extend(expand(fastqc_dir + "{fastq_file_names}_fastqc.zip", fastq_file_names=config_model.get_all_fastq_names(remove_suffix = True)))
 
 if config['analysis']['analysis_type'] == "paired":
-    multiqc_input.extend(expand(bam_dir + "normal.{sample}.{final_bam_suffix}.cram", sample=normal_sample, final_bam_suffix=final_bam_suffix))
+    multiqc_input.extend(expand(bam_dir + "normal.{sample}.cram", sample=normal_sample))
     multiqc_input.append(config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = normal_sample))
     multiqc_input.append(qc_dir + "somalier/somalier.pairs.tsv")
     multiqc_input.append(qc_dir + "normal.{}.dedup.metrics".format(normal_sample))
@@ -42,15 +38,20 @@ if config["analysis"]["sequencing_type"] == 'wgs':
         sample=sample_names))
     multiqc_input.extend(expand(qc_dir + "{sample}.multiple_metrics.{metrics_wc}",
         sample=sample_names, metrics_wc=picard_metrics_wildcard))
+    multiqc_input.extend(expand(qc_dir + "{sample}.dedup.realign.hsmetric.txt", sample=sample_names))
+    multiqc_input.extend(expand(qc_dir + "{sample}.dedup.realign.gc_bias_metrics.txt", sample=sample_names))
+    multiqc_input.extend(expand(qc_dir + "{sample}.dedup.realign.gc_bias_metrics.sum_metrics.txt", sample=sample_names))
+    multiqc_input.extend(expand(qc_dir + "{sample}.dedup.realign.gc_bias_metrics.chart.pdf", sample=sample_names))
 
     # Sentieon metrics
     multiqc_input.extend(expand(qc_dir + "{sample}_sentieon_wgs_metrics.txt", sample=sample_names))
     multiqc_input.extend(expand(qc_dir + "{sample}_coverage.gz", sample=sample_names))
 
+
     if config["analysis"]["analysis_workflow"] != "balsamic-qc":
-        multiqc_input.append(bam_dir+"tumor.recal_data.table")
+        multiqc_input.append(bam_dir + "tumor.recal_data.table")
         if config['analysis']['analysis_type'] == "paired":
-            multiqc_input.append(bam_dir+"normal.recal_data.table")
+            multiqc_input.append(bam_dir + "normal.recal_data.table")
 
 else:
     # fastp metrics
@@ -60,17 +61,17 @@ else:
         fastq_pattern=config_model.get_fastq_patterns_by_sample(sample_names = sample_names)))
 
     # picard metrics
-    multiqc_input.extend(expand(bam_dir + "{sample}.dedup.realign.insertsizemetric", sample=tumor_sample))
-    multiqc_input.extend(expand(bam_dir + "{sample}.dedup.realign.alignmetric", sample=tumor_sample))
+    multiqc_input.extend(expand(bam_dir + "{sample}.dedup.insertsizemetric.txt", sample=tumor_sample))
+    multiqc_input.extend(expand(bam_dir + "{sample}.dedup.alignmetric.txt", sample=tumor_sample))
     if config['analysis']['analysis_type'] == "paired":
-        multiqc_input.extend(expand(bam_dir + "{sample}.dedup.realign.insertsizemetric", sample=normal_sample))
-        multiqc_input.extend(expand(bam_dir + "{sample}.dedup.realign.alignmetric", sample=normal_sample))
+        multiqc_input.extend(expand(bam_dir + "{sample}.dedup.insertsizemetric.txt", sample=normal_sample))
+        multiqc_input.extend(expand(bam_dir + "{sample}.dedup.alignmetric.txt", sample=normal_sample))
 
-    multiqc_input.extend(expand(bam_dir + "{sample}.dedup.realign.hsmetric", sample=sample_names))
+    multiqc_input.extend(expand(bam_dir + "{sample}.dedup.hsmetric.txt", sample=sample_names))
 
     # sambamba metrics
-    multiqc_input.extend(expand(bam_dir + "{sample}.dedup.realign.cov.bed", sample=sample_names))
-    multiqc_input.extend(expand(bam_dir + "{sample}.dedup.realign.exon.cov.bed", sample=sample_names))
+    multiqc_input.extend(expand(bam_dir + "{sample}.dedup.cov.bed", sample=sample_names))
+    multiqc_input.extend(expand(bam_dir + "{sample}.dedup.exon.cov.bed", sample=sample_names))
 
     # mosdepth metrics
     mosdepth_metrics_wildcard = ["mosdepth.global.dist.txt", "mosdepth.region.dist.txt",
@@ -83,8 +84,8 @@ else:
 
     if config["analysis"]["analysis_workflow"]=="balsamic-umi":
         # UMI picard metrics
-        multiqc_input.extend(expand(umi_qc_dir + "{sample}.umi.collect_hsmetric", sample=sample_names))
-        multiqc_input.extend(expand(umi_qc_dir + "{sample}.umi.metrics", sample=sample_names))
+        multiqc_input.extend(expand(umi_qc_dir + "{sample}.umi.collect_hsmetric.txt", sample=sample_names))
+        multiqc_input.extend(expand(umi_qc_dir + "{sample}.umi.metrics.txt", sample=sample_names))
 
 
 rule multiqc:

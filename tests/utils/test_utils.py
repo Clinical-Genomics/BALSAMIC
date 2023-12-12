@@ -4,7 +4,7 @@ import logging
 import subprocess
 import sys
 from pathlib import Path
-from typing import List, Dict
+from typing import Dict, List
 from unittest import mock
 
 import click
@@ -15,46 +15,53 @@ from _pytest.tmpdir import TempPathFactory
 from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV, SampleType, SequencingType
 from BALSAMIC.constants.cache import CacheVersion
 from BALSAMIC.constants.cluster import ClusterConfigType
+from BALSAMIC.constants.constants import FileType
 from BALSAMIC.constants.paths import CONTAINERS_DIR
-from BALSAMIC.models.analysis import FastqInfoModel, ConfigModel
+from BALSAMIC.models.config import ConfigModel, FastqInfoModel
 from BALSAMIC.utils.cli import (
     CaptureStdout,
-    get_snakefile,
-    createDir,
-    get_file_status_string,
-    find_file_index,
-    get_panel_chrom,
-    get_file_extension,
-    get_bioinfo_tools_version,
-    convert_deliverables_tags,
     check_executable,
-    job_id_dump_to_yaml,
+    convert_deliverables_tags,
+    createDir,
+    find_file_index,
     generate_h5,
-    get_pon_sample_list,
-    get_sample_list,
-    get_fastq_info,
-    get_config_path,
-    get_resolved_fastq_files_directory,
     get_analysis_fastq_files_directory,
+    get_bioinfo_tools_version,
+    get_config_path,
+    get_fastq_info,
+    get_file_extension,
+    get_file_status_string,
+    get_panel_chrom,
+    get_pon_sample_list,
+    get_resolved_fastq_files_directory,
+    get_sample_list,
+    get_snakefile,
+    job_id_dump_to_yaml,
     validate_cache_version,
 )
 from BALSAMIC.utils.exc import BalsamicError, WorkflowRunError
-from BALSAMIC.utils.io import read_json, write_json, read_yaml, write_finish_file
+from BALSAMIC.utils.io import (
+    read_json,
+    read_vcf_file,
+    read_yaml,
+    write_finish_file,
+    write_json,
+)
 from BALSAMIC.utils.rule import (
-    get_vcf,
-    get_variant_callers,
-    get_script_path,
-    get_result_dir,
-    get_threads,
     get_delivery_id,
+    get_fastp_parameters,
+    get_result_dir,
     get_rule_output,
     get_sample_type_from_sample_name,
-    get_fastp_parameters,
+    get_script_path,
+    get_threads,
+    get_variant_callers,
+    get_vcf,
 )
 from BALSAMIC.utils.utils import (
-    remove_unnecessary_spaces,
-    get_relative_paths_dict,
     get_absolute_paths_dict,
+    get_relative_paths_dict,
+    remove_unnecessary_spaces,
 )
 
 
@@ -236,7 +243,7 @@ def test_get_bioinfo_pip_tools_version():
     bioinfo_tools: dict = get_bioinfo_tools_version(BIOINFO_TOOL_ENV, CONTAINERS_DIR)
 
     # THEN assert that the PIP specific packages are correctly retrieved
-    assert set(bioinfo_tools["cnvkit"]).issubset({"0.9.9"})
+    assert set(bioinfo_tools["cnvkit"]).issubset({"0.9.10"})
 
 
 def test_get_delivery_id():
@@ -273,8 +280,8 @@ def test_get_file_extension_get_any_ext():
 
 def test_get_file_extension_known_ext():
     # GIVEN a dummy file string with a known string
-    dummy_file = "hassan.fastq.gz"
-    actual_extension = "fastq.gz"
+    dummy_file = f"dummy.{FileType.FASTQ}.{FileType.GZ}"
+    actual_extension = f"{FileType.FASTQ}.{FileType.GZ}"
 
     # WHEN extracting the extension
     file_extension = get_file_extension(dummy_file)
@@ -310,7 +317,7 @@ def test_get_snakefile():
     ]
 
     # WHEN asking to see snakefile for paired
-    for reference_genome in ["hg19", "hg38", "canfam3"]:
+    for _reference_genome in ["hg19", "hg38", "canfam3"]:
         for analysis_type, analysis_workflow in workflow:
             snakefile = get_snakefile(analysis_type, analysis_workflow)
 
@@ -885,8 +892,12 @@ def test_get_fastq_info(tumor_sample_name: str, fastq_dir_tumor_only: str):
 
     # THEN check that the fastq_dict matches the expected fastq_dict
     expected_fastq_dict = {
-        "1_171015_HJ7TLDSX5_ACC1_XXXXXX": fastq_info1_expected.dict(exclude_none=True),
-        "2_171015_HJ7TLDSX5_ACC1_XXXXXX": fastq_info2_expected.dict(exclude_none=True),
+        "1_171015_HJ7TLDSX5_ACC1_XXXXXX": fastq_info1_expected.model_dump(
+            exclude_none=True
+        ),
+        "2_171015_HJ7TLDSX5_ACC1_XXXXXX": fastq_info2_expected.model_dump(
+            exclude_none=True
+        ),
     }
     assert fastq_dict == expected_fastq_dict
 
@@ -1015,3 +1026,24 @@ def test_validate_cache_version_wrong_format():
     # THEN a bad parameter error should be raised
     with pytest.raises(click.BadParameter):
         validate_cache_version(click.Context, click.Parameter, cli_version)
+
+
+def test_read_vcf(vcf_file_path, vcf_file_gz_path):
+    """Test correct reading of VCF files."""
+    # GIVEN a path to two identical VCF files, one gzipped and one not
+
+    # WHEN reading VCF file into list of strings
+    vcf_contents: List[str] = read_vcf_file(vcf_file_path)
+    vcf_contents_from_gz: List[str] = read_vcf_file(vcf_file_gz_path)
+
+    # THEN first and last line of the list should match the expected values
+    first_line = vcf_contents[0]
+    last_line = vcf_contents[-1]
+    first_line_expect = "##fileformat=VCFv4.2"
+    last_line_expect = "20\t13417\t.\tC\tCGAGA\t-0.00\tLowQual\tAC=0;AF=0;AN=2;DP=46;ExcessHet=3.0103;FS=0.000;MLEAC=0;MLEAF=0;MQ=30.92;SOR=0.307\tGT:AD:DP:GQ:PL\t0/0:46,0:46:99:0,139,2084"
+
+    assert first_line == first_line_expect
+    assert last_line == last_line_expect
+
+    # THEN the contents from the gzipped VCF should match the non-gzipped VCF
+    assert vcf_contents == vcf_contents_from_gz

@@ -1,44 +1,55 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
+import glob
+import logging
 import os
 import re
-import logging
 import tempfile
-import glob
-
 from pathlib import Path
-from typing import List, Dict
+from typing import Dict, List
+
+from BALSAMIC.constants.analysis import FastqName, MutationType, SampleType
+from BALSAMIC.constants.paths import BALSAMIC_DIR, SENTIEON_DNASCOPE_DIR, SENTIEON_TNSCOPE_DIR
+from BALSAMIC.constants.rules import SNAKEMAKE_RULES
+from BALSAMIC.constants.variant_filters import (
+    COMMON_SETTINGS,
+    SENTIEON_VARCALL_SETTINGS,
+    SVDB_FILTER_SETTINGS,
+    VARDICT_SETTINGS,
+)
+from BALSAMIC.constants.workflow_params import VARCALL_PARAMS, WORKFLOW_PARAMS
+from BALSAMIC.models.config import ConfigModel
+from BALSAMIC.models.params import BalsamicWorkflowConfig, VarCallerFilter
+from BALSAMIC.utils.cli import check_executable, generate_h5
+from BALSAMIC.utils.exc import BalsamicError
+from BALSAMIC.utils.io import read_yaml, write_finish_file, write_json
+from BALSAMIC.utils.rule import (
+    dump_toml,
+    get_cancer_germline_snv_observations,
+    get_cancer_somatic_snv_observations,
+    get_capture_kit,
+    get_clinical_snv_observations,
+    get_clinical_sv_observations,
+    get_fastp_parameters,
+    get_pon_cnn,
+    get_result_dir,
+    get_rule_output,
+    get_script_path,
+    get_sequencing_type,
+    get_somatic_sv_observations,
+    get_swegen_snv,
+    get_swegen_sv,
+    get_threads,
+    get_variant_callers,
+    get_vcf,
+)
+from BALSAMIC.utils.workflowscripts import plot_analysis
+from PyPDF2 import PdfFileMerger
+from snakemake.exceptions import RuleException, WorkflowError
 from yapf.yapflib.yapf_api import FormatFile
 
-from snakemake.exceptions import RuleException, WorkflowError
-
-from PyPDF2 import PdfFileMerger
-
-from BALSAMIC.constants.paths import SENTIEON_DNASCOPE_DIR, SENTIEON_TNSCOPE_DIR, BALSAMIC_DIR
-from BALSAMIC.utils.exc import BalsamicError
-
-from BALSAMIC.utils.cli import (check_executable, generate_h5)
-from BALSAMIC.utils.io import write_json, read_yaml, write_finish_file
-
-from BALSAMIC.models.analysis import VarCallerFilter, BalsamicWorkflowConfig, ConfigModel
-
-from BALSAMIC.utils.workflowscripts import plot_analysis
-
-from BALSAMIC.utils.rule import (get_fastp_parameters, get_variant_callers, get_rule_output, get_result_dir, get_vcf,
-                                 get_threads, get_script_path, get_sequencing_type,
-                                 get_capture_kit,
-                                 get_clinical_snv_observations, get_clinical_sv_observations, get_swegen_snv,
-                                 get_swegen_sv, dump_toml, get_cancer_germline_snv_observations,
-                                 get_cancer_somatic_snv_observations, get_somatic_sv_observations)
-
-from BALSAMIC.constants.analysis import MutationType, FastqName, SampleType
-from BALSAMIC.constants.variant_filters import (COMMON_SETTINGS, VARDICT_SETTINGS, SENTIEON_VARCALL_SETTINGS,
-                                                SVDB_FILTER_SETTINGS)
-from BALSAMIC.constants.workflow_params import (WORKFLOW_PARAMS, VARCALL_PARAMS)
-from BALSAMIC.constants.rules import SNAKEMAKE_RULES
-
 # Initialize ConfigModel
-config_model = ConfigModel.parse_obj(config)
+config_model = ConfigModel.model_validate(config)
 
 shell.executable("/bin/bash")
 shell.prefix("set -eo pipefail; ")
@@ -59,7 +70,7 @@ Path.mkdir(Path(tmp_dir), parents=True, exist_ok=True)
 
 # Directories
 input_fastq_dir: str = config_model.analysis.fastq_path + "/"
-benchmark_dir: str = config_model.analysis.benchmark
+benchmark_dir: str = config_model.analysis.benchmark + "/"
 fastq_dir: str = Path(result_dir, "fastq").as_posix() + "/"
 bam_dir: str = Path(result_dir, "bam").as_posix() + "/"
 cnv_dir: str = Path(result_dir, "cnv").as_posix() + "/"
@@ -83,12 +94,22 @@ clinical_sv = ""
 somatic_sv = ""
 swegen_sv = ""
 
+if config["analysis"]["sequencing_type"] != "wgs":
+    pon_cnn: str = get_pon_cnn(config)
+
 # Run information
 singularity_image: str = config_model.singularity['image']
 sample_names: List[str] = config_model.get_all_sample_names()
 tumor_sample: str = config_model.get_sample_name_by_type(SampleType.TUMOR)
+sequencing_type = config_model.analysis.sequencing_type
 if config_model.analysis.analysis_type == "paired":
     normal_sample: str = config_model.get_sample_name_by_type(SampleType.NORMAL)
+
+# Sample status to sampleID namemap
+if config_model.analysis.analysis_type == "paired":
+    status_to_sample_id = "TUMOR" + "\\\\t" + tumor_sample + "\\\\n" + "NORMAL" + "\\\\t" + normal_sample
+else:
+    status_to_sample_id = "TUMOR" + "\\\\t" + tumor_sample
 
 
 # vcfanno annotations
@@ -182,16 +203,16 @@ if "swegen_sv_frequency" in config["reference"]:
 
 
 # Varcaller filter settings
-COMMON_FILTERS = VarCallerFilter.parse_obj(COMMON_SETTINGS)
-VARDICT = VarCallerFilter.parse_obj(VARDICT_SETTINGS)
-SENTIEON_CALLER = VarCallerFilter.parse_obj(SENTIEON_VARCALL_SETTINGS)
-SVDB_FILTERS = VarCallerFilter.parse_obj(SVDB_FILTER_SETTINGS)
+COMMON_FILTERS = VarCallerFilter.model_validate(COMMON_SETTINGS)
+VARDICT = VarCallerFilter.model_validate(VARDICT_SETTINGS)
+SENTIEON_CALLER = VarCallerFilter.model_validate(SENTIEON_VARCALL_SETTINGS)
+SVDB_FILTERS = VarCallerFilter.model_validate(SVDB_FILTER_SETTINGS)
 
 # Fastp parameters
 fastp_parameters: Dict = get_fastp_parameters(config_model)
 
 # parse parameters as constants to workflows
-params = BalsamicWorkflowConfig.parse_obj(WORKFLOW_PARAMS)
+params = BalsamicWorkflowConfig.model_validate(WORKFLOW_PARAMS)
 
 # Capture kit name
 if config["analysis"]["sequencing_type"] != "wgs":
@@ -372,6 +393,11 @@ if config["analysis"]["analysis_workflow"] == "balsamic":
 if "dragen" in config:
     rules_to_include.append("snakemake_rules/concatenation/concatenation.rule")
 
+# Add rule for GENS
+if "gens_coverage_pon" in config["reference"]:
+    rules_to_include.append("snakemake_rules/variant_calling/gatk_read_counts.rule")
+    rules_to_include.append("snakemake_rules/variant_calling/gens_preprocessing.rule")
+
 LOG.info(f"The following rules will be included in the workflow: {rules_to_include}")
 LOG.info(f"The following Germline variant callers will be included in the workflow: {germline_caller}")
 LOG.info(f"The following somatic variant callers will be included in the workflow: {somatic_caller}")
@@ -396,7 +422,7 @@ analysis_specific_results.extend(
 )
 
 # Germline SNVs specifically for genotype
-if config["analysis"]["analysis_type"]=="paired":
+if config["analysis"]["analysis_type"] == "paired":
     analysis_specific_results.append(vep_dir + "SNV.genotype.normal.dnascope.vcf.gz")
 
 # Raw VCFs
@@ -442,12 +468,14 @@ if config["analysis"]["sequencing_type"] != "wgs":
         expand(vep_dir + "{vcf}.research.filtered.pass.ranked.vcf.gz", vcf=get_vcf(config, ["vardict"], [case_id]))
     )
     # UMI
-    if config["analysis"]["analysis_workflow"]=="balsamic-umi":
+    if config["analysis"]["analysis_workflow"] == "balsamic-umi":
         analysis_specific_results.extend(expand(umi_qc_dir + "{sample}.umi.mean_family_depth", sample=config_model.get_all_sample_names()))
         if background_variant_file:
             analysis_specific_results.extend(
                 expand(umi_qc_dir + "{case_name}.{var_caller}.AFtable.txt", case_name=case_id, var_caller=["tnscope_umi"])
         )
+
+
 
 if config["analysis"]["sequencing_type"] == "wgs" and config['analysis']['analysis_type'] == "paired":
     analysis_specific_results.extend(
@@ -481,6 +509,12 @@ if config['analysis']['sequencing_type'] == "wgs" and config['analysis']['analys
 if config['analysis']['analysis_type'] == "single":
     analysis_specific_results.extend(
         expand(vcf_dir + "{vcf}.cov.gz",vcf=get_vcf(config,["dellycnv"],[case_id]))
+    )
+
+# GENS Outputs
+if config["analysis"]["sequencing_type"] == "wgs" and "gens_coverage_pon" in config["reference"]:
+    analysis_specific_results.extend(
+        expand(cnv_dir + "{sample}.{gens_input}.bed.gz", sample=sample_names, gens_input=["cov", "baf"])
     )
 
 # Dragen
@@ -554,7 +588,7 @@ if 'delivery' in config:
 
         LOG.info("Delivering step (rule) {} {}.".format(my_rule, housekeeper_id))
         files_to_deliver = get_rule_output(rules=rules, rule_name=my_rule, output_file_wildcards=wildcard_dict)
-        LOG.debug("The following files added to delivery: {}".format(files_to_deliver))
+        LOG.info("The following files added to delivery: {}".format(files_to_deliver))
         output_files_ready.extend(files_to_deliver)
 
     output_files_ready = [dict(zip(output_files_ready[0], value)) for value in output_files_ready[1:]]

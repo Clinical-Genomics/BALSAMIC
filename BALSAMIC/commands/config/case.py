@@ -1,17 +1,19 @@
 """Balsamic config case CLI."""
 import logging
+from datetime import datetime
 from pathlib import Path
 from typing import Dict
 
 import click
 
+from BALSAMIC import __version__ as balsamic_version
 from BALSAMIC.commands.options import (
-    OPTION_GENOME_VERSION,
     OPTION_ADAPTER_TRIM,
     OPTION_ANALYSIS_DIR,
     OPTION_ANALYSIS_WORKFLOW,
     OPTION_BACKGROUND_VARIANTS,
     OPTION_BALSAMIC_CACHE,
+    OPTION_CACHE_VERSION,
     OPTION_CADD_ANNOTATIONS,
     OPTION_CANCER_GERMLINE_SNV_OBSERVATIONS,
     OPTION_CANCER_SOMATIC_SNV_OBSERVATIONS,
@@ -21,6 +23,10 @@ from BALSAMIC.commands.options import (
     OPTION_CLINICAL_SV_OBSERVATIONS,
     OPTION_FASTQ_PATH,
     OPTION_GENDER,
+    OPTION_GENOME_INTERVAL,
+    OPTION_GENOME_VERSION,
+    OPTION_GENS_COV_PON,
+    OPTION_GNOMAD_AF5,
     OPTION_NORMAL_SAMPLE_NAME,
     OPTION_PANEL_BED,
     OPTION_PON_CNN,
@@ -30,22 +36,21 @@ from BALSAMIC.commands.options import (
     OPTION_TUMOR_SAMPLE_NAME,
     OPTION_UMI,
     OPTION_UMI_TRIM_LENGTH,
-    OPTION_CACHE_VERSION,
 )
-from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV, Gender, AnalysisWorkflow
+from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV, AnalysisWorkflow, Gender
 from BALSAMIC.constants.cache import GenomeVersion
 from BALSAMIC.constants.constants import FileType
 from BALSAMIC.constants.paths import CONTAINERS_DIR
 from BALSAMIC.constants.workflow_params import VCF_DICT
-from BALSAMIC.models.analysis import ConfigModel
+from BALSAMIC.models.config import ConfigModel
 from BALSAMIC.utils.cli import (
-    get_sample_list,
-    get_panel_chrom,
-    get_bioinfo_tools_version,
     generate_graph,
     get_analysis_fastq_files_directory,
+    get_bioinfo_tools_version,
+    get_panel_chrom,
+    get_sample_list,
 )
-from BALSAMIC.utils.io import write_json, read_json
+from BALSAMIC.utils.io import read_json, write_json
 from BALSAMIC.utils.utils import get_absolute_paths_dict
 
 LOG = logging.getLogger(__name__)
@@ -68,6 +73,9 @@ LOG = logging.getLogger(__name__)
 @OPTION_FASTQ_PATH
 @OPTION_GENDER
 @OPTION_GENOME_VERSION
+@OPTION_GENOME_INTERVAL
+@OPTION_GENS_COV_PON
+@OPTION_GNOMAD_AF5
 @OPTION_NORMAL_SAMPLE_NAME
 @OPTION_PANEL_BED
 @OPTION_PON_CNN
@@ -96,6 +104,9 @@ def case_config(
     fastq_path: Path,
     gender: Gender,
     genome_version: GenomeVersion,
+    genome_interval: Path,
+    gens_coverage_pon: Path,
+    gnomad_min_af5: Path,
     normal_sample_name: str,
     panel_bed: Path,
     pon_cnn: Path,
@@ -114,6 +125,31 @@ def case_config(
     cadd_annotations_path = {"cadd_annotations": cadd_annotations}
     if cadd_annotations:
         references.update(cadd_annotations_path)
+
+    if any([genome_interval, gens_coverage_pon, gnomad_min_af5]):
+        if panel_bed:
+            raise click.BadParameter(
+                "GENS is currently not compatible with TGA analysis, only WGS."
+            )
+        if not all([genome_interval, gens_coverage_pon, gnomad_min_af5]):
+            raise click.BadParameter(
+                "All three arguments (genome_interval gens_coverage_pon, gnomad_min_af5) are required for GENS."
+            )
+
+        gens_ref_files = {
+            "genome_interval": genome_interval,
+            "gens_coverage_pon": gens_coverage_pon,
+            "gnomad_min_af5": gnomad_min_af5,
+        }
+
+        references.update(
+            {
+                gens_file: path
+                for gens_file, path in gens_ref_files.items()
+                if path is not None
+            }
+        )
+
     variants_observations = {
         "clinical_snv_observations": clinical_snv_observations,
         "clinical_sv_observations": clinical_sv_observations,
@@ -134,6 +170,15 @@ def case_config(
     analysis_fastq_dir: str = get_analysis_fastq_files_directory(
         case_dir=Path(analysis_dir, case_id).as_posix(), fastq_path=fastq_path
     )
+    result_dir: Path = Path(analysis_dir, case_id, "analysis")
+    log_dir: Path = Path(analysis_dir, case_id, "logs")
+    script_dir: Path = Path(analysis_dir, case_id, "scripts")
+    benchmark_dir: Path = Path(analysis_dir, case_id, "benchmarks")
+    dag_path: Path = Path(
+        analysis_dir, case_id, f"{case_id}_BALSAMIC_{balsamic_version}_graph.pdf"
+    )
+    for directory in [result_dir, log_dir, script_dir, benchmark_dir]:
+        directory.mkdir(exist_ok=True)
 
     config_collection_dict = ConfigModel(
         QC={
@@ -148,8 +193,14 @@ def case_config(
             "analysis_dir": analysis_dir,
             "fastq_path": analysis_fastq_dir,
             "analysis_type": "paired" if normal_sample_name else "single",
+            "log": log_dir.as_posix(),
+            "script": script_dir.as_posix(),
+            "result": result_dir.as_posix(),
+            "benchmark": benchmark_dir.as_posix(),
+            "dag": dag_path.as_posix(),
             "sequencing_type": "targeted" if panel_bed else "wgs",
             "analysis_workflow": analysis_workflow,
+            "config_creation_date": datetime.now().strftime("%Y-%m-%d %H:%M"),
         },
         reference=references,
         singularity={
@@ -174,19 +225,8 @@ def case_config(
         }
         if panel_bed
         else None,
-    ).dict(by_alias=True, exclude_none=True)
+    ).model_dump(by_alias=True, exclude_none=True)
     LOG.info("Balsamic config model instantiated successfully")
-
-    result_path: Path = Path(config_collection_dict["analysis"]["result"])
-    log_path: Path = Path(config_collection_dict["analysis"]["log"])
-    script_path: Path = Path(config_collection_dict["analysis"]["script"])
-    benchmark_path: Path = Path(config_collection_dict["analysis"]["benchmark"])
-
-    # Create directories for results, logs, scripts and benchmark files
-    analysis_directories_list = [result_path, log_path, script_path, benchmark_path]
-
-    for analysis_sub_dir in analysis_directories_list:
-        analysis_sub_dir.mkdir(exist_ok=True)
 
     config_path = Path(analysis_dir, case_id, case_id + ".json").as_posix()
     write_json(json_obj=config_collection_dict, path=config_path)

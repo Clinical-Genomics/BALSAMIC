@@ -12,7 +12,7 @@
     "vcf": {
         "vardict": {
             "mutation": "somatic",
-            "type": "SNV",
+            "mutation_type": "SNV",
             "analysis_type": [
                 "paired",
                 "single"
@@ -26,7 +26,7 @@
         },
         "tnscope": {
             "mutation": "somatic",
-            "type": "SNV",
+            "mutation_type": "SNV",
             "analysis_type": [
                 "paired",
                 "single"
@@ -40,7 +40,7 @@
         },
         "dnascope": {
             "mutation": "germline",
-            "type": "SNV",
+            "mutation_type": "SNV",
             "analysis_type": [
                 "paired",
                 "single"
@@ -55,7 +55,7 @@
         },
         "tnscope_umi": {
             "mutation": "somatic",
-            "type": "SNV",
+            "mutation_type": "SNV",
             "analysis_type": [
                 "single",
                 "paired"
@@ -69,7 +69,7 @@
         },
         "manta_germline": {
             "mutation": "germline",
-            "type": "SV",
+            "mutation_type": "SV",
             "analysis_type": [
                 "paired",
                 "single"
@@ -84,7 +84,7 @@
         },
         "manta": {
             "mutation": "somatic",
-            "type": "SV",
+            "mutation_type": "SV",
             "analysis_type": [
                 "paired",
                 "single"
@@ -99,7 +99,7 @@
         },
         "dellysv": {
             "mutation": "somatic",
-            "type": "SV",
+            "mutation_type": "SV",
             "analysis_type": [
                 "paired",
                 "single"
@@ -114,7 +114,7 @@
         },
         "cnvkit": {
             "mutation": "somatic",
-            "type": "CNV",
+            "mutation_type": "CNV",
             "analysis_type": [
                 "paired",
                 "single"
@@ -128,7 +128,7 @@
         },
         "ascat": {
             "mutation": "somatic",
-            "type": "CNV",
+            "mutation_type": "CNV",
             "analysis_type": [
                 "paired"
             ],
@@ -141,7 +141,7 @@
         },
         "dellycnv": {
             "mutation": "somatic",
-            "type": "CNV",
+            "mutation_type": "CNV",
             "analysis_type": [
                 "single",
                 "paired"
@@ -156,7 +156,7 @@
         },
         "tiddit": {
             "mutation": "somatic",
-            "type": "SV",
+            "mutation_type": "SV",
             "analysis_type": [
                 "single",
                 "paired"
@@ -170,7 +170,7 @@
         },
         "cnvpytor": {
             "mutation": "somatic",
-            "type": "CNV",
+            "mutation_type": "CNV",
             "analysis_type": [
                 "single"
             ],
@@ -183,7 +183,7 @@
         },
         "svdb": {
             "mutation": "somatic",
-            "type": "SV",
+            "mutation_type": "SV",
             "analysis_type": [
                 "paired",
                 "single"

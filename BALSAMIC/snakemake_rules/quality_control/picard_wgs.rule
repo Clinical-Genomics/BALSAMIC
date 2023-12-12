@@ -7,15 +7,91 @@ picard_metrics_wildcard = ["alignment_summary_metrics", "base_distribution_by_cy
                            "quality_by_cycle.pdf", "quality_distribution_metrics", "quality_distribution.pdf"]
 
 
+rule picard_CollectHsMetrics_WGS:
+    input:
+        fadict = config_model.reference["reference_genome"].replace(".fasta",".dict"),
+        bed = config_model.reference["refgene_bed"],
+        bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample),
+        fa = config_model.reference["reference_genome"],
+    output:
+        hs_metrics = qc_dir + "{sample}.dedup.realign.hsmetric.txt"
+    benchmark:
+        Path(benchmark_dir + "picard_CollectHsMetrics_{sample}.tsv").as_posix()
+    singularity:
+        Path(singularity_image, config["bioinfo_tools"].get("picard") + ".sif").as_posix()
+    params:
+        mem = "16g",
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
+        bed_name = Path(config_model.reference["refgene_bed"]).name,
+        sample = "{sample}"
+    threads:
+        get_threads(cluster_config, "picard_CollectHsMetrics")
+    message:
+        "Calculating picard HsMetrics for sample {params.sample}"
+    shell:
+        """
+export TMPDIR={params.tmpdir};
+
+picard -Djava.io.tmpdir={params.tmpdir} -Xmx{params.mem} \
+BedToIntervalList \
+I={input.bed} \
+O={input.bam}.picard.bedintervals \
+SD={input.fadict};
+
+picard -Djava.io.tmpdir={params.tmpdir} -Xmx{params.mem} \
+CollectHsMetrics \
+BI={input.bam}.picard.bedintervals \
+TI={input.bam}.picard.bedintervals \
+I={input.bam} \
+O={output.hs_metrics} \
+R={input.fa} \
+BAIT_SET_NAME={params.bed_name} \
+COVERAGE_CAP=50000 \
+METRIC_ACCUMULATION_LEVEL=ALL_READS;
+      """
+
+rule picard_CollectGcBiasMetrics:
+    input:
+        bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample),
+        fa = config_model.reference["reference_genome"],
+    output:
+        gc_bias_metrics = qc_dir + "{sample}.dedup.realign.gc_bias_metrics.txt",
+        gc_bias_sum_metrics = qc_dir + "{sample}.dedup.realign.gc_bias_metrics.sum_metrics.txt",
+        gc_bias_sum_chart = qc_dir + "{sample}.dedup.realign.gc_bias_metrics.chart.pdf"
+    benchmark:
+        Path(benchmark_dir + "picard_CollectHsMetrics_{sample}.tsv").as_posix()
+    singularity:
+        Path(singularity_image, config["bioinfo_tools"].get("picard") + ".sif").as_posix()
+    params:
+        mem = "16g",
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
+        bed_name =  Path(config_model.reference["refgene_bed"]).name,
+        sample = "{sample}"
+    threads:
+        get_threads(cluster_config, "picard_CollectHsMetrics")
+    message:
+        "Calculating picard HsMetrics for sample {params.sample}"
+    shell:
+        """
+export TMPDIR={params.tmpdir};
+
+picard -Djava.io.tmpdir={params.tmpdir} -Xmx{params.mem} \
+CollectGcBiasMetrics \
+I={input.bam} \
+O={output.gc_bias_metrics} \
+R={input.fa} \
+S={output.gc_bias_sum_metrics} \
+CHART={output.gc_bias_sum_chart};
+      """
 
 rule picard_CollectMultipleMetrics:
     input:
         bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample),
         reference = config["reference"]["reference_genome"]
     output:
-        expand(qc_dir + "{{sample}}.multiple_metrics.{metrics_wc}", sample = config["samples"], metrics_wc = picard_metrics_wildcard)
+        expand(qc_dir + "{{sample}}.multiple_metrics.{metrics_wc}", metrics_wc = picard_metrics_wildcard)
     benchmark:
-        Path(benchmark_dir, "picard_CollectMultipleMetrics_" + "{sample}.tsv").as_posix()
+        Path(benchmark_dir, "picard_CollectMultipleMetrics_{sample}.tsv").as_posix()
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("picard") + ".sif").as_posix()
     params:
@@ -24,12 +100,11 @@ rule picard_CollectMultipleMetrics:
         output_prefix = qc_dir + "{sample}.multiple_metrics",
         sample = '{sample}'
     threads:
-        get_threads(cluster_config,'picard_CollectMultipleMetrics')
+        get_threads(cluster_config, "picard_CollectMultipleMetrics")
     message:
         "Collecting picard multiple quality metrics for wgs sample {params.sample}"
     shell:
         """
-mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
 
 picard -Djava.io.tmpdir={params.tmpdir} -Xmx{params.mem} \
@@ -47,20 +122,19 @@ rule picard_CollectWgsMetrics:
     output:
         qc_dir + "{sample}_picard_wgs_metrics.txt"
     benchmark:
-        Path(benchmark_dir + "picard_CollectWgsMetrics_" + "{sample}.tsv").as_posix()
+        Path(benchmark_dir + "picard_CollectWgsMetrics_{sample}.tsv").as_posix()
     singularity:
         Path(singularity_image,config[ "bioinfo_tools" ].get("picard") + ".sif").as_posix()
     params:
         mem = "16g",
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-        sample = '{sample}'
+        sample = "{sample}"
     threads:
-        get_threads(cluster_config,'picard_CollectWgsMetrics')
+        get_threads(cluster_config,"picard_CollectWgsMetrics")
     message:
-        "Collecting various picard quality metrics for wgs sample '{params.sample}'"
+        "Collecting various picard quality metrics for wgs sample {params.sample}"
     shell:
         """
-mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
 
 picard -Djava.io.tmpdir={params.tmpdir} -Xmx{params.mem} \

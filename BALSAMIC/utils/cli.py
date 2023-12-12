@@ -6,7 +6,7 @@ import sys
 from distutils.spawn import find_executable
 from io import StringIO
 from pathlib import Path
-from typing import Dict, Optional, List
+from typing import Dict, List, Optional
 
 import click
 import graphviz
@@ -15,12 +15,12 @@ import yaml
 from colorclass import Color
 
 from BALSAMIC import __version__ as balsamic_version
-from BALSAMIC.constants.analysis import FASTQ_SUFFIXES, SampleType, FastqName, PonParams
+from BALSAMIC.constants.analysis import FASTQ_SUFFIXES, FastqName, PonParams, SampleType
 from BALSAMIC.constants.cache import CacheVersion
 from BALSAMIC.constants.cluster import ClusterConfigType
 from BALSAMIC.constants.constants import FileType
 from BALSAMIC.constants.paths import CONSTANTS_DIR
-from BALSAMIC.models.analysis import SampleInstanceModel, FastqInfoModel
+from BALSAMIC.models.config import FastqInfoModel, SampleInstanceModel
 from BALSAMIC.utils.exc import BalsamicError
 
 LOG = logging.getLogger(__name__)
@@ -107,6 +107,7 @@ def find_file_index(file_path):
         ".cram": [".cram.crai", ".crai"],
         ".vcf.gz": [".vcf.gz.tbi"],
         ".vcf": [".vcf.tbi"],
+        ".bed.gz": [".bed.gz.tbi"],
     }
 
     file_path_index = set()
