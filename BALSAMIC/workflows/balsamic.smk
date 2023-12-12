@@ -291,10 +291,11 @@ if config["analysis"]["sequencing_type"] == "wgs":
         ))
 else:
     cnv_report_paths.extend(expand(f"{cnv_dir}tumor.merged-{{plot}}.pdf",plot=["diagram", "scatter"]))
-    cnv_report_paths.append(expand(
+    loh_report_paths: List[str] = expand(
         f"{cnv_dir}CNV.somatic.{config['analysis']['case_id']}.purecn.{{dataframe}}.csv.pdf",
         dataframe=["purity", "LOHregions", "LOHgenes"]
-    ))
+    )
+    cnv_report_paths.extend([path for path in loh_report_paths if Path(path).is_file()])
 
 
 # Extract variant callers for the workflow
