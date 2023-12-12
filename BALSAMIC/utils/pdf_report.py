@@ -34,9 +34,15 @@ def get_image_html(image_path: Path, image_name: str) -> str:
         <html>
         <head>
             <style>
-                h1, {{ padding: 10px;}}
-                h1, div {{text-align: center;}}
+                h1 {{text-align: center;}}
                 img {{max-height: 800px;}}
+                div {{
+                    height: 800px;
+                    display: -webkit-box;
+                    -webkit-box-pack: center; /* Center horizontally */
+                    -webkit-box-align: center; /* Center vertically */
+                    position: relative;
+                }}
             </style>
         </head>
         <body>
