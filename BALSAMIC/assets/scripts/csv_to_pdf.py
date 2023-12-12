@@ -12,9 +12,16 @@ from BALSAMIC.utils.pdf_report import get_table_html, html_to_pdf
     "csv_path", nargs=1, required=True, type=click.Path(exists=True, resolve_path=True)
 )
 @click.argument("pdf_path", nargs=1, required=True, type=click.Path(resolve_path=True))
-def csv_to_pdf(csv_path: str, pdf_path: str) -> None:
+@click.option(
+    "--delimiter",
+    type=click.STRING,
+    default=",",
+    show_default=True,
+    help="CSV file delimiter",
+)
+def csv_to_pdf(csv_path: str, pdf_path: str, delimiter: str) -> None:
     """Convert CSV file to a PDF."""
-    df: DataFrame = read_csv(csv_path)
+    df: DataFrame = read_csv(filepath_or_buffer=csv_path, delimiter=delimiter)
     html_table: str = df.to_html(
         index=False, na_rep="NA", justify="center", escape=False
     )
