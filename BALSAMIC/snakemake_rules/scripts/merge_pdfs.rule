@@ -21,7 +21,7 @@ rule merge_cnv_pdf_reports:
     shell:
         """
 IFS=' ' read -r -a report_paths <<< "{input.report_paths}"
-if [ -f "{params.loh_regions_pdf}" ] && [ -f "{params.loh_genes_pdf}" ]; then
+if [[ -f "{params.loh_regions_pdf}" ]] && [[ -f "{params.loh_genes_pdf}" ]]; then
     report_paths+=("{params.loh_regions_pdf}" "{params.loh_genes_pdf}")
 fi
 python "{params.merge_pdfs_script}" "${{report_paths[@]}}" "{output.cnv_report_pdf}"
