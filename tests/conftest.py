@@ -607,6 +607,12 @@ def references_dir(test_data_dir) -> Path:
 
 
 @pytest.fixture(scope="session")
+def purity_csv_path(test_data_dir) -> Path:
+    """Return a pureCN purity CSV path."""
+    return Path(test_data_dir, "cnv_report", "CNV.somatic.case_id.purecn.purity.csv")
+
+
+@pytest.fixture(scope="session")
 def balsamic_cache(
     tmp_path_factory: TempPathFactory, reference: Dict[str, Path], references_dir: Path
 ) -> str:
