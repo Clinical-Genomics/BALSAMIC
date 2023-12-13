@@ -6,10 +6,7 @@ rule csv_to_pdf:
     input:
         purity_csv=f"{cnv_dir}CNV.somatic.{config['analysis']['case_id']}.purecn.purity.csv",
     output:
-        loh_pdfs=expand(
-            f"{cnv_dir}CNV.somatic.{config['analysis']['case_id']}.purecn.{{dataframe}}.csv.pdf",
-            dataframe=["purity", "LOHregions", "LOHgenes"],
-        ),
+        purity_csv_pdf=f"{cnv_dir}CNV.somatic.{config['analysis']['case_id']}.purecn.purity.csv.pdf",
     params:
         csv_to_pdf_script=get_script_path("csv_to_pdf.py"),
         loh_regions=f"{cnv_dir}CNV.somatic.{config['analysis']['case_id']}.purecn.LOHregions.csv",
@@ -22,7 +19,8 @@ rule csv_to_pdf:
         """
 for file in "{input.purity_csv}" "{params.loh_regions}" "{params.loh_genes}"; do
     if [[ -f "$file" ]]; then
-        python "{params.csv_to_pdf_script}" "$file" "$file.pdf" --header
+        python "{params.csv_to_pdf_script}" "$file" "$file.pdf"
+    fi
 done
         """
 
