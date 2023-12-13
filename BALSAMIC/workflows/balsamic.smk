@@ -284,11 +284,11 @@ if config["analysis"]["sequencing_type"] == "wgs":
             vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat." + "{output_suffix}" + ".png.pdf",
             output_suffix=["ascatprofile", "rawprofile", "ASPCF", "tumor", "germline", "sunrise"]
         ))
-    else:
-        cnv_report_paths.extend(expand(
-            vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".cnvpytor." + "{output_suffix}" + ".png",
-            output_suffix=["circular", "scatter"]
-        ))
+    # else:
+    #     cnv_report_paths.extend(expand(
+    #         vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".cnvpytor." + "{output_suffix}" + ".png",
+    #         output_suffix=["circular", "scatter"]
+    #     ))
 else:
     cnv_report_paths.extend(expand(f"{cnv_dir}tumor.merged-{{plot}}.pdf",plot=["diagram", "scatter"]))
     loh_report_paths: List[str] = expand(

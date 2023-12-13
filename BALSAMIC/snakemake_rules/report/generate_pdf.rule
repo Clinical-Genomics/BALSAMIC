@@ -14,7 +14,8 @@ rule csv_to_pdf:
         csv_to_pdf_script=get_script_path("csv_to_pdf.py"),
         loh_regions=f"{cnv_dir}CNV.somatic.{config['analysis']['case_id']}.purecn.LOHregions.csv",
         loh_genes=f"{cnv_dir}CNV.somatic.{config['analysis']['case_id']}.purecn.LOHgenes.csv",
-    threads: get_threads(cluster_config=cluster_config, rule_name="csv_to_pdf")
+    threads:
+        get_threads(cluster_config=cluster_config, rule_name="csv_to_pdf")
     message:
         "Converting CSV files to PDF"
     shell:
@@ -23,4 +24,54 @@ for file in "{input.purity_csv}" "{params.loh_regions}" "{params.loh_genes}"; do
     if [[ -f "$file" ]]; then
         python "{params.csv_to_pdf_script}" "$file" "$file.pdf" --header
 done
+        """
+
+rule txt_to_pdf:
+    """Converting AscatNgs statistics TXT file to PDF format."""
+    input:
+        sample_statistics=f"{vcf_dir}CNV.somatic.{config['analysis']['case_id']}.ascat.samplestatistics.txt"
+    output:
+        sample_statistics_pdf=f"{vcf_dir}CNV.somatic.{config['analysis']['case_id']}.ascat.samplestatistics.txt.pdf"
+    params:
+        csv_to_pdf_script=get_script_path("csv_to_pdf.py"),
+    threads:
+        get_threads(cluster_config=cluster_config, rule_name="image_to_pdf")
+    message:
+        "Converting AscatNgs statistics TXT file to PDF"
+    shell:
+        """
+python "{params.csv_to_pdf_script}" "{input.sample_statistics}" "{output.sample_statistics_pdf}" --delimiter " "
+        """
+
+
+rule image_to_pdf:
+    """Converting AscatNgs PNG files to PDF format."""
+    input:
+        plot_ascat_profile = f"{vcf_dir}CNV.somatic.{config['analysis']['case_id']}.ascat.ascatprofile.png",
+        plot_raw_profile = f"{vcf_dir}CNV.somatic.{config['analysis']['case_id']}.ascat.rawprofile.png",
+        plot_aspcf = f"{vcf_dir}CNV.somatic.{config['analysis']['case_id']}.ascat.ASPCF.png",
+        plot_tumor = f"{vcf_dir}CNV.somatic.{config['analysis']['case_id']}.ascat.tumor.png",
+        plot_germline = f"{vcf_dir}CNV.somatic.{config['analysis']['case_id']}.ascat.germline.png",
+        plot_sunrise = f"{vcf_dir}CNV.somatic.{config['analysis']['case_id']}.ascat.sunrise.png",
+    output:
+        plot_ascat_profile_pdf = f"{vcf_dir}CNV.somatic.{config['analysis']['case_id']}.ascat.ascatprofile.png.pdf",
+        plot_raw_profile_pdf = f"{vcf_dir}CNV.somatic.{config['analysis']['case_id']}.ascat.rawprofile.png.pdf",
+        plot_aspcf_pdf = f"{vcf_dir}CNV.somatic.{config['analysis']['case_id']}.ascat.ASPCF.png.pdf",
+        plot_tumor_pdf = f"{vcf_dir}CNV.somatic.{config['analysis']['case_id']}.ascat.tumor.png.pdf",
+        plot_germline_pdf = f"{vcf_dir}CNV.somatic.{config['analysis']['case_id']}.ascat.germline.png.pdf",
+        plot_sunrise_pdf = f"{vcf_dir}CNV.somatic.{config['analysis']['case_id']}.ascat.sunrise.png.pdf",
+    params:
+        image_to_pdf_script=get_script_path("image_to_pdf.py"),
+    threads:
+        get_threads(cluster_config=cluster_config, rule_name="image_to_pdf")
+    message:
+        "Converting AscatNgs PNG files to PDF"
+    shell:
+        """
+python "{params.image_to_pdf_script}" "{input.plot_ascat_profile}" "{output.plot_ascat_profile_pdf}"
+python "{params.image_to_pdf_script}" "{input.plot_raw_profile}" "{output.plot_raw_profile_pdf}"
+python "{params.image_to_pdf_script}" "{input.plot_aspcf}" "{output.plot_aspcf_pdf}"
+python "{params.image_to_pdf_script}" "{input.plot_tumor}" "{output.plot_tumor_pdf}"
+python "{params.image_to_pdf_script}" "{input.plot_germline}" "{output.plot_germline_pdf}"
+python "{params.image_to_pdf_script}" "{input.plot_sunrise}" "{output.plot_sunrise_pdf}"
         """
