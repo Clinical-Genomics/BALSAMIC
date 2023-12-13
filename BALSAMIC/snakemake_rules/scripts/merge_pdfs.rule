@@ -10,6 +10,8 @@ rule merge_cnv_pdf_reports:
     params:
         housekeeper_id={"id": config["analysis"]["case_id"], "tags": "clinical"},
         merge_pdfs_script=get_script_path("merge_pdfs.py"),
+        loh_regions_pdf=f"{cnv_dir}CNV.somatic.{config['analysis']['case_id']}.purecn.LOHregions.csv.pdf",
+        loh_genes_pdf=f"{cnv_dir}CNV.somatic.{config['analysis']['case_id']}.purecn.LOHgenes.csv.pdf",
     threads:
         get_threads(cluster_config=cluster_config, rule_name="merge_cnv_pdf_reports")
     message:
@@ -18,5 +20,9 @@ rule merge_cnv_pdf_reports:
         Path(benchmark_dir, f"merge_cnv_pdf_reports_{config['analysis']['case_id']}.tsv").as_posix()
     shell:
         """
-python {params.merge_pdfs_script} {input.report_paths} {output.cnv_report_pdf}
+report_paths="{input.report_paths}"
+if [ -f "{params.loh_regions_pdf}" ] && [ -f "{params.loh_genes_pdf} ]; then
+    report_paths="$report_paths {params.loh_regions_pdf} {params.loh_genes_pdf}"
+fi
+python "{params.merge_pdfs_script}" "$report_paths" "{output.cnv_report_pdf}"
         """
