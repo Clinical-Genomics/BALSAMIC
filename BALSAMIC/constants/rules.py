@@ -37,7 +37,6 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
             "snakemake_rules/quality_control/samtools_qc.rule",
         ],
         "report": [
-            "snakemake_rules/report/generate_pdf.rule",
             "snakemake_rules/report/merge_pdfs.rule",
         ],
         "align": [
@@ -69,6 +68,9 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
             "snakemake_rules/umi/qc_umi.rule",
             "snakemake_rules/umi/mergetype_tumor_umi.rule",
             "snakemake_rules/umi/generate_AF_tables.rule",
+        ],
+        "report": [
+            "snakemake_rules/report/generate_pdf_tga.rule",
         ],
         "align": [
             "snakemake_rules/umi/sentieon_umiextract.rule",
@@ -102,6 +104,9 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
             "snakemake_rules/quality_control/contest.rule",
             "snakemake_rules/umi/generate_AF_tables.rule",
         ],
+        "report": [
+            "snakemake_rules/report/generate_pdf_tga.rule",
+        ],
         "align": [
             "snakemake_rules/umi/sentieon_umiextract.rule",
             "snakemake_rules/umi/sentieon_consensuscall.rule",
@@ -127,6 +132,9 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
             "snakemake_rules/quality_control/sentieon_qc_metrics.rule",
             "snakemake_rules/quality_control/picard_wgs.rule",
         ],
+        "report": [
+            "snakemake_rules/report/generate_pdf_wgs.rule",
+        ],
         "varcall": [
             "snakemake_rules/variant_calling/sentieon_germline.rule",
             "snakemake_rules/variant_calling/sentieon_split_snv_sv.rule",
@@ -144,6 +152,9 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
             "snakemake_rules/quality_control/sentieon_qc_metrics.rule",
             "snakemake_rules/quality_control/picard_wgs.rule",
             "snakemake_rules/quality_control/somalier.rule",
+        ],
+        "report": [
+            "snakemake_rules/report/generate_pdf_wgs.rule",
         ],
         "varcall": [
             "snakemake_rules/variant_calling/sentieon_germline.rule",
@@ -212,6 +223,6 @@ DELIVERY_RULES: List[str] = [
     "finalize_gens_outputfiles",
     # TMB
     "tmb_calculation",
-    # Scripts
+    # CNV report
     "merge_cnv_pdf_reports",
 ]
