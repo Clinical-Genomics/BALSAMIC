@@ -19,7 +19,7 @@ def test_csv_to_pdf(
 
     # WHEN converting the CSV file to PDF
     result: Result = cli_runner.invoke(
-        csv_to_pdf, [purity_csv_path.as_posix(), pdf_path.as_posix()]
+        csv_to_pdf, [purity_csv_path.as_posix(), pdf_path.as_posix(), "--header"]
     )
 
     # THEN the output PDF file should exist

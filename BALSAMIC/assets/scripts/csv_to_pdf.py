@@ -17,13 +17,19 @@ from BALSAMIC.utils.pdf_report import get_table_html, html_to_pdf
     type=click.STRING,
     default=",",
     show_default=True,
-    help="CSV file delimiter",
+    help="CSV file delimiter.",
 )
-def csv_to_pdf(csv_path: str, pdf_path: str, delimiter: str) -> None:
+@click.option(
+    "-h",
+    "--header",
+    is_flag=True,
+    help="Include this option if the CSV file has a header row.",
+)
+def csv_to_pdf(csv_path: str, pdf_path: str, delimiter: str, header: bool) -> None:
     """Convert CSV file to a PDF."""
     df: DataFrame = read_csv(filepath_or_buffer=csv_path, delimiter=delimiter)
     html_table: str = df.to_html(
-        index=False, na_rep="NA", justify="center", escape=False
+        index=False, na_rep="NA", justify="center", escape=False, header=header
     )
     html_page: str = get_table_html(
         html_table=html_table, table_name=Path(csv_path).stem
