@@ -20,9 +20,8 @@ rule merge_cnv_pdf_reports:
         Path(benchmark_dir, f"merge_cnv_pdf_reports_{config['analysis']['case_id']}.tsv").as_posix()
     shell:
         """
-report_paths="{input.report_paths}"
 if [ -f "{params.loh_regions_pdf}" ] && [ -f "{params.loh_genes_pdf}" ]; then
-    report_paths+=("{params.loh_regions_pdf}" "{params.loh_genes_pdf}")
+    {input.report_paths}+=("{params.loh_regions_pdf}" "{params.loh_genes_pdf}")
 fi
 python "{params.merge_pdfs_script}" "${{report_paths[@]}}" "{output.cnv_report_pdf}"
         """
