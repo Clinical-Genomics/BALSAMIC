@@ -19,7 +19,7 @@ rule csv_to_pdf:
         """
 for file in "{input.purity_csv}" "{params.loh_regions}" "{params.loh_genes}"; do
     if [[ -f "$file" ]]; then
-        python "{params.csv_to_pdf_script}" "$file" "$file.pdf"
+        python "{params.csv_to_pdf_script}" "$file" "$file.pdf" --header
     fi
 done
         """
