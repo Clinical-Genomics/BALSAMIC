@@ -204,6 +204,7 @@ DELIVERY_RULES: List[str] = [
     "delly_cnv_tumor_only",
     "delly_cnv_tumor_normal",
     "ascat_tumor_normal",
+    "cnvpytor_tumor_only",
     "vcf2cytosure_convert_tumor_only",
     "vcf2cytosure_convert_tumor_normal",
     "cnvkit_segment_CNV_research",
