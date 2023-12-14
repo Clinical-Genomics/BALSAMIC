@@ -45,7 +45,7 @@ from BALSAMIC.utils.rule import (
     get_vcf,
 )
 from BALSAMIC.utils.workflowscripts import plot_analysis
-from PyPDF2 import PdfFileMerger
+from pypdf import PdfWriter
 from snakemake.exceptions import RuleException, WorkflowError
 from yapf.yapflib.yapf_api import FormatFile
 
@@ -547,7 +547,7 @@ if 'benchmark_plots' in config:
 
         # Merge plots into one based on rule name
         for my_rule in vars(rules).keys():
-            my_rule_pdf = PdfFileMerger()
+            my_rule_pdf = PdfWriter()
             my_rule_plots = list()
             for plots in Path(benchmark_dir).glob(f"BALSAMIC*.{my_rule}.*.pdf"):
                 my_rule_pdf.append(plots.as_posix())
