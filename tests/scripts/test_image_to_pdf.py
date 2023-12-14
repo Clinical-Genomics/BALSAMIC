@@ -1,8 +1,8 @@
 """Test converting images to PDF."""
 from pathlib import Path
 
-from PyPDF2 import PdfReader
 from click.testing import CliRunner, Result
+from pypdf import PdfReader
 
 from BALSAMIC.assets.scripts.image_to_pdf import image_to_pdf
 
