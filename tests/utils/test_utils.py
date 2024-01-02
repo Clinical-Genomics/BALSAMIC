@@ -458,7 +458,7 @@ def test_write_json_error(tmp_path: Path):
     # GIVEN a directory as the output file
     with pytest.raises(Exception, match=r"Is a directory"):
         # THEN an exception should be raised
-        assert write_json(ref_json, tmp_path)
+        write_json(ref_json, tmp_path)
 
 
 def test_read_json(config_path: str):
