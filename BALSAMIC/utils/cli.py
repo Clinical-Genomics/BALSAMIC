@@ -6,7 +6,7 @@ import sys
 from distutils.spawn import find_executable
 from io import StringIO
 from pathlib import Path
-from typing import Dict, Optional, List
+from typing import Dict, List, Optional
 
 import click
 import graphviz
@@ -15,12 +15,12 @@ import yaml
 from colorclass import Color
 
 from BALSAMIC import __version__ as balsamic_version
-from BALSAMIC.constants.analysis import FASTQ_SUFFIXES, SampleType, FastqName, PonParams
+from BALSAMIC.constants.analysis import FASTQ_SUFFIXES, FastqName, PonParams, SampleType
 from BALSAMIC.constants.cache import CacheVersion
 from BALSAMIC.constants.cluster import ClusterConfigType
 from BALSAMIC.constants.constants import FileType
 from BALSAMIC.constants.paths import CONSTANTS_DIR
-from BALSAMIC.models.analysis import SampleInstanceModel, FastqInfoModel
+from BALSAMIC.models.config import FastqInfoModel, SampleInstanceModel
 from BALSAMIC.utils.exc import BalsamicError
 
 LOG = logging.getLogger(__name__)
@@ -107,6 +107,7 @@ def find_file_index(file_path):
         ".cram": [".cram.crai", ".crai"],
         ".vcf.gz": [".vcf.gz.tbi"],
         ".vcf": [".vcf.tbi"],
+        ".bed.gz": [".bed.gz.tbi"],
     }
 
     file_path_index = set()
@@ -342,12 +343,12 @@ def get_sample_list(
     return sample_list
 
 
-def get_pon_sample_list(fastq_path: str) -> Dict[str, dict]:
+def get_pon_sample_list(fastq_path: str) -> List[SampleInstanceModel]:
     """Returns a list of SampleInstanceModels to be used in PON generation."""
     sample_list: List[SampleInstanceModel] = []
     sample_names = set()
 
-    for fastq in Path(fastq_path).glob("*.fastq.gz"):
+    for fastq in Path(fastq_path).glob(f"*.{FileType.FASTQ}.{FileType.GZ}"):
         sample_names.add(fastq.name.split("_")[-4])
 
     if len(sample_names) < PonParams.MIN_PON_SAMPLES:
@@ -459,7 +460,8 @@ def job_id_dump_to_yaml(job_id_dump: Path, job_id_yaml: Path, case_name: str):
 def get_resolved_fastq_files_directory(directory: str) -> str:
     """Return the absolute path for the directory containing the input fastq files."""
     input_files: List[Path] = [
-        file.absolute() for file in Path(directory).glob("*.fastq.gz")
+        file.absolute()
+        for file in Path(directory).glob(f"*.{FileType.FASTQ}.{FileType.GZ}")
     ]
     if not input_files or not input_files[0].is_symlink():
         return directory
@@ -471,7 +473,7 @@ def get_analysis_fastq_files_directory(case_dir: str, fastq_path: str) -> str:
     analysis_fastq_path: Path = Path(case_dir, "fastq")
     analysis_fastq_path.mkdir(parents=True, exist_ok=True)
     if Path(case_dir) not in Path(fastq_path).parents:
-        for fastq in Path(fastq_path).glob("*.fastq.gz"):
+        for fastq in Path(fastq_path).glob(f"*.{FileType.FASTQ}.{FileType.GZ}"):
             try:
                 Path(analysis_fastq_path, fastq.name).symlink_to(fastq)
                 LOG.info(f"Created link for {fastq} in {analysis_fastq_path}")

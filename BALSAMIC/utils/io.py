@@ -1,8 +1,10 @@
 """Input/Output utility methods."""
+import gzip
 import json
 import logging
 from datetime import datetime
 from pathlib import Path
+from typing import List
 
 import snakemake
 import yaml
@@ -70,6 +72,23 @@ def read_yaml(yaml_path: str) -> dict:
             return yaml.load(fn, Loader=yaml.SafeLoader)
     else:
         raise FileNotFoundError(f"The YAML file {yaml_path} was not found")
+
+
+def read_vcf_file(vcf_file_path: str) -> List[str]:
+    """
+    Reads a VCF file and returns its contents as a list of lines.
+
+    Args:
+        vcf_file (str): The path to the VCF file to be read.
+
+    Returns:
+        List[str]: A list of strings representing the lines in the VCF file.
+    """
+    vcf_file_path: Path = Path(vcf_file_path)
+    if vcf_file_path.suffix == ".gz":
+        with gzip.open(vcf_file_path, "rt") as vcf_file:
+            return vcf_file.read().splitlines()
+    return vcf_file_path.read_text().splitlines()
 
 
 def write_finish_file(file_path: str) -> None:

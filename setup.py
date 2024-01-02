@@ -2,7 +2,7 @@
 import os
 from typing import List
 
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
 NAME: str = "BALSAMIC"
 AUTHOR: str = "Clinical Genomics"
@@ -56,8 +56,8 @@ requirements: List[str] = [
     "importlib-metadata==6.8.0",
     "iniconfig==2.0.0",
     "Jinja2==3.1.2",
-    "jsonschema==4.18.6",
     "jsonschema-specifications==2023.7.1",
+    "jsonschema==4.18.6",
     "jupyter_core==5.3.1",
     "kiwisolver==1.4.4",
     "MarkupSafe==2.1.3",
@@ -69,20 +69,21 @@ requirements: List[str] = [
     "oauth2client==4.1.3",
     "packaging==23.1",
     "pandas==2.0.3",
+    "pdfkit==1.0.0",
     "Pillow==10.0.0",
     "plac==1.3.5",
     "platformdirs==3.10.0",
     "pluggy==1.2.0",
     "psutil==5.9.5",
     "PuLP==2.7.0",
-    "pyasn1==0.5.0",
     "pyasn1-modules==0.3.0",
+    "pyasn1==0.5.0",
     "pycparser==2.21",
-    "pydantic>=2.0",
+    "pydantic>=2.4",
     "Pygments==2.15.1",
     "pyOpenSSL==23.2.0",
     "pyparsing==3.0.9",
-    "PyPDF2==3.0.1",
+    "pypdf==3.17.1",
     "pytest==7.4.0",
     "python-dateutil==2.8.2",
     "pytz==2023.3",
@@ -97,7 +98,7 @@ requirements: List[str] = [
     "six==1.16.0",
     "smart-open==6.3.0",
     "smmap==5.0.0",
-    "snakemake==7.32.0",
+    "snakemake==7.32.4",
     "stopit==1.1.2",
     "tabulate==0.9.0",
     "throttler==1.2.2",

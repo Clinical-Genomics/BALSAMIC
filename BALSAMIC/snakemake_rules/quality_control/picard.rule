@@ -13,23 +13,22 @@ rule picard_CollectHsMetrics:
         bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample),
         fa = config["reference"]["reference_genome"],
     output:
-        mrkdup = bam_dir + "{sample}.dedup.realign.hsmetric"
+        hs_metrics = bam_dir + "{sample}.dedup.hsmetric.txt"
     benchmark:
-        Path(benchmark_dir + "picard_CollectHsMetrics_" + "{sample}.tsv").as_posix()
+        Path(benchmark_dir + "picard_CollectHsMetrics_{sample}.tsv").as_posix()
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("picard") + ".sif").as_posix()
     params:
         mem = memory,
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-        baitsetname = os.path.basename(config["panel"]["capture_kit"]),
-        sample = '{sample}'
+        baitsetname = Path(config["panel"]["capture_kit"]).name,
+        sample = "{sample}"
     threads:
-        get_threads(cluster_config, 'picard_CollectHsMetrics')
+        get_threads(cluster_config, "picard_CollectHsMetrics")
     message:
-        "Calculating picard HsMetrics for sample '{params.sample}'"
+        "Calculating picard HsMetrics for sample {params.sample}"
     shell:
         """
-mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
 
 picard -Djava.io.tmpdir={params.tmpdir} -Xmx{params.mem} \
@@ -43,7 +42,7 @@ CollectHsMetrics \
 BI={input.bam}.picard.bedintervals \
 TI={input.bam}.picard.bedintervals \
 I={input.bam} \
-O={output.mrkdup} \
+O={output.hs_metrics} \
 R={input.fa} \
 BAIT_SET_NAME={params.baitsetname} \
 COVERAGE_CAP=50000 \
@@ -56,23 +55,22 @@ rule picard_CollectAlignmentSummaryMetrics:
         bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample),
         fa = config["reference"]["reference_genome"]
     output:
-        bam_dir + "{sample}.dedup.realign.alignmetric"
+        bam_dir + "{sample}.dedup.alignmetric.txt"
     benchmark:
-        Path(benchmark_dir, "CollectAlignmentSummaryMetrics_" + "{sample}.tsv").as_posix()
+        Path(benchmark_dir, "CollectAlignmentSummaryMetrics_{sample}.tsv").as_posix()
     singularity:
         Path(singularity_image,config["bioinfo_tools"].get("picard") + ".sif").as_posix()
     params:
         mem = "16g",
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         adapter = config["QC"]["adapter"],
-        sample = '{sample}'
+        sample = "{sample}"
     threads:
-        get_threads(cluster_config,'picard_CollectAlignmentSummaryMetrics')
+        get_threads(cluster_config,"picard_CollectAlignmentSummaryMetrics")
     message:
-        "Calculating picard alignment summary metrics for sample '{params.sample}'"
+        "Calculating picard alignment summary metrics for sample {params.sample}"
     shell:
         """
-mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
 
 picard -Djava.io.tmpdir={params.tmpdir} -Xmx{params.mem} \
@@ -90,23 +88,22 @@ rule picard_CollectInsertSizeMetrics:
     input:
         bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample),
     output:
-        pdf = bam_dir + "{sample}.dedup.realign.insertsizemetric.pdf",
-        txt = bam_dir + "{sample}.dedup.realign.insertsizemetric"
+        pdf = bam_dir + "{sample}.dedup.insertsizemetric.pdf",
+        txt = bam_dir + "{sample}.dedup.insertsizemetric.txt"
     benchmark:
-        Path(benchmark_dir, "picard_CollectInsertSizeMetrics_" + "{sample}.tsv").as_posix()
+        Path(benchmark_dir, "picard_CollectInsertSizeMetrics_{sample}.tsv").as_posix()
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("picard") + ".sif").as_posix()
     params:
         mem = "16g",
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-        sample = '{sample}'
+        sample = "{sample}"
     threads:
-        get_threads(cluster_config,'picard_CollectInsertSizeMetrics')
+        get_threads(cluster_config,"picard_CollectInsertSizeMetrics")
     message:
-        "Calculating picard InsertSize metrics for sample '{params.sample}'"
+        "Calculating picard InsertSize metrics for sample {params.sample}"
     shell:
         """
-mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
 
 picard -Djava.io.tmpdir={params.tmpdir} -Xmx{params.mem} \

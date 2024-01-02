@@ -11,6 +11,18 @@
 		"time": "00:15:00",
 		"n": 1
 	},
+	"gens_preprocessing": {
+		"time": "01:00:00",
+		"n": 4
+	},
+	"postprocess_bam": {
+		"time": "03:00:00",
+		"n": 12
+	},
+	"finalize_gens_outputfiles": {
+		"time": "01:00:00",
+		"n": 2
+	},
 	"CollectAlignmentSummaryMetrics": {
 		"time": "03:30:00",
 		"n": 8
@@ -39,18 +51,30 @@
 		"time": "00:30:00",
 		"n": 1
 	},
-	"cnvkit_paired": {
-		"time": "12:00:00",
+	"bcftools_merge_germlineSNV_research": {
+		"time": "4:00:00",
+		"n": 18
+	},
+	"cnvkit_segment_CNV_research": {
+		"time": "6:00:00",
+		"n": 18
+	},
+	"purecn_call_CNV_research": {
+		"time": "6:00:00",
+		"n": 10
+	},
+	"cnvkit_call_CNV_research": {
+		"time": "6:00:00",
+		"n": 10
+	},
+	"bcftools_sort_cnvkitCNV_research": {
+		"time": "4:00:00",
 		"n": 10
 	},
 	"dragen_align_call_tumor_only": {
 		"time": "10:00:00",
 		"n": 36,
 		"partition": "dragen"
-	},
-	"cnvkit_single": {
-		"time": "12:00:00",
-		"n": 10
 	},
 	"fastqc":{
 		"time": "12:00:00",
@@ -63,6 +87,18 @@
 	"fastp_remove_umi":{
 		"time": "12:00:00",
 		"n": 4
+	},
+	"gatk_collectreadcounts":{
+		"time": "10:00:00",
+		"n": 5
+	},
+	"gatk_denoisereadcounts":{
+		"time": "10:00:00",
+		"n": 10
+	},
+	"gatk_create_readcount_pon":{
+		"time": "60:00:00",
+		"n": 86
 	},
 	"manta_germline": {
 		"time": "05:00:00",
@@ -97,10 +133,14 @@
 		"n": 8
 	},
 	"samtools_sort_index": {
-		"time": "01:30:00",
+		"time": "02:30:00",
 		"n": 16
 	},
 	"sentieon_DNAscope": {
+		"time": "24:00:00",
+		"n": 36
+	},
+	"sentieon_DNAscope_gnomad": {
 		"time": "24:00:00",
 		"n": 36
 	},
@@ -150,11 +190,11 @@
 	},
 	"vardict_tumor_normal": {
 		"time": "12:00:00",
-		"n": 10
+		"n": 18
 	},
 	"vardict_tumor_only": {
 		"time": "10:00:00",
-		"n": 10
+		"n": 9
 	},
 	"sentieon_bwa_umiextract": {
 		"time": "8:00:00",
@@ -240,11 +280,27 @@
 		"time": "12:00:00",
 		"n": 36
 	},
-	"cnv_report": {
+	"csv_to_pdf": {
+		"time": "00:15:00",
+		"n": 1
+	},
+	"txt_to_pdf": {
+		"time": "00:15:00",
+		"n": 1
+	},
+	"image_to_pdf": {
+		"time": "00:15:00",
+		"n": 1
+	},
+	"merge_cnv_pdf_reports": {
 		"time": "00:15:00",
 		"n": 1
 	},
 	"collect_custom_qc_metrics": {
+		"time": "00:15:00",
+		"n": 1
+	},
+	"create_final_vcf_namemap": {
 		"time": "00:15:00",
 		"n": 1
 	},

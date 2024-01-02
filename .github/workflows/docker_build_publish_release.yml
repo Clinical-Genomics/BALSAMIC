@@ -11,7 +11,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        container-name: [align_qc, annotate, ascatNgs, cadd, cnvkit, cnvpytor, coverage_qc, delly, gatk, htslib, purecn, somalier, varcall_cnvkit, varcall_py3, varcall_py27, vcf2cytosure]
+        container-name: [align_qc, annotate, ascatNgs, cadd, cnvkit, cnvpytor, coverage_qc, delly, gatk, htslib, purecn, somalier, varcall_py3, varcall_py27, vcf2cytosure]
     steps:
       - name: Git checkout
         id: git_checkout
@@ -39,6 +39,11 @@ jobs:
           tags: clinicalgenomics/balsamic:${{ steps.get_branch_name.outputs.branch }}-${{ matrix.container-name }}
           build-args: CONTAINER_NAME=${{ matrix.container-name }}
           provenance: false
+      - name: Prune containers
+        id: docker_prune_containers
+        shell: bash
+        run: |
+          docker system prune -a -f
       - name: Test container
         id: docker_test_container
         shell: bash

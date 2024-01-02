@@ -147,6 +147,49 @@ The following command can be used to fetch the variants identified by a specific
   zgrep -E "#|<Caller>" <*.svdb.vcf.gz>
 
 
+**Using GENS for WGS**
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+GENS is a visualization tool similar to IGV, originally developed in Clinical Genomics Lund, and primarily for visualizing genomic copy number profiles from WGS samples.
+
+To visualise the GENS-formatted files from BALSAMIC you need to have GENS installed, and to do this you can follow the instructions on the Clinical-Genomics-Lund GENS-repository:
+
+- `Clinical-Genomics-Lund-GENS`_
+
+.. _Clinical-Genomics-Lund-GENS: https://github.com/Clinical-Genomics-Lund/gens
+
+Two files per sample are uploaded to GENS, one file with allele-frequencies from SNV & InDel germline-calls (BAF file) which can be used to aid the interpretation of the CN-profile, and one file with the Log2 copy number ratios normalized against a PON. Instructions for how to generate this PON using the BALSAMIC PON workflow can be found here:
+
+`Generate GENS PON <https://balsamic.readthedocs.io/en/latest/balsamic_pon.html>`_.
+
+There are three required arguments for creating the input files for GENS:
+1. Genome interval file produced by GATK ``PreprocessIntervals`` (see instructions in GENS PON creation)
+2. A gender specific PON (see instructions in GENS PON creation)
+3. A population database VCF with variant positions to be reported in the BAF file.
+
+We created the file mentioned in **3** using the file ``gnomad.genomes.r2.1.1.sites`` filtered with bcftools to only keep variants with an AF above 0.05.
+
+.. code-block::
+
+    bcftools view -i AF>=0.05 -Oz
+
+To config BALSAMIC to run with GENS activated you supply these files like this:
+
+::
+
+  balsamic config case \
+    --case-id <CASE_ID>
+    --balsamic-cache </path/reference_cache/>
+    --analysis-dir </path/analysis/>
+    --fastq-path </path/fastq/>
+    --gender <[male/female]>
+    --analysis-workflow balsamic
+    --genome-version hg19
+    --tumor-sample-name <TUMOR_NAME>
+    --genome-interval </path/genome_interval>
+    --gens-coverage-pon </path/pon_file>
+    --gnomad-min-af5 </path/population_vcf.vcf.gz>
+
 
 **Genome Reference Files**
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -193,5 +236,3 @@ Second step is to use *SnpPositions.tsv* file and generate *SnpGcCorrections.tsv
 
     ascatSnpPanelGcCorrections.pl genome.fa SnpPositions.tsv > SnpGcCorrections.tsv
 
-**Attention:**
-**BALSAMIC >= v11.0.0 removes unmapped reads from the bam and cram files for all the workflows.**

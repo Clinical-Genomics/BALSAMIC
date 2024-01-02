@@ -85,9 +85,9 @@ shell_bam_files=$(echo {input.bam_files} | sed 's/ / -i /g') ;
 --metrics {output.metrics} \
 {output.bam};
 
+
 sed 's/^LIBRARY/\\n## METRICS CLASS\tpicard\.sam\.DuplicationMetrics\\nLIBRARY/' -i {output.metrics}
         """
-
 
 rule sentieon_realign:
     input:
@@ -101,7 +101,7 @@ rule sentieon_realign:
         Path(benchmark_dir, "sentieon_realign_{sample_type}.{sample}.tsv").as_posix()
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-         sentieon_exec = config["SENTIEON_EXEC"],
+        sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
         sample_id = "{sample}"
     threads:
@@ -110,18 +110,18 @@ rule sentieon_realign:
         "INDEL realignment using sentieon realigner for sample: {params.sample_id}"
     shell:
         """
-mkdir -p {params.tmpdir};
-export TMPDIR={params.tmpdir};
-export SENTIEON_TMPDIR={params.tmpdir};
-export SENTIEON_LICENSE={params.sentieon_lic};
-
-{params.sentieon_exec} driver \
--r {input.ref} \
--t {threads} \
--i {input.bam} \
---algo Realigner \
--k {input.mills} \
--k {input.indel_1kg} \
-{output}; 
-        """
+    mkdir -p {params.tmpdir};
+    export TMPDIR={params.tmpdir};
+    export SENTIEON_TMPDIR={params.tmpdir};
+    export SENTIEON_LICENSE={params.sentieon_lic};
+    
+    {params.sentieon_exec} driver \
+    -r {input.ref} \
+    -t {threads} \
+    -i {input.bam} \
+    --algo Realigner \
+    -k {input.mills} \
+    -k {input.indel_1kg} \
+    {output}; 
+            """
 

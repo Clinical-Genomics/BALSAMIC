@@ -43,7 +43,7 @@ cnvkit
 
 cnvpytor
 ~~~~~~~~
-:Source code: `GitHub` `<https://github.com/abyzovlab/CNVpytor/>
+:Source code: `GitHub` `<https://github.com/abyzovlab/CNVpytor/>`
 :Article: `GigaSciences` `<https://doi.org/10.1093/gigascience/giab074>`
 :Version: `1.3.1`
 

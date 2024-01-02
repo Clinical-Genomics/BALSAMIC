@@ -1,8 +1,6 @@
 """Balsamic cluster and submission specific constants."""
+from enum import StrEnum
 from typing import List
-
-from BALSAMIC.utils.class_types import StrEnum
-
 
 MAX_JOBS: int = 999
 
@@ -21,7 +19,7 @@ class ClusterProfile(StrEnum):
     QSUB: str = "qsub"
 
 
-CLUSTER_PROFILES: List[ClusterProfile] = [profile.value for profile in ClusterProfile]
+CLUSTER_PROFILES: List[ClusterProfile] = [profile for profile in ClusterProfile]
 
 
 class ClusterAccount(StrEnum):
@@ -39,7 +37,7 @@ class QOS(StrEnum):
     EXPRESS: str = "express"
 
 
-QOS_OPTIONS: List[QOS] = [qos.value for qos in QOS]
+QOS_OPTIONS: List[QOS] = [qos for qos in QOS]
 
 
 class ClusterMailType(StrEnum):
@@ -54,4 +52,4 @@ class ClusterMailType(StrEnum):
     TIME_LIMIT: str = "TIME_LIMIT"
 
 
-CLUSTER_MAIL_TYPES: List[ClusterMailType] = [type.value for type in ClusterMailType]
+CLUSTER_MAIL_TYPES: List[ClusterMailType] = [mail_type for mail_type in ClusterMailType]

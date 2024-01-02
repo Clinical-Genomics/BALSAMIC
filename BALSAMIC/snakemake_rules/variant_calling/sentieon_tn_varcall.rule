@@ -27,7 +27,6 @@ rule sentieon_base_calibration:
         "Base recalibration using Sentieon tools for {params.sample}"
     shell:
         """
-mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
 export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
@@ -97,7 +96,6 @@ rule sentieon_TNscope:
          "applying machine learning algorithm for sample {params.case_name}")
     shell:
         """
-mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
 export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};

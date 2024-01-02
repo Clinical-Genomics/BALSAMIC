@@ -3,9 +3,9 @@
 
 rule cnv_report:
     input:
-        cnv_data = cnv_data_paths
+        cnv_data = cnv_report_paths
     output:
-        cnv_report_pdf = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".report.pdf"
+        cnv_report_pdf = cnv_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".report.pdf"
     params:
         housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "clinical"},
         cnv_report_script= get_script_path("generate_cnv_report.py"),
