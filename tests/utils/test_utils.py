@@ -17,7 +17,7 @@ from BALSAMIC.constants.cache import CacheVersion
 from BALSAMIC.constants.cluster import ClusterConfigType
 from BALSAMIC.constants.constants import FileType
 from BALSAMIC.constants.paths import CONTAINERS_DIR
-from BALSAMIC.models.config import ConfigModel, FastqInfoModel
+from BALSAMIC.models.config import ConfigModel, FastqInfoModel, SampleInstanceModel
 from BALSAMIC.utils.cli import (
     CaptureStdout,
     check_executable,
@@ -114,7 +114,7 @@ def test_get_pon_sample_dict(pon_config_dict_w_fastq: Dict):
     # GIVEN a FASTQ directory
     fastq_dir_pon = pon_config_dict_w_fastq["analysis"]["fastq_path"]
     # WHEN retrieving PON samples
-    samples: List = get_pon_sample_list(fastq_dir_pon)
+    samples: List[SampleInstanceModel] = get_pon_sample_list(fastq_dir_pon)
 
     # THEN the samples should be retrieved from the FASTQ directory
     # And match the expected structure of pre-designed PON-config

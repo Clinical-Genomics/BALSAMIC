@@ -343,7 +343,7 @@ def get_sample_list(
     return sample_list
 
 
-def get_pon_sample_list(fastq_path: str) -> Dict[str, dict]:
+def get_pon_sample_list(fastq_path: str) -> List[SampleInstanceModel]:
     """Returns a list of SampleInstanceModels to be used in PON generation."""
     sample_list: List[SampleInstanceModel] = []
     sample_names = set()
