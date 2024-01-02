@@ -1,11 +1,10 @@
 import json
-
+from pathlib import Path
 from unittest import mock
 
 import graphviz
 
-from pathlib import Path
-
+from BALSAMIC.constants.constants import FileType
 from tests.conftest import MOCKED_OS_ENVIRON
 
 
@@ -58,7 +57,7 @@ def test_tumor_normal_config(
     # THEN a config should be created and exist
     assert result.exit_code == 0
     assert Path(
-        analysis_dir, case_id_tumor_normal, case_id_tumor_normal + ".json"
+        analysis_dir, case_id_tumor_normal, f"{case_id_tumor_normal}.{FileType.JSON}"
     ).exists()
 
 
@@ -106,7 +105,9 @@ def test_tumor_only_config(
 
     # THEN a config should be created and exist
     assert result.exit_code == 0
-    assert Path(analysis_dir, case_id_tumor_only, case_id_tumor_only + ".json").exists()
+    assert Path(
+        analysis_dir, case_id_tumor_only, f"{case_id_tumor_only}.{FileType.JSON}"
+    ).exists()
 
 
 def test_run_without_permissions(
@@ -411,7 +412,9 @@ def test_config_with_gens_arguments(
     )
     # THEN a config should be created and exist
     assert result.exit_code == 0
-    assert Path(analysis_dir, case_id_tumor_only, case_id_tumor_only + ".json").exists()
+    assert Path(
+        analysis_dir, case_id_tumor_only, f"{case_id_tumor_only}.{FileType.JSON}"
+    ).exists()
 
 
 def test_config_with_gens_arguments_for_tga(
