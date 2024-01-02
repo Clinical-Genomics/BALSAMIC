@@ -31,8 +31,9 @@ Added:
 * Command-line arguments and rules for creation of GENS files https://github.com/Clinical-Genomics/BALSAMIC/pull/1279
 * Somatic and germline Loqusdb annotation to ReadtheDocs https://github.com/Clinical-Genomics/BALSAMIC/pull/1317
 * Postprocess step before VarDict in TGA https://github.com/Clinical-Genomics/BALSAMIC/pull/1332
-* CNV report for TGA workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1338
-* `wkhtmltopdf` to system requirements https://github.com/Clinical-Genomics/BALSAMIC/pull/1338
+* CNV report for TGA workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1339
+* `wkhtmltopdf` to system requirements https://github.com/Clinical-Genomics/BALSAMIC/pull/1339
+* Store WGS CNV report plots https://github.com/Clinical-Genomics/BALSAMIC/pull/1347
 
 Changed:
 ^^^^^^^^
