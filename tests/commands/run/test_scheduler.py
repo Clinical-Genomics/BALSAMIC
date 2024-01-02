@@ -190,32 +190,31 @@ def test_qsub_scheduler():
 
 
 def test_read_sample_config_err(panel_bed_file: str):
+    # GIVEN a bed file instead of json file
+
+    # WHEN calling read_sample_config
     with pytest.raises(Exception):
-        # GIVEN a bed file instead of json file
-
-        # WHEN calling read_sample_config
-
         # THEN It should raise the exception error
-        assert read_sample_config(panel_bed_file)
+        read_sample_config(panel_bed_file)
 
 
 def test_write_sacct_file_err():
-    with pytest.raises(FileNotFoundError):
-        # GIVEN a non-existing file path and jobid
-        dummy_file_path = "dummy/dummy_fname"
-        dummy_jobid = "12345"
+    # GIVEN a non-existing file path and jobid
+    dummy_file_path = "dummy/dummy_fname"
+    dummy_jobid = "12345"
 
-        # WHEN calling write_sacct_file
+    # WHEN calling write_sacct_file
+    with pytest.raises(FileNotFoundError):
         # THEN It should raise the exception
-        assert write_sacct_file(dummy_file_path, dummy_jobid)
+        write_sacct_file(dummy_file_path, dummy_jobid)
 
 
 def test_submit_job_err():
-    with pytest.raises(subprocess.CalledProcessError):
-        # GIVEN a wrong command
-        sbatch_cmd = "SBATCH jobscript.sh"
-        profile = "slurm"
+    # GIVEN a wrong command
+    sbatch_cmd = "SBATCH jobscript.sh"
+    profile = "slurm"
 
-        # WHEN calling submit_job function
+    # WHEN calling submit_job function
+    with pytest.raises(subprocess.CalledProcessError):
         # THEN it should return the exit code 1 and raise the subprocess error
-        assert submit_job(sbatch_cmd, profile)
+        submit_job(sbatch_cmd, profile)

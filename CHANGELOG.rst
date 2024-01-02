@@ -90,6 +90,7 @@ Fixed:
 * MultiQC rule missing input files https://github.com/Clinical-Genomics/BALSAMIC/pull/1321
 * `gens_preprocessing` rule missing python directive https://github.com/Clinical-Genomics/BALSAMIC/pull/1322
 * CADD annotations container path and code smells https://github.com/Clinical-Genomics/BALSAMIC/pull/1323
+* Sonarcloud reported issues https://github.com/Clinical-Genomics/BALSAMIC/pull/1348
 
 Removed:
 ^^^^^^^^

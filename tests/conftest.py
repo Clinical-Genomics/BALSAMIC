@@ -2243,7 +2243,7 @@ def fixture_analysis_references_hg_data(
 @pytest.fixture(scope="session", name="analysis_references_hg")
 def fixture_analysis_references_hg(
     analysis_references_hg_data: Dict[str, Path]
-) -> CacheAnalysis:
+) -> AnalysisReferencesHg:
     """Return mocked human genome analysis references model."""
     return AnalysisReferencesHg(**analysis_references_hg_data)
 
