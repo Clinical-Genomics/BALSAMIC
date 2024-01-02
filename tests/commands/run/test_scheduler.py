@@ -193,7 +193,7 @@ def test_read_sample_config_err(panel_bed_file: str):
     # GIVEN a bed file instead of json file
 
     # WHEN calling read_sample_config
-    with pytest.raises(Exception) as exc_info:
+    with pytest.raises(Exception):
         # THEN It should raise the exception error
         read_sample_config(panel_bed_file)
 
