@@ -4,7 +4,7 @@ from pathlib import Path
 from click.testing import CliRunner, Result
 from pypdf import PdfReader
 
-from BALSAMIC.assets.scripts.csv_to_pdf import csv_to_pdf, get_table_html_page
+from BALSAMIC.assets.scripts.csv_to_pdf import csv_to_pdf
 
 
 def test_csv_to_pdf(
@@ -19,7 +19,7 @@ def test_csv_to_pdf(
 
     # WHEN converting the CSV file to PDF
     result: Result = cli_runner.invoke(
-        csv_to_pdf, [purity_csv_path.as_posix(), pdf_path.as_posix()]
+        csv_to_pdf, [purity_csv_path.as_posix(), pdf_path.as_posix(), "--header"]
     )
 
     # THEN the output PDF file should exist
@@ -32,28 +32,27 @@ def test_csv_to_pdf(
     assert purity_csv_path.stem in pdf_page
 
 
-def test_get_table_html_page():
-    """Test table insertion in an HTML page"""
+def test_txt_to_pdf(
+    cnv_statistics_path: Path, tmp_path: Path, cli_runner: CliRunner
+) -> None:
+    """Test converting of a TXT file to PDF."""
 
-    # GIVEN an HTML table and a test table name
-    html_table: str = """
-        <table>
-          <tr>
-            <th>Header 1</th>
-            <th>Header 2</th>
-          </tr>
-          <tr>
-            <td>Data 1</td>
-            <td>Data 2</td>
-          </tr>
-        </table>
-    """
-    table_name: str = "Test Table"
+    # GIVEN an input TXT file
 
-    # WHEN adding the table to an HTML page
-    html_page: str = get_table_html_page(html_table=html_table, table_name=table_name)
+    # GIVEN an output PDF file
+    pdf_path: Path = Path(tmp_path, "csv_to_pdf.pdf")
 
-    # THEN the table HTML page should be successfully created
-    assert "<html>" in html_page
-    assert f"<h2>{table_name}</h2>" in html_page
-    assert html_table in html_page
+    # WHEN converting the TXT file to PDF
+    result: Result = cli_runner.invoke(
+        csv_to_pdf,
+        [cnv_statistics_path.as_posix(), pdf_path.as_posix(), "--delimiter", " "],
+    )
+
+    # THEN the output PDF file should exist
+    assert result.exit_code == 0
+    assert pdf_path.is_file()
+
+    # THEN the output PDF file should contain the TXT table
+    reader: PdfReader = PdfReader(stream=pdf_path)
+    pdf_page: str = reader.pages[0].extract_text()
+    assert cnv_statistics_path.stem in pdf_page

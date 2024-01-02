@@ -36,6 +36,10 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
             "snakemake_rules/quality_control/qc_metrics.rule",
             "snakemake_rules/quality_control/samtools_qc.rule",
         ],
+        "report": [
+            "snakemake_rules/report/generate_pdf.rule",
+            "snakemake_rules/report/merge_pdfs.rule",
+        ],
         "align": [
             "snakemake_rules/align/sentieon_alignment.rule",
             "snakemake_rules/align/bam_compress.rule",
@@ -65,8 +69,6 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
             "snakemake_rules/umi/qc_umi.rule",
             "snakemake_rules/umi/mergetype_tumor_umi.rule",
             "snakemake_rules/umi/generate_AF_tables.rule",
-            "snakemake_rules/scripts/generate_pdf.rule",
-            "snakemake_rules/scripts/merge_pdfs.rule",
         ],
         "align": [
             "snakemake_rules/umi/sentieon_umiextract.rule",
@@ -99,8 +101,6 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
             "snakemake_rules/umi/mergetype_normal_umi.rule",
             "snakemake_rules/quality_control/contest.rule",
             "snakemake_rules/umi/generate_AF_tables.rule",
-            "snakemake_rules/scripts/generate_pdf.rule",
-            "snakemake_rules/scripts/merge_pdfs.rule",
         ],
         "align": [
             "snakemake_rules/umi/sentieon_umiextract.rule",
@@ -126,7 +126,6 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
             "snakemake_rules/quality_control/fastp_wgs.rule",
             "snakemake_rules/quality_control/sentieon_qc_metrics.rule",
             "snakemake_rules/quality_control/picard_wgs.rule",
-            "snakemake_rules/quality_control/report.rule",
         ],
         "varcall": [
             "snakemake_rules/variant_calling/sentieon_germline.rule",
@@ -144,7 +143,6 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
             "snakemake_rules/quality_control/fastp_wgs.rule",
             "snakemake_rules/quality_control/sentieon_qc_metrics.rule",
             "snakemake_rules/quality_control/picard_wgs.rule",
-            "snakemake_rules/quality_control/report.rule",
             "snakemake_rules/quality_control/somalier.rule",
         ],
         "varcall": [
@@ -169,7 +167,6 @@ DELIVERY_RULES: List[str] = [
     # QC
     "multiqc",
     "collect_custom_qc_metrics",
-    "cnv_report",
     # Alignment
     "mergeBam_tumor_umiconsensus",
     "mergeBam_normal_umiconsensus",
@@ -215,6 +212,6 @@ DELIVERY_RULES: List[str] = [
     "finalize_gens_outputfiles",
     # TMB
     "tmb_calculation",
-    # Scripts
+    # CNV report
     "merge_cnv_pdf_reports",
 ]

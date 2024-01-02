@@ -45,7 +45,7 @@ from BALSAMIC.utils.rule import (
     get_vcf,
 )
 from BALSAMIC.utils.workflowscripts import plot_analysis
-from PyPDF2 import PdfFileMerger
+from pypdf import PdfWriter
 from snakemake.exceptions import RuleException, WorkflowError
 from yapf.yapflib.yapf_api import FormatFile
 
@@ -279,14 +279,14 @@ os.environ['TMPDIR'] = get_result_dir(config)
 cnv_report_paths = []
 if config["analysis"]["sequencing_type"] == "wgs":
     if config['analysis']['analysis_type'] == "paired":
-        cnv_report_paths.append(vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.samplestatistics.txt")
+        cnv_report_paths.append(f"{vcf_dir}CNV.somatic.{config['analysis']['case_id']}.ascat.samplestatistics.txt.pdf")
         cnv_report_paths.extend(expand(
-            vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat." + "{output_suffix}" + ".png",
+            f"{vcf_dir}CNV.somatic.{config['analysis']['case_id']}.ascat.{{output_suffix}}.png.pdf",
             output_suffix=["ascatprofile", "rawprofile", "ASPCF", "tumor", "germline", "sunrise"]
         ))
     else:
         cnv_report_paths.extend(expand(
-            vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".cnvpytor." + "{output_suffix}" + ".png",
+            f"{vcf_dir}CNV.somatic.{config['analysis']['case_id']}.cnvpytor.{{output_suffix}}.png.pdf",
             output_suffix=["circular", "scatter"]
         ))
 else:
@@ -547,7 +547,7 @@ if 'benchmark_plots' in config:
 
         # Merge plots into one based on rule name
         for my_rule in vars(rules).keys():
-            my_rule_pdf = PdfFileMerger()
+            my_rule_pdf = PdfWriter()
             my_rule_plots = list()
             for plots in Path(benchmark_dir).glob(f"BALSAMIC*.{my_rule}.*.pdf"):
                 my_rule_pdf.append(plots.as_posix())

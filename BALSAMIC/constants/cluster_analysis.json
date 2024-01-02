@@ -280,11 +280,15 @@
 		"time": "12:00:00",
 		"n": 36
 	},
-	"cnv_report": {
+	"csv_to_pdf": {
 		"time": "00:15:00",
 		"n": 1
 	},
-	"csv_to_pdf": {
+	"txt_to_pdf": {
+		"time": "00:15:00",
+		"n": 1
+	},
+	"image_to_pdf": {
 		"time": "00:15:00",
 		"n": 1
 	},

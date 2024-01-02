@@ -71,6 +71,7 @@ Changed:
 * Update Gens HK tags https://github.com/Clinical-Genomics/BALSAMIC/pull/1319
 * Increased memory and threads for VarDict https://github.com/Clinical-Genomics/BALSAMIC/pull/1332
 * Updated ReadtheDocs with GENS and structural pipeline changes https://github.com/Clinical-Genomics/BALSAMIC/pull/1327
+* Migrate WGS CNV report generation to pypdf & pdfkit https://github.com/Clinical-Genomics/BALSAMIC/pull/1346
 
 Fixed:
 ^^^^^^
