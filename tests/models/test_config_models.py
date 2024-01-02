@@ -77,13 +77,11 @@ def test_sample_instance_model_sample_type_error(tumor_normal_fastq_info_correct
     tumor_dict["type"] = illegal_sample_type
 
     # WHEN parsing the sample dictionary
-    # THEN a ValueError should be triggered
     with pytest.raises(ValueError) as exc:
         SampleInstanceModel.model_validate(tumor_dict)
-        assert (
-            f"The provided sample type ({illegal_sample_type}) is not supported in BALSAMIC"
-            in exc.value
-        )
+
+    # THEN a ValueError should be triggered
+    assert "Input should be 'normal' or 'tumor'" in str(exc.value)
 
 
 def test_analysis_model_for_pon(test_data_dir: Path, timestamp_now: datetime):
