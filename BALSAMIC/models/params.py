@@ -194,7 +194,6 @@ class VarCallerFilter(BaseModel):
     Attributes:
         AD: VCFAttributes (required); minimum allelic depth
         AF_min: VCFAttributes (optional); minimum allelic fraction
-        AF_max: VCFAttributes (optional); maximum allelic fraction
         MQ: VCFAttributes (optional); minimum mapping quality
         DP: VCFAttributes (optional); minimum read depth
         pop_freq: VCFAttributes (optional); maximum gnomad allele frequency

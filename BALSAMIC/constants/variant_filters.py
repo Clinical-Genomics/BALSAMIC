@@ -19,7 +19,6 @@ VARDICT_SETTINGS = {
         "field": "INFO",
     },
     "MQ": {"tag_value": 40, "filter_name": "balsamic_low_mq", "field": "INFO"},
-    "AF_max": {"tag_value": 1, "filter_name": "balsamic_af_one", "field": "INFO"},
     "AF_min": {"tag_value": 0.007, "filter_name": "balsamic_low_af", "field": "INFO"},
     "pop_freq": {
         "tag_value": 0.005,
