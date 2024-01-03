@@ -104,7 +104,6 @@ Removed:
 * Removed max AF 1 filter from bcftools https://github.com/Clinical-Genomics/BALSAMIC/pull/1338
 * Extra samtools sort command from WGS cases https://github.com/Clinical-Genomics/BALSAMIC/pull/1334
 
-
 [12.0.2]
 --------
 
