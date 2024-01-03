@@ -75,7 +75,7 @@ bcftools view -f PASS,triallelic_site {input.vcf_snv} \
 | bcftools filter --threads {threads} --include 'FORMAT/AF[0] >= {params.AF_min[0]}' --soft-filter '{params.AF_min[1]}' --mode '+' \
 | bcftools filter --threads {threads} --include 'FORMAT/AF[0] < {params.AF_max[0]}' --soft-filter '{params.AF_max[1]}' --mode '+' \
 | bcftools annotate -x FILTER/alt_allele_in_normal \
-| bcftools filter --threads {threads} --exclude '(FORMAT/AF[1] / FORMAT/AF[0]) >= 0.5' --soft-filter '{params.AF_max[1]}' --mode '+' \
+| bcftools filter --threads {threads} --exclude '(FORMAT/AF[1] / FORMAT/AF[0]) >= {params.high_normal_frac[0]}' --soft-filter '{params.high_normal_frac[1]}' --mode '+' \
 | bcftools view -f PASS,triallelic_site -O z -o {output.vcf_snv_research}; 
 
 tabix -p vcf -f {output.vcf_snv_research};

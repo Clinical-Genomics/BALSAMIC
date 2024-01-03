@@ -215,6 +215,7 @@ class VarCallerFilter(BaseModel):
     AD: Optional[VCFAttributes] = None
     AF_min: Optional[VCFAttributes] = None
     AF_max: Optional[VCFAttributes] = None
+    high_normal_frac: Optional[VCFAttributes] = None
     MQ: Optional[VCFAttributes] = None
     DP: Optional[VCFAttributes] = None
     pop_freq: Optional[VCFAttributes] = None
