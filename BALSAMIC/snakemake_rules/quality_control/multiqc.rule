@@ -4,9 +4,14 @@
 multiqc_input = [config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample)]
 
 multiqc_input.append(qc_dir + "tumor.{}.dedup.metrics".format(tumor_sample))
-multiqc_input.extend(expand(bam_dir + "{sample}.samtools.{stats}.txt",
-    sample=sample_names, stats=['flagstats', 'idxstats', 'stats']))
 
+
+multiqc_input.extend(expand(bam_dir + "{sample}_{fastq_pattern}.samtools.{stats}.txt",
+    sample=tumor_sample, fastq_pattern=config_model.get_fastq_patterns_by_sample(sample_names = tumor_sample), stats=['flagstats', 'idxstats', 'stats']))
+if config['analysis']['analysis_type'] == "paired":
+    multiqc_input.extend(expand(bam_dir + "{sample}_{fastq_pattern}.samtools.{stats}.txt",
+        sample=normal_sample,fastq_pattern=config_model.get_fastq_patterns_by_sample(sample_names=normal_sample),stats=[
+            'flagstats', 'idxstats', 'stats']))
 
 multiqc_input.extend(expand(bam_dir + "tumor.{sample}.cram", sample=tumor_sample))
 

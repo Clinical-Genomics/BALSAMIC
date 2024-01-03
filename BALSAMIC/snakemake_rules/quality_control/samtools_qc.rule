@@ -3,21 +3,22 @@
 
 rule samtools_qc:
     input:
-        bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample)
+        bam = Path(bam_dir, "{sample}_align_sort_{fastq_pattern}.bam").as_posix()
     output:
-        flagstats = Path(bam_dir, "{sample}.samtools.flagstats.txt").as_posix(),
-        idxstats = Path(bam_dir, "{sample}.samtools.idxstats.txt").as_posix(),
-        stats = Path(bam_dir, "{sample}.samtools.stats.txt").as_posix(),
+        flagstats = Path(bam_dir, "{sample}_{fastq_pattern}.samtools.flagstats.txt").as_posix(),
+        idxstats = Path(bam_dir, "{sample}_{fastq_pattern}.samtools.idxstats.txt").as_posix(),
+        stats = Path(bam_dir, "{sample}_{fastq_pattern}.samtools.stats.txt").as_posix(),
     benchmark:
-        Path(benchmark_dir,"samtools_qc_{sample}.tsv").as_posix()
+        Path(benchmark_dir,"samtools_qc_{sample}_{fastq_pattern}.tsv").as_posix()
     singularity:
         Path(singularity_image,config["bioinfo_tools"].get("samtools") + ".sif").as_posix()
     params:
-        sample_id = "{sample}"
+        sample_id = "{sample}",
+        fastq_pattern = "{fastq_pattern}"
     threads:
         get_threads(cluster_config, "samtools_qc")
     message:
-        "Calculating alignment stats for sample: {params.sample_id}"
+        "Calculating alignment stats for sample: {params.sample_id}, {params.fastq_pattern}"
     shell:
         """
 samtools flagstats --threads {threads} {input.bam} > {output.flagstats};
