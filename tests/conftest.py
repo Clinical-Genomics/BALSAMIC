@@ -607,6 +607,32 @@ def references_dir(test_data_dir) -> Path:
 
 
 @pytest.fixture(scope="session")
+def purity_csv_path(test_data_dir) -> Path:
+    """Return pureCN purity CSV path."""
+    return Path(test_data_dir, "cnv_report", "CNV.somatic.case_id.purecn.purity.csv")
+
+
+@pytest.fixture(scope="session")
+def cnv_plot_path(test_data_dir) -> Path:
+    """Return AscatNgs CNV plot path."""
+    return Path(
+        test_data_dir,
+        "cnv_report",
+        "CNV.somatic.sample_tumor_normal_wgs.ascat.ASPCF.png",
+    )
+
+
+@pytest.fixture(scope="session")
+def cnv_statistics_path(test_data_dir) -> Path:
+    """Return CNV sample statistics path."""
+    return Path(
+        test_data_dir,
+        "cnv_report",
+        "CNV.somatic.sample_tumor_normal_wgs.ascat.samplestatistics.txt",
+    )
+
+
+@pytest.fixture(scope="session")
 def balsamic_cache(
     tmp_path_factory: TempPathFactory, reference: Dict[str, Path], references_dir: Path
 ) -> str:
@@ -2217,7 +2243,7 @@ def fixture_analysis_references_hg_data(
 @pytest.fixture(scope="session", name="analysis_references_hg")
 def fixture_analysis_references_hg(
     analysis_references_hg_data: Dict[str, Path]
-) -> CacheAnalysis:
+) -> AnalysisReferencesHg:
     """Return mocked human genome analysis references model."""
     return AnalysisReferencesHg(**analysis_references_hg_data)
 

@@ -31,6 +31,9 @@ Added:
 * Command-line arguments and rules for creation of GENS files https://github.com/Clinical-Genomics/BALSAMIC/pull/1279
 * Somatic and germline Loqusdb annotation to ReadtheDocs https://github.com/Clinical-Genomics/BALSAMIC/pull/1317
 * Postprocess step before VarDict in TGA https://github.com/Clinical-Genomics/BALSAMIC/pull/1332
+* CNV report for TGA workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1339
+* `wkhtmltopdf` to system requirements https://github.com/Clinical-Genomics/BALSAMIC/pull/1339
+* Store WGS CNV report plots https://github.com/Clinical-Genomics/BALSAMIC/pull/1347
 
 Changed:
 ^^^^^^^^
@@ -69,6 +72,7 @@ Changed:
 * Update Gens HK tags https://github.com/Clinical-Genomics/BALSAMIC/pull/1319
 * Increased memory and threads for VarDict https://github.com/Clinical-Genomics/BALSAMIC/pull/1332
 * Updated ReadtheDocs with GENS and structural pipeline changes https://github.com/Clinical-Genomics/BALSAMIC/pull/1327
+* Migrate WGS CNV report generation to pypdf & pdfkit https://github.com/Clinical-Genomics/BALSAMIC/pull/1346
 
 Fixed:
 ^^^^^^
@@ -86,6 +90,7 @@ Fixed:
 * MultiQC rule missing input files https://github.com/Clinical-Genomics/BALSAMIC/pull/1321
 * `gens_preprocessing` rule missing python directive https://github.com/Clinical-Genomics/BALSAMIC/pull/1322
 * CADD annotations container path and code smells https://github.com/Clinical-Genomics/BALSAMIC/pull/1323
+* Sonarcloud reported issues https://github.com/Clinical-Genomics/BALSAMIC/pull/1348
 
 Removed:
 ^^^^^^^^
@@ -97,6 +102,7 @@ Removed:
 * Archived/outdated workflows and scripts https://github.com/Clinical-Genomics/BALSAMIC/pull/1296
 * Sed command to convert CNVpytor integer to float, deprecated by updated CNVpytor version https://github.com/Clinical-Genomics/BALSAMIC/pull/1310
 * Removed max AF 1 filter from bcftools https://github.com/Clinical-Genomics/BALSAMIC/pull/1338
+* Extra samtools sort command from WGS cases https://github.com/Clinical-Genomics/BALSAMIC/pull/1334
 
 
 [12.0.2]

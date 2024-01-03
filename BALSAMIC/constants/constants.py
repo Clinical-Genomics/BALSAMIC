@@ -23,6 +23,7 @@ class FileType(StrEnum):
     """Balsamic analysis and reference file extensions."""
 
     BED: str = "bed"
+    CSV: str = "csv"
     DICT: str = "dict"
     FAI: str = "fai"
     FASTA: str = "fasta"
@@ -33,6 +34,7 @@ class FileType(StrEnum):
     GZ: str = "gz"
     JSON: str = "json"
     LOG: str = "log"
+    PDF: str = "pdf"
     SIF: str = "sif"
     TBI: str = "tbi"
     TSV: str = "tsv"

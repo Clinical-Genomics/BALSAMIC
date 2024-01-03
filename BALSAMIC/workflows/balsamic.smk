@@ -8,6 +8,7 @@ import tempfile
 from pathlib import Path
 from typing import Dict, List
 
+from BALSAMIC.constants.constants import FileType
 from BALSAMIC.constants.analysis import FastqName, MutationType, SampleType
 from BALSAMIC.constants.paths import BALSAMIC_DIR, SENTIEON_DNASCOPE_DIR, SENTIEON_TNSCOPE_DIR
 from BALSAMIC.constants.rules import SNAKEMAKE_RULES
@@ -44,7 +45,7 @@ from BALSAMIC.utils.rule import (
     get_vcf,
 )
 from BALSAMIC.utils.workflowscripts import plot_analysis
-from PyPDF2 import PdfFileMerger
+from pypdf import PdfWriter
 from snakemake.exceptions import RuleException, WorkflowError
 from yapf.yapflib.yapf_api import FormatFile
 
@@ -275,19 +276,22 @@ os.environ["SENTIEON_TMPDIR"] = result_dir
 os.environ['TMPDIR'] = get_result_dir(config)
 
 # CNV report input files
-cnv_data_paths = []
-if config["analysis"]["sequencing_type"] == "wgs" and config['analysis']['analysis_type'] == "paired":
-    cnv_data_paths.append(vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.samplestatistics.txt")
-    cnv_data_paths.extend(expand(
-        vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat." + "{output_suffix}" + ".png",
-        output_suffix=["ascatprofile", "rawprofile", "ASPCF", "tumor", "germline", "sunrise"]
-    ))
-
-if config["analysis"]["sequencing_type"] == "wgs" and config['analysis']['analysis_type'] == "single":
-    cnv_data_paths.extend(expand(
-        vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".cnvpytor." + "{output_suffix}" + ".png",
-        output_suffix=["circular", "scatter"]
-    ))
+cnv_report_paths = []
+if config["analysis"]["sequencing_type"] == "wgs":
+    if config['analysis']['analysis_type'] == "paired":
+        cnv_report_paths.append(f"{vcf_dir}CNV.somatic.{config['analysis']['case_id']}.ascat.samplestatistics.txt.pdf")
+        cnv_report_paths.extend(expand(
+            f"{vcf_dir}CNV.somatic.{config['analysis']['case_id']}.ascat.{{output_suffix}}.png.pdf",
+            output_suffix=["ascatprofile", "rawprofile", "ASPCF", "tumor", "germline", "sunrise"]
+        ))
+    else:
+        cnv_report_paths.extend(expand(
+            f"{vcf_dir}CNV.somatic.{config['analysis']['case_id']}.cnvpytor.{{output_suffix}}.png.pdf",
+            output_suffix=["circular", "scatter"]
+        ))
+else:
+    cnv_report_paths.extend(expand(f"{cnv_dir}tumor.merged-{{plot}}.pdf",plot=["diagram", "scatter"]))
+    cnv_report_paths.append(f"{cnv_dir}CNV.somatic.{config['analysis']['case_id']}.purecn.purity.csv.pdf")
 
 # Extract variant callers for the workflow
 germline_caller = []
@@ -446,10 +450,8 @@ analysis_specific_results.extend(
     expand(vep_dir + "{vcf}.balsamic_stat", vcf=get_vcf(config, somatic_caller_tmb, [case_id]))
 )
 
-# WGS specific files
-if config["analysis"]["sequencing_type"] == "wgs":
-    # CNV report
-    analysis_specific_results.append(vcf_dir + "CNV.somatic." + case_id + ".report.pdf"),
+# CNV report
+analysis_specific_results.append(cnv_dir + "CNV.somatic." + case_id + ".report.pdf"),
 
 # TGA specific files
 if config["analysis"]["sequencing_type"] != "wgs":
@@ -545,7 +547,7 @@ if 'benchmark_plots' in config:
 
         # Merge plots into one based on rule name
         for my_rule in vars(rules).keys():
-            my_rule_pdf = PdfFileMerger()
+            my_rule_pdf = PdfWriter()
             my_rule_plots = list()
             for plots in Path(benchmark_dir).glob(f"BALSAMIC*.{my_rule}.*.pdf"):
                 my_rule_pdf.append(plots.as_posix())

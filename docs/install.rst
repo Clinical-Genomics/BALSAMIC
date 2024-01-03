@@ -28,7 +28,7 @@ Step 1. Installing BALSAMIC
 
 ::
 
-    conda create -c conda-forge -c defaults --name S_balsamic python==3.11 pip pygraphviz
+    conda create -c conda-forge -c defaults --name S_balsamic python==3.11 pip pygraphviz wkhtmltopdf
 
 
 2. Activate environment:
