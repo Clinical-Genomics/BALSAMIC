@@ -1,33 +1,34 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
-import os
 import logging
+import os
 import tempfile
-
 from pathlib import Path
-from typing import List, Dict
+from typing import Dict, List
+
+from BALSAMIC.constants.analysis import AnalysisType, FastqName, SampleType
+from BALSAMIC.constants.paths import BALSAMIC_DIR
+from BALSAMIC.constants.rules import SNAKEMAKE_RULES
+from BALSAMIC.constants.workflow_params import WORKFLOW_PARAMS, SLEEP_BEFORE_START
+from BALSAMIC.models.config import ConfigModel
+from BALSAMIC.models.params import BalsamicWorkflowConfig
+from BALSAMIC.utils.cli import check_executable, generate_h5
+from BALSAMIC.utils.exc import BalsamicError
+from BALSAMIC.utils.io import write_finish_file, write_json
+from BALSAMIC.utils.rule import (
+    get_capture_kit,
+    get_fastp_parameters,
+    get_result_dir,
+    get_rule_output,
+    get_script_path,
+    get_sequencing_type,
+    get_threads,
+)
+from snakemake.exceptions import RuleException, WorkflowError
 from yapf.yapflib.yapf_api import FormatFile
 
-from snakemake.exceptions import RuleException, WorkflowError
-
-from BALSAMIC.constants.rules import SNAKEMAKE_RULES
-from BALSAMIC.constants.paths import BALSAMIC_DIR
-from BALSAMIC.constants.analysis import FastqName, SampleType, AnalysisType
-from BALSAMIC.utils.exc import BalsamicError
-
-from BALSAMIC.utils.cli import check_executable, generate_h5
-from BALSAMIC.utils.io import write_json, write_finish_file
-
-from BALSAMIC.models.analysis import BalsamicWorkflowConfig, ConfigModel
-
-from BALSAMIC.utils.rule import (get_fastp_parameters, get_rule_output, get_result_dir,
-                                 get_script_path, get_threads,
-                                 get_sequencing_type, get_capture_kit)
-
-from BALSAMIC.constants.workflow_params import WORKFLOW_PARAMS, SLEEP_BEFORE_START
-
 # Initialize ConfigModel
-config_model = ConfigModel.parse_obj(config)
+config_model = ConfigModel.model_validate(config)
 
 shell.executable("/bin/bash")
 shell.prefix("set -eo pipefail; ")
@@ -48,7 +49,7 @@ Path.mkdir(Path(tmp_dir), parents=True, exist_ok=True)
 
 # Directories
 input_fastq_dir: str = config_model.analysis.fastq_path + "/"
-benchmark_dir: str = config_model.analysis.benchmark
+benchmark_dir: str = config_model.analysis.benchmark + "/"
 fastq_dir: str = Path(result_dir, "fastq").as_posix() + "/"
 bam_dir: str = Path(result_dir, "bam").as_posix() + "/"
 fastqc_dir: str = Path(result_dir, "fastqc").as_posix() + "/"
@@ -56,9 +57,12 @@ vcf_dir: str = Path(result_dir, "vcf").as_posix() + "/"
 qc_dir: str = Path(result_dir, "qc").as_posix() + "/"
 delivery_dir: str = Path(result_dir, "delivery").as_posix() + "/"
 
+<<<<<<< HEAD
 # Pre run parameters
 seconds_before_start: int = SLEEP_BEFORE_START
 
+=======
+>>>>>>> release_v13.0.0
 # Run information
 singularity_image: str = config_model.singularity['image']
 sample_names: List[str] = config_model.get_all_sample_names()
@@ -67,7 +71,7 @@ if config_model.analysis.analysis_type == AnalysisType.PAIRED:
     normal_sample: str = config_model.get_sample_name_by_type(SampleType.NORMAL)
 
 # parse parameters as constants to workflows
-params = BalsamicWorkflowConfig.parse_obj(WORKFLOW_PARAMS)
+params = BalsamicWorkflowConfig.model_validate(WORKFLOW_PARAMS)
 
 # Fastp parameters
 fastp_parameters: Dict = get_fastp_parameters(config_model)
@@ -114,10 +118,15 @@ sequence_type = config['analysis']["sequencing_type"]
 rules_to_include = []
 for workflow_type, value in SNAKEMAKE_RULES.items():
     if workflow_type in ["common", analysis_type + "_" + sequence_type]:
+<<<<<<< HEAD
         rules_to_include.extend(value.get("misc", []) + value.get("qc", []) + value.get("align", []))
 rules_to_include = [rule for rule in rules_to_include if "umi" not in rule]
 if "snakemake_rules/quality_control/report.rule" in rules_to_include:
     rules_to_include = [rule for rule in rules_to_include if "quality_control/report.rule" not in rule]
+=======
+        rules_to_include.extend(value.get("qc", []) + value.get("align", []))
+rules_to_include = [rule for rule in rules_to_include if "umi" not in rule and "report" not in rule]
+>>>>>>> release_v13.0.0
 
 # Somalier only implemented for hg38 and hg19
 if "canfam3" in config["reference"]["reference_genome"]:

@@ -4,7 +4,7 @@ import logging
 import subprocess
 import sys
 from pathlib import Path
-from typing import List, Dict
+from typing import Dict, List
 from unittest import mock
 
 import click
@@ -15,52 +15,53 @@ from _pytest.tmpdir import TempPathFactory
 from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV, SampleType, SequencingType
 from BALSAMIC.constants.cache import CacheVersion
 from BALSAMIC.constants.cluster import ClusterConfigType
+from BALSAMIC.constants.constants import FileType
 from BALSAMIC.constants.paths import CONTAINERS_DIR
-from BALSAMIC.models.analysis import FastqInfoModel, ConfigModel
+from BALSAMIC.models.config import ConfigModel, FastqInfoModel, SampleInstanceModel
 from BALSAMIC.utils.cli import (
     CaptureStdout,
-    get_snakefile,
-    createDir,
-    get_file_status_string,
-    find_file_index,
-    get_panel_chrom,
-    get_file_extension,
-    get_bioinfo_tools_version,
-    convert_deliverables_tags,
     check_executable,
-    job_id_dump_to_yaml,
+    convert_deliverables_tags,
+    createDir,
+    find_file_index,
     generate_h5,
-    get_pon_sample_list,
-    get_sample_list,
-    get_fastq_info,
-    get_config_path,
-    get_resolved_fastq_files_directory,
     get_analysis_fastq_files_directory,
+    get_bioinfo_tools_version,
+    get_config_path,
+    get_fastq_info,
+    get_file_extension,
+    get_file_status_string,
+    get_panel_chrom,
+    get_pon_sample_list,
+    get_resolved_fastq_files_directory,
+    get_sample_list,
+    get_snakefile,
+    job_id_dump_to_yaml,
     validate_cache_version,
 )
 from BALSAMIC.utils.exc import BalsamicError, WorkflowRunError
 from BALSAMIC.utils.io import (
     read_json,
-    write_json,
+    read_vcf_file,
     read_yaml,
     write_finish_file,
-    read_vcf_file,
+    write_json,
 )
 from BALSAMIC.utils.rule import (
-    get_vcf,
-    get_variant_callers,
-    get_script_path,
-    get_result_dir,
-    get_threads,
     get_delivery_id,
+    get_fastp_parameters,
+    get_result_dir,
     get_rule_output,
     get_sample_type_from_sample_name,
-    get_fastp_parameters,
+    get_script_path,
+    get_threads,
+    get_variant_callers,
+    get_vcf,
 )
 from BALSAMIC.utils.utils import (
-    remove_unnecessary_spaces,
-    get_relative_paths_dict,
     get_absolute_paths_dict,
+    get_relative_paths_dict,
+    remove_unnecessary_spaces,
 )
 
 
@@ -113,7 +114,7 @@ def test_get_pon_sample_dict(pon_config_dict_w_fastq: Dict):
     # GIVEN a FASTQ directory
     fastq_dir_pon = pon_config_dict_w_fastq["analysis"]["fastq_path"]
     # WHEN retrieving PON samples
-    samples: List = get_pon_sample_list(fastq_dir_pon)
+    samples: List[SampleInstanceModel] = get_pon_sample_list(fastq_dir_pon)
 
     # THEN the samples should be retrieved from the FASTQ directory
     # And match the expected structure of pre-designed PON-config
@@ -130,9 +131,9 @@ def test_get_variant_callers_wrong_analysis_type(tumor_normal_config: Dict):
     mutation_class = "germline"
 
     # WHEN getting list of variant callers
-    # THEN capture error
     with pytest.raises(WorkflowRunError):
-        assert get_variant_callers(
+        # THEN capture error
+        get_variant_callers(
             config=tumor_normal_config,
             analysis_type=wrong_analysis_type,
             workflow_solution=workflow,
@@ -150,8 +151,10 @@ def test_get_variant_callers_wrong_workflow(tumor_normal_config: Dict):
     sequencing_type = "wgs"
     analysis_type = "paired"
 
+    # WHEN getting list of variant callers
     with pytest.raises(WorkflowRunError):
-        assert get_variant_callers(
+        # THEN capture error
+        get_variant_callers(
             config=tumor_normal_config,
             analysis_type=analysis_type,
             workflow_solution=wrong_workflow,
@@ -170,9 +173,9 @@ def test_get_variant_callers_wrong_mutation_type(tumor_normal_config: Dict):
     analysis_type = "paired"
 
     # WHEN getting list of variant callers
-    # THEN capture error
     with pytest.raises(WorkflowRunError):
-        assert get_variant_callers(
+        # THEN capture error
+        get_variant_callers(
             config=tumor_normal_config,
             analysis_type=analysis_type,
             workflow_solution=workflow,
@@ -191,9 +194,9 @@ def test_get_variant_callers_wrong_mutation_class(tumor_normal_config: Dict):
     analysis_type = "paired"
 
     # WHEN getting list of variant callers
-    # THEN capture error
     with pytest.raises(WorkflowRunError):
-        assert get_variant_callers(
+        # THEN capture error
+        get_variant_callers(
             config=tumor_normal_config,
             analysis_type=analysis_type,
             workflow_solution=workflow,
@@ -212,9 +215,9 @@ def test_get_variant_callers_wrong_sequencing_type(tumor_normal_config: Dict):
     analysis_type = "paired"
 
     # WHEN getting list of variant callers
-    # THEN capture error
     with pytest.raises(WorkflowRunError):
-        assert get_variant_callers(
+        # THEN capture error
+        get_variant_callers(
             config=tumor_normal_config,
             analysis_type=analysis_type,
             workflow_solution=workflow,
@@ -279,8 +282,8 @@ def test_get_file_extension_get_any_ext():
 
 def test_get_file_extension_known_ext():
     # GIVEN a dummy file string with a known string
-    dummy_file = "hassan.fastq.gz"
-    actual_extension = "fastq.gz"
+    dummy_file = f"dummy.{FileType.FASTQ}.{FileType.GZ}"
+    actual_extension = f"{FileType.FASTQ}.{FileType.GZ}"
 
     # WHEN extracting the extension
     file_extension = get_file_extension(dummy_file)
@@ -316,7 +319,7 @@ def test_get_snakefile():
     ]
 
     # WHEN asking to see snakefile for paired
-    for reference_genome in ["hg19", "hg38", "canfam3"]:
+    for _reference_genome in ["hg19", "hg38", "canfam3"]:
         for analysis_type, analysis_workflow in workflow:
             snakefile = get_snakefile(analysis_type, analysis_workflow)
 
@@ -455,7 +458,7 @@ def test_write_json_error(tmp_path: Path):
     # GIVEN a directory as the output file
     with pytest.raises(Exception, match=r"Is a directory"):
         # THEN an exception should be raised
-        assert write_json(ref_json, tmp_path)
+        write_json(ref_json, tmp_path)
 
 
 def test_read_json(config_path: str):
@@ -891,8 +894,12 @@ def test_get_fastq_info(tumor_sample_name: str, fastq_dir_tumor_only: str):
 
     # THEN check that the fastq_dict matches the expected fastq_dict
     expected_fastq_dict = {
-        "1_171015_HJ7TLDSX5_ACC1_XXXXXX": fastq_info1_expected.dict(exclude_none=True),
-        "2_171015_HJ7TLDSX5_ACC1_XXXXXX": fastq_info2_expected.dict(exclude_none=True),
+        "1_171015_HJ7TLDSX5_ACC1_XXXXXX": fastq_info1_expected.model_dump(
+            exclude_none=True
+        ),
+        "2_171015_HJ7TLDSX5_ACC1_XXXXXX": fastq_info2_expected.model_dump(
+            exclude_none=True
+        ),
     }
     assert fastq_dict == expected_fastq_dict
 

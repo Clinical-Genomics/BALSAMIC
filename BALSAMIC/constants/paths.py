@@ -20,6 +20,9 @@ SENTIEON_TNSCOPE_DIR: Path = Path(
     SENTIEON_MODELS_DIR, "SentieonTNscopeModel_GiAB_HighAF_LowFP-201711.05.model"
 )
 
+# Singularity container hardcoded paths
+CADD_ANNOTATIONS_CONTAINER_DIR = Path("/opt/conda/share/CADD-scripts/data/annotations")
+
 # Pytest paths
 TEST_DATA_DIR: Path = Path("tests/test_data")
 FASTQ_TEST_INFO: Path = Path(TEST_DATA_DIR, "fastq_test_info.json")

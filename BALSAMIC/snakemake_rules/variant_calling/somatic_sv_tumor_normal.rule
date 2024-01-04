@@ -194,13 +194,13 @@ rule ascat_tumor_normal:
     output:
         final_vcf = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".raw.ascat.vcf.gz",
         ascat_copynumber = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.copynumber.txt.gz",
-        sample_statistics = temp(vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.samplestatistics.txt"),
-        plot_ascat_profile = temp(vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.ascatprofile.png"),
-        plot_raw_profile = temp(vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.rawprofile.png"),
-        plot_aspcf = temp(vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.ASPCF.png"),
-        plot_tumor = temp(vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.tumor.png"),
-        plot_germline = temp(vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.germline.png"),
-        plot_sunrise = temp(vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.sunrise.png"),
+        sample_statistics = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.samplestatistics.txt",
+        plot_ascat_profile = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.ascatprofile.png",
+        plot_raw_profile = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.rawprofile.png",
+        plot_aspcf = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.ASPCF.png",
+        plot_tumor = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.tumor.png",
+        plot_germline = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.germline.png",
+        plot_sunrise = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.sunrise.png",
         namemap = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.sample_name_map",
     benchmark:
         benchmark_dir + 'ascat_tumor_normal_' + config["analysis"]["case_id"] + "_ascat.tsv"

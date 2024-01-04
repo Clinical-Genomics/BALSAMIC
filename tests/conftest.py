@@ -4,7 +4,7 @@ import shutil
 from datetime import datetime
 from functools import partial
 from pathlib import Path
-from typing import Dict, Any, List
+from typing import Any, Dict, List
 from unittest import mock
 
 import pytest
@@ -13,36 +13,35 @@ from click.testing import CliRunner
 from pydantic_core import Url
 
 from BALSAMIC import __version__ as balsamic_version
+from BALSAMIC.assets.scripts.preprocess_gens import cli as gens_preprocessing_cli
 from BALSAMIC.commands.base import cli
 from BALSAMIC.constants.analysis import (
     BIOINFO_TOOL_ENV,
-    RunMode,
     AnalysisWorkflow,
     PONWorkflow,
+    RunMode,
 )
-from BALSAMIC.constants.cache import DockerContainers, GenomeVersion, REFERENCE_FILES
+from BALSAMIC.constants.cache import REFERENCE_FILES, DockerContainers, GenomeVersion
 from BALSAMIC.constants.cluster import (
-    ClusterConfigType,
-    ClusterAccount,
     QOS,
+    ClusterAccount,
+    ClusterConfigType,
     ClusterProfile,
 )
 from BALSAMIC.constants.constants import FileType
 from BALSAMIC.constants.paths import CONSTANTS_DIR, FASTQ_TEST_INFO, TEST_DATA_DIR
 from BALSAMIC.constants.workflow_params import VCF_DICT
-from BALSAMIC.models.analysis import ConfigModel
 from BALSAMIC.models.cache import (
+    AnalysisReferencesHg,
     CacheAnalysis,
     CacheConfig,
     References,
     ReferencesHg,
-    AnalysisReferencesHg,
 )
+from BALSAMIC.models.config import ConfigModel
 from BALSAMIC.models.snakemake import SingularityBindPath, SnakemakeExecutable
 from BALSAMIC.utils.io import read_json, read_yaml, write_json
 from .helpers import ConfigHelper, Map
-
-from BALSAMIC.assets.scripts.preprocess_gens import cli as gens_preprocessing_cli
 
 MOCKED_OS_ENVIRON = "os.environ"
 
@@ -164,18 +163,6 @@ def invalid_dnascope_variant_illegal_chrom() -> str:
     )
 
 
-@pytest.fixture(scope="session")
-def analysis_workflow_qc():
-    """Return string for balsamic QC workflow."""
-    return AnalysisWorkflow.BALSAMIC_QC
-
-
-@pytest.fixture(scope="session")
-def genome_version_canfam():
-    """Return string to specify Canfam reference for QC workflow."""
-    return GenomeVersion.CanFam3
-
-
 @pytest.fixture(scope="session", name="session_tmp_path")
 def fixture_session_tmp_path(tmp_path_factory: TempPathFactory) -> Path:
     """Return a non-existent files directory path."""
@@ -243,6 +230,12 @@ def case_id_tumor_only_pon() -> str:
 def case_id_tumor_only_umi() -> str:
     """Creates mock case-id for TGA tumor-only UMI workflow."""
     return "sample_tumor_only_umi"
+
+
+@pytest.fixture(scope="session")
+def case_id_tumor_normal_umi() -> str:
+    """Creates mock case-id for TGA tumor-only UMI workflow."""
+    return "sample_tumor_normal_umi"
 
 
 @pytest.fixture(scope="session")
@@ -611,6 +604,32 @@ def no_write_perm_path(tmp_path_factory) -> str:
 def references_dir(test_data_dir) -> Path:
     """Return a references directory path."""
     return Path(test_data_dir, "references")
+
+
+@pytest.fixture(scope="session")
+def purity_csv_path(test_data_dir) -> Path:
+    """Return pureCN purity CSV path."""
+    return Path(test_data_dir, "cnv_report", "CNV.somatic.case_id.purecn.purity.csv")
+
+
+@pytest.fixture(scope="session")
+def cnv_plot_path(test_data_dir) -> Path:
+    """Return AscatNgs CNV plot path."""
+    return Path(
+        test_data_dir,
+        "cnv_report",
+        "CNV.somatic.sample_tumor_normal_wgs.ascat.ASPCF.png",
+    )
+
+
+@pytest.fixture(scope="session")
+def cnv_statistics_path(test_data_dir) -> Path:
+    """Return CNV sample statistics path."""
+    return Path(
+        test_data_dir,
+        "cnv_report",
+        "CNV.somatic.sample_tumor_normal_wgs.ascat.samplestatistics.txt",
+    )
 
 
 @pytest.fixture(scope="session")
@@ -1131,7 +1150,7 @@ def balsamic_model(
 ) -> ConfigModel:
     """Return ConfigModel parsed from static tumor normal config dict."""
     # Initialize balsamic model
-    balsamic_config = ConfigModel.parse_obj(config_dict_w_fastqs)
+    balsamic_config = ConfigModel.model_validate(config_dict_w_fastqs)
     return balsamic_config
 
 
@@ -1141,21 +1160,14 @@ def balsamic_pon_model(
 ) -> ConfigModel:
     """Return ConfigModel parsed from static PON config dict."""
     # Initialize ConfigModel
-    balsamic_pon_config = ConfigModel.parse_obj(pon_config_dict_w_fastq)
+    balsamic_pon_config = ConfigModel.model_validate(pon_config_dict_w_fastq)
     return balsamic_pon_config
 
 
 @pytest.fixture(scope="session")
-def tumor_only_config(
-    case_id_tumor_only: str,
-    tumor_sample_name: str,
+def config_case_cli(
     balsamic_cache: str,
-    analysis_dir: str,
-    fastq_dir_tumor_only: str,
-    panel_bed_file: str,
     background_variant_file: str,
-    sentieon_license: str,
-    sentieon_install_dir: str,
     cadd_annotations: str,
     swegen_snv_frequency_path: str,
     swegen_sv_frequency_path: str,
@@ -1164,9 +1176,189 @@ def tumor_only_config(
     somatic_sv_observations_path: str,
     cancer_germline_snv_observations_path: str,
     cancer_somatic_snv_observations_path: str,
+) -> List[str]:
+    """Return common config case CLI."""
+    return [
+        "--balsamic-cache",
+        balsamic_cache,
+        "--background-variants",
+        background_variant_file,
+        "--cadd-annotations",
+        cadd_annotations,
+        "--swegen-snv",
+        swegen_snv_frequency_path,
+        "--swegen-sv",
+        swegen_sv_frequency_path,
+        "--clinical-snv-observations",
+        clinical_snv_observations_path,
+        "--clinical-sv-observations",
+        clinical_sv_observations_path,
+        "--cancer-somatic-sv-observations",
+        somatic_sv_observations_path,
+        "--cancer-germline-snv-observations",
+        cancer_germline_snv_observations_path,
+        "--cancer-somatic-snv-observations",
+        cancer_somatic_snv_observations_path,
+    ]
+
+
+@pytest.fixture(scope="session")
+def tumor_only_config_qc(
+    case_id_tumor_only_qc: str,
+    analysis_dir: str,
+    fastq_dir_tumor_only_qc: str,
+    tumor_sample_name: str,
+    panel_bed_file: str,
+    sentieon_license: str,
+    sentieon_install_dir: str,
+    config_case_cli: list[str],
 ) -> str:
     """Invoke balsamic config sample to create sample configuration file for tumor-only TGA."""
 
+    with mock.patch.dict(
+        MOCKED_OS_ENVIRON,
+        {
+            "SENTIEON_LICENSE": sentieon_license,
+            "SENTIEON_INSTALL_DIR": sentieon_install_dir,
+        },
+    ):
+        runner = CliRunner()
+        runner.invoke(
+            cli,
+            [
+                "config",
+                "case",
+                "--case-id",
+                case_id_tumor_only_qc,
+                "--analysis-workflow",
+                AnalysisWorkflow.BALSAMIC_QC,
+                "--analysis-dir",
+                analysis_dir,
+                "--fastq-path",
+                fastq_dir_tumor_only_qc,
+                "--tumor-sample-name",
+                tumor_sample_name,
+                "-p",
+                panel_bed_file,
+            ]
+            + config_case_cli,
+        )
+
+    return Path(
+        analysis_dir, case_id_tumor_only_qc, f"{case_id_tumor_only_qc}.{FileType.JSON}"
+    ).as_posix()
+
+
+@pytest.fixture(scope="session")
+def tumor_normal_config_qc(
+    case_id_tumor_normal_qc: str,
+    tumor_sample_name: str,
+    normal_sample_name: str,
+    analysis_dir: str,
+    fastq_dir_tumor_normal_qc: str,
+    sentieon_license: str,
+    sentieon_install_dir: str,
+    config_case_cli: list[str],
+) -> str:
+    """Invoke balsamic config sample to create sample configuration file for tumor-normal TGA QC workflow."""
+
+    with mock.patch.dict(
+        MOCKED_OS_ENVIRON,
+        {
+            "SENTIEON_LICENSE": sentieon_license,
+            "SENTIEON_INSTALL_DIR": sentieon_install_dir,
+        },
+    ):
+        runner = CliRunner()
+        runner.invoke(
+            cli,
+            [
+                "config",
+                "case",
+                "--case-id",
+                case_id_tumor_normal_qc,
+                "--analysis-workflow",
+                AnalysisWorkflow.BALSAMIC_QC,
+                "--analysis-dir",
+                analysis_dir,
+                "--fastq-path",
+                fastq_dir_tumor_normal_qc,
+                "--tumor-sample-name",
+                tumor_sample_name,
+                "--normal-sample-name",
+                normal_sample_name,
+            ]
+            + config_case_cli,
+        )
+
+    return Path(
+        analysis_dir,
+        case_id_tumor_normal_qc,
+        f"{case_id_tumor_normal_qc}.{FileType.JSON}",
+    ).as_posix()
+
+
+@pytest.fixture(scope="session")
+def tumor_normal_config_qc_wgs(
+    case_id_tumor_normal_qc_wgs: str,
+    analysis_dir: str,
+    fastq_dir_tumor_normal_qc_wgs: str,
+    tumor_sample_name: str,
+    normal_sample_name: str,
+    sentieon_license: str,
+    sentieon_install_dir: str,
+    config_case_cli: List[str],
+) -> str:
+    """Invoke balsamic config sample to create sample configuration file for tumor-normal WGS QC workflow."""
+
+    with mock.patch.dict(
+        MOCKED_OS_ENVIRON,
+        {
+            "SENTIEON_LICENSE": sentieon_license,
+            "SENTIEON_INSTALL_DIR": sentieon_install_dir,
+        },
+    ):
+        runner = CliRunner()
+        runner.invoke(
+            cli,
+            [
+                "config",
+                "case",
+                "--case-id",
+                case_id_tumor_normal_qc_wgs,
+                "--analysis-workflow",
+                AnalysisWorkflow.BALSAMIC_QC,
+                "--analysis-dir",
+                analysis_dir,
+                "--fastq-path",
+                fastq_dir_tumor_normal_qc_wgs,
+                "--tumor-sample-name",
+                tumor_sample_name,
+                "--normal-sample-name",
+                normal_sample_name,
+            ]
+            + config_case_cli,
+        )
+
+    return Path(
+        analysis_dir,
+        case_id_tumor_normal_qc_wgs,
+        f"{case_id_tumor_normal_qc_wgs}.{FileType.JSON}",
+    ).as_posix()
+
+
+@pytest.fixture(scope="session")
+def tumor_only_config(
+    case_id_tumor_only: str,
+    tumor_sample_name: str,
+    analysis_dir: str,
+    fastq_dir_tumor_only: str,
+    panel_bed_file: str,
+    sentieon_license: str,
+    sentieon_install_dir: str,
+    config_case_cli: list[str],
+) -> str:
+    """Invoke balsamic config sample to create sample configuration file for tumor-only TGA."""
     with mock.patch.dict(
         MOCKED_OS_ENVIRON,
         {
@@ -1186,33 +1378,13 @@ def tumor_only_config(
                 analysis_dir,
                 "--fastq-path",
                 fastq_dir_tumor_only,
-                "-p",
-                panel_bed_file,
-                "--balsamic-cache",
-                balsamic_cache,
-                "--background-variants",
-                background_variant_file,
                 "--tumor-sample-name",
                 tumor_sample_name,
-                "--cadd-annotations",
-                cadd_annotations,
-                "--swegen-snv",
-                swegen_snv_frequency_path,
-                "--swegen-sv",
-                swegen_sv_frequency_path,
-                "--clinical-snv-observations",
-                clinical_snv_observations_path,
-                "--clinical-sv-observations",
-                clinical_sv_observations_path,
-                "--cancer-somatic-sv-observations",
-                somatic_sv_observations_path,
-                "--cancer-germline-snv-observations",
-                cancer_germline_snv_observations_path,
-                "--cancer-somatic-snv-observations",
-                cancer_somatic_snv_observations_path,
-            ],
+                "-p",
+                panel_bed_file,
+            ]
+            + config_case_cli,
         )
-
     return Path(
         analysis_dir,
         case_id_tumor_only,
@@ -1227,19 +1399,109 @@ def tumor_normal_config(
     normal_sample_name: str,
     analysis_dir: str,
     fastq_dir_tumor_normal: str,
-    balsamic_cache: str,
-    background_variant_file: str,
     panel_bed_file: str,
     sentieon_license: str,
     sentieon_install_dir: str,
-    cadd_annotations: str,
-    swegen_snv_frequency_path: str,
-    swegen_sv_frequency_path: str,
-    clinical_snv_observations_path: str,
-    clinical_sv_observations_path: str,
-    somatic_sv_observations_path: str,
-    cancer_germline_snv_observations_path: str,
-    cancer_somatic_snv_observations_path: str,
+    config_case_cli: list[str],
+) -> str:
+    """Invoke balsamic config sample to create sample configuration file for tumor-normal TGA."""
+
+    with mock.patch.dict(
+        MOCKED_OS_ENVIRON,
+        {
+            "SENTIEON_LICENSE": sentieon_license,
+            "SENTIEON_INSTALL_DIR": sentieon_install_dir,
+        },
+    ):
+        runner = CliRunner()
+        runner.invoke(
+            cli,
+            [
+                "config",
+                "case",
+                "--case-id",
+                case_id_tumor_normal,
+                "--analysis-dir",
+                analysis_dir,
+                "--fastq-path",
+                fastq_dir_tumor_normal,
+                "--tumor-sample-name",
+                tumor_sample_name,
+                "--normal-sample-name",
+                normal_sample_name,
+                "-p",
+                panel_bed_file,
+            ]
+            + config_case_cli,
+        )
+
+    return Path(
+        analysis_dir,
+        case_id_tumor_normal,
+        f"{case_id_tumor_normal}.{FileType.JSON}",
+    ).as_posix()
+
+
+@pytest.fixture(scope="session")
+def tumor_only_umi_config(
+    case_id_tumor_only_umi: str,
+    tumor_sample_name: str,
+    analysis_dir: str,
+    fastq_dir_tumor_only: str,
+    panel_bed_file: str,
+    sentieon_license: str,
+    sentieon_install_dir: str,
+    config_case_cli: list[str],
+) -> str:
+    """Invoke balsamic config sample to create sample configuration file for tumor-only TGA."""
+
+    with mock.patch.dict(
+        MOCKED_OS_ENVIRON,
+        {
+            "SENTIEON_LICENSE": sentieon_license,
+            "SENTIEON_INSTALL_DIR": sentieon_install_dir,
+        },
+    ):
+        runner = CliRunner()
+        runner.invoke(
+            cli,
+            [
+                "config",
+                "case",
+                "--case-id",
+                case_id_tumor_only_umi,
+                "--analysis-workflow",
+                AnalysisWorkflow.BALSAMIC_UMI,
+                "--analysis-dir",
+                analysis_dir,
+                "--fastq-path",
+                fastq_dir_tumor_only,
+                "--tumor-sample-name",
+                tumor_sample_name,
+                "-p",
+                panel_bed_file,
+            ]
+            + config_case_cli,
+        )
+
+    return Path(
+        analysis_dir,
+        case_id_tumor_only_umi,
+        f"{case_id_tumor_only_umi}.{FileType.JSON}",
+    ).as_posix()
+
+
+@pytest.fixture(scope="session")
+def tumor_normal_umi_config(
+    case_id_tumor_normal_umi: str,
+    tumor_sample_name: str,
+    normal_sample_name: str,
+    analysis_dir: str,
+    fastq_dir_tumor_normal: str,
+    panel_bed_file: str,
+    sentieon_license: str,
+    sentieon_install_dir: str,
+    config_case_cli: list[str],
 ) -> str:
     """Invoke balsamic config sample to create sample configuration file for tumor-normal TGA."""
 
@@ -1259,124 +1521,41 @@ def tumor_normal_config(
                 "-p",
                 panel_bed_file,
                 "--case-id",
-                case_id_tumor_normal,
+                case_id_tumor_normal_umi,
+                "--analysis-workflow",
+                AnalysisWorkflow.BALSAMIC_UMI,
                 "--analysis-dir",
                 analysis_dir,
                 "--fastq-path",
                 fastq_dir_tumor_normal,
-                "--background-variants",
-                background_variant_file,
-                "--balsamic-cache",
-                balsamic_cache,
                 "--tumor-sample-name",
                 tumor_sample_name,
                 "--normal-sample-name",
                 normal_sample_name,
-                "--cadd-annotations",
-                cadd_annotations,
-                "--swegen-snv",
-                swegen_snv_frequency_path,
-                "--swegen-sv",
-                swegen_sv_frequency_path,
-                "--clinical-snv-observations",
-                clinical_snv_observations_path,
-                "--clinical-sv-observations",
-                clinical_sv_observations_path,
-                "--cancer-somatic-sv-observations",
-                somatic_sv_observations_path,
-                "--cancer-germline-snv-observations",
-                cancer_germline_snv_observations_path,
-                "--cancer-somatic-snv-observations",
-                cancer_somatic_snv_observations_path,
-            ],
-        )
-
-    return Path(
-        analysis_dir,
-        case_id_tumor_normal,
-        f"{case_id_tumor_normal}.{FileType.JSON}",
-    ).as_posix()
-
-
-@pytest.fixture(scope="session")
-def tumor_normal_config_qc(
-    case_id_tumor_normal_qc: str,
-    tumor_sample_name: str,
-    normal_sample_name: str,
-    analysis_dir: str,
-    fastq_dir_tumor_normal_qc: str,
-    balsamic_cache: str,
-    background_variant_file: str,
-    panel_bed_file: str,
-    sentieon_license: str,
-    sentieon_install_dir: str,
-    analysis_workflow_qc: str,
-    cadd_annotations: str,
-    swegen_snv_frequency_path: str,
-    swegen_sv_frequency_path: str,
-    clinical_snv_observations_path: str,
-    clinical_sv_observations_path: str,
-    somatic_sv_observations_path: str,
-    cancer_germline_snv_observations_path: str,
-    cancer_somatic_snv_observations_path: str,
-) -> str:
-    """Invoke balsamic config sample to create sample configuration file for tumor-normal TGA QC workflow."""
-
-    with mock.patch.dict(
-        MOCKED_OS_ENVIRON,
-        {
-            "SENTIEON_LICENSE": sentieon_license,
-            "SENTIEON_INSTALL_DIR": sentieon_install_dir,
-        },
-    ):
-        runner = CliRunner()
-        runner.invoke(
-            cli,
-            [
-                "config",
-                "case",
                 "-p",
                 panel_bed_file,
-                "--case-id",
-                case_id_tumor_normal_qc,
-                "--analysis-dir",
-                analysis_dir,
-                "--fastq-path",
-                fastq_dir_tumor_normal_qc,
-                "--background-variants",
-                background_variant_file,
-                "--balsamic-cache",
-                balsamic_cache,
-                "--tumor-sample-name",
-                tumor_sample_name,
-                "--normal-sample-name",
-                normal_sample_name,
-                "--analysis-workflow",
-                analysis_workflow_qc,
-            ],
+            ]
+            + config_case_cli,
         )
 
     return Path(
         analysis_dir,
-        case_id_tumor_normal_qc,
-        f"{case_id_tumor_normal_qc}.{FileType.JSON}",
+        case_id_tumor_normal_umi,
+        f"{case_id_tumor_normal_umi}.{FileType.JSON}",
     ).as_posix()
 
 
 @pytest.fixture(scope="session")
-def tumor_normal_config_qc_wgs(
-    case_id_tumor_normal_qc_wgs: str,
-    tumor_sample_name: str,
-    normal_sample_name: str,
+def tumor_only_wgs_config(
+    case_id_tumor_only_wgs: str,
     analysis_dir: str,
-    fastq_dir_tumor_normal_qc_wgs: str,
-    balsamic_cache: str,
-    background_variant_file: str,
+    fastq_dir_tumor_only_wgs: str,
+    tumor_sample_name: str,
     sentieon_license: str,
     sentieon_install_dir: str,
-    analysis_workflow_qc: str,
+    config_case_cli: List[str],
 ) -> str:
-    """Invoke balsamic config sample to create sample configuration file for tumor-normal WGS QC workflow."""
+    """Invoke balsamic config sample to create sample configuration file for tumor-only WGS."""
 
     with mock.patch.dict(
         MOCKED_OS_ENVIRON,
@@ -1392,68 +1571,36 @@ def tumor_normal_config_qc_wgs(
                 "config",
                 "case",
                 "--case-id",
-                case_id_tumor_normal_qc_wgs,
+                case_id_tumor_only_wgs,
                 "--analysis-dir",
                 analysis_dir,
                 "--fastq-path",
-                fastq_dir_tumor_normal_qc_wgs,
-                "--background-variants",
-                background_variant_file,
-                "--balsamic-cache",
-                balsamic_cache,
+                fastq_dir_tumor_only_wgs,
                 "--tumor-sample-name",
                 tumor_sample_name,
-                "--normal-sample-name",
-                normal_sample_name,
-                "--analysis-workflow",
-                analysis_workflow_qc,
-                "--cadd-annotations",
-                cadd_annotations,
-                "--swegen-snv",
-                swegen_snv_frequency_path,
-                "--swegen-sv",
-                swegen_sv_frequency_path,
-                "--clinical-snv-observations",
-                clinical_snv_observations_path,
-                "--clinical-sv-observations",
-                clinical_sv_observations_path,
-                "--cancer-somatic-sv-observations",
-                somatic_sv_observations_path,
-                "--cancer-germline-snv-observations",
-                cancer_germline_snv_observations_path,
-                "--cancer-somatic-snv-observations",
-                cancer_somatic_snv_observations_path,
-            ],
+            ]
+            + config_case_cli,
         )
 
     return Path(
         analysis_dir,
-        case_id_tumor_normal_qc_wgs,
-        f"{case_id_tumor_normal_qc_wgs}.{FileType.JSON}",
+        case_id_tumor_only_wgs,
+        f"{case_id_tumor_only_wgs}.{FileType.JSON}",
     ).as_posix()
 
 
 @pytest.fixture(scope="session")
 def tumor_normal_wgs_config(
     case_id_tumor_normal_wgs: str,
-    tumor_sample_name: str,
-    normal_sample_name: str,
     analysis_dir: str,
     fastq_dir_tumor_normal_wgs: str,
-    balsamic_cache: str,
+    tumor_sample_name: str,
+    normal_sample_name: str,
     sentieon_license: str,
     sentieon_install_dir: str,
-    cadd_annotations: str,
-    swegen_snv_frequency_path: str,
-    swegen_sv_frequency_path: str,
-    clinical_snv_observations_path: str,
-    clinical_sv_observations_path: str,
-    somatic_sv_observations_path: str,
-    cancer_germline_snv_observations_path: str,
-    cancer_somatic_snv_observations_path: str,
+    config_case_cli: str,
 ) -> str:
     """Invoke balsamic config sample to create sample configuration file for tumor-normal WGS."""
-
     with mock.patch.dict(
         MOCKED_OS_ENVIRON,
         {
@@ -1473,29 +1620,12 @@ def tumor_normal_wgs_config(
                 analysis_dir,
                 "--fastq-path",
                 fastq_dir_tumor_normal_wgs,
-                "--balsamic-cache",
-                balsamic_cache,
                 "--tumor-sample-name",
                 tumor_sample_name,
                 "--normal-sample-name",
                 normal_sample_name,
-                "--cadd-annotations",
-                cadd_annotations,
-                "--swegen-snv",
-                swegen_snv_frequency_path,
-                "--swegen-sv",
-                swegen_sv_frequency_path,
-                "--clinical-snv-observations",
-                clinical_snv_observations_path,
-                "--clinical-sv-observations",
-                clinical_sv_observations_path,
-                "--cancer-somatic-sv-observations",
-                somatic_sv_observations_path,
-                "--cancer-germline-snv-observations",
-                cancer_germline_snv_observations_path,
-                "--cancer-somatic-snv-observations",
-                cancer_somatic_snv_observations_path,
-            ],
+            ]
+            + config_case_cli,
         )
 
     return Path(
@@ -1552,121 +1682,6 @@ def tumor_only_config_dummy_vep(
         analysis_dir,
         case_id_tumor_only_dummy_vep,
         f"{case_id_tumor_only_dummy_vep}.{FileType.JSON}",
-    ).as_posix()
-
-
-@pytest.fixture(scope="session")
-def tumor_only_config_qc(
-    case_id_tumor_only_qc: str,
-    tumor_sample_name: str,
-    balsamic_cache: str,
-    analysis_dir: str,
-    fastq_dir_tumor_only_qc: str,
-    panel_bed_file: str,
-    background_variant_file: str,
-    sentieon_license: str,
-    sentieon_install_dir: str,
-    analysis_workflow_qc: str,
-) -> str:
-    """Invoke balsamic config sample to create sample configuration file for tumor-only TGA."""
-
-    with mock.patch.dict(
-        MOCKED_OS_ENVIRON,
-        {
-            "SENTIEON_LICENSE": sentieon_license,
-            "SENTIEON_INSTALL_DIR": sentieon_install_dir,
-        },
-    ):
-        runner = CliRunner()
-        runner.invoke(
-            cli,
-            [
-                "config",
-                "case",
-                "--case-id",
-                case_id_tumor_only_qc,
-                "--analysis-dir",
-                analysis_dir,
-                "--fastq-path",
-                fastq_dir_tumor_only_qc,
-                "-p",
-                panel_bed_file,
-                "--balsamic-cache",
-                balsamic_cache,
-                "--background-variants",
-                background_variant_file,
-                "--tumor-sample-name",
-                tumor_sample_name,
-                "--analysis-workflow",
-                analysis_workflow_qc,
-            ],
-        )
-
-    return Path(
-        analysis_dir, case_id_tumor_only_qc, f"{case_id_tumor_only_qc}.{FileType.JSON}"
-    ).as_posix()
-
-
-@pytest.fixture(scope="session")
-def tumor_only_wgs_config(
-    case_id_tumor_only_wgs: str,
-    tumor_sample_name: str,
-    analysis_dir: str,
-    fastq_dir_tumor_only_wgs: str,
-    balsamic_cache: str,
-    sentieon_license: str,
-    sentieon_install_dir: str,
-    swegen_snv_frequency_path: str,
-    swegen_sv_frequency_path: str,
-    clinical_snv_observations_path: str,
-    clinical_sv_observations_path: str,
-    cancer_germline_snv_observations_path: str,
-    cancer_somatic_snv_observations_path: str,
-) -> str:
-    """Invoke balsamic config sample to create sample configuration file for tumor-only WGS."""
-
-    with mock.patch.dict(
-        MOCKED_OS_ENVIRON,
-        {
-            "SENTIEON_LICENSE": sentieon_license,
-            "SENTIEON_INSTALL_DIR": sentieon_install_dir,
-        },
-    ):
-        runner = CliRunner()
-        runner.invoke(
-            cli,
-            [
-                "config",
-                "case",
-                "--case-id",
-                case_id_tumor_only_wgs,
-                "--analysis-dir",
-                analysis_dir,
-                "--fastq-path",
-                fastq_dir_tumor_only_wgs,
-                "--balsamic-cache",
-                balsamic_cache,
-                "--tumor-sample-name",
-                tumor_sample_name,
-                "--swegen-snv",
-                swegen_snv_frequency_path,
-                "--swegen-sv",
-                swegen_sv_frequency_path,
-                "--clinical-snv-observations",
-                clinical_snv_observations_path,
-                "--clinical-sv-observations",
-                clinical_sv_observations_path,
-                "--cancer-germline-snv-observations",
-                cancer_germline_snv_observations_path,
-                "--cancer-somatic-snv-observations",
-                cancer_somatic_snv_observations_path,
-            ],
-        )
-
-    return Path(
-        analysis_dir,
-        case_id_tumor_only_wgs,
-        f"{case_id_tumor_only_wgs}.{FileType.JSON}",
     ).as_posix()
 
 
@@ -2228,7 +2243,7 @@ def fixture_analysis_references_hg_data(
 @pytest.fixture(scope="session", name="analysis_references_hg")
 def fixture_analysis_references_hg(
     analysis_references_hg_data: Dict[str, Path]
-) -> CacheAnalysis:
+) -> AnalysisReferencesHg:
     """Return mocked human genome analysis references model."""
     return AnalysisReferencesHg(**analysis_references_hg_data)
 

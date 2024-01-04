@@ -1,26 +1,25 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
 
-from pathlib import Path
 import glob
-import tempfile
-import os
 import logging
+import os
+import tempfile
+from pathlib import Path
+from typing import Dict, List
 
-from typing import List, Dict
-from BALSAMIC.utils.exc import BalsamicError
-
-
+from BALSAMIC.constants.analysis import FastqName, Gender, PONWorkflow, SampleType, SequencingType
 from BALSAMIC.constants.paths import BALSAMIC_DIR
-from BALSAMIC.constants.analysis import FastqName, SampleType, SequencingType, PONWorkflow, Gender
-from BALSAMIC.utils.io import write_finish_file
-from BALSAMIC.utils.rule import get_fastp_parameters, get_threads, get_result_dir
 from BALSAMIC.constants.workflow_params import WORKFLOW_PARAMS, SLEEP_BEFORE_START
-from BALSAMIC.models.analysis import BalsamicWorkflowConfig, ConfigModel
+from BALSAMIC.models.config import ConfigModel
+from BALSAMIC.models.params import BalsamicWorkflowConfig
+from BALSAMIC.utils.exc import BalsamicError
+from BALSAMIC.utils.io import write_finish_file
+from BALSAMIC.utils.rule import get_fastp_parameters, get_result_dir, get_threads
 
 
 # Initialize ConfigModel
-config_model = ConfigModel.parse_obj(config)
+config_model = ConfigModel.model_validate(config)
 
 shell.prefix("set -eo pipefail; ")
 
@@ -29,7 +28,7 @@ localrules: all
 LOG = logging.getLogger(__name__)
 
 # parse parameters as constants to workflows
-params = BalsamicWorkflowConfig.parse_obj(WORKFLOW_PARAMS)
+params = BalsamicWorkflowConfig.model_validate(WORKFLOW_PARAMS)
 
 # Get case id/name
 case_id: str = config_model.analysis.case_id
@@ -44,7 +43,7 @@ tmp_dir: str = Path(result_dir, "tmp").as_posix() + "/"
 Path.mkdir(Path(tmp_dir), parents=True, exist_ok=True)
 
 # Directories
-benchmark_dir: str = config_model.analysis.benchmark
+benchmark_dir: str = config_model.analysis.benchmark + "/"
 fastq_dir: str = Path(result_dir, "fastq").as_posix() + "/"
 bam_dir: str = Path(result_dir, "bam", "").as_posix() + "/"
 cnv_dir: str = Path(result_dir, "cnv", "").as_posix() + "/"
@@ -107,7 +106,7 @@ if pon_workflow == PONWorkflow.CNVKIT:
 if pon_workflow in [PONWorkflow.GENS_MALE, PONWorkflow.GENS_FEMALE]:
     gender = Gender.MALE if pon_workflow == PONWorkflow.GENS_MALE else Gender.FEMALE
 
-    pon_reference = expand(cnv_dir + "balsamic_pon_100bp.{gender}.{version}.hdf5", gender=gender, version=version)
+    pon_reference = expand(cnv_dir + "gens_pon_100bp.{gender}.{version}.hdf5", gender=gender, version=version)
     rules_to_include.append("snakemake_rules/variant_calling/gatk_read_counts.rule")
     rules_to_include.append("snakemake_rules/pon/gens_create_pon.rule")
 

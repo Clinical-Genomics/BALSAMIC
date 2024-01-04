@@ -1,44 +1,56 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
+import glob
+import logging
 import os
 import re
-import logging
 import tempfile
-import glob
-
 from pathlib import Path
-from typing import List, Dict
+from typing import Dict, List
+
+from BALSAMIC.constants.constants import FileType
+from BALSAMIC.constants.analysis import FastqName, MutationType, SampleType
+from BALSAMIC.constants.paths import BALSAMIC_DIR, SENTIEON_DNASCOPE_DIR, SENTIEON_TNSCOPE_DIR
+from BALSAMIC.constants.rules import SNAKEMAKE_RULES
+from BALSAMIC.constants.variant_filters import (
+    COMMON_SETTINGS,
+    SENTIEON_VARCALL_SETTINGS,
+    SVDB_FILTER_SETTINGS,
+    VARDICT_SETTINGS,
+)
+from BALSAMIC.constants.workflow_params import VARCALL_PARAMS, WORKFLOW_PARAMS, SLEEP_BEFORE_START
+from BALSAMIC.models.config import ConfigModel
+from BALSAMIC.models.params import BalsamicWorkflowConfig, VarCallerFilter
+from BALSAMIC.utils.cli import check_executable, generate_h5
+from BALSAMIC.utils.exc import BalsamicError
+from BALSAMIC.utils.io import read_yaml, write_finish_file, write_json
+from BALSAMIC.utils.rule import (
+    dump_toml,
+    get_cancer_germline_snv_observations,
+    get_cancer_somatic_snv_observations,
+    get_capture_kit,
+    get_clinical_snv_observations,
+    get_clinical_sv_observations,
+    get_fastp_parameters,
+    get_pon_cnn,
+    get_result_dir,
+    get_rule_output,
+    get_script_path,
+    get_sequencing_type,
+    get_somatic_sv_observations,
+    get_swegen_snv,
+    get_swegen_sv,
+    get_threads,
+    get_variant_callers,
+    get_vcf,
+)
+from BALSAMIC.utils.workflowscripts import plot_analysis
+from pypdf import PdfWriter
+from snakemake.exceptions import RuleException, WorkflowError
 from yapf.yapflib.yapf_api import FormatFile
 
-from snakemake.exceptions import RuleException, WorkflowError
-
-from PyPDF2 import PdfFileMerger
-
-from BALSAMIC.constants.paths import SENTIEON_DNASCOPE_DIR, SENTIEON_TNSCOPE_DIR, BALSAMIC_DIR
-from BALSAMIC.utils.exc import BalsamicError
-
-from BALSAMIC.utils.cli import (check_executable, generate_h5)
-from BALSAMIC.utils.io import write_json, read_yaml, write_finish_file
-
-from BALSAMIC.models.analysis import VarCallerFilter, BalsamicWorkflowConfig, ConfigModel
-
-from BALSAMIC.utils.workflowscripts import plot_analysis
-
-from BALSAMIC.utils.rule import (get_fastp_parameters, get_variant_callers, get_rule_output, get_result_dir, get_vcf,
-                                 get_threads, get_script_path, get_sequencing_type,
-                                 get_capture_kit, get_pon_cnn,
-                                 get_clinical_snv_observations, get_clinical_sv_observations, get_swegen_snv,
-                                 get_swegen_sv, dump_toml, get_cancer_germline_snv_observations,
-                                 get_cancer_somatic_snv_observations, get_somatic_sv_observations)
-
-from BALSAMIC.constants.analysis import MutationType, FastqName, SampleType
-from BALSAMIC.constants.variant_filters import (COMMON_SETTINGS, VARDICT_SETTINGS, SENTIEON_VARCALL_SETTINGS,
-                                                SVDB_FILTER_SETTINGS)
-from BALSAMIC.constants.workflow_params import (WORKFLOW_PARAMS, VARCALL_PARAMS, SLEEP_BEFORE_START)
-from BALSAMIC.constants.rules import SNAKEMAKE_RULES
-
 # Initialize ConfigModel
-config_model = ConfigModel.parse_obj(config)
+config_model = ConfigModel.model_validate(config)
 
 shell.executable("/bin/bash")
 shell.prefix("set -eo pipefail; ")
@@ -59,7 +71,7 @@ Path.mkdir(Path(tmp_dir), parents=True, exist_ok=True)
 
 # Directories
 input_fastq_dir: str = config_model.analysis.fastq_path + "/"
-benchmark_dir: str = config_model.analysis.benchmark
+benchmark_dir: str = config_model.analysis.benchmark + "/"
 fastq_dir: str = Path(result_dir, "fastq").as_posix() + "/"
 bam_dir: str = Path(result_dir, "bam").as_posix() + "/"
 cnv_dir: str = Path(result_dir, "cnv").as_posix() + "/"
@@ -95,6 +107,12 @@ tumor_sample: str = config_model.get_sample_name_by_type(SampleType.TUMOR)
 sequencing_type = config_model.analysis.sequencing_type
 if config_model.analysis.analysis_type == "paired":
     normal_sample: str = config_model.get_sample_name_by_type(SampleType.NORMAL)
+
+# Sample status to sampleID namemap
+if config_model.analysis.analysis_type == "paired":
+    status_to_sample_id = "TUMOR" + "\\\\t" + tumor_sample + "\\\\n" + "NORMAL" + "\\\\t" + normal_sample
+else:
+    status_to_sample_id = "TUMOR" + "\\\\t" + tumor_sample
 
 
 # vcfanno annotations
@@ -188,16 +206,16 @@ if "swegen_sv_frequency" in config["reference"]:
 
 
 # Varcaller filter settings
-COMMON_FILTERS = VarCallerFilter.parse_obj(COMMON_SETTINGS)
-VARDICT = VarCallerFilter.parse_obj(VARDICT_SETTINGS)
-SENTIEON_CALLER = VarCallerFilter.parse_obj(SENTIEON_VARCALL_SETTINGS)
-SVDB_FILTERS = VarCallerFilter.parse_obj(SVDB_FILTER_SETTINGS)
+COMMON_FILTERS = VarCallerFilter.model_validate(COMMON_SETTINGS)
+VARDICT = VarCallerFilter.model_validate(VARDICT_SETTINGS)
+SENTIEON_CALLER = VarCallerFilter.model_validate(SENTIEON_VARCALL_SETTINGS)
+SVDB_FILTERS = VarCallerFilter.model_validate(SVDB_FILTER_SETTINGS)
 
 # Fastp parameters
 fastp_parameters: Dict = get_fastp_parameters(config_model)
 
 # parse parameters as constants to workflows
-params = BalsamicWorkflowConfig.parse_obj(WORKFLOW_PARAMS)
+params = BalsamicWorkflowConfig.model_validate(WORKFLOW_PARAMS)
 
 # Capture kit name
 if config["analysis"]["sequencing_type"] != "wgs":
@@ -260,19 +278,22 @@ os.environ["SENTIEON_TMPDIR"] = result_dir
 os.environ['TMPDIR'] = get_result_dir(config)
 
 # CNV report input files
-cnv_data_paths = []
-if config["analysis"]["sequencing_type"] == "wgs" and config['analysis']['analysis_type'] == "paired":
-    cnv_data_paths.append(vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.samplestatistics.txt")
-    cnv_data_paths.extend(expand(
-        vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat." + "{output_suffix}" + ".png",
-        output_suffix=["ascatprofile", "rawprofile", "ASPCF", "tumor", "germline", "sunrise"]
-    ))
-
-if config["analysis"]["sequencing_type"] == "wgs" and config['analysis']['analysis_type'] == "single":
-    cnv_data_paths.extend(expand(
-        vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".cnvpytor." + "{output_suffix}" + ".png",
-        output_suffix=["circular", "scatter"]
-    ))
+cnv_report_paths = []
+if config["analysis"]["sequencing_type"] == "wgs":
+    if config['analysis']['analysis_type'] == "paired":
+        cnv_report_paths.append(f"{vcf_dir}CNV.somatic.{config['analysis']['case_id']}.ascat.samplestatistics.txt.pdf")
+        cnv_report_paths.extend(expand(
+            f"{vcf_dir}CNV.somatic.{config['analysis']['case_id']}.ascat.{{output_suffix}}.png.pdf",
+            output_suffix=["ascatprofile", "rawprofile", "ASPCF", "tumor", "germline", "sunrise"]
+        ))
+    else:
+        cnv_report_paths.extend(expand(
+            f"{vcf_dir}CNV.somatic.{config['analysis']['case_id']}.cnvpytor.{{output_suffix}}.png.pdf",
+            output_suffix=["circular", "scatter"]
+        ))
+else:
+    cnv_report_paths.extend(expand(f"{cnv_dir}tumor.merged-{{plot}}.pdf",plot=["diagram", "scatter"]))
+    cnv_report_paths.append(f"{cnv_dir}CNV.somatic.{config['analysis']['case_id']}.purecn.purity.csv.pdf")
 
 # Extract variant callers for the workflow
 germline_caller = []
@@ -431,10 +452,8 @@ analysis_specific_results.extend(
     expand(vep_dir + "{vcf}.balsamic_stat", vcf=get_vcf(config, somatic_caller_tmb, [case_id]))
 )
 
-# WGS specific files
-if config["analysis"]["sequencing_type"] == "wgs":
-    # CNV report
-    analysis_specific_results.append(vcf_dir + "CNV.somatic." + case_id + ".report.pdf"),
+# CNV report
+analysis_specific_results.append(cnv_dir + "CNV.somatic." + case_id + ".report.pdf"),
 
 # TGA specific files
 if config["analysis"]["sequencing_type"] != "wgs":
@@ -530,7 +549,7 @@ if 'benchmark_plots' in config:
 
         # Merge plots into one based on rule name
         for my_rule in vars(rules).keys():
-            my_rule_pdf = PdfFileMerger()
+            my_rule_pdf = PdfWriter()
             my_rule_plots = list()
             for plots in Path(benchmark_dir).glob(f"BALSAMIC*.{my_rule}.*.pdf"):
                 my_rule_pdf.append(plots.as_posix())

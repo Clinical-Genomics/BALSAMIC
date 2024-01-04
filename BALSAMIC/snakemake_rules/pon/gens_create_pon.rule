@@ -5,7 +5,7 @@ rule gatk_create_readcount_pon:
     input:
         readcounts_hdf5s = expand(cnv_dir + "{sample}.collectreadcounts.hdf5", sample=sample_names)
     output:
-        pon_hdf5 = cnv_dir + "balsamic_pon_100bp.{gender}.{version}.hdf5"
+        pon_hdf5 = cnv_dir + "gens_pon_100bp.{gender}.{version}.hdf5"
     params:
         tmpdir=tempfile.mkdtemp(prefix=tmp_dir),
         gender="{gender}"
