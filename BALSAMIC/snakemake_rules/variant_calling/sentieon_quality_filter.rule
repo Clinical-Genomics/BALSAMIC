@@ -16,7 +16,6 @@ if config["analysis"]["sequencing_type"] == 'wgs' and config["analysis"]["analys
         DP = [SENTIEON_CALLER.DP.tag_value, SENTIEON_CALLER.DP.filter_name],
         AD = [SENTIEON_CALLER.AD.tag_value, SENTIEON_CALLER.AD.filter_name],
         AF_min = [SENTIEON_CALLER.AF_min.tag_value, SENTIEON_CALLER.AF_min.filter_name],
-        AF_max = [SENTIEON_CALLER.AF_max.tag_value, SENTIEON_CALLER.AF_max.filter_name],
         strand_reads = [SENTIEON_CALLER.strand_reads.tag_value, SENTIEON_CALLER.strand_reads.filter_name],
         qss = [SENTIEON_CALLER.qss.tag_value, SENTIEON_CALLER.qss.filter_name],
         sor = [SENTIEON_CALLER.sor.tag_value, SENTIEON_CALLER.sor.filter_name],
@@ -36,7 +35,6 @@ bcftools view -f PASS,triallelic_site --threads {threads} --regions-file {input.
 | bcftools filter --threads {threads} --include 'SUM(FORMAT/AD[0:0]+FORMAT/AD[0:1]) >= {params.DP[0]}' --soft-filter '{params.DP[1]}' --mode '+' \
 | bcftools filter --threads {threads} --include 'FORMAT/AD[0:1] > {params.AD[0]}' --soft-filter '{params.AD[1]}' --mode '+' \
 | bcftools filter --threads {threads} --include 'FORMAT/AF > {params.AF_min[0]}' --soft-filter '{params.AF_min[1]}' --mode '+' \
-| bcftools filter --threads {threads} --include 'FORMAT/AF < {params.AF_max[0]}' --soft-filter '{params.AF_max[1]}' --mode '+' \
 | bcftools filter --threads {threads} --include 'SUM(FORMAT/QSS)/SUM(FORMAT/AD) >= {params.qss[0]}' --soft-filter '{params.qss[1]}' --mode '+' \
 | bcftools filter --threads {threads} --include 'FORMAT/ALT_F1R2 > {params.strand_reads[0]} && (FORMAT/ALT_F1R2 > 0  && FORMAT/ALT_F2R1 > {params.strand_reads[0]} &&  FORMAT/REF_F1R2 > {params.strand_reads[0]} && FORMAT/REF_F2R1 > {params.strand_reads[0]})' --soft-filter '{params.strand_reads[1]}' --mode '+' \
 | bcftools filter --threads {threads} --include "INFO/SOR < {params.sor[0]}" --soft-filter '{params.sor[1]}' --mode '+' \
@@ -60,7 +58,6 @@ elif config["analysis"]["sequencing_type"] == 'wgs' and config["analysis"]["anal
         AD = [SENTIEON_CALLER.AD.tag_value, SENTIEON_CALLER.AD.filter_name],
         DP = [SENTIEON_CALLER.DP.tag_value, SENTIEON_CALLER.DP.filter_name],
         AF_min = [SENTIEON_CALLER.AF_min.tag_value, SENTIEON_CALLER.AF_min.filter_name],
-        AF_max = [SENTIEON_CALLER.AF_max.tag_value, SENTIEON_CALLER.AF_max.filter_name],
         case_name = config["analysis"]["case_id"],
       threads:
         get_threads(cluster_config, 'bcftools_quality_filter_tnscope_tumor_normal')
@@ -72,7 +69,6 @@ bcftools view -f PASS,triallelic_site {input.vcf_snv} \
 | bcftools filter --threads {threads} --include 'SUM(FORMAT/AD[0:0]+FORMAT/AD[0:1]) >= {params.DP[0]} || SUM(FORMAT/AD[1:0]+FORMAT/AD[1:1]) >= {params.DP[0]}' --soft-filter '{params.DP[1]}' --mode '+' \
 | bcftools filter --threads {threads} --include 'FORMAT/AD[0:1] >= {params.AD[0]}' --soft-filter '{params.AD[1]}' --mode '+' \
 | bcftools filter --threads {threads} --include 'FORMAT/AF[0] >= {params.AF_min[0]}' --soft-filter '{params.AF_min[1]}' --mode '+' \
-| bcftools filter --threads {threads} --include 'FORMAT/AF[0] <  {params.AF_max[0]}' --soft-filter '{params.AF_max[1]}' --mode '+' \
 | bcftools view -f PASS,triallelic_site -O z -o {output.vcf_snv_research}; 
 
 tabix -p vcf -f {output.vcf_snv_research};
@@ -94,7 +90,6 @@ if config["analysis"]["sequencing_type"] == 'targeted' and config["analysis"]["a
       AD=[VARDICT.AD.tag_value, VARDICT.AD.filter_name],
       DP=[VARDICT.DP.tag_value, VARDICT.DP.filter_name],
       AF_min=[VARDICT.AF_min.tag_value, VARDICT.AF_min.filter_name],
-      AF_max=[VARDICT.AF_max.tag_value, VARDICT.AF_max.filter_name],
       case_name = config["analysis"]["case_id"],
     threads:
       get_threads(cluster_config,'bcftools_quality_filter_vardict_tumor_only')
@@ -107,7 +102,6 @@ bcftools filter --include 'INFO/MQ >= {params.MQ[0]}' --soft-filter '{params.MQ[
 bcftools filter --include 'INFO/DP >= {params.DP[0]}' --soft-filter '{params.DP[1]}' --mode '+' | \
 bcftools filter --include 'INFO/VD >= {params.AD[0]}' --soft-filter '{params.AD[1]}' --mode '+' | \
 bcftools filter --include 'INFO/AF >= {params.AF_min[0]}' --soft-filter '{params.AF_min[1]}' --mode '+' | \
-bcftools filter --include 'INFO/AF <  {params.AF_max[0]}' --soft-filter '{params.AF_max[1]}' --mode '+' | \
 bcftools view -f PASS -o {output.vcf_filtered} -O z;
 
 tabix -p vcf -f {output.vcf_filtered};
@@ -154,7 +148,6 @@ elif config["analysis"]["sequencing_type"] == 'targeted' and config["analysis"][
       AD=[VARDICT.AD.tag_value, VARDICT.AD.filter_name],
       DP=[VARDICT.DP.tag_value, VARDICT.DP.filter_name],
       AF_min=[VARDICT.AF_min.tag_value, VARDICT.AF_min.filter_name],
-      AF_max=[VARDICT.AF_max.tag_value, VARDICT.AF_max.filter_name],
       possible_germline="balsamic_possible_germline",
       case_name = config["analysis"]["case_id"],
     threads:
@@ -168,7 +161,6 @@ bcftools filter --include 'SMPL_MIN(FMT/MQ) >= {params.MQ[0]}' --soft-filter '{p
 bcftools filter --include 'INFO/DP >= {params.DP[0]}' --soft-filter '{params.DP[1]}' --mode '+' | \
 bcftools filter --include 'INFO/VD >= {params.AD[0]}' --soft-filter '{params.AD[1]}' --mode '+' | \
 bcftools filter --include 'INFO/AF >= {params.AF_min[0]}' --soft-filter '{params.AF_min[1]}' --mode '+' | \
-bcftools filter --include 'INFO/AF <  {params.AF_max[0]}' --soft-filter '{params.AF_max[1]}' --mode '+' | \
 bcftools filter --exclude 'INFO/STATUS ~ "germline/i"' --soft-filter '{params.possible_germline}' --mode '+' | \
 bcftools view -f PASS -o {output.vcf_filtered} -O z;
 
