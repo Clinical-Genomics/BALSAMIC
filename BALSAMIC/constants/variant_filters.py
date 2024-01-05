@@ -50,6 +50,7 @@ SENTIEON_VARCALL_SETTINGS = {
         "field": "FORMAT",
     },
     "AF_min": {"tag_value": 0.05, "filter_name": "balsamic_low_af", "field": "FORMAT"},
+    "high_normal_frac": {"tag_value": 0.4, "filter_name": "high_normal_frac", "field": "FORMAT"},
     "pop_freq": {
         "tag_value": 0.001,
         "filter_name": "balsamic_high_pop_freq",
