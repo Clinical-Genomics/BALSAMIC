@@ -58,11 +58,8 @@ elif config["analysis"]["sequencing_type"] == 'wgs' and config["analysis"]["anal
         AD = [SENTIEON_CALLER.AD.tag_value, SENTIEON_CALLER.AD.filter_name],
         DP = [SENTIEON_CALLER.DP.tag_value, SENTIEON_CALLER.DP.filter_name],
         AF_min = [SENTIEON_CALLER.AF_min.tag_value, SENTIEON_CALLER.AF_min.filter_name],
-<<<<<<< HEAD
-=======
         AF_max = [SENTIEON_CALLER.AF_max.tag_value, SENTIEON_CALLER.AF_max.filter_name],
         high_normal_frac = [SENTIEON_CALLER.high_normal_frac.tag_value, SENTIEON_CALLER.high_normal_frac.filter_name],
->>>>>>> replace_alt_allele_in_normal
         case_name = config["analysis"]["case_id"],
       threads:
         get_threads(cluster_config, 'bcftools_quality_filter_tnscope_tumor_normal')
@@ -74,12 +71,9 @@ bcftools view -f PASS,triallelic_site {input.vcf_snv} \
 | bcftools filter --threads {threads} --include 'SUM(FORMAT/AD[0:0]+FORMAT/AD[0:1]) >= {params.DP[0]} || SUM(FORMAT/AD[1:0]+FORMAT/AD[1:1]) >= {params.DP[0]}' --soft-filter '{params.DP[1]}' --mode '+' \
 | bcftools filter --threads {threads} --include 'FORMAT/AD[0:1] >= {params.AD[0]}' --soft-filter '{params.AD[1]}' --mode '+' \
 | bcftools filter --threads {threads} --include 'FORMAT/AF[0] >= {params.AF_min[0]}' --soft-filter '{params.AF_min[1]}' --mode '+' \
-<<<<<<< HEAD
-=======
 | bcftools filter --threads {threads} --include 'FORMAT/AF[0] < {params.AF_max[0]}' --soft-filter '{params.AF_max[1]}' --mode '+' \
 | bcftools annotate -x FILTER/alt_allele_in_normal \
 | bcftools filter --threads {threads} --exclude '(FORMAT/AF[1] / FORMAT/AF[0]) >= {params.high_normal_frac[0]}' --soft-filter '{params.high_normal_frac[1]}' --mode '+' \
->>>>>>> replace_alt_allele_in_normal
 | bcftools view -f PASS,triallelic_site -O z -o {output.vcf_snv_research}; 
 
 tabix -p vcf -f {output.vcf_snv_research};
@@ -197,10 +191,10 @@ tabix -p vcf -f {output.vcf_filtered};
       "Quality filtering TNscope_umi tumor-normal annotated variants using bcftools for {params.case_name} "
     shell:
       """
-bcftools view {input.vcf} \
-| bcftools annotate -x FILTER/alt_allele_in_normal \
-| bcftools filter --threads {threads} --exclude '(FORMAT/AF[1] / FORMAT/AF[0]) >= {params.high_normal_frac[0]}' --soft-filter '{params.high_normal_frac[1]}' --mode '+' \
-| bcftools view -f PASS,triallelic_site -o {output.vcf_filtered} -O z;
+bcftools view {input.vcf} | \
+bcftools annotate -x FILTER/alt_allele_in_normal | \
+bcftools filter --threads {threads} --exclude '(FORMAT/AF[1] / FORMAT/AF[0]) >= {params.high_normal_frac[0]}' --soft-filter '{params.high_normal_frac[1]}' --mode '+' | \
+bcftools view -f PASS,triallelic_site -o {output.vcf_filtered} -O z;
 
 tabix -p vcf -f {output.vcf_filtered};
       """
