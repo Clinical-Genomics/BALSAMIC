@@ -190,14 +190,17 @@ tabix -p vcf -f {output.vcf_filtered};
       Path(singularity_image,config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
     params:
       case_name = config["analysis"]["case_id"],
+      high_normal_frac = [SENTIEON_CALLER.high_normal_frac.tag_value, SENTIEON_CALLER.high_normal_frac.filter_name],
     threads:
       get_threads(cluster_config,'bcftools_quality_filter_TNscope_umi_tumor_normal')
     message:
       "Quality filtering TNscope_umi tumor-normal annotated variants using bcftools for {params.case_name} "
     shell:
       """
-bcftools view {input.vcf} | \
-bcftools view -f PASS,triallelic_site -o {output.vcf_filtered} -O z;
+bcftools view {input.vcf} \
+| bcftools annotate -x FILTER/alt_allele_in_normal \
+| bcftools filter --threads {threads} --exclude '(FORMAT/AF[1] / FORMAT/AF[0]) >= {params.high_normal_frac[0]}' --soft-filter '{params.high_normal_frac[1]}' --mode '+' \
+| bcftools view -f PASS,triallelic_site -o {output.vcf_filtered} -O z;
 
 tabix -p vcf -f {output.vcf_filtered};
       """
