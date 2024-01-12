@@ -94,7 +94,7 @@ rule svdb_annotate_clinical_obs_somatic_clinical_sv:
         """
 if [[ -f "{params.clinical_sv_observations}" ]]; then
     svdb --query --bnd_distance 10000 --overlap 0.80 \
-    --in_occ Obs --out_occ Obs --in_frq Frq --out_frq Frq \
+    --in_occ Obs --out_occ clin_obs --in_frq Frq --out_frq Frq \
     --db {params.clinical_sv_observations} --query_vcf {input.vcf_sv_research} > {params.vcf_clinical_obs}
     bgzip -l 9 -c {params.vcf_clinical_obs} > {output.vcf_sv_clinical_obs};
 else

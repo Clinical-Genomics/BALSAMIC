@@ -158,22 +158,21 @@ LoqusDB germline frequencies (non-cancer cases)
 
 `BALSAMIC` adds the following annotation from database of `non-cancer clinical` samples using ``vcfanno`` for SNVs and SVDB for SVs.
 
-.. list-table:: Loqusdb Germline (non-cancer) Annotations
+.. list-table:: loqusDB germline (non-cancer) SNV annotations
    :widths: 50 150 50
    :header-rows: 1
 
-   * - VCF tag
-     - description
-     - variant type
-   * - Frq
-     - Frequency of observation of the variants from normal `non-cancer clinical` samples
+	@@ -173,13 +170,10 @@ LoqusDB germline frequencies (non-cancer cases)
      - SNV, SV
    * - Obs
      - allele counts of the variant in normal `non-cancer clinical` samples
-     - SNV, SV
+     - SNV
    * - Hom
      - allele counts of the homozygous variant in normal `non-cancer clinical` samples
      - SNV
+   * - clin_obs
+     - allele counts
+     - SV
 
 SWEGEN
 ------
