@@ -162,7 +162,11 @@ LoqusDB germline frequencies (non-cancer cases)
    :widths: 50 150 50
    :header-rows: 1
 
-	@@ -173,13 +170,10 @@ LoqusDB germline frequencies (non-cancer cases)
+   * - VCF tag
+     - description
+     - variant type
+   * - Frq
+     - Frequency of observation of the variants from normal `non-cancer clinical` samples
      - SNV, SV
    * - Obs
      - allele counts of the variant in normal `non-cancer clinical` samples
