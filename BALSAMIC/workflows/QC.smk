@@ -57,12 +57,9 @@ vcf_dir: str = Path(result_dir, "vcf").as_posix() + "/"
 qc_dir: str = Path(result_dir, "qc").as_posix() + "/"
 delivery_dir: str = Path(result_dir, "delivery").as_posix() + "/"
 
-<<<<<<< HEAD
 # Pre run parameters
 seconds_before_start: int = SLEEP_BEFORE_START
 
-=======
->>>>>>> release_v13.0.0
 # Run information
 singularity_image: str = config_model.singularity['image']
 sample_names: List[str] = config_model.get_all_sample_names()
@@ -118,15 +115,9 @@ sequence_type = config['analysis']["sequencing_type"]
 rules_to_include = []
 for workflow_type, value in SNAKEMAKE_RULES.items():
     if workflow_type in ["common", analysis_type + "_" + sequence_type]:
-<<<<<<< HEAD
-        rules_to_include.extend(value.get("misc", []) + value.get("qc", []) + value.get("align", []))
-rules_to_include = [rule for rule in rules_to_include if "umi" not in rule]
-if "snakemake_rules/quality_control/report.rule" in rules_to_include:
-    rules_to_include = [rule for rule in rules_to_include if "quality_control/report.rule" not in rule]
-=======
-        rules_to_include.extend(value.get("qc", []) + value.get("align", []))
+        rules_to_include.extend(value.get("qc", []) + value.get("align", []) + value.get("misc", []))
 rules_to_include = [rule for rule in rules_to_include if "umi" not in rule and "report" not in rule]
->>>>>>> release_v13.0.0
+
 
 # Somalier only implemented for hg38 and hg19
 if "canfam3" in config["reference"]["reference_genome"]:
