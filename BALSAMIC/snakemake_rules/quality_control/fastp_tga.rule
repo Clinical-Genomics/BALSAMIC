@@ -8,7 +8,7 @@ rule sentieon_umiextract_tga:
         fastq_r1 = lambda wildcards: config_model.get_fastq_by_fastq_pattern(wildcards.fastq_pattern, FastqName.FWD),
         fastq_r2 = lambda wildcards: config_model.get_fastq_by_fastq_pattern(wildcards.fastq_pattern, FastqName.REV)
     output:
-        ds_umi = temp(umi_dir + "{fastq_pattern}_umiextract_interleaved.fastq.gz")
+        ds_umi = temp(fastq_dir + "{fastq_pattern}_umiextract_interleaved.fastq.gz")
     benchmark:
         Path(benchmark_dir, "sentieon_umiextract_tga_{fastq_pattern}.tsv").as_posix()
     params:
@@ -40,7 +40,7 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 rule fastp_quality_trim_tga:
     """Fastq data pre-processing after extraction of UMIs."""
     input:
-        interleaved_fastq = umi_dir + "{fastq_pattern}_umiextract_interleaved.fastq.gz"
+        interleaved_fastq = fastq_dir + "{fastq_pattern}_umiextract_interleaved.fastq.gz"
     output:
         fastq_r1 = temp(fastq_dir + "{fastq_pattern}_1.fp.fastq.gz"),
         fastq_r2 = temp(fastq_dir + "{fastq_pattern}_2.fp.fastq.gz"),

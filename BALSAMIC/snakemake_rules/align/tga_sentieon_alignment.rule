@@ -1,6 +1,6 @@
 """Rules to align, mark duplicates and realign reads with Sentieon tools."""
 
-rule sentieon_align_sort:
+rule sentieon_align_sort_umireads:
     input:
         ref = config["reference"]["reference_genome"],
         fastq_r1 = Path(fastq_dir, "{fastq_pattern}_1.fp.fastq.gz").as_posix(),
@@ -12,12 +12,14 @@ rule sentieon_align_sort:
         Path(benchmark_dir, "sentieon_align_sort_{sample}_{fastq_pattern}.tsv").as_posix()
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-        header = params.common.align_header,
+        sentieon_install_dir= config["SENTIEON_INSTALL_DIR"],
         sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
         sample_id = "{sample}",
         sample_type = lambda wildcards: config_model.get_sample_type_by_name(wildcards.sample, uppercase=True),
-        fastq_pattern = "{fastq_pattern}"
+        fastq_pattern = "{fastq_pattern}",
+        sheader = params.umicommon.align_header,
+        ip_bases = params.umicommon.align_intbases
     threads:
         get_threads(cluster_config, 'sentieon_align_sort')
     message:
@@ -25,19 +27,23 @@ rule sentieon_align_sort:
         "{params.sample_type} : {params.sample_id}, {params.fastq_pattern}")
     shell:
         """
+export LD_PRELOAD={params.sentieon_install_dir}/lib/libjemalloc.so.1
+export MALLOC_CONF=lg_dirty_mult:-1
+
 mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
 export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
 
-{params.sentieon_exec} bwa mem -M \
--R '@RG\\tID:{wildcards.fastq_pattern}\\tSM:{params.sample_type}\\tPL:ILLUMINA' \
--t {threads} \
--K 50000000 \
-{input.ref} {input.fastq_r1} {input.fastq_r2} \
-| {params.sentieon_exec} util sort \
--o {output.bam_out} \
--t {threads} \
---block_size 3G \
---sam2bam -i -;
+{params.sentieon_exec} bwa mem \
+-R {params.sheader} \
+-K {params.ip_bases} \
+-t {threads} -C \
+{input.ref_fa} {input.fastq_r1} {input.fastq_r2} | \
+{params.sentieon_exec} util sort \
+-r {input.ref_fa} \
+--sam2bam \
+-o {output.align_umi} -i - ;
         """
+
+

@@ -2,6 +2,53 @@
 # coding: utf-8
 
 
+rule sentieon_dedup_consensus:
+    input:
+        bam_files = lambda wildcards: config_model.get_bam_name_per_lane(bam_dir = bam_dir, sample_name = wildcards.sample)
+    output:
+        bam = Path(bam_dir, "{sample_type}.{sample}.dedup.bam").as_posix(),
+        score = Path(bam_dir, "{sample_type}.{sample}.dedup.score").as_posix(),
+        metrics = Path(qc_dir, "{sample_type}.{sample}.dedup.metrics").as_posix()
+    benchmark:
+        Path(benchmark_dir, "sentieon_dedup_{sample_type}.{sample}.tsv").as_posix()
+    params:
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
+        sentieon_exec = config["SENTIEON_EXEC"],
+        sentieon_lic = config["SENTIEON_LICENSE"],
+        sample_id = "{sample}"
+    threads:
+        get_threads(cluster_config, 'sentieon_dedup')
+    message:
+        ("Collects read information using sentieon LocusCollector and collapse duplicate reads based on UMIs. "
+         "Current sample: {params.sample_id}")
+    shell:
+        """
+mkdir -p {params.tmpdir};
+export TMPDIR={params.tmpdir};
+export SENTIEON_TMPDIR={params.tmpdir};
+export SENTIEON_LICENSE={params.sentieon_lic};
+
+shell_bam_files=$(echo {input.bam_files} | sed 's/ / -i /g') ;
+
+{params.sentieon_exec} driver \
+-t {threads} \
+-i $shell_bam_files \
+--algo LocusCollector \
+--consensus --umi_tag XR --fun score_info \
+{output.score};
+
+{params.sentieon_exec} driver \
+-t {threads} \
+-i $shell_bam_files \
+--algo Dedup \
+--score_info {output.score} \
+--metrics {output.metrics} \
+{output.bam};
+
+sed 's/^LIBRARY/\\n## METRICS CLASS\tpicard\.sam\.DuplicationMetrics\\nLIBRARY/' -i {output.metrics}
+        """
+
+
 # NOTE: This rule is only applied to prevent VarDict from failing with error like this:
 # Critical exception occurs on region: 20:39794721-39795011, program will be stopped.
 # java.util.concurrent.CompletionException: java.lang.InternalError: a fault occurred in a recent unsafe memory access

@@ -42,8 +42,6 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
             "snakemake_rules/report/merge_pdfs.rule",
         ],
         "align": [
-            "snakemake_rules/align/sentieon_alignment.rule",
-            "snakemake_rules/align/sentieon_bam_postprocess.rule",
             "snakemake_rules/align/bam_compress.rule",
         ],
         "varcall": [
@@ -73,9 +71,10 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
             "snakemake_rules/umi/generate_AF_tables.rule",
         ],
         "align": [
+            "snakemake_rules/align/tga_sentieon_alignment",
+            "snakemake_rules/align/tga_bam_postprocess.rule",
             "snakemake_rules/umi/sentieon_umiextract.rule",
             "snakemake_rules/umi/sentieon_consensuscall.rule",
-            "snakemake_rules/align/tga_bam_postprocess.rule",
         ],
         "varcall": [
             "snakemake_rules/variant_calling/germline.rule",
@@ -105,9 +104,10 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
             "snakemake_rules/umi/generate_AF_tables.rule",
         ],
         "align": [
+            "snakemake_rules/align/tga_sentieon_alignment",
+            "snakemake_rules/align/tga_bam_postprocess.rule",
             "snakemake_rules/umi/sentieon_umiextract.rule",
             "snakemake_rules/umi/sentieon_consensuscall.rule",
-            "snakemake_rules/align/tga_bam_postprocess.rule",
         ],
         "varcall": [
             "snakemake_rules/variant_calling/germline.rule",
@@ -129,6 +129,10 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
             "snakemake_rules/quality_control/sentieon_qc_metrics.rule",
             "snakemake_rules/quality_control/picard_wgs.rule",
         ],
+        "align": [
+            "snakemake_rules/align/wgs_sentieon_alignment",
+            "snakemake_rules/align/wgs_bam_postprocess.rule",
+        ],
         "varcall": [
             "snakemake_rules/variant_calling/sentieon_germline.rule",
             "snakemake_rules/variant_calling/sentieon_split_snv_sv.rule",
@@ -146,6 +150,10 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
             "snakemake_rules/quality_control/sentieon_qc_metrics.rule",
             "snakemake_rules/quality_control/picard_wgs.rule",
             "snakemake_rules/quality_control/somalier.rule",
+        ],
+        "align": [
+            "snakemake_rules/align/wgs_sentieon_alignment",
+            "snakemake_rules/align/wgs_bam_postprocess.rule",
         ],
         "varcall": [
             "snakemake_rules/variant_calling/sentieon_germline.rule",
