@@ -6,6 +6,7 @@ from typing import Dict
 
 import snakemake
 import toml
+from BALSAMIC.constants.paths import SCRIPT_DIR
 
 from BALSAMIC.constants.analysis import (
     AnalysisType,
@@ -144,15 +145,9 @@ def get_result_dir(config):
     return config["analysis"]["result"]
 
 
-def get_script_path(script_name: str):
-    """
-    Retrieves script path where name is matching {{script_name}}.
-    """
-
-    p = Path(__file__).parents[1]
-    script_path = str(Path(p, "assets/scripts", script_name))
-
-    return script_path
+def get_script_path(script_name: str) -> str:
+    """Return the path to the script matching the file name."""
+    return Path(SCRIPT_DIR, script_name).as_posix()
 
 
 def get_threads(cluster_config, rule_name="__default__"):

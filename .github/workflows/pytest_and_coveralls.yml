@@ -27,6 +27,8 @@ jobs:
         with:
           activate-environment: balsamic
           environment-file: BALSAMIC/conda/balsamic.yaml
+      - name: Install the HTML to PDF renderer
+        run: sudo apt-get update && sudo apt-get install -y wkhtmltopdf
       # Install BALSAMIC
       - name: Install BALSAMIC
         id: install_balsamic

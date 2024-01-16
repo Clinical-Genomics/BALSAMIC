@@ -24,6 +24,6 @@ rule concatenate:
         "Sample {params.sample} FASTQ concatenation"
     shell:
         """
-        cat {input.fastqs_fwd} > {output.concat_fwd}
-        cat {input.fastqs_rev} > {output.concat_rev}
+cat {input.fastqs_fwd} > {output.concat_fwd}
+cat {input.fastqs_rev} > {output.concat_rev}
         """

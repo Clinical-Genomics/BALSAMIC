@@ -30,11 +30,16 @@ canfam_cache_rules: List[str] = common_cache_rules + [
 
 SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
     "common": {
+        "misc": ["snakemake_rules/misc/sleep.rule"],
         "qc": [
             "snakemake_rules/quality_control/fastqc.rule",
             "snakemake_rules/quality_control/multiqc.rule",
             "snakemake_rules/quality_control/qc_metrics.rule",
             "snakemake_rules/quality_control/samtools_qc.rule",
+        ],
+        "report": [
+            "snakemake_rules/report/generate_pdf.rule",
+            "snakemake_rules/report/merge_pdfs.rule",
         ],
         "align": [
             "snakemake_rules/align/sentieon_alignment.rule",
@@ -123,7 +128,6 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
             "snakemake_rules/quality_control/fastp_wgs.rule",
             "snakemake_rules/quality_control/sentieon_qc_metrics.rule",
             "snakemake_rules/quality_control/picard_wgs.rule",
-            "snakemake_rules/quality_control/report.rule",
         ],
         "varcall": [
             "snakemake_rules/variant_calling/sentieon_germline.rule",
@@ -141,7 +145,6 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
             "snakemake_rules/quality_control/fastp_wgs.rule",
             "snakemake_rules/quality_control/sentieon_qc_metrics.rule",
             "snakemake_rules/quality_control/picard_wgs.rule",
-            "snakemake_rules/quality_control/report.rule",
             "snakemake_rules/quality_control/somalier.rule",
         ],
         "varcall": [
@@ -166,7 +169,6 @@ DELIVERY_RULES: List[str] = [
     # QC
     "multiqc",
     "collect_custom_qc_metrics",
-    "cnv_report",
     # Alignment
     "mergeBam_tumor_umiconsensus",
     "mergeBam_normal_umiconsensus",
@@ -204,6 +206,7 @@ DELIVERY_RULES: List[str] = [
     "delly_cnv_tumor_only",
     "delly_cnv_tumor_normal",
     "ascat_tumor_normal",
+    "cnvpytor_tumor_only",
     "vcf2cytosure_convert_tumor_only",
     "vcf2cytosure_convert_tumor_normal",
     "cnvkit_segment_CNV_research",
@@ -212,4 +215,6 @@ DELIVERY_RULES: List[str] = [
     "finalize_gens_outputfiles",
     # TMB
     "tmb_calculation",
+    # CNV report
+    "merge_cnv_pdf_reports",
 ]

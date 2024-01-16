@@ -4,7 +4,8 @@
 rule sentieon_umiextract_tga:
     """Extract UMIs into tags in read header."""
     input:
-        fastq_r1 =  lambda wildcards: config_model.get_fastq_by_fastq_pattern(wildcards.fastq_pattern, FastqName.FWD),
+        wake_up = result_dir + "start_analysis",
+        fastq_r1 = lambda wildcards: config_model.get_fastq_by_fastq_pattern(wildcards.fastq_pattern, FastqName.FWD),
         fastq_r2 = lambda wildcards: config_model.get_fastq_by_fastq_pattern(wildcards.fastq_pattern, FastqName.REV)
     output:
         ds_umi = temp(umi_dir + "{fastq_pattern}_umiextract_interleaved.fastq.gz")
