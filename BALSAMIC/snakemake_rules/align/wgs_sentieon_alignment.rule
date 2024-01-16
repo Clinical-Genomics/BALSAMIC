@@ -31,7 +31,7 @@ export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
 
 {params.sentieon_exec} bwa mem -M \
--R {params.sheader} 
+-R {params.header} 
  '@RG\\tID:{wildcards.fastq_pattern}\\tSM:{params.sample_type}\\tPL:ILLUMINA' \
 -t {threads} \
 -K 50000000 \
