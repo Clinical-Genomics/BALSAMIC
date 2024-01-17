@@ -62,9 +62,6 @@ rule sentieon_bwa_umiextract:
         "Aligning UMI extracted reads and sorting using sentieon bwa-mem for {params.sample_id}"
     shell:
         """
-export LD_PRELOAD={params.sentieon_install_dir}/lib/libjemalloc.so.1
-export MALLOC_CONF=lg_dirty_mult:-1
-
 mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
 export SENTIEON_TMPDIR={params.tmpdir};
