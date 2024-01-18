@@ -113,7 +113,6 @@ SLEEP_BEFORE_START = 200
 WORKFLOW_PARAMS = {
     "common": {
         "pcr_model": "NONE",
-        "align_header": "'@RG\\tID:{params.fastq_pattern}\\tSM:{params.sample_type}\\tPL:ILLUMINA'",
         "min_mapq": "20",
         "picard_fixmate": " ".join(
             [
@@ -158,7 +157,6 @@ WORKFLOW_PARAMS = {
         "vep_filters": "--compress_output bgzip --vcf --everything --hgvsg --allow_non_variant --dont_skip --buffer_size 30000 --max_sv_size 249250621 --format vcf --offline --variant_class --merged --cache --verbose --force_overwrite"
     },
     "umicommon": {
-        "align_header": "'@RG\\tID:{params.fastq_pattern}\\tSM:{params.sample_type}\\tLB:TargetPanel\\tPL:ILLUMINA'",
         "align_intbases": 1000000,
         "filter_tumor_af": 0.0005,
     },

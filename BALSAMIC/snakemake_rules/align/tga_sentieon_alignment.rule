@@ -18,7 +18,6 @@ rule sentieon_align_sort_umireads:
         sample_id = "{sample}",
         sample_type = lambda wildcards: config_model.get_sample_type_by_name(wildcards.sample, uppercase=True),
         fastq_pattern = "{fastq_pattern}",
-        align_header = params.umicommon.align_header,
         ip_bases = params.umicommon.align_intbases
     threads:
         get_threads(cluster_config, 'sentieon_align_sort')
@@ -33,7 +32,7 @@ export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
 
 {params.sentieon_exec} bwa mem \
--R {params.align_header} \
+-R '@RG\\tID:{params.fastq_pattern}\\tSM:{params.sample_type}\\tLB:TargetPanel\\tPL:ILLUMINA' \
 -K {params.ip_bases} \
 -t {threads} -C \
 {input.ref} {input.fastq_r1} {input.fastq_r2} | \
