@@ -4,6 +4,7 @@
 
 rule sentieon_dedup_consensus:
     input:
+        ref = config["reference"]["reference_genome"],
         bam_files = lambda wildcards: config_model.get_bam_name_per_lane(bam_dir = bam_dir, sample_name = wildcards.sample)
     output:
         bam = Path(bam_dir, "{sample_type}.{sample}.dedup.bam").as_posix(),
@@ -39,6 +40,7 @@ shell_bam_files=$(echo {input.bam_files} | sed 's/ / -i /g') ;
 
 {params.sentieon_exec} driver \
 -t {threads} \
+-r {input.ref} \
 -i $shell_bam_files \
 --algo Dedup \
 --score_info {output.score} \
