@@ -30,6 +30,7 @@ canfam_cache_rules: List[str] = common_cache_rules + [
 
 SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
     "common": {
+        "misc": ["snakemake_rules/misc/sleep.rule"],
         "qc": [
             "snakemake_rules/quality_control/fastqc.rule",
             "snakemake_rules/quality_control/multiqc.rule",
@@ -42,6 +43,7 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
         ],
         "align": [
             "snakemake_rules/align/sentieon_alignment.rule",
+            "snakemake_rules/align/sentieon_bam_postprocess.rule",
             "snakemake_rules/align/bam_compress.rule",
         ],
         "varcall": [
@@ -73,7 +75,7 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
         "align": [
             "snakemake_rules/umi/sentieon_umiextract.rule",
             "snakemake_rules/umi/sentieon_consensuscall.rule",
-            "snakemake_rules/align/postprocess_bam.rule",
+            "snakemake_rules/align/tga_bam_postprocess.rule",
         ],
         "varcall": [
             "snakemake_rules/variant_calling/germline.rule",
@@ -105,7 +107,7 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
         "align": [
             "snakemake_rules/umi/sentieon_umiextract.rule",
             "snakemake_rules/umi/sentieon_consensuscall.rule",
-            "snakemake_rules/align/postprocess_bam.rule",
+            "snakemake_rules/align/tga_bam_postprocess.rule",
         ],
         "varcall": [
             "snakemake_rules/variant_calling/germline.rule",

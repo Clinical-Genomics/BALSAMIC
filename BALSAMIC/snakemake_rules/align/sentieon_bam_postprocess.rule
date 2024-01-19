@@ -1,0 +1,85 @@
+"""Rules to mark duplicates and realign reads with Sentieon tools."""
+
+rule sentieon_dedup:
+    input:
+        bam_files = lambda wildcards: config_model.get_bam_name_per_lane(bam_dir = bam_dir, sample_name = wildcards.sample)
+    output:
+        bam = Path(bam_dir, "{sample_type}.{sample}.dedup.bam").as_posix(),
+        score = Path(bam_dir, "{sample_type}.{sample}.dedup.score").as_posix(),
+        metrics = Path(qc_dir, "{sample_type}.{sample}.dedup.metrics").as_posix()
+    benchmark:
+        Path(benchmark_dir, "sentieon_dedup_{sample_type}.{sample}.tsv").as_posix()
+    params:
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
+        sentieon_exec = config["SENTIEON_EXEC"],
+        sentieon_lic = config["SENTIEON_LICENSE"],
+        sample_id = "{sample}"
+    threads:
+        get_threads(cluster_config, 'sentieon_dedup')
+    message:
+        ("Collects read information using sentieon LocusCollector and mark duplicated reads. "
+         "Current sample: {params.sample_id}")
+    shell:
+        """
+mkdir -p {params.tmpdir};
+export TMPDIR={params.tmpdir};
+export SENTIEON_TMPDIR={params.tmpdir};
+export SENTIEON_LICENSE={params.sentieon_lic};
+
+shell_bam_files=$(echo {input.bam_files} | sed 's/ / -i /g') ;
+
+{params.sentieon_exec} driver \
+-t {threads} \
+-i $shell_bam_files \
+--algo LocusCollector \
+--fun score_info \
+{output.score};
+
+{params.sentieon_exec} driver \
+-t {threads} \
+-i $shell_bam_files \
+--algo Dedup \
+--score_info {output.score} \
+--metrics {output.metrics} \
+{output.bam};
+
+sed 's/^LIBRARY/\\n## METRICS CLASS\tpicard\.sam\.DuplicationMetrics\\nLIBRARY/' -i {output.metrics}
+        """
+
+
+rule sentieon_realign:
+    input:
+        ref = config["reference"]["reference_genome"],
+        mills = config["reference"]["mills_1kg"],
+        bam = Path(bam_dir, "{sample_type}.{sample}.dedup.bam").as_posix(),
+        indel_1kg = config["reference"]["known_indel_1kg"]
+    output:
+        bam = Path(bam_dir, "{sample_type}.{sample}.dedup.realign.bam").as_posix()
+    benchmark:
+        Path(benchmark_dir, "sentieon_realign_{sample_type}.{sample}.tsv").as_posix()
+    params:
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
+         sentieon_exec = config["SENTIEON_EXEC"],
+        sentieon_lic = config["SENTIEON_LICENSE"],
+        sample_id = "{sample}"
+    threads:
+        get_threads(cluster_config, 'sentieon_realign')
+    message:
+        "INDEL realignment using sentieon realigner for sample: {params.sample_id}"
+    shell:
+        """
+mkdir -p {params.tmpdir};
+export TMPDIR={params.tmpdir};
+export SENTIEON_TMPDIR={params.tmpdir};
+export SENTIEON_LICENSE={params.sentieon_lic};
+
+{params.sentieon_exec} driver \
+-r {input.ref} \
+-t {threads} \
+-i {input.bam} \
+--algo Realigner \
+-k {input.mills} \
+-k {input.indel_1kg} \
+{output}; 
+        """
+
