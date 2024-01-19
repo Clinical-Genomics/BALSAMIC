@@ -1,8 +1,8 @@
 name: Assessment
-description: An assessment for <MTP>
+description: An assessment for BALSAMIC
 title: "[Assessment] <title>"
 labels: ["Assessment"]
-projects: ["Clinical-Genomics/XXX"]
+projects: ["Clinical-Genomics/46"]
 body:
 - type: textarea
   attributes:
