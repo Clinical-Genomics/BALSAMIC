@@ -1,37 +1,29 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
 
-# Following rule will take input fastq files, align them using bwa mem, and convert the output to sam format
-
-
 rule fastqc:
+    """Perform quality control checks on raw sequence data."""
     input:
-        read1 = fastq_dir + "{sample}_1.fastq.gz",
-        read2 = fastq_dir + "{sample}_2.fastq.gz",
+        fastq = input_fastq_dir + "{fastq_file_names}.fastq.gz"
     output:
-        read1 = fastqc_dir + "{sample}_1_fastqc.zip",
-        read2 = fastqc_dir + "{sample}_2_fastqc.zip"
+        fastqc_zip = fastqc_dir + "{fastq_file_names}_fastqc.zip"
     benchmark:
-        Path(benchmark_dir, "fastqc_{sample}.tsv").as_posix()
+        Path(benchmark_dir, "fastqc_{fastq_file_names}.tsv").as_posix()
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("fastqc") + ".sif").as_posix()
     params:
         fastqc_dir = fastqc_dir,
-        sample = "{sample}",
-        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
+        fastq_file_name = "{fastq_file_names}",
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir)
     threads: get_threads(cluster_config, "fastqc")
     message:
-        "Running FastQC on {params.sample}"
+        "Running FastQC on {params.fastq_file_name}"
     shell:
         """
 mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
     
-fastqc --threads {threads} {input.read1} \
---dir {params.tmpdir} \
---outdir {params.fastqc_dir};
-    
-fastqc --threads {threads} {input.read2} \
+fastqc --threads {threads} {input.fastq} \
 --dir {params.tmpdir} \
 --outdir {params.fastqc_dir};
         """

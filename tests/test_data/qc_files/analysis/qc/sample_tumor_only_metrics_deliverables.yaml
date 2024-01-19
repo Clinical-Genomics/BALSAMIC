@@ -1,34 +1,34 @@
 - header: null
-  id: tumor
-  input: concatenated_tumor_XXXXXX_R.sorted.mrkdup.hsmetric
+  id: ACC1
+  input: ACC1.dedup.realign.hsmetric
   name: PCT_OFF_BAIT
   step: multiqc_picard_HsMetrics
   value: 0.364546
   condition: null
 - header: null
-  id: tumor
-  input: concatenated_tumor_XXXXXX_R.sorted.mrkdup.hsmetric
+  id: ACC1
+  input: ACC1.dedup.realign.hsmetric
   name: MEAN_TARGET_COVERAGE
   step: multiqc_picard_HsMetrics
   value: 2314.698853
   condition: null
 - header: null
-  id: tumor
-  input: concatenated_tumor_XXXXXX_R.sorted.mrkdup.hsmetric
+  id: ACC1
+  input: ACC1.dedup.realign.hsmetric
   name: MEDIAN_TARGET_COVERAGE
   step: multiqc_picard_HsMetrics
   value: 2393.0
   condition: null
 - header: null
-  id: tumor
-  input: concatenated_tumor_XXXXXX_R.sorted.mrkdup.hsmetric
+  id: ACC1
+  input: ACC1.dedup.realign.hsmetric
   name: FOLD_80_BASE_PENALTY
   step: multiqc_picard_HsMetrics
   value: 1.359189
   condition: null
 - header: null
-  id: tumor
-  input: concatenated_tumor_XXXXXX_R.sorted.mrkdup.hsmetric
+  id: ACC1
+  input: ACC1.dedup.realign.hsmetric
   name: GC_DROPOUT
   step: multiqc_picard_HsMetrics
   value: 0.027402
@@ -36,29 +36,29 @@
     norm: lt
     threshold: 1.0
 - header: null
-  id: tumor
-  input: concatenated_tumor_XXXXXX_R.sorted.mrkdup.hsmetric
+  id: ACC1
+  input: ACC1.dedup.realign.hsmetric
   name: PCT_TARGET_BASES_50X
   step: multiqc_picard_HsMetrics
   value: 1.0
   condition: null
 - header: null
-  id: tumor
-  input: concatenated_tumor_XXXXXX_R.sorted.mrkdup.hsmetric
+  id: ACC1
+  input: ACC1.dedup.realign.hsmetric
   name: PCT_TARGET_BASES_100X
   step: multiqc_picard_HsMetrics
   value: 0.999987
   condition: null
 - header: null
-  id: tumor
-  input: concatenated_tumor_XXXXXX_R.sorted.mrkdup.hsmetric
+  id: ACC1
+  input: ACC1.dedup.realign.hsmetric
   name: PCT_TARGET_BASES_250X
   step: multiqc_picard_HsMetrics
   value: 0.998445
   condition: null
 - header: null
-  id: tumor
-  input: concatenated_tumor_XXXXXX_R.sorted.mrkdup.hsmetric
+  id: ACC1
+  input: ACC1.dedup.realign.hsmetric
   name: PCT_TARGET_BASES_500X
   step: multiqc_picard_HsMetrics
   value: 0.996675
@@ -66,22 +66,22 @@
     norm: gt
     threshold: 0.9
 - header: null
-  id: tumor
-  input: concatenated_tumor_XXXXXX_R.sorted.mrkdup.hsmetric
+  id: ACC1
+  input: ACC1.dedup.realign.hsmetric
   name: PCT_TARGET_BASES_1000X
   step: multiqc_picard_HsMetrics
   value: 0.992466
   condition: null
 - header: null
-  id: tumor
-  input: concatenated_tumor_XXXXXX_R.sorted.insertsizemetric
+  id: ACC1
+  input: ACC1.dedup.realign.insertsizemetric
   name: MEAN_INSERT_SIZE
   step: multiqc_picard_insertSize
   value: 201.813054
   condition: null
 - header: null
-  id: tumor
-  input: concatenated_tumor_XXXXXX_R.sorted.mrkdup.txt
+  id: ACC1
+  input: tumor.ACC1.dedup.metrics
   name: PERCENT_DUPLICATION
   step: multiqc_picard_dups
   value: 0.391429

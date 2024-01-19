@@ -1,3 +1,110 @@
+[13.0.0]
+-------
+
+Added:
+^^^^^^
+* Fastq concatenation https://github.com/Clinical-Genomics/BALSAMIC/pull/1069
+* `CADD` SNV references https://github.com/Clinical-Genomics/BALSAMIC/pull/1126
+* `CADD` SNV annotation https://github.com/Clinical-Genomics/BALSAMIC/pull/1150
+* Samtools `stats`, `flagstat`, `idxstat` to WGS workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1176
+* Functionality for dynamically assigning fastq-info to sample dict in config from input fastq-dir https://github.com/Clinical-Genomics/BALSAMIC/pull/1176
+* Annotate SNVs with cancer germline SNV observations from Loqusdb https://github.com/Clinical-Genomics/BALSAMIC/pull/1178
+* Annotate SNVs with somatic SNV observations from Loqusdb https://github.com/Clinical-Genomics/BALSAMIC/pull/1187
+* Tests for Annotation with Cancer germline, somatic and clinical observations, and swegen frequencies https://github/Clinical-Genomics/BALSAMIC/pull/1190
+* Annotate SVs with somatic SV observations from Loqusdb https://github.com/Clinical-Genomics/BALSAMIC/pull/1194
+* Support singularity bind paths with different destination directories https://github/Clinical-Genomics/BALSAMIC/pull/1211
+* Added `--rerun-trigger mtime` option to Snakemake command https://github.com/Clinical-Genomics/BALSAMIC/pull/1217
+* `CADD` container https://github.com/Clinical-Genomics/BALSAMIC/pull/1222
+* Container ettiquette to ReadtheDocs https://github.com/Clinical-Genomics/BALSAMIC/pull/1232
+* `htslib` (samtools, bcftools tabix) container https://github.com/Clinical-Genomics/BALSAMIC/pull/1234
+* Release version support for cache generation https://github.com/Clinical-Genomics/BALSAMIC/pull/1231
+* `CADD` scores for INDELs https://github.com/Clinical-Genomics/BALSAMIC/pull/1238
+* `CADD` reference to tests https://githuc.com/Clinical-Genomics/BALSAMIC/pull/1241
+* Add cache version option to config case https://github.com/Clinical-Genomics/BALSAMIC/pull/1244
+* `cnvkit` container https://github.com/Clinical-Genomics/BALSAMIC/pull/1252
+* `PureCN` container https://github.com/Clinical-Genomics/BALSAMIC/pull/1255
+* `GATK` container https://github.com/Clinical-Genomics/BALSAMIC/pull/1266
+* Resolved FASTQ paths to sample dictionary (balsamic logging) https://github.com/Clinical-Genomics/BALSAMIC/pull/1275
+* Picard HsMetrics and CollectGcBiasMetrics for WGS https://github.com/Clinical-Genomics/BALSAMIC/pull/1288
+* `LOH` to TGA workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1278
+* CNVs from PureCN to TGA workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1278
+* Command-line arguments and rules for creation of GENS files https://github.com/Clinical-Genomics/BALSAMIC/pull/1279
+* Somatic and germline Loqusdb annotation to ReadtheDocs https://github.com/Clinical-Genomics/BALSAMIC/pull/1317
+* Postprocess step before VarDict in TGA https://github.com/Clinical-Genomics/BALSAMIC/pull/1332
+* CNV report for TGA workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1339
+* `wkhtmltopdf` to system requirements https://github.com/Clinical-Genomics/BALSAMIC/pull/1339
+* Store WGS CNV report plots https://github.com/Clinical-Genomics/BALSAMIC/pull/1347
+
+Changed:
+^^^^^^^^
+* Changed CN header field in cnvpytor in cnvpytor_tumor_only to be Float instead of Integer https://github.com/Clinical-Genomics/BALSAMIC/pull/1182
+* Changed samples in case_config.json from being a dict to a list of dicts  https://github.com/Clinical-Genomics/BALSAMIC/pull/1176
+* Updated snakemake version to 7.25.0 https://github.com/Clinical-Genomics/BALSAMIC/pull/1099
+* Updated cryptography version to 41.0.1 https://github.com/Clinical-Genomics/BALSAMIC/pull/1173
+* Refactor bam and fastq inputs in snakemake to call pydantic model functions https://github.com/Clinical-Genomics/BALSAMIC/pull/1176
+* Standardised alignment workflows to WGS-workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1176
+* Implemented parallel trimming and alignment in all workflows per lane https://github.com/Clinical-Genomics/BALSAMIC/pull/1176
+* All bam-QC tools take the final dedup.realign bamfile as input https://github.com/Clinical-Genomics/BALSAMIC/pull/1176
+* Validation of pydantic models done both during config and run https://github.com/Clinical-Genomics/BALSAMIC/pull/1176
+* Refactored fastp rules, and changed order of UMI-trimming and quality trimming https://github.com/Clinical-Genomics/BALSAMIC/pull/1176
+* Fix pydantic version (<2.0) https://github.com/Clinical-Genomics/BALSAMIC/pull/1191
+* Refactor constants https://github.com/Clinical-Genomics/BALSAMIC/pull/1174
+* Move models to their own folder https://github.com/Clinical-Genomics/BALSAMIC/pull/1176
+* Balsamic init workflow refactoring https://github.com/Clinical-Genomics/BALSAMIC/pull/1188
+* Updated cryptography version to 41.0.2 https://github.com/Clinical-Genomics/BALSAMIC/pull/1205
+* Refactor snakemake executable command generation https://github/Clinical-Genomics/BALSAMIC/pull/1211
+* Updated Python version to 3.11 and its dependencies https://github.com/Clinical-Genomics/BALSAMIC/pull/1216
+* Tools versions in doc https:/github.com/Clinical-Genomics/BALSAMIC/pull/1239
+* Reuse common Balsamic CLI options https://github.com/Clinical-Genomics/BALSAMIC/pull/1242
+* Update `reference.json` file to use relative paths https://github.com/Clinical-Genomics/BALSAMIC/pull/1251
+* Update pydantic to v2 while maintaining support for v1 models https://github.com/Clinical-Genomics/BALSAMIC/pull/1253
+* `PCT_PF_READS_IMPROPER_PAIRS` QC threshold lowered to 5% https://github.com/Clinical-Genomics/BALSAMIC/issues/1265
+* Migrate Metrics models to pydantic v2 https://github.com/Clinical-Genomics/BALSAMIC/pull/1270
+* Migrate Snakemake models to pydantic v2 https://github.com/Clinical-Genomics/BALSAMIC/pull/1268
+* Migrate Cache models to pydantic v2 https://github.com/Clinical-Genomics/BALSAMIC/pull/1274
+* Made BALSAMIC compatible with multiple PON creation workflows https://github.com/Clinical-Genomics/BALSAMIC/pull/1279
+* Use StrEnum from python enum https://github.com/Clinical-Genomics/BALSAMIC/pull/1303
+* Renamed final cram bamfile to format `<tumor/normal>.<LIMS_ID>.cram` https://github.com/Clinical-Genomics/BALSAMIC/pull/1307
+* Updated snakemake version to 7.32.4 https://github.com/Clinical-Genomics/BALSAMIC/pull/1308
+* Migrate analysis models to pydantic v2 https://github.com/Clinical-Genomics/BALSAMIC/pull/1306
+* Split analysis model into config and params models https://github.com/Clinical-Genomics/BALSAMIC/pull/1306
+* Renamed name in sample column of final clincial vcfs https://github.com/Clinical-Genomics/BALSAMIC/pull/1310
+* Update Gens HK tags https://github.com/Clinical-Genomics/BALSAMIC/pull/1319
+* Increased memory and threads for VarDict https://github.com/Clinical-Genomics/BALSAMIC/pull/1332
+* Updated ReadtheDocs with GENS and structural pipeline changes https://github.com/Clinical-Genomics/BALSAMIC/pull/1327
+* Migrate WGS CNV report generation to pypdf & pdfkit https://github.com/Clinical-Genomics/BALSAMIC/pull/1346
+
+Fixed:
+^^^^^^
+* vcf2cytosure container https://github.com/Clinical-Genomics/BALSAMIC/pull/1159
+* Link external fastqs to case folder & create case directory https://github.com/Clinical-Genomics/BALSAMIC/pull/1195
+* vcf2cytosure container missing constants https://github.com/Clinical-Genomics/BALSAMIC/pull/1198
+* Bash commands in vep_somatic_clinical_snv https://github.com/Clinical-Genomics/BALSAMIC/pull/1200
+* Fix SVDB annotation intermediate rule https://github.com/Clinical-Genomics/BALSAMIC/pull/1218
+* Broken documentation links https://github.com/Clinical-Genomics/BALSAMIC/pull/1226
+* Updated contributors in main README https://github.com/Clinical-Genomics/BALSAMIC/pull/1237
+* CNVpytor container https://github.com/Clinical-Genomics/BALSAMIC/pull/1246
+* Restored balsamic container in UMI concatenation rule https://github.com/Clinical-Genomics/BALSAMIC/pull/1261
+* CNVpytor container, fixing numpy version https://github.com/Clinical-Genomics/BALSAMIC/pull/1273
+* QC workflow store https://github.com/Clinical-Genomics/BALSAMIC/pull/1295
+* MultiQC rule missing input files https://github.com/Clinical-Genomics/BALSAMIC/pull/1321
+* `gens_preprocessing` rule missing python directive https://github.com/Clinical-Genomics/BALSAMIC/pull/1322
+* CADD annotations container path and code smells https://github.com/Clinical-Genomics/BALSAMIC/pull/1323
+* Sonarcloud reported issues https://github.com/Clinical-Genomics/BALSAMIC/pull/1348
+* Loqusdb SV annotation somatic fields https://github.com/Clinical-Genomics/BALSAMIC/pull/1354
+
+Removed:
+^^^^^^^^
+* Config folder https://github.com/Clinical-Genomics/BALSAMIC/pull/1175
+* Quality trimming of fastqs for UMI workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1176
+* Balsamic container https://github.com/Clinical-Genomics/BALSAMIC/pull/1230
+* Plugin CLI https://github.com/Clinical-Genomics/BALSAMIC/pull/1245
+* Realignment step for TGA workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1272
+* Archived/outdated workflows and scripts https://github.com/Clinical-Genomics/BALSAMIC/pull/1296
+* Sed command to convert CNVpytor integer to float, deprecated by updated CNVpytor version https://github.com/Clinical-Genomics/BALSAMIC/pull/1310
+* Removed max AF 1 filter from bcftools https://github.com/Clinical-Genomics/BALSAMIC/pull/1338
+* Extra samtools sort command from WGS cases https://github.com/Clinical-Genomics/BALSAMIC/pull/1334
+
 [12.0.2]
 --------
 

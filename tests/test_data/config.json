@@ -1,85 +1,377 @@
 {
     "QC": {
-        "picard_rmdup": "TRUE",
-        "adapter":
-        "AATGATACGGCGACCACCGAGATCTACACTCTTTCCCTACACGACGCTCTTCCGATCT",
-        "min_seq_length": "25"
+        "picard_rmdup": false,
+        "adapter": "AATGATACGGCGACCACCGAGATCTACACTCTTTCCCTACACGACGCTCTTCCGATCT",
+        "quality_trim": true,
+        "adapter_trim": true,
+        "umi_trim": true,
+        "min_seq_length": "25",
+        "umi_trim_length": "5",
+        "n_base_limit": "50"
     },
     "vcf": {
-        "manta": {
-            "default": [
-                "diploidSV.vcf.gz", "somaticSV.vcf.gz",
-                "candidateSV.vcf.gz", "candidateSmallIndels.vcf.gz"
-            ],
-            "merged": "manta.vcf.gz",
+        "vardict": {
             "mutation": "somatic",
-            "type": "SV"
+            "mutation_type": "SNV",
+            "analysis_type": [
+                "paired",
+                "single"
+            ],
+            "sequencing_type": [
+                "targeted"
+            ],
+            "workflow_solution": [
+                "BALSAMIC"
+            ]
+        },
+        "tnscope": {
+            "mutation": "somatic",
+            "mutation_type": "SNV",
+            "analysis_type": [
+                "paired",
+                "single"
+            ],
+            "sequencing_type": [
+                "wgs"
+            ],
+            "workflow_solution": [
+                "Sentieon"
+            ]
+        },
+        "dnascope": {
+            "mutation": "germline",
+            "mutation_type": "SNV",
+            "analysis_type": [
+                "paired",
+                "single"
+            ],
+            "sequencing_type": [
+                "targeted",
+                "wgs"
+            ],
+            "workflow_solution": [
+                "Sentieon"
+            ]
+        },
+        "tnscope_umi": {
+            "mutation": "somatic",
+            "mutation_type": "SNV",
+            "analysis_type": [
+                "single",
+                "paired"
+            ],
+            "sequencing_type": [
+                "targeted"
+            ],
+            "workflow_solution": [
+                "Sentieon_umi"
+            ]
         },
         "manta_germline": {
-            "default": [
-                "diploidSV.vcf.gz", "candidateSV.vcf.gz",
-                "candidateSmallIndels.vcf.gz"
-            ],
             "mutation": "germline",
-            "merged": "manta_germline.vcf.gz",
-            "type": "SV"
+            "mutation_type": "SV",
+            "analysis_type": [
+                "paired",
+                "single"
+            ],
+            "sequencing_type": [
+                "targeted",
+                "wgs"
+            ],
+            "workflow_solution": [
+                "BALSAMIC"
+            ]
         },
-        "mutect": {
-            "default": "mutect.vcf.gz",
+        "manta": {
             "mutation": "somatic",
-            "merged": "mutect.vcf.gz",
-            "type": "SNV"
+            "mutation_type": "SV",
+            "analysis_type": [
+                "paired",
+                "single"
+            ],
+            "sequencing_type": [
+                "targeted",
+                "wgs"
+            ],
+            "workflow_solution": [
+                "BALSAMIC"
+            ]
         },
-        "vardict": {
-            "default": "vardict.vcf.gz",
+        "dellysv": {
             "mutation": "somatic",
-            "merged": "vardict.vcf.gz",
-            "type": "SNV"
+            "mutation_type": "SV",
+            "analysis_type": [
+                "paired",
+                "single"
+            ],
+            "sequencing_type": [
+                "targeted",
+                "wgs"
+            ],
+            "workflow_solution": [
+                "BALSAMIC"
+            ]
+        },
+        "cnvkit": {
+            "mutation": "somatic",
+            "mutation_type": "CNV",
+            "analysis_type": [
+                "paired",
+                "single"
+            ],
+            "sequencing_type": [
+                "targeted"
+            ],
+            "workflow_solution": [
+                "BALSAMIC"
+            ]
+        },
+        "ascat": {
+            "mutation": "somatic",
+            "mutation_type": "CNV",
+            "analysis_type": [
+                "paired"
+            ],
+            "sequencing_type": [
+                "wgs"
+            ],
+            "workflow_solution": [
+                "BALSAMIC"
+            ]
+        },
+        "dellycnv": {
+            "mutation": "somatic",
+            "mutation_type": "CNV",
+            "analysis_type": [
+                "single",
+                "paired"
+            ],
+            "sequencing_type": [
+                "targeted",
+                "wgs"
+            ],
+            "workflow_solution": [
+                "BALSAMIC"
+            ]
+        },
+        "tiddit": {
+            "mutation": "somatic",
+            "mutation_type": "SV",
+            "analysis_type": [
+                "single",
+                "paired"
+            ],
+            "sequencing_type": [
+                "wgs"
+            ],
+            "workflow_solution": [
+                "BALSAMIC"
+            ]
+        },
+        "cnvpytor": {
+            "mutation": "somatic",
+            "mutation_type": "CNV",
+            "analysis_type": [
+                "single"
+            ],
+            "sequencing_type": [
+                "wgs"
+            ],
+            "workflow_solution": [
+                "BALSAMIC"
+            ]
+        },
+        "svdb": {
+            "mutation": "somatic",
+            "mutation_type": "SV",
+            "analysis_type": [
+                "paired",
+                "single"
+            ],
+            "sequencing_type": [
+                "targeted",
+                "wgs"
+            ],
+            "workflow_solution": [
+                "BALSAMIC"
+            ]
         }
     },
     "analysis": {
         "case_id": "id1",
         "analysis_type": "paired",
+        "gender": "male",
         "sequencing_type": "targeted",
+        "analysis_workflow": "balsamic",
         "analysis_dir": "tests/test_data/",
-        "fastq_path": "tests/test_data/fastq/",
-        "script": "tests/test_data/id1/scripts/",
-        "log": "tests/test_data/id1/logs/",
-        "result": "tests/test_data/id1/analysis/",
+        "fastq_path": "tests/test_data/fastq_lanes/",
+        "script": "placeholder/scripts/",
+        "log": "placeholder/logs/",
+        "result": "placeholder/analysis/",
+        "benchmark": "placeholder/benchmarks/",
         "config_creation_date": "yyyy-mm-dd xx",
-        "BALSAMIC_version": "2.9.8",
-        "dag": "tests/test_data/id1_analysis.json_BALSAMIC_2.9.8_graph.pdf"
+        "BALSAMIC_version": "12.0.2",
+        "dag": "tests/test_data/id1_analysis.json_BALSAMIC_12.0.2_graph.pdf"
     },
-    "samples": {
-        "concatenated_tumor_XXXXXX_R": {
-            "file_prefix": "concatenated_tumor_XXXXXX_R",
-            "sample_name" : "ACC1",
+    "samples": [
+        {
+            "name": "ACC1",
             "type": "tumor",
-            "readpair_suffix": ["1", "2"]
+            "fastq_info": {
+                "HXXXXXXX_ACC1_S01_L001": {
+                    "fwd": "tests/test_data/fastq_lanes/fastq/HXXXXXXX_ACC1_S01_L001_R1_001.fastq.gz",
+                    "rev": "tests/test_data/fastq_lanes/fastq/HXXXXXXX_ACC1_S01_L001_R2_001.fastq.gz"
+                },
+                "HXXXXXXX_ACC1_S01_L002": {
+                    "fwd": "tests/test_data/fastq_lanes/fastq/HXXXXXXX_ACC1_S01_L002_R1_001.fastq.gz",
+                    "rev": "tests/test_data/fastq_lanes/fastq/HXXXXXXX_ACC1_S01_L002_R2_001.fastq.gz"
+                }
+            }
         },
-        "concatenated_normal_XXXXXX_R": {
-            "file_prefix": "concatenated_normal_XXXXXX_R",
-            "sample_name" : "ACC2",
+        {
+            "name": "ACC2",
             "type": "normal",
-            "readpair_suffix": ["1", "2"]
+            "fastq_info": {
+                "HXXXXXXX_ACC2_S01_L002": {
+                    "fwd": "tests/test_data/fastq_lanes/fastq/HXXXXXXX_ACC2_S01_L002_R1_001.fastq.gz",
+                    "rev": "tests/test_data/fastq_lanes/fastq/HXXXXXXX_ACC2_S01_L002_R2_001.fastq.gz"
+                },
+                "HXXXXXXX_ACC2_S01_L001": {
+                    "fwd": "tests/test_data/fastq_lanes/fastq/HXXXXXXX_ACC2_S01_L001_R1_001.fastq.gz",
+                    "rev": "tests/test_data/fastq_lanes/fastq/HXXXXXXX_ACC2_S01_L001_R2_001.fastq.gz"
+                }
+            }
         }
-    },
+    ],
     "reference": {
         "reference_genome": "tests/test_data/references/genome/human_g1k_v37_decoy.fasta",
         "dbsnp": "tests/test_data/references/variants/dbsnp_grch37_b138.vcf.gz",
-        "1kg_snps_all": "tests/test_data/references/variants/1k_genome_wgs_p1_v3_all_sites.vcf.gz",
-        "1kg_snps_high": "tests/test_data/references/variants/1kg_phase1_snps_high_confidence_b37.vcf.gz",
+        "vcf_1kg": "tests/test_data/references/variants/1k_genome_wgs_p1_v3_all_sites.vcf.gz",
+        "hc_vcf_1kg": "tests/test_data/references/variants/1kg_phase1_snps_high_confidence_b37.vcf.gz",
         "mills_1kg": "tests/test_data/references/variants/mills_1kg_index.vcf.gz",
         "cosmic": "tests/test_data/references/variants/cosmic_coding_muts_v89.vcf.gz",
-        "vep": "tests/test_data/references/vep/",
-        "exon_bed": "tests/test_data/references/genome/refseq.flat.bed",
+        "vep_dir": "tests/test_data/references/vep/",
+        "refgene_bed": "tests/test_data/references/genome/refseq.flat.bed",
         "somalier_sites": "tests/test_data/references/variants/GRCh37.somalier.sites.vcf.gz"
+    },
+    "bioinfo_tools": {
+        "bedtools": "align_qc",
+        "bwa": "align_qc",
+        "compress": "align_qc",
+        "fastqc": "align_qc",
+        "samtools": "align_qc",
+        "picard": "align_qc",
+        "multiqc": "align_qc",
+        "fastp": "align_qc",
+        "csvkit": "align_qc",
+        "ensembl-vep": "annotate",
+        "genmod": "annotate",
+        "vcfanno": "annotate",
+        "sambamba": "coverage_qc",
+        "mosdepth": "coverage_qc",
+        "bcftools": "varcall_py3",
+        "tabix": "varcall_py3",
+        "bgzip": "varcall_py3",
+        "gatk": "varcall_py3",
+        "vardict": "varcall_py3",
+        "svdb": "varcall_py3",
+        "tiddit": "varcall_py3",
+        "cnvpytor": "cnvpytor",
+        "manta": "varcall_py27",
+        "cnvkit": "varcall_cnvkit",
+        "delly": "delly",
+        "ascatNgs": "ascatNgs",
+        "vcf2cytosure": "vcf2cytosure",
+        "somalier": "somalier"
+    },
+    "bioinfo_tools_version": {
+        "bcftools": [
+            "1.15.1",
+            "1.10.2",
+            "1.9"
+        ],
+        "tabix": [
+            "1.11",
+            "0.2.6"
+        ],
+        "cnvkit": [
+            "0.9.9"
+        ],
+        "bwa": [
+            "0.7.17"
+        ],
+        "gatk": [
+            "3.8"
+        ],
+        "samtools": [
+            "1.15.1",
+            "1.9"
+        ],
+        "svdb": [
+            "2.8.1"
+        ],
+        "tiddit": [
+            "3.3.2"
+        ],
+        "vardict": [
+            "2019.06.04"
+        ],
+        "somalier": [
+            "0.2.16"
+        ],
+        "delly": [
+            "1.0.3"
+        ],
+        "manta": [
+            "1.6.0"
+        ],
+        "bedtools": [
+            "2.30.0"
+        ],
+        "csvkit": [
+            "1.0.7"
+        ],
+        "fastp": [
+            "0.23.2"
+        ],
+        "fastqc": [
+            "0.11.9"
+        ],
+        "multiqc": [
+            "1.12"
+        ],
+        "picard": [
+            "2.27.1"
+        ],
+        "mosdepth": [
+            "0.3.3"
+        ],
+        "sambamba": [
+            "0.8.2"
+        ],
+        "ensembl-vep": [
+            "104.3"
+        ],
+        "vcfanno": [
+            "0.3.3"
+        ],
+        "genmod": [
+            "3.7.4"
+        ],
+        "ascatNgs": [
+            "4.5.0"
+        ],
+        "vcf2cytosure": [
+            "0.8.1"
+        ],
+        "cnvpytor": [
+            "1.2.1"
+        ]
     },
     "panel": {
         "capture_kit": "tests/test_data/references/panel/panel.bed",
         "chrom": ["18", "14", "11", "4", "10", "12", "3", "5", "13", "20", "7", "2",
                   "8", "21", "15", "9", "17", "16", "22", "19", "1", "6"]
     },
-    "conda_env_yaml": "BALSAMIC/config/balsamic_env.yaml",
     "rule_directory": "BALSAMIC/"
 }

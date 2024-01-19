@@ -2,13 +2,12 @@
 # coding: utf-8
 
 
-
 rule sentieon_DNAscope:
     input:
         ref = config["reference"]["reference_genome"],
         dbsnp = config["reference"]["dbsnp"],
-        bam = bam_dir + "{sample_type}.merged.bam",
-        recal_table = bam_dir + "{sample_type}.merged.recal_data.table"
+        bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_type = wildcards.sample_type),
+        recal_table = bam_dir + "{sample_type}.recal_data.table"
     output:
         vcf = vcf_dir + "SNV.germline.{sample_type}.dnascope.vcf.gz",
     params:
@@ -26,7 +25,6 @@ rule sentieon_DNAscope:
         "Calling germline variants using Sentieon DNAscope for {params.sample}"
     shell:
       """
-mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
 export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};

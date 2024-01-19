@@ -87,7 +87,7 @@ def test_get_metric_condition(config_dict, qc_requested_metrics):
     config["panel"] = None
 
     # GIVEN a specific sample & metric name
-    sample = "concatenated_tumor_XXXXXX_R"
+    sample = "ACC1"
     metric = "METRIC_1"
 
     # GIVEN an expected output
@@ -112,7 +112,7 @@ def test_get_metric_condition_pct_wgs(config_dict):
     config["panel"] = None
 
     # GIVEN a specific sample & metric name
-    sample = "concatenated_tumor_XXXXXX_R"
+    sample = "ACC1"
     metric = "PCT_60X"
 
     # GIVEN the requested metric
@@ -134,7 +134,7 @@ def test_get_multiqc_data_source(multiqc_data_path):
     """test multiqc source extraction from multiqc_data.json analysis file"""
 
     # GIVEN input parameters and the multiqc data
-    sample = "concatenated_tumor_XXXXXX_R"
+    sample = "tumor.ACC1"
     source_name_hs_metrics = "multiqc_picard_HsMetrics"
     source_name_dup = "multiqc_picard_dups"
 
@@ -142,8 +142,8 @@ def test_get_multiqc_data_source(multiqc_data_path):
         multiqc_data = json.load(f)
 
     # GIVEN an expected output
-    source_hs_metrics = "concatenated_tumor_XXXXXX_R.sorted.mrkdup.hsmetric"
-    source_dup = "concatenated_tumor_XXXXXX_R.sorted.mrkdup.txt"
+    source_hs_metrics = "ACC1.dedup.realign.hsmetric"
+    source_dup = "tumor.ACC1.dedup.metrics"
 
     # WHEN extracting the source of a specific sample and collection of metrics
     out_source_hs_metrics = get_multiqc_data_source(

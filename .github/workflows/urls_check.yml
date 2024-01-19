@@ -15,5 +15,5 @@ jobs:
       - name: Link Checker
         uses: lycheeverse/lychee-action@v1.8.0
         with:
-          args: --verbose './BALSAMIC/constants/reference.py' './docs/*.rst'
+          args: --verbose './BALSAMIC/constants/cache.py' './docs/*.rst'
           fail: true

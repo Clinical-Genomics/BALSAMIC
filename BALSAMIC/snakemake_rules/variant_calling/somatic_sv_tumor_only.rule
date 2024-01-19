@@ -1,12 +1,11 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
 
-tumor_bam = "tumor.merged.bam"
 
 rule manta_tumor_only:
     input:
         fa = config["reference"]["reference_genome"],
-        bamT = bam_dir + tumor_bam
+        bamT = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample)
     output:
         final = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".manta.vcf.gz",
         namemap = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".manta.sample_name_map"
@@ -17,7 +16,7 @@ rule manta_tumor_only:
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         runmode = "local",
-        tumor = get_sample_type(config["samples"], "tumor"),
+        tumor = config_model.get_sample_name_by_type(SampleType.TUMOR),
         case_name = config["analysis"]["case_id"],
         manta_install_path= "/opt/conda/share/manta-1.6.0-2"
     threads:
@@ -53,7 +52,7 @@ rm -rf {params.tmpdir};
 rule delly_sv_tumor_only:
     input:
         fa = config["reference"]["reference_genome"],
-        bamT = bam_dir + tumor_bam,
+        bamT = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
         excl = config["reference"]["delly_exclusion_converted"],
     output:
         bcf = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".delly.bcf",
@@ -83,7 +82,7 @@ if config["analysis"]["sequencing_type"] == 'wgs':
     rule delly_cnv_tumor_only:
         input:
             fa = config["reference"]["reference_genome"],
-            bamT = bam_dir + tumor_bam,
+            bamT = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
             bcf = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".delly.bcf",
             map = config["reference"]["delly_mappability"],
         output:
@@ -115,10 +114,10 @@ rm -rf {params.tmpdir};
 else:
     rule delly_cnv_tumor_only:
         input:
-            fa=config["reference"]["reference_genome"],
-            bamT=bam_dir + tumor_bam,
-            bcf=vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".delly.bcf",
-            map=config["reference"]["delly_mappability"],
+            fa = config["reference"]["reference_genome"],
+            bamT = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
+            bcf = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".delly.bcf",
+            map = config["reference"]["delly_mappability"],
             baits_bed = config["panel"]["capture_kit"],
         output:
             cnv_delly=vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".delly.bcf",
@@ -150,7 +149,7 @@ rm -rf {params.tmpdir};
 rule tiddit_sv_tumor_only:
     input:
         fa = config["reference"]["reference_genome"],
-        bamT = bam_dir + tumor_bam,
+        bamT = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample)
     output:
         vcf = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".tiddit.vcf.gz",
         cov_tumor_tiddit = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".tumor.tiddit_cov.bed",
@@ -187,12 +186,12 @@ rm -rf {params.tmpdir};
 
 rule cnvpytor_tumor_only:
     input:
-        bamT = bam_dir + tumor_bam,
+        bamT = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
         vcfT = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.vcf.gz",
     output:
         cnv_cnvpytor = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".cnvpytor.vcf.gz",
         circular_cnvpytor = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".cnvpytor.circular.png",
-        scattter_cnvpytor = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".cnvpytor.scatter.png",
+        scatter_cnvpytor = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".cnvpytor.scatter.png",
         namemap= vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".cnvpytor.sample_name_map",
     benchmark:
         benchmark_dir + 'cnvpytor_tumor_only_' + config["analysis"]["case_id"] + ".tsv"
@@ -240,7 +239,7 @@ cnvpytor -root {params.tmpdir}/{params.tumor}.pytor \
 for binsize in 1000 10000 100000; do cnvpytor -root {params.tmpdir}/{params.tumor}.pytor \
 -view $binsize < {params.tmpdir}/{params.tumor}.out.sh;done;
 
-cp {params.tmpdir}/{params.tumor}.global.0000.png {output.scattter_cnvpytor};
+cp {params.tmpdir}/{params.tumor}.global.0000.png {output.scatter_cnvpytor};
 
 cp {params.tmpdir}/{params.tumor}.circular.0001.png {output.circular_cnvpytor};
 
@@ -301,7 +300,7 @@ rule svdb_merge_tumor_only:
         Path(singularity_image, config["bioinfo_tools"].get("svdb") + ".sif").as_posix()
     params:
         housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "research"},
-        tumor = get_sample_type(config["samples"], "tumor"),
+        tumor = config_model.get_sample_name_by_type(SampleType.TUMOR),
         case_name = config["analysis"]["case_id"],
         vcf= lambda wildcards, input:[input[index] + ":" + svdb_callers_prio[index] for index in range(0,len(input))],
         svdb_priority= ",".join(svdb_callers_prio)

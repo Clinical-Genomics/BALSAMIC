@@ -1,45 +1,29 @@
-"""
-Entry cli for balsamic
-"""
+"""Balsamic CLI."""
 import logging
+
 import click
 import coloredlogs
 
-# Subcommands
-from BALSAMIC.commands.run.base import run as run_command
-from BALSAMIC.commands.init.base import initialize as init_command
-from BALSAMIC.commands.report.base import report as report_command
+from BALSAMIC import __version__ as balsamic_version
 from BALSAMIC.commands.config.base import config as config_command
-from BALSAMIC.commands.plugins.base import plugins as plugins_command
-
-# CLI commands and decorators
+from BALSAMIC.commands.init.base import initialize as init_command
+from BALSAMIC.commands.options import OPTION_LOG_LEVEL
+from BALSAMIC.commands.report.base import report as report_command
+from BALSAMIC.commands.run.base import run as run_command
+from BALSAMIC.constants.constants import LogLevel
 from BALSAMIC.utils.cli import add_doc as doc
 
-# Get version
-from BALSAMIC import __version__ as balsamic_version
-
 LOG = logging.getLogger(__name__)
-LOG_LEVELS = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
 
 
 @click.group()
-@click.option(
-    "--loglevel",
-    default="INFO",
-    type=click.Choice(LOG_LEVELS),
-    help="Set the level of log output.",
-    show_default=True,
-)
+@OPTION_LOG_LEVEL
 @click.version_option(version=balsamic_version)
 @click.pass_context
 @doc(
-    """BALSAMIC {version}: Bioinformatic Analysis pipeLine for
-        SomAtic MutatIons in Cancer""".format(
-        version=balsamic_version
-    )
+    f"Balsamic {balsamic_version}: Bioinformatic Analysis Pipeline for Somatic Mutations in Cancer"
 )
-def cli(context, loglevel):
-    "BALSAMIC"
+def cli(context: click.Context, log_level: LogLevel):
     coloredlogs.DEFAULT_FIELD_STYLES = {
         "asctime": {"color": "green"},
         "hostname": {"color": "magenta"},
@@ -48,18 +32,14 @@ def cli(context, loglevel):
         "name": {"color": "blue"},
     }
     coloredlogs.install(
-        level=loglevel,
+        level=log_level,
         fmt="%(programname)s %(hostname)s %(asctime)s %(name)s pid:%(process)d [%(levelname)s] %(message)s",
     )
-    LOG.info("Running BALSAMIC version %s", balsamic_version)
-
-    context.obj = {}
-    context.obj["loglevel"] = loglevel
-    # LOG.info(f"BALSAMIC started with log level {loglevel}.")
+    LOG.info(f"Running BALSAMIC version {balsamic_version}")
+    context.obj = {"log_level": log_level}
 
 
 cli.add_command(run_command)
 cli.add_command(report_command)
 cli.add_command(config_command)
-cli.add_command(plugins_command)
 cli.add_command(init_command)

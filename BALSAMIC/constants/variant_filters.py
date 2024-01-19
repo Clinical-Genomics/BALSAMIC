@@ -19,7 +19,6 @@ VARDICT_SETTINGS = {
         "field": "INFO",
     },
     "MQ": {"tag_value": 40, "filter_name": "balsamic_low_mq", "field": "INFO"},
-    "AF_max": {"tag_value": 1, "filter_name": "balsamic_af_one", "field": "INFO"},
     "AF_min": {"tag_value": 0.007, "filter_name": "balsamic_low_af", "field": "INFO"},
     "pop_freq": {
         "tag_value": 0.005,
@@ -50,7 +49,6 @@ SENTIEON_VARCALL_SETTINGS = {
         "filter_name": "balsamic_low_tumor_dp",
         "field": "FORMAT",
     },
-    "AF_max": {"tag_value": 1, "filter_name": "balsamic_af_one", "field": "FORMAT"},
     "AF_min": {"tag_value": 0.05, "filter_name": "balsamic_low_af", "field": "FORMAT"},
     "pop_freq": {
         "tag_value": 0.001,

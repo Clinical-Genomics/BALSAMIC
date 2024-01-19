@@ -1,12 +1,15 @@
-***********************************
+**********************
 Annotation resources
-***********************************
+**********************
 
 BALSAMIC annotates somatic single nucleotide variants (SNVs) using ``ensembl-vep`` and ``vcfanno``. Somatic structural variants (SVs), somatic copy-number variants (CNVs) and germline single nucleotide variants are annotated using only ``ensembl-vep``. All SVs and CNVs are merged using ``SVDB`` before annotating for `Target Genome Analysis (TGA)` or `Whole Genome Sequencing (WGS)` analyses.
 
+gnomAD
+------
+
 `BALSAMIC` adds the following annotation from `gnomAD` database using ``vcfanno``.
 
-.. list-table:: gnomAD
+.. list-table:: gnomAD annotations
    :widths: 50 50
    :header-rows: 1
 
@@ -17,9 +20,12 @@ BALSAMIC annotates somatic single nucleotide variants (SNVs) using ``ensembl-vep
    * - GNOMADAF
      - fraction of the reads supporting the alternate allele, allelic frequency
 
+ClinVar
+-------
+
 `BALSAMIC` adds the following annotation from `ClinVar` database using ``vcfanno``.
 
-.. list-table:: ClinVar
+.. list-table:: ClinVar annotations
    :widths: 50 50
    :header-rows: 1
 
@@ -40,7 +46,7 @@ BALSAMIC annotates somatic single nucleotide variants (SNVs) using ``ensembl-vep
 
 The values for `ORIGIN` are described below:
 
-.. list-table:: ORIGIN
+.. list-table:: ClinVar ORIGIN
    :widths: 25 25
    :header-rows: 1
 
@@ -71,9 +77,12 @@ The values for `ORIGIN` are described below:
    * - 1073741824
      - other
 
+COSMIC
+------
+
 `BALSAMIC` uses `ensembl-vep` to add the following annotation from `COSMIC` database.
 
-.. list-table:: COSMIC
+.. list-table:: COSMIC annotations
    :widths: 50 50
    :header-rows: 1
 
@@ -90,6 +99,116 @@ The values for `ORIGIN` are described below:
    * - COSMIC_AA
      - peptide annotation
 
+CADD
+----
+
+`BALSAMIC` adds the following annotation for SNVs from `CADD` database using ``vcfanno``.
+
+.. list-table:: CADD annotations
+   :widths: 50 50
+   :header-rows: 1
+
+   * - VCF tag
+     - description
+   * - CADD
+     - Combined Annotation Dependent Depletion
+
+LoqusDB somatic frequencies (cancer cases)
+------------------------------------------
+
+.. list-table:: LoqusDB Somatic Annotations
+   :widths: 50 150 50
+   :header-rows: 1
+
+   * - VCF tag
+     - description
+     - variant type
+   * - Cancer_Somatic_Frq
+     - Frequency of observation for somatic mutations
+     - SNV, SV
+   * - Cancer_Somatic_Obs
+     - allele counts of the somatic variant
+     - SNV, SV
+   * - Cancer_Somatic_Hom
+     - allele counts of the homozygous somatic variant
+     - SNV
+
+LoqusDB germline frequencies (cancer cases)
+-------------------------------------------
+
+.. list-table:: loqusDB germline SNV annotations
+   :widths: 50 150 50
+   :header-rows: 1
+
+   * - VCF tag
+     - description
+     - variant type
+   * - Cancer_Germline_Frq
+     - Frequency of observation for germline mutations
+     - SNV
+   * - Cancer_Germline_Obs
+     - allele counts of the germline variant
+     - SNV
+   * - Cancer_Germline_Hom
+     - allele counts of the homozygous germline variant
+     - SNV
+
+LoqusDB germline frequencies (non-cancer cases)
+------------------------------------------------
+
+`BALSAMIC` adds the following annotation from database of `non-cancer clinical` samples using ``vcfanno`` for SNVs and SVDB for SVs.
+
+.. list-table:: loqusDB germline (non-cancer) SNV annotations
+   :widths: 50 150 50
+   :header-rows: 1
+
+   * - VCF tag
+     - description
+     - variant type
+   * - Frq
+     - Frequency of observation of the variants from normal `non-cancer clinical` samples
+     - SNV, SV
+   * - Obs
+     - allele counts of the variant in normal `non-cancer clinical` samples
+     - SNV
+   * - Hom
+     - allele counts of the homozygous variant in normal `non-cancer clinical` samples
+     - SNV
+   * - clin_obs
+     - allele counts
+     - SV
+
+SWEGEN
+------
+
+`BALSAMIC` adds the following annotation from `SWEGEN` database using ``vcfanno`` for SNVs and SVDB for SVs.
+
+.. list-table:: Swegen SNV annotations
+   :widths: 50 150 50
+   :header-rows: 1
+
+   * - VCF tag
+     - description
+     - variant type
+   * - SWEGENAF
+     - allele frequency from 1000 Swedish genomes project
+     - SNV, SV
+   * - SWEGENAAC_Hom
+     - allele counts of homozygous variants
+     - SNV
+   * - SWEGENAAC_Het
+     - allele counts of heterozygous variants
+     - SNV
+   * - SWEGENAAC_Hemi
+     - allele counts of hemizygous variants
+     - SNV
+   * - swegen_obs
+     - allele count
+     - SV
+
+
+ENSEMBL-VEP annotations
+-----------------------
 
 Where relevant, `BALSAMIC` uses `ensembl-vep` to annotate somatic and germline SNVs and somatic SVs/CNVs from `1000genomes (phase3)`, `ClinVar`, `ESP, HGMD-PUBLIC`, `dbSNP`, `gencode`, `gnomAD`, `polyphen`, `refseq`, and `sift` databases.
 The following annotations are added by `ensembl-vep`.
@@ -256,52 +375,3 @@ VEP has a setting for the maximum size of a structural variant that it will anno
      - indicating if the transcript is the MANE Select or MANE Plus Clinical transcript for the gene.
    * - miRNA
      - Reports where the variant lies in the miRNA secondary structure.
-
-
-`BALSAMIC` adds the following annotation from `Swegen` database using ``vcfanno`` for SNVs and SVDB for SVs.
-
-.. list-table:: Swegen SNV
-   :widths: 50 150 50
-   :header-rows: 1
-
-   * - VCF tag
-     - description
-     - variant type
-   * - SWEGENAF
-     - allele frequency from 1000 Swedish genomes project
-     - SNV, SV
-   * - SWEGENAAC_Hom
-     - allele counts of homozygous variants
-     - SNV
-   * - SWEGENAAC_Het
-     - allele counts of heterozygous variants
-     - SNV
-   * - SWEGENAAC_Hemi
-     - allele counts of hemizygous variants
-     - SNV
-   * - swegen_obs
-     - allele count
-     - SV
-
-`BALSAMIC` adds the following annotation from database of normal `Clinical` samples using ``vcfanno`` for SNVs and SVDB for SVs.
-
-.. list-table:: Clinical Normal samples SNV
-   :widths: 50 150 50
-   :header-rows: 1
-
-   * - VCF tag
-     - description
-     - variant type
-   * - Frq
-     - Frequency of observation of the variants from normal `Clinical` samples
-     - SNV, SV
-   * - Obs
-     - allele counts of the variant in normal `Clinical` samples
-     - SNV
-   * - Hom
-     - allele counts of the homozygous variant in normal `Clinical` samples
-     - SNV
-   * - clin_obs
-     - allele counts
-     - SV
-

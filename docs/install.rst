@@ -10,8 +10,8 @@ Software Requirements
 ~~~~~~~~~~~~~~~~~~~~~
 
 - Conda >=version 4.5.0: For detailed software and python requirements please see ``setup.py`` and ``BALSAMIC/conda/balsamic.yaml``
-- Singularity >=version 3.0.0: BALSAMIC uses singularity to run vairous parts of the workflow. 
-- Python 3.6
+- Singularity >=version 3.0.0: BALSAMIC uses singularity to run vairous parts of the workflow.
+- Python 3.11
 - BALSAMIC is dependent on third-party bioinformatics software ``Sentieon-tools``. Example: for running wgs variant calling using ``TNScope``, and to execute ``UMIworkflow``.
 
 ``Note: Set Sentieon envionment variables in your ~/.bashrc file by adding following two lines``
@@ -28,10 +28,10 @@ Step 1. Installing BALSAMIC
 
 ::
 
-    conda create -c conda-forge -c defaults --name S_BALSAMIC python==3.7 pip pygraphviz
+    conda create -c conda-forge -c defaults --name S_balsamic python==3.11 pip pygraphviz wkhtmltopdf
 
 
-2. Activate environment: 
+2. Activate environment:
 
 ::
 
@@ -39,7 +39,7 @@ Step 1. Installing BALSAMIC
 
 
 
-3. Install BALSAMIC using ``pip`` within the newly created environment: 
+3. Install BALSAMIC using ``pip`` within the newly created environment:
 
 ::
 
@@ -67,7 +67,7 @@ NOTE: This process can take couple of hours
   # Note:
   # 1. COSMIC key is in variable $COSMIC_KEY
   # 2. For genome version hg38, set --genome-version to hg38
-  # 3. For using develop container version, set --container-version to develop
+  # 3. For using develop container version, set --cache-version to develop
   # 4. For submitting jobs to slurm cluster, use option --account
 
   balsamic init --outdir ~/balsamic_cache \

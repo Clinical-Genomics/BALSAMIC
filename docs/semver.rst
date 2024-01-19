@@ -13,7 +13,6 @@ Since October 24, 2018 the following changes were added in addition to SemVer al
     callers, aligners, quality trimmers, and/or anything other than QC reporting and rule `all`.
 
   - Addition of annotation softwares or sources, variant callers, aligners, quality trimmers, and/or anything other than QC reporting
-    
 
 - **minor**:
 
