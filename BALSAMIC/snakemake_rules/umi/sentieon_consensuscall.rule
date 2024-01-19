@@ -57,7 +57,6 @@ rule sentieon_bwa_umiconsensus:
         sentieon_install_dir = config["SENTIEON_INSTALL_DIR"],
         sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
-        sheader = params.umicommon.align_header,
         ip_bases = params.umicommon.align_intbases,
         sample_id = "{sample}"
     threads: 
@@ -75,7 +74,7 @@ export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
 
 {params.sentieon_exec} bwa mem \
--R {params.sheader} \
+-R '@RG\\tID:{params.sample_id}\\tSM:{params.sample_type}\\tLB:TargetPanel\\tPL:ILLUMINA' \
 -t {threads} \
 -K {params.ip_bases} \
 -p -C {input.ref_fa} \
