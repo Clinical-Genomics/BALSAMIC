@@ -49,9 +49,6 @@ bam_dir: str = Path(result_dir, "bam", "").as_posix() + "/"
 cnv_dir: str = Path(result_dir, "cnv", "").as_posix() + "/"
 qc_dir: str = Path(result_dir, "qc", "").as_posix() + "/"
 
-# Pre run parameters
-seconds_before_start: int = SLEEP_BEFORE_START
-
 # PON setting
 pon_workflow: PONWorkflow = config_model.analysis.pon_workflow
 
