@@ -93,6 +93,7 @@ Fixed:
 * `gens_preprocessing` rule missing python directive https://github.com/Clinical-Genomics/BALSAMIC/pull/1322
 * CADD annotations container path and code smells https://github.com/Clinical-Genomics/BALSAMIC/pull/1323
 * Sonarcloud reported issues https://github.com/Clinical-Genomics/BALSAMIC/pull/1348
+* Loqusdb SV annotation somatic fields https://github.com/Clinical-Genomics/BALSAMIC/pull/1354
 
 Removed:
 ^^^^^^^^
