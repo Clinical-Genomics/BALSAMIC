@@ -3,7 +3,7 @@
 
 Added:
 ^^^^^^
-* Sleep rule before start to fix key_error https://github.com/Clinical-Genomics/BALSAMIC/pull/1310
+* Sleep rule before start to fix key_error https://github.com/Clinical-Genomics/BALSAMIC/pull/1311
 
 
 [13.0.0]
