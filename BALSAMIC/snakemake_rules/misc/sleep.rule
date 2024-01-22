@@ -1,6 +1,6 @@
 
 rule sleep_before_start:
-    """Wait 120s before starting any processing to avoid key_error issue."""
+    """Wait the specified number of seconds before starting any processing to avoid key_error issue."""
     output:
         wake_up = result_dir + "start_analysis"
     params:
