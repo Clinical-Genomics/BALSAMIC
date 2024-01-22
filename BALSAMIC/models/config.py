@@ -403,9 +403,25 @@ class ConfigModel(BaseModel):
             final_bam_suffix = "dedup"
         elif self.analysis.sequencing_type == SequencingType.TARGETED:
             # Only dedup is necessary for TGA
-            final_bam_suffix = "dedup"
+            final_bam_suffix = "dedup_sorted"
         else:
             # For WGS the bamfiles are realigned
             final_bam_suffix = "dedup.realign"
 
         return f"{bam_dir}{sample_type}.{sample_name}.{final_bam_suffix}.bam"
+
+    def get_cnv_report_plots(self) -> List[str]:
+        """Return a list of AscatNgs CNV plot files."""
+        if self.analysis.analysis_type == AnalysisType.SINGLE:
+            return [
+                f"CNV.somatic.{self.analysis.case_id}.cnvpytor.circular.png",
+                f"CNV.somatic.{self.analysis.case_id}.cnvpytor.scatter.png",
+            ]
+        return [
+            f"CNV.somatic.{self.analysis.case_id}.ascat.ascatprofile.png",
+            f"CNV.somatic.{self.analysis.case_id}.ascat.rawprofile.png",
+            f"CNV.somatic.{self.analysis.case_id}.ascat.ASPCF.png",
+            f"CNV.somatic.{self.analysis.case_id}.ascat.tumor.png",
+            f"CNV.somatic.{self.analysis.case_id}.ascat.germline.png",
+            f"CNV.somatic.{self.analysis.case_id}.ascat.sunrise.png",
+        ]

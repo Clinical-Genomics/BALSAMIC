@@ -2,29 +2,38 @@
 Short tutorial
 ==============
 
-Here a short tutorial is provided for BALSAMIC (**version** = 12.0.2).
+Here a short tutorial is provided for BALSAMIC (**version** = 13.0.0).
+
+Regarding fastq-inputs
+---------------------
+
+Previous versions of BALSAMIC only accepted one fastq-pair per sample, which required concatenation of fastq-pairs if multiple existed.
+
+The current version BALSAMIC takes ``--fastq-path`` instead which is a path to a directory containing ALL fastq-files you want to include in the analysis, for tumor and normal (if it exists for the analysis).
+
+**NOTE**: The fastq-files in ``--fastq-path`` need to contain the names from ``--tumor-sample-name [sample_name]`` and ``--normal-sample-name [sample_name]`` as a sub-string in the fastq-names to correctly assign them to their respective sample.
 
 Running a test sample
 ---------------------
 
-Given the 
+Example config demo case:
 
 ::
 
   balsamic config case \
-    --tumor tests/test_data/fastq/S1_R_1.fastq.gz \
-    --normal tests/test_data/fastq/S2_R_1.fastq.gz \
-    --case-id demo_run_balsamic \
-    --analysis-dir demo/ \
-    --panel-bed tests/test_data/references/panel/panel.bed \
-    --balsamic-cache ~/balsamic_cache \
-    --quiet
+    --analysis-dir demo/
+    --balsamic-cache ~/balsamic_cache
+    --fastq-path tests/test_data/fastq/
+    --case-id demo_run_balsamic
+    --gender female
+    --analysis-workflow balsamic
+    --genome-version hg19
+    --tumor-sample-name S1
+    --panel-bed tests/test_data/references/panel/panel.bed
 
 
-Notes:
 
-- If you want to test tumor_only mode, remove the ``--normal tests/test_data/fastq/S2_R_1.fastq.gz`` line.
-- ``--output-config demo_run_balsamic.json`` is also optional
+
 
 Let's try a dry run and see everything is in place:
 

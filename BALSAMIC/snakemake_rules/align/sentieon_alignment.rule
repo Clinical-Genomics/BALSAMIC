@@ -85,9 +85,9 @@ shell_bam_files=$(echo {input.bam_files} | sed 's/ / -i /g') ;
 --metrics {output.metrics} \
 {output.bam};
 
+
 sed 's/^LIBRARY/\\n## METRICS CLASS\tpicard\.sam\.DuplicationMetrics\\nLIBRARY/' -i {output.metrics}
         """
-
 
 rule sentieon_realign:
     input:
@@ -110,18 +110,18 @@ rule sentieon_realign:
         "INDEL realignment using sentieon realigner for sample: {params.sample_id}"
     shell:
         """
-mkdir -p {params.tmpdir};
-export TMPDIR={params.tmpdir};
-export SENTIEON_TMPDIR={params.tmpdir};
-export SENTIEON_LICENSE={params.sentieon_lic};
-
-{params.sentieon_exec} driver \
--r {input.ref} \
--t {threads} \
--i {input.bam} \
---algo Realigner \
--k {input.mills} \
--k {input.indel_1kg} \
-{output}; 
-        """
+    mkdir -p {params.tmpdir};
+    export TMPDIR={params.tmpdir};
+    export SENTIEON_TMPDIR={params.tmpdir};
+    export SENTIEON_LICENSE={params.sentieon_lic};
+    
+    {params.sentieon_exec} driver \
+    -r {input.ref} \
+    -t {threads} \
+    -i {input.bam} \
+    --algo Realigner \
+    -k {input.mills} \
+    -k {input.indel_1kg} \
+    {output}; 
+            """
 

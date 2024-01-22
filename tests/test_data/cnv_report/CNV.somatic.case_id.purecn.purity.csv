@@ -1,0 +1,2 @@
+"Sampleid","Purity","Ploidy","Sex","Contamination","Flagged","Failed","Curated","Comment"
+"tumor.initial",0.64,4.52136051294267,"Coverage: M VCF: F",0,TRUE,FALSE,FALSE,"RARE KARYOTYPE"

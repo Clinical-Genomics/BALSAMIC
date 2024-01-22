@@ -1,0 +1,62 @@
+"""Rules for generating TGA PDF reports."""
+
+
+rule csv_to_pdf:
+    """Converting LOH report CSV files to PDF format."""
+    input:
+        purity_csv=f"{cnv_dir}CNV.somatic.{config['analysis']['case_id']}.purecn.purity.csv",
+    output:
+        purity_csv_pdf=f"{cnv_dir}CNV.somatic.{config['analysis']['case_id']}.purecn.purity.csv.pdf",
+    params:
+        csv_to_pdf_script=get_script_path("csv_to_pdf.py"),
+        loh_regions=f"{cnv_dir}CNV.somatic.{config['analysis']['case_id']}.purecn.LOHregions.csv",
+        loh_genes=f"{cnv_dir}CNV.somatic.{config['analysis']['case_id']}.purecn.LOHgenes.csv",
+    threads:
+        get_threads(cluster_config=cluster_config, rule_name="csv_to_pdf")
+    message:
+        "Converting CSV files to PDF"
+    shell:
+        """
+for file in "{input.purity_csv}" "{params.loh_regions}" "{params.loh_genes}"; do
+    if [[ -f "$file" ]]; then
+        python "{params.csv_to_pdf_script}" "$file" "$file.pdf" --header
+    fi
+done
+        """
+
+rule txt_to_pdf:
+    """Converting AscatNgs statistics TXT file to PDF format."""
+    input:
+        sample_statistics=f"{vcf_dir}CNV.somatic.{config['analysis']['case_id']}.ascat.samplestatistics.txt"
+    output:
+        sample_statistics_pdf=f"{vcf_dir}CNV.somatic.{config['analysis']['case_id']}.ascat.samplestatistics.txt.pdf"
+    params:
+        csv_to_pdf_script=get_script_path("csv_to_pdf.py"),
+    threads:
+        get_threads(cluster_config=cluster_config, rule_name="txt_to_pdf")
+    message:
+        "Converting AscatNgs statistics TXT file to PDF"
+    shell:
+        """
+python "{params.csv_to_pdf_script}" "{input.sample_statistics}" "{output.sample_statistics_pdf}" --delimiter " "
+        """
+
+
+rule image_to_pdf:
+    """Converting CNV PNG files to PDF format."""
+    input:
+        plot=f"{vcf_dir}{{plot}}"
+    output:
+        plot_pdf=f"{vcf_dir}{{plot}}.{FileType.PDF}"
+    wildcard_constraints:
+        plot="|".join(config_model.get_cnv_report_plots()),
+    params:
+        image_to_pdf_script=get_script_path("image_to_pdf.py"),
+    threads:
+        get_threads(cluster_config=cluster_config, rule_name="image_to_pdf")
+    message:
+        "Converting CNV PNG files to PDF"
+    shell:
+        """
+python "{params.image_to_pdf_script}" "{input.plot}" "{output.plot_pdf}"
+        """

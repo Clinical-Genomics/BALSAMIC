@@ -1,9 +1,13 @@
 """Utility functions for Balsamic analysis."""
 import os
 from pathlib import Path
-from typing import List, Any, Dict
+from typing import Any, Dict, List
 
-from BALSAMIC.constants.paths import ASSETS_DIR, BALSAMIC_DIR
+from BALSAMIC.constants.paths import (
+    ASSETS_DIR,
+    BALSAMIC_DIR,
+    CADD_ANNOTATIONS_CONTAINER_DIR,
+)
 from BALSAMIC.models.cache import CacheConfig
 from BALSAMIC.models.snakemake import SingularityBindPath
 from BALSAMIC.utils.cli import get_resolved_fastq_files_directory
@@ -45,12 +49,9 @@ def get_singularity_bind_paths(
         cadd_annotations_path: Path = Path(
             sample_config.get("reference").get("cadd_annotations")
         )
-        cadd_annotations_dest_path: Path = (
-            "/opt/conda/share/CADD-scripts/data/annotations"
-        )
         singularity_bind_paths.append(
             SingularityBindPath(
-                source=cadd_annotations_path, destination=cadd_annotations_dest_path
+                source=cadd_annotations_path, destination=CADD_ANNOTATIONS_CONTAINER_DIR
             )
         )
     return singularity_bind_paths

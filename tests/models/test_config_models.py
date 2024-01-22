@@ -77,13 +77,11 @@ def test_sample_instance_model_sample_type_error(tumor_normal_fastq_info_correct
     tumor_dict["type"] = illegal_sample_type
 
     # WHEN parsing the sample dictionary
-    # THEN a ValueError should be triggered
     with pytest.raises(ValueError) as exc:
         SampleInstanceModel.model_validate(tumor_dict)
-        assert (
-            f"The provided sample type ({illegal_sample_type}) is not supported in BALSAMIC"
-            in exc.value
-        )
+
+    # THEN a ValueError should be triggered
+    assert "Input should be 'normal' or 'tumor'" in str(exc.value)
 
 
 def test_analysis_model_for_pon(test_data_dir: Path, timestamp_now: datetime):
@@ -364,7 +362,7 @@ def test_get_final_bam_name(balsamic_model: ConfigModel):
     )
 
     # Then retrieved final bam names should match the expected format and be identical regardless of request parameter
-    expected_final_bam_name = f"{bam_dir}{sample_type}.{sample_name}.dedup.bam"
+    expected_final_bam_name = f"{bam_dir}{sample_type}.{sample_name}.dedup_sorted.bam"
     assert expected_final_bam_name == bam_name_sample_name
     assert bam_name_sample_name == bam_name_sample_type
 
