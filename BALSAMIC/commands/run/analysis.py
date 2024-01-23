@@ -152,7 +152,6 @@ def analysis(
         profile=profile,
         qos=qos,
         quiet=quiet,
-        result_dir=result_path.as_posix(),
         run_analysis=run_analysis,
         run_mode=run_mode,
         script_dir=script_path.as_posix(),

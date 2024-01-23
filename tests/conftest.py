@@ -2358,7 +2358,6 @@ def fixture_snakemake_executable_data(
         "profile": ClusterProfile.SLURM,
         "qos": QOS.HIGH,
         "quiet": True,
-        "result_dir": session_tmp_path,
         "run_analysis": True,
         "run_mode": RunMode.CLUSTER,
         "script_dir": session_tmp_path,

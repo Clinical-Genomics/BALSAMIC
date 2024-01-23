@@ -42,7 +42,6 @@ class SnakemakeExecutable(BaseModel):
         qos (Optional[QOS])                                          : QOS for sbatch jobs.
         quiet (Optional[bool])                                       : Quiet mode for snakemake.
         report_path (Optional[Path])                                 : Snakemake generated report path.
-        result_dir (Optional[DirectoryPath])                         : Analysis output directory.
         run_analysis (bool)                                          : Flag to run the actual analysis.
         run_mode (RunMode)                                           : Cluster run mode to execute analysis.
         script_dir (Optional[DirectoryPath])                         : Cluster profile scripts directory.
@@ -68,7 +67,6 @@ class SnakemakeExecutable(BaseModel):
     qos: Optional[QOS] = None
     quiet: bool = False
     report_path: Optional[Path] = None
-    result_dir: Optional[DirectoryPath] = None
     run_analysis: bool = False
     run_mode: RunMode
     script_dir: Optional[DirectoryPath] = None
@@ -116,12 +114,6 @@ class SnakemakeExecutable(BaseModel):
             return "--forceall"
         return ""
 
-    def get_mail_type_option(self) -> str:
-        """Return string representation of the mail_type option."""
-        if self.mail_type:
-            return f"--mail-type {self.mail_type}"
-        return ""
-
     def get_quiet_flag(self) -> str:
         """Return string representation of the quiet flag."""
         if self.quiet:
@@ -149,12 +141,6 @@ class SnakemakeExecutable(BaseModel):
                     f"--bind {singularity_bind_path.source.as_posix()}:{singularity_bind_path.destination.as_posix()}"
                 )
             return f"--use-singularity --singularity-args '--cleanenv {' '.join(bind_options)}'"
-        return ""
-
-    def get_slurm_profiler_option(self) -> str:
-        """Return string representation of the slurm profiler option."""
-        if self.benchmark and self.profile == ClusterProfile.SLURM:
-            return "--slurm-profiler task"
         return ""
 
     def get_snakemake_options_command(self) -> str:
@@ -197,16 +183,17 @@ class SnakemakeExecutable(BaseModel):
         """Get cluster command to be submitted by Snakemake."""
         cluster_submit_command: str = (
             f"'{sys.executable} {IMMEDIATE_SUBMIT_PATH.as_posix()} "
-            f"--sample-config {self.config_path.as_posix()} "
             f"--profile {self.profile} "
+            f"--benchmark "
+            if self.benchmark
+            else ""
             f"--account {self.account} "
             f"--qos {self.qos} "
+            f"--mail-user {self.mail_user} "
+            f"--mail-type {self.mail_user} "
             f"--log-dir {self.log_dir.as_posix()} "
             f"--script-dir {self.script_dir.as_posix()} "
-            f"--result-dir {self.result_dir.as_posix()} "
-            f"{self.get_slurm_profiler_option()} "
-            f"{self.mail_user} "
-            f"{self.get_mail_type_option()} "
+            f"{self.case_id} "
             "{dependencies} '"
         )
         return remove_unnecessary_spaces(cluster_submit_command)
