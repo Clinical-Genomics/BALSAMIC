@@ -92,9 +92,7 @@ def analysis(
         run_mode: RunMode = RunMode.LOCAL
 
     if run_mode == RunMode.CLUSTER and not account:
-        LOG.info(
-            "slurm-account, qsub-account, or account is required for slurm run mode"
-        )
+        LOG.info("An account is required for custer run mode")
         raise click.Abort()
 
     sample_config_path: Path = Path(sample_config).absolute()

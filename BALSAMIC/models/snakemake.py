@@ -62,7 +62,7 @@ class SnakemakeExecutable(BaseModel):
     force: bool = False
     log_dir: Optional[DirectoryPath] = None
     mail_type: Optional[ClusterMailType] = None
-    mail_user: Optional[str] = Field(default=None, validate_default=True)
+    mail_user: Optional[str] = None
     profile: Optional[ClusterProfile] = None
     qos: Optional[QOS] = None
     quiet: bool = False
@@ -80,13 +80,6 @@ class SnakemakeExecutable(BaseModel):
         """Return string representation of the disable_variant_caller option."""
         if disable_variant_caller:
             return f"disable_variant_caller={disable_variant_caller}"
-        return ""
-
-    @field_validator("mail_user")
-    def get_mail_user_option(cls, mail_user: Optional[str]) -> str:
-        """Return string representation of the mail_user option."""
-        if mail_user:
-            return f"--mail-user {mail_user}"
         return ""
 
     def get_config_files_option(self) -> str:
