@@ -190,7 +190,7 @@ class SnakemakeExecutable(BaseModel):
             f"--account {self.account} "
             f"--qos {self.qos} "
             f"--mail-user {self.mail_user} "
-            f"--mail-type {self.mail_user} "
+            f"--mail-type {self.mail_type} "
             f"--log-dir {self.log_dir.as_posix()} "
             f"--script-dir {self.script_dir.as_posix()} "
             f"{self.case_id} "
