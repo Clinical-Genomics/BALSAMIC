@@ -2,19 +2,19 @@
 import copy
 import sys
 from pathlib import Path
-from typing import Dict, Any
+from typing import Any, Dict
 
 import pytest
 from pydantic import ValidationError
 
 from BALSAMIC.constants.cluster import (
-    ClusterMailType,
     MAX_JOBS,
-    ClusterProfile,
-    ClusterAccount,
     QOS,
+    ClusterAccount,
+    ClusterMailType,
+    ClusterProfile,
 )
-from BALSAMIC.constants.paths import SCHEDULER_PATH
+from BALSAMIC.constants.paths import IMMEDIATE_SUBMIT_PATH
 from BALSAMIC.models.snakemake import SingularityBindPath, SnakemakeExecutable
 
 
@@ -249,7 +249,7 @@ def test_get_snakemake_command(
         f"--configfiles {reference_file.as_posix()} {reference_file.as_posix()} "
         f"--use-singularity --singularity-args '--cleanenv --bind {session_tmp_path.as_posix()}:/' --quiet "
         f"--immediate-submit -j {MAX_JOBS} --jobname BALSAMIC.{case_id_tumor_only}.{{rulename}}.{{jobid}}.sh "
-        f"--cluster-config {reference_file.as_posix()} --cluster '{sys.executable} {SCHEDULER_PATH} "
+        f"--cluster-config {reference_file.as_posix()} --cluster '{sys.executable} {IMMEDIATE_SUBMIT_PATH.as_posix()} "
         f"--sample-config {reference_file.as_posix()} --profile {ClusterProfile.SLURM} "
         f"--account {ClusterAccount.DEVELOPMENT} --qos {QOS.HIGH} --log-dir {session_tmp_path} "
         f"--script-dir {session_tmp_path} --result-dir {session_tmp_path} --mail-user {mail_user_option} "
@@ -277,7 +277,7 @@ def test_get_snakemake_cluster_options(
     assert (
         snakemake_cluster_options
         == f"--immediate-submit -j {MAX_JOBS} --jobname BALSAMIC.{case_id_tumor_only}.{{rulename}}.{{jobid}}.sh "
-        f"--cluster-config {reference_file.as_posix()} --cluster '{sys.executable} {SCHEDULER_PATH.as_posix()} "
+        f"--cluster-config {reference_file.as_posix()} --cluster '{sys.executable} {IMMEDIATE_SUBMIT_PATH.as_posix()} "
         f"--sample-config {reference_file.as_posix()} --profile {ClusterProfile.SLURM} "
         f"--account {ClusterAccount.DEVELOPMENT} --qos {QOS.HIGH} --log-dir {session_tmp_path} "
         f"--script-dir {session_tmp_path} --result-dir {session_tmp_path} --mail-user {mail_user_option} "
@@ -302,7 +302,7 @@ def test_get_cluster_submit_command(
 
     # THEN the expected format should be returned
     assert snakemake_cluster_submit_command == (
-        f"'{sys.executable} {SCHEDULER_PATH.as_posix()} "
+        f"'{sys.executable} {IMMEDIATE_SUBMIT_PATH.as_posix()} "
         f"--sample-config {reference_file.as_posix()} --profile {ClusterProfile.SLURM} "
         f"--account {ClusterAccount.DEVELOPMENT} --qos {QOS.HIGH} --log-dir {session_tmp_path} "
         f"--script-dir {session_tmp_path} --result-dir {session_tmp_path} --mail-user {mail_user_option} "
