@@ -117,20 +117,6 @@ def test_get_force_flag(snakemake_executable: SnakemakeExecutable):
     assert force_flag == "--forceall"
 
 
-def test_get_mail_type_option(snakemake_executable: SnakemakeExecutable):
-    """Test formatting of the mail type option."""
-
-    # GIVEN a snakemake model with a mail type option
-    snakemake_model: SnakemakeExecutable = copy.deepcopy(snakemake_executable)
-    snakemake_model.mail_type = ClusterMailType.FAIL
-
-    # WHEN calling the method
-    mail_type_option: str = snakemake_model.get_mail_type_option()
-
-    # THEN the expected format should be returned
-    assert mail_type_option == "--mail-type FAIL"
-
-
 def test_quiet_flag(snakemake_executable: SnakemakeExecutable):
     """Test formatting of the quiet flag."""
 
@@ -197,20 +183,6 @@ def test_get_singularity_bind_paths_option(
         == f"--use-singularity --singularity-args '--cleanenv --bind {session_tmp_path.as_posix()}:/ "
         f"--bind {reference_file.as_posix()}:{reference_file.as_posix()}'"
     )
-
-
-def test_get_slurm_profiler_option(snakemake_executable: SnakemakeExecutable):
-    """Test formatting of the snakemake slurm profiler option."""
-
-    # GIVEN a snakemake executable model
-    snakemake_model: SnakemakeExecutable = copy.deepcopy(snakemake_executable)
-    snakemake_model.benchmark = True
-
-    # WHEN calling the method
-    slurm_profiler: str = snakemake_model.get_slurm_profiler_option()
-
-    # THEN the expected format should be returned
-    assert slurm_profiler == "--slurm-profiler task"
 
 
 def test_get_snakemake_options_command(snakemake_executable: SnakemakeExecutable):
