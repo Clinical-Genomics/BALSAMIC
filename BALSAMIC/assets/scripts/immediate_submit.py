@@ -71,6 +71,7 @@ def immediate_submit(
     scheduler: Scheduler = Scheduler(
         account=account,
         benchmark=benchmark,
+        case_id=case_id,
         dependencies=dependencies,
         job_properties=job_properties,
         job_script=job_script,
@@ -80,6 +81,7 @@ def immediate_submit(
         profile=profile,
         qos=qos,
     )
+    scheduler.submit_job()
 
 
 if __name__ == "__main__":

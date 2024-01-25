@@ -1,11 +1,16 @@
 """Scheduler models."""
+import logging
 from pathlib import Path
-from typing import Optional, List, Dict, Any
+from re import Match, search
+from subprocess import PIPE, CompletedProcess, run
+from typing import Any, Dict, List, Optional
 
+from pydantic import BaseModel, DirectoryPath, Field, FilePath, field_validator
+
+from BALSAMIC.constants.cluster import QOS, ClusterMailType, ClusterProfile
 from BALSAMIC.utils.utils import remove_unnecessary_spaces
 
-from BALSAMIC.constants.cluster import ClusterProfile, QOS, ClusterMailType
-from pydantic import BaseModel, FilePath, DirectoryPath, field_validator, Field
+LOG = logging.getLogger(__name__)
 
 
 class Scheduler(BaseModel):
@@ -15,6 +20,7 @@ class Scheduler(BaseModel):
     Attributes:
         account (Optional[str])                   : Cluster account to run jobs.
         benchmark (Optional[bool])                : Flag to profile slurm jobs.
+        case_id (str)                             : Case identifier.
         dependencies (Optional[List[str]])        : List of job dependencies.
         job_properties (Optional[Dict[str, Any]]) : Job properties defined in a snakemake jobscript.
         job_script (Optional[FilePath])           : Snakemake job script path.
@@ -25,11 +31,11 @@ class Scheduler(BaseModel):
         profiling_interval (Optional[int])        : Sampling interval for a profiling type.
         profiling_type (Optional[str])            : Collected data types.
         qos (Optional[QOS])                       : QOS for sbatch jobs.
-
     """
 
     account: Optional[str] = Field(default=None, validate_default=True)
     benchmark: Optional[bool] = False
+    case_id: str
     dependencies: Optional[List[str]] = Field(default=None, validate_default=True)
     job_properties: Optional[Dict[str, Any]] = Field(
         default=None, validate_default=True
@@ -124,7 +130,7 @@ class Scheduler(BaseModel):
             return f"--partition {partition}"
         return ""
 
-    def get_command(self) -> None:
+    def get_command(self) -> str:
         """Return the command to submit a specific job to the cluster."""
         command: str = (
             f"sbatch "
@@ -144,6 +150,37 @@ class Scheduler(BaseModel):
         )
         return remove_unnecessary_spaces(command)
 
-    def submit_job(self, command: str) -> None:
-        """Submit a job to the cluster using the provided command."""
-        # TODO
+    @staticmethod
+    def get_job_id_from_stdout(stdout: str) -> str:
+        """Return job ID from the standard output."""
+        job_id_match: Match[str] = search("Submitted batch job (\d+)", stdout)
+        if job_id_match:
+            job_id: str = job_id_match.group(1)
+            LOG.info(f"Submitted job with ID: {job_id}")
+            return job_id
+        raise ValueError("Failed to extract job ID from the submission result.")
+
+    def write_job_log_data(self, job_id: str, command: str):
+        """Write accounting information for jobs."""
+        log_files: Dict[Path, str] = {
+            Path(self.log_dir, f"{self.case_id}.sacct"): f"{job_id}\n",
+            Path(
+                self.log_dir, f"{self.case_id}.extended.sacct"
+            ): f"{job_id},{command}\n",
+        }
+        for file_path, log in log_files:
+            with open(file_path, "a") as file:
+                file.write(log)
+
+    def submit_job(self) -> str:
+        """Submit a job to the cluster."""
+        cluster_command: str = self.get_command()
+        try:
+            result: CompletedProcess = run(
+                cluster_command, check=True, shell=True, stdout=PIPE, text=True
+            )
+            job_id: str = self.get_job_id_from_stdout(result.stdout)
+            self.write_job_data(job_id=job_id, command=cluster_command)
+        except Exception:
+            LOG.error(f"Failed to submit: {cluster_command}")
+            raise
