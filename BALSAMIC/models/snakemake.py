@@ -176,17 +176,17 @@ class SnakemakeExecutable(BaseModel):
         """Get cluster command to be submitted by Snakemake."""
         cluster_submit_command: str = (
             f"'{sys.executable} {IMMEDIATE_SUBMIT_PATH.as_posix()} "
-            f"--profile {self.profile} "
+            f"--account {self.account} "
             f"--benchmark "
             if self.benchmark
             else ""
-            f"--account {self.account} "
-            f"--qos {self.qos} "
-            f"--mail-user {self.mail_user} "
-            f"--mail-type {self.mail_type} "
             f"--log-dir {self.log_dir.as_posix()} "
+            f"--mail-type {self.mail_type} "
+            f"--mail-user {self.mail_user} "
+            f"--profile {self.profile} "
+            f"--qos {self.qos} "
             f"--script-dir {self.script_dir.as_posix()} "
             f"{self.case_id} "
-            "{dependencies} '"
+            "{dependencies}'"
         )
         return remove_unnecessary_spaces(cluster_submit_command)
