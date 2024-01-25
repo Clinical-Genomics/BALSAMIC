@@ -116,25 +116,22 @@ CADD
 LoqusDB somatic frequencies (cancer cases)
 ------------------------------------------
 
-.. list-table:: loqusDB somatic SNV annotations
+.. list-table:: LoqusDB Somatic Annotations
    :widths: 50 150 50
    :header-rows: 1
 
    * - VCF tag
      - description
      - variant type
-   * - Cancer_Somatic_Frq, somatic_frq
+   * - Cancer_Somatic_Frq
      - Frequency of observation for somatic mutations
      - SNV, SV
    * - Cancer_Somatic_Obs
-     - allele counts of the somtaic variant
-     - SNV
+     - allele counts of the somatic variant
+     - SNV, SV
    * - Cancer_Somatic_Hom
      - allele counts of the homozygous somatic variant
      - SNV
-   * - somatic_obs
-     - allele counts
-     - SV
 
 LoqusDB germline frequencies (cancer cases)
 -------------------------------------------
