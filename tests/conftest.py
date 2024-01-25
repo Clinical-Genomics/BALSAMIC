@@ -2348,7 +2348,7 @@ def fixture_snakemake_executable_data(
 ) -> Dict[str, Any]:
     """Return snakemake executable model data."""
     return {
-        "account": ClusterAccount.DEVELOPMENT,
+        "account": ClusterAccount.DEVELOPMENT.value,
         "case_id": case_id_tumor_only,
         "cluster_config_path": reference_file,
         "config_path": reference_file,
@@ -2387,7 +2387,7 @@ def fixture_snakemake_executable_validated_data(
 ) -> Dict[str, Any]:
     """Return snakemake model expected data."""
     return {
-        "account": ClusterAccount.DEVELOPMENT,
+        "account": ClusterAccount.DEVELOPMENT.value,
         "benchmark": False,
         "case_id": case_id_tumor_only,
         "cluster_config_path": reference_file,
