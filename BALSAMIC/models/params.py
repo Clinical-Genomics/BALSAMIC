@@ -188,9 +188,15 @@ class BalsamicWorkflowConfig(BaseModel):
 
     def get_manta_target_settings(self, genome_version, sequencing_type) -> str:
         """Return correct setting for manta target rule."""
-        if sequencing_type == SequencingType.WGS and genome_version == GenomeVersion.HG19:
+        if (
+            sequencing_type == SequencingType.WGS
+            and genome_version == GenomeVersion.HG19
+        ):
             return self.manta_target.wgs_hg19
-        elif sequencing_type == SequencingType.WGS and genome_version == GenomeVersion.HG38:
+        elif (
+            sequencing_type == SequencingType.WGS
+            and genome_version == GenomeVersion.HG38
+        ):
             return self.manta_target.wgs_hg38
         else:
             return self.manta_target.targeted

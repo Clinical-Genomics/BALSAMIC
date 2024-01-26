@@ -90,6 +90,20 @@
                 "single"
             ],
             "sequencing_type": [
+                "wgs"
+            ],
+            "workflow_solution": [
+                "BALSAMIC"
+            ]
+        },
+        "mantatarget": {
+            "mutation": "somatic",
+            "mutation_type": "SV",
+            "analysis_type": [
+                "paired",
+                "single"
+            ],
+            "sequencing_type": [
                 "targeted",
                 "wgs"
             ],
