@@ -6,8 +6,10 @@ from typing import Any, Dict
 from unittest import mock
 
 import pytest
+from _pytest.logging import LogCaptureFixture
 from pydantic import ValidationError
 
+from BALSAMIC.constants.constants import EXIT_SUCCESS
 from BALSAMIC.models.scheduler import Scheduler
 
 
@@ -135,9 +137,7 @@ def test_get_job_id_from_stdout(job_id: str, scheduler_model: Scheduler):
     assert retrieved_job_id == job_id
 
 
-def test_write_job_log_data(
-    case_id_tumor_only: str, job_id: str, scheduler_model: Scheduler
-):
+def test_write_job_log_data(job_id: str, scheduler_model: Scheduler):
     """Test writing job log data."""
 
     # GIVEN a scheduler model, a case id, a job id, and a scheduler command
@@ -147,7 +147,7 @@ def test_write_job_log_data(
     scheduler_model.write_job_log_data(job_id=job_id, command=command)
 
     # THEN the log file should have been created
-    log_file: Path = Path(scheduler_model.log_dir, f"{case_id_tumor_only}.sacct")
+    log_file: Path = Path(scheduler_model.log_dir, f"{scheduler_model.case_id}.sacct")
     assert log_file.is_file()
     with open(log_file, "r") as file:
         assert f"{job_id},{command}" in file.read()
@@ -169,24 +169,23 @@ def test_get_command(
             assert str(value) in command
 
 
-def test_submit_job(
-    job_id: str, case_id_tumor_only: str, scheduler_model: Scheduler, caplog
-):
+def test_submit_job(job_id: str, scheduler_model: Scheduler, caplog: LogCaptureFixture):
     """Test job submission to the cluster."""
     caplog.set_level(logging.INFO)
 
-    # GIVEN a scheduler model and a mocked subprocess command
+    # GIVEN a scheduler model and the expected standard output command
     stdout: str = f"Submitted batch job {job_id}"
+
+    # WHEN submitting a cluster job
     with mock.patch.object(
         subprocess,
         "run",
         return_value=subprocess.CompletedProcess(
-            args="", returncode=0, stdout=stdout, stderr=""
+            args="", returncode=EXIT_SUCCESS, stdout=stdout, stderr=""
         ),
     ):
-        # WHEN submitting a specific job
         scheduler_model.submit_job()
 
-    # THEN the cluster job should be submitted and the log file updated
+    # THEN the cluster job should be submitted and the log file created
     assert f"Submitted job with ID: {job_id}" in caplog.text
-    assert Path(scheduler_model.log_dir, f"{case_id_tumor_only}.sacct").is_file()
+    assert Path(scheduler_model.log_dir, f"{scheduler_model.case_id}.sacct").is_file()
