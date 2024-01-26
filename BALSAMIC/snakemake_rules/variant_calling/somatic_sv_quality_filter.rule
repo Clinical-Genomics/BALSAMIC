@@ -15,7 +15,7 @@ rule bcftools_quality_filter_svdb:
     "Filtering merged research structural and copy number variants using bcftools for {params.case_name}"
   shell:
     """
-bcftools view --threads {threads} -f .,PASS,MaxDepth -o {output.vcf_pass_svdb_research} -O z {input.vcf_svdb};
+bcftools view --threads {threads} -f PASS -o {output.vcf_pass_svdb_research} -O z {input.vcf_svdb};
 
 tabix -p vcf -f {output.vcf_pass_svdb_research};
     """

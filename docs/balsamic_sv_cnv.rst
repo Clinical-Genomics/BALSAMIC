@@ -138,7 +138,7 @@ The following filter applies for both tumor-normal and tumor-only samples in add
 
     Frq <= 0.02  (or) Frq == "."
 
-The variants scored as `PASS` or `MaxDepth` are included in the final vcf file (`SNV.somatic.<CASE_ID>.svdb.<research/clinical>.filtered.pass.vcf.gz`).
+The variants scored as `PASS` are included in the final vcf file (`SNV.somatic.<CASE_ID>.svdb.<research/clinical>.filtered.pass.vcf.gz`).
 
 The following command can be used to fetch the variants identified by a specific caller from merged structural and copy number variants.
 

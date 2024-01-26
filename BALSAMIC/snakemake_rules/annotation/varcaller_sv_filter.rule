@@ -23,9 +23,8 @@ rule bcftools_filter_sv_research:
     "Filtering merged research structural and copy number variants using bcftools for {params.case_name}"
   shell:
     """
-bcftools view --threads {threads} -f .,PASS,MaxDepth {input.vcf_sv_research} |\
 bcftools filter --threads {threads} --include 'INFO/SWEGENAF <= {params.swegen_freq[0]} || INFO/SWEGENAF == \".\"' --soft-filter '{params.swegen_freq[1]}' --mode '+' |\
-bcftools view --threads {threads} -f .,PASS,MaxDepth -O z -o {output.vcf_pass_svdb};
+bcftools view --threads {threads} -f PASS -O z -o {output.vcf_pass_svdb};
 
 tabix -p vcf -f {output.vcf_pass_svdb};
 
@@ -56,10 +55,9 @@ rule bcftools_filter_sv_clinical:
   shell:
     """
 bcftools reheader --threads {threads} -s {input.namemap} {input.vcf_sv_clinical} |\
-bcftools view --threads {threads} -f .,PASS,MaxDepth |\
 bcftools filter --threads {threads} --include 'INFO/SWEGENAF <= {params.swegen_freq[0]} || INFO/SWEGENAF == \".\"' --soft-filter '{params.swegen_freq[1]}' --mode '+' |\
 bcftools filter --threads {threads} --include 'INFO/Frq <= {params.loqusdb_clinical_freq[0]} || INFO/Frq == \".\"' --soft-filter '{params.loqusdb_clinical_freq[1]}' --mode '+' |\
-bcftools view --threads {threads} -f .,PASS,MaxDepth -O z -o {output.vcf_pass_svdb};
+bcftools view --threads {threads} -f PASS -O z -o {output.vcf_pass_svdb};
 
 tabix -p vcf -f {output.vcf_pass_svdb};
 

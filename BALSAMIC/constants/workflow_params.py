@@ -33,6 +33,13 @@ VCF_DICT = {
         "mutation": "somatic",
         "mutation_type": "SV",
         "analysis_type": ["paired", "single"],
+        "sequencing_type": ["wgs"],
+        "workflow_solution": ["BALSAMIC"],
+    },
+    "mantatarget": {
+        "mutation": "somatic",
+        "mutation_type": "SV",
+        "analysis_type": ["paired", "single"],
         "sequencing_type": ["targeted", "wgs"],
         "workflow_solution": ["BALSAMIC"],
     },
@@ -145,6 +152,11 @@ WORKFLOW_PARAMS = {
                 "-CREATE_MD5_FILE true",
             ]
         ),
+    },
+    "manta_target": {
+        "wgs_hg19": "--exome --region=chr13:28525642-28726481",
+        "wgs_hg38": "--exome --region=chr13:27952208-28151643",
+        "targeted": "--exome",
     },
     "vardict": {
         "allelic_frequency": "0.001",

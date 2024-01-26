@@ -113,6 +113,18 @@ else:
     status_to_sample_id = "TUMOR" + "\\\\t" + tumor_sample
 
 
+# Varcaller filter settings
+COMMON_FILTERS = VarCallerFilter.model_validate(COMMON_SETTINGS)
+VARDICT = VarCallerFilter.model_validate(VARDICT_SETTINGS)
+SENTIEON_CALLER = VarCallerFilter.model_validate(SENTIEON_VARCALL_SETTINGS)
+SVDB_FILTERS = VarCallerFilter.model_validate(SVDB_FILTER_SETTINGS)
+
+# Fastp parameters
+fastp_parameters: Dict = get_fastp_parameters(config_model)
+
+# parse parameters as constants to workflows
+params = BalsamicWorkflowConfig.model_validate(WORKFLOW_PARAMS)
+
 # vcfanno annotations
 research_annotations.append( {
     'annotation': [{
@@ -201,19 +213,6 @@ if "cancer_somatic_sv_observations" in config["reference"]:
 if "swegen_sv_frequency" in config["reference"]:
     swegen_sv: str = get_swegen_sv(config)
 
-
-
-# Varcaller filter settings
-COMMON_FILTERS = VarCallerFilter.model_validate(COMMON_SETTINGS)
-VARDICT = VarCallerFilter.model_validate(VARDICT_SETTINGS)
-SENTIEON_CALLER = VarCallerFilter.model_validate(SENTIEON_VARCALL_SETTINGS)
-SVDB_FILTERS = VarCallerFilter.model_validate(SVDB_FILTER_SETTINGS)
-
-# Fastp parameters
-fastp_parameters: Dict = get_fastp_parameters(config_model)
-
-# parse parameters as constants to workflows
-params = BalsamicWorkflowConfig.model_validate(WORKFLOW_PARAMS)
 
 # Capture kit name
 if config["analysis"]["sequencing_type"] != "wgs":
