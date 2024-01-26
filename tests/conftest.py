@@ -2445,10 +2445,10 @@ def scheduler_data(
         "case_id": case_id_tumor_only,
         "dependencies": ["1", "2", "3"],
         "job_properties": job_properties,
-        "job_script": reference_file,
-        "log_dir": session_tmp_path,
+        "job_script": reference_file.as_posix(),
+        "log_dir": session_tmp_path.as_posix(),
         "mail_user": mail_user_option,
-        "profile": ClusterProfile.SLURM,
+        "profile": ClusterProfile.SLURM.value,
         "qos": QOS.HIGH,
     }
 
@@ -2472,7 +2472,7 @@ def scheduler_validated_data(
         "log_dir": session_tmp_path,
         "mail_type": "",
         "mail_user": "--mail-user balsamic@scilifelab.se",
-        "profile": ClusterProfile.SLURM.value,
+        "profile": ClusterProfile.SLURM,
         "profiling_interval": 10,
         "profiling_type": "task",
         "qos": "--qos high",
