@@ -94,7 +94,7 @@ SENTIEON_VARCALL_SETTINGS = {
 # Manta bcftools filters
 MANTA_FILTER_SETTINGS = {
     "low_pr_sr_freq": {
-        "tag_value": 0.03,
+        "tag_value": 0.01,
         "filter_name": "low_pr_sr_freq",
         "field": "FORMAT",
     },
