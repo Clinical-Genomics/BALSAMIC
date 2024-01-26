@@ -95,6 +95,7 @@ class VCFModel(BaseModel):
     dnascope: VarcallerAttribute
     tnscope_umi: VarcallerAttribute
     manta_germline: VarcallerAttribute
+    mantatarget: VarcallerAttribute
     manta: VarcallerAttribute
     dellysv: VarcallerAttribute
     cnvkit: VarcallerAttribute
