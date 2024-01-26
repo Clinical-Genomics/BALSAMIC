@@ -3,6 +3,8 @@ import shutil
 from typing import Any, Dict, List, Optional
 
 import click
+from snakemake import utils
+
 from BALSAMIC.commands.options import (
     OPTION_BENCHMARK,
     OPTION_CLUSTER_ACCOUNT,
@@ -13,23 +15,12 @@ from BALSAMIC.commands.options import (
 )
 from BALSAMIC.constants.cluster import QOS, ClusterProfile
 from BALSAMIC.models.scheduler import Scheduler
-from snakemake.utils import read_job_properties
 
 
 @click.command()
 @click.argument("case_id", nargs=1, required=True, type=click.STRING)
-@click.argument(
-    "dependencies",
-    nargs=-1,
-    type=click.STRING,
-    help="Snakemake job dependencies",
-)
-@click.argument(
-    "job_script",
-    nargs=1,
-    type=click.Path(exists=True, resolve_path=True),
-    help="Snakemake job script path",
-)
+@click.argument("dependencies", nargs=-1, type=click.STRING)
+@click.argument("job_script", nargs=1, type=click.Path(exists=True, resolve_path=True))
 @OPTION_CLUSTER_ACCOUNT
 @OPTION_BENCHMARK
 @OPTION_CLUSTER_MAIL_TYPE
@@ -51,12 +42,12 @@ from snakemake.utils import read_job_properties
 def immediate_submit(
     account: str,
     case_id: str,
+    job_script: str,
     log_dir: str,
     profile: ClusterProfile,
     script_dir: str,
     benchmark: Optional[bool] = False,
     dependencies: Optional[List[str]] = None,
-    job_script: Optional[str] = None,
     mail_type: Optional[str] = None,
     mail_user: Optional[str] = None,
     qos: Optional[QOS] = QOS.LOW,
@@ -66,7 +57,7 @@ def immediate_submit(
     from the output. These job IDs are then forwarded as dependencies to the subsequent jobs.
     """
     job_script: str = shutil.copy2(src=job_script, dst=script_dir)
-    job_properties: Dict[str, Any] = read_job_properties(job_script)
+    job_properties: Dict[str, Any] = utils.read_job_properties(job_script)
     scheduler: Scheduler = Scheduler(
         account=account,
         benchmark=benchmark,
