@@ -1,10 +1,8 @@
 """Script to submit jobs to a cluster."""
 import shutil
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 import click
-from snakemake.utils import read_job_properties
-
 from BALSAMIC.commands.options import (
     OPTION_BENCHMARK,
     OPTION_CLUSTER_ACCOUNT,
@@ -15,6 +13,7 @@ from BALSAMIC.commands.options import (
 )
 from BALSAMIC.constants.cluster import QOS, ClusterProfile
 from BALSAMIC.models.scheduler import Scheduler
+from snakemake.utils import read_job_properties
 
 
 @click.command()
@@ -51,16 +50,16 @@ from BALSAMIC.models.scheduler import Scheduler
 )
 def immediate_submit(
     account: str,
-    benchmark: bool,
     case_id: str,
-    dependencies: List[str],
-    job_script: str,
     log_dir: str,
-    mail_type: str,
-    mail_user: str,
     profile: ClusterProfile,
-    qos: QOS,
     script_dir: str,
+    benchmark: Optional[bool] = False,
+    dependencies: Optional[List[str]] = None,
+    job_script: Optional[str] = None,
+    mail_type: Optional[str] = None,
+    mail_user: Optional[str] = None,
+    qos: Optional[QOS] = QOS.LOW,
 ) -> None:
     """
     Submits jobs to the cluster. Each job is submitted sequentially, and their respective job IDs are collected
