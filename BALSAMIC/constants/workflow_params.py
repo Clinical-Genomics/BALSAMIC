@@ -115,6 +115,8 @@ VCF_DICT = {
     },
 }
 
+SLEEP_BEFORE_START = 300
+
 WORKFLOW_PARAMS = {
     "common": {
         "pcr_model": "NONE",

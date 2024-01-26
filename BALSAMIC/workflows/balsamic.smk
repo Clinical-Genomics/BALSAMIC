@@ -18,7 +18,7 @@ from BALSAMIC.constants.variant_filters import (
     SVDB_FILTER_SETTINGS,
     VARDICT_SETTINGS,
 )
-from BALSAMIC.constants.workflow_params import VARCALL_PARAMS, WORKFLOW_PARAMS
+from BALSAMIC.constants.workflow_params import VARCALL_PARAMS, WORKFLOW_PARAMS, SLEEP_BEFORE_START
 from BALSAMIC.models.config import ConfigModel
 from BALSAMIC.models.params import BalsamicWorkflowConfig, VarCallerFilter
 from BALSAMIC.utils.cli import check_executable, generate_h5
@@ -82,7 +82,6 @@ qc_dir: str = Path(result_dir, "qc").as_posix() + "/"
 delivery_dir: str = Path(result_dir, "delivery").as_posix() + "/"
 umi_dir: str = Path(result_dir, "umi").as_posix() + "/"
 umi_qc_dir: str = Path(qc_dir, "umi_qc").as_posix() + "/"
-
 
 # Annotations
 research_annotations = []
