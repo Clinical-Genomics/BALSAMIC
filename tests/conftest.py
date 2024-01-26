@@ -68,6 +68,20 @@ def fastq_pattern_ids() -> list:
 
 
 @pytest.fixture(scope="session")
+def empty_dir(tmp_path_factory: TempPathFactory) -> Path:
+    """Return an empty directory path."""
+    return tmp_path_factory.mktemp("empty_dir")
+
+
+@pytest.fixture(scope="session")
+def empty_file(empty_dir: Path) -> Path:
+    """Return an empty directory path."""
+    empty_file: Path = Path(empty_dir, "file.empty")
+    empty_file.touch()
+    return empty_file
+
+
+@pytest.fixture(scope="session")
 def test_data_dir() -> Path:
     """
     Creates path for test data directory.
@@ -2435,9 +2449,9 @@ def job_properties() -> Dict[str, Any]:
 def scheduler_data(
     case_id_tumor_only: str,
     job_properties: Dict[str, Any],
+    empty_file: Path,
+    empty_dir: Path,
     mail_user_option: str,
-    reference_file: Path,
-    session_tmp_path: Path,
 ) -> Dict[str, Any]:
     """Return raw scheduler model data."""
     return {
@@ -2445,8 +2459,8 @@ def scheduler_data(
         "case_id": case_id_tumor_only,
         "dependencies": ["1", "2", "3"],
         "job_properties": job_properties,
-        "job_script": reference_file.as_posix(),
-        "log_dir": session_tmp_path.as_posix(),
+        "job_script": empty_file.as_posix(),
+        "log_dir": empty_dir.as_posix(),
         "mail_user": mail_user_option,
         "profile": ClusterProfile.SLURM.value,
         "qos": QOS.HIGH,
@@ -2457,21 +2471,21 @@ def scheduler_data(
 def scheduler_validated_data(
     case_id_tumor_only: str,
     job_properties: Dict[str, Any],
+    empty_file: Path,
+    empty_dir: Path,
     mail_user_option: str,
-    reference_file: Path,
-    session_tmp_path: Path,
 ) -> Dict[str, Any]:
     """Return scheduler model validated data."""
     return {
-        "account": "--account development",
+        "account": f"--account {ClusterAccount.DEVELOPMENT}",
         "benchmark": False,
-        "case_id": "sample_tumor_only",
+        "case_id": case_id_tumor_only,
         "dependencies": "--dependency afterok:1,2,3",
         "job_properties": job_properties,
-        "job_script": reference_file,
-        "log_dir": session_tmp_path,
+        "job_script": empty_file,
+        "log_dir": empty_dir,
         "mail_type": "",
-        "mail_user": "--mail-user balsamic@scilifelab.se",
+        "mail_user": f"--mail-user {mail_user_option}",
         "profile": ClusterProfile.SLURM,
         "profiling_interval": 10,
         "profiling_type": "task",
