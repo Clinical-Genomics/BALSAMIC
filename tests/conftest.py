@@ -39,6 +39,7 @@ from BALSAMIC.models.cache import (
     ReferencesHg,
 )
 from BALSAMIC.models.config import ConfigModel
+from BALSAMIC.models.scheduler import Scheduler
 from BALSAMIC.models.snakemake import SingularityBindPath, SnakemakeExecutable
 from BALSAMIC.utils.io import read_json, read_yaml, write_json
 from .helpers import ConfigHelper, Map
@@ -2410,3 +2411,75 @@ def fixture_snakemake_executable_validated_data(
         "snakemake_options": snakemake_options_command,
         "working_dir": session_tmp_path,
     }
+
+
+@pytest.fixture(scope="session")
+def job_id() -> str:
+    """Return cluster job identifier."""
+    return "12345"
+
+
+@pytest.fixture(scope="session")
+def job_properties() -> Dict[str, Any]:
+    """Cluster job properties."""
+    return {
+        "cluster": {
+            "partition": "core",
+            "n": "1",
+            "time": "10:00:00",
+        }
+    }
+
+
+@pytest.fixture(scope="session")
+def scheduler_data(
+    case_id_tumor_only: str,
+    job_properties: Dict[str, Any],
+    mail_user_option: str,
+    reference_file: Path,
+    session_tmp_path: Path,
+) -> Dict[str, Any]:
+    """Return raw scheduler model data."""
+    return {
+        "account": ClusterAccount.DEVELOPMENT.value,
+        "case_id": case_id_tumor_only,
+        "dependencies": ["1", "2", "3"],
+        "job_properties": job_properties,
+        "job_script": reference_file,
+        "log_dir": session_tmp_path,
+        "mail_user": mail_user_option,
+        "profile": ClusterProfile.SLURM,
+        "qos": QOS.HIGH,
+    }
+
+
+@pytest.fixture(scope="session")
+def scheduler_validated_data(
+    case_id_tumor_only: str,
+    job_properties: Dict[str, Any],
+    mail_user_option: str,
+    reference_file: Path,
+    session_tmp_path: Path,
+) -> Dict[str, Any]:
+    """Return scheduler model validated data."""
+    return {
+        "account": "--account development",
+        "benchmark": False,
+        "case_id": "sample_tumor_only",
+        "dependencies": "--dependency afterok:1,2,3",
+        "job_properties": job_properties,
+        "job_script": reference_file,
+        "log_dir": session_tmp_path,
+        "mail_type": "",
+        "mail_user": "--mail-user balsamic@scilifelab.se",
+        "profile": ClusterProfile.SLURM.value,
+        "profiling_interval": 10,
+        "profiling_type": "task",
+        "qos": "--qos high",
+    }
+
+
+@pytest.fixture(scope="session")
+def scheduler_model(scheduler_data: Dict[str, Any]) -> Scheduler:
+    """Return scheduler pydantic model."""
+    return Scheduler(**scheduler_data)
