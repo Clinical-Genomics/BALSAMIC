@@ -17,6 +17,7 @@ from BALSAMIC.constants.variant_filters import (
     SENTIEON_VARCALL_SETTINGS,
     SVDB_FILTER_SETTINGS,
     VARDICT_SETTINGS,
+    MANTA_FILTER_SETTINGS,
 )
 from BALSAMIC.constants.workflow_params import VARCALL_PARAMS, WORKFLOW_PARAMS, SLEEP_BEFORE_START
 from BALSAMIC.models.config import ConfigModel
@@ -117,6 +118,7 @@ COMMON_FILTERS = VarCallerFilter.model_validate(COMMON_SETTINGS)
 VARDICT = VarCallerFilter.model_validate(VARDICT_SETTINGS)
 SENTIEON_CALLER = VarCallerFilter.model_validate(SENTIEON_VARCALL_SETTINGS)
 SVDB_FILTERS = VarCallerFilter.model_validate(SVDB_FILTER_SETTINGS)
+MANTA_FILTERS = VarCallerFilter.model_validate(MANTA_FILTER_SETTINGS)
 
 # Fastp parameters
 fastp_parameters: Dict = get_fastp_parameters(config_model)
