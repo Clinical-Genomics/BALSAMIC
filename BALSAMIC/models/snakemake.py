@@ -177,12 +177,10 @@ class SnakemakeExecutable(BaseModel):
         cluster_submit_command: str = (
             f"'{sys.executable} {IMMEDIATE_SUBMIT_PATH.as_posix()} "
             f"--account {self.account} "
-            f"--benchmark "
-            if self.benchmark
-            else ""
+            f"{'--benchmark' if self.benchmark else ''} "
             f"--log-dir {self.log_dir.as_posix()} "
-            f"--mail-type {self.mail_type} "
-            f"--mail-user {self.mail_user} "
+            f"{f'--mail-type {self.mail_type}' if self.mail_type else ''} "
+            f"{f'--mail-user {self.mail_user}' if self.mail_user else ''} "
             f"--profile {self.profile} "
             f"--qos {self.qos} "
             f"--script-dir {self.script_dir.as_posix()} "
