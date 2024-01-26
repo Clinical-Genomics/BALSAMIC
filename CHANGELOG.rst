@@ -1,3 +1,20 @@
+[X.X.X]
+-------
+
+Added:
+^^^^^^
+
+Changed:
+^^^^^^^^
+- Cluster scheduler script for immediate submit https://github.com/Clinical-Genomics/BALSAMIC/pull/1372
+
+Fixed:
+^^^^^^
+
+Removed:
+^^^^^^^^
+- SGE (qsub) support https://github.com/Clinical-Genomics/BALSAMIC/pull/1372
+
 [13.0.0]
 -------
 
