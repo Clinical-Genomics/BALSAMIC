@@ -18,22 +18,22 @@ class Scheduler(BaseModel):
     Scheduler model handling cluster job submissions.
 
     Attributes:
-        account (Optional[str])                   : Cluster account to run jobs.
+        account (str)                             : Cluster account to run jobs.
         benchmark (Optional[bool])                : Flag to profile slurm jobs.
         case_id (str)                             : Case identifier.
         dependencies (Optional[List[str]])        : List of job dependencies.
         job_properties (Optional[Dict[str, Any]]) : Job properties defined in a snakemake jobscript.
         job_script (Optional[FilePath])           : Snakemake job script path.
-        log_dir (Optional[DirectoryPath])         : Logging directory.
+        log_dir (DirectoryPath)                   : Logging directory.
         mail_type (Optional[ClusterMailType])     : Email type triggering job status notifications.
         mail_user (Optional[str])                 : User email to receive job status notifications.
-        profile (Optional[ClusterProfile])        : Cluster profile to submit jobs.
+        profile (ClusterProfile)                  : Cluster profile to submit jobs.
         profiling_interval (Optional[int])        : Sampling interval for a profiling type.
         profiling_type (Optional[str])            : Collected data types.
         qos (Optional[QOS])                       : QOS for sbatch jobs.
     """
 
-    account: Optional[str] = Field(default=None, validate_default=True)
+    account: str
     benchmark: Optional[bool] = False
     case_id: str
     dependencies: Optional[List[str]] = Field(default=None, validate_default=True)
@@ -41,20 +41,18 @@ class Scheduler(BaseModel):
         default=None, validate_default=True
     )
     job_script: FilePath
-    log_dir: Optional[DirectoryPath] = None
+    log_dir: DirectoryPath
     mail_type: Optional[ClusterMailType] = Field(default=None, validate_default=True)
     mail_user: Optional[str] = Field(default=None, validate_default=True)
-    profile: Optional[ClusterProfile] = ClusterProfile.SLURM
+    profile: ClusterProfile
     profiling_interval: int = 10
     profiling_type: str = "task"
     qos: Optional[QOS] = QOS.LOW
 
     @field_validator("account")
-    def get_account_option(cls, account: Optional[str]) -> str:
+    def get_account_option(cls, account: str) -> str:
         """Return string representation of the account option."""
-        if account:
-            return f"--account {account}"
-        return ""
+        return f"--account {account}"
 
     @field_validator("dependencies")
     def get_dependency_option(cls, dependencies: Optional[List[str]]) -> str:
@@ -87,15 +85,11 @@ class Scheduler(BaseModel):
 
     def get_error_option(self) -> str:
         """Return the standard error file path."""
-        if self.log_dir:
-            return f"--error {Path(self.log_dir, f'{Path(self.job_script).name}.%j.err').as_posix()}"
-        return ""
+        return f"--error {Path(self.log_dir, f'{Path(self.job_script).name}.%j.err').as_posix()}"
 
     def get_output_option(self) -> str:
         """Return the standard output file path."""
-        if self.log_dir:
-            return f"--output {Path(self.log_dir, f'{Path(self.job_script).name}.%j.out').as_posix()}"
-        return ""
+        return f"--output {Path(self.log_dir, f'{Path(self.job_script).name}.%j.out').as_posix()}"
 
     def get_profile_option(self) -> str:
         """Return string representation of the slurm profile option."""
