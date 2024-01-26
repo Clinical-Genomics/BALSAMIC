@@ -153,7 +153,7 @@ class Scheduler(BaseModel):
             f"{self.get_output_option()} "
             f"{self.get_profile_option()} "
             f"{self.get_acctg_freq_option()} "
-            f"{self.get_ntasks_option()}"
+            f"{self.get_ntasks_option()} "
             f"{self.get_time_option()} "
             f"{self.get_partition_option()} "
             f"{self.job_script} "
