@@ -57,7 +57,7 @@ rule manta_target_tumor_only:
         final = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".mantatarget.vcf.gz",
         namemap = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".mantatarget.sample_name_map"
     benchmark:
-        benchmark_dir + 'manta_tumor_only_' + config["analysis"]["case_id"] + ".tsv"
+        benchmark_dir + 'manta_target_tumor_only_' + config["analysis"]["case_id"] + ".tsv"
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("manta") + ".sif").as_posix()
     params:
@@ -68,10 +68,9 @@ rule manta_target_tumor_only:
         case_name = config["analysis"]["case_id"],
         manta_install_path= "/opt/conda/share/manta-1.6.0-2"
     threads:
-        get_threads(cluster_config, "manta_tumor_only")
+        get_threads(cluster_config, "manta_target_tumor_only")
     message:
-        ("Calling structural variants using manta for {params.case_name} and"
-        "index the compressed vcf file")
+        ("Calling structural variants using manta for {params.case_name} using --exome mode")
     shell:
       """
 samtools_path=$(readlink -f $(which samtools))
