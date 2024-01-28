@@ -14,6 +14,8 @@ rule picard_umiaware:
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("picard") + ".sif").as_posix()
     params:
+        mem = "16g",
+        tmpdir= tempfile.mkdtemp(prefix=tmp_dir),
         sample_id = "{sample}"
     threads:
         get_threads(cluster_config, "picard_umiaware")
@@ -21,7 +23,7 @@ rule picard_umiaware:
         "Marking duplicates using Picardtools with UmiAware for {params.sample_id}"
     shell:
         """
-picard UmiAwareMarkDuplicatesWithMateCigar \
+picard -Xmx{params.mem} -Djava.io.tmpdir={params.tmpdir} UmiAwareMarkDuplicatesWithMateCigar \
 I={input.bam} \
 O={output.bam} \
 M={output.duplicates} \
@@ -42,7 +44,9 @@ rule picard_collecthsmetrics_umi:
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("picard") + ".sif").as_posix()
     params:
+        mem = "16g",
         baitsetname = os.path.basename(config["panel"]["capture_kit"]),
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         sample_id = "{sample}"
     threads:
         get_threads(cluster_config, "CollectHsMetrics")
@@ -55,7 +59,7 @@ I={input.bed} \
 O={input.bam}.picard.bedintervals \
 SD={input.fadict};
 
-picard CollectHsMetrics \
+picard -Xmx{params.mem} -Djava.io.tmpdir={params.tmpdir} CollectHsMetrics \
 BI={input.bam}.picard.bedintervals \
 TI={input.bam}.picard.bedintervals \
 I={input.bam} \
