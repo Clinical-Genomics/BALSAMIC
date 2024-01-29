@@ -1,0 +1,15 @@
+
+rule sleep_before_start:
+    """Wait 120s before starting any processing to avoid key_error issue."""
+    output:
+        wake_up = result_dir + "start_analysis"
+    params:
+        sleep_seconds = seconds_before_start
+    threads: get_threads(cluster_config, "sleep_before_start")
+    message:
+        "Sleeping for {params.sleep_seconds} seconds before starting analysis."
+    shell:
+        """
+sleep {params.sleep_seconds}
+echo "Waited: {params.sleep_seconds} seconds. Now starting analysis." >> {output.wake_up}
+        """

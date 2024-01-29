@@ -18,7 +18,7 @@ from BALSAMIC.constants.variant_filters import (
     SVDB_FILTER_SETTINGS,
     VARDICT_SETTINGS,
 )
-from BALSAMIC.constants.workflow_params import VARCALL_PARAMS, WORKFLOW_PARAMS
+from BALSAMIC.constants.workflow_params import VARCALL_PARAMS, WORKFLOW_PARAMS, SLEEP_BEFORE_START
 from BALSAMIC.models.config import ConfigModel
 from BALSAMIC.models.params import BalsamicWorkflowConfig, VarCallerFilter
 from BALSAMIC.utils.cli import check_executable, generate_h5
@@ -83,6 +83,8 @@ delivery_dir: str = Path(result_dir, "delivery").as_posix() + "/"
 umi_dir: str = Path(result_dir, "umi").as_posix() + "/"
 umi_qc_dir: str = Path(qc_dir, "umi_qc").as_posix() + "/"
 
+# Pre run parameters
+seconds_before_start: int = SLEEP_BEFORE_START
 
 # Annotations
 research_annotations = []
@@ -226,12 +228,12 @@ if len(cluster_config.keys()) == 0:
 # Find and set Sentieon binary and license server from env variables
 try:
     config["SENTIEON_LICENSE"] = os.environ["SENTIEON_LICENSE"]
-    config["SENTIEON_INSTALL_DIR"] = os.environ["SENTIEON_INSTALL_DIR"]
+    config["SENTIEON_INSTALL_DIR"] = "/home/proj/bin/sentieon/sentieon-genomics-202308/"
 
     if os.getenv("SENTIEON_EXEC") is not None:
         config["SENTIEON_EXEC"] = os.environ["SENTIEON_EXEC"]
     else:
-        config["SENTIEON_EXEC"] = Path(os.environ["SENTIEON_INSTALL_DIR"], "bin", "sentieon").as_posix()
+        config["SENTIEON_EXEC"] = Path("/home/proj/bin/sentieon/sentieon-genomics-202308/", "bin", "sentieon").as_posix()
 
     config["SENTIEON_TNSCOPE"] = SENTIEON_TNSCOPE_DIR.as_posix()
     config["SENTIEON_DNASCOPE"] = SENTIEON_DNASCOPE_DIR.as_posix()

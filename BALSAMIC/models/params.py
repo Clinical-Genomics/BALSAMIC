@@ -9,14 +9,12 @@ class ParamsCommon(BaseModel):
 
     Attributes:
         pcr_model: str (required). PCR indel model used to weed out false positive indels. Eg: none- PCR free samples.
-        align_header: str (required); header line appended to the aligned BAM output
         min_mapq: int (required); minimum mapping quality score. Eg: 20- probability of mapping random read at 99% accuracy
         picard_fixmate: str (required), fix read mate information in bam file
         picard_RG_normal: str (required); replace readgroups in normal bam file
         picard_RG_tumor: str (required); replace readgroups in tumor bam file
     """
 
-    align_header: str
     pcr_model: str
     min_mapq: int
     picard_fixmate: str
@@ -85,12 +83,10 @@ class UMIParamsCommon(BaseModel):
 
     Attributes:
         align_format: str (required); output alignment format. eg. 'BAM'
-        align_header: str (required); header line appended to the aligned BAM output
         align_intbases: int; input bases in each batch regardless of threads, for reproducibility
         filter_tumor_af: float (required); settings to filter minimum allelic frequency
     """
 
-    align_header: str
     align_intbases: int
     filter_tumor_af: float
 
@@ -110,7 +106,7 @@ class UMIParamsConsensuscall(BaseModel):
 
     Attributes:
         align_format: str (required); output alignment format. eg. 'BAM'
-            filter_minreads: str (required); settings to filter consensus tags based on group size
+        filter_minreads: str (required); settings to filter consensus tags based on group size
         tag: str; Logic UMI tag
     """
 
