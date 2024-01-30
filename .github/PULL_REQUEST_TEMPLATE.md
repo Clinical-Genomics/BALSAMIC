@@ -37,8 +37,10 @@
 - [ ] Verified integrity of the Balsamic QC workflow.
 - [ ] Verified integrity of the Balsamic PON workflow.
 
+## Clinical Genomics Stockholm
+
 <details>
-<summary><h2>Clinical Genomics Stockholm</h2></summary>
+<summary></summary>
 
 <!-- Do not reveal clinical data, and if applicable, place it within the internal Google Drive directory. -->
 
