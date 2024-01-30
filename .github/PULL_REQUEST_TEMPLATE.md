@@ -8,9 +8,9 @@
 
 <!-- Link all added or updated documents. -->
 
-- [ ] Not applicable.
+- [ ] N/A
 - [ ] Updated Balsamic documentation to reflect the changes as needed for this PR.
-  - Document ...
+  - Document [Name]
 
 ## Tests
 
@@ -21,20 +21,66 @@
 
 <!-- Include tests relevant to the changes in this PR. -->
 
-- [ ] Not applicable.
-- [ ] Test ...
+- [ ] N/A
+- [ ] Test [Description]
+  - [Screenshot]
 
 #### Pipeline Integrity Tests
 
 <!-- Include tests to verify the integrity of the different Balsamic workflows. -->
 
-- [ ] Not applicable.
+- [ ] N/A
 - [ ] Verified integrity of the Balsamic TGA T/O workflow.
 - [ ] Verified integrity of the Balsamic TGA T/N workflow.
 - [ ] Verified integrity of the Balsamic WGS T/O workflow.
 - [ ] Verified integrity of the Balsamic WGS T/N workflow.
 - [ ] Verified integrity of the Balsamic QC workflow.
 - [ ] Verified integrity of the Balsamic PON workflow.
+
+<details>
+<summary><h2>Clinical Genomics Stockholm</h2></summary>
+
+<!-- Do not reveal clinical data, and if applicable, place it within the internal Google Drive directory. -->
+
+### Documentation
+
+<!-- Link related issues or PRs for necessary changes. -->
+
+- [ ] N/A
+- [ ] Updated _Atlas_ documentation for this PR.
+  - [Link]
+- [ ] Ensured web portal for Clinical Genomics reflects changes.
+  - [Link]
+
+### User Changes
+
+- [ ] N/A
+- [ ] Affected users have been included in the development process and given a chance to provide feedback.
+
+### Infrastructure Changes
+
+<!-- Link related issues or PRs for necessary changes. -->
+
+- [ ] N/A
+- [ ] Updated stored files for this PR in _Hermes_.
+  - [Link] 
+- [ ] Aligned _CG_ interface and CLI with changes.
+  - [Link] 
+- [ ] Verified _Scout_ interface reflects updates from this PR.
+  - [Link] 
+- [ ] Updated _Servers_ in accordance with this PR.
+  - [Link]
+
+### Integration Tests
+
+<!-- Include tests relevant to how changes affect infrastructure tools. -->
+<!-- Add screenshots or visual representations of your changes. -->
+
+- [ ] N/A
+- [ ] Test [Description]
+  - [Screenshot]
+
+</details>
 
 ## Checklist
 
@@ -49,12 +95,12 @@
 - **Documentation**
   - [ ] Verified and updated documentation if necessary.
 - **Tests**
-  - [ ] Described and tested the functionality addressed in the PR (_Feature Tests_).
-  - [ ] Ensured integration of the new code with existing workflows (_Pipeline Integrity Tests_).
+  - [ ] Described and tested the functionality addressed in the PR.
+  - [ ] Ensured integration of the new code with existing workflows.
   - [ ] Confirmed that meaningful unit tests were added for the changes introduced.
   - [ ] Checked that the PR has successfully passed all relevant code smells and coverage checks.
 - **Review**
-  - [ ] Addressed and resolved any comments provided during the code review process.
+  - [ ] Addressed and resolved all the feedback provided during the code review process.
   - [ ] Obtained final approval from designated reviewers.
  
 #### For Reviewers
@@ -67,6 +113,6 @@
 - **Tests**
   - [ ] The author provided a description of their manual testing, including consideration of edge cases and boundary conditions where applicable, with satisfactory results.
 - **Review**
-  - [ ] Confirmed that the developer has addressed any feedback during the code review.
+  - [ ] Confirmed that the developer has addressed all the comments during the code review.
 
 <!-- Add any other relevant information or specific checks necessary for your PR. -->
