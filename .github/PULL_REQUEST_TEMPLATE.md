@@ -85,8 +85,12 @@
 
 ### User Changes
 
+<!-- Please provide justification if you select N/A and the changes affect the output or results. -->
+
 - [ ] N/A
-- [ ] Affected users have been included in the development process and given a chance to provide feedback.
+- [ ] This PR affects the output files or results.
+  - [ ] User feedback is considered unnecessary because [Justification].
+  - [ ] Affected users have been included in the development process and given a chance to provide feedback.
 
 ### Infrastructure Changes
 
