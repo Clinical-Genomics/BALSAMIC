@@ -41,13 +41,30 @@
 
 <!-- Include tests to verify the integrity of the different Balsamic workflows. -->
 
-- [ ] N/A
-- [ ] Verified integrity of the Balsamic TGA T/O workflow.
-- [ ] Verified integrity of the Balsamic TGA T/N workflow.
-- [ ] Verified integrity of the Balsamic WGS T/O workflow.
-- [ ] Verified integrity of the Balsamic WGS T/N workflow.
-- [ ] Verified integrity of the Balsamic QC workflow.
-- [ ] Verified integrity of the Balsamic PON workflow.
+- **TGA T/O workflow**
+  - [ ] N/A
+  - [ ] Verified integrity.
+- **TGA T/N workflow**
+  - [ ] N/A
+  - [ ] Verified integrity.
+- **UMI T/O workflow**
+  - [ ] N/A
+  - [ ] Verified integrity.
+- **UMI T/N workflow**
+  - [ ] N/A
+  - [ ] Verified integrity.
+- **WGS T/O workflow**
+  - [ ] N/A
+  - [ ] Verified integrity.
+- **WGS T/N workflow**
+  - [ ] N/A
+  - [ ] Verified integrity.
+- **QC workflow**
+  - [ ] N/A
+  - [ ] Verified integrity.
+- **PON workflow**
+  - [ ] N/A
+  - [ ] Verified integrity.
 
 ## Clinical Genomics Stockholm
 
