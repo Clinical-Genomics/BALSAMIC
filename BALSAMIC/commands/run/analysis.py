@@ -92,7 +92,7 @@ def analysis(
         run_mode: RunMode = RunMode.LOCAL
 
     if run_mode == RunMode.CLUSTER and not account:
-        LOG.info("An account is required for custer run mode")
+        LOG.info("An account is required for cluster run mode")
         raise click.Abort()
 
     sample_config_path: Path = Path(sample_config).absolute()
