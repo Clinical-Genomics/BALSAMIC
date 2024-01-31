@@ -34,7 +34,9 @@ def test_analysis_model(
     }
 
     # THEN we can successfully create a config dict
-    assert AnalysisModel.model_validate(valid_args)
+    analysis_model: AnalysisModel = AnalysisModel.model_validate(valid_args)
+    assert analysis_model
+    assert analysis_model.script == test_data_dir.as_posix()
 
     # GIVEN invalid input arguments for the log directory
     valid_args["log"] = "/not/a/directory"
