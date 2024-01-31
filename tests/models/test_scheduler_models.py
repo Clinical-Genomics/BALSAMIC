@@ -137,6 +137,22 @@ def test_get_job_id_from_stdout(job_id: str, scheduler_model: Scheduler):
     assert retrieved_job_id == job_id
 
 
+def test_get_job_id_from_stdout_error(
+    job_id: str, scheduler_model: Scheduler, caplog: LogCaptureFixture
+):
+    """Test get job identifier from the scheduler incorrect standard output."""
+
+    # GIVEN a scheduler model and an incorrect stdout with a job identifier
+    stdout: str = "Submitted batch job no ID"
+
+    # WHEN retrieving the job id
+    with pytest.raises(ValueError):
+        scheduler_model.get_job_id_from_stdout(stdout)
+
+    # THEN the expected error should be catched
+    assert "Failed to extract job ID from the submission result" in caplog.text
+
+
 def test_write_job_log_data(job_id: str, scheduler_model: Scheduler):
     """Test writing job log data."""
 

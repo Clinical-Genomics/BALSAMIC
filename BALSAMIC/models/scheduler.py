@@ -132,7 +132,8 @@ class Scheduler(BaseModel):
             job_id: str = job_id_match.group(1)
             LOG.info(f"Submitted job with ID: {job_id}")
             return job_id
-        raise ValueError("Failed to extract job ID from the submission result.")
+        LOG.error("Failed to extract job ID from the submission result")
+        raise ValueError
 
     def write_job_log_data(self, job_id: str, command: str) -> None:
         """Write accounting information for jobs."""
