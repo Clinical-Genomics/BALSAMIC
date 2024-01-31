@@ -231,8 +231,7 @@ def test_submit_job_error(
 ):
     """Test job submission to the cluster when an exception is raised."""
 
-    # GIVEN a scheduler model and the expected standard output command
-    stdout: str = f"Submitted batch job {job_id}"
+    # GIVEN a scheduler model
 
     # WHEN submitting a cluster job that has not been mocked
     with pytest.raises(Exception):
