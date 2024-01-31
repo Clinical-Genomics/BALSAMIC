@@ -205,3 +205,19 @@ def test_submit_job(job_id: str, scheduler_model: Scheduler, caplog: LogCaptureF
     # THEN the cluster job should be submitted and the log file created
     assert f"Submitted job with ID: {job_id}" in caplog.text
     assert Path(scheduler_model.log_dir, f"{scheduler_model.case_id}.sacct").is_file()
+
+
+def test_submit_job_error(
+    job_id: str, scheduler_model: Scheduler, caplog: LogCaptureFixture
+):
+    """Test job submission to the cluster when an exception is raised."""
+
+    # GIVEN a scheduler model and the expected standard output command
+    stdout: str = f"Submitted batch job {job_id}"
+
+    # WHEN submitting a cluster job that has not been mocked
+    with pytest.raises(Exception):
+        scheduler_model.submit_job()
+
+    # THEN the cluster job should fail to be submitted
+    assert f"Failed to submit: {scheduler_model.get_command()}" in caplog.text
