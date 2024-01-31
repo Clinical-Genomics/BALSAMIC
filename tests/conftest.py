@@ -27,6 +27,7 @@ from BALSAMIC.constants.cluster import (
     ClusterAccount,
     ClusterConfigType,
     ClusterProfile,
+    ClusterMailType,
 )
 from BALSAMIC.constants.constants import FileType
 from BALSAMIC.constants.paths import CONSTANTS_DIR, FASTQ_TEST_INFO, TEST_DATA_DIR
@@ -2462,6 +2463,7 @@ def scheduler_data(
         "job_script": empty_file.as_posix(),
         "log_dir": empty_dir.as_posix(),
         "mail_user": mail_user_option,
+        "mail_type": ClusterMailType.FAIL.value,
         "profile": ClusterProfile.SLURM.value,
         "qos": QOS.HIGH,
     }
@@ -2484,7 +2486,7 @@ def scheduler_validated_data(
         "job_properties": job_properties,
         "job_script": empty_file,
         "log_dir": empty_dir,
-        "mail_type": "",
+        "mail_type": "--mail-type FAIL",
         "mail_user": f"--mail-user {mail_user_option}",
         "profile": ClusterProfile.SLURM,
         "profiling_interval": 10,
