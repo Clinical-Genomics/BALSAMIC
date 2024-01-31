@@ -124,6 +124,25 @@ def test_get_partition_option(scheduler_model: Scheduler):
     assert "--partition" in partition_option
 
 
+def test_get_empty_options(scheduler_data: Dict[str, Any]):
+    """Test parsing of empty options."""
+
+    # GIVEN scheduler data with empty options
+    scheduler_data["qos"] = None
+    scheduler_data["job_properties"]["cluster"]["n"] = None
+    scheduler_data["job_properties"]["cluster"]["time"] = None
+    scheduler_data["job_properties"]["cluster"]["partition"] = None
+
+    # WHEN initialising the model
+    scheduler_model: Scheduler = Scheduler(**scheduler_data)
+
+    # THEN the empty options should be returned as empty string
+    assert scheduler_model.qos == ""
+    assert scheduler_model.get_ntasks_option() == ""
+    assert scheduler_model.get_time_option() == ""
+    assert scheduler_model.get_partition_option() == ""
+
+
 def test_get_job_id_from_stdout(job_id: str, scheduler_model: Scheduler):
     """Test get job identifier from the scheduler standard output."""
 
