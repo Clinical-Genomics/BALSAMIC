@@ -1038,7 +1038,7 @@ def test_write_sacct_to_yaml(case_id_tumor_only: str, sacct_file: Path, tmp_path
     """Tests parsing of the sacct file to create a job IDs yaml file."""
 
     # GIVEN a sacct file and an output yaml file
-    yaml_file_path: Path = Path(tmp_path, f"slurm_jobids.yaml")
+    yaml_file_path: Path = Path(tmp_path, "slurm_jobids.yaml")
 
     # WHEN writing the yaml file
     write_sacct_to_yaml(
