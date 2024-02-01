@@ -10,12 +10,13 @@ from typing import Dict, List
 
 from BALSAMIC.constants.analysis import FastqName, Gender, PONWorkflow, SampleType, SequencingType
 from BALSAMIC.constants.paths import BALSAMIC_DIR
-from BALSAMIC.constants.workflow_params import WORKFLOW_PARAMS
+from BALSAMIC.constants.workflow_params import WORKFLOW_PARAMS, SLEEP_BEFORE_START
 from BALSAMIC.models.config import ConfigModel
 from BALSAMIC.models.params import BalsamicWorkflowConfig
 from BALSAMIC.utils.exc import BalsamicError
 from BALSAMIC.utils.io import write_finish_file
 from BALSAMIC.utils.rule import get_fastp_parameters, get_result_dir, get_threads
+
 
 # Initialize ConfigModel
 config_model = ConfigModel.model_validate(config)
@@ -81,6 +82,7 @@ if not Path(config["SENTIEON_EXEC"]).exists():
 
 sequence_type = config['analysis']["sequencing_type"]
 rules_to_include = []
+rules_to_include.append("snakemake_rules/misc/sleep.rule")
 if sequence_type == SequencingType.TARGETED:
     rules_to_include.append("snakemake_rules/quality_control/fastp_tga.rule")
 else:
