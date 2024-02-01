@@ -83,6 +83,12 @@ def empty_file(empty_dir: Path) -> Path:
 
 
 @pytest.fixture(scope="session")
+def sacct_file(case_id_tumor_only: str) -> Path:
+    """Return sacct file path."""
+    return Path(TEST_DATA_DIR, "logs", f"{case_id_tumor_only}.sacct")
+
+
+@pytest.fixture(scope="session")
 def test_data_dir() -> Path:
     """
     Creates path for test data directory.

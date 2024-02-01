@@ -37,12 +37,8 @@ from BALSAMIC.constants.cluster import (
 from BALSAMIC.models.config import ConfigModel
 from BALSAMIC.models.snakemake import SnakemakeExecutable
 from BALSAMIC.utils.analysis import get_singularity_bind_paths
-from BALSAMIC.utils.cli import (
-    createDir,
-    get_config_path,
-    get_snakefile,
-    job_id_dump_to_yaml,
-)
+from BALSAMIC.utils.cli import createDir, get_config_path, get_snakefile
+from BALSAMIC.utils.io import write_sacct_to_yaml
 
 LOG = logging.getLogger(__name__)
 
@@ -164,8 +160,10 @@ def analysis(
     )
 
     if run_analysis and run_mode == "cluster":
-        jobid_dump = Path(log_path, f"{case_name}.sacct")
-        jobid_yaml = Path(result_path, f"{profile}_jobids.yaml")
-        job_id_dump_to_yaml(
-            job_id_dump=jobid_dump, job_id_yaml=jobid_yaml, case_name=case_name
+        sacct_file_path: Path = Path(log_path, f"{case_name}.sacct")
+        yaml_file_path: Path = Path(result_path, f"{profile}_jobids.yaml")
+        write_sacct_to_yaml(
+            case_id=case_name,
+            sacct_file_path=sacct_file_path,
+            yaml_file_path=yaml_file_path,
         )
