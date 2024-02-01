@@ -41,22 +41,13 @@
 
 <!-- Include tests to verify the integrity of the different Balsamic workflows. -->
 
-- **TGA T/O workflow**
+- **TGA workflow**
   - [ ] N/A
   - [ ] Verified integrity.
-- **TGA T/N workflow**
+- **UMI workflow**
   - [ ] N/A
   - [ ] Verified integrity.
-- **UMI T/O workflow**
-  - [ ] N/A
-  - [ ] Verified integrity.
-- **UMI T/N workflow**
-  - [ ] N/A
-  - [ ] Verified integrity.
-- **WGS T/O workflow**
-  - [ ] N/A
-  - [ ] Verified integrity.
-- **WGS T/N workflow**
+- **WGS workflow**
   - [ ] N/A
   - [ ] Verified integrity.
 - **QC workflow**
