@@ -37,12 +37,8 @@ from BALSAMIC.constants.cluster import (
 from BALSAMIC.models.config import ConfigModel
 from BALSAMIC.models.snakemake import SnakemakeExecutable
 from BALSAMIC.utils.analysis import get_singularity_bind_paths
-from BALSAMIC.utils.cli import (
-    createDir,
-    get_config_path,
-    get_snakefile,
-    job_id_dump_to_yaml,
-)
+from BALSAMIC.utils.cli import createDir, get_config_path, get_snakefile
+from BALSAMIC.utils.io import write_sacct_to_yaml
 
 LOG = logging.getLogger(__name__)
 
@@ -92,9 +88,7 @@ def analysis(
         run_mode: RunMode = RunMode.LOCAL
 
     if run_mode == RunMode.CLUSTER and not account:
-        LOG.info(
-            "slurm-account, qsub-account, or account is required for slurm run mode"
-        )
+        LOG.info("An account is required for cluster run mode")
         raise click.Abort()
 
     sample_config_path: Path = Path(sample_config).absolute()
@@ -152,7 +146,6 @@ def analysis(
         profile=profile,
         qos=qos,
         quiet=quiet,
-        result_dir=result_path.as_posix(),
         run_analysis=run_analysis,
         run_mode=run_mode,
         script_dir=script_path.as_posix(),
@@ -167,8 +160,10 @@ def analysis(
     )
 
     if run_analysis and run_mode == "cluster":
-        jobid_dump = Path(log_path, f"{case_name}.sacct")
-        jobid_yaml = Path(result_path, f"{profile}_jobids.yaml")
-        job_id_dump_to_yaml(
-            job_id_dump=jobid_dump, job_id_yaml=jobid_yaml, case_name=case_name
+        sacct_file_path: Path = Path(log_path, f"{case_name}.sacct")
+        yaml_file_path: Path = Path(result_path, f"{profile}_jobids.yaml")
+        write_sacct_to_yaml(
+            case_id=case_name,
+            sacct_file_path=sacct_file_path,
+            yaml_file_path=yaml_file_path,
         )

@@ -1,3 +1,22 @@
+[X.X.X]
+-------
+
+Added:
+^^^^^^
+*
+
+Changed:
+^^^^^^^^
+* Cluster scheduler script for immediate submit https://github.com/Clinical-Genomics/BALSAMIC/pull/1372
+
+Fixed:
+^^^^^^
+*
+
+Removed:
+^^^^^^^^
+* SGE (qsub) support https://github.com/Clinical-Genomics/BALSAMIC/pull/1372
+
 [13.0.1]
 -------
 
@@ -45,7 +64,6 @@ Added:
 * CNV report for TGA workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1339
 * `wkhtmltopdf` to system requirements https://github.com/Clinical-Genomics/BALSAMIC/pull/1339
 * Store WGS CNV report plots https://github.com/Clinical-Genomics/BALSAMIC/pull/1347
-
 
 Changed:
 ^^^^^^^^

@@ -1,13 +1,13 @@
 """Snakemake related models."""
 import sys
 from pathlib import Path
-from typing import Optional, List
+from typing import List, Optional
 
-from pydantic import BaseModel, FilePath, DirectoryPath, field_validator, Field
+from pydantic import BaseModel, DirectoryPath, Field, FilePath, field_validator
 
 from BALSAMIC.constants.analysis import RunMode
-from BALSAMIC.constants.cluster import ClusterMailType, QOS, ClusterProfile, MAX_JOBS
-from BALSAMIC.constants.paths import SCHEDULER_PATH
+from BALSAMIC.constants.cluster import MAX_JOBS, QOS, ClusterMailType, ClusterProfile
+from BALSAMIC.constants.paths import IMMEDIATE_SUBMIT_PATH
 from BALSAMIC.utils.utils import remove_unnecessary_spaces
 
 
@@ -42,7 +42,6 @@ class SnakemakeExecutable(BaseModel):
         qos (Optional[QOS])                                          : QOS for sbatch jobs.
         quiet (Optional[bool])                                       : Quiet mode for snakemake.
         report_path (Optional[Path])                                 : Snakemake generated report path.
-        result_dir (Optional[DirectoryPath])                         : Analysis output directory.
         run_analysis (bool)                                          : Flag to run the actual analysis.
         run_mode (RunMode)                                           : Cluster run mode to execute analysis.
         script_dir (Optional[DirectoryPath])                         : Cluster profile scripts directory.
@@ -63,12 +62,11 @@ class SnakemakeExecutable(BaseModel):
     force: bool = False
     log_dir: Optional[DirectoryPath] = None
     mail_type: Optional[ClusterMailType] = None
-    mail_user: Optional[str] = Field(default=None, validate_default=True)
+    mail_user: Optional[str] = None
     profile: Optional[ClusterProfile] = None
     qos: Optional[QOS] = None
     quiet: bool = False
     report_path: Optional[Path] = None
-    result_dir: Optional[DirectoryPath] = None
     run_analysis: bool = False
     run_mode: RunMode
     script_dir: Optional[DirectoryPath] = None
@@ -82,13 +80,6 @@ class SnakemakeExecutable(BaseModel):
         """Return string representation of the disable_variant_caller option."""
         if disable_variant_caller:
             return f"disable_variant_caller={disable_variant_caller}"
-        return ""
-
-    @field_validator("mail_user")
-    def get_mail_user_option(cls, mail_user: Optional[str]) -> str:
-        """Return string representation of the mail_user option."""
-        if mail_user:
-            return f"--mail-user {mail_user}"
         return ""
 
     def get_config_files_option(self) -> str:
@@ -114,12 +105,6 @@ class SnakemakeExecutable(BaseModel):
         """Return string representation of the force flag."""
         if self.force:
             return "--forceall"
-        return ""
-
-    def get_mail_type_option(self) -> str:
-        """Return string representation of the mail_type option."""
-        if self.mail_type:
-            return f"--mail-type {self.mail_type}"
         return ""
 
     def get_quiet_flag(self) -> str:
@@ -149,12 +134,6 @@ class SnakemakeExecutable(BaseModel):
                     f"--bind {singularity_bind_path.source.as_posix()}:{singularity_bind_path.destination.as_posix()}"
                 )
             return f"--use-singularity --singularity-args '--cleanenv {' '.join(bind_options)}'"
-        return ""
-
-    def get_slurm_profiler_option(self) -> str:
-        """Return string representation of the slurm profiler option."""
-        if self.benchmark and self.profile == ClusterProfile.SLURM:
-            return "--slurm-profiler task"
         return ""
 
     def get_snakemake_options_command(self) -> str:
@@ -196,17 +175,16 @@ class SnakemakeExecutable(BaseModel):
     def get_cluster_submit_command(self) -> str:
         """Get cluster command to be submitted by Snakemake."""
         cluster_submit_command: str = (
-            f"'{sys.executable} {SCHEDULER_PATH.as_posix()} "
-            f"--sample-config {self.config_path.as_posix()} "
-            f"--profile {self.profile} "
+            f"'{sys.executable} {IMMEDIATE_SUBMIT_PATH.as_posix()} "
             f"--account {self.account} "
-            f"--qos {self.qos} "
+            f"{'--benchmark' if self.benchmark else ''} "
             f"--log-dir {self.log_dir.as_posix()} "
+            f"{f'--mail-type {self.mail_type}' if self.mail_type else ''} "
+            f"{f'--mail-user {self.mail_user}' if self.mail_user else ''} "
+            f"--profile {self.profile} "
+            f"--qos {self.qos} "
             f"--script-dir {self.script_dir.as_posix()} "
-            f"--result-dir {self.result_dir.as_posix()} "
-            f"{self.get_slurm_profiler_option()} "
-            f"{self.mail_user} "
-            f"{self.get_mail_type_option()} "
-            "{dependencies} '"
+            f"{self.case_id} "
+            "{dependencies}'"
         )
         return remove_unnecessary_spaces(cluster_submit_command)

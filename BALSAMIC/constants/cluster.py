@@ -16,7 +16,6 @@ class ClusterProfile(StrEnum):
     """Profile to submit jobs to the cluster."""
 
     SLURM: str = "slurm"
-    QSUB: str = "qsub"
 
 
 CLUSTER_PROFILES: List[ClusterProfile] = [profile for profile in ClusterProfile]
