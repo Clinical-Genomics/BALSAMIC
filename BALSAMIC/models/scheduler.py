@@ -6,6 +6,7 @@ from re import Match, search
 from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, DirectoryPath, Field, FilePath, field_validator
+from pydantic_core.core_schema import ValidationInfo
 
 from BALSAMIC.constants.cluster import QOS, ClusterMailType, ClusterProfile
 from BALSAMIC.utils.utils import remove_unnecessary_spaces
@@ -37,9 +38,7 @@ class Scheduler(BaseModel):
     benchmark: Optional[bool] = False
     case_id: str
     dependencies: Optional[List[str]] = Field(default=None, validate_default=True)
-    job_properties: Optional[Dict[str, Any]] = Field(
-        default=None, validate_default=True
-    )
+    job_properties: Dict[str, Any]
     job_script: FilePath
     log_dir: DirectoryPath
     mail_type: Optional[ClusterMailType] = Field(default=None, validate_default=True)
@@ -63,10 +62,19 @@ class Scheduler(BaseModel):
         return ""
 
     @field_validator("mail_type")
-    def get_mail_type_option(cls, mail_type: Optional[ClusterMailType]) -> str:
+    def get_mail_type_option(
+        cls, mail_type: Optional[ClusterMailType], info: ValidationInfo
+    ) -> str:
         """Return string representation of the mail_type option."""
         if mail_type:
             return f"--mail-type {mail_type}"
+        cluster_mail_type: Optional[ClusterMailType] = (
+            info.data["job_properties"]["cluster"].get("mail_type")
+            if info.data.get("job_properties")
+            else None
+        )
+        if cluster_mail_type:
+            return f"--mail-type {cluster_mail_type}"
         return ""
 
     @field_validator("mail_user")

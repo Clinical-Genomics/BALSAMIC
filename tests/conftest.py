@@ -2442,6 +2442,7 @@ def job_properties() -> Dict[str, Any]:
             "partition": "core",
             "n": "1",
             "time": "10:00:00",
+            "mail_type": ClusterMailType.ALL.value,
         }
     }
 
