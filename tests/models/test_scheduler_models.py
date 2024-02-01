@@ -38,6 +38,18 @@ def test_scheduler_model_empty():
         Scheduler()
 
 
+def test_get_dependency_option(scheduler_model: Scheduler):
+    """Test get dependency option for cluster submission."""
+
+    # GIVEN a scheduler model
+
+    # WHEN retrieving the formatted option
+    dependency_option: str = scheduler_model.get_dependency_option()
+
+    # THEN the error option should be appended to the command
+    assert "--dependency afterok:1,2,3" in dependency_option
+
+
 def test_get_error_option(scheduler_model: Scheduler):
     """Test get error option for cluster submission."""
 
@@ -132,6 +144,7 @@ def test_get_empty_options(scheduler_data: Dict[str, Any]):
     scheduler_data["job_properties"]["cluster"]["n"] = None
     scheduler_data["job_properties"]["cluster"]["time"] = None
     scheduler_data["job_properties"]["cluster"]["partition"] = None
+    scheduler_data["dependencies"] = None
 
     # WHEN initialising the model
     scheduler_model: Scheduler = Scheduler(**scheduler_data)
@@ -141,6 +154,7 @@ def test_get_empty_options(scheduler_data: Dict[str, Any]):
     assert scheduler_model.get_ntasks_option() == ""
     assert scheduler_model.get_time_option() == ""
     assert scheduler_model.get_partition_option() == ""
+    assert scheduler_model.get_dependency_option() == ""
 
 
 def test_get_job_id_from_stdout(job_id: str, scheduler_model: Scheduler):
@@ -200,7 +214,13 @@ def test_get_command(
 
     # THEN the mandatory options should be appended to the command
     for option, value in scheduler_validated_data.items():
-        if option not in ["benchmark", "case_id", "job_properties", "profile"]:
+        if option not in [
+            "benchmark",
+            "case_id",
+            "dependencies",
+            "job_properties",
+            "profile",
+        ]:
             assert str(value) in command
 
 

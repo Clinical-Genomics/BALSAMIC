@@ -1,6 +1,7 @@
 """Scheduler models."""
 import logging
 import subprocess
+import sys
 from pathlib import Path
 from re import Match, search
 from typing import Any, Dict, List, Optional
@@ -37,7 +38,7 @@ class Scheduler(BaseModel):
     account: str
     benchmark: Optional[bool] = False
     case_id: str
-    dependencies: Optional[List[str]] = Field(default=None, validate_default=True)
+    dependencies: Optional[List[str]] = None
     job_properties: Dict[str, Any]
     job_script: FilePath
     log_dir: DirectoryPath
@@ -52,14 +53,6 @@ class Scheduler(BaseModel):
     def get_account_option(cls, account: str) -> str:
         """Return string representation of the account option."""
         return f"--account {account}"
-
-    @field_validator("dependencies")
-    def get_dependency_option(cls, dependencies: Optional[List[str]]) -> str:
-        """Return string representation of the dependency option."""
-        if dependencies:
-            dependencies: str = ",".join([job for job in dependencies if job.isdigit()])
-            return f"--dependency afterok:{dependencies}"
-        return ""
 
     @field_validator("mail_type")
     def get_mail_type_option(
@@ -89,6 +82,15 @@ class Scheduler(BaseModel):
         """Return string representation of the mail_user option."""
         if qos:
             return f"--qos {qos}"
+        return ""
+
+    def get_dependency_option(self) -> str:
+        """Return string representation of the dependency option."""
+        if self.dependencies:
+            dependencies: str = ",".join(
+                [job for job in self.dependencies if job.isdigit()]
+            )
+            return f"--dependency afterok:{dependencies}"
         return ""
 
     def get_error_option(self) -> str:
@@ -154,10 +156,10 @@ class Scheduler(BaseModel):
         command: str = (
             f"sbatch "
             f"{self.account} "
-            f"{self.dependencies} "
             f"{self.mail_type} "
             f"{self.mail_user} "
             f"{self.qos} "
+            f"{self.get_dependency_option()} "
             f"{self.get_error_option()} "
             f"{self.get_output_option()} "
             f"{self.get_profile_option()} "
@@ -169,7 +171,7 @@ class Scheduler(BaseModel):
         )
         return remove_unnecessary_spaces(command)
 
-    def submit_job(self) -> str:
+    def submit_job(self) -> None:
         """Submit a job to the cluster."""
         cluster_command: str = self.get_command()
         try:
@@ -182,6 +184,8 @@ class Scheduler(BaseModel):
             )
             job_id: str = self.get_job_id_from_stdout(result.stdout)
             self.write_job_log_data(job_id=job_id, command=cluster_command)
+            # Send job ID to stdout for dependency parsing
+            print(job_id, file=sys.stdout)
         except Exception:
             LOG.error(f"Failed to submit: {cluster_command}")
             raise

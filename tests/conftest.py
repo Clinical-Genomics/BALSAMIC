@@ -2489,7 +2489,7 @@ def scheduler_validated_data(
         "account": f"--account {ClusterAccount.DEVELOPMENT}",
         "benchmark": False,
         "case_id": case_id_tumor_only,
-        "dependencies": "--dependency afterok:1,2,3",
+        "dependencies": ["1", "2", "3"],
         "job_properties": job_properties,
         "job_script": empty_file,
         "log_dir": empty_dir,
