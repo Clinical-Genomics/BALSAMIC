@@ -9,7 +9,7 @@ from typing import Dict, List
 from BALSAMIC.constants.analysis import AnalysisType, FastqName, SampleType
 from BALSAMIC.constants.paths import BALSAMIC_DIR
 from BALSAMIC.constants.rules import SNAKEMAKE_RULES
-from BALSAMIC.constants.workflow_params import WORKFLOW_PARAMS
+from BALSAMIC.constants.workflow_params import WORKFLOW_PARAMS, SLEEP_BEFORE_START
 from BALSAMIC.models.config import ConfigModel
 from BALSAMIC.models.params import BalsamicWorkflowConfig
 from BALSAMIC.utils.cli import check_executable, generate_h5
@@ -112,8 +112,9 @@ sequence_type = config['analysis']["sequencing_type"]
 rules_to_include = []
 for workflow_type, value in SNAKEMAKE_RULES.items():
     if workflow_type in ["common", analysis_type + "_" + sequence_type]:
-        rules_to_include.extend(value.get("qc", []) + value.get("align", []))
+        rules_to_include.extend(value.get("qc", []) + value.get("align", []) + value.get("misc", []))
 rules_to_include = [rule for rule in rules_to_include if "umi" not in rule and "report" not in rule]
+
 
 # Somalier only implemented for hg38 and hg19
 if "canfam3" in config["reference"]["reference_genome"]:

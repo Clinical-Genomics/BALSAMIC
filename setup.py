@@ -122,7 +122,7 @@ if not os.getenv("READTHEDOCS"):
 
 setup(
     name=NAME,
-    version="13.0.0",
+    version="13.0.1",
     url=URL,
     author=AUTHOR,
     author_email=EMAIL,

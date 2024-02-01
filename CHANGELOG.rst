@@ -3,6 +3,7 @@
 
 Added:
 ^^^^^^
+*
 
 Changed:
 ^^^^^^^^
@@ -10,10 +11,22 @@ Changed:
 
 Fixed:
 ^^^^^^
+*
 
 Removed:
 ^^^^^^^^
 * SGE (qsub) support https://github.com/Clinical-Genomics/BALSAMIC/pull/1372
+
+[13.0.1]
+-------
+
+Added:
+^^^^^^
+* Sleep rule before start to fix key_error https://github.com/Clinical-Genomics/BALSAMIC/pull/1311
+
+Fixed:
+^^^^^^
+* Missing `__init__.py` in `snakemake_rules` folders https://github.com/Clinical-Genomics/BALSAMIC/pull/1383
 
 [13.0.0]
 -------
