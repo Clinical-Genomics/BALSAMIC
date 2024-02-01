@@ -3,6 +3,7 @@
 rule fastp_umi_trim:
     """Fastq TGA data pre-processing to remove UMIs."""
     input:
+        wake_up = result_dir + "start_analysis",
         fastq_r1 = lambda wildcards: config_model.get_fastq_by_fastq_pattern(wildcards.fastq_pattern, FastqName.FWD),
         fastq_r2 = lambda wildcards: config_model.get_fastq_by_fastq_pattern(wildcards.fastq_pattern, FastqName.REV)
     output:
