@@ -33,7 +33,7 @@
 <!-- Describe in detail how you tested your changes to help reviewers validate the code. -->
 <!-- Include screenshots or visual representations of your changes. -->
 
-#### Feature Tests
+### Feature Tests
 
 <!-- Include tests relevant to the changes in this PR. -->
 
@@ -41,7 +41,7 @@
 - [ ] Test [Description]
     - [Screenshot]
 
-#### Pipeline Integrity Tests
+### Pipeline Integrity Tests
 
 <!-- Include tests to verify the integrity of the different Balsamic workflows. -->
 
@@ -133,7 +133,7 @@
 > [!IMPORTANT]  
 > Ensure that all checkboxes below are ticked before merging.
 
-#### For Developers
+### For Developers
 
 - **PR Description**
     - [ ] Provided a comprehensive description of the PR.
@@ -149,7 +149,7 @@
     - [ ] Addressed and resolved all the feedback provided during the code review process.
     - [ ] Obtained final approval from designated reviewers.
 
-#### For Reviewers
+### For Reviewers
 
 - **Code**
     - [ ] Code implements the intended features or fixes the reported issue.
