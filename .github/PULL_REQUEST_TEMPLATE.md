@@ -5,15 +5,19 @@
 [PR description]
 
 #### Added
+
 - [Description]
 
 #### Changed
+
 - [Description]
 
 #### Fixed
+
 - [Description]
 
 #### Removed
+
 - [Description]
 
 ## Documentation
@@ -22,7 +26,7 @@
 
 - [ ] N/A
 - [ ] Updated Balsamic documentation to reflect the changes as needed for this PR.
-  - Document [Name]
+    - [Document Name]
 
 ## Tests
 
@@ -35,27 +39,39 @@
 
 - [ ] N/A
 - [ ] Test [Description]
-  - [Screenshot]
+    - [Screenshot]
 
 #### Pipeline Integrity Tests
 
 <!-- Include tests to verify the integrity of the different Balsamic workflows. -->
 
-- **TGA workflow**
-  - [ ] N/A
-  - [ ] Verified integrity.
-- **UMI workflow**
-  - [ ] N/A
-  - [ ] Verified integrity.
-- **WGS workflow**
-  - [ ] N/A
-  - [ ] Verified integrity.
-- **QC workflow**
-  - [ ] N/A
-  - [ ] Verified integrity.
-- **PON workflow**
-  - [ ] N/A
-  - [ ] Verified integrity.
+- **Report deliver (generation of the `.hk` file)**
+    - [ ] N/A
+    - [ ] Verified
+- **TGA T/O Workflow**
+    - [ ] N/A
+    - [ ] Verified
+- **TGA T/N Workflow**
+    - [ ] N/A
+    - [ ] Verified
+- **UMI T/O Workflow**
+    - [ ] N/A
+    - [ ] Verified
+- **UMI T/N Workflow**
+    - [ ] N/A
+    - [ ] Verified
+- **WGS T/O Workflow**
+    - [ ] N/A
+    - [ ] Verified
+- **WGS T/N Workflow**
+    - [ ] N/A
+    - [ ] Verified
+- **QC Workflow**
+    - [ ] N/A
+    - [ ] Verified
+- **PON Workflow**
+    - [ ] N/A
+    - [ ] Verified
 
 ## Clinical Genomics Stockholm
 
@@ -68,11 +84,12 @@
 
 <!-- Link related issues or PRs for necessary changes. -->
 
-- [ ] N/A
-- [ ] Updated _Atlas_ documentation for this PR.
-  - [Link]
-- [ ] Ensured web portal for Clinical Genomics reflects changes.
-  - [Link]
+- **Atlas documentation**
+    - [ ] N/A
+    - [ ] Updated: [Link]
+- **Web portal for Clinical Genomics**
+    - [ ] N/A
+    - [ ] Updated: [Link]
 
 ### User Changes
 
@@ -80,22 +97,25 @@
 
 - [ ] N/A
 - [ ] This PR affects the output files or results.
-  - [ ] User feedback is considered unnecessary because [Justification].
-  - [ ] Affected users have been included in the development process and given a chance to provide feedback.
+    - [ ] User feedback is considered unnecessary because [Justification].
+    - [ ] Affected users have been included in the development process and given a chance to provide feedback.
 
 ### Infrastructure Changes
 
 <!-- Link related issues or PRs for necessary changes. -->
 
-- [ ] N/A
-- [ ] Updated stored files for this PR in _Hermes_.
-  - [Link] 
-- [ ] Aligned _CG_ interface and CLI with changes.
-  - [Link] 
-- [ ] Verified _Scout_ interface reflects updates from this PR.
-  - [Link] 
-- [ ] Updated _Servers_ in accordance with this PR.
-  - [Link]
+- **Stored files in Housekeeper**
+    - [ ] N/A
+    - [ ] Updated: [Link]
+- **CG (CLI and delivered/uploaded files)**
+    - [ ] N/A
+    - [ ] Updated: [Link]
+- **Servers (configuration files on Hasta)**
+    - [ ] N/A
+    - [ ] Updated: [Link]
+- **Scout interface**
+    - [ ] N/A
+    - [ ] Updated: [Link]
 
 ### Integration Tests
 
@@ -104,7 +124,7 @@
 
 - [ ] N/A
 - [ ] Test [Description]
-  - [Screenshot]
+    - [Screenshot]
 
 </details>
 
@@ -116,29 +136,30 @@
 #### For Developers
 
 - **PR Description**
-  - [ ] Provided a comprehensive description of the PR.
-  - [ ] Linked relevant user stories or issues to the PR.
+    - [ ] Provided a comprehensive description of the PR.
+    - [ ] Linked relevant user stories or issues to the PR.
 - **Documentation**
-  - [ ] Verified and updated documentation if necessary.
+    - [ ] Verified and updated documentation if necessary.
 - **Tests**
-  - [ ] Described and tested the functionality addressed in the PR.
-  - [ ] Ensured integration of the new code with existing workflows.
-  - [ ] Confirmed that meaningful unit tests were added for the changes introduced.
-  - [ ] Checked that the PR has successfully passed all relevant code smells and coverage checks.
+    - [ ] Described and tested the functionality addressed in the PR.
+    - [ ] Ensured integration of the new code with existing workflows.
+    - [ ] Confirmed that meaningful unit tests were added for the changes introduced.
+    - [ ] Checked that the PR has successfully passed all relevant code smells and coverage checks.
 - **Review**
-  - [ ] Addressed and resolved all the feedback provided during the code review process.
-  - [ ] Obtained final approval from designated reviewers.
- 
+    - [ ] Addressed and resolved all the feedback provided during the code review process.
+    - [ ] Obtained final approval from designated reviewers.
+
 #### For Reviewers
 
 - **Code**
-  - [ ] Code implements the intended features or fixes the reported issue.
-  - [ ] Code follows the project's coding standards and style guide.
+    - [ ] Code implements the intended features or fixes the reported issue.
+    - [ ] Code follows the project's coding standards and style guide.
 - **Documentation**
-  - [ ] Pipeline changes are well-documented in the CHANGELOG and relevant documentation.
+    - [ ] Pipeline changes are well-documented in the CHANGELOG and relevant documentation.
 - **Tests**
-  - [ ] The author provided a description of their manual testing, including consideration of edge cases and boundary conditions where applicable, with satisfactory results.
+    - [ ] The author provided a description of their manual testing, including consideration of edge cases and boundary
+      conditions where applicable, with satisfactory results.
 - **Review**
-  - [ ] Confirmed that the developer has addressed all the comments during the code review.
+    - [ ] Confirmed that the developer has addressed all the comments during the code review.
 
 <!-- Add any other relevant information or specific checks necessary for your PR. -->
