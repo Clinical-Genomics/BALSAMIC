@@ -156,8 +156,8 @@ WORKFLOW_PARAMS = {
         ),
     },
     "manta_target": {
-        "wgs_hg19": "--exome --region=chr13:28525642-28726481",
-        "wgs_hg38": "--exome --region=chr13:27952208-28151643",
+        "wgs_hg19": "--exome --region=13:28525642-28726481",
+        "wgs_hg38": "--exome --region=13:27952208-28151643",
         "targeted": "--exome",
     },
     "vardict": {
