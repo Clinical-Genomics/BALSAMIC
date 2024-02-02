@@ -3,8 +3,6 @@ from typing import Optional
 
 from pydantic import BaseModel, ConfigDict
 from BALSAMIC.constants.analysis import SequencingType
-from BALSAMIC.constants.cache import GenomeVersion
-
 
 class ParamsCommon(BaseModel):
     """This class defines the common params settings used as constants across various rules in balsamic workflow.
@@ -26,18 +24,16 @@ class ParamsCommon(BaseModel):
     picard_RG_tumor: str
 
 
-class ParamsMantaTarget(BaseModel):
-    """This class defines the params settings used as constants in vardict rule.
+class ParamsManta(BaseModel):
+    """This class defines the params settings used as constants in Manta rule.
 
     Attributes:
-        wgs_hg19: str(required). parameters for targted Manta analysis for WGS with hg19 positions
-        wgs_hg38: str(required). parameters for targted Manta analysis for WGS with hg38 positions
-        targeted: str(required). parameters for targted Manta analysis for TGA
+        wgs_settings: str(required). parameters for Manta analysis for WGS
+        tga_settings: str(required). parameters for Manta analysis for TGA
     """
 
-    wgs_hg19: str
-    wgs_hg38: str
-    targeted: str
+    wgs_settings: str
+    tga_settings: str
 
 
 class ParamsVardict(BaseModel):
@@ -165,7 +161,7 @@ class BalsamicWorkflowConfig(BaseModel):
 
     Attributes:
         common: global params defined across all rules in balsamic workflow
-        manta_target: params used in the manta_target rules
+        manta: params used in the manta rules
         umicommon: global params defined across specific rules in UMI workflow
         vep: global params defined in the rule vep
         vardict: params defined in the rule vardict
@@ -174,11 +170,11 @@ class BalsamicWorkflowConfig(BaseModel):
         tnscope_umi: params defined in the rule sentieon_tnscope_umi
 
     Functions:
-        - get_manta_target_settings: Return setting for manta_target rule
+        - get_manta_settings: Return setting for manta rule
     """
 
     common: ParamsCommon
-    manta_target: ParamsMantaTarget
+    manta: ParamsManta
     vardict: ParamsVardict
     vep: ParamsVEP
     umicommon: UMIParamsCommon
@@ -186,20 +182,12 @@ class BalsamicWorkflowConfig(BaseModel):
     umiconsensuscall: UMIParamsConsensuscall
     tnscope_umi: UMIParamsTNscope
 
-    def get_manta_target_settings(self, genome_version, sequencing_type) -> str:
-        """Return correct setting for manta target rule."""
-        if (
-            sequencing_type == SequencingType.WGS
-            and genome_version == GenomeVersion.HG19
-        ):
-            return self.manta_target.wgs_hg19
-        elif (
-            sequencing_type == SequencingType.WGS
-            and genome_version == GenomeVersion.HG38
-        ):
-            return self.manta_target.wgs_hg38
+    def get_manta_settings(self, sequencing_type) -> str:
+        """Return correct setting for manta rules depending on sequencing type."""
+        if sequencing_type == SequencingType.WGS:
+            return self.manta.wgs_settings
         else:
-            return self.manta_target.targeted
+            return self.manta.tga_settings
 
 
 class VCFAttributes(BaseModel):
