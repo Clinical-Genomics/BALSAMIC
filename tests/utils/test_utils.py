@@ -4,7 +4,7 @@ import logging
 import subprocess
 import sys
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Any
 from unittest import mock
 
 import click
@@ -46,6 +46,7 @@ from BALSAMIC.utils.io import (
     read_yaml,
     write_finish_file,
     write_json,
+    write_yaml,
 )
 from BALSAMIC.utils.rule import (
     get_delivery_id,
@@ -546,6 +547,30 @@ def test_read_yaml_error():
         read_yaml(yaml_path)
     except FileNotFoundError as file_exc:
         assert f"The YAML file {yaml_path} was not found" in str(file_exc)
+
+
+def test_write_yaml(metrics_yaml_path: str, tmp_path: Path):
+    """Tests write yaml file."""
+
+    # GIVEN a yaml file
+
+    # GIVEN a file path to write to
+    yaml_file: Path = Path(tmp_path, "write_yaml.yaml")
+
+    # WHEN reading the yaml file
+    metrics_data: Dict[str, Any] = read_yaml(metrics_yaml_path)
+
+    # WHEN writing the yaml file from dict
+    write_yaml(data=metrics_data, file_path=yaml_file.as_posix())
+
+    # THEN assert that a file was successfully created
+    assert Path.exists(yaml_file)
+
+    # WHEN reading it as a yaml
+    written_metrics_data: dict = read_yaml(yaml_file.as_posix())
+
+    # THEN assert that all data is kept
+    assert written_metrics_data == metrics_data
 
 
 def test_get_threads(cluster_analysis_config_path: str):
