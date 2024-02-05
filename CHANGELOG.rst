@@ -1,3 +1,14 @@
+[X.X.X]
+-------
+
+Added:
+^^^^^^
+* Add MultiQC intermediate files to deliverables
+
+Changed:
+^^^^^^^^
+* `delivery.py`, removing unused arguments
+
 [13.0.1]
 -------
 
