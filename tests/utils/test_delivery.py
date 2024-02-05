@@ -2,6 +2,9 @@
 from pathlib import Path
 from typing import Any, Dict, List
 
+import pytest
+from BALSAMIC.utils.exc import BalsamicError
+
 from BALSAMIC.constants.constants import FileType
 from BALSAMIC.utils.delivery import get_file_tags_from_name, get_multiqc_deliverables
 
@@ -23,6 +26,21 @@ def test_get_multiqc_deliverables(case_id_tumor_only: str, multiqc_data_dir: Pat
     assert all(item["format"] == FileType.JSON for item in multiqc_deliverables)
     assert all(isinstance(item["tag"], list) for item in multiqc_deliverables)
     assert all(item["id"] == case_id_tumor_only for item in multiqc_deliverables)
+
+
+def test_get_multiqc_deliverables_error(
+    case_id_tumor_only: str, fastq_dir_tumor_only: str
+):
+    """Test MultiQC delivery files parsing when incorrect path is provided."""
+
+    # GIVEN a case ID and an incorrect MultiQC data directory
+
+    # WHEN extracting the deliverables
+    with pytest.raises(BalsamicError):
+        # THEN an exception should be raised
+        get_multiqc_deliverables(
+            case_id=case_id_tumor_only, multiqc_dir=Path(fastq_dir_tumor_only)
+        )
 
 
 def test_get_file_tags_from_name():

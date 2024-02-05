@@ -22,6 +22,7 @@ from BALSAMIC.utils.cli import (
     convert_deliverables_tags,
     get_file_extension,
 )
+from BALSAMIC.utils.delivery import get_multiqc_deliverables
 from BALSAMIC.utils.io import read_json, write_json, write_yaml
 
 LOG = logging.getLogger(__name__)
@@ -123,6 +124,15 @@ def deliver(
             "id": config_model.analysis.case_id,
         }
     )
+
+    # MultiQC intermediate files
+    multiqc_deliverables: List[Dict[str, Any]] = get_multiqc_deliverables(
+        case_id=config_model.analysis.case_id,
+        multiqc_dir=Path(
+            config_model.analysis.result, "qc", "multiqc_data", "multiqc_data.json"
+        ),
+    )
+    hk_deliverables.extend(multiqc_deliverables)
 
     hk_deliverables: Dict[str, Any] = {"files": hk_deliverables}
     write_json(json_obj={"files": hk_deliverables}, path=hk_file.as_posix())
