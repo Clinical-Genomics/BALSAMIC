@@ -412,7 +412,6 @@ def convert_deliverables_tags(
     """Replaces values of sample_type with sample_name in deliverables dict."""
 
     for delivery_file in delivery_json:
-        print(delivery_file)
         file_tags = delivery_file["tag"].split(",")
         sample_list = sample_config_dict["samples"]
         for sample_dict in sample_list:
