@@ -128,9 +128,7 @@ def deliver(
     # MultiQC intermediate files
     multiqc_deliverables: List[Dict[str, Any]] = get_multiqc_deliverables(
         case_id=config_model.analysis.case_id,
-        multiqc_dir=Path(
-            config_model.analysis.result, "qc", "multiqc_data", "multiqc_data.json"
-        ),
+        multiqc_dir=Path(config_model.analysis.result, "qc", "multiqc_data"),
     )
     hk_deliverables.extend(multiqc_deliverables)
 
