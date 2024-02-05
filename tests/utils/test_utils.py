@@ -628,34 +628,32 @@ def test_convert_deliverables_tags(tumor_normal_fastq_info_correct: List[Dict]):
     """Test generation of delivery tags."""
 
     # GIVEN a deliverables dict and a sample config dict
-    delivery_json = {
-        "files": [
-            {
-                "path": "dummy_balsamic_run/run_tests/TN_WGS/analysis/fastq/ACC1_R_1.fp.fastq.gz",
-                "path_index": [],
-                "step": "fastp",
-                "tag": "ACC1,read1,quality-trimmed-fastq-read1",
-                "id": "ACC1",
-                "format": "fastq.gz",
-            },
-            {
-                "path": "dummy_balsamic_run/run_tests/TN_WGS/analysis/fastq/ACC1_R_2.fp.fastq.gz",
-                "path_index": [],
-                "step": "fastp",
-                "tag": "read2,quality-trimmed-fastq-read1",
-                "id": "ACC1",
-                "format": "fastq.gz",
-            },
-            {
-                "path": "dummy_balsamic_run/run_tests/TN_WGS/analysis/qc/fastp/ACC1.fastp.json",
-                "path_index": [],
-                "step": "fastp",
-                "tag": "ACC1,json,quality-trimmed-fastq-json,tumor",
-                "id": "tumor",
-                "format": "json",
-            },
-        ]
-    }
+    delivery_json = [
+        {
+            "path": "dummy_balsamic_run/run_tests/TN_WGS/analysis/fastq/ACC1_R_1.fp.fastq.gz",
+            "path_index": [],
+            "step": "fastp",
+            "tag": "ACC1,read1,quality-trimmed-fastq-read1",
+            "id": "ACC1",
+            "format": "fastq.gz",
+        },
+        {
+            "path": "dummy_balsamic_run/run_tests/TN_WGS/analysis/fastq/ACC1_R_2.fp.fastq.gz",
+            "path_index": [],
+            "step": "fastp",
+            "tag": "read2,quality-trimmed-fastq-read1",
+            "id": "ACC1",
+            "format": "fastq.gz",
+        },
+        {
+            "path": "dummy_balsamic_run/run_tests/TN_WGS/analysis/qc/fastp/ACC1.fastp.json",
+            "path_index": [],
+            "step": "fastp",
+            "tag": "ACC1,json,quality-trimmed-fastq-json,tumor",
+            "id": "tumor",
+            "format": "json",
+        },
+    ]
 
     sample_config_dict = {"samples": tumor_normal_fastq_info_correct}
 
@@ -665,7 +663,7 @@ def test_convert_deliverables_tags(tumor_normal_fastq_info_correct: List[Dict]):
     )
 
     # THEN prefix strings should be replaced with sample name
-    for delivery_file in delivery_json["files"]:
+    for delivery_file in delivery_json:
         assert "ACC1" in delivery_file["tag"]
         assert "tumor" not in delivery_file["tag"]
         assert delivery_file["id"] == "ACC1"

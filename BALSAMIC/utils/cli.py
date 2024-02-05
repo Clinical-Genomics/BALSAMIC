@@ -6,7 +6,7 @@ import sys
 from distutils.spawn import find_executable
 from io import StringIO
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 import click
 import graphviz
@@ -406,10 +406,13 @@ def generate_graph(config_collection_dict, config_path):
     graph_obj.render(cleanup=True)
 
 
-def convert_deliverables_tags(delivery_json: dict, sample_config_dict: dict) -> dict:
+def convert_deliverables_tags(
+    delivery_json: List[Dict[str, Any]], sample_config_dict: dict
+) -> List[Dict[str, Any]]:
     """Replaces values of sample_type with sample_name in deliverables dict."""
 
-    for delivery_file in delivery_json["files"]:
+    for delivery_file in delivery_json:
+        print(delivery_file)
         file_tags = delivery_file["tag"].split(",")
         sample_list = sample_config_dict["samples"]
         for sample_dict in sample_list:
