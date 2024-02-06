@@ -31,4 +31,4 @@ def get_multiqc_deliverables(case_id: str, multiqc_dir: Path) -> List[Dict[str, 
 
 def get_file_tags_from_name(file_path: Path) -> List[str]:
     """Return Housekeeper tags from the file name after discarding the suffix."""
-    return file_path.stem.split("_")
+    return [tag.lower() for tag in file_path.stem.split("_")]

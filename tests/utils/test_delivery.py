@@ -55,4 +55,4 @@ def test_get_file_tags_from_name():
     tags: List[str] = get_file_tags_from_name(file_path)
 
     # THEN the correct tags are extracted from the file name
-    assert tags == ["multiqc", "picard", "AlignmentSummaryMetrics"]
+    assert tags == ["multiqc", "picard", "alignmentsummarymetrics"]
