@@ -133,6 +133,6 @@ def deliver(
     hk_deliverables.extend(multiqc_deliverables)
 
     hk_deliverables: Dict[str, Any] = {"files": hk_deliverables}
-    write_json(json_obj={"files": hk_deliverables}, path=hk_file.as_posix())
-    write_yaml(data={"files": hk_deliverables}, file_path=f"{hk_file}.{FileType.YAML}")
+    write_json(json_obj=hk_deliverables, path=hk_file.as_posix())
+    write_yaml(data=hk_deliverables, file_path=f"{hk_file}.{FileType.YAML}")
     LOG.info(f"Generated analysis deliverables: {hk_file.as_posix()}")
