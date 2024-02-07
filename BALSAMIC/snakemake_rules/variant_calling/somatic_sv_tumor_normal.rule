@@ -22,7 +22,6 @@ rule manta_tumor_normal:
         normal = config_model.get_sample_name_by_type(SampleType.NORMAL),
         case_name = case_id,
         manta_install_path = "/opt/conda/share/manta-1.6.0-2",
-        low_pr_sr_freq = [MANTA_FILTERS.low_pr_sr_freq.tag_value,MANTA_FILTERS.low_pr_sr_freq.filter_name],
         low_pr_sr_count = [MANTA_FILTERS.low_pr_sr_count.tag_value,MANTA_FILTERS.low_pr_sr_count.filter_name],
     threads:
         get_threads(cluster_config, "manta_tumor_normal")
