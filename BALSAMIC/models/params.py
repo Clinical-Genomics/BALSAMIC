@@ -229,7 +229,6 @@ class VarCallerFilter(BaseModel):
         swegen_sv_freq: VCFAttributes (optional); maximum swegen sv allele frequency
         loqusdb_clinical_snv_freq: VCFAttributes (optional); maximum loqusdb clinical snv allele frequency
         loqusdb_clinical_sv_freq: VCFAttributes (optional); maximum loqusdb clinical sv allele frequency
-        low_pr_sr_freq: VCFAttributes (optional); minimum Manta variant frequency
         low_pr_sr_count: VCFAttributes (optional); minumum Manta variant read support
         varcaller_name: str (required); variant caller name
         filter_type: str (required); filter name for variant caller
@@ -250,7 +249,6 @@ class VarCallerFilter(BaseModel):
     swegen_sv_freq: Optional[VCFAttributes] = None
     loqusdb_clinical_snv_freq: Optional[VCFAttributes] = None
     loqusdb_clinical_sv_freq: Optional[VCFAttributes] = None
-    low_pr_sr_freq: Optional[VCFAttributes] = None
     low_pr_sr_count: Optional[VCFAttributes] = None
     varcaller_name: str
     filter_type: str

@@ -20,7 +20,6 @@ rule manta_tumor_only:
         tumor = config_model.get_sample_name_by_type(SampleType.TUMOR),
         case_name = config["analysis"]["case_id"],
         manta_install_path= "/opt/conda/share/manta-1.6.0-2",
-        low_pr_sr_freq = [MANTA_FILTERS.low_pr_sr_freq.tag_value,MANTA_FILTERS.low_pr_sr_freq.filter_name],
         low_pr_sr_count = [MANTA_FILTERS.low_pr_sr_count.tag_value,MANTA_FILTERS.low_pr_sr_count.filter_name],
     threads:
         get_threads(cluster_config, "manta_tumor_only")
@@ -46,8 +45,7 @@ python {params.tmpdir}/runWorkflow.py -m {params.runmode} -j {threads};
 
 bgzip -l 9 {params.tmpdir}/results/variants/tumorSV_converted.vcf;
 
-bcftools filter --threads {threads} --exclude 'SUM(FORMAT/PR[0:1]+FORMAT/SR[0:1])/SUM(SUM(FORMAT/PR[0:0]+FORMAT/SR[0:0])+SUM(FORMAT/PR[0:1]+FORMAT/SR[0:1])) < {params.low_pr_sr_freq[0]}' --soft-filter '{params.low_pr_sr_freq[1]}' --mode '+' {params.tmpdir}/results/variants/tumorSV_converted.vcf.gz \
-| bcftools filter --threads {threads} --exclude 'SUM(FORMAT/PR[0:1]+FORMAT/SR[0:1]) < {params.low_pr_sr_count[0]}' --soft-filter '{params.low_pr_sr_count[1]}' --mode '+' -o {output.final}
+bcftools filter --threads {threads} --exclude 'SUM(FORMAT/PR[0:1]+FORMAT/SR[0:1]) < {params.low_pr_sr_count[0]}' --soft-filter '{params.low_pr_sr_count[1]}' --mode '+' -o {output.final} {params.tmpdir}/results/variants/tumorSV_converted.vcf.gz
 
 tabix -p vcf -f {output.final};
 
