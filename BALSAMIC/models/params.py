@@ -4,6 +4,7 @@ from typing import Optional
 from pydantic import BaseModel, ConfigDict
 from BALSAMIC.constants.analysis import SequencingType
 
+
 class ParamsCommon(BaseModel):
     """This class defines the common params settings used as constants across various rules in balsamic workflow.
 
