@@ -23,7 +23,7 @@ rule bcftools_filter_sv_research:
     "Filtering merged research structural and copy number variants using bcftools for {params.case_name}"
   shell:
     """
-bcftools filter --threads {threads} --include 'INFO/SWEGENAF <= {params.swegen_freq[0]} || INFO/SWEGENAF == \".\"' --soft-filter '{params.swegen_freq[1]}' --mode '+' |\
+bcftools filter --threads {threads} --include 'INFO/SWEGENAF <= {params.swegen_freq[0]} || INFO/SWEGENAF == \".\"' --soft-filter '{params.swegen_freq[1]}' --mode '+' {input.vcf_sv_research} |\
 bcftools view --threads {threads} -f .,PASS -O z -o {output.vcf_pass_svdb};
 
 tabix -p vcf -f {output.vcf_pass_svdb};
