@@ -187,8 +187,7 @@ class BalsamicWorkflowConfig(BaseModel):
         """Return correct setting for manta rules depending on sequencing type."""
         if sequencing_type == SequencingType.WGS:
             return self.manta.wgs_settings
-        else:
-            return self.manta.tga_settings
+        return self.manta.tga_settings
 
 
 class VCFAttributes(BaseModel):

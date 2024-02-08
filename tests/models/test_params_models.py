@@ -23,7 +23,7 @@ from BALSAMIC.models.params import (
 
 
 def test_params_manta():
-    """test Manta settings model for correct validation."""
+    """Test Manta settings model for correct validation."""
 
     # GIVEN Manta params
     test_manta_params = {"wgs_settings": "", "tga_settings": "--exome"}
@@ -37,7 +37,7 @@ def test_params_manta():
 
 
 def test_get_manta_settings_tga():
-    """test get Manta settings based on sequencing type TGA."""
+    """Test get Manta settings based on sequencing type TGA."""
 
     # GIVEN workflow params
     params = BalsamicWorkflowConfig.model_validate(WORKFLOW_PARAMS)
@@ -50,7 +50,7 @@ def test_get_manta_settings_tga():
 
 
 def test_get_manta_settings_wgs():
-    """test get Manta settings based on sequencing type WGS."""
+    """Test get Manta settings based on sequencing type WGS."""
     # GIVEN workflow params
     params = BalsamicWorkflowConfig.model_validate(WORKFLOW_PARAMS)
 
