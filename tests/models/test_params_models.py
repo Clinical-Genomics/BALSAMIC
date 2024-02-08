@@ -31,6 +31,7 @@ def test_params_manta():
     # WHEN building the model
     test_manta_built = ParamsManta(**test_manta_params)
 
+    # THEN string values should be correctly populated into the model
     assert test_manta_built.tga_settings == "--exome"
     assert test_manta_built.wgs_settings == ""
 
