@@ -46,31 +46,31 @@
 <!-- Include tests to verify the integrity of the different Balsamic workflows. -->
 
 - **Report deliver (generation of the `.hk` file)**
-    - [ ] N/A
+    - [x] N/A
     - [ ] Verified
 - **TGA T/O Workflow**
-    - [ ] N/A
+    - [x] N/A
     - [ ] Verified
 - **TGA T/N Workflow**
-    - [ ] N/A
+    - [x] N/A
     - [ ] Verified
 - **UMI T/O Workflow**
-    - [ ] N/A
+    - [x] N/A
     - [ ] Verified
 - **UMI T/N Workflow**
-    - [ ] N/A
+    - [x] N/A
     - [ ] Verified
 - **WGS T/O Workflow**
-    - [ ] N/A
+    - [x] N/A
     - [ ] Verified
 - **WGS T/N Workflow**
-    - [ ] N/A
+    - [x] N/A
     - [ ] Verified
 - **QC Workflow**
-    - [ ] N/A
+    - [x] N/A
     - [ ] Verified
 - **PON Workflow**
-    - [ ] N/A
+    - [x] N/A
     - [ ] Verified
 
 ## Clinical Genomics Stockholm
