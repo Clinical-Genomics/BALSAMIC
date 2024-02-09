@@ -85,17 +85,17 @@
 <!-- Link related issues or PRs for necessary changes. -->
 
 - **Atlas documentation**
-    - [ ] N/A
+    - [x] N/A
     - [ ] Updated: [Link]
 - **Web portal for Clinical Genomics**
-    - [ ] N/A
+    - [x] N/A
     - [ ] Updated: [Link]
 
 ### User Changes
 
 <!-- Please provide justification if you select N/A and the changes affect the output or results. -->
 
-- [ ] N/A
+- [x] N/A
 - [ ] This PR affects the output files or results.
     - [ ] User feedback is considered unnecessary because [Justification].
     - [ ] Affected users have been included in the development process and given a chance to provide feedback.
@@ -105,16 +105,16 @@
 <!-- Link related issues or PRs for necessary changes. -->
 
 - **Stored files in Housekeeper**
-    - [ ] N/A
+    - [x] N/A
     - [ ] Updated: [Link]
 - **CG (CLI and delivered/uploaded files)**
-    - [ ] N/A
+    - [x] N/A
     - [ ] Updated: [Link]
 - **Servers (configuration files on Hasta)**
-    - [ ] N/A
+    - [x] N/A
     - [ ] Updated: [Link]
 - **Scout interface**
-    - [ ] N/A
+    - [x] N/A
     - [ ] Updated: [Link]
 
 ### Integration Tests
@@ -122,7 +122,7 @@
 <!-- Include tests relevant to how changes affect infrastructure tools. -->
 <!-- Add screenshots or visual representations of your changes. -->
 
-- [ ] N/A
+- [x] N/A
 - [ ] Test [Description]
     - [Screenshot]
 
