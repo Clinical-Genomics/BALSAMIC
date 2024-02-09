@@ -103,6 +103,7 @@
 ### Infrastructure Changes
 
 <!-- Link related issues or PRs for necessary changes. -->
+<!-- Make sure that the linked PRs include relevant tests. -->
 
 - **Stored files in Housekeeper**
     - [x] N/A
@@ -116,15 +117,6 @@
 - **Scout interface**
     - [x] N/A
     - [ ] Updated: [Link]
-
-### Integration Tests
-
-<!-- Include tests relevant to how changes affect infrastructure tools. -->
-<!-- Add screenshots or visual representations of your changes. -->
-
-- [x] N/A
-- [ ] Test [Description]
-    - [Screenshot]
 
 </details>
 
