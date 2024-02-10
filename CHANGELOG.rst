@@ -3,17 +3,14 @@
 
 Added:
 ^^^^^^
-* Add MultiQC intermediate files to deliverables
-
-Changed:
-^^^^^^^^
-* bcftools filters for PR:SR evidence in Manta calls
-* "--exome" argument to Manta runs in TGA cases
-* `delivery.py`, removing unused arguments
+* bcftools filters for PR:SR evidence in Manta calls https://github.com/Clinical-Genomics/BALSAMIC/pull/1371
+* "--exome" argument to Manta runs in TGA cases https://github.com/Clinical-Genomics/BALSAMIC/pull/1371
+* MultiQC intermediate files to deliverables https://github.com/Clinical-Genomics/BALSAMIC/pull/1388
 
 Removed:
 ^^^^^^^^
-* Extra bcftools filters that allows MaxDepth filtered variants in the final SV VCF
+* Extra bcftools filters that allows MaxDepth filtered variants in the final SV VCF https://github.com/Clinical-Genomics/BALSAMIC/pull/1371
+* Unused arguments from `delivery.py` https://github.com/Clinical-Genomics/BALSAMIC/pull/1388
 
 [13.0.1]
 -------
