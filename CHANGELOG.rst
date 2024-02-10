@@ -7,7 +7,13 @@ Added:
 
 Changed:
 ^^^^^^^^
+* bcftools filters for PR:SR evidence in Manta calls
+* "--exome" argument to Manta runs in TGA cases
 * `delivery.py`, removing unused arguments
+
+Removed:
+^^^^^^^^
+* Extra bcftools filters that allows MaxDepth filtered variants in the final SV VCF
 
 [13.0.1]
 -------

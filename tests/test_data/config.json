@@ -90,8 +90,8 @@
                 "single"
             ],
             "sequencing_type": [
-                "targeted",
-                "wgs"
+                "wgs",
+                "targeted"
             ],
             "workflow_solution": [
                 "BALSAMIC"
