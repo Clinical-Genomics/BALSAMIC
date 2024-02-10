@@ -4,7 +4,7 @@ import json
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import List
+from typing import List, Any
 
 import snakemake
 import yaml
@@ -72,6 +72,12 @@ def read_yaml(yaml_path: str) -> dict:
             return yaml.load(fn, Loader=yaml.SafeLoader)
     else:
         raise FileNotFoundError(f"The YAML file {yaml_path} was not found")
+
+
+def write_yaml(data: Any, file_path: Path) -> None:
+    """Write data to a yaml file."""
+    with open(file_path, "w") as file:
+        yaml.dump(data, file)
 
 
 def read_vcf_file(vcf_file_path: str) -> List[str]:
