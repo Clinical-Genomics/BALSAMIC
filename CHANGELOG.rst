@@ -22,7 +22,7 @@ Added:
 Fixed:
 ^^^^^^
 * Missing `__init__.py` in `snakemake_rules` folders https://github.com/Clinical-Genomics/BALSAMIC/pull/1383
-
+* ASCAT-Ngs container 
 [13.0.0]
 -------
 
