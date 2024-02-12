@@ -12,6 +12,11 @@ Removed:
 * Extra bcftools filters that allows MaxDepth filtered variants in the final SV VCF https://github.com/Clinical-Genomics/BALSAMIC/pull/1371
 * Unused arguments from `delivery.py` https://github.com/Clinical-Genomics/BALSAMIC/pull/1388
 
+Fixed:
+^^^^^^
+* ASCAT-Ngs container https://github.com/Clinical-Genomics/BALSAMIC/pull/1395 
+
+
 [13.0.1]
 -------
 
@@ -22,7 +27,7 @@ Added:
 Fixed:
 ^^^^^^
 * Missing `__init__.py` in `snakemake_rules` folders https://github.com/Clinical-Genomics/BALSAMIC/pull/1383
-* ASCAT-Ngs container 
+
 [13.0.0]
 -------
 
