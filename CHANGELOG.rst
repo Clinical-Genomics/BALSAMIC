@@ -12,6 +12,11 @@ Removed:
 * Extra bcftools filters that allows MaxDepth filtered variants in the final SV VCF https://github.com/Clinical-Genomics/BALSAMIC/pull/1371
 * Unused arguments from `delivery.py` https://github.com/Clinical-Genomics/BALSAMIC/pull/1388
 
+Fixed:
+^^^^^^
+* ASCAT-Ngs container https://github.com/Clinical-Genomics/BALSAMIC/pull/1395 
+
+
 [13.0.1]
 -------
 
