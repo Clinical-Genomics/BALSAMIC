@@ -1,0 +1,63 @@
+# vim: syntax=python tabstop=4 expandtab
+# coding: utf-8
+
+
+rule custom_detection_tumor_only:
+    input:
+        fa = config["reference"]["reference_genome"],
+        bamT = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample)
+    output:
+        vcf = vcf_dir + "custom_detection_tumor_only." + config["analysis"]["case_id"] + ".vcf.gz",
+    benchmark:
+        benchmark_dir + 'custom_detection_tumor_only_' + config["analysis"]["case_id"] + ".tsv"
+    singularity:
+        Path(singularity_image, config["bioinfo_tools"].get("htslib") + ".sif").as_posix()
+    params:
+        genome_version = config["reference"]["genome_version"],
+    threads:
+        get_threads(cluster_config, "custom_detection_tumor_only")
+    message:
+        ("Detecting IGH::DUX4 rearrangement for {params.case_name} using samtools comand published in Frontiers in Oncology, 13, p.1217712.")
+    shell:
+        """
+# Write vcf headers        
+echo '##fileformat=VCFv4.2' > {output.vcf}.tmp
+echo '##ALT=<ID=BND,Description="Break end">' >> {output.vcf}.tmp
+echo '##INFO=<ID=SVTYPE,Number=1,Type=String,Description="Type of structural variant">' >> {output.vcf}.tmp
+echo '##INFO=<ID=IMPRECISE,Number=0,Type=Flag,Description="Imprecise structural variation">' >> {output.vcf}.tmp
+echo '##FORMAT=<ID=DV,Number=1,Type=Integer,Description="Number of paired-ends that support the event">' >> {output.vcf}.tmp
+echo -e "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tTUMOR" >> {output.vcf}.tmp     
+
+# Get number of supporting reads for IGH::DUX4 rearrangement        
+if [ {params.genome_version} = "hg19" ]; then
+    supporting_reads=$(samtools view -F 1024 -c -e '(rnext == "4" && pnext > 190988100 && pnext < 191007000) || (rnext == "10" && pnext > 135477000 && pnext < 135500000) || (rnext == "GL000228.1" && pnext > 70000 && pnext < 115000) || ([SA] =~ "10,1354[789][0-9]{{4}}") || ([SA] =~ "4,19(09[8-9][0-9]|100[0-7])[0-9]{{3}}" || [SA] =~ "GL000228.1,([7-9][0-9]{{4}}|1[0-1][0-5][0-9]{{3}})")' {input.bamT} 14:106032614-107288051 )
+    igh_chr="14"
+    igh_pos="106032614"
+    dux4_chr="4"
+    dux4_pos="190988100"    
+elif [ {params.genome_version} = "hg38" ]; then
+    supporting_reads=$(samtools view -F 1024 -c -e \
+    '(rnext == "4" && pnext > 190173000 && pnext < 190176000) || ([SA] =~ "4,19017[345][0-9]{{3}}")' \
+    {input.bamT} chr14:105586437-106879844 )
+    igh_chr="14"
+    igh_pos="105586437"
+    dux4_chr="4"
+    dux4_pos="190173000"   
+fi
+
+
+if [ "$supporting_reads" -gt 0 ]; then
+    vcf_filter="PASS"
+else
+    vcf_filter="no_supporting_reads"
+fi
+
+# Write vcf entry
+if [ -n "$igh_chr" ]; then
+    echo -e "${{igh_chr}}\t${{igh_pos}}\tsamtools_igh_dux4\tN\tN[${{dux4_chr}}:${{dux4_pos}}[\t.\t${{vcf_filter}}\tSVTYPE=BND;IMPRECISE;\tDV\t${{supporting_reads}}" >> {output.vcf}.tmp 
+fi
+
+bgzip {output.vcf}.tmp > {output.vcf};
+tabix -p vcf {output.vcf};
+rm {output.vcf}.tmp ;
+"""
