@@ -413,7 +413,7 @@ rule custom_detection_tumor_normal:
     benchmark:
         benchmark_dir + 'custom_detection_tumor_normal_' + config["analysis"]["case_id"] + ".tsv"
     singularity:
-        Path(singularity_image, config["bioinfo_tools"].get("htslib") + ".sif").as_posix()
+        Path(singularity_image, config["bioinfo_tools"].get("samtools") + ".sif").as_posix()
     params:
         genome_version = config["reference"]["genome_version"],
         custom_sv_detection_script= get_script_path("custom_sv_detection.sh"),
