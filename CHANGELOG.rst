@@ -14,7 +14,8 @@ Removed:
 
 Fixed:
 ^^^^^^
-* ASCAT-Ngs container https://github.com/Clinical-Genomics/BALSAMIC/pull/1395 
+* ASCAT-Ngs container https://github.com/Clinical-Genomics/BALSAMIC/pull/1395
+* bcftools in manta_tumor_normal uses correct column for tumor read filtering https://github.com/Clinical-Genomics/BALSAMIC/pull/1400
 
 
 [13.0.1]
