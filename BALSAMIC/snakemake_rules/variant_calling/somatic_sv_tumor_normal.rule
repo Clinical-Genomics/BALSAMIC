@@ -402,6 +402,32 @@ else:
     rm {input.ascat_cnv};
         """
 
+
+rule custom_detection_tumor_normal:
+    input:
+        fa = config["reference"]["reference_genome"],
+        bamT = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
+        bamN = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name=normal_sample),
+    output:
+        vcf = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".custom.vcf.gz",
+    benchmark:
+        benchmark_dir + 'custom_detection_tumor_normal_' + config["analysis"]["case_id"] + ".tsv"
+    singularity:
+        Path(singularity_image, config["bioinfo_tools"].get("htslib") + ".sif").as_posix()
+    params:
+        genome_version = config["reference"]["genome_version"],
+        custom_sv_detection_script= get_script_path("custom_sv_detection.sh"),
+    threads:
+        get_threads(cluster_config, "custom_detection_tumor_only")
+    message:
+        ("Detecting IGH::DUX4 rearrangement for {params.case_name} using samtools comand published in Frontiers in Oncology, 13, p.1217712.")
+    shell:
+        """
+        bash {params.custom_sv_detection_script} {params.genome_version} {output.vcf} {input.bamT} {input.bamN} 
+        """
+
+
+
 rule svdb_merge_tumor_normal:
     input:
         vcf = expand(
