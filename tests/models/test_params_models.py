@@ -4,8 +4,12 @@ from math import isclose
 import pytest
 from pydantic import ValidationError
 
+from BALSAMIC.constants.analysis import SequencingType
+from BALSAMIC.constants.workflow_params import WORKFLOW_PARAMS
+from BALSAMIC.models.params import BalsamicWorkflowConfig
 from BALSAMIC.models.config import VarcallerAttribute
 from BALSAMIC.models.params import (
+    ParamsManta,
     ParamsVardict,
     ParamsVEP,
     QCModel,
@@ -16,6 +20,45 @@ from BALSAMIC.models.params import (
     VarCallerFilter,
     VCFAttributes,
 )
+
+
+def test_params_manta():
+    """Test Manta settings model for correct validation."""
+
+    # GIVEN Manta params
+    test_manta_params = {"wgs_settings": "", "tga_settings": "--exome"}
+
+    # WHEN building the model
+    test_manta_built = ParamsManta(**test_manta_params)
+
+    # THEN string values should be correctly populated into the model
+    assert test_manta_built.tga_settings == "--exome"
+    assert test_manta_built.wgs_settings == ""
+
+
+def test_get_manta_settings_tga():
+    """Test get Manta settings based on sequencing type TGA."""
+
+    # GIVEN workflow params
+    params = BalsamicWorkflowConfig.model_validate(WORKFLOW_PARAMS)
+
+    # WHEN getting manta settings for TGA
+    manta_settings = params.get_manta_settings(SequencingType.TARGETED)
+
+    # THEN manta setting should specify exome argument
+    assert manta_settings == "--exome"
+
+
+def test_get_manta_settings_wgs():
+    """Test get Manta settings based on sequencing type WGS."""
+    # GIVEN workflow params
+    params = BalsamicWorkflowConfig.model_validate(WORKFLOW_PARAMS)
+
+    # WHEN getting manta settings for WGS
+    manta_settings = params.get_manta_settings(SequencingType.WGS)
+
+    # THEN manta setting should be empty
+    assert manta_settings == ""
 
 
 def test_params_vardict():
