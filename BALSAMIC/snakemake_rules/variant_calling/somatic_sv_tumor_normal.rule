@@ -416,7 +416,8 @@ rule igh_dux4_detection_tumor_normal:
         Path(singularity_image, config["bioinfo_tools"].get("samtools") + ".sif").as_posix()
     params:
         genome_version = config["reference"]["genome_version"],
-        custom_sv_detection_script= get_script_path("igh_dux4_detection.sh"),
+        custom_sv_detection_script = get_script_path("igh_dux4_detection.sh"),
+        case_name = config["analysis"]["case_id"],
     threads:
         get_threads(cluster_config, "igh_dux4_detection")
     message:
