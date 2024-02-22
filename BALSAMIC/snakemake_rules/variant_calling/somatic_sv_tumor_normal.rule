@@ -420,7 +420,7 @@ rule igh_dux4_detection_tumor_normal:
     threads:
         get_threads(cluster_config, "igh_dux4_detection_tumor_normal")
     message:
-        ("Detecting IGH::DUX4 rearrangement for {params.case_name} using samtools comand published in Frontiers in Oncology, 13, p.1217712.")
+        ("Detecting IGH::DUX4 rearrangement for {params.case_name} using samtools.")
     shell:
         """
         bash {params.custom_sv_detection_script} {params.genome_version} {output.vcf} {input.bamT} {input.bamN} 
