@@ -418,7 +418,7 @@ rule igh_dux4_detection_tumor_normal:
         genome_version = config["reference"]["genome_version"],
         custom_sv_detection_script= get_script_path("custom_sv_detection.sh"),
     threads:
-        get_threads(cluster_config, "igh_dux4_detection_tumor_normal")
+        get_threads(cluster_config, "igh_dux4_detection")
     message:
         ("Detecting IGH::DUX4 rearrangement for {params.case_name} using samtools.")
     shell:
