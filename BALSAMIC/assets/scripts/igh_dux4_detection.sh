@@ -40,9 +40,13 @@ get_supporting_reads() {
       # Get number of supporting reads for IGH::DUX4 rearrangement in a given BAM file
       local bam="$1"
       if [ "$genome_version" = "hg19" ]; then
-          local supporting_reads=$(samtools view -F 1024 -c -e '(rnext == "4" && pnext > 190988100 && pnext < 191007000) || (rnext == "10" && pnext > 135477000 && pnext < 135500000) || (rnext == "GL000228.1" && pnext > 70000 && pnext < 115000) || ([SA] =~ "10,1354[789][0-9]{4}") || ([SA] =~ "4,19(09[8-9][0-9]|100[0-7])[0-9]{3}" || [SA] =~ "GL000228.1,([7-9][0-9]{4}|1[0-1][0-5][0-9]{3})")' {input.bamT} 14:106032614-107288051 )
+          local supporting_reads=$(samtools view -F 1024 -c \
+           -e '(rnext == "4" && pnext > 190988100 && pnext < 191007000) || (rnext == "10" && pnext > 135477000 && pnext < 135500000) || (rnext == "GL000228.1" && pnext > 70000 && pnext < 115000) || ([SA] =~ "10,1354[789][0-9]{4}") || ([SA] =~ "4,19(09[8-9][0-9]|100[0-7])[0-9]{3}" || [SA] =~ "GL000228.1,([7-9][0-9]{4}|1[0-1][0-5][0-9]{3})")' \
+           {input.bamT} 14:106032614-107288051 )
       elif [ "$genome_version" = "hg38" ]; then
-          local supporting_reads=$(samtools view -F 1024 -c -e '(rnext == "4" && pnext > 190173000 && pnext < 190176000) || ([SA] =~ "4,19017[345][0-9]{3}")' {input.bamT} chr14:105586437-106879844 )
+          local supporting_reads=$(samtools view -F 1024 -c \
+           -e '(rnext == "4" && pnext > 190173000 && pnext < 190176000) || ([SA] =~ "4,19017[345][0-9]{3}")' \
+           {input.bamT} chr14:105586437-106879844 )
       fi
       echo $supporting_reads
 }
