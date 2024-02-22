@@ -403,7 +403,7 @@ else:
         """
 
 
-rule custom_detection_tumor_normal:
+rule igh_dux4_detection_tumor_normal:
     input:
         fa = config["reference"]["reference_genome"],
         bamT = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
@@ -411,14 +411,14 @@ rule custom_detection_tumor_normal:
     output:
         vcf = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".custom.vcf.gz",
     benchmark:
-        benchmark_dir + 'custom_detection_tumor_normal_' + config["analysis"]["case_id"] + ".tsv"
+        benchmark_dir + 'igh_dux4_detection_tumor_normal_' + config["analysis"]["case_id"] + ".tsv"
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("samtools") + ".sif").as_posix()
     params:
         genome_version = config["reference"]["genome_version"],
         custom_sv_detection_script= get_script_path("custom_sv_detection.sh"),
     threads:
-        get_threads(cluster_config, "custom_detection_tumor_only")
+        get_threads(cluster_config, "igh_dux4_detection_tumor_normal")
     message:
         ("Detecting IGH::DUX4 rearrangement for {params.case_name} using samtools comand published in Frontiers in Oncology, 13, p.1217712.")
     shell:
