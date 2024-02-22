@@ -1,3 +1,23 @@
+[14.0.0]
+-------
+
+Added:
+^^^^^^
+* bcftools filters for `PR:SR` evidence in Manta calls https://github.com/Clinical-Genomics/BALSAMIC/pull/1371
+* `--exome` argument to Manta runs in TGA cases https://github.com/Clinical-Genomics/BALSAMIC/pull/1371
+* MultiQC intermediate files to deliverables https://github.com/Clinical-Genomics/BALSAMIC/pull/1388
+
+Removed:
+^^^^^^^^
+* Extra bcftools filters that allows MaxDepth filtered variants in the final SV VCF https://github.com/Clinical-Genomics/BALSAMIC/pull/1371
+* Unused arguments from `delivery.py` https://github.com/Clinical-Genomics/BALSAMIC/pull/1388
+
+Fixed:
+^^^^^^
+* ASCAT-Ngs container https://github.com/Clinical-Genomics/BALSAMIC/pull/1395
+* bcftools in manta_tumor_normal uses correct column for tumor read filtering https://github.com/Clinical-Genomics/BALSAMIC/pull/1400
+
+
 [13.0.1]
 -------
 

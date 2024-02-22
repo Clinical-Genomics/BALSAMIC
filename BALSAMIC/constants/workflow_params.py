@@ -148,6 +148,10 @@ WORKFLOW_PARAMS = {
             ]
         ),
     },
+    "manta": {
+        "wgs_settings": "",
+        "tga_settings": "--exome",
+    },
     "vardict": {
         "allelic_frequency": "0.001",
         "max_pval": "0.9",
