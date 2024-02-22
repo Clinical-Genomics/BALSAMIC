@@ -16,6 +16,10 @@ def test_deliver_tumor_only_panel(
     # GIVEN a tumor-normal config file
     helpers.read_config(tumor_only_config)
     actual_delivery_report = Path(helpers.delivery_dir, helpers.case_id + ".hk")
+    multiqc_data_dir: Path = Path(helpers.result_dir, "qc", "multiqc_data")
+    multiqc_data_dir.mkdir(parents=True, exist_ok=True)
+    multiqc_data_json: Path = Path(multiqc_data_dir, "multiqc_data.json")
+    multiqc_data_json.touch()
 
     with mock.patch.dict(
         environ,
@@ -71,6 +75,10 @@ def test_deliver_tumor_normal_panel(
         vep_result_dir, "SNV.somatic." + helpers.case_id + ".vardict.vcf.gz.tbi"
     )
     touch_vcf_delivery_file_index.touch()
+    multiqc_data_dir: Path = Path(helpers.result_dir, "qc", "multiqc_data")
+    multiqc_data_dir.mkdir(parents=True, exist_ok=True)
+    multiqc_data_json: Path = Path(multiqc_data_dir, "multiqc_data.json")
+    multiqc_data_json.touch()
 
     # Temporary files to be ignored by delivery
     vcf_result_dir = Path(helpers.result_dir, "vcf")
