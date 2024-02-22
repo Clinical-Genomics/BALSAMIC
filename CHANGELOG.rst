@@ -1,3 +1,19 @@
+[X.X.X]
+-------
+
+Added:
+^^^^^^
+* custom samtools script for the detection of IGH::DUX4 rearrangements https://github.com/Clinical-Genomics/BALSAMIC/pull/1397
+
+Removed:
+^^^^^^^^
+
+
+Fixed:
+^^^^^^
+
+
+
 [14.0.0]
 -------
 
@@ -6,7 +22,6 @@ Added:
 * bcftools filters for `PR:SR` evidence in Manta calls https://github.com/Clinical-Genomics/BALSAMIC/pull/1371
 * `--exome` argument to Manta runs in TGA cases https://github.com/Clinical-Genomics/BALSAMIC/pull/1371
 * MultiQC intermediate files to deliverables https://github.com/Clinical-Genomics/BALSAMIC/pull/1388
-* custom samtools script for the detection of IGH::DUX4 rearrangements https://github.com/Clinical-Genomics/BALSAMIC/pull/1397
 
 Removed:
 ^^^^^^^^
