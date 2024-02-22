@@ -1,5 +1,5 @@
 name: Maintenance task
-description: A maintenance task
+description: A maintenance task. Could be updates to databases, code or documents.
 title: "[Maintenance] <title>"
 labels: ["Maintenance"]
 projects: ["Clinical-Genomics/46"]
