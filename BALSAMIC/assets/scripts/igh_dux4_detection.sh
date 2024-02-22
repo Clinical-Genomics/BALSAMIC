@@ -11,6 +11,7 @@ genome_version="$1"
 output_vcf="$2"
 tumor_bam="$3"
 normal_bam="$4"
+output_vcf_tmp="$output_vcf.tmp"
 
 # Print given arguments
 echo "genome_version: $genome_version"
@@ -74,14 +75,16 @@ echo "supporting reads normal: $supporting_reads_normal"
 echo "vcf filter: $vcf_filter"
 
 # Write vcf entry
-echo '##fileformat=VCFv4.2' > $output_vcf.tmp
-echo '##ALT=<ID=BND,Description="Break end">' >> $output_vcf.tmp
-echo '##INFO=<ID=SVTYPE,Number=1,Type=String,Description="Type of structural variant">' >> $output_vcf.tmp
-echo '##INFO=<ID=IMPRECISE,Number=0,Type=Flag,Description="Imprecise structural variation">' >> $output_vcf.tmp
-echo '##FORMAT=<ID=DV,Number=1,Type=Integer,Description="Number of paired-ends that support the event">' >> $output_vcf.tmp
-echo -e "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\t${samples_header}" >> $output_vcf.tmp
-echo -e "${igh_chr}\t${igh_pos}\tsamtools_igh_dux4\tN\tN[${dux4_chr}:${dux4_pos}[\t.\t${vcf_filter}\tSVTYPE=BND;IMPRECISE;\tDV\t${samples_field}" >> $output_vcf.tmp
-bgzip $output_vcf.tmp > $output_vcf
-tabix -p vcf $output_vcf
-rm $output_vcf.tmp
+{
+  echo '##fileformat=VCFv4.2'
+  echo '##ALT=<ID=BND,Description="Break end">'
+  echo '##INFO=<ID=SVTYPE,Number=1,Type=String,Description="Type of structural variant">'
+  echo '##INFO=<ID=IMPRECISE,Number=0,Type=Flag,Description="Imprecise structural variation">'
+  echo '##FORMAT=<ID=DV,Number=1,Type=Integer,Description="Number of paired-ends that support the event">'
+  echo -e "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\t${samples_header}"
+  echo -e "${igh_chr}\t${igh_pos}\tsamtools_igh_dux4\tN\tN[${dux4_chr}:${dux4_pos}[\t.\t${vcf_filter}\tSVTYPE=BND;IMPRECISE;\tDV\t${samples_field}"
+} >> $output_vcf_tmp
 
+bgzip $output_vcf_tmp > $output_vcf
+tabix -p vcf $output_vcf
+rm $output_vcf_tmp
