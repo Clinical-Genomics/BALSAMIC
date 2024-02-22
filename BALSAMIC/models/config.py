@@ -102,6 +102,7 @@ class VCFModel(BaseModel):
     dellycnv: VarcallerAttribute
     tiddit: VarcallerAttribute
     cnvpytor: VarcallerAttribute
+    custom: VarcallerAttribute
     svdb: VarcallerAttribute
 
 

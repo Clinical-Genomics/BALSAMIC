@@ -201,6 +201,8 @@ DELIVERY_RULES: List[str] = [
     "bcftools_filter_sv_clinical",
     "tiddit_sv_tumor_only",
     "tiddit_sv_tumor_normal",
+    "igh_dux4_detection_tumor_only",
+    "igh_dux4_detection_tumor_normal",
     # CNVs
     "delly_cnv_tumor_only",
     "delly_cnv_tumor_normal",
