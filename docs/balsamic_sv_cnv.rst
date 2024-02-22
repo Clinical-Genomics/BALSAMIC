@@ -58,6 +58,7 @@ The copy number variants, identified using ascatNgs and `dellycnv`, are converte
 Tumor and normal calls in `TIDDIT` are merged using `SVDB` with `--bnd_distance 500` and `--overlap = 0.80`.
 Using a custom made script "filter_SVs.py", soft-filters are added to the calls based on the presence of the variant in the normal, with the goal of retaining only somatic variants as PASS.
 
+Manta calls are filtered using bcftools to only keep variants that have evidence from 3 or more reads.
 
 .. list-table:: SV filters
    :widths: 25 25 40
@@ -78,6 +79,9 @@ Using a custom made script "filter_SVs.py", soft-filters are added to the calls 
    * - TIDDIT
      - in_normal
      - ctg_n == True and AF_N_MAX == 0 and AF_T_MAX <= 0.25
+   * - Manta
+     - low_pr_sr_count
+     - SUM(FORMAT/PR[0:1]+FORMAT/SR[0:1]) < 4.0
 
 
 Further information regarding the TIDDIT tumor normal filtration: As translocation variants are represented by 2 BNDs in the VCF which allows for mixed assignment of soft-filters, a requirement for assigning soft-filters to translocations is that neither BND is PASS.
@@ -138,7 +142,7 @@ The following filter applies for both tumor-normal and tumor-only samples in add
 
     Frq <= 0.02  (or) Frq == "."
 
-The variants scored as `PASS` or `MaxDepth` are included in the final vcf file (`SNV.somatic.<CASE_ID>.svdb.<research/clinical>.filtered.pass.vcf.gz`).
+The variants scored as `PASS` are included in the final vcf file (`SNV.somatic.<CASE_ID>.svdb.<research/clinical>.filtered.pass.vcf.gz`).
 
 The following command can be used to fetch the variants identified by a specific caller from merged structural and copy number variants.
 

@@ -92,6 +92,19 @@ SENTIEON_VARCALL_SETTINGS = {
     "description": "General purpose filters used for filtering tnscope and tnhaplotyper",
 }
 
+# Manta bcftools filters
+MANTA_FILTER_SETTINGS = {
+    "low_pr_sr_count": {
+        "tag_value": 4,
+        "filter_name": "low_pr_sr_count",
+        "field": "FORMAT",
+    },
+    "varcaller_name": "Manta",
+    "filter_type": "general",
+    "analysis_type": "tumor_only,tumor_normal",
+    "description": "Bcftools filters to set frequency and minimum read support for SV calls",
+}
+
 # Configuration for SVDB settings:
 SVDB_FILTER_SETTINGS = {
     "swegen_sv_freq": {
