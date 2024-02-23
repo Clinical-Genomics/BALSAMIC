@@ -75,8 +75,6 @@ bcftools view -f PASS,triallelic_site {input.vcf_snv} \
 | bcftools filter --threads {threads} --exclude 'sum(FORMAT/AF[0])<sum(FORMAT/AF[1])*{params.high_normal_tumor_af_frac_value}' --soft-filter '{params.high_normal_tumor_af_frac_filter_name}' --mode '+' \
 | bcftools view -f PASS,triallelic_site -O z -o {output.vcf_snv_research}; 
 
--e sum(FORMAT/AF[0])<sum(FORMAT/AF[1])*4 -s high_normal_af_ratio -m +
-
 tabix -p vcf -f {output.vcf_snv_research};
           """
 
