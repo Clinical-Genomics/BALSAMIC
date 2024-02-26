@@ -44,10 +44,20 @@ Depending on the sequencing type, BALSAMIC is currently running the following st
      - tumor-only
      - somatic
      - CNV
+   * - igh_dux4 (see note below)
+     - WGS
+     - tumor-normal, tumor-only
+     - somatic
+     - SV
 
 Further details about a specific caller can be found in the links for the repositories containing the documentation for SV and CNV callers along with the links for the articles are listed in `bioinfo softwares <https://balsamic.readthedocs.io/en/latest/bioinfo_softwares.html>`_.
 
+Note that igh_dux4 is not a variant caller itself. This is a custom script that uses samtools to detect read pairs supporting IGH::DUX4 rearrangements. In short, the command identifies discordant reads mapping to the IGH region and to either DUX4 or its homologous DUX4-like regions (see references for details). The inclusion of this feature aims to alleviate the failure of callers to detect this rearrangement. It is important to note, however, that the reported breakpoints are fixed to the IGH and DUX4 coordinates and are, therefore, imprecise and uncertain. Therefore, we advise caution when interpreting this information.
+
+
 It is mandatory to provide the gender of the sample from BALSAMIC version >= 10.0.0 For CNV analysis.
+
+
 
 **Pre-merge Filtrations**
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -82,6 +92,9 @@ Manta calls are filtered using bcftools to only keep variants that have evidence
    * - Manta
      - low_pr_sr_count
      - SUM(FORMAT/PR[0:1]+FORMAT/SR[0:1]) < 4.0
+   * - igh_dux4
+     - samtools_igh_dux4
+     - DV < 1
 
 
 Further information regarding the TIDDIT tumor normal filtration: As translocation variants are represented by 2 BNDs in the VCF which allows for mixed assignment of soft-filters, a requirement for assigning soft-filters to translocations is that neither BND is PASS.
@@ -117,12 +130,13 @@ Further information regarding the TIDDIT tumor normal filtration: As translocati
        | 3. ascat
        | 4. dellycnv
        | 5. tiddit
+       | 6. igh_dux4
      - | 1. manta
        | 2. dellysv
        | 3. dellycnv
        | 4. tiddit
        | 5. cnvpytor
-
+       | 6. igh_dux4
 
 
 The merged `SNV.somatic.<CASE_ID>.svdb.vcf.gz` file retains all the information for the variants from the caller in which the variants are identified, which are then annotated using `ensembl-vep`.
