@@ -294,7 +294,7 @@ rule igh_dux4_detection_tumor_only:
         fa = config["reference"]["reference_genome"],
         bamT = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample)
     output:
-        vcf = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".custom.vcf.gz",
+        vcf = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".igh_dux4.vcf.gz",
     benchmark:
         benchmark_dir + 'igh_dux4_detection_tumor_only_' + config["analysis"]["case_id"] + ".tsv"
     singularity:
@@ -306,7 +306,7 @@ rule igh_dux4_detection_tumor_only:
     threads:
         get_threads(cluster_config, "igh_dux4_detection")
     message:
-        ("Detecting IGH::DUX4 rearrangement for {params.case_name} using samtools.")
+        "Detecting IGH::DUX4 rearrangement for {params.case_name} using samtools."
     shell:
         """
         bash {params.custom_sv_detection_script} {params.genome_version} {output.vcf} {input.bamT} 
