@@ -5,14 +5,6 @@ Added:
 ^^^^^^
 * custom samtools script for the detection of IGH::DUX4 rearrangements https://github.com/Clinical-Genomics/BALSAMIC/pull/1397
 
-Removed:
-^^^^^^^^
-
-
-Fixed:
-^^^^^^
-
-
 
 [14.0.0]
 -------
