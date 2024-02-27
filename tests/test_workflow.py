@@ -15,6 +15,14 @@ def test_workflow_tumor_only_tga_hg19(
     caplog,
 ):
     # GIVEN a sample config dict and a snakefile
+
+    print("----------------------------------------------------------------")
+    print(caplog.text)
+    print("----------------------------------------------------------------")
+    caplog.clear()
+    print(caplog.text)
+    print("----------------------------------------------------------------")
+
     analysis_type = "single"
     analysis_workflow = "balsamic"
     snakefile = get_snakefile(analysis_type, analysis_workflow)
@@ -32,8 +40,7 @@ def test_workflow_tumor_only_tga_hg19(
     ):
         assert snakemake.snakemake(snakefile, configfiles=[config_json], dryrun=True)
 
-        print(caplog.text)
-
+        caplog.
         # THEN the following rules should not be included
         # assert "igh_dux4_detection_tumor_only" not in caplog.text
         assert "cnvpytor_tumor_only" not in caplog.text
