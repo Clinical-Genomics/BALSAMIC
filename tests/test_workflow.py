@@ -15,14 +15,14 @@ def test_workflow_tumor_only_tga_hg19(
     caplog,
 ):
     # GIVEN a sample config dict and a snakefile
-    caplog.set_level(logging.INFO)
 
-    print("----------------------------------------------------------------")
-    print(caplog.text)
-    print("----------------------------------------------------------------")
-    caplog.clear()
-    print(caplog.text)
-    print("----------------------------------------------------------------")
+    # Clear existing handlers from the root logger
+    for handler in logging.root.handlers[:]:
+        logging.root.removeHandler(handler)
+
+    # Add a new handler to direct logs to caplog
+    caplog.set_level(logging.INFO)
+    logging.basicConfig(level=logging.INFO, handlers=[caplog.handler])
 
     analysis_type = "single"
     analysis_workflow = "balsamic"
@@ -129,9 +129,7 @@ def test_workflow_tumor_normal_wgs_hg19(
         # assert "igh_dux4_detection_tumor_normal" in caplog.text
 
 
-def test_workflow_qc_tumor_only_hg19(
-    tumor_only_config_qc, sentieon_install_dir, sentieon_license
-):
+def test_workflow_qc_tumor_only_hg19(tumor_only_config_qc, sentieon_install_dir, sentieon_license):
     # GIVEN a sample config dict and a snakefile
     workflow = "single"
     snakefile = get_snakefile(workflow, AnalysisWorkflow.BALSAMIC_QC)
