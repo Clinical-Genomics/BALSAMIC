@@ -36,6 +36,7 @@ def test_workflow_tumor_only_tga_hg19(
 
         # THEN the following rules should not be included
         # assert "igh_dux4_detection_tumor_only" not in caplog.text
+        assert "cnvpytor_tumor_only" not in caplog.text
 
 
 def test_workflow_tumor_normal_tga_hg19(
@@ -122,9 +123,7 @@ def test_workflow_tumor_normal_wgs_hg19(
         # assert "igh_dux4_detection_tumor_normal" in caplog.text
 
 
-def test_workflow_qc_tumor_only_hg19(
-    tumor_only_config_qc, sentieon_install_dir, sentieon_license
-):
+def test_workflow_qc_tumor_only_hg19(tumor_only_config_qc, sentieon_install_dir, sentieon_license):
     # GIVEN a sample config dict and a snakefile
     workflow = "single"
     snakefile = get_snakefile(workflow, AnalysisWorkflow.BALSAMIC_QC)
