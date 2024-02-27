@@ -40,7 +40,6 @@ def test_workflow_tumor_only_tga_hg19(
     ):
         assert snakemake.snakemake(snakefile, configfiles=[config_json], dryrun=True)
 
-        caplog.
         # THEN the following rules should not be included
         # assert "igh_dux4_detection_tumor_only" not in caplog.text
         assert "cnvpytor_tumor_only" not in caplog.text
