@@ -15,6 +15,7 @@ def test_workflow_tumor_only_tga_hg19(
     caplog,
 ):
     # GIVEN a sample config dict and a snakefile
+    caplog.set_level(logging.INFO)
 
     print("----------------------------------------------------------------")
     print(caplog.text)
@@ -27,7 +28,6 @@ def test_workflow_tumor_only_tga_hg19(
     analysis_workflow = "balsamic"
     snakefile = get_snakefile(analysis_type, analysis_workflow)
     config_json = tumor_only_config
-    caplog.set_level(logging.INFO)
 
     # WHEN invoking snakemake module with dry run option
     # THEN the snakemake workflow for TGA, hg19-tumor-only should run successfully.
