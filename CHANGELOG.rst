@@ -1,3 +1,12 @@
+[x.x.x]
+-------
+
+Fixed:
+^^^^^^
+* PureCN fail due to bash strict mode https://github.com/Clinical-Genomics/BALSAMIC/pull/
+
+
+
 [14.0.0]
 -------
 

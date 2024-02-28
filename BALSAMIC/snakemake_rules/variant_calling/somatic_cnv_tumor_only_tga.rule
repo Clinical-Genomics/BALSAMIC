@@ -126,6 +126,11 @@ rule purecn_call_CNV_research:
 export PURECN='/opt/PureCN/PureCN.R'
 
 # Run PureCN to estimate tumor-purity and ploidy
+
+# Keep exit_status to bypass bash stict mode and continue even if purecn fails.
+exit_status="true"
+
+{{
 Rscript $PURECN \
 --parallel \
 --out {params.tmpdir} \
@@ -137,7 +142,9 @@ Rscript $PURECN \
 --genome {params.genome} \
 --fun-segmentation Hclust \
 --force --post-optimize \
---seed 124;
+--seed 124; 
+}} || exit_status="false"
+
 
 if [[ -f "{params.tmpdir}/{params.sample_id}_dnacopy.seg" ]];  then
 mv {params.tmpdir}/{params.sample_id}_dnacopy.seg {params.cnv_csv};
