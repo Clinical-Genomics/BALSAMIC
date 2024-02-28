@@ -1,8 +1,19 @@
 [X.X.X]
 -------
 
+Added:
+^^^^^^
+* high_normal_tumor_af_frac filter in bcftools for TNscope T+N filtering out more than 30% TINC https://github.com/Clinical-Genomics/BALSAMIC/pull/1289
 
+Changed:
+^^^^^^^^
 
+Removed:
+^^^^^^^^
+* alt_allele_in_normal from TNscope T+N workflows https://github.com/Clinical-Genomics/BALSAMIC/pull/1289
+
+Fixed:
+^^^^^^
 
 [14.0.0]
 -------
