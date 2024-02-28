@@ -218,7 +218,7 @@ class VarCallerFilter(BaseModel):
     Attributes:
         AD: VCFAttributes (required); minimum allelic depth
         AF_min: VCFAttributes (optional); minimum allelic fraction
-        high_normal_tumor_af_frac: VCFAttributes (optional); maximum tumor allele frequency / normal allele frequency
+        high_normal_tumor_af_frac: VCFAttributes (optional); maximum normal allele frequency / tumor allele frequency
         MQ: VCFAttributes (optional); minimum mapping quality
         DP: VCFAttributes (optional); minimum read depth
         pop_freq: VCFAttributes (optional); maximum gnomad allele frequency

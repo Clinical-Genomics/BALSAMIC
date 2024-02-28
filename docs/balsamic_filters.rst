@@ -206,7 +206,7 @@ The following filters are applied to the variants in TNscope raw VCF file (`SNV.
 
 ::
 
-    AF(tumor) / AF(normal) < 3.33
+    excludes variant if: AF(normal) / AF(tumor) > 0.3
 
 *GNOMADAF_POPMAX*: Maximum Allele Frequency across populations
 
@@ -340,7 +340,7 @@ Minimum log-odds for the candidate selection. TNscope default: `4`. In our UMI-w
 
 ::
 
-    AF(tumor) / AF(normal) < 3.33
+    excludes variant if: AF(normal) / AF(tumor) > 0.3
 
 *GNOMADAF_POPMAX*: Maximum Allele Frequency across populations
 

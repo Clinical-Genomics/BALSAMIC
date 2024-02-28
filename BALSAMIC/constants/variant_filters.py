@@ -51,7 +51,7 @@ SENTIEON_VARCALL_SETTINGS = {
     },
     "AF_min": {"tag_value": 0.05, "filter_name": "balsamic_low_af", "field": "FORMAT"},
     "high_normal_tumor_af_frac": {
-        "tag_value": 3.33,
+        "tag_value": 0.3,
         "filter_name": "high_normal_tumor_af_frac",
         "field": "FORMAT",
     },
