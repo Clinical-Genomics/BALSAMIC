@@ -195,6 +195,19 @@ The following filters are applied to the variants in TNscope raw VCF file (`SNV.
     Minimum AF(tumor) >= 0.05
     Maximum AF(tumor) < 1
 
+*alt_allele_in_normal*: Default filter set by TNscope was considered too stringent in filtering tumor in normal and is removed.
+
+::
+
+    bcftools annotate -x FILTER/alt_allele_in_normal
+
+
+*Relative tumor AF in normal*: Allows for maximum Tumor-In-Normal-Contamination of 30%.
+
+::
+
+    excludes variant if: AF(normal) / AF(tumor) > 0.3
+
 *GNOMADAF_POPMAX*: Maximum Allele Frequency across populations
 
 ::
@@ -316,6 +329,19 @@ Minimum log-odds for the candidate selection. TNscope default: `4`. In our UMI-w
 
 **Post-call Filters**
 
+*alt_allele_in_normal*: Default filter set by TNscope was considered too stringent in filtering tumor in normal and is removed.
+
+::
+
+    bcftools annotate -x FILTER/alt_allele_in_normal
+
+
+*Relative tumor AF in normal*: Allows for maximum Tumor-In-Normal-Contamination of 30%.
+
+::
+
+    excludes variant if: AF(normal) / AF(tumor) > 0.3
+
 *GNOMADAF_POPMAX*: Maximum Allele Frequency across populations
 
 ::
@@ -338,5 +364,6 @@ Minimum log-odds for the candidate selection. TNscope default: `4`. In our UMI-w
 **Attention:**
 **BALSAMIC <= v8.2.10 uses GNOMAD_popmax <= 0.005. From Balsamic v9.0.0, this settings is changed to 0.02, to reduce the stringency.**
 **BALSAMIC >= v11.0.0 removes unmapped reads from the bam and cram files for all the workflows.**
+**BALSAMIC >= v13.0.0 keeps unmapped reads in bam and cram files for all the workflows.**
 
 
