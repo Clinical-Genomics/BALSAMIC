@@ -1,4 +1,11 @@
-[14.0.0]
+[[14.0.1]
+-------
+
+Fixed:
+^^^^^^
+* PureCN fail due to bash strict mode ASCAT-Ngs container https://github.com/Clinical-Genomics/BALSAMIC/pull/
+
+14.0.0]
 -------
 
 Added:

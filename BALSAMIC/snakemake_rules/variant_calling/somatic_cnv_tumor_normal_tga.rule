@@ -187,7 +187,12 @@ rule purecn_call_CNV_research:
         """
 export PURECN='/opt/PureCN/PureCN.R'
 
+
 # Run PureCN to estimate tumor-purity and ploidy
+
+# Keep exit_status to bypass bash stict mode and continue even if purecn fails.
+exit_status="true"
+{{
 Rscript $PURECN \
 --parallel \
 --out {params.tmpdir} \
@@ -200,29 +205,32 @@ Rscript $PURECN \
 --fun-segmentation Hclust \
 --force --post-optimize \
 --seed 124;
+}} || exit_status="false"
 
-if [[ -f "{params.tmpdir}/{params.sample_id}_dnacopy.seg" ]];  then
-mv {params.tmpdir}/{params.sample_id}_dnacopy.seg {params.cnv_csv};
-fi;
+if $exit_status; then
+    if [[ -f "{params.tmpdir}/{params.sample_id}_dnacopy.seg" ]];  then
+    mv {params.tmpdir}/{params.sample_id}_dnacopy.seg {params.cnv_csv};
+    fi;
 
-if [[ -f "{params.tmpdir}/{params.sample_id}.pdf" ]];  then
-mv {params.tmpdir}/{params.sample_id}.pdf {params.purity_pdf};
-fi;
+    if [[ -f "{params.tmpdir}/{params.sample_id}.pdf" ]];  then
+    mv {params.tmpdir}/{params.sample_id}.pdf {params.purity_pdf};
+    fi;
 
-if [[ -f "{params.tmpdir}/{params.sample_id}_loh.csv" ]];  then
-mv {params.tmpdir}/{params.sample_id}_loh.csv {params.loh_regions};
-fi;
+    if [[ -f "{params.tmpdir}/{params.sample_id}_loh.csv" ]];  then
+    mv {params.tmpdir}/{params.sample_id}_loh.csv {params.loh_regions};
+    fi;
 
-if [[ -f "{params.tmpdir}/{params.sample_id}_genes.csv" ]];  then
-mv {params.tmpdir}/{params.sample_id}_genes.csv {params.loh_genes};
-fi;
+    if [[ -f "{params.tmpdir}/{params.sample_id}_genes.csv" ]];  then
+    mv {params.tmpdir}/{params.sample_id}_genes.csv {params.loh_genes};
+    fi;
 
-if [[ -f "{params.tmpdir}/{params.sample_id}.vcf.gz" ]];  then
-mv {params.tmpdir}/{params.sample_id}.vcf.gz {params.purecn_vcf};
-fi;
+    if [[ -f "{params.tmpdir}/{params.sample_id}.vcf.gz" ]];  then
+    mv {params.tmpdir}/{params.sample_id}.vcf.gz {params.purecn_vcf};
+    fi;
 
-if [[ -f "{params.tmpdir}/{params.sample_id}.csv" ]];  then
-mv {params.tmpdir}/{params.sample_id}.csv {output.purecn_purity};
+    if [[ -f "{params.tmpdir}/{params.sample_id}.csv" ]];  then
+    mv {params.tmpdir}/{params.sample_id}.csv {output.purecn_purity};
+    fi;
 else
 echo '"Sampleid","Purity","Ploidy","Sex","Contamination","Flagged","Failed","Curated","Comment"
 "tumor.initial",0.02,2,"?",0,FALSE,FALSE,FALSE,NA' > {output.purecn_purity}; 
