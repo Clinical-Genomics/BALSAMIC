@@ -11,7 +11,7 @@ genome_version="$1"
 output_vcf="$2"
 tumor_bam="$3"
 normal_bam="$4"
-output_vcf_tmp="$output_vcf.tmp"
+output_vcf_tmp=$(echo $output_vcf | sed 's/.gz$//;')
 
 # Print given arguments
 echo "genome_version: $genome_version"
@@ -85,6 +85,5 @@ echo "vcf filter: $vcf_filter"
   echo -e "${igh_chr}\t${igh_pos}\tsamtools_igh_dux4\tN\tN[${dux4_chr}:${dux4_pos}[\t.\t${vcf_filter}\tSVTYPE=BND;IMPRECISE;\tDV\t${samples_field}"
 } >> $output_vcf_tmp
 
-bgzip $output_vcf_tmp > $output_vcf
+bgzip $output_vcf_tmp
 tabix -p vcf $output_vcf
-rm $output_vcf_tmp
