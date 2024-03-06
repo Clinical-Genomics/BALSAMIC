@@ -233,7 +233,7 @@ if [ "$exit_status" = "true" ]; then
     fi;
 else
 echo '"Sampleid","Purity","Ploidy","Sex","Contamination","Flagged","Failed","Curated","Comment"
-"tumor.initial",0.02,2,"?",0,FALSE,FALSE,FALSE,NA' > {output.purecn_purity}; 
+"tumor.initial",0.02,2,"?",0,FALSE,FALSE,FALSE,"FAILED PURITY ESTIMATION"' > {output.purecn_purity}; 
 fi;
 
 rm -rf {params.tmpdir};
