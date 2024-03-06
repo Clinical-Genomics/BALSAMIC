@@ -207,7 +207,7 @@ Rscript $PURECN \
 --seed 124;
 }} || exit_status="false"
 
-if $exit_status; then
+if [ "$exit_status" = "true" ]; then
     if [[ -f "{params.tmpdir}/{params.sample_id}_dnacopy.seg" ]];  then
     mv {params.tmpdir}/{params.sample_id}_dnacopy.seg {params.cnv_csv};
     fi;
