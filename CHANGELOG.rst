@@ -4,17 +4,18 @@
 Added:
 ^^^^^^
 * high_normal_tumor_af_frac filter in bcftools for TNscope T+N filtering out more than 30% TINC https://github.com/Clinical-Genomics/BALSAMIC/pull/1289
-* new option for exome samples --exome with modified bcftools filters compared to standard targeted workflow
-* added -U flag to VarDict T-only rule to not call SVs
+* new option for exome samples --exome with modified bcftools filters compared to standard targeted workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1414
+* added -U flag to VarDict T-only rule to not call SVs https://github.com/Clinical-Genomics/BALSAMIC/pull/1414
 
 Changed:
 ^^^^^^^^
-* slightly lowered stringency of targeted none-exome bcftools filters for depth and min MQ
+* reduced stringency of targeted none-exome bcftools filters for depth and min MQ https://github.com/Clinical-Genomics/BALSAMIC/pull/1414
+* removed -u flag from VarDict T+N and T only rules https://github.com/Clinical-Genomics/BALSAMIC/pull/1414
 
 Removed:
 ^^^^^^^^
 * alt_allele_in_normal from TNscope T+N workflows https://github.com/Clinical-Genomics/BALSAMIC/pull/1289
-* removed -u flag from VarDict T+N and T only rules
+* removed structural variant calling in VarDict https://github.com/Clinical-Genomics/BALSAMIC/pull/1414
 
 Fixed:
 ^^^^^^
