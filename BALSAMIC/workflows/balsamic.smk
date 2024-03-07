@@ -16,7 +16,8 @@ from BALSAMIC.constants.variant_filters import (
     COMMON_SETTINGS,
     SENTIEON_VARCALL_SETTINGS,
     SVDB_FILTER_SETTINGS,
-    VARDICT_SETTINGS,
+    VARDICT_SETTINGS_PANEL,
+    VARDICT_SETTINGS_EXOME,
     MANTA_FILTER_SETTINGS,
 )
 from BALSAMIC.constants.workflow_params import VARCALL_PARAMS, WORKFLOW_PARAMS, SLEEP_BEFORE_START
@@ -115,7 +116,13 @@ else:
 
 # Varcaller filter settings
 COMMON_FILTERS = VarCallerFilter.model_validate(COMMON_SETTINGS)
-VARDICT = VarCallerFilter.model_validate(VARDICT_SETTINGS)
+
+# Set VarDict settings depending on if panel is exome or not
+if config_model.panel and config_model.panel.exome:
+    VARDICT = VarCallerFilter.model_validate(VARDICT_SETTINGS_EXOME)
+else:
+    VARDICT = VarCallerFilter.model_validate(VARDICT_SETTINGS_PANEL)
+
 SENTIEON_CALLER = VarCallerFilter.model_validate(SENTIEON_VARCALL_SETTINGS)
 SVDB_FILTERS = VarCallerFilter.model_validate(SVDB_FILTER_SETTINGS)
 MANTA_FILTERS = VarCallerFilter.model_validate(MANTA_FILTER_SETTINGS)

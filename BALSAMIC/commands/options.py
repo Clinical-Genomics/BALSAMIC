@@ -22,7 +22,7 @@ from BALSAMIC.constants.cluster import (
 from BALSAMIC.constants.constants import LOG_LEVELS, LogLevel
 from BALSAMIC.constants.rules import DELIVERY_RULES
 from BALSAMIC.constants.workflow_params import VCF_DICT
-from BALSAMIC.utils.cli import validate_cache_version
+from BALSAMIC.utils.cli import validate_cache_version, validate_exome_option
 
 OPTION_ADAPTER_TRIM = click.option(
     "--adapter-trim/--no-adapter-trim",
@@ -187,6 +187,14 @@ OPTION_DRAGEN = click.option(
     is_flag=True,
     default=False,
     help="Enable dragen variant caller",
+)
+
+OPTION_EXOME = click.option(
+    "--exome",
+    is_flag=True,
+    default=False,
+    help="Assign exome parameters to TGA workflow",
+    callback=validate_exome_option
 )
 
 OPTION_FASTQ_PATH = click.option(
