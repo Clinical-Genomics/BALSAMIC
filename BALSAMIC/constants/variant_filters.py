@@ -10,8 +10,32 @@ COMMON_SETTINGS = {
     "description": "General purpose filters used for filtering any variant caller",
 }
 
+# Configuration of common VARDICT settings
+VARDICT_SETTINGS_COMMON = {
+    "pop_freq": {
+        "tag_value": 0.005,
+        "filter_name": "balsamic_high_pop_freq",
+        "field": "INFO",
+    },
+    "swegen_snv_freq": {
+        "tag_value": 0.01,
+        "filter_name": "SWEGENAF",
+        "field": "INFO",
+    },
+    "loqusdb_clinical_snv_freq": {
+        "tag_value": 0.01,
+        "filter_name": "Frq",
+        "field": "INFO",
+    },
+    "varcaller_name": "VarDict",
+    "filter_type": "general",
+    "analysis_type": "tumor_only,tumor_normal",
+    "description": "General purpose filters used for filtering VarDict",
+}
+
 # Configuration of VARDICT settings for smaller panels
 VARDICT_SETTINGS_PANEL = {
+    **VARDICT_SETTINGS_COMMON,
     "AD": {"tag_value": 5, "filter_name": "balsamic_low_tumor_ad", "field": "INFO"},
     "DP": {
         "tag_value": 80,
@@ -20,29 +44,15 @@ VARDICT_SETTINGS_PANEL = {
     },
     "MQ": {"tag_value": 30, "filter_name": "balsamic_low_mq", "field": "INFO"},
     "AF_min": {"tag_value": 0.007, "filter_name": "balsamic_low_af", "field": "INFO"},
-    "pop_freq": {
-        "tag_value": 0.005,
-        "filter_name": "balsamic_high_pop_freq",
-        "field": "INFO",
-    },
-    "swegen_snv_freq": {
-        "tag_value": 0.01,
-        "filter_name": "SWEGENAF",
-        "field": "INFO",
-    },
-    "loqusdb_clinical_snv_freq": {
-        "tag_value": 0.01,
-        "filter_name": "Frq",
-        "field": "INFO",
-    },
     "varcaller_name": "VarDict",
     "filter_type": "general",
-    "analysis_type": "tumor_only",
+    "analysis_type": "tumor_only,tumor_normal",
     "description": "General purpose filters used for filtering VarDict",
 }
 
 # Configuration of VARDICT settings for exomes
 VARDICT_SETTINGS_EXOME = {
+    **VARDICT_SETTINGS_COMMON,
     "AD": {"tag_value": 4, "filter_name": "balsamic_low_tumor_ad", "field": "INFO"},
     "DP": {
         "tag_value": 10,
@@ -51,25 +61,6 @@ VARDICT_SETTINGS_EXOME = {
     },
     "MQ": {"tag_value": 30, "filter_name": "balsamic_low_mq", "field": "INFO"},
     "AF_min": {"tag_value": 0.01, "filter_name": "balsamic_low_af", "field": "INFO"},
-    "pop_freq": {
-        "tag_value": 0.005,
-        "filter_name": "balsamic_high_pop_freq",
-        "field": "INFO",
-    },
-    "swegen_snv_freq": {
-        "tag_value": 0.01,
-        "filter_name": "SWEGENAF",
-        "field": "INFO",
-    },
-    "loqusdb_clinical_snv_freq": {
-        "tag_value": 0.01,
-        "filter_name": "Frq",
-        "field": "INFO",
-    },
-    "varcaller_name": "VarDict",
-    "filter_type": "general",
-    "analysis_type": "tumor_only",
-    "description": "General purpose filters used for filtering VarDict",
 }
 
 # Configuration for SENTIEON settings:
