@@ -5,8 +5,10 @@ Added:
 ^^^^^^
 * high_normal_tumor_af_frac filter in bcftools for TNscope T+N filtering out more than 30% TINC https://github.com/Clinical-Genomics/BALSAMIC/pull/1289
 
+
 Changed:
 ^^^^^^^^
+* updated Sentieon to version 202308.02 
 
 Removed:
 ^^^^^^^^
