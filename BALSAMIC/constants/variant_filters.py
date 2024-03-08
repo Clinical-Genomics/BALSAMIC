@@ -53,14 +53,14 @@ VARDICT_SETTINGS_PANEL = {
 # Configuration of VARDICT settings for exomes
 VARDICT_SETTINGS_EXOME = {
     **VARDICT_SETTINGS_COMMON,
-    "AD": {"tag_value": 4, "filter_name": "balsamic_low_tumor_ad", "field": "INFO"},
+    "AD": {"tag_value": 5, "filter_name": "balsamic_low_tumor_ad", "field": "INFO"},
     "DP": {
-        "tag_value": 10,
+        "tag_value": 20,
         "filter_name": "balsamic_low_tumor_dp",
         "field": "INFO",
     },
     "MQ": {"tag_value": 30, "filter_name": "balsamic_low_mq", "field": "INFO"},
-    "AF_min": {"tag_value": 0.01, "filter_name": "balsamic_low_af", "field": "INFO"},
+    "AF_min": {"tag_value": 0.007, "filter_name": "balsamic_low_af", "field": "INFO"},
 }
 
 # Configuration for SENTIEON settings:
