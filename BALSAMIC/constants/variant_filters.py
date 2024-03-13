@@ -27,6 +27,8 @@ VARDICT_SETTINGS_COMMON = {
         "filter_name": "Frq",
         "field": "INFO",
     },
+    "MQ": {"tag_value": 30, "filter_name": "balsamic_low_mq", "field": "INFO"},
+    "AF_min": {"tag_value": 0.007, "filter_name": "balsamic_low_af", "field": "INFO"},
     "varcaller_name": "VarDict",
     "filter_type": "general",
     "analysis_type": "tumor_only,tumor_normal",
@@ -42,12 +44,6 @@ VARDICT_SETTINGS_PANEL = {
         "filter_name": "balsamic_low_tumor_dp",
         "field": "INFO",
     },
-    "MQ": {"tag_value": 30, "filter_name": "balsamic_low_mq", "field": "INFO"},
-    "AF_min": {"tag_value": 0.007, "filter_name": "balsamic_low_af", "field": "INFO"},
-    "varcaller_name": "VarDict",
-    "filter_type": "general",
-    "analysis_type": "tumor_only,tumor_normal",
-    "description": "General purpose filters used for filtering VarDict",
 }
 
 # Configuration of VARDICT settings for exomes
@@ -59,8 +55,6 @@ VARDICT_SETTINGS_EXOME = {
         "filter_name": "balsamic_low_tumor_dp",
         "field": "INFO",
     },
-    "MQ": {"tag_value": 30, "filter_name": "balsamic_low_mq", "field": "INFO"},
-    "AF_min": {"tag_value": 0.007, "filter_name": "balsamic_low_af", "field": "INFO"},
 }
 
 # Configuration for SENTIEON settings:
