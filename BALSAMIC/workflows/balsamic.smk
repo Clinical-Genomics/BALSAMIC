@@ -119,10 +119,10 @@ else:
 COMMON_FILTERS = VarCallerFilter.model_validate(COMMON_SETTINGS)
 
 # Set VarDict settings depending on if panel is exome or not
+VARDICT = VarCallerFilter.model_validate(VARDICT_SETTINGS_PANEL)
 if config_model.panel and config_model.panel.exome:
     VARDICT = VarCallerFilter.model_validate(VARDICT_SETTINGS_EXOME)
-else:
-    VARDICT = VarCallerFilter.model_validate(VARDICT_SETTINGS_PANEL)
+
 
 SENTIEON_CALLER = VarCallerFilter.model_validate(SENTIEON_VARCALL_SETTINGS)
 SVDB_FILTERS = VarCallerFilter.model_validate(SVDB_FILTER_SETTINGS)
