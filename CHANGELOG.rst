@@ -10,12 +10,11 @@ Added:
 Changed:
 ^^^^^^^^
 * reduced stringency of targeted none-exome bcftools filters for depth and min MQ https://github.com/Clinical-Genomics/BALSAMIC/pull/1414
-* removed -u flag from VarDict T+N and T only rules https://github.com/Clinical-Genomics/BALSAMIC/pull/1414
+* removed -u flag from VarDict T+N and T only rules to remove calling only in reverse reads of overlapping mates https://github.com/Clinical-Genomics/BALSAMIC/pull/1414
 
 Removed:
 ^^^^^^^^
 * alt_allele_in_normal from TNscope T+N workflows https://github.com/Clinical-Genomics/BALSAMIC/pull/1289
-* removed structural variant calling in VarDict https://github.com/Clinical-Genomics/BALSAMIC/pull/1414
 
 Fixed:
 ^^^^^^
