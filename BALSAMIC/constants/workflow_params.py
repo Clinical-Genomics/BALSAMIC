@@ -168,7 +168,7 @@ WORKFLOW_PARAMS = {
     },
     "umiconsensuscall": {
         "align_format": "BAM",
-        "filter_minreads": "3,1,1",
+        "filter_minreads": "2,0,0",
         "tag": "XR",
     },
     "umiextract": {"read_structure": "-d '3M2S+T,3M2S+T'"},
