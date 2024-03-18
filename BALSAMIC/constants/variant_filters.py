@@ -40,7 +40,7 @@ VARDICT_SETTINGS_PANEL = {
     **VARDICT_SETTINGS_COMMON,
     "AD": {"tag_value": 5, "filter_name": "balsamic_low_tumor_ad", "field": "INFO"},
     "DP": {
-        "tag_value": 80,
+        "tag_value": 100,
         "filter_name": "balsamic_low_tumor_dp",
         "field": "INFO",
     },
