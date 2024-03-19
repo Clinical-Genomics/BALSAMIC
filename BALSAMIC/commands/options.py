@@ -194,7 +194,7 @@ OPTION_EXOME = click.option(
     is_flag=True,
     default=False,
     help="Assign exome parameters to TGA workflow",
-    callback=validate_exome_option
+    callback=validate_exome_option,
 )
 
 OPTION_FASTQ_PATH = click.option(

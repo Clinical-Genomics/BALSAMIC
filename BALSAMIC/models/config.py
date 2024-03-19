@@ -59,6 +59,7 @@ class PanelModel(BaseModel):
             When capture_kit argument is set, but is not a valid path
 
     """
+
     exome: Optional[bool] = False
     capture_kit: Annotated[Optional[str], AfterValidator(is_file)] = None
     chrom: Optional[List[str]] = None
