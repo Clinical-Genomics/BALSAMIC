@@ -1,0 +1,557 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Annotation resources" href="balsamic_annotation.html" /><link rel="prev" title="Calling and filtering variants" href="balsamic_filters.html" />
+
+    <!-- Generated with Sphinx 6.2.1 and Furo 2023.07.26 -->
+        <title>Structural and Copy Number variants - BALSAMIC documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=369552022d0b975c8e74270ce6eabe0fb7978f24" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-half" viewBox="0 0 24 24">
+    <title>Auto light/dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M13 12h5" />
+      <path d="M13 15h4" />
+      <path d="M13 18h1" />
+      <path d="M13 9h4" />
+      <path d="M13 6h1" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="index.html"><div class="brand">BALSAMIC  documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
+  
+  <div class="sidebar-logo-container">
+    <img class="sidebar-logo" src="_static/balsamic_logo.png" alt="Logo"/>
+  </div>
+  
+  <span class="sidebar-brand-text">BALSAMIC  documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Installation and Usage</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user_guide.html">Short tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli_package.html">Command line arguments</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Analysis and Interpretation</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="balsamic_filters.html">Calling and filtering variants</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Structural and Copy Number variants</a></li>
+<li class="toctree-l1"><a class="reference internal" href="balsamic_annotation.html">Annotation resources</a></li>
+<li class="toctree-l1"><a class="reference internal" href="balsamic_pon.html">Panel of Normals (PON)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="balsamic_pon.html#cnvkit-pon">CNVkit PON</a></li>
+<li class="toctree-l1"><a class="reference internal" href="balsamic_pon.html#gens-pon">GENS PON</a></li>
+<li class="toctree-l1"><a class="reference internal" href="balsamic_methods.html">Method description</a></li>
+<li class="toctree-l1"><a class="reference internal" href="history.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bioinfo_softwares.html">Tools and software</a></li>
+<li class="toctree-l1"><a class="reference internal" href="resources.html">References and other resources</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="README.html">Documentation Guidline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="programming_guide.html">Coding etiquettes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="semver.html">Semantic versioning</a></li>
+<li class="toctree-l1"><a class="reference internal" href="FAQs.html">Frequently Asked Questions (FAQs)</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main">
+          <section id="structural-and-copy-number-variants">
+<h1>Structural and Copy Number variants<a class="headerlink" href="#structural-and-copy-number-variants" title="Permalink to this heading">#</a></h1>
+<p>Depending on the sequencing type, BALSAMIC is currently running the following structural and copy number variant callers:</p>
+<div class="table-wrapper colwidths-given docutils container" id="id1">
+<table class="docutils align-default" id="id1">
+<caption><span class="caption-text">SV CNV callers</span><a class="headerlink" href="#id1" title="Permalink to this table">#</a></caption>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Variant caller</p></th>
+<th class="head"><p>Sequencing type</p></th>
+<th class="head"><p>Analysis type</p></th>
+<th class="head"><p>Somatic/Germline</p></th>
+<th class="head"><p>Variant type</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>AscatNgs</p></td>
+<td><p>WGS</p></td>
+<td><p>tumor-normal</p></td>
+<td><p>somatic</p></td>
+<td><p>CNV</p></td>
+</tr>
+<tr class="row-odd"><td><p>CNVkit</p></td>
+<td><p>TGA, WES</p></td>
+<td><p>tumor-normal, tumor-only</p></td>
+<td><p>somatic</p></td>
+<td><p>CNV</p></td>
+</tr>
+<tr class="row-even"><td><p>Delly</p></td>
+<td><p>TGA, WES, WGS</p></td>
+<td><p>tumor-normal, tumor-only</p></td>
+<td><p>somatic</p></td>
+<td><p>SV, CNV</p></td>
+</tr>
+<tr class="row-odd"><td><p>Manta</p></td>
+<td><p>TGA, WES, WGS</p></td>
+<td><p>tumor-normal, tumor-only</p></td>
+<td><p>somatic, germline</p></td>
+<td><p>SV</p></td>
+</tr>
+<tr class="row-even"><td><p>TIDDIT</p></td>
+<td><p>WGS</p></td>
+<td><p>tumor-normal, tumor-only</p></td>
+<td><p>somatic</p></td>
+<td><p>SV</p></td>
+</tr>
+<tr class="row-odd"><td><p>CNVpytor</p></td>
+<td><p>WGS</p></td>
+<td><p>tumor-only</p></td>
+<td><p>somatic</p></td>
+<td><p>CNV</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Further details about a specific caller can be found in the links for the repositories containing the documentation for SV and CNV callers along with the links for the articles are listed in <a class="reference external" href="https://balsamic.readthedocs.io/en/latest/bioinfo_softwares.html">bioinfo softwares</a>.</p>
+<p>It is mandatory to provide the gender of the sample from BALSAMIC version &gt;= 10.0.0 For CNV analysis.</p>
+<section id="pre-merge-filtrations">
+<h2><strong>Pre-merge Filtrations</strong><a class="headerlink" href="#pre-merge-filtrations" title="Permalink to this heading">#</a></h2>
+<p>The copy number variants, identified using ascatNgs and <cite>dellycnv</cite>, are converted to deletion and duplications before they are merged using <cite>SVDB</cite> with <cite>–bnd_distance = 5000</cite> (distance between end points for the variants from different callers) and  <cite>–overlap = 0.80</cite> (percentage for overlapping bases for the variants from different callers).</p>
+<p>Tumor and normal calls in <cite>TIDDIT</cite> are merged using <cite>SVDB</cite> with <cite>–bnd_distance 500</cite> and <cite>–overlap = 0.80</cite>.
+Using a custom made script “filter_SVs.py”, soft-filters are added to the calls based on the presence of the variant in the normal, with the goal of retaining only somatic variants as PASS.</p>
+<p>Manta calls are filtered using bcftools to only keep variants that have evidence from 3 or more reads.</p>
+<div class="table-wrapper colwidths-given docutils container" id="id2">
+<table class="docutils align-default" id="id2">
+<caption><span class="caption-text">SV filters</span><a class="headerlink" href="#id2" title="Permalink to this table">#</a></caption>
+<colgroup>
+<col style="width: 28%" />
+<col style="width: 28%" />
+<col style="width: 44%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Variant caller</p></th>
+<th class="head"><p>Filter added</p></th>
+<th class="head"><p>Filter expression</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>TIDDIT</p></td>
+<td><p>high_normal_af_fraction</p></td>
+<td><p>(AF_N_MAX / AF_T_MAX) &gt; 0.25</p></td>
+</tr>
+<tr class="row-odd"><td><p>TIDDIT</p></td>
+<td><p>max_normal_allele_frequency</p></td>
+<td><p>AF_N_MAX &gt; 0.25</p></td>
+</tr>
+<tr class="row-even"><td><p>TIDDIT</p></td>
+<td><p>normal_variant</p></td>
+<td><p>AF_T_MAX == 0 and ctg_t == False</p></td>
+</tr>
+<tr class="row-odd"><td><p>TIDDIT</p></td>
+<td><p>in_normal</p></td>
+<td><p>ctg_n == True and AF_N_MAX == 0 and AF_T_MAX &lt;= 0.25</p></td>
+</tr>
+<tr class="row-even"><td><p>Manta</p></td>
+<td><p>low_pr_sr_count</p></td>
+<td><p>SUM(FORMAT/PR[0:1]+FORMAT/SR[0:1]) &lt; 4.0</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Further information regarding the TIDDIT tumor normal filtration: As translocation variants are represented by 2 BNDs in the VCF which allows for mixed assignment of soft-filters, a requirement for assigning soft-filters to translocations is that neither BND is PASS.</p>
+</section>
+<section id="post-merge-filtrations">
+<h2><strong>Post-merge Filtrations</strong><a class="headerlink" href="#post-merge-filtrations" title="Permalink to this heading">#</a></h2>
+<p><cite>SVDB</cite> prioritizes the merging of variants from SV and CNV callers to fetch position and genotype information,  in the following order:</p>
+<div class="table-wrapper colwidths-given docutils container" id="id3">
+<table class="docutils align-default" id="id3">
+<caption><span class="caption-text">SVDB merge caller priority order</span><a class="headerlink" href="#id3" title="Permalink to this table">#</a></caption>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><dl class="simple">
+<dt>TGA, WES</dt><dd><p>tumor-normal</p>
+</dd>
+</dl>
+</th>
+<th class="head"><dl class="simple">
+<dt>TGA, WES</dt><dd><p>tumor-only</p>
+</dd>
+</dl>
+</th>
+<th class="head"><dl class="simple">
+<dt>WGS</dt><dd><p>tumor-normal</p>
+</dd>
+</dl>
+</th>
+<th class="head"><dl class="simple">
+<dt>WGS</dt><dd><p>tumor-only</p>
+</dd>
+</dl>
+</th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><div class="line-block">
+<div class="line">1. manta</div>
+<div class="line">2. dellysv</div>
+<div class="line">3. cnvkit</div>
+<div class="line">4. dellycnv</div>
+</div>
+</td>
+<td><div class="line-block">
+<div class="line">1. manta</div>
+<div class="line">2. dellysv</div>
+<div class="line">3. cnvkit</div>
+<div class="line">4. dellycnv</div>
+</div>
+</td>
+<td><div class="line-block">
+<div class="line">1. manta</div>
+<div class="line">2. dellysv</div>
+<div class="line">3. ascat</div>
+<div class="line">4. dellycnv</div>
+<div class="line">5. tiddit</div>
+</div>
+</td>
+<td><div class="line-block">
+<div class="line">1. manta</div>
+<div class="line">2. dellysv</div>
+<div class="line">3. dellycnv</div>
+<div class="line">4. tiddit</div>
+<div class="line">5. cnvpytor</div>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The merged <cite>SNV.somatic.&lt;CASE_ID&gt;.svdb.vcf.gz</cite> file retains all the information for the variants from the caller in which the variants are identified, which are then annotated using <cite>ensembl-vep</cite>.
+The SweGen and frequencies and the frequency of observed structural variants from clinical normal samples are annotated using <cite>SVDB</cite>.</p>
+<p>The following filter applies for both tumor-normal and tumor-only samples in addition to caller specific filters.</p>
+<p><em>SWEGENAF</em>: SweGen Allele Frequency</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">SWEGENAF</span> <span class="o">&lt;=</span> <span class="mf">0.02</span>  <span class="p">(</span><span class="ow">or</span><span class="p">)</span> <span class="n">SWEGENAF</span> <span class="o">==</span> <span class="s2">&quot;.&quot;</span>
+</pre></div>
+</div>
+<p><em>Frq</em>: Frequency of observation of the variants from normal <cite>Clinical</cite> samples</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Frq</span> <span class="o">&lt;=</span> <span class="mf">0.02</span>  <span class="p">(</span><span class="ow">or</span><span class="p">)</span> <span class="n">Frq</span> <span class="o">==</span> <span class="s2">&quot;.&quot;</span>
+</pre></div>
+</div>
+<p>The variants scored as <cite>PASS</cite> are included in the final vcf file (<cite>SNV.somatic.&lt;CASE_ID&gt;.svdb.&lt;research/clinical&gt;.filtered.pass.vcf.gz</cite>).</p>
+<p>The following command can be used to fetch the variants identified by a specific caller from merged structural and copy number variants.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">zgrep</span> <span class="o">-</span><span class="n">E</span> <span class="s2">&quot;#|&lt;Caller&gt;&quot;</span> <span class="o">&lt;*.</span><span class="n">svdb</span><span class="o">.</span><span class="n">vcf</span><span class="o">.</span><span class="n">gz</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</section>
+<section id="using-gens-for-wgs">
+<h2><strong>Using GENS for WGS</strong><a class="headerlink" href="#using-gens-for-wgs" title="Permalink to this heading">#</a></h2>
+<p>GENS is a visualization tool similar to IGV, originally developed in Clinical Genomics Lund, and primarily for visualizing genomic copy number profiles from WGS samples.</p>
+<p>To visualise the GENS-formatted files from BALSAMIC you need to have GENS installed, and to do this you can follow the instructions on the Clinical-Genomics-Lund GENS-repository:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://github.com/Clinical-Genomics-Lund/gens">Clinical-Genomics-Lund-GENS</a></p></li>
+</ul>
+<p>Two files per sample are uploaded to GENS, one file with allele-frequencies from SNV &amp; InDel germline-calls (BAF file) which can be used to aid the interpretation of the CN-profile, and one file with the Log2 copy number ratios normalized against a PON. Instructions for how to generate this PON using the BALSAMIC PON workflow can be found here:</p>
+<p><a class="reference external" href="https://balsamic.readthedocs.io/en/latest/balsamic_pon.html">Generate GENS PON</a>.</p>
+<p>There are three required arguments for creating the input files for GENS:
+1. Genome interval file produced by GATK <code class="docutils literal notranslate"><span class="pre">PreprocessIntervals</span></code> (see instructions in GENS PON creation)
+2. A gender specific PON (see instructions in GENS PON creation)
+3. A population database VCF with variant positions to be reported in the BAF file.</p>
+<p>We created the file mentioned in <strong>3</strong> using the file <code class="docutils literal notranslate"><span class="pre">gnomad.genomes.r2.1.1.sites</span></code> filtered with bcftools to only keep variants with an AF above 0.05.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">bcftools</span> <span class="n">view</span> <span class="o">-</span><span class="n">i</span> <span class="n">AF</span><span class="o">&gt;=</span><span class="mf">0.05</span> <span class="o">-</span><span class="n">Oz</span>
+</pre></div>
+</div>
+<p>To config BALSAMIC to run with GENS activated you supply these files like this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">balsamic</span> <span class="n">config</span> <span class="n">case</span> \
+  <span class="o">--</span><span class="n">case</span><span class="o">-</span><span class="nb">id</span> <span class="o">&lt;</span><span class="n">CASE_ID</span><span class="o">&gt;</span>
+  <span class="o">--</span><span class="n">balsamic</span><span class="o">-</span><span class="n">cache</span> <span class="o">&lt;/</span><span class="n">path</span><span class="o">/</span><span class="n">reference_cache</span><span class="o">/&gt;</span>
+  <span class="o">--</span><span class="n">analysis</span><span class="o">-</span><span class="nb">dir</span> <span class="o">&lt;/</span><span class="n">path</span><span class="o">/</span><span class="n">analysis</span><span class="o">/&gt;</span>
+  <span class="o">--</span><span class="n">fastq</span><span class="o">-</span><span class="n">path</span> <span class="o">&lt;/</span><span class="n">path</span><span class="o">/</span><span class="n">fastq</span><span class="o">/&gt;</span>
+  <span class="o">--</span><span class="n">gender</span> <span class="o">&lt;</span><span class="p">[</span><span class="n">male</span><span class="o">/</span><span class="n">female</span><span class="p">]</span><span class="o">&gt;</span>
+  <span class="o">--</span><span class="n">analysis</span><span class="o">-</span><span class="n">workflow</span> <span class="n">balsamic</span>
+  <span class="o">--</span><span class="n">genome</span><span class="o">-</span><span class="n">version</span> <span class="n">hg19</span>
+  <span class="o">--</span><span class="n">tumor</span><span class="o">-</span><span class="n">sample</span><span class="o">-</span><span class="n">name</span> <span class="o">&lt;</span><span class="n">TUMOR_NAME</span><span class="o">&gt;</span>
+  <span class="o">--</span><span class="n">genome</span><span class="o">-</span><span class="n">interval</span> <span class="o">&lt;/</span><span class="n">path</span><span class="o">/</span><span class="n">genome_interval</span><span class="o">&gt;</span>
+  <span class="o">--</span><span class="n">gens</span><span class="o">-</span><span class="n">coverage</span><span class="o">-</span><span class="n">pon</span> <span class="o">&lt;/</span><span class="n">path</span><span class="o">/</span><span class="n">pon_file</span><span class="o">&gt;</span>
+  <span class="o">--</span><span class="n">gnomad</span><span class="o">-</span><span class="nb">min</span><span class="o">-</span><span class="n">af5</span> <span class="o">&lt;/</span><span class="n">path</span><span class="o">/</span><span class="n">population_vcf</span><span class="o">.</span><span class="n">vcf</span><span class="o">.</span><span class="n">gz</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</section>
+<section id="genome-reference-files">
+<h2><strong>Genome Reference Files</strong><a class="headerlink" href="#genome-reference-files" title="Permalink to this heading">#</a></h2>
+<p><strong>How to generate genome reference files for ascatNGS</strong></p>
+<p>Detailed information is available from <a class="reference external" href="https://github.com/cancerit/ascatNgs">ascatNGS</a> documentation</p>
+<p>The file <em>SnpGcCorrections.tsv</em> prepared from the 1000 genome SNP panel.</p>
+<p><strong>GC correction file:</strong></p>
+<p>First step is to download the 1000 genome snp file and convert it from .vcf to .tsv. The detailed procedure to for this step is available from <a class="reference external" href="https://github.com/cancerit/ascatNgs/wiki/Human-reference-files-from-1000-genomes-VCFs">ascatNGS-reference-files</a> (Human reference files from 1000 genomes VCFs)</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">export</span> <span class="n">TG_DATA</span><span class="o">=</span><span class="n">ftp</span><span class="p">:</span><span class="o">//</span><span class="n">ftp</span><span class="o">.</span><span class="n">ensembl</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">pub</span><span class="o">/</span><span class="n">grch37</span><span class="o">/</span><span class="n">release</span><span class="o">-</span><span class="mi">83</span><span class="o">/</span><span class="n">variation</span><span class="o">/</span><span class="n">vcf</span><span class="o">/</span><span class="n">homo_sapiens</span><span class="o">/</span><span class="mi">1000</span><span class="n">GENOMES</span><span class="o">-</span><span class="n">phase_3</span><span class="o">.</span><span class="n">vcf</span><span class="o">.</span><span class="n">gz</span>
+</pre></div>
+</div>
+<p>Followed by:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>curl -sSL $TG_DATA | zgrep -F &#39;E_Multiple_observations&#39; | grep -F &#39;TSA=SNV&#39; |\
+perl -ane &#39;next if($F[0] !~ m/^\d+$/ &amp;&amp; $F[0] !~ m/^[XY]$/);\
+next if($F[0] eq $l_c &amp;&amp; $F[1]-1000 &lt; $l_p); $F[7]=~m/MAF=([^;]+)/;\
+next if($1 &lt; 0.05); printf &quot;%s\t%s\t%d\n&quot;, $F[2],$F[0],$F[1];\
+$l_c=$F[0]; $l_p=$F[1];&#39; &gt; SnpPositions_GRCh37_1000g.tsv
+</pre></div>
+</div>
+<p>–or–</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>curl -sSL $TG_DATA | zgrep -F &#39;E_Multiple_observations&#39; | grep -F &#39;TSA=SNV&#39; |\
+perl -ane &#39;next if($F[0] !~ m/^\d+$/ &amp;&amp; $F[0] !~ m/^[XY]$/); $F[7]=~m/MAF=([^;]+)/;\
+next if($1 &lt; 0.05); next if($F[0] eq $l_c &amp;&amp; $F[1]-1000 &lt; $l_p);\
+printf &quot;%s\t%s\t%d\n&quot;, $F[2],$F[0],$F[1]; $l_c=$F[0]; $l_p=$F[1];&#39;\
+&gt; SnpPositions_GRCh37_1000g.tsv
+</pre></div>
+</div>
+<p>Second step is to use <em>SnpPositions.tsv</em> file and generate <em>SnpGcCorrections.tsv</em> file, more details see <a class="reference external" href="https://github.com/cancerit/ascatNgs/wiki/Convert-SnpPositions.tsv-to-SnpGcCorrections.tsv">ascatNGS-convert-snppositions</a></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ascatSnpPanelGcCorrections</span><span class="o">.</span><span class="n">pl</span> <span class="n">genome</span><span class="o">.</span><span class="n">fa</span> <span class="n">SnpPositions</span><span class="o">.</span><span class="n">tsv</span> <span class="o">&gt;</span> <span class="n">SnpGcCorrections</span><span class="o">.</span><span class="n">tsv</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="balsamic_annotation.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Annotation resources</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="balsamic_filters.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Calling and filtering variants</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2023, Clinical Genomics
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Structural and Copy Number variants</a><ul>
+<li><a class="reference internal" href="#pre-merge-filtrations"><strong>Pre-merge Filtrations</strong></a></li>
+<li><a class="reference internal" href="#post-merge-filtrations"><strong>Post-merge Filtrations</strong></a></li>
+<li><a class="reference internal" href="#using-gens-for-wgs"><strong>Using GENS for WGS</strong></a></li>
+<li><a class="reference internal" href="#genome-reference-files"><strong>Genome Reference Files</strong></a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/scripts/furo.js"></script>
+    </body>
+</html>

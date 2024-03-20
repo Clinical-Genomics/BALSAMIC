@@ -210,7 +210,7 @@ The following filter applies for both tumor-normal and tumor-only samples.
 
     minreads = 3,1,1
 
-It means that at least `3` read-pairs need to support the UMI-group (based on the UMI-tag and the aligned genomic positions), and with at least 1 read-pair from each strand (F1R2 and F2R1).
+It means that at least `3` UMI tag groups should be ideally considered from both DNA strands, where a minimum of at least `1` UMI tag group should exist in each of the single-stranded consensus reads.
 
 *min_init_tumor_lod*: Initial Log odds for the that the variant exists in the tumor.
 

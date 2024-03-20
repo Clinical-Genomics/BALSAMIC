@@ -1,0 +1,385 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Changelog" href="history.html" /><link rel="prev" title="Panel of Normals (PON)" href="balsamic_pon.html" />
+
+    <!-- Generated with Sphinx 6.2.1 and Furo 2023.07.26 -->
+        <title>Method description - BALSAMIC documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=369552022d0b975c8e74270ce6eabe0fb7978f24" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-half" viewBox="0 0 24 24">
+    <title>Auto light/dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M13 12h5" />
+      <path d="M13 15h4" />
+      <path d="M13 18h1" />
+      <path d="M13 9h4" />
+      <path d="M13 6h1" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="index.html"><div class="brand">BALSAMIC  documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
+  
+  <div class="sidebar-logo-container">
+    <img class="sidebar-logo" src="_static/balsamic_logo.png" alt="Logo"/>
+  </div>
+  
+  <span class="sidebar-brand-text">BALSAMIC  documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Installation and Usage</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user_guide.html">Short tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli_package.html">Command line arguments</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Analysis and Interpretation</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="balsamic_filters.html">Calling and filtering variants</a></li>
+<li class="toctree-l1"><a class="reference internal" href="balsamic_sv_cnv.html">Structural and Copy Number variants</a></li>
+<li class="toctree-l1"><a class="reference internal" href="balsamic_annotation.html">Annotation resources</a></li>
+<li class="toctree-l1"><a class="reference internal" href="balsamic_pon.html">Panel of Normals (PON)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="balsamic_pon.html#cnvkit-pon">CNVkit PON</a></li>
+<li class="toctree-l1"><a class="reference internal" href="balsamic_pon.html#gens-pon">GENS PON</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Method description</a></li>
+<li class="toctree-l1"><a class="reference internal" href="history.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bioinfo_softwares.html">Tools and software</a></li>
+<li class="toctree-l1"><a class="reference internal" href="resources.html">References and other resources</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="README.html">Documentation Guidline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="programming_guide.html">Coding etiquettes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="semver.html">Semantic versioning</a></li>
+<li class="toctree-l1"><a class="reference internal" href="FAQs.html">Frequently Asked Questions (FAQs)</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main">
+          <section id="method-description">
+<h1>Method description<a class="headerlink" href="#method-description" title="Permalink to this heading">#</a></h1>
+<section id="target-genome-analysis">
+<h2>Target Genome Analysis<a class="headerlink" href="#target-genome-analysis" title="Permalink to this heading">#</a></h2>
+<p>BALSAMIC <sup>1</sup> (<strong>version</strong> = 14.0.0) was used to analyze the data from raw FASTQ files.
+We first quality controlled FASTQ files using FastQC v0.11.9 <sup>2</sup>.
+Adapter sequences and low-quality bases were trimmed using fastp v0.23.2 <sup>3</sup>.
+Trimmed reads were mapped to the reference genome hg19 using sentieon-tools 202010.02 <sup>15</sup>.
+Duplicated reads were marked using Dedup from sentieon-tools 202010.02 <sup>15</sup>.
+The final BAM is promptly quality controlled using CollectHsMetrics, CollectInsertSizeMetrics and CollectAlignmentSummaryMetrics functionalities from Picard tools v2.27.1 <sup>6</sup>.
+Results of the quality controlled steps were summarized by MultiQC v1.12 <sup>7</sup>.
+Small somatic mutations (SNVs and INDELs) were called for each sample using VarDict v1.8.2 <sup>8</sup>.
+Apart from the Vardict filters to report the variants, the called-variants were also further second filtered using the criteria
+(<em>MQ &gt;= 40, DP &gt;= 100, VD &gt;= 5, Minimum AF &gt;= 0.007, Maximum AF &lt; 1, GNOMADAF_popmax &lt;= 0.005, swegen AF &lt; 0.01</em>).
+Only those variants that fulfilled the filtering criteria and scored as <cite>PASS</cite> in the VCF file were reported.
+Structural variants (SV) were called using Manta v1.6.0 <sup>9</sup> and Dellyv1.0.3 <sup>10</sup>.
+Copy number variations (CNV) were called using CNVkit v0.9.9 <sup>11</sup>.
+The variant calls from CNVkit, Manta and Delly were merged using SVDB v2.8.1 <sup>12</sup>.
+The clinical set of SNV and SV is also annotated and filtered against loqusDB curated frequency of observed variants (frequency &lt; 0.01) from non-cancer cases and only annotated using frequency of observed variants from cancer cases (somatic and germline).
+All variants were annotated using Ensembl VEP v104.3 <sup>13</sup>. We used vcfanno v0.3.3 <sup>14</sup>
+to annotate somatic variants for their population allele frequency from gnomAD v2.1.1 <sup>18</sup>, CADD v1.6 <sup>24</sup>, SweGen <sup>22</sup> and frequency of observed variants in normal samples.</p>
+</section>
+<section id="whole-genome-analysis">
+<h2>Whole Genome Analysis<a class="headerlink" href="#whole-genome-analysis" title="Permalink to this heading">#</a></h2>
+<p>BALSAMIC <sup>1</sup> (<strong>version</strong> = 14.0.0) was used to analyze the data from raw FASTQ files.
+We first quality controlled FASTQ files using FastQC v0.11.9 <sup>2</sup>.
+Adapter sequences and low-quality bases were trimmed using fastp v0.23.2 <sup>3</sup>.
+Trimmed reads were mapped to the reference genome hg19 using sentieon-tools 202010.02 <sup>15</sup>.
+Duplicated reads were marked using Dedup from sentieon-tools 202010.02 <sup>15</sup>.
+The BAM file was then realigned using Realign from sentieon-tools 202010.02 <sup>15</sup> and common population InDels.
+The final BAM is quality controlled using WgsMetricsAlgo and CoverageMetrics from sentieon-tools 202010.02 <sup>15</sup> and CollectWgsMetrics, CollectMultipleMetrics, CollectGcBiasMetrics, and CollectHsMetrics functionalities from Picard tools v2.27.1 <sup>6</sup>.
+Results of the quality controlled steps were summarized by MultiQC v1.12 <sup>7</sup>.
+Small somatic mutations (SNVs and INDELs) were called for each sample using Sentieon TNscope <sup>16</sup>.
+The called-variants were also further second filtered using the criteria (DP(tumor,normal) &gt;= 10; AD(tumor) &gt;= 3; AF(tumor) &gt;= 0.05, Maximum AF(tumor &lt; 1;  GNOMADAF_popmax &lt;= 0.001; normalized base quality scores &gt;= 20, read_counts of alt,ref alle &gt; 0).
+Structural variants were called using Manta v1.6.0 <sup>9</sup>, Delly v1.0.3 <sup>10</sup> and TIDDIT v3.3.2 <sup>12</sup>.
+Copy number variations (CNV) were called using ascatNgs v4.5.0 <sup>17</sup> (tumor-normal), Delly v1.0.3 <sup>10</sup> and CNVpytor v1.3.1 <sup>22</sup> (tumor-only) and converted from CNV to deletions (DEL) and duplications (DUP).
+The structural variant (SV) calls from Manta, Delly, TIDDIT, ascatNgs (tumor-normal) and CNVpytor (tumor-only) were merged using SVDB v2.8.1 <sup>12</sup>
+The clinical set of SNV and SV is also annotated and filtered against loqusDB curated frequency of observed variants (frequency &lt; 0.01) from non-cancer cases and only annotated using frequency of observed variants from cancer cases (somatic and germline).
+All variants were annotated using Ensembl VEP v104.3 <sup>13</sup>. We used vcfanno v0.3.3 <sup>14</sup>
+to annotate somatic single nucleotide variants for their population allele frequency from gnomAD v2.1.1 <sup>18</sup>, CADD v1.6 <sup>24</sup>, SweGen <sup>22</sup>  and frequency of observed variants in normal samples.</p>
+</section>
+<section id="umi-data-analysis">
+<h2>UMI Data Analysis<a class="headerlink" href="#umi-data-analysis" title="Permalink to this heading">#</a></h2>
+<p>BALSAMIC <sup>1</sup> (<strong>version</strong> = 14.0.0) was used to analyze the data from raw FASTQ files.
+We first quality controlled FASTQ files using FastQC v0.11.9 <sup>2</sup>.
+UMI tag extraction and consensus generation were performed using Sentieon tools v202010.02 <sup>15</sup>.
+Adapter sequences and low-quality bases were trimmed using fastp v0.23.2 <sup>3</sup>.
+The alignment of UMI extracted and consensus called reads to the human reference genome (hg19) was done by bwa-mem and
+samtools using Sentieon utils. Consensus reads were filtered based on the number of minimum reads supporting each UMI tag group.
+We applied a criteria filter of minimum reads <cite>3,1,1</cite>. It means that at least three UMI tag groups should be ideally considered from both DNA strands,
+where a minimum of at least one UMI tag group should exist in each single-stranded consensus read.
+The filtered consensus reads were quality controlled using Picard CollectHsMetrics v2.27.1 <sup>5</sup>. Results of the quality controlled steps were summarized by MultiQC v1.12 <sup>6</sup>.
+For each sample, somatic mutations were called using Sentieon TNscope <sup>16</sup>, with non-default parameters for passing the final list of variants
+(–min_tumor_allele_frac 0.0005, –filter_t_alt_frac 0.0005, –min_init_tumor_lod 0.5, min_tumor_lod 4, –max_error_per_read 5  –pcr_indel_model NONE, GNOMADAF_popmax &lt;= 0.02).
+The clinical set of SNV and SV is also annotated and filtered against loqusDB curated frequency of observed variants (frequency &lt; 0.01) from non-cancer cases and only annotated using frequency of observed variants from cancer cases (somatic and germline).
+All variants were annotated using Ensembl VEP v104.3 <sup>7</sup>. We used vcfanno v0.3.3 <sup>8</sup> to annotate somatic variants for their population allele frequency from gnomAD v2.1.1 <sup>18</sup>, CADD v1.6 <sup>24</sup>, SweGen <sup>22</sup> and frequency of observed variants in normal samples.
+For exact parameters used for each software, please refer to  <a class="reference external" href="https://github.com/Clinical-Genomics/BALSAMIC">https://github.com/Clinical-Genomics/BALSAMIC</a>.
+We used three commercially available products from SeraCare [Material numbers: 0710-067110 <sup>19</sup>, 0710-067211 <sup>20</sup>, 0710-067312 <sup>21</sup>] for validating the efficiency of the UMI workflow in identifying 14 mutation sites at known allelic frequencies.</p>
+</section>
+<section id="references">
+<h2><strong>References</strong><a class="headerlink" href="#references" title="Permalink to this heading">#</a></h2>
+<ol class="arabic simple">
+<li><p>Foroughi-Asl, H., Jeggari, A., Maqbool, K., Ivanchuk, V., Elhami, K., &amp; Wirta, V. BALSAMIC: Bioinformatic Analysis pipeLine for SomAtic MutatIons in Cancer (Version v8.2.10) [Computer software]. <a class="reference external" href="https://github.com/Clinical-Genomics/BALSAMIC">https://github.com/Clinical-Genomics/BALSAMIC</a></p></li>
+<li><p>Babraham Bioinformatics - FastQC A Quality Control tool for High Throughput Sequence Data. Accessed June 22, 2020. <a class="reference external" href="https://www.bioinformatics.babraham.ac.uk/projects/fastqc/">https://www.bioinformatics.babraham.ac.uk/projects/fastqc/</a></p></li>
+<li><p>Chen S, Zhou Y, Chen Y, Gu J. fastp: an ultra-fast all-in-one FASTQ preprocessor. Bioinformatics. 2018;34(17):i884-i890. <a class="reference external" href="https://doi.org/10.1093/bioinformatics/bty560">https://doi.org/10.1093/bioinformatics/bty560</a></p></li>
+<li><p>Li H. (2013) Aligning sequence reads, clone sequences and assembly contigs with BWA-MEM. <a class="reference external" href="https://doi.org/10.48550/arXiv.1303.3997">https://doi.org/10.48550/arXiv.1303.3997</a></p></li>
+<li><p>Li H, Handsaker B, Wysoker A, Fennell T, Ruan J., Homer N., Marth G., Abecasis G., Durbin R. and 1000 Genome Project Data Processing Subgroup (2009) The Sequence alignment/map (SAM) format and SAMtools. Bioinformatics, 25, 2078-9. <a class="reference external" href="https://doi.org/10.1093/bioinformatics/btp352">https://doi.org/10.1093/bioinformatics/btp352</a></p></li>
+<li><p>Picard Tools - By Broad Institute. Accessed June 22, 2020. <a class="reference external" href="https://broadinstitute.github.io/picard/">https://broadinstitute.github.io/picard/</a></p></li>
+<li><p>Ewels P, Magnusson M, Lundin S, Käller M. MultiQC: summarize analysis results for multiple tools and samples in a single report. Bioinformatics. 2016;32(19):3047-3048. <a class="reference external" href="https://doi.org/10.1093/bioinformatics/btw354">https://doi.org/10.1093/bioinformatics/btw354</a></p></li>
+<li><p>Lai Z, Markovets A, Ahdesmaki M, Chapman B, Hofmann O, McEwen R, Johnson J, Dougherty B, Barrett JC, and Dry JR. VarDict: a novel and versatile variant caller for next-generation sequencing in cancer research. Nucleic Acids Res. 2016. <a class="reference external" href="https://doi.org/10.1093/nar/gkw227">https://doi.org/10.1093/nar/gkw227</a></p></li>
+<li><p>Chen, X. et al. (2016) Manta: rapid detection of structural variants and indels for germline and cancer sequencing applications. Bioinformatics, 32, 1220-1222. <a class="reference external" href="https://doi.org/10.1093/bioinformatics/btv710">https://doi.org/10.1093/bioinformatics/btv710</a></p></li>
+<li><p>Tobias Rausch, Thomas Zichner, Andreas Schlattl, Adrian M. Stuetz, Vladimir Benes, Jan O. Korbel. DELLY: structural variant discovery by integrated paired-end and split-read analysis. Bioinformatics. 2012 Sep 15;28(18):i333-i339. <a class="reference external" href="https://doi.org/10.1093/bioinformatics/bts378">https://doi.org/10.1093/bioinformatics/bts378</a></p></li>
+<li><p>Talevich, E, Shain, A.H, Botton, T, &amp; Bastian, B.C. CNVkit: Genome-wide copy number detection and visualization from targeted sequencing. PLOS Computational Biology. 2016, 12(4):e1004873. <a class="reference external" href="https://doi.org/10.1371/journal.pcbi.1004873">https://doi.org/10.1371/journal.pcbi.1004873</a></p></li>
+<li><p>Jesper Eisfeldt et.al. TIDDIT, an efficient and comprehensive structural variant caller for massive parallel sequencing data. F1000 research. 2017. <a class="reference external" href="https://doi.org/10.12688/f1000research.11168.2">https://doi.org/10.12688/f1000research.11168.2</a></p></li>
+<li><p>McLaren W, Gil L, Hunt SE, et al. The Ensembl Variant Effect Predictor. Genome Biology. 2016;17(1):122. <a class="reference external" href="https://doi.org/10.1186/s13059-016-0974-4">https://doi.org/10.1186/s13059-016-0974-4</a></p></li>
+<li><p>Pedersen BS, Layer RM, Quinlan AR. Vcfanno: fast, flexible annotation of genetic variants. Genome Biology. 2016;17(1):118. <a class="reference external" href="https://doi.org/10.1186/s13059-016-0973-5">https://doi.org/10.1186/s13059-016-0973-5</a></p></li>
+<li><p>Donald Freed, Rafael Aldana, Jessica A. Weber, Jeremy S. Edwards. The Sentieon Genomics Tools - A fast and accurate solution to variant calling from next-generation sequence data. Bioinformatics. 2016, Volume 32,Issue 8. <a class="reference external" href="https://doi.org/10.1093/bioinformatics/btv710">https://doi.org/10.1093/bioinformatics/btv710</a></p></li>
+<li><p>Donald Freed, Renke Pan, Rafael Aldana. TNscope: Accurate Detection of Somatic Mutations with Haplotype-based Variant Candidate Detection and Machine Learning Filtering. bioRvix. <a class="reference external" href="https://doi.org/10.1101/250647">https://doi.org/10.1101/250647</a></p></li>
+<li><p>Keiran MR, Peter VL, David CW, David J, Andrew M, Adam PB , Jon WT, Patrick T, Serena Nik-Zainal, Peter J C. ascatNgs: Identifying Somatically Acquired Copy-Number Alterations from Whole-Genome Sequencing Data. Curr Protoc Bioinformatics. 2016. <a class="reference external" href="https://doi.org/10.1002/cpbi.17">https://doi.org/10.1002/cpbi.17</a></p></li>
+<li><p>Karczewski, K.J., Francioli, L.C., Tiao, G. et al. The mutational constraint spectrum quantified from variation in 141,456 humans. Nature 581, 434–443 (2020). <a class="reference external" href="https://doi.org/10.1038/s41586-020-2308-7">https://doi.org/10.1038/s41586-020-2308-7</a></p></li>
+<li><p>Seraseq ctDNA Complete Reference Material AF 1%. <a class="reference external" href="https://www.seracare.com/Seraseq-ctDNA-Complete-Reference-Material-AF1-0710-0671/">https://www.seracare.com/Seraseq-ctDNA-Complete-Reference-Material-AF1-0710-0671/</a></p></li>
+<li><p>Seraseq ctDNA Complete Reference Material AF 0.5%. <a class="reference external" href="https://www.seracare.com/Seraseq-ctDNA-Complete-Reference-Material-AF05-0710-0672/">https://www.seracare.com/Seraseq-ctDNA-Complete-Reference-Material-AF05-0710-0672/</a></p></li>
+<li><p>Seraseq ctDNA Complete Reference Material AF 0.1%. <a class="reference external" href="https://www.seracare.com/Seraseq-ctDNA-Complete-Reference-Material-AF01-0710-0673/">https://www.seracare.com/Seraseq-ctDNA-Complete-Reference-Material-AF01-0710-0673/</a></p></li>
+<li><p>Ameur, A., Dahlberg, J., Olason, P. et al. SweGen: a whole-genome data resource of genetic variability in a cross-section of the Swedish population. Eur J Hum Genet 25, 1253–1260 (2017). <a class="reference external" href="https://doi.org/10.1038/ejhg.2017.130">https://doi.org/10.1038/ejhg.2017.130</a></p></li>
+<li><p>Milovan Suvakov, Arijit Panda, Colin Diesh, Ian Holmes, Alexej Abyzov, CNVpytor: a tool for copy number variation detection and analysis from read depth and allele imbalance in whole-genome sequencing, GigaScience, Volume 10, Issue 11, November 2021, giab074, <a class="reference external" href="https://doi.org/10.1093/gigascience/giab074">https://doi.org/10.1093/gigascience/giab074</a></p></li>
+<li><p>Rentzsch P., Witten D., Cooper G.M., Shendure J., Kircher M. CADD: predicting the deleteriousness of variants throughout the human genome. Nucleic Acids Res. 2018. <a class="reference external" href="https://doi.org/10.1093/nar/gky1016">https://doi.org/10.1093/nar/gky1016</a>. PubMed PMID: 30371827.</p></li>
+</ol>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="history.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Changelog</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="balsamic_pon.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Panel of Normals (PON)</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2023, Clinical Genomics
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Method description</a><ul>
+<li><a class="reference internal" href="#target-genome-analysis">Target Genome Analysis</a></li>
+<li><a class="reference internal" href="#whole-genome-analysis">Whole Genome Analysis</a></li>
+<li><a class="reference internal" href="#umi-data-analysis">UMI Data Analysis</a></li>
+<li><a class="reference internal" href="#references"><strong>References</strong></a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/scripts/furo.js"></script>
+    </body>
+</html>
