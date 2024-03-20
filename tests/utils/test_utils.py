@@ -38,6 +38,7 @@ from BALSAMIC.utils.cli import (
     get_snakefile,
     job_id_dump_to_yaml,
     validate_cache_version,
+    validate_exome_option,
 )
 from BALSAMIC.utils.exc import BalsamicError, WorkflowRunError
 from BALSAMIC.utils.io import (
@@ -999,6 +1000,28 @@ def test_get_fastp_parameters(balsamic_model: ConfigModel):
     fastp_params_tga = get_fastp_parameters(balsamic_model)
     # THEN no adapter trimming should be done
     assert "--disable_adapter_trimming" in fastp_params_tga["fastp_trim_adapter"]
+
+
+class MockClickContext:
+    def __init__(self, params):
+        self.params = params
+
+
+def test_validate_exome_option(panel_bed_file):
+    # GIVEN that a panel bedfile has been supplied and exome parameter set to true
+    ctx = MockClickContext({"panel_bed": panel_bed_file})
+
+    # WHEN validating exome option
+    # THEN exome argument should be correctly set
+    assert validate_exome_option(ctx, None, True) == True
+
+    # GIVEN that a panel bedfile has NOT been supplied and exome parameter set to true
+    ctx = MockClickContext({"panel_bed": None})
+
+    # WHEN validating exome option
+    # THEN a bad parameter error should be raised
+    with pytest.raises(click.BadParameter):
+        validate_exome_option(ctx, None, True)
 
 
 def test_validate_cache_version_develop():

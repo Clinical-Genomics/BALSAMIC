@@ -29,6 +29,7 @@ VARDICT_SETTINGS_COMMON = {
     },
     "MQ": {"tag_value": 30, "filter_name": "balsamic_low_mq", "field": "INFO"},
     "AF_min": {"tag_value": 0.007, "filter_name": "balsamic_low_af", "field": "INFO"},
+    "AD": {"tag_value": 5, "filter_name": "balsamic_low_tumor_ad", "field": "INFO"},
     "varcaller_name": "VarDict",
     "filter_type": "general",
     "analysis_type": "tumor_only,tumor_normal",
@@ -38,7 +39,6 @@ VARDICT_SETTINGS_COMMON = {
 # Configuration of VARDICT settings for smaller panels
 VARDICT_SETTINGS_PANEL = {
     **VARDICT_SETTINGS_COMMON,
-    "AD": {"tag_value": 5, "filter_name": "balsamic_low_tumor_ad", "field": "INFO"},
     "DP": {
         "tag_value": 100,
         "filter_name": "balsamic_low_tumor_dp",
@@ -49,7 +49,6 @@ VARDICT_SETTINGS_PANEL = {
 # Configuration of VARDICT settings for exomes
 VARDICT_SETTINGS_EXOME = {
     **VARDICT_SETTINGS_COMMON,
-    "AD": {"tag_value": 5, "filter_name": "balsamic_low_tumor_ad", "field": "INFO"},
     "DP": {
         "tag_value": 20,
         "filter_name": "balsamic_low_tumor_dp",

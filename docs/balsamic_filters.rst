@@ -105,7 +105,7 @@ The results of `Vardict` variant calling are further post-filtered based on seve
 These high-confidence variant calls are the final list of variants uploaded to Scout or available in the delivered VCF file in Caesar.
 
 
-There are two slightly different post-processing filters used depending on if the flag "--exome" is supplied at the start, which is designed to accomodate targeted analyses of lower depths.
+There are two slightly different post-processing filters activated depending on if the sample is an exome or a smaller panel as these tend to have very different sequencing depths.
 
 **Vardict_filtering**
 ^^^^^^^^^^^^^^^^^^^^^^
