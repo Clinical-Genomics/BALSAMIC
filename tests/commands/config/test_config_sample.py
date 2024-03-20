@@ -464,6 +464,7 @@ def test_config_with_gens_arguments_for_tga(
         "GENS is currently not compatible with TGA analysis, only WGS." in result.output
     )
 
+
 def test_config_wgs_with_exome(
     invoke_cli,
     tumor_sample_name: str,
@@ -496,9 +497,8 @@ def test_config_wgs_with_exome(
     )
     # THEN config should fail with error message
     assert result.exit_code == 2
-    assert (
-        "If --exome is provided, --panel-bed must also be provided." in result.output
-    )
+    assert "If --exome is provided, --panel-bed must also be provided." in result.output
+
 
 def test_config_tga_with_exome(
     invoke_cli,
