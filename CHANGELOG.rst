@@ -4,20 +4,18 @@
 Added:
 ^^^^^^
 * high_normal_tumor_af_frac filter in bcftools for TNscope T+N filtering out more than 30% TINC https://github.com/Clinical-Genomics/BALSAMIC/pull/1289
-* new option for exome samples --exome with modified bcftools filters compared to standard targeted workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1414
+* New option for exome samples `--exome` with modified bcftools filters compared to standard targeted workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1414
+* Custom samtools script for the detection of IGH::DUX4 rearrangements https://github.com/Clinical-Genomics/BALSAMIC/pull/1397
 
 Changed:
 ^^^^^^^^
-* reduced stringency of minimum MQ for all TGA to 30 from 40 https://github.com/Clinical-Genomics/BALSAMIC/pull/1414
-* removed -u flag from VarDict T+N and T only rules to remove calling only in reverse reads of overlapping mates https://github.com/Clinical-Genomics/BALSAMIC/pull/1414
-* removed -U flag to VarDict T+N rule to start calling SVs https://github.com/Clinical-Genomics/BALSAMIC/pull/1414
+* Reduced stringency of minimum MQ for all TGA to 30 from 40 https://github.com/Clinical-Genomics/BALSAMIC/pull/1414
+* Removed -u flag from VarDict T+N and T only rules to remove calling only in reverse reads of overlapping mates https://github.com/Clinical-Genomics/BALSAMIC/pull/1414
+* Removed -U flag to VarDict T+N rule to start calling SVs https://github.com/Clinical-Genomics/BALSAMIC/pull/1414
 
 Removed:
 ^^^^^^^^
 * alt_allele_in_normal from TNscope T+N workflows https://github.com/Clinical-Genomics/BALSAMIC/pull/1289
-
-Fixed:
-^^^^^^
 
 [14.0.1]
 -------
