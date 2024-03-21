@@ -488,6 +488,15 @@ def get_analysis_fastq_files_directory(case_dir: str, fastq_path: str) -> str:
     return Path(fastq_path).as_posix()
 
 
+def validate_exome_option(ctx: click.Context, _param: click.Parameter, exome: bool):
+    """Validate that a panel-bed has been supplied together with the exome option."""
+    if exome and not ctx.params.get("panel_bed"):
+        raise click.BadParameter(
+            "If --exome is provided, --panel-bed must also be provided."
+        )
+    return exome
+
+
 def validate_cache_version(
     _ctx: click.Context, _param: click.Parameter, version: str
 ) -> str:

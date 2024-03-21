@@ -2,7 +2,7 @@
 Short tutorial
 ==============
 
-Here a short tutorial is provided for BALSAMIC (**version** = 14.0.0).
+Here a short tutorial is provided for BALSAMIC (**version** = 14.0.1).
 
 Regarding fastq-inputs
 ---------------------
