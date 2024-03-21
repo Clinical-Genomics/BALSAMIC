@@ -1003,7 +1003,7 @@ def test_get_fastp_parameters(balsamic_model: ConfigModel):
     assert "--disable_adapter_trimming" in fastp_params_tga["fastp_trim_adapter"]
 
 
-def test_validate_exome_option(panel_bed_file):
+def test_validate_exome_option(panel_bed_file: str):
     # GIVEN that a panel bedfile has been supplied and exome parameter set to true
     ctx = click.Context(case_config)
     ctx.params["panel_bed"] = panel_bed_file
