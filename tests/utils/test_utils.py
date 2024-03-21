@@ -12,6 +12,7 @@ import pytest
 from _pytest.logging import LogCaptureFixture
 from _pytest.tmpdir import TempPathFactory
 
+from BALSAMIC.commands.config.case import case_config
 from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV, SampleType, SequencingType
 from BALSAMIC.constants.cache import CacheVersion
 from BALSAMIC.constants.cluster import ClusterConfigType
@@ -1002,26 +1003,21 @@ def test_get_fastp_parameters(balsamic_model: ConfigModel):
     assert "--disable_adapter_trimming" in fastp_params_tga["fastp_trim_adapter"]
 
 
-class MockClickContext:
-    def __init__(self, params):
-        self.params = params
-
-
 def test_validate_exome_option(panel_bed_file):
     # GIVEN that a panel bedfile has been supplied and exome parameter set to true
-    ctx = MockClickContext({"panel_bed": panel_bed_file})
-
+    ctx = click.Context(case_config)
+    ctx.params["panel_bed"] = panel_bed_file
     # WHEN validating exome option
     # THEN exome argument should be correctly set
-    assert validate_exome_option(ctx, None, True) == True
+    assert validate_exome_option(ctx, click.Parameter, True) == True
 
     # GIVEN that a panel bedfile has NOT been supplied and exome parameter set to true
-    ctx = MockClickContext({"panel_bed": None})
+    ctx.params["panel_bed"] = None
 
     # WHEN validating exome option
     # THEN a bad parameter error should be raised
     with pytest.raises(click.BadParameter):
-        validate_exome_option(ctx, None, True)
+        validate_exome_option(ctx, click.Parameter, True)
 
 
 def test_validate_cache_version_develop():
