@@ -32,7 +32,7 @@ mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
 export VAR_DICT_OPTS='\"-Djava.io.tmpdir={params.tmpdir}\" \"-Xmx90G\"';
 
-vardict-java -U -u -I 600 -G {input.fa} -f {params.af} -N {params.case_name} \
+vardict-java -I 600 -G {input.fa} -f {params.af} -N {params.case_name} \
 -b \"{input.bamT}|{input.bamN}\" \
 -th {threads} \
 {params.col_info} {input.bed} \

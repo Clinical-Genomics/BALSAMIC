@@ -458,8 +458,83 @@ def test_config_with_gens_arguments_for_tga(
             panel_bed_file,
         ],
     )
-    # THEN a config should be created and exist
+    # THEN config should fail with error message
     assert result.exit_code == 2
     assert (
         "GENS is currently not compatible with TGA analysis, only WGS." in result.output
     )
+
+
+def test_config_wgs_with_exome(
+    invoke_cli,
+    tumor_sample_name: str,
+    analysis_dir: str,
+    balsamic_cache: str,
+    fastq_dir_tumor_only: str,
+    case_id_tumor_only: str,
+):
+    """Test balsamic config case with --exome argument for WGS."""
+
+    # GIVEN CLI arguments including optional GENS input-files
+
+    # WHEN invoking the config case command
+    result = invoke_cli(
+        [
+            "config",
+            "case",
+            "--case-id",
+            case_id_tumor_only,
+            "--analysis-dir",
+            analysis_dir,
+            "--fastq-path",
+            fastq_dir_tumor_only,
+            "--balsamic-cache",
+            balsamic_cache,
+            "--tumor-sample-name",
+            tumor_sample_name,
+            "--exome",
+        ],
+    )
+    # THEN config should fail with error message
+    assert result.exit_code == 2
+    assert "If --exome is provided, --panel-bed must also be provided." in result.output
+
+
+def test_config_tga_with_exome(
+    invoke_cli,
+    tumor_sample_name: str,
+    analysis_dir: str,
+    balsamic_cache: str,
+    fastq_dir_tumor_only: str,
+    case_id_tumor_only: str,
+    panel_bed_file: str,
+):
+    """Test balsamic config case with GENS arguments for TGA."""
+
+    # GIVEN CLI arguments including optional GENS input-files
+
+    # WHEN invoking the config case command
+    result = invoke_cli(
+        [
+            "config",
+            "case",
+            "--case-id",
+            case_id_tumor_only,
+            "--analysis-dir",
+            analysis_dir,
+            "--fastq-path",
+            fastq_dir_tumor_only,
+            "--balsamic-cache",
+            balsamic_cache,
+            "--tumor-sample-name",
+            tumor_sample_name,
+            "-p",
+            panel_bed_file,
+            "--exome",
+        ],
+    )
+    # THEN a config should be created and exist
+    assert result.exit_code == 0
+    assert Path(
+        analysis_dir, case_id_tumor_only, f"{case_id_tumor_only}.{FileType.JSON}"
+    ).exists()

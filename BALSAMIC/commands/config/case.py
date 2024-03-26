@@ -21,6 +21,7 @@ from BALSAMIC.commands.options import (
     OPTION_CASE_ID,
     OPTION_CLINICAL_SNV_OBSERVATIONS,
     OPTION_CLINICAL_SV_OBSERVATIONS,
+    OPTION_EXOME,
     OPTION_FASTQ_PATH,
     OPTION_GENDER,
     OPTION_GENOME_INTERVAL,
@@ -70,6 +71,7 @@ LOG = logging.getLogger(__name__)
 @OPTION_CASE_ID
 @OPTION_CLINICAL_SNV_OBSERVATIONS
 @OPTION_CLINICAL_SV_OBSERVATIONS
+@OPTION_EXOME
 @OPTION_FASTQ_PATH
 @OPTION_GENDER
 @OPTION_GENOME_VERSION
@@ -101,6 +103,7 @@ def case_config(
     case_id: str,
     clinical_snv_observations: Path,
     clinical_sv_observations: Path,
+    exome: bool,
     fastq_path: Path,
     gender: Gender,
     genome_version: GenomeVersion,
@@ -219,6 +222,7 @@ def case_config(
             container_conda_env_path=CONTAINERS_DIR,
         ),
         panel={
+            "exome": exome,
             "capture_kit": panel_bed,
             "chrom": get_panel_chrom(panel_bed),
             "pon_cnn": pon_cnn,

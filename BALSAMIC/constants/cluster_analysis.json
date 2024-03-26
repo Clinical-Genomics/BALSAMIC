@@ -411,5 +411,9 @@
 	"samtools_qc": {
 		"time": "04:00:00",
 		"n": 16
+	},
+	"igh_dux4_detection": {
+		"time": "02:00:00",
+		"n": 1
 	}
 }

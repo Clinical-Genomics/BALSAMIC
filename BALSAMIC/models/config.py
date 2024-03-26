@@ -49,6 +49,7 @@ class SampleInstanceModel(BaseModel):
 class PanelModel(BaseModel):
     """Holds attributes of PANEL BED file if provided
     Attributes:
+        exome: (bool); optional parameter for targeted analyses to use exome parameters
         capture_kit : Field(str(Path)); string representation of path to PANEL BED file
         chrom : Field(list(str)); list of chromosomes in PANEL BED
         pon_cnn: Field(optional); Path where PON reference .cnn file is stored
@@ -59,6 +60,7 @@ class PanelModel(BaseModel):
 
     """
 
+    exome: Optional[bool] = False
     capture_kit: Annotated[Optional[str], AfterValidator(is_file)] = None
     chrom: Optional[List[str]] = None
     pon_cnn: Annotated[Optional[str], AfterValidator(is_file)] = None
@@ -102,6 +104,7 @@ class VCFModel(BaseModel):
     dellycnv: VarcallerAttribute
     tiddit: VarcallerAttribute
     cnvpytor: VarcallerAttribute
+    igh_dux4: VarcallerAttribute
     svdb: VarcallerAttribute
 
 
