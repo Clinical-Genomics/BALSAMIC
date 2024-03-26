@@ -15,7 +15,9 @@ Changed:
 
 Removed:
 ^^^^^^^^
-* alt_allele_in_normal from TNscope T+N workflows https://github.com/Clinical-Genomics/BALSAMIC/pull/1289
+* alt_allele_in_normal filter from TNscope T+N workflows https://github.com/Clinical-Genomics/BALSAMIC/pull/1289
+* initial filter keeping only PASS or triallelic-site from T+N bcftools quality filter rule https://github.com/Clinical-Genomics/BALSAMIC/pull/1424
+
 
 [14.0.1]
 -------
