@@ -78,15 +78,16 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
         ],
         "varcall": [
             "snakemake_rules/variant_calling/germline.rule",
-            "snakemake_rules/variant_calling/split_bed.rule",
             "snakemake_rules/variant_calling/somatic_cnv_tumor_only_tga.rule",
-            "snakemake_rules/variant_calling/somatic_tumor_only.rule",
             "snakemake_rules/variant_calling/somatic_sv_tumor_only.rule",
             "snakemake_rules/umi/sentieon_varcall_tnscope.rule",
+            "snakemake_rules/variant_calling/sentieon_split_snv_sv.rule",
+            "snakemake_rules/variant_calling/sentieon_t_varcall.rule",
         ],
         "annotate": [
             "snakemake_rules/annotation/rankscore.rule",
             "snakemake_rules/annotation/varcaller_filter_tumor_only.rule",
+            "snakemake_rules/annotation/varcaller_filter_tumor_only_umi.rule",
         ],
     },
     "paired_targeted": {
@@ -116,10 +117,13 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
             "snakemake_rules/variant_calling/somatic_sv_tumor_normal.rule",
             "snakemake_rules/variant_calling/somatic_cnv_tumor_normal_tga.rule",
             "snakemake_rules/umi/sentieon_varcall_tnscope_tn.rule",
+            "snakemake_rules/variant_calling/sentieon_split_snv_sv.rule",
+            "snakemake_rules/variant_calling/sentieon_tn_varcall.rule",
         ],
         "annotate": [
             "snakemake_rules/annotation/rankscore.rule",
             "snakemake_rules/annotation/varcaller_filter_tumor_normal.rule",
+            "snakemake_rules/annotation/varcaller_filter_tumor_normal_umi.rule",
             "snakemake_rules/annotation/vcfheader_rename.rule",
         ],
     },
@@ -141,7 +145,7 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
             "snakemake_rules/dragen_suite/dragen_dna.rule",
         ],
         "annotate": [
-            "snakemake_rules/annotation/varcaller_wgs_filter_tumor_only.rule",
+            "snakemake_rules/annotation/varcaller_filter_tumor_only.rule",
         ],
     },
     "paired_wgs": {
@@ -162,7 +166,7 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
             "snakemake_rules/variant_calling/somatic_sv_tumor_normal.rule",
         ],
         "annotate": [
-            "snakemake_rules/annotation/varcaller_wgs_filter_tumor_normal.rule",
+            "snakemake_rules/annotation/varcaller_filter_tumor_normal.rule",
             "snakemake_rules/annotation/vcfheader_rename.rule",
         ],
     },
