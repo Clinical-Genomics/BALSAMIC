@@ -112,7 +112,6 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
         ],
         "varcall": [
             "snakemake_rules/variant_calling/germline.rule",
-            "snakemake_rules/variant_calling/somatic_tumor_normal.rule",
             "snakemake_rules/variant_calling/somatic_sv_tumor_normal.rule",
             "snakemake_rules/variant_calling/somatic_cnv_tumor_normal_tga.rule",
             "snakemake_rules/umi/sentieon_varcall_tnscope_tn.rule",
