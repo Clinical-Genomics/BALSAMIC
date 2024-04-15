@@ -92,7 +92,6 @@ class VarcallerAttribute(BaseModel):
 class VCFModel(BaseModel):
     """Contains VCF config"""
 
-    vardict: VarcallerAttribute
     tnscope: VarcallerAttribute
     dnascope: VarcallerAttribute
     tnscope_umi: VarcallerAttribute

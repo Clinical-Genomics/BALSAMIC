@@ -43,13 +43,6 @@ VCF_DICT = {
         "sequencing_type": ["targeted"],
         "workflow_solution": ["BALSAMIC"],
     },
-    "vardict": {
-        "mutation": "somatic",
-        "mutation_type": "SNV",
-        "analysis_type": ["paired", "single"],
-        "sequencing_type": ["targeted"],
-        "workflow_solution": ["BALSAMIC"],
-    },
     "manta_germline": {
         "mutation": "germline",
         "mutation_type": "SV",
@@ -157,12 +150,6 @@ WORKFLOW_PARAMS = {
     "manta": {
         "wgs_settings": "",
         "tga_settings": "--exome",
-    },
-    "vardict": {
-        "allelic_frequency": "0.001",
-        "max_pval": "0.9",
-        "max_mm": "4.5",
-        "column_info": "-c 1 -S 2 -E 3 -g 4",
     },
     "vep": {
         "vep_filters": "--compress_output bgzip --vcf --everything --hgvsg --allow_non_variant --dont_skip --buffer_size 30000 --max_sv_size 249250621 --format vcf --offline --variant_class --merged --cache --verbose --force_overwrite"

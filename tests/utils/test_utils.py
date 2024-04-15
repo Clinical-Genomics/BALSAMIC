@@ -349,7 +349,7 @@ def test_get_snakefile():
 
 def test_get_vcf(sample_config: Dict):
     # GIVEN a sample_config dict and a variant callers list
-    variant_callers = ["tnscope", "vardict", "manta"]
+    variant_callers = ["tnscope", "manta"]
 
     # WHEN passing args to that function
     vcf_list = get_vcf(
@@ -358,13 +358,12 @@ def test_get_vcf(sample_config: Dict):
 
     # THEN It should return the list of vcf file names
     assert any("tnscope" in vcf_name for vcf_name in vcf_list)
-    assert any("vardict" in vcf_name for vcf_name in vcf_list)
     assert any("manta" in vcf_name for vcf_name in vcf_list)
 
 
 def test_get_vcf_invalid_variant_caller(sample_config):
     # GIVEN a sample_config dict and an incorrect variant callers list
-    variant_callers = ["vardict", "manta", "tnhaplotyper"]
+    variant_callers = ["manta", "tnhaplotyper"]
 
     # WHEN passing args to that function
     with pytest.raises(KeyError):
