@@ -474,10 +474,6 @@ if config["analysis"]["sequencing_type"] != "wgs":
         case_name=case_id,
         var_caller=["cnvkit"]
     ))
-    # VarDict
-    analysis_specific_results.extend(
-        expand(vep_dir + "{vcf}.research.filtered.pass.ranked.vcf.gz", vcf=get_vcf(config, ["vardict"], [case_id]))
-    )
     # UMI
     if config["analysis"]["analysis_workflow"] == "balsamic-umi":
         analysis_specific_results.extend(expand(umi_qc_dir + "{sample}.umi.mean_family_depth", sample=config_model.get_all_sample_names()))
