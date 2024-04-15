@@ -16,11 +16,14 @@ rule manta_tumor_normal:
         Path(singularity_image, config["bioinfo_tools"].get("manta") + ".sif").as_posix()
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
+        settings = params.get_manta_settings(sequencing_type=sequencing_type),
         runmode = "local",
         tumor = config_model.get_sample_name_by_type(SampleType.TUMOR),
         normal = config_model.get_sample_name_by_type(SampleType.NORMAL),
         case_name = case_id,
-        manta_install_path = "/opt/conda/share/manta-1.6.0-2"
+        manta_install_path = "/opt/conda/share/manta-1.6.0-2",
+        low_pr_sr_count_value = MANTA_FILTERS.low_pr_sr_count.tag_value,
+        low_pr_sr_count_filter_name = MANTA_FILTERS.low_pr_sr_count.filter_name,
     threads:
         get_threads(cluster_config, "manta_tumor_normal")
     message:
@@ -31,6 +34,7 @@ rule manta_tumor_normal:
 samtools_path=$(readlink -f $(which samtools))
 
 configManta.py \
+{params.settings} \
 --normalBam={input.bamN} \
 --tumorBam={input.bamT} \
 --referenceFasta={input.fa} \
@@ -43,11 +47,13 @@ python {params.tmpdir}/runWorkflow.py -m {params.runmode} -j {threads};
   {input.fa} \
   {params.tmpdir}/results/variants/somaticSV.vcf.gz > {params.tmpdir}/results/variants/somaticSV_converted.vcf;
 
-bgzip -l 9 -c {params.tmpdir}/results/variants/somaticSV_converted.vcf > {output.final};
+bgzip -l 9 {params.tmpdir}/results/variants/somaticSV_converted.vcf ;
+
+bcftools filter --threads {threads} --exclude 'SUM(FORMAT/PR[1:1]+FORMAT/SR[1:1]) < {params.low_pr_sr_count_value}' --soft-filter '{params.low_pr_sr_count_filter_name}' --mode '+' -o {output.final} -O z {params.tmpdir}/results/variants/somaticSV_converted.vcf.gz
 
 tabix -p vcf -f {output.final};
 
-echo -e \"{params.tumor}\\tTUMOR\\n{params.normal}\\tNORMAL\" > {output.namemap};
+echo -e \"{params.normal}\\tNORMAL\\n{params.tumor}\\tTUMOR\" > {output.namemap};
 
 rm -rf {params.tmpdir};
         """
@@ -395,6 +401,33 @@ else:
 
     rm {input.ascat_cnv};
         """
+
+
+rule igh_dux4_detection_tumor_normal:
+    input:
+        fa = config["reference"]["reference_genome"],
+        bamT = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
+        bamN = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name=normal_sample),
+    output:
+        vcf = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".igh_dux4.vcf.gz",
+    benchmark:
+        benchmark_dir + 'igh_dux4_detection_tumor_normal_' + config["analysis"]["case_id"] + ".tsv"
+    singularity:
+        Path(singularity_image, config["bioinfo_tools"].get("samtools") + ".sif").as_posix()
+    params:
+        genome_version = config["reference"]["genome_version"],
+        custom_sv_detection_script = get_script_path("igh_dux4_detection.sh"),
+        case_name = config["analysis"]["case_id"],
+    threads:
+        get_threads(cluster_config, "igh_dux4_detection")
+    message:
+        "Detecting IGH::DUX4 rearrangement for {params.case_name} using samtools."
+    shell:
+        """
+        bash {params.custom_sv_detection_script} {params.genome_version} {output.vcf} {input.bamT} {input.bamN} 
+        """
+
+
 
 rule svdb_merge_tumor_normal:
     input:

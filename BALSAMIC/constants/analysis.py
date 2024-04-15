@@ -90,16 +90,6 @@ class PONWorkflow(StrEnum):
 PON_WORKFLOWS: List[PONWorkflow] = [workflow for workflow in PONWorkflow]
 
 
-class RuleDeliveryMode(StrEnum):
-    """Rules to deliver mode."""
-
-    APPEND: str = "append"
-    RESET: str = "reset"
-
-
-RULE_DELIVERY_MODES: List[RuleDeliveryMode] = [mode for mode in RuleDeliveryMode]
-
-
 class BioinfoTools(StrEnum):
     """List of bioinformatics tools in Balsamic."""
 

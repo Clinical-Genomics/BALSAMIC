@@ -1,87 +1,70 @@
-"""Balsamic report delivery CLI."""
-import json
+"""Report deliver CLI command."""
 import logging
-import os
 import subprocess
 import sys
 from pathlib import Path
-from typing import List
+from typing import Any, Dict, List, Optional
 
 import click
 import snakemake
-import yaml
+from BALSAMIC.constants.constants import FileType
 
 from BALSAMIC.commands.options import (
-    OPTION_SAMPLE_CONFIG,
     OPTION_DISABLE_VARIANT_CALLER,
-    OPTION_DELIVERY_MODE,
     OPTION_RULES_TO_DELIVER,
+    OPTION_SAMPLE_CONFIG,
 )
-from BALSAMIC.constants.analysis import RunMode, RuleDeliveryMode
-from BALSAMIC.constants.rules import DELIVERY_RULES
+from BALSAMIC.constants.analysis import RunMode
+from BALSAMIC.models.config import ConfigModel
 from BALSAMIC.models.snakemake import SnakemakeExecutable
-from BALSAMIC.utils.cli import convert_deliverables_tags
-from BALSAMIC.utils.cli import get_file_extension
-from BALSAMIC.utils.cli import get_snakefile
-from BALSAMIC.utils.io import write_json
-from BALSAMIC.utils.rule import get_result_dir
+from BALSAMIC.utils.cli import (
+    get_snakefile,
+    convert_deliverables_tags,
+    get_file_extension,
+)
+from BALSAMIC.utils.delivery import get_multiqc_deliverables
+from BALSAMIC.utils.io import read_json, write_json, write_yaml
 
 LOG = logging.getLogger(__name__)
 
 
-@click.command("deliver", short_help="Creates a report file with output files")
-@OPTION_DELIVERY_MODE
+@click.command(
+    "deliver", short_help="Create a <case_id>.hk file with output analysis files"
+)
 @OPTION_DISABLE_VARIANT_CALLER
 @OPTION_RULES_TO_DELIVER
 @OPTION_SAMPLE_CONFIG
 @click.pass_context
 def deliver(
     context: click.Context,
-    delivery_mode: RuleDeliveryMode,
-    disable_variant_caller: str,
+    disable_variant_caller: Optional[str],
     rules_to_deliver: List[str],
     sample_config: str,
 ):
-    """Deliver command to write <case_id>.hk with the output analysis files."""
+    """Report deliver command to generate output analysis files."""
     LOG.info(f"BALSAMIC started with log level {context.obj['log_level']}.")
-    LOG.debug("Reading input sample config")
-    with open(sample_config, "r") as fn:
-        sample_config_dict = json.load(fn)
-
-    default_rules_to_deliver = DELIVERY_RULES
-
-    if not rules_to_deliver:
-        rules_to_deliver = default_rules_to_deliver
-
-    rules_to_deliver = list(rules_to_deliver)
-    if delivery_mode == RuleDeliveryMode.APPEND:
-        rules_to_deliver.extend(default_rules_to_deliver)
-
-    case_name = sample_config_dict["analysis"]["case_id"]
-    result_dir = get_result_dir(sample_config_dict)
-    dst_directory = os.path.join(result_dir, "delivery_report")
-    LOG.info("Creating delivery_report directory")
-    Path.mkdir(Path(dst_directory), parents=True, exist_ok=True)
-
-    yaml_write_directory = os.path.join(result_dir, "delivery_report")
-    Path.mkdir(Path(yaml_write_directory), parents=True, exist_ok=True)
-
-    analysis_type = sample_config_dict["analysis"]["analysis_type"]
-    analysis_workflow = sample_config_dict["analysis"]["analysis_workflow"]
-    snakefile = get_snakefile(analysis_type, analysis_workflow)
-
-    report_path = Path(yaml_write_directory, f"{case_name}_report.html")
-    LOG.info(f"Creating report file {report_path.as_posix()}")
-
-    LOG.info(f"Delivering {analysis_workflow} workflow...")
-    working_dir = Path(
-        sample_config_dict["analysis"]["analysis_dir"], case_name, "BALSAMIC_run"
+    LOG.info("Creating <case_id>.hk deliverables file")
+    config: Dict[str, Any] = read_json(sample_config)
+    config_model: ConfigModel = ConfigModel(**config)
+    output_dir: Path = Path(config_model.analysis.result, "delivery_report")
+    output_dir.mkdir(exist_ok=True)
+    working_dir: Path = Path(
+        config_model.analysis.analysis_dir,
+        config_model.analysis.case_id,
+        "BALSAMIC_run",
     )
+    html_report: Path = Path(output_dir, f"{config_model.analysis.case_id}_report.html")
+    snakefile: Path = get_snakefile(
+        analysis_type=config_model.analysis.analysis_type,
+        analysis_workflow=config_model.analysis.analysis_workflow,
+    )
+
+    LOG.info(f"Creating HTML report file: {html_report.as_posix()}")
     snakemake_executable: SnakemakeExecutable = SnakemakeExecutable(
-        case_id=case_name,
+        case_id=config_model.analysis.case_id,
         config_path=sample_config,
         disable_variant_caller=disable_variant_caller,
-        report_path=report_path,
+        report_path=html_report,
         run_analysis=True,
         run_mode=RunMode.LOCAL,
         snakefile=snakefile,
@@ -89,11 +72,14 @@ def deliver(
         working_dir=working_dir,
     )
     subprocess.check_output(
-        f"{sys.executable} -m {snakemake_executable.get_command()}".split(),
-        shell=False,
+        f"{sys.executable} -m {snakemake_executable.get_command()}".split(), shell=False
     )
-    LOG.info(f"Workflow report file {report_path.as_posix()}")
 
+    LOG.info(f"Delivering analysis workflow: {config_model.analysis.analysis_workflow}")
+    hk_file: Path = Path(output_dir, f"{config_model.analysis.case_id}.hk")
+    delivery_ready_file: Path = Path(
+        output_dir, f"{config_model.analysis.case_id}_delivery_ready.hk"
+    )
     snakemake.snakemake(
         snakefile=snakefile,
         config={"delivery": "True", "rules_to_deliver": ",".join(rules_to_deliver)},
@@ -101,56 +87,52 @@ def deliver(
         configfiles=[sample_config],
         quiet=True,
     )
-
-    delivery_file_name = os.path.join(yaml_write_directory, case_name + ".hk")
-
-    delivery_file_ready = os.path.join(
-        yaml_write_directory,
-        case_name + "_delivery_ready.hk",
-    )
-    with open(delivery_file_ready, "r") as fn:
-        delivery_file_ready_dict = json.load(fn)
-
-    delivery_json = dict()
-    delivery_json["files"] = delivery_file_ready_dict
-
-    delivery_json = convert_deliverables_tags(
-        delivery_json=delivery_json, sample_config_dict=sample_config_dict
+    hk_deliverables: List[Dict[str, Any]] = read_json(delivery_ready_file.as_posix())
+    hk_deliverables: List[Dict[str, Any]] = convert_deliverables_tags(
+        delivery_json=hk_deliverables, sample_config_dict=config
     )
 
-    # Add Housekeeper file to report
-    delivery_json["files"].append(
+    # HTML analysis report
+    hk_deliverables.append(
         {
-            "path": report_path.as_posix(),
+            "path": html_report.as_posix(),
             "step": "balsamic_delivery",
-            "format": get_file_extension(report_path.as_posix()),
+            "format": get_file_extension(html_report.as_posix()),
             "tag": ["balsamic-report"],
-            "id": case_name,
+            "id": config_model.analysis.case_id,
         }
     )
-    # Add CASE_ID.JSON to report
-    delivery_json["files"].append(
+
+    # Sample configuration file
+    hk_deliverables.append(
         {
             "path": Path(sample_config).resolve().as_posix(),
             "step": "case_config",
             "format": get_file_extension(sample_config),
             "tag": ["balsamic-config"],
-            "id": case_name,
+            "id": config_model.analysis.case_id,
         }
     )
-    # Add DAG Graph to report
-    delivery_json["files"].append(
+
+    # DAG
+    hk_deliverables.append(
         {
-            "path": sample_config_dict["analysis"]["dag"],
+            "path": config_model.analysis.dag,
             "step": "case_config",
-            "format": get_file_extension(sample_config_dict["analysis"]["dag"]),
+            "format": get_file_extension(config_model.analysis.dag),
             "tag": ["balsamic-dag"],
-            "id": case_name,
+            "id": config_model.analysis.case_id,
         }
     )
 
-    write_json(delivery_json, delivery_file_name)
-    with open(delivery_file_name + ".yaml", "w") as fn:
-        yaml.dump(delivery_json, fn, default_flow_style=False)
+    # MultiQC intermediate files
+    multiqc_deliverables: List[Dict[str, Any]] = get_multiqc_deliverables(
+        case_id=config_model.analysis.case_id,
+        multiqc_dir=Path(config_model.analysis.result, "qc", "multiqc_data"),
+    )
+    hk_deliverables.extend(multiqc_deliverables)
 
-    LOG.info(f"Housekeeper delivery file {delivery_file_name}")
+    hk_deliverables: Dict[str, Any] = {"files": hk_deliverables}
+    write_json(json_obj=hk_deliverables, path=hk_file.as_posix())
+    write_yaml(data=hk_deliverables, file_path=f"{hk_file}.{FileType.YAML}")
+    LOG.info(f"Generated analysis deliverables: {hk_file.as_posix()}")
