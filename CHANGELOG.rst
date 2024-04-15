@@ -1,19 +1,34 @@
-[X.X.X]
+[15.0.0]
 -------
 
 Added:
 ^^^^^^
 * high_normal_tumor_af_frac filter in bcftools for TNscope T+N filtering out more than 30% TINC https://github.com/Clinical-Genomics/BALSAMIC/pull/1289
+* New option for exome samples `--exome` with modified bcftools filters compared to standard targeted workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1414
+* Custom samtools script for the detection of IGH::DUX4 rearrangements https://github.com/Clinical-Genomics/BALSAMIC/pull/1397
 
 Changed:
 ^^^^^^^^
+* Reduced stringency of minimum MQ for all TGA to 30 from 40 https://github.com/Clinical-Genomics/BALSAMIC/pull/1414
+* Removed -u flag from VarDict T+N and T only rules to remove calling only in reverse reads of overlapping mates https://github.com/Clinical-Genomics/BALSAMIC/pull/1414
+* Removed -U flag to VarDict T+N rule to start calling SVs https://github.com/Clinical-Genomics/BALSAMIC/pull/1414
 
 Removed:
 ^^^^^^^^
-* alt_allele_in_normal from TNscope T+N workflows https://github.com/Clinical-Genomics/BALSAMIC/pull/1289
+* alt_allele_in_normal filter from TNscope T+N workflows https://github.com/Clinical-Genomics/BALSAMIC/pull/1289
 
 Fixed:
 ^^^^^^
+* initial filter keeping only PASS or triallelic-site from T+N bcftools quality filter rule has been removed https://github.com/Clinical-Genomics/BALSAMIC/pull/1424
+
+
+[14.0.1]
+-------
+
+Fixed:
+^^^^^^
+* PureCN fail due to bash strict mode https://github.com/Clinical-Genomics/BALSAMIC/pull/1406
+* Corrected name of CNVkit container in the CNVkit PON creation workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1412
 
 [14.0.0]
 -------
@@ -33,7 +48,6 @@ Fixed:
 ^^^^^^
 * ASCAT-Ngs container https://github.com/Clinical-Genomics/BALSAMIC/pull/1395
 * bcftools in manta_tumor_normal uses correct column for tumor read filtering https://github.com/Clinical-Genomics/BALSAMIC/pull/1400
-
 
 [13.0.1]
 -------

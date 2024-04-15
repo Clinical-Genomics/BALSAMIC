@@ -10,16 +10,8 @@ COMMON_SETTINGS = {
     "description": "General purpose filters used for filtering any variant caller",
 }
 
-# Configuration of VARDICT settings
-VARDICT_SETTINGS = {
-    "AD": {"tag_value": 5, "filter_name": "balsamic_low_tumor_ad", "field": "INFO"},
-    "DP": {
-        "tag_value": 100,
-        "filter_name": "balsamic_low_tumor_dp",
-        "field": "INFO",
-    },
-    "MQ": {"tag_value": 40, "filter_name": "balsamic_low_mq", "field": "INFO"},
-    "AF_min": {"tag_value": 0.007, "filter_name": "balsamic_low_af", "field": "INFO"},
+# Configuration of common VARDICT settings
+VARDICT_SETTINGS_COMMON = {
     "pop_freq": {
         "tag_value": 0.005,
         "filter_name": "balsamic_high_pop_freq",
@@ -35,10 +27,33 @@ VARDICT_SETTINGS = {
         "filter_name": "Frq",
         "field": "INFO",
     },
+    "MQ": {"tag_value": 30, "filter_name": "balsamic_low_mq", "field": "INFO"},
+    "AF_min": {"tag_value": 0.007, "filter_name": "balsamic_low_af", "field": "INFO"},
+    "AD": {"tag_value": 5, "filter_name": "balsamic_low_tumor_ad", "field": "INFO"},
     "varcaller_name": "VarDict",
     "filter_type": "general",
-    "analysis_type": "tumor_only",
+    "analysis_type": "tumor_only,tumor_normal",
     "description": "General purpose filters used for filtering VarDict",
+}
+
+# Configuration of VARDICT settings for smaller panels
+VARDICT_SETTINGS_PANEL = {
+    **VARDICT_SETTINGS_COMMON,
+    "DP": {
+        "tag_value": 100,
+        "filter_name": "balsamic_low_tumor_dp",
+        "field": "INFO",
+    },
+}
+
+# Configuration of VARDICT settings for exomes
+VARDICT_SETTINGS_EXOME = {
+    **VARDICT_SETTINGS_COMMON,
+    "DP": {
+        "tag_value": 20,
+        "filter_name": "balsamic_low_tumor_dp",
+        "field": "INFO",
+    },
 }
 
 # Configuration for SENTIEON settings:
