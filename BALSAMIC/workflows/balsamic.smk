@@ -124,7 +124,6 @@ if config_model.panel and config_model.panel.exome:
     SNV_FILTER_SETTINGS = VarCallerFilter.model_validate(SNV_BCFTOOLS_SETTINGS_EXOME)
 
 
-SENTIEON_CALLER = VarCallerFilter.model_validate(SENTIEON_VARCALL_SETTINGS)
 SVDB_FILTERS = VarCallerFilter.model_validate(SVDB_FILTER_SETTINGS)
 MANTA_FILTERS = VarCallerFilter.model_validate(MANTA_FILTER_SETTINGS)
 
