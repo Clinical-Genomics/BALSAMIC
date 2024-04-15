@@ -14,8 +14,8 @@ rule bcftools_filter_TNscope_umi_research_tumor_only:
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
   params:
-    pop_freq = [SENTIEON_CALLER.pop_freq_umi.tag_value, SENTIEON_CALLER.pop_freq_umi.filter_name],
-    swegen_freq = [SENTIEON_CALLER.swegen_snv_freq.tag_value, SENTIEON_CALLER.swegen_snv_freq.filter_name],
+    pop_freq = [SNV_FILTER_SETTINGS.pop_freq_umi.tag_value, SNV_FILTER_SETTINGS.pop_freq_umi.filter_name],
+    swegen_freq = [SNV_FILTER_SETTINGS.swegen_snv_freq.tag_value, SNV_FILTER_SETTINGS.swegen_snv_freq.filter_name],
     housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "research"},
     case_name =  '{case_name}',
     edit_vcf_script = get_script_path("edit_vcf_info.py"),
@@ -61,9 +61,9 @@ rule bcftools_filter_TNscope_umi_clinical_tumor_only:
   singularity:
     Path(singularity_image,config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
   params:
-    pop_freq=[SENTIEON_CALLER.pop_freq_umi.tag_value, SENTIEON_CALLER.pop_freq_umi.filter_name],
-    swegen_freq = [SENTIEON_CALLER.swegen_snv_freq.tag_value, SENTIEON_CALLER.swegen_snv_freq.filter_name],
-    loqusdb_clinical_freq = [SENTIEON_CALLER.loqusdb_clinical_snv_freq.tag_value, SENTIEON_CALLER.loqusdb_clinical_snv_freq.filter_name],
+    pop_freq=[SNV_FILTER_SETTINGS.pop_freq_umi.tag_value, SNV_FILTER_SETTINGS.pop_freq_umi.filter_name],
+    swegen_freq = [SNV_FILTER_SETTINGS.swegen_snv_freq.tag_value, SNV_FILTER_SETTINGS.swegen_snv_freq.filter_name],
+    loqusdb_clinical_freq = [SNV_FILTER_SETTINGS.loqusdb_clinical_snv_freq.tag_value, SNV_FILTER_SETTINGS.loqusdb_clinical_snv_freq.filter_name],
     housekeeper_id={"id": config["analysis"]["case_id"], "tags": "clinical"},
     case_name='{case_name}',
     edit_vcf_script=get_script_path("edit_vcf_info.py"),
