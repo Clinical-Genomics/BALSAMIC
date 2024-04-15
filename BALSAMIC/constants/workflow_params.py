@@ -19,7 +19,7 @@ VCF_DICT = {
         "mutation": "somatic",
         "mutation_type": "SNV",
         "analysis_type": ["paired", "single"],
-        "sequencing_type": ["wgs"],
+        "sequencing_type": ["targeted", "wgs"],
         "workflow_solution": ["Sentieon"],
     },
     "dnascope": {
