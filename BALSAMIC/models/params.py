@@ -144,7 +144,6 @@ class BalsamicWorkflowConfig(BaseModel):
         manta: params used in the manta rules
         umicommon: global params defined across specific rules in UMI workflow
         vep: global params defined in the rule vep
-        vardict: params defined in the rule vardict
         umiextract : params defined in the rule sentieon_umiextract
         umiconsensuscall: params defined in the rule sentieon_consensuscall
         tnscope_umi: params defined in the rule sentieon_tnscope_umi
