@@ -82,9 +82,9 @@ if config["analysis"]["sequencing_type"] == 'targeted' and config["analysis"]["a
 
   rule bcftools_quality_filter_tnscope_tumor_only_tga:
     input:
-      vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.vcf.gz",
+      vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.vcf.gz",
     output:
-      vcf_filtered = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.research.vcf.gz",
+      vcf_filtered = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.research.vcf.gz",
     benchmark:
       Path(benchmark_dir,'bcftools_quality_filter_vardict_tumor_only_' + config["analysis"]["case_id"] + ".tsv").as_posix()
     singularity:
@@ -138,9 +138,9 @@ elif config["analysis"]["sequencing_type"] == 'targeted' and config["analysis"][
 
   rule bcftools_quality_filter_tnscope_tumor_normal_tga:
     input:
-      vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.vcf.gz",
+      vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.vcf.gz",
     output:
-      vcf_filtered = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.research.vcf.gz",
+      vcf_filtered = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.research.vcf.gz",
     benchmark:
       Path(benchmark_dir,'bcftools_quality_filter_vardict_tumor_normal_' + config["analysis"]["case_id"] + ".tsv").as_posix()
     singularity:
