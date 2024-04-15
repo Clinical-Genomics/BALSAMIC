@@ -54,6 +54,7 @@ rule sentieon_bwa_umiextract:
         sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
         sample_id = '{sample}',
+        sample_type = lambda wildcards: config_model.get_sample_type_by_name(wildcards.sample, uppercase=True),
         ip_bases = params.umicommon.align_intbases
     threads:
         get_threads(cluster_config, "sentieon_bwa_umiextract")
