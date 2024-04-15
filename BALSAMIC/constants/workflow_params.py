@@ -99,6 +99,13 @@ VCF_DICT = {
         "sequencing_type": ["wgs"],
         "workflow_solution": ["BALSAMIC"],
     },
+    "igh_dux4": {
+        "mutation": "somatic",
+        "mutation_type": "SV",
+        "analysis_type": ["single", "paired"],
+        "sequencing_type": ["wgs"],
+        "workflow_solution": ["BALSAMIC"],
+    },
     "svdb": {
         "mutation": "somatic",
         "mutation_type": "SV",

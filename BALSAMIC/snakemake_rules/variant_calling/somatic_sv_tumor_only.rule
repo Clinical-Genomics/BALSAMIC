@@ -288,6 +288,31 @@ tabix -p vcf -f {output.delly_sv};
 tabix -p vcf -f {output.delly_cnv};
         """
 
+
+rule igh_dux4_detection_tumor_only:
+    input:
+        fa = config["reference"]["reference_genome"],
+        bamT = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample)
+    output:
+        vcf = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".igh_dux4.vcf.gz",
+    benchmark:
+        benchmark_dir + 'igh_dux4_detection_tumor_only_' + config["analysis"]["case_id"] + ".tsv"
+    singularity:
+        Path(singularity_image, config["bioinfo_tools"].get("samtools") + ".sif").as_posix()
+    params:
+        genome_version = config["reference"]["genome_version"],
+        custom_sv_detection_script = get_script_path("igh_dux4_detection.sh"),
+        case_name = config["analysis"]["case_id"],
+    threads:
+        get_threads(cluster_config, "igh_dux4_detection")
+    message:
+        "Detecting IGH::DUX4 rearrangement for {params.case_name} using samtools."
+    shell:
+        """
+        bash {params.custom_sv_detection_script} {params.genome_version} {output.vcf} {input.bamT} 
+        """
+
+
 rule svdb_merge_tumor_only:
     input:
         vcf = expand(

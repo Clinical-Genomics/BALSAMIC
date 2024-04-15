@@ -31,7 +31,7 @@ mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
 export VAR_DICT_OPTS='\"-Djava.io.tmpdir={params.tmpdir}\" \"-Xmx45G\"'; 
 
-vardict-java -u -I 600 \
+vardict-java -I 600 \
 -G {input.fa} \
 -f {params.af} \
 -N {params.case_name} \
