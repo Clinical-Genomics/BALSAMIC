@@ -45,8 +45,6 @@ shell_bam_files=$(echo {input.bam_files} | sed 's/ / -i /g') ;
 -i $shell_bam_files \
 --algo Dedup \
 --score_info {output.score} \
---cell_barcode_counts {output.metrics}.cell_barcode_counts \
---cell_barcode_superlist {output.metrics}.cell_barcode_superlist \
 --metrics {output.metrics} \
 {output.bam};
 
