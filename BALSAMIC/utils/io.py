@@ -1,4 +1,5 @@
 """Input/Output utility methods."""
+
 import gzip
 import json
 import logging
@@ -18,7 +19,7 @@ LOG = logging.getLogger(__name__)
 
 
 def generate_workflow_graph(
-        config_path: Path, directory_path: Path, snakefile: Path, title: str
+    config_path: Path, directory_path: Path, snakefile: Path, title: str
 ) -> None:
     """Generate snakemake workflow graph and save it in a PDF file."""
     with CaptureStdout() as graph_dot:
@@ -103,9 +104,7 @@ def write_finish_file(file_path: str) -> None:
         finish_file.write(f"{datetime.now().strftime('%Y-%m-%d %H:%M')}\n")
 
 
-def write_sacct_to_yaml(
-        case_id: str, sacct_file_path: Path, yaml_file_path: Path
-) -> None:
+def write_sacct_to_yaml(case_id: str, sacct_file_path: Path, yaml_file_path: Path) -> None:
     """Extracts the first element before comma (job ID) from the file content and saves it in a YAML file."""
     with open(sacct_file_path, "r") as file:
         lines: List[str] = file.readlines()
