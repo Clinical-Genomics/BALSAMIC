@@ -4,7 +4,7 @@ import json
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import List, Dict
+from typing import List, Any
 
 import snakemake
 import yaml
@@ -18,7 +18,7 @@ LOG = logging.getLogger(__name__)
 
 
 def generate_workflow_graph(
-    config_path: Path, directory_path: Path, snakefile: Path, title: str
+        config_path: Path, directory_path: Path, snakefile: Path, title: str
 ) -> None:
     """Generate snakemake workflow graph and save it in a PDF file."""
     with CaptureStdout() as graph_dot:
@@ -74,6 +74,12 @@ def read_yaml(yaml_path: str) -> dict:
         raise FileNotFoundError(f"The YAML file {yaml_path} was not found")
 
 
+def write_yaml(data: Any, file_path: Path) -> None:
+    """Write data to a yaml file."""
+    with open(file_path, "w") as file:
+        yaml.dump(data, file)
+
+
 def read_vcf_file(vcf_file_path: str) -> List[str]:
     """
     Reads a VCF file and returns its contents as a list of lines.
@@ -98,7 +104,7 @@ def write_finish_file(file_path: str) -> None:
 
 
 def write_sacct_to_yaml(
-    case_id: str, sacct_file_path: Path, yaml_file_path: Path
+        case_id: str, sacct_file_path: Path, yaml_file_path: Path
 ) -> None:
     """Extracts the first element before comma (job ID) from the file content and saves it in a YAML file."""
     with open(sacct_file_path, "r") as file:

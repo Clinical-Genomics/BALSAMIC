@@ -4,7 +4,7 @@ import logging
 import subprocess
 import sys
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Any
 from unittest import mock
 
 import click
@@ -13,6 +13,7 @@ import yaml
 from _pytest.logging import LogCaptureFixture
 from _pytest.tmpdir import TempPathFactory
 
+from BALSAMIC.commands.config.case import case_config
 from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV, SampleType, SequencingType
 from BALSAMIC.constants.cache import CacheVersion
 from BALSAMIC.constants.cluster import ClusterConfigType
@@ -38,6 +39,7 @@ from BALSAMIC.utils.cli import (
     get_sample_list,
     get_snakefile,
     validate_cache_version,
+    validate_exome_option,
 )
 from BALSAMIC.utils.exc import BalsamicError, WorkflowRunError
 from BALSAMIC.utils.io import (
@@ -47,6 +49,7 @@ from BALSAMIC.utils.io import (
     write_finish_file,
     write_json,
     write_sacct_to_yaml,
+    write_yaml,
 )
 from BALSAMIC.utils.rule import (
     get_delivery_id,
@@ -549,6 +552,30 @@ def test_read_yaml_error():
         assert f"The YAML file {yaml_path} was not found" in str(file_exc)
 
 
+def test_write_yaml(metrics_yaml_path: str, tmp_path: Path):
+    """Tests write yaml file."""
+
+    # GIVEN a yaml file
+
+    # GIVEN a file path to write to
+    yaml_file: Path = Path(tmp_path, "write_yaml.yaml")
+
+    # WHEN reading the yaml file
+    metrics_data: Dict[str, Any] = read_yaml(metrics_yaml_path)
+
+    # WHEN writing the yaml file from dict
+    write_yaml(data=metrics_data, file_path=yaml_file.as_posix())
+
+    # THEN assert that a file was successfully created
+    assert Path.exists(yaml_file)
+
+    # WHEN reading it as a yaml
+    written_metrics_data: dict = read_yaml(yaml_file.as_posix())
+
+    # THEN assert that all data is kept
+    assert written_metrics_data == metrics_data
+
+
 def test_get_threads(cluster_analysis_config_path: str):
     # GIVEN cluster config file and rule name
     cluster_config = json.load(open(cluster_analysis_config_path, "r"))
@@ -604,34 +631,32 @@ def test_convert_deliverables_tags(tumor_normal_fastq_info_correct: List[Dict]):
     """Test generation of delivery tags."""
 
     # GIVEN a deliverables dict and a sample config dict
-    delivery_json = {
-        "files": [
-            {
-                "path": "dummy_balsamic_run/run_tests/TN_WGS/analysis/fastq/ACC1_R_1.fp.fastq.gz",
-                "path_index": [],
-                "step": "fastp",
-                "tag": "ACC1,read1,quality-trimmed-fastq-read1",
-                "id": "ACC1",
-                "format": "fastq.gz",
-            },
-            {
-                "path": "dummy_balsamic_run/run_tests/TN_WGS/analysis/fastq/ACC1_R_2.fp.fastq.gz",
-                "path_index": [],
-                "step": "fastp",
-                "tag": "read2,quality-trimmed-fastq-read1",
-                "id": "ACC1",
-                "format": "fastq.gz",
-            },
-            {
-                "path": "dummy_balsamic_run/run_tests/TN_WGS/analysis/qc/fastp/ACC1.fastp.json",
-                "path_index": [],
-                "step": "fastp",
-                "tag": "ACC1,json,quality-trimmed-fastq-json,tumor",
-                "id": "tumor",
-                "format": "json",
-            },
-        ]
-    }
+    delivery_json = [
+        {
+            "path": "dummy_balsamic_run/run_tests/TN_WGS/analysis/fastq/ACC1_R_1.fp.fastq.gz",
+            "path_index": [],
+            "step": "fastp",
+            "tag": "ACC1,read1,quality-trimmed-fastq-read1",
+            "id": "ACC1",
+            "format": "fastq.gz",
+        },
+        {
+            "path": "dummy_balsamic_run/run_tests/TN_WGS/analysis/fastq/ACC1_R_2.fp.fastq.gz",
+            "path_index": [],
+            "step": "fastp",
+            "tag": "read2,quality-trimmed-fastq-read1",
+            "id": "ACC1",
+            "format": "fastq.gz",
+        },
+        {
+            "path": "dummy_balsamic_run/run_tests/TN_WGS/analysis/qc/fastp/ACC1.fastp.json",
+            "path_index": [],
+            "step": "fastp",
+            "tag": "ACC1,json,quality-trimmed-fastq-json,tumor",
+            "id": "tumor",
+            "format": "json",
+        },
+    ]
 
     sample_config_dict = {"samples": tumor_normal_fastq_info_correct}
 
@@ -641,7 +666,7 @@ def test_convert_deliverables_tags(tumor_normal_fastq_info_correct: List[Dict]):
     )
 
     # THEN prefix strings should be replaced with sample name
-    for delivery_file in delivery_json["files"]:
+    for delivery_file in delivery_json:
         assert "ACC1" in delivery_file["tag"]
         assert "tumor" not in delivery_file["tag"]
         assert delivery_file["id"] == "ACC1"
@@ -959,6 +984,23 @@ def test_get_fastp_parameters(balsamic_model: ConfigModel):
     fastp_params_tga = get_fastp_parameters(balsamic_model)
     # THEN no adapter trimming should be done
     assert "--disable_adapter_trimming" in fastp_params_tga["fastp_trim_adapter"]
+
+
+def test_validate_exome_option(panel_bed_file: str):
+    # GIVEN that a panel bedfile has been supplied and exome parameter set to true
+    ctx = click.Context(case_config)
+    ctx.params["panel_bed"] = panel_bed_file
+    # WHEN validating exome option
+    # THEN exome argument should be correctly set
+    assert validate_exome_option(ctx, click.Parameter, True) == True
+
+    # GIVEN that a panel bedfile has NOT been supplied and exome parameter set to true
+    ctx.params["panel_bed"] = None
+
+    # WHEN validating exome option
+    # THEN a bad parameter error should be raised
+    with pytest.raises(click.BadParameter):
+        validate_exome_option(ctx, click.Parameter, True)
 
 
 def test_validate_cache_version_develop():

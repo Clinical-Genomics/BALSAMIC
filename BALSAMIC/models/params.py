@@ -2,6 +2,7 @@
 from typing import Optional
 
 from pydantic import BaseModel, ConfigDict
+from BALSAMIC.constants.analysis import SequencingType
 
 
 class ParamsCommon(BaseModel):
@@ -22,6 +23,18 @@ class ParamsCommon(BaseModel):
     picard_fixmate: str
     picard_RG_normal: str
     picard_RG_tumor: str
+
+
+class ParamsManta(BaseModel):
+    """This class defines the params settings used as constants in Manta rule.
+
+    Attributes:
+        wgs_settings: str(required). parameters for Manta analysis for WGS
+        tga_settings: str(required). parameters for Manta analysis for TGA
+    """
+
+    wgs_settings: str
+    tga_settings: str
 
 
 class ParamsVardict(BaseModel):
@@ -149,21 +162,32 @@ class BalsamicWorkflowConfig(BaseModel):
 
     Attributes:
         common: global params defined across all rules in balsamic workflow
+        manta: params used in the manta rules
         umicommon: global params defined across specific rules in UMI workflow
         vep: global params defined in the rule vep
         vardict: params defined in the rule vardict
         umiextract : params defined in the rule sentieon_umiextract
         umiconsensuscall: params defined in the rule sentieon_consensuscall
         tnscope_umi: params defined in the rule sentieon_tnscope_umi
+
+    Functions:
+        - get_manta_settings: Return setting for manta rule
     """
 
     common: ParamsCommon
+    manta: ParamsManta
     vardict: ParamsVardict
     vep: ParamsVEP
     umicommon: UMIParamsCommon
     umiextract: UMIParamsUMIextract
     umiconsensuscall: UMIParamsConsensuscall
     tnscope_umi: UMIParamsTNscope
+
+    def get_manta_settings(self, sequencing_type) -> str:
+        """Return correct setting for manta rules depending on sequencing type."""
+        if sequencing_type == SequencingType.WGS:
+            return self.manta.wgs_settings
+        return self.manta.tga_settings
 
 
 class VCFAttributes(BaseModel):
@@ -194,6 +218,7 @@ class VarCallerFilter(BaseModel):
     Attributes:
         AD: VCFAttributes (required); minimum allelic depth
         AF_min: VCFAttributes (optional); minimum allelic fraction
+        high_normal_tumor_af_frac: VCFAttributes (optional); maximum normal allele frequency / tumor allele frequency
         MQ: VCFAttributes (optional); minimum mapping quality
         DP: VCFAttributes (optional); minimum read depth
         pop_freq: VCFAttributes (optional); maximum gnomad allele frequency
@@ -205,6 +230,7 @@ class VarCallerFilter(BaseModel):
         swegen_sv_freq: VCFAttributes (optional); maximum swegen sv allele frequency
         loqusdb_clinical_snv_freq: VCFAttributes (optional); maximum loqusdb clinical snv allele frequency
         loqusdb_clinical_sv_freq: VCFAttributes (optional); maximum loqusdb clinical sv allele frequency
+        low_pr_sr_count: VCFAttributes (optional); minumum Manta variant read support
         varcaller_name: str (required); variant caller name
         filter_type: str (required); filter name for variant caller
         analysis_type: str (required); analysis type e.g. tumor_normal or tumor_only
@@ -213,6 +239,7 @@ class VarCallerFilter(BaseModel):
 
     AD: Optional[VCFAttributes] = None
     AF_min: Optional[VCFAttributes] = None
+    high_normal_tumor_af_frac: Optional[VCFAttributes] = None
     MQ: Optional[VCFAttributes] = None
     DP: Optional[VCFAttributes] = None
     pop_freq: Optional[VCFAttributes] = None
@@ -224,6 +251,7 @@ class VarCallerFilter(BaseModel):
     swegen_sv_freq: Optional[VCFAttributes] = None
     loqusdb_clinical_snv_freq: Optional[VCFAttributes] = None
     loqusdb_clinical_sv_freq: Optional[VCFAttributes] = None
+    low_pr_sr_count: Optional[VCFAttributes] = None
     varcaller_name: str
     filter_type: str
     analysis_type: str

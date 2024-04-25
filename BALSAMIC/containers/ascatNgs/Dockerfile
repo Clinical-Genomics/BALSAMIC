@@ -90,7 +90,6 @@ locales \
 gcc \
 wget \
 pkg-config \
-cpanminus \
 git \
 unattended-upgrades && \
 unattended-upgrade -d -v && \
@@ -140,6 +139,7 @@ moreutils \
 google-perftools \
 libcairo2 \
 gfortran \
+cpanminus \
 unattended-upgrades && \
 unattended-upgrade -d -v && \
 apt-get remove -yq unattended-upgrades && \

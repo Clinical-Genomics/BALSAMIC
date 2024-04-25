@@ -1899,36 +1899,42 @@ def sample_config(
 
 @pytest.fixture(scope="session")
 def analysis_path():
-    """Return path for test analysis"""
+    """Return path for test analysis."""
     return "tests/test_data/qc_files/analysis"
 
 
 @pytest.fixture(scope="session")
-def multiqc_data_path(analysis_path):
-    """Return path of JSON for MultiQC test data"""
-    return os.path.join(analysis_path, "qc", "multiqc_data", "multiqc_data.json")
+def multiqc_data_dir(analysis_path: str) -> Path:
+    """Return path of tje MultiQC test data directory."""
+    return Path(analysis_path, "qc", "multiqc_data")
 
 
 @pytest.fixture(scope="session")
-def multiqc_data_dict(multiqc_data_path):
-    """Read and Return test data from JASON of MultiQC test data"""
+def multiqc_data_path(multiqc_data_dir: Path) -> str:
+    """Return path of JSON for MultiQC test data."""
+    return Path(multiqc_data_dir, "multiqc_data.json").as_posix()
+
+
+@pytest.fixture(scope="session")
+def multiqc_data_dict(multiqc_data_path: str) -> dict:
+    """Read and Return test data from JASON of MultiQC test data."""
     return read_json(multiqc_data_path)
 
 
 @pytest.fixture(scope="session")
-def metrics_yaml_path(analysis_path):
-    """Return path for Tumor-Only deliverable metrics from YAML"""
-    return os.path.join(
+def metrics_yaml_path(analysis_path: str) -> str:
+    """Return path for Tumor-Only deliverable metrics from YAML."""
+    return Path(
         analysis_path, "qc", "sample_tumor_only_metrics_deliverables.yaml"
-    )
+    ).as_posix()
 
 
 @pytest.fixture(scope="session")
-def bcftools_counts_path(analysis_path):
-    """Return path for svdb.clinical.filtered.pass.stats"""
-    return os.path.join(
+def bcftools_counts_path(analysis_path: str) -> str:
+    """Return path for svdb.clinical.filtered.pass.stats."""
+    return Path(
         analysis_path, "vep", "SNV.somatic.case.svdb.clinical.filtered.pass.stats"
-    )
+    ).as_posix()
 
 
 @pytest.fixture(scope="session")

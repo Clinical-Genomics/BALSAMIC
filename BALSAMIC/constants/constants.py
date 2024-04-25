@@ -40,6 +40,7 @@ class FileType(StrEnum):
     TSV: str = "tsv"
     TXT: str = "txt"
     VCF: str = "vcf"
+    YAML: str = "yaml"
 
 
 class BwaIndexFileType(StrEnum):

@@ -58,6 +58,8 @@ Relevant publications
 #. **Two case studies and a pipeline (unpublished)**: Noll, A. C., Miller, N. A., Smith, L. D., Yoo, B., Fiedler, S., Cooley, L. D., … Kingsmore, S. F. (2016). Clinical detection of deletion structural variants in whole-genome sequences. Npj Genomic Medicine, 1(1), 16026. https://doi.org/10.1038/npjgenmed.2016.26
 #. **Review on driver gene methods**: Tokheim, C. J., Papadopoulos, N., Kinzler, K. W., Vogelstein, B., & Karchin, R. (2016). Evaluating the evaluation of cancer driver genes. Proceedings of the National Academy of Sciences, 113(50), 14330–14335. https://doi.org/10.1073/pnas.1616440113
 
+#. **Detection of IGH::DUX4 rearrangement**: Rezayee, F., Eisfeldt, J., Skaftason, A., Öfverholm, I., Sayyab, S., Syvänen, A. C., … & Barbany, G. (2023). Feasibility to use whole-genome sequencing as a sole diagnostic method to detect genomic aberrations in pediatric B-cell acute lymphoblastic leukemia. Frontiers in Oncology, 13, 1217712. https://doi.org/10.3389/fonc.2023.1217712
+
 *Resource, or general notable papers including resource and KB papers related to cancer genomics*
 
 #. **GIAB**: Zook, J. M., Catoe, D., McDaniel, J., Vang, L., Spies, N., Sidow, A., … Salit, M. (2016). Extensive sequencing of seven human genomes to characterize benchmark reference materials. Scientific Data, 3, 160025. https://doi.org/10.1038/sdata.2016.25

@@ -3,29 +3,26 @@ import click
 
 from BALSAMIC import __version__ as balsamic_version
 from BALSAMIC.constants.analysis import (
-    RunMode,
-    RUN_MODES,
     ANALYSIS_WORKFLOWS,
+    PON_WORKFLOWS,
+    RUN_MODES,
     AnalysisWorkflow,
     Gender,
-    RULE_DELIVERY_MODES,
-    RuleDeliveryMode,
-    PON_WORKFLOWS,
     PONWorkflow,
+    RunMode,
 )
-from BALSAMIC.constants.cache import GenomeVersion, CacheVersion, GENOME_VERSIONS
+from BALSAMIC.constants.cache import GENOME_VERSIONS, CacheVersion, GenomeVersion
 from BALSAMIC.constants.cluster import (
-    ClusterProfile,
-    QOS,
-    CLUSTER_PROFILES,
-    QOS_OPTIONS,
     CLUSTER_MAIL_TYPES,
+    CLUSTER_PROFILES,
+    QOS,
+    QOS_OPTIONS,
+    ClusterProfile,
 )
-from BALSAMIC.constants.constants import LogLevel, LOG_LEVELS
+from BALSAMIC.constants.constants import LOG_LEVELS, LogLevel
 from BALSAMIC.constants.rules import DELIVERY_RULES
 from BALSAMIC.constants.workflow_params import VCF_DICT
-from BALSAMIC.utils.cli import validate_cache_version
-
+from BALSAMIC.utils.cli import validate_cache_version, validate_exome_option
 
 OPTION_ADAPTER_TRIM = click.option(
     "--adapter-trim/--no-adapter-trim",
@@ -179,16 +176,6 @@ OPTION_COSMIC_KEY = click.option(
     help="Cosmic DB authentication key",
 )
 
-OPTION_DELIVERY_MODE = click.option(
-    "-m",
-    "--delivery-mode",
-    type=click.Choice(RULE_DELIVERY_MODES),
-    default=RuleDeliveryMode.APPEND,
-    show_default=True,
-    help=f"Append rules to deliver to the current delivery option ({RuleDeliveryMode.APPEND}) or deliver only "
-    f"the ones specified ({RuleDeliveryMode.RESET})",
-)
-
 OPTION_DISABLE_VARIANT_CALLER = click.option(
     "--disable-variant-caller",
     help=f"Run workflow with selected variant caller(s) disable. Use comma to remove multiple variant callers. Valid "
@@ -200,6 +187,14 @@ OPTION_DRAGEN = click.option(
     is_flag=True,
     default=False,
     help="Enable dragen variant caller",
+)
+
+OPTION_EXOME = click.option(
+    "--exome",
+    is_flag=True,
+    default=False,
+    help="Assign exome parameters to TGA workflow",
+    callback=validate_exome_option,
 )
 
 OPTION_FASTQ_PATH = click.option(
@@ -339,6 +334,8 @@ OPTION_RULES_TO_DELIVER = click.option(
     "-r",
     "--rules-to-deliver",
     multiple=True,
+    default=DELIVERY_RULES,
+    show_default=False,
     type=click.Choice(DELIVERY_RULES),
     help="Specify the rules to deliver. The delivery mode selected via the --delivery-mode option.",
 )
