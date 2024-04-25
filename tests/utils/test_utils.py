@@ -354,7 +354,9 @@ def test_get_vcf(sample_config: Dict):
     variant_callers = ["tnscope", "vardict", "manta"]
 
     # WHEN passing args to that function
-    vcf_list = get_vcf(sample_config, variant_callers, [sample_config["analysis"]["case_id"]])
+    vcf_list = get_vcf(
+        sample_config, variant_callers, [sample_config["analysis"]["case_id"]]
+    )
 
     # THEN It should return the list of vcf file names
     assert any("tnscope" in vcf_name for vcf_name in vcf_list)
@@ -759,7 +761,10 @@ def test_get_rule_output(snakemake_bcftools_filter_vardict_research_tumor_only):
             == "SNV.somatic.sample_tumor_only.vardict.research.filtered.pass.vcf.gz"
         )
         # Expected tags
-        assert file[3] == "SNV,sample-tumor-only,vcf-pass-vardict,research-vcf-pass-vardict"
+        assert (
+            file[3]
+            == "SNV,sample-tumor-only,vcf-pass-vardict,research-vcf-pass-vardict"
+        )
 
 
 def test_get_resolved_fastq_files_directory(fastq_dir: str):
@@ -774,7 +779,9 @@ def test_get_resolved_fastq_files_directory(fastq_dir: str):
     assert input_dir == fastq_dir
 
 
-def test_get_resolved_fastq_files_directory_symlinked_files(fastq_dir: str, tmp_path: Path):
+def test_get_resolved_fastq_files_directory_symlinked_files(
+    fastq_dir: str, tmp_path: Path
+):
     """Test get fastq directory for symlinked files."""
 
     # GIVEN a temporary fastq path containing symlinked files
@@ -827,8 +834,12 @@ def test_get_analysis_fastq_files_directory_exception(
     case_dir: str = tmp_path_factory.mktemp(case_id_tumor_only).as_posix()
 
     # WHEN getting the analysis fastq directory twice
-    _input_dir: str = get_analysis_fastq_files_directory(case_dir=case_dir, fastq_path=fastq_dir)
-    input_dir: str = get_analysis_fastq_files_directory(case_dir=case_dir, fastq_path=fastq_dir)
+    _input_dir: str = get_analysis_fastq_files_directory(
+        case_dir=case_dir, fastq_path=fastq_dir
+    )
+    input_dir: str = get_analysis_fastq_files_directory(
+        case_dir=case_dir, fastq_path=fastq_dir
+    )
 
     # THEN the fastq directory should be located inside the case directory and the linking should have been skipped
     assert input_dir == Path(case_dir, "fastq").as_posix()
@@ -844,7 +855,9 @@ def test_get_analysis_fastq_files_directory_no_fastqs(
     case_dir: str = tmp_path_factory.mktemp(case_id_tumor_only).as_posix()
 
     # WHEN getting the analysis fastq directory
-    input_dir: str = get_analysis_fastq_files_directory(case_dir=case_dir, fastq_path=fastq_dir)
+    input_dir: str = get_analysis_fastq_files_directory(
+        case_dir=case_dir, fastq_path=fastq_dir
+    )
 
     # THEN the fastq directory should be located inside the case directory
     assert input_dir == Path(case_dir, "fastq").as_posix()
@@ -890,8 +903,12 @@ def test_get_fastq_info(tumor_sample_name: str, fastq_dir_tumor_only: str):
 
     # THEN check that the fastq_dict matches the expected fastq_dict
     expected_fastq_dict = {
-        "1_171015_HJ7TLDSX5_ACC1_XXXXXX": fastq_info1_expected.model_dump(exclude_none=True),
-        "2_171015_HJ7TLDSX5_ACC1_XXXXXX": fastq_info2_expected.model_dump(exclude_none=True),
+        "1_171015_HJ7TLDSX5_ACC1_XXXXXX": fastq_info1_expected.model_dump(
+            exclude_none=True
+        ),
+        "2_171015_HJ7TLDSX5_ACC1_XXXXXX": fastq_info2_expected.model_dump(
+            exclude_none=True
+        ),
     }
     assert fastq_dict == expected_fastq_dict
 
@@ -902,7 +919,9 @@ def test_get_fastq_info_symlink(tumor_sample_name: str, fastq_dir_symlinked: str
     # GIVEN a fastq_dir and sample name
 
     # WHEN calling the get_fastq_info function
-    fastq_dict: Dict[str, FastqInfoModel] = get_fastq_info(tumor_sample_name, fastq_dir_symlinked)
+    fastq_dict: Dict[str, FastqInfoModel] = get_fastq_info(
+        tumor_sample_name, fastq_dir_symlinked
+    )
 
     # THEN verify that the resolved file links have been included in the samples dictionary
     assert "fwd_resolved" in next(iter(fastq_dict.values()))
@@ -915,7 +934,9 @@ def test_get_fastq_info_empty_fastq_dir(tumor_sample_name: str, empty_fastq_dir:
 
     # WHEN calling get_fastq_info
     # THEN the following error should be found
-    with pytest.raises(BalsamicError, match=f"No fastqs found for: {tumor_sample_name}"):
+    with pytest.raises(
+        BalsamicError, match=f"No fastqs found for: {tumor_sample_name}"
+    ):
         get_fastq_info(tumor_sample_name, empty_fastq_dir)
 
 
