@@ -84,7 +84,6 @@ rule sentieon_TNscope_tumor_only:
         tumor_options = VARCALL_PARAMS["tnscope"]["tumor"],
         pon = " " if get_pon(config) is None else " ".join(["--pon", get_pon(config)]),
         pcr_model = params.common.pcr_model,
-        sentieon_ml_tnscope = config["SENTIEON_TNSCOPE"],
         sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
         case_name =  config["analysis"]["case_id"]

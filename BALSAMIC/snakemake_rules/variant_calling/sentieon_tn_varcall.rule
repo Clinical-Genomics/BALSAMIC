@@ -85,7 +85,6 @@ rule sentieon_TNscope:
         pcr_model = params.common.pcr_model,
         tumor_options = VARCALL_PARAMS["tnscope"]["tumor"],
         normal_options = VARCALL_PARAMS["tnscope"]["normal"],
-        sentieon_ml_tnscope = config["SENTIEON_TNSCOPE"],
         sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
         case_name = config["analysis"]["case_id"]
@@ -99,8 +98,6 @@ rule sentieon_TNscope:
 export TMPDIR={params.tmpdir};
 export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
-
-intermediate_vcf={params.tmpdir}/tn_sentieon_varcall_file
 
 {params.sentieon_exec} driver \
 -t {threads} \
@@ -116,13 +113,7 @@ intermediate_vcf={params.tmpdir}/tn_sentieon_varcall_file
 --cosmic {input.cosmic} \
 --pcr_indel_mode {params.pcr_model} \
 {params.tumor_options} \
-{params.normal_options} $intermediate_vcf;
-
-{params.sentieon_exec} driver \
--r {input.ref} \
---algo TNModelApply \
--m {params.sentieon_ml_tnscope} \
--v $intermediate_vcf {output.vcf_tnscope};
+{params.normal_options} {output.vcf_tnscope};
 
 echo -e \"{params.tumor}\\tTUMOR\\n{params.normal}\\tNORMAL\" > {output.namemap_snv};
 cp {output.namemap_snv} {output.namemap_sv}
