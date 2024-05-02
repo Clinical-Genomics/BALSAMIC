@@ -104,7 +104,7 @@ rule cap_base_quality:
     benchmark:
         Path(benchmark_dir,"cap_base_quality_{sample_type}_{sample}.tsv").as_posix()
     singularity:
-        Path(singularity_image,config["bioinfo_tools"].get("htslib") + ".sif").as_posix()
+        Path(singularity_image,config["bioinfo_tools"].get("pysam") + ".sif").as_posix()
     params:
         sample_id = "{sample}",
         cap_base_qualities = get_script_path("cap_base_quality_in_bam.py")
