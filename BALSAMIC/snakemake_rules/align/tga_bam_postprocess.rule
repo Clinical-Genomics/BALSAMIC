@@ -96,6 +96,26 @@ samtools sort --threads {threads} -o {output.bam} {input.bam};
 samtools index -@ {threads} {output.bam};
         """
 
+rule cap_base_quality:
+    input:
+        bam = Path(bam_dir,"{sample_type}.{sample}.dedup_sorted.bam").as_posix()
+    output:
+        bam = Path(bam_dir,"{sample_type}.{sample}.dedup_sorted_capped.bam").as_posix(),
+    benchmark:
+        Path(benchmark_dir,"cap_base_quality_{sample_type}_{sample}.tsv").as_posix()
+    singularity:
+        Path(singularity_image,config["bioinfo_tools"].get("htslib") + ".sif").as_posix()
+    params:
+        sample_id = "{sample}",
+        cap_base_qualities = get_script_path("cap_base_quality_in_bam.py")
+    threads:
+        get_threads(cluster_config, "cap_base_quality")
+    message:
+        "Capping base qualities to 70 in bamfile using pysam in sample: {params.sample_id}"
+    shell:
+        """
+python {params.cap_base_qualities} --max_quality 70 {input.bam} {output.bam}
+        """
 
 rule postprocess_bam:
     input:

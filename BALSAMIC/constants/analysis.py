@@ -123,6 +123,7 @@ class BioinfoTools(StrEnum):
     VCFANNO: str = "vcfanno"
     CADD: str = "cadd"
     PURECN: str = "purecn"
+    HTSLIB: str = "htslib"
 
 
 class FastqName(StrEnum):
@@ -175,4 +176,5 @@ BIOINFO_TOOL_ENV: Dict[str, str] = {
     BioinfoTools.CADD: DockerContainers.CADD,
     BioinfoTools.PURECN: DockerContainers.PURECN,
     BioinfoTools.GATK: DockerContainers.GATK,
+    BioinfoTools.HTSLIB: DockerContainers.HTSLIB,
 }
