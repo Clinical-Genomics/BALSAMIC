@@ -19,6 +19,10 @@
 		"time": "03:00:00",
 		"n": 12
 	},
+	"cap_base_quality": {
+		"time": "05:00:00",
+		"n": 10
+	},
 	"finalize_gens_outputfiles": {
 		"time": "01:00:00",
 		"n": 2
