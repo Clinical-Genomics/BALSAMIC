@@ -176,5 +176,5 @@ BIOINFO_TOOL_ENV: Dict[str, str] = {
     BioinfoTools.CADD: DockerContainers.CADD,
     BioinfoTools.PURECN: DockerContainers.PURECN,
     BioinfoTools.GATK: DockerContainers.GATK,
-    BioinfoTools.PYSAN: DockerContainers.PYTHON_3,
+    BioinfoTools.PYSAM: DockerContainers.PYTHON_3,
 }
