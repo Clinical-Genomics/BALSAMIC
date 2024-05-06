@@ -4,9 +4,8 @@
 rule sentieon_umiextract_tga:
     """Extract UMIs into tags in read header."""
     input:
-        wake_up = result_dir + "start_analysis",
-        fastq_fwd=fastq_dir + "concat.{sample}_1.pre_umi.fastq.gz",
-        fastq_rev=fastq_dir + "concat.{sample}_2.pre_umi.fastq.gz",
+        fastq_fwd = fastq_dir + "concat.{sample}_1.pre_umi.fastq.gz",
+        fastq_rev = fastq_dir + "concat.{sample}_2.pre_umi.fastq.gz"
     output:
         ds_umi = temp(fastq_dir + "{sample}_umiextract_interleaved.fastq.gz")
     benchmark:
