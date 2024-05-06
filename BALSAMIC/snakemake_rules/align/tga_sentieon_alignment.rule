@@ -3,13 +3,13 @@
 rule sentieon_align_sort_umireads:
     input:
         ref = config["reference"]["reference_genome"],
-        fastq_r1 = Path(fastq_dir, "{fastq_pattern}_1.fp.fastq.gz").as_posix(),
-        fastq_r2 = Path(fastq_dir, "{fastq_pattern}_2.fp.fastq.gz").as_posix(),
+        fastq_r1 = Path(fastq_dir, "{sample}_1.fp.fastq.gz").as_posix(),
+        fastq_r2 = Path(fastq_dir, "{sample}_2.fp.fastq.gz").as_posix(),
         refidx = expand(config["reference"]["reference_genome"] + ".{prefix}", prefix=["amb","ann","bwt","pac","sa"])
     output:
-        bam_out = Path(bam_dir, "{sample}_align_sort_{fastq_pattern}.bam").as_posix()
+        bam_out = Path(bam_dir, "{sample}_align_sort.bam").as_posix()
     benchmark:
-        Path(benchmark_dir, "sentieon_align_sort_{sample}_{fastq_pattern}.tsv").as_posix()
+        Path(benchmark_dir, "sentieon_align_sort_{sample}.tsv").as_posix()
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         sentieon_install_dir= config["SENTIEON_INSTALL_DIR"],
@@ -17,13 +17,12 @@ rule sentieon_align_sort_umireads:
         sentieon_lic = config["SENTIEON_LICENSE"],
         sample_id = "{sample}",
         sample_type = lambda wildcards: config_model.get_sample_type_by_name(wildcards.sample, uppercase=True),
-        fastq_pattern = "{fastq_pattern}",
         ip_bases = params.umicommon.align_intbases
     threads:
         get_threads(cluster_config, 'sentieon_align_sort')
     message:
         ("Align fastq reads using sentieon bwa-mem and sort reads using samtools for sample type: "
-        "{params.sample_type} : {params.sample_id}, {params.fastq_pattern}")
+        "{params.sample_type} : {params.sample_id}")
     shell:
         """
 mkdir -p {params.tmpdir};
@@ -32,7 +31,7 @@ export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
 
 {params.sentieon_exec} bwa mem \
--R '@RG\\tID:{params.fastq_pattern}\\tSM:{params.sample_type}\\tLB:TargetPanel\\tPL:ILLUMINA' \
+-R '@RG\\tID:{params.sample}\\tSM:{params.sample_type}\\tLB:TargetPanel\\tPL:ILLUMINA' \
 -K {params.ip_bases} \
 -t {threads} -C \
 {input.ref} {input.fastq_r1} {input.fastq_r2} | \
