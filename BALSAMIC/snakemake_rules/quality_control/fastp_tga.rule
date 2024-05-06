@@ -33,7 +33,7 @@ export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
 
 {params.sentieon_exec} umi extract \
-{params.ds_params} {input.fastq_r1} {input.fastq_r2} | gzip > {output.ds_umi} ;
+{params.ds_params} {input.fastq_fwd} {input.fastq_rev} | gzip > {output.ds_umi} ;
         """
 
 
@@ -47,7 +47,7 @@ rule fastp_quality_trim_tga:
         json = qc_dir + "fastp/{sample}_fastp.json",
         html = qc_dir + "fastp/{sample}_fastp.html"
     benchmark:
-        Path(benchmark_dir, "fastp_quality_trim" + "{fastq_pattern}.tsv").as_posix()
+        Path(benchmark_dir, "fastp_quality_trim" + "{sample}.tsv").as_posix()
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("fastp") + ".sif").as_posix()
     params:
