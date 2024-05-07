@@ -1,3 +1,12 @@
+[x.x.x]
+-------
+
+
+Removed:
+^^^^^^^^
+* GATK3 https://github.com/Clinical-Genomics/BALSAMIC/pull/
+
+
 [15.0.0]
 -------
 
