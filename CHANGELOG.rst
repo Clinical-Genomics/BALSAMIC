@@ -3,6 +3,7 @@
 Changed:
 ^^^^^^^^
 * Cluster scheduler script for immediate submit https://github.com/Clinical-Genomics/BALSAMIC/pull/1372
+* `SLEEP_BEFORE_START` to 600s
 
 [15.0.0]
 
