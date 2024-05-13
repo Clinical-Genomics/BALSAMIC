@@ -114,7 +114,7 @@ class Scheduler(BaseModel):
         return ""
 
     def get_ntasks_option(self) -> str:
-        """Return the maximum of number tasks for allocation."""
+        """Return the maximum number of tasks for allocation."""
         ntasks: str = self.job_properties["cluster"].get("n")
         if ntasks:
             return f"--ntasks {ntasks}"
