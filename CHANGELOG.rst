@@ -5,11 +5,14 @@ Changed:
 * Cluster scheduler script for immediate submit https://github.com/Clinical-Genomics/BALSAMIC/pull/1372
 * `SLEEP_BEFORE_START` to 600s https://github.com/Clinical-Genomics/BALSAMIC/pull/1372
 
-[15.0.0]
-
 Removed:
 ^^^^^^^^
 * SGE (qsub) support https://github.com/Clinical-Genomics/BALSAMIC/pull/1372
+
+[15.0.0]
+
+Added:
+^^^^^^
 * high_normal_tumor_af_frac filter in bcftools for TNscope T+N filtering out more than 30% TINC https://github.com/Clinical-Genomics/BALSAMIC/pull/1289
 * New option for exome samples `--exome` with modified bcftools filters compared to standard targeted workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1414
 * Custom samtools script for the detection of IGH::DUX4 rearrangements https://github.com/Clinical-Genomics/BALSAMIC/pull/1397
