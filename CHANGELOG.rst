@@ -1,4 +1,5 @@
 [X.X.X]
+-------
 
 Changed:
 ^^^^^^^^
@@ -10,6 +11,7 @@ Removed:
 * SGE (qsub) support https://github.com/Clinical-Genomics/BALSAMIC/pull/1372
 
 [15.0.0]
+--------
 
 Added:
 ^^^^^^
