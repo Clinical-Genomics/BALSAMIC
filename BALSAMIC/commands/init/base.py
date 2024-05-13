@@ -5,42 +5,42 @@ import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Union, List, Optional
+from typing import List, Optional, Union
 
 import click
 
 from BALSAMIC.commands.options import (
-    OPTION_RUN_MODE,
-    OPTION_CLUSTER_PROFILE,
-    OPTION_CLUSTER_QOS,
+    OPTION_CACHE_VERSION,
     OPTION_CLUSTER_ACCOUNT,
-    OPTION_SNAKEMAKE_OPT,
-    OPTION_GENOME_VERSION,
-    OPTION_FORCE_ALL,
-    OPTION_RUN_ANALYSIS,
+    OPTION_CLUSTER_CONFIG,
     OPTION_CLUSTER_MAIL,
     OPTION_CLUSTER_MAIL_TYPE,
-    OPTION_QUIET,
-    OPTION_CACHE_VERSION,
-    OPTION_SNAKEFILE,
-    OPTION_OUT_DIR,
-    OPTION_CLUSTER_CONFIG,
+    OPTION_CLUSTER_PROFILE,
+    OPTION_CLUSTER_QOS,
     OPTION_COSMIC_KEY,
+    OPTION_FORCE_ALL,
+    OPTION_GENOME_VERSION,
+    OPTION_OUT_DIR,
+    OPTION_QUIET,
+    OPTION_RUN_ANALYSIS,
+    OPTION_RUN_MODE,
+    OPTION_SNAKEFILE,
+    OPTION_SNAKEMAKE_OPT,
 )
 from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV, RunMode
-from BALSAMIC.constants.cache import GenomeVersion, REFERENCE_FILES
+from BALSAMIC.constants.cache import REFERENCE_FILES, GenomeVersion
 from BALSAMIC.constants.cluster import (
-    ClusterMailType,
     QOS,
-    ClusterProfile,
     ClusterConfigType,
+    ClusterMailType,
+    ClusterProfile,
 )
-from BALSAMIC.models.cache import CacheConfig, ReferencesHg, ReferencesCanFam
+from BALSAMIC.models.cache import CacheConfig, ReferencesCanFam, ReferencesHg
 from BALSAMIC.models.snakemake import SnakemakeExecutable
 from BALSAMIC.utils.analysis import get_cache_singularity_bind_paths
 from BALSAMIC.utils.cache import get_containers
-from BALSAMIC.utils.cli import get_snakefile, get_config_path
-from BALSAMIC.utils.io import write_json, generate_workflow_graph
+from BALSAMIC.utils.cli import get_config_path, get_snakefile
+from BALSAMIC.utils.io import generate_workflow_graph, write_json
 
 LOG = logging.getLogger(__name__)
 
@@ -160,7 +160,6 @@ def initialize(
         profile=profile,
         qos=qos,
         quiet=quiet,
-        result_dir=references_dir,
         run_analysis=run_analysis,
         run_mode=run_mode,
         script_dir=script_dir,
