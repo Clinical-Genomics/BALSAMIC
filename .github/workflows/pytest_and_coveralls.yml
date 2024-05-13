@@ -19,11 +19,11 @@ jobs:
       # Checkout BALSAMIC
       - name: Git checkout
         id: git_checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       # Conda env create
       - name: setup conda
         id: setup_conda
-        uses: conda-incubator/setup-miniconda@v2
+        uses: conda-incubator/setup-miniconda@v3
         with:
           activate-environment: balsamic
           environment-file: BALSAMIC/conda/balsamic.yaml
@@ -55,7 +55,7 @@ jobs:
           SENTIEON_INSTALL_DIR: dummy_install_dir
       # Run Codecov
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           file: ./coverage.xml

@@ -4,11 +4,11 @@ jobs:
   lint:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
       - uses: psf/black@stable
         with:
           options: "--check --verbose"
-          version: "22.3.0"
+          version: "24.4.2"
