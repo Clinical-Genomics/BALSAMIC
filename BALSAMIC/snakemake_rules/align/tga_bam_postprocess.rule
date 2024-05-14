@@ -1,31 +1,11 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
 
-rule samtools_merge_index:
-    input:
-        bam_files = lambda wildcards: config_model.get_bam_name_per_lane(bam_dir = bam_dir, sample_name = wildcards.sample)
-    output:
-        bam = Path(bam_dir,"{sample_type}.{sample}.merged.bam").as_posix(),
-    benchmark:
-        Path(benchmark_dir,"samtools_merge_index_{sample_type}_{sample}.tsv").as_posix()
-    singularity:
-        Path(singularity_image,config["bioinfo_tools"].get("samtools") + ".sif").as_posix()
-    params:
-        sample_id="{sample}"
-    threads:
-        get_threads(cluster_config,"samtools_sort_index")
-    message:
-        "Merging lane bamfiles for sample: {params.sample_id}"
-    shell:
-        """
-samtools merge --threads {threads} -o {output.bam} {input.bam_files} ;
-samtools index -@ {threads} {output.bam};
-        """
 
 rule sentieon_dedup_consensus:
     input:
         ref = config["reference"]["reference_genome"],
-        bam = Path(bam_dir,"{sample_type}.{sample}.merged.bam").as_posix(),
+        bam = Path(bam_dir, "{sample}_align_sort.bam").as_posix(),
     output:
         bam = Path(bam_dir, "{sample_type}.{sample}.dedup.bam").as_posix(),
         score = Path(bam_dir, "{sample_type}.{sample}.dedup.score").as_posix(),
