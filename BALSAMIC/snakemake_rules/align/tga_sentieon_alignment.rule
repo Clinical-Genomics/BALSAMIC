@@ -84,7 +84,7 @@ rule sentieon_bwa_umiconsensus:
         fastq_r1 = fastq_dir + "{sample}_1.trimmed_consensuscall_umi.fastq.gz",
         fastq_r2 = fastq_dir + "{sample}_2.trimmed_consensuscall_umi.fastq.gz"
     output:
-        align_consensus = bam_dir + "{sample_type}.{sample}_consensuscalled_umi.bam"
+        align_consensus = bam_dir + "{sample_type}.{sample}.consensuscalled_umi.bam"
     benchmark:
         Path(benchmark_dir, "sentieon_bwa_umiconsensus_{sample_type}_{sample}.tsv").as_posix()
     params:
