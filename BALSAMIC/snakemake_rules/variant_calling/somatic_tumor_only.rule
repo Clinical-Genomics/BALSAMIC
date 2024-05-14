@@ -4,7 +4,7 @@
 rule vardict_tumor_only:
     input:
         fa = config["reference"]["reference_genome"],
-        bamT = expand(bam_dir + "tumor.{sample}.dedup_sorted_addRG.bam", sample=tumor_sample),
+        bamT = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
         bed = vcf_dir + "split_bed/{bedchrom}." + capture_kit,
     output:
         temp(vcf_dir + "vardict/split_vcf/{bedchrom}_vardict.vcf.gz")
@@ -82,44 +82,3 @@ echo '{{ vcf: {{ vardict: {{ name: vardict , path: {output.vcf_vardict} }} }} }}
         """
 
 
-rule sentieon_TNhaplotyper_tumor_only:
-    input:
-        bam = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
-        ref = config["reference"]["reference_genome"],
-        dbsnp = config["reference"]["dbsnp"],
-        cosmic = config["reference"]["cosmic"],
-        interval = config["panel"]["capture_kit"],
-    output:
-        vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnhaplotyper.research.vcf.gz",
-        namemap = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnhaplotyper.sample_name_map",
-    benchmark:
-        Path(benchmark_dir,'sentieon_TNhaplotyper_tumor_only_' + config["analysis"]["case_id"] + ".tsv").as_posix()
-    params:
-        tumor = "TUMOR",
-        tmpdir= tempfile.mkdtemp(prefix=tmp_dir),
-        sentieon_exec = config["SENTIEON_EXEC"],
-        sentieon_lic = config["SENTIEON_LICENSE"],
-        case_name = config["analysis"]["case_id"]
-    threads:
-        get_threads(cluster_config, 'sentieon_TNhaplotyper_tumor_only')
-    message:
-        "Calling variants using TNhaplotyper for sample {params.case_name}"
-    shell:
-        """
-mkdir -p {params.tmpdir}; 
-export TMPDIR={params.tmpdir}; 
-export SENTIEON_TMPDIR={params.tmpdir};
-export SENTIEON_LICENSE={params.sentieon_lic};
-
-{params.sentieon_exec} driver \
--r {input.ref} \
--t {threads} \
--i {input.bam} \
---interval {input.interval} \
---algo TNhaplotyper \
---tumor_sample {params.tumor} \
---cosmic {input.cosmic} \
---dbsnp {input.dbsnp} {output.vcf};
- 
-echo -e \"{params.tumor}\\tTUMOR\" > {output.namemap};
-        """

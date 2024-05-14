@@ -3,8 +3,7 @@
 rule sentieon_align_sort_umireads:
     input:
         ref = config["reference"]["reference_genome"],
-        fastq_r1 = Path(fastq_dir, "{sample}_1.fp.fastq.gz").as_posix(),
-        fastq_r2 = Path(fastq_dir, "{sample}_2.fp.fastq.gz").as_posix(),
+        fastq_umi = temp(fastq_dir + "{sample}_umiextract_interleaved.fastq.gz")
         refidx = expand(config["reference"]["reference_genome"] + ".{prefix}", prefix=["amb","ann","bwt","pac","sa"])
     output:
         bam_out = Path(bam_dir, "{sample}_align_sort.bam").as_posix()
@@ -34,11 +33,92 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 -R '@RG\\tID:{params.sample_id}\\tSM:{params.sample_type}\\tLB:TargetPanel\\tPL:ILLUMINA' \
 -K {params.ip_bases} \
 -t {threads} -C \
-{input.ref} {input.fastq_r1} {input.fastq_r2} | \
+{input.ref} {input.fastq_umi} | \
 {params.sentieon_exec} util sort \
 -r {input.ref} \
 --sam2bam \
 -o {output.bam_out} -i - ;
         """
 
+rule sentieon_consensuscall_umi:
+    input:
+        bam_consensus = bam_dir + "{sample}_align_sort.bam"
+    output:
+        fastq_consensus = fastq_dir + "{sample}_consensuscall_umi.fastq.gz"
+    benchmark:
+        Path(benchmark_dir, "sentieon_consensuscall_umi_{sample}.tsv").as_posix()
+    params:
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
+        sentieon_install_dir = config["SENTIEON_INSTALL_DIR"],
+        sentieon_exec = config["SENTIEON_EXEC"],
+        sentieon_lic = config["SENTIEON_LICENSE"],
+        tag = params.umiconsensuscall.tag,
+        ip_format = params.umiconsensuscall.align_format,
+        sample_id = '{sample}'
+    threads:
+        get_threads(cluster_config, "sentieon_consensuscall_umi")
+    message:
+        "Calling consensus molecules using sentieon for {params.sample_id}"
+    shell:
+        """
+export LD_PRELOAD={params.sentieon_install_dir}/lib/libjemalloc.so.1
+export MALLOC_CONF=lg_dirty_mult:-1
 
+mkdir -p {params.tmpdir};
+export TMPDIR={params.tmpdir};
+export SENTIEON_TMPDIR={params.tmpdir};
+export SENTIEON_LICENSE={params.sentieon_lic};
+
+{params.sentieon_exec} umi consensus \
+-t {threads} \
+-i {input.bam_consensus} \
+-o {output.fastq_consensus} \
+--input_format {params.ip_format} \
+--umi_tag {params.tag} \
+--read_name_prefix 'UMI-'; 
+        """
+
+rule sentieon_bwa_umiconsensus:
+    input:
+        ref_fa = config["reference"]["reference_genome"],
+        fastq_r1 = fastq_dir + "{sample}_1.trimmed_consensuscall_umi.fastq.gz",
+        fastq_r2 = fastq_dir + "{sample}_2.trimmed_consensuscall_umi.fastq.gz"
+    output:
+        align_consensus = bam_dir + "{sample_type}.{sample}_consensuscalled_umi.bam"
+    benchmark:
+        Path(benchmark_dir, "sentieon_bwa_umiconsensus_{sample_type}_{sample}.tsv").as_posix()
+    params:
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
+        sentieon_install_dir = config["SENTIEON_INSTALL_DIR"],
+        sentieon_exec = config["SENTIEON_EXEC"],
+        sentieon_lic = config["SENTIEON_LICENSE"],
+        ip_bases = params.umicommon.align_intbases,
+        sample_id = "{sample}",
+        sample_type = lambda wildcards: config_model.get_sample_type_by_name(wildcards.sample,uppercase=True)
+    threads:
+        get_threads(cluster_config, "sentieon_bwa_umiconsensus")
+    message:
+         "Mapping consensus reads and sorting using sentieon bwa-mem for {params.sample_id}"
+    shell:
+        """
+export LD_PRELOAD={params.sentieon_install_dir}/lib/libjemalloc.so.1
+export MALLOC_CONF=lg_dirty_mult:-1
+
+mkdir -p {params.tmpdir};
+export TMPDIR={params.tmpdir};
+export SENTIEON_TMPDIR={params.tmpdir};
+export SENTIEON_LICENSE={params.sentieon_lic};
+
+{params.sentieon_exec} bwa mem \
+-R '@RG\\tID:{params.sample_id}\\tSM:{params.sample_type}\\tLB:TargetPanel\\tPL:ILLUMINA' \
+-t {threads} \
+-K {params.ip_bases} \
+-p -C {input.ref_fa} \
+{input.fastq_r1} {input.fastq_r2} | \
+{params.sentieon_exec} util sort \
+-r {input.ref_fa} \
+--sam2bam \
+--umi_post_process \
+-o {output.align_consensus} \
+-i - ;
+        """
