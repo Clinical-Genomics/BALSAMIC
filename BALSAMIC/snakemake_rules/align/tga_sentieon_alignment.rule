@@ -3,7 +3,7 @@
 rule sentieon_align_sort_umireads:
     input:
         ref = config["reference"]["reference_genome"],
-        fastq_umi = temp(fastq_dir + "{sample}_umiextract_interleaved.fastq.gz")
+        fastq_umi = temp(fastq_dir + "{sample}_umiextract_interleaved.fastq.gz"),
         refidx = expand(config["reference"]["reference_genome"] + ".{prefix}", prefix=["amb","ann","bwt","pac","sa"])
     output:
         bam_out = Path(bam_dir, "{sample}_align_sort.bam").as_posix()
