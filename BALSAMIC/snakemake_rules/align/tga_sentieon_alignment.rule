@@ -61,7 +61,6 @@ rule sentieon_consensuscall_umi:
         "Calling consensus molecules using sentieon for {params.sample_id}"
     shell:
         """
-export LD_PRELOAD={params.sentieon_install_dir}/lib/libjemalloc.so.1
 export MALLOC_CONF=lg_dirty_mult:-1
 
 mkdir -p {params.tmpdir};
@@ -101,7 +100,6 @@ rule sentieon_bwa_umiconsensus:
          "Mapping consensus reads and sorting using sentieon bwa-mem for {params.sample_id}"
     shell:
         """
-export LD_PRELOAD={params.sentieon_install_dir}/lib/libjemalloc.so.1
 export MALLOC_CONF=lg_dirty_mult:-1
 
 mkdir -p {params.tmpdir};
