@@ -239,7 +239,7 @@ try:
     if os.getenv("SENTIEON_EXEC") is not None:
         config["SENTIEON_EXEC"] = os.environ["SENTIEON_EXEC"]
     else:
-        config["SENTIEON_EXEC"] = "/home/proj/bin/sentieon/sentieon-genomics-202308.02/"
+        config["SENTIEON_EXEC"] = Path("/home/proj/bin/sentieon/sentieon-genomics-202308.02/", "bin", "sentieon").as_posix()
 
     config["SENTIEON_TNSCOPE"] = SENTIEON_TNSCOPE_DIR.as_posix()
     config["SENTIEON_DNASCOPE"] = SENTIEON_DNASCOPE_DIR.as_posix()
