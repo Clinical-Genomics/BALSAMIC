@@ -54,7 +54,7 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 -i {input.bam} \
 --algo LocusCollector \
 --umi_ecc_dist 0 \
---consensus --umi_tag RX --fun score_info \
+--consensus --umi_tag XR --fun score_info \
 {output.score};
 
 {params.sentieon_exec} driver \
@@ -96,9 +96,38 @@ samtools sort --threads {threads} -o {output.bam} {input.bam};
 samtools index -@ {threads} {output.bam};
         """
 
-rule cap_base_quality:
+rule picard_fix_mate:
     input:
         bam = Path(bam_dir,"{sample_type}.{sample}.dedup_sorted.bam").as_posix()
+    output:
+        postprocessed_bam = Path(bam_dir, "{sample_type}.{sample}.dedup_sorted_fixMate.bam").as_posix(),
+    benchmark:
+        Path(benchmark_dir,"postprocess_bam_{sample_type}.{sample}.tsv").as_posix()
+    singularity:
+        Path(singularity_image,config["bioinfo_tools"].get("picard") + ".sif").as_posix()
+    params:
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
+        sample_id = "{sample}",
+        picard_fixmateinfo = params.common.picard_fixmate,
+    threads:
+        get_threads(cluster_config, "postprocess_bam")
+    message:
+        "Collapse readgroups for sample: {params.sample_id}"
+    shell:
+        """
+export TMPDIR={params.tmpdir};
+
+picard -Xmx100g FixMateInformation {params.picard_fixmateinfo} \
+-TMP_DIR {params.tmpdir} \
+-INPUT {input.bam} \
+-OUTPUT {output.postprocessed_bam}
+
+rm -rf {params.tmpdir};
+        """
+
+rule cap_base_quality:
+    input:
+        bam = Path(bam_dir,"{sample_type}.{sample}.dedup_sorted_fixMate.bam").as_posix()
     output:
         bam = Path(bam_dir,"{sample_type}.{sample}.dedup_sorted_capped.bam").as_posix(),
     benchmark:
@@ -115,11 +144,12 @@ rule cap_base_quality:
     shell:
         """
 python {params.cap_base_qualities} --max_quality 70 {input.bam} {output.bam}
+samtools index -@ {threads} {output.bam}
         """
 
 rule postprocess_bam:
     input:
-        bam = Path(bam_dir,"{sample_type}.{sample}.dedup_sorted.bam").as_posix()
+        bam = Path(bam_dir,"{sample_type}.{sample}.dedup_sorted_capped.bam").as_posix()
     output:
         postprocessed_bam = Path(bam_dir, "{sample_type}.{sample}.dedup_sorted_addRG.bam").as_posix(),
     benchmark:
