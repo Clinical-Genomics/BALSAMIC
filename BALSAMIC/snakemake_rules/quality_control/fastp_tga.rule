@@ -38,10 +38,10 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 rule fastp_quality_trim_tga:
     """Fastq data pre-processing after extraction of UMIs."""
     input:
-        interleaved_fastq = fastq_dir + "{sample}_consensuscall_umi.fastq.gz"
+        interleaved_fastq = fastq_dir + "{sample}_umiextract_interleaved.fastq.gz"
     output:
-        fastq_r1 = fastq_dir + "{sample}_1.trimmed_consensuscall_umi.fastq.gz",
-        fastq_r2 = fastq_dir + "{sample}_2.trimmed_consensuscall_umi.fastq.gz",
+        fastq_r1 = fastq_dir + "{sample}_1.trimmed_umi_extracted.fastq.gz",
+        fastq_r2 = fastq_dir + "{sample}_2.trimmed_umi_extracted.fastq.gz",
         json = qc_dir + "fastp/{sample}_fastp.json",
         html = qc_dir + "fastp/{sample}_fastp.html"
     benchmark:
