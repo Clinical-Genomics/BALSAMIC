@@ -10,9 +10,9 @@
 
 rule cap_base_quality:
     input:
-        bam = Path(bam_dir,"{sample_type}.{sample}.dedup_sorted_fixMate.bam").as_posix()
+        bam = Path(bam_dir, "{sample_type}.{sample}.consensuscalled_umi.bam").as_posix()
     output:
-        bam = Path(bam_dir,"{sample_type}.{sample}.dedup_sorted_capped.bam").as_posix(),
+        bam = Path(bam_dir,"{sample_type}.{sample}.consensuscalled_umi_qualcapped.bam").as_posix(),
     benchmark:
         Path(benchmark_dir,"cap_base_quality_{sample_type}_{sample}.tsv").as_posix()
     singularity:
@@ -32,7 +32,7 @@ samtools index -@ {threads} {output.bam}
 
 rule postprocess_bam:
     input:
-        bam = Path(bam_dir,"{sample_type}.{sample}.dedup_sorted_capped.bam").as_posix()
+        bam = Path(bam_dir,"{sample_type}.{sample}.consensuscalled_umi_qualcapped.bam").as_posix()
     output:
         postprocessed_bam = Path(bam_dir, "{sample_type}.{sample}.dedup_sorted_addRG.bam").as_posix(),
     benchmark:
