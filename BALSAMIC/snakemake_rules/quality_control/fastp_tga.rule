@@ -4,27 +4,25 @@
 rule sentieon_umiextract_tga:
     """Extract UMIs into tags in read header."""
     input:
-        wake_up = result_dir + "start_analysis",
-        fastq_r1 = lambda wildcards: config_model.get_fastq_by_fastq_pattern(wildcards.fastq_pattern, FastqName.FWD),
-        fastq_r2 = lambda wildcards: config_model.get_fastq_by_fastq_pattern(wildcards.fastq_pattern, FastqName.REV)
+        fastq_fwd = fastq_dir + "concat.{sample}_1.pre_umi.fastq.gz",
+        fastq_rev = fastq_dir + "concat.{sample}_2.pre_umi.fastq.gz"
     output:
-        ds_umi = temp(fastq_dir + "{fastq_pattern}_umiextract_interleaved.fastq.gz")
+        ds_umi = fastq_dir + "{sample}_umiextract_interleaved.fastq.gz"
     benchmark:
-        Path(benchmark_dir, "sentieon_umiextract_tga_{fastq_pattern}.tsv").as_posix()
+        Path(benchmark_dir, "sentieon_umiextract_tga_{sample}.tsv").as_posix()
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         sentieon_install_dir = config["SENTIEON_INSTALL_DIR"],
         sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
         ds_params = params.umiextract.read_structure,
-        fastq_pattern = "{fastq_pattern}"
+        sample = "{sample}"
     threads:
         get_threads(cluster_config, "sentieon_umiextract")
     message:
-        "Extracing UMI tags using sentieon for {params.fastq_pattern}"
+        "Extracing UMI tags using sentieon for {params.sample}"
     shell:
         """
-export LD_PRELOAD={params.sentieon_install_dir}/lib/libjemalloc.so.1
 export MALLOC_CONF=lg_dirty_mult:-1
 
 mkdir -p {params.tmpdir};
@@ -33,32 +31,32 @@ export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
 
 {params.sentieon_exec} umi extract \
-{params.ds_params} {input.fastq_r1} {input.fastq_r2} | gzip > {output.ds_umi} ;
+{params.ds_params} {input.fastq_fwd} {input.fastq_rev} | gzip > {output.ds_umi} ;
         """
 
 
 rule fastp_quality_trim_tga:
     """Fastq data pre-processing after extraction of UMIs."""
     input:
-        interleaved_fastq = fastq_dir + "{fastq_pattern}_umiextract_interleaved.fastq.gz"
+        interleaved_fastq = fastq_dir + "{sample}_umiextract_interleaved.fastq.gz"
     output:
-        fastq_r1 = temp(fastq_dir + "{fastq_pattern}_1.fp.fastq.gz"),
-        fastq_r2 = temp(fastq_dir + "{fastq_pattern}_2.fp.fastq.gz"),
-        json = qc_dir + "fastp/{fastq_pattern}_fastp.json",
-        html = qc_dir + "fastp/{fastq_pattern}_fastp.html"
+        fastq_r1 = fastq_dir + "{sample}_1.trimmed_umi_extracted.fastq.gz",
+        fastq_r2 = fastq_dir + "{sample}_2.trimmed_umi_extracted.fastq.gz",
+        json = qc_dir + "fastp/{sample}_fastp.json",
+        html = qc_dir + "fastp/{sample}_fastp.html"
     benchmark:
-        Path(benchmark_dir, "fastp_quality_trim" + "{fastq_pattern}.tsv").as_posix()
+        Path(benchmark_dir, "fastp_quality_trim" + "{sample}.tsv").as_posix()
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("fastp") + ".sif").as_posix()
     params:
         tmpdir = tmp_dir,
         quality_trim = " ".join(fastp_parameters["fastp_trim_qual"]),
         adapter_trim = " ".join(fastp_parameters["fastp_trim_adapter"]),
-        fastq_pattern = "{fastq_pattern}"
+        sample = "{sample}"
     threads:
         get_threads(cluster_config, 'fastp_quality_trim')
     message:
-        "Quality and adapter trimming for fastqs for fastq pattern: {params.fastq_pattern}"
+        "Quality and adapter trimming for fastqs for fastq pattern: {params.sample}"
     shell:
         """
 export TMPDIR={params.tmpdir};

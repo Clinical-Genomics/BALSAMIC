@@ -1,0 +1,83 @@
+# vim: syntax=python tabstop=4 expandtab
+# coding: utf-8
+
+
+
+rule vardict_tumor_normal:
+    input:
+        fa = config["reference"]["reference_genome"],
+        bamN = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = normal_sample),
+        bamT = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
+        bed = vcf_dir + "split_bed/{bedchrom}." + capture_kit,
+    output:
+        temp(vcf_dir + "vardict/split_vcf/{bedchrom}_vardict.vcf.gz")
+    benchmark:
+        Path(benchmark_dir,'vardict_tumor_normal_' + "{bedchrom}.tsv").as_posix()
+    singularity:
+        Path(singularity_image, config["bioinfo_tools"].get("vardict") + ".sif").as_posix()
+    params:
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
+        af = params.vardict.allelic_frequency,
+        max_pval = params.vardict.max_pval,
+        max_mm = params.vardict.max_mm,
+        col_info = params.vardict.column_info,
+        case_name = config["analysis"]["case_id"],
+    threads:
+        get_threads(cluster_config, "vardict_tumor_normal")
+    message:
+        "Calling variants using vardict for {params.case_name}"
+    shell:
+        """
+mkdir -p {params.tmpdir};
+export TMPDIR={params.tmpdir};
+export VAR_DICT_OPTS='\"-Djava.io.tmpdir={params.tmpdir}\" \"-Xmx90G\"';
+
+vardict-java -I 600 -G {input.fa} -f {params.af} -N {params.case_name} \
+-b \"{input.bamT}|{input.bamN}\" \
+-th {threads} \
+{params.col_info} {input.bed} \
+| testsomatic.R \
+| var2vcf_paired.pl -P {params.max_pval} \
+-m {params.max_mm} -M -f {params.af} -N {params.case_name} \
+| bgzip > {output};
+
+tabix -p vcf {output};
+rm -rf {params.tmpdir};
+    """
+
+
+rule vardict_merge:
+    input:
+        expand(vcf_dir + "vardict/split_vcf/{chrom}_vardict.vcf.gz", chrom=chromlist)
+    output:
+        vcf_vardict = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.vcf.gz",
+        yaml = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.yaml",
+        namemap = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.sample_name_map"
+    params:
+        housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "research"},
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
+        case_name = config["analysis"]["case_id"],
+    benchmark:
+        Path(benchmark_dir,'vardict_merge_' + config["analysis"]["case_id"] + ".tsv").as_posix()
+    singularity:
+        Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
+    threads:
+        get_threads(cluster_config,"vardict_merge")
+    message:
+        ("Merging multiple VCFs from vardict into single VCF using bcftools for {params.case_name}")
+    shell:
+        """
+mkdir -p {params.tmpdir};
+
+bcftools concat {input} | bcftools sort --temp-dir {params.tmpdir} - | bgzip > {output.vcf_vardict}; 
+tabix -f -p vcf {output.vcf_vardict};
+
+echo -e \"{params.case_name}\\tTUMOR\\n{params.case_name}-match\\tNORMAL\" > {output.namemap}; 
+echo -e \"{params.case_name}\" > {output.namemap}.tumor;
+echo -e \"{params.case_name}-match\" > {output.namemap}.normal; 
+echo '{{ vcf: {{ vardict: {{ name: vardict, path: {output.vcf_vardict} }} }} }}' > {output.yaml};
+
+rm -rf {params.tmpdir};
+    """
+
+

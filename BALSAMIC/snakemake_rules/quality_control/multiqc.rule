@@ -3,7 +3,6 @@
 
 multiqc_input = [config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample)]
 
-multiqc_input.append(qc_dir + "tumor.{}.dedup.metrics".format(tumor_sample))
 multiqc_input.extend(expand(bam_dir + "{sample}.samtools.{stats}.txt",
     sample=sample_names, stats=['flagstats', 'idxstats', 'stats']))
 
@@ -17,7 +16,6 @@ if config['analysis']['analysis_type'] == "paired":
     multiqc_input.extend(expand(bam_dir + "normal.{sample}.cram", sample=normal_sample))
     multiqc_input.append(config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = normal_sample))
     multiqc_input.append(qc_dir + "somalier/somalier.pairs.tsv")
-    multiqc_input.append(qc_dir + "normal.{}.dedup.metrics".format(normal_sample))
 
 
 if config["analysis"]["sequencing_type"] == 'wgs':
@@ -55,10 +53,8 @@ if config["analysis"]["sequencing_type"] == 'wgs':
 
 else:
     # fastp metrics
-    multiqc_input.extend(expand(qc_dir + "fastp/{fastq_pattern}_fastp.json",
-        fastq_pattern=config_model.get_fastq_patterns_by_sample(sample_names = sample_names)))
-    multiqc_input.extend(expand(qc_dir + "fastp/{fastq_pattern}_fastp.html",
-        fastq_pattern=config_model.get_fastq_patterns_by_sample(sample_names = sample_names)))
+    multiqc_input.extend(expand(qc_dir + "fastp/{sample}_fastp.json", sample=sample_names))
+    multiqc_input.extend(expand(qc_dir + "fastp/{sample}_fastp.html", sample=sample_names))
 
     # picard metrics
     multiqc_input.extend(expand(bam_dir + "{sample}.dedup.insertsizemetric.txt", sample=tumor_sample))
