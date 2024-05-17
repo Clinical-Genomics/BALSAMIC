@@ -154,6 +154,7 @@ class TGAParamsTNscope(BaseModel):
     prunefactor: int
     padding: int
     pcr_model: str
+
 class BalsamicWorkflowConfig(BaseModel):
     """Defines set of rules in balsamic workflow
 
@@ -179,7 +180,7 @@ class BalsamicWorkflowConfig(BaseModel):
     umiextract: UMIParamsUMIextract
     umiconsensuscall: UMIParamsConsensuscall
     tnscope_umi: UMIParamsTNscope
-    tnscope_tga:
+    tnscope_tga: TGAParamsTNscope
 
     def get_manta_settings(self, sequencing_type) -> str:
         """Return correct setting for manta rules depending on sequencing type."""
