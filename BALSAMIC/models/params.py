@@ -78,14 +78,10 @@ class UMIParamsCommon(BaseModel):
     """This class defines the common params settings used as constants across various rules in UMI workflow.
 
     Attributes:
-        align_format: str (required); output alignment format. eg. 'BAM'
         align_intbases: int; input bases in each batch regardless of threads, for reproducibility
-        filter_tumor_af: float (required); settings to filter minimum allelic frequency
     """
 
     align_intbases: int
-    filter_tumor_af: float
-
 
 class UMIParamsUMIextract(BaseModel):
     """This class defines the params settings used as constants in UMI workflow-rule umextract.
@@ -112,7 +108,7 @@ class UMIParamsConsensuscall(BaseModel):
 
 
 class UMIParamsTNscope(BaseModel):
-    """This class defines the params settings used as constants in UMI workflow- rule tnscope.
+    """This class defines the params settings used as constants in UMI workflow-rule tnscope.
 
     Attributes:
         algo: str; choice of sentieon varcall algorithm. eg. 'TNscope'
@@ -123,17 +119,41 @@ class UMIParamsTNscope(BaseModel):
         error_rate: int (required); allow error-rate to consider in calling
         prunefactor: int (required); pruning factor in the kmer graph
         padding: int(required); amount to pad bed interval regions
+        pcr_model: str (required). PCR indel model used to weed out false positive indels. Eg: none- PCR free samples.
     """
 
     algo: str
+    filter_tumor_af: float
     init_tumorLOD: float
     min_tumorLOD: int
     error_rate: int
     prunefactor: int
     padding: int
     disable_detect: str
+    pcr_model: str
 
+class TGAParamsTNscope(BaseModel):
+    """This class defines the params settings used as constants in TGA workflow-rule tnscope.
 
+    Attributes:
+        algo: str; choice of sentieon varcall algorithm. eg. 'TNscope'
+        filter_tumor_af: float (required); minimum allelic frequency to detect
+        min_tumorLOD: int (required); minimum tumor log odds in the final call of variants
+        init_tumorLOD: float (required); minimum tumor log odds in the initial pass calling variants
+        error_rate: int (required); allow error-rate to consider in calling
+        prunefactor: int (required); pruning factor in the kmer graph
+        padding: int(required); amount to pad bed interval regions
+        pcr_model: str (required). PCR indel model used to weed out false positive indels. Eg: none- PCR free samples.
+    """
+
+    algo: str
+    filter_tumor_af: float
+    init_tumorLOD: float
+    min_tumorLOD: int
+    error_rate: int
+    prunefactor: int
+    padding: int
+    pcr_model: str
 class BalsamicWorkflowConfig(BaseModel):
     """Defines set of rules in balsamic workflow
 
@@ -159,6 +179,7 @@ class BalsamicWorkflowConfig(BaseModel):
     umiextract: UMIParamsUMIextract
     umiconsensuscall: UMIParamsConsensuscall
     tnscope_umi: UMIParamsTNscope
+    tnscope_tga:
 
     def get_manta_settings(self, sequencing_type) -> str:
         """Return correct setting for manta rules depending on sequencing type."""

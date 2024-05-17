@@ -148,8 +148,7 @@ WORKFLOW_PARAMS = {
         "vep_filters": "--compress_output bgzip --vcf --everything --hgvsg --allow_non_variant --dont_skip --buffer_size 30000 --max_sv_size 249250621 --format vcf --offline --variant_class --merged --cache --verbose --force_overwrite"
     },
     "umicommon": {
-        "align_intbases": 1000000,
-        "filter_tumor_af": 0.0005,
+        "align_intbases": 1000000
     },
     "umiconsensuscall": {
         "align_format": "BAM",
@@ -159,6 +158,8 @@ WORKFLOW_PARAMS = {
     "umiextract": {"read_structure": "-d '3M2S+T,3M2S+T'"},
     "tnscope_umi": {
         "algo": "TNscope",
+        "filter_tumor_af": 0.0005,
+        "pcr_model": "NONE",
         "min_tumorLOD": 4,
         "init_tumorLOD": 0.5,
         "error_rate": 5,
@@ -167,9 +168,9 @@ WORKFLOW_PARAMS = {
         "disable_detect": "sv",
     },
     "tnscope_tga": {
+        "algo": "TNscope",
         "filter_tumor_af": 0.0005,
         "pcr_model": "NONE",
-        "algo": "TNscope",
         "min_tumorLOD": 4,
         "init_tumorLOD": 0.5,
         "error_rate": 5,

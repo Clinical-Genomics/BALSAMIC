@@ -4,7 +4,7 @@
 # Variant-calling using TNscope
 
 
-rule sentieon_tnscope_tn:
+rule sentieon_tnscope_tga_tumor_normal:
     input:
         bamN = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = normal_sample),
         bamT = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),

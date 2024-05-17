@@ -5,7 +5,7 @@
 
 
 
-rule sentieon_tnscope:
+rule sentieon_tnscope_tga_tumor_only:
     input:
         bam = config_model.get_final_bam_name(bam_dir=bam_dir,sample_name=tumor_sample),
         ref_fa = config["reference"]["reference_genome"],

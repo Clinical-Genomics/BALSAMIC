@@ -21,7 +21,7 @@ rule sentieon_tnscope_umi:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
-        tumor_af = params.umicommon.filter_tumor_af,
+        tumor_af = params.tnscope_umi.filter_tumor_af,
         algo = params.tnscope_umi.algo,
         disable_detect = params.tnscope_umi.disable_detect,
         tumor_lod = params.tnscope_umi.min_tumorLOD,
@@ -30,7 +30,7 @@ rule sentieon_tnscope_umi:
         prune_factor = params.tnscope_umi.prunefactor,
         padding = params.tnscope_umi.padding,
         tumor = "TUMOR",
-        pcr_model = params.common.pcr_model
+        pcr_model = params.tnscope_umi.pcr_model
     threads:
         get_threads(cluster_config, "sentieon_tnscope_umi")
     message:

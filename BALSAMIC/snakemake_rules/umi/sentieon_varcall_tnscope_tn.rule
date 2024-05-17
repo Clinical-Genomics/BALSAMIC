@@ -28,7 +28,7 @@ rule sentieon_tnscope_umi_tn:
         init_tumor_lod = params.tnscope_umi.init_tumorLOD,
         error_rate = params.tnscope_umi.error_rate,
         prune_factor = params.tnscope_umi.prunefactor,
-        pcr_model = params.common.pcr_model,
+        pcr_model = params.tnscope_umi.pcr_model,
         padding = params.tnscope_umi.padding,
         tumor = "TUMOR",
         normal = "NORMAL",
