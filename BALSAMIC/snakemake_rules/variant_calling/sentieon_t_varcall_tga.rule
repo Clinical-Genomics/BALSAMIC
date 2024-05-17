@@ -58,7 +58,7 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 --max_error_per_read {params.error_rate} \
 --pcr_indel_model {params.pcr_model} \
 --prune_factor {params.prune_factor} \
-{output.vcf_tnscope_umi};
+{output.vcf_tnscope};
 
 echo -e \"{params.tumor}\\tTUMOR\" > {output.namemap}; 
         """
