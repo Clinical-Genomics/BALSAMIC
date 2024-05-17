@@ -4,7 +4,7 @@
 # Variant-calling using TNscope
 
 
-rule sentieon_tnscope_umi_tn:
+rule sentieon_tnscope_tn:
     input:
         bamN = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = normal_sample),
         bamT = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
@@ -12,8 +12,9 @@ rule sentieon_tnscope_umi_tn:
         bed = config["panel"]["capture_kit"],
         dbsnp = config["reference"]["dbsnp"]
     output:
-        vcf_tnscope_umi = vcf_dir +  "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope_umi.vcf.gz",
-        namemap = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope_umi.sample_name_map"
+        vcf_tnscope = vcf_dir + "sentieon_tnscope" + "/" + "ALL.somatic." + config["analysis"]["case_id"] + ".tnscope.vcf.gz",
+        namemap_snv = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.sample_name_map",
+        namemap_sv = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".tnscope.sample_name_map",
     benchmark:
         Path(benchmark_dir, "sentieon_tnscope_umi_" + config["analysis"]["case_id"] + ".tsv").as_posix()
     params:
@@ -21,15 +22,14 @@ rule sentieon_tnscope_umi_tn:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
-        tumor_af = params.umicommon.filter_tumor_af,
-        algo = params.tnscope_umi.algo,
-        disable_detect = params.tnscope_umi.disable_detect,
-        tumor_lod = params.tnscope_umi.min_tumorLOD,
-        init_tumor_lod = params.tnscope_umi.init_tumorLOD,
-        error_rate = params.tnscope_umi.error_rate,
-        prune_factor = params.tnscope_umi.prunefactor,
-        pcr_model = params.common.pcr_model,
-        padding = params.tnscope_umi.padding,
+        tumor_af = params.tnscope_tga.filter_tumor_af,
+        algo = params.tnscope_tga.algo,
+        tumor_lod = params.tnscope_tga.min_tumorLOD,
+        init_tumor_lod = params.tnscope_tga.init_tumorLOD,
+        error_rate = params.tnscope_tga.error_rate,
+        prune_factor = params.tnscope_tga.prunefactor,
+        pcr_model = params.tnscope_tga.pcr_model,
+        padding = params.tnscope_tga.padding,
         tumor = "TUMOR",
         normal = "NORMAL",
         case_name= config["analysis"]["case_id"]
@@ -59,7 +59,6 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 --filter_t_alt_frac {params.tumor_af} \
 --min_init_tumor_lod {params.init_tumor_lod} \
 --min_tumor_lod {params.tumor_lod} \
---disable_detector {params.disable_detect} \
 --max_error_per_read {params.error_rate} \
 --pcr_indel_model {params.pcr_model} \
 --prune_factor {params.prune_factor} \

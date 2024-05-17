@@ -40,7 +40,7 @@ SNV_BCFTOOLS_SETTINGS_TGA = {
         "filter_name": "balsamic_umi_high_pop_freq",
         "field": "INFO",
     },
-    "AF_min": {"tag_value": 0.007, "filter_name": "balsamic_low_af", "field": "INFO"},
+    "AF_min": {"tag_value": 0.005, "filter_name": "balsamic_low_af", "field": "INFO"},
     "AD": {"tag_value": 5, "filter_name": "balsamic_low_tumor_ad", "field": "INFO"},
 }
 
@@ -48,7 +48,7 @@ SNV_BCFTOOLS_SETTINGS_TGA = {
 SNV_BCFTOOLS_SETTINGS_PANEL = {
     **SNV_BCFTOOLS_SETTINGS_TGA,
     "DP": {
-        "tag_value": 100,
+        "tag_value": 50,
         "filter_name": "balsamic_low_tumor_dp",
         "field": "INFO",
     },

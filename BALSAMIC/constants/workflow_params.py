@@ -166,4 +166,14 @@ WORKFLOW_PARAMS = {
         "padding": 100,
         "disable_detect": "sv",
     },
+    "tnscope_tga": {
+        "filter_tumor_af": 0.0005,
+        "pcr_model": "NONE",
+        "algo": "TNscope",
+        "min_tumorLOD": 4,
+        "init_tumorLOD": 0.5,
+        "error_rate": 5,
+        "prunefactor": 3,
+        "padding": 100,
+    },
 }
