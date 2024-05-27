@@ -43,7 +43,7 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 
 rule sentieon_consensuscall_umi:
     input:
-        bam_consensus = bam_dir + "{sample_type}.{sample}_align_sort.bam"
+        bam_consensus = bam_dir + "{sample_type}.{sample}.align_sort.bam"
     output:
         fastq_consensus = fastq_dir + "{sample_type}.{sample}_consensuscall_umi.fastq.gz"
     benchmark:
