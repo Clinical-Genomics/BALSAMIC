@@ -65,8 +65,11 @@ else:
         sample=sample_names,stats=['flagstats', 'idxstats', 'stats']))
 
     # fastp metrics
-    multiqc_input.extend(expand(qc_dir + "fastp/{sample}_fastp.json", sample=sample_names))
-    multiqc_input.extend(expand(qc_dir + "fastp/{sample}_fastp.html", sample=sample_names))
+    multiqc_input.extend(expand(qc_dir + "fastp/tumor.{sample}_fastp.json", sample=tumor_sample))
+    multiqc_input.extend(expand(qc_dir + "fastp/tumor.{sample}_fastp.html", sample=tumor_sample))
+    if config['analysis']['analysis_type'] == "paired":
+        multiqc_input.extend(expand(qc_dir + "fastp/normal.{sample}_fastp.json",sample=normal_sample))
+        multiqc_input.extend(expand(qc_dir + "fastp/normal.{sample}_fastp.html",sample=normal_sample))
 
     # picard metrics
     multiqc_input.extend(expand(bam_dir + "{sample}.insertsizemetric.txt", sample=tumor_sample))
