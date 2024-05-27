@@ -52,10 +52,10 @@ METRIC_ACCUMULATION_LEVEL=ALL_READS;
 
 rule picard_CollectAlignmentSummaryMetrics:
     input:
-        bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample),
+        bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample, specified_suffix="align_sort"),
         fa = config["reference"]["reference_genome"]
     output:
-        bam_dir + "{sample}.dedup.alignmetric.txt"
+        bam_dir + "{sample}.alignmetric.txt"
     benchmark:
         Path(benchmark_dir, "CollectAlignmentSummaryMetrics_{sample}.tsv").as_posix()
     singularity:
@@ -86,10 +86,10 @@ METRIC_ACCUMULATION_LEVEL=LIBRARY;
 
 rule picard_CollectInsertSizeMetrics:
     input:
-        bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample),
+        bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample, specified_suffix="align_sort")
     output:
-        pdf = bam_dir + "{sample}.dedup.insertsizemetric.pdf",
-        txt = bam_dir + "{sample}.dedup.insertsizemetric.txt"
+        pdf = bam_dir + "{sample}.insertsizemetric.pdf",
+        txt = bam_dir + "{sample}.insertsizemetric.txt"
     benchmark:
         Path(benchmark_dir, "picard_CollectInsertSizeMetrics_{sample}.tsv").as_posix()
     singularity:

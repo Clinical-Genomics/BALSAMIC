@@ -3,6 +3,7 @@
 
 multiqc_input = [config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample)]
 
+# Samtools stats
 multiqc_input.extend(expand(bam_dir + "{sample}.samtools.{stats}.txt",
     sample=sample_names, stats=['flagstats', 'idxstats', 'stats']))
 
@@ -52,16 +53,20 @@ if config["analysis"]["sequencing_type"] == 'wgs':
             multiqc_input.append(bam_dir + "normal.recal_data.table")
 
 else:
+    # Samtools stats for post-UMI collapse
+    multiqc_input.extend(expand(bam_dir + "{sample}_umi_dedup.samtools.{stats}.txt",
+        sample=sample_names,stats=['flagstats', 'idxstats', 'stats']))
+
     # fastp metrics
     multiqc_input.extend(expand(qc_dir + "fastp/{sample}_fastp.json", sample=sample_names))
     multiqc_input.extend(expand(qc_dir + "fastp/{sample}_fastp.html", sample=sample_names))
 
     # picard metrics
-    multiqc_input.extend(expand(bam_dir + "{sample}.dedup.insertsizemetric.txt", sample=tumor_sample))
-    multiqc_input.extend(expand(bam_dir + "{sample}.dedup.alignmetric.txt", sample=tumor_sample))
+    multiqc_input.extend(expand(bam_dir + "{sample}.insertsizemetric.txt", sample=tumor_sample))
+    multiqc_input.extend(expand(bam_dir + "{sample}.alignmetric.txt", sample=tumor_sample))
     if config['analysis']['analysis_type'] == "paired":
-        multiqc_input.extend(expand(bam_dir + "{sample}.dedup.insertsizemetric.txt", sample=normal_sample))
-        multiqc_input.extend(expand(bam_dir + "{sample}.dedup.alignmetric.txt", sample=normal_sample))
+        multiqc_input.extend(expand(bam_dir + "{sample}.insertsizemetric.txt", sample=normal_sample))
+        multiqc_input.extend(expand(bam_dir + "{sample}.alignmetric.txt", sample=normal_sample))
 
     multiqc_input.extend(expand(bam_dir + "{sample}.dedup.hsmetric.txt", sample=sample_names))
 

@@ -35,7 +35,6 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
             "snakemake_rules/quality_control/fastqc.rule",
             "snakemake_rules/quality_control/multiqc.rule",
             "snakemake_rules/quality_control/qc_metrics.rule",
-            "snakemake_rules/quality_control/samtools_qc.rule",
         ],
         "report": [
             "snakemake_rules/report/generate_pdf.rule",
@@ -68,6 +67,7 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
             "snakemake_rules/umi/qc_umi.rule",
             "snakemake_rules/umi/mergetype_tumor_umi.rule",
             "snakemake_rules/umi/generate_AF_tables.rule",
+            "snakemake_rules/quality_control/samtools_qc_tga.rule",
         ],
         "align": [
             "snakemake_rules/align/tga_sentieon_alignment.rule",
@@ -102,6 +102,7 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
             "snakemake_rules/umi/mergetype_normal_umi.rule",
             "snakemake_rules/quality_control/contest.rule",
             "snakemake_rules/umi/generate_AF_tables.rule",
+            "snakemake_rules/quality_control/samtools_qc_tga.rule",
         ],
         "align": [
             "snakemake_rules/align/tga_sentieon_alignment.rule",
@@ -130,6 +131,7 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
             "snakemake_rules/quality_control/fastp_wgs.rule",
             "snakemake_rules/quality_control/sentieon_qc_metrics.rule",
             "snakemake_rules/quality_control/picard_wgs.rule",
+            "snakemake_rules/quality_control/samtools_qc_wgs.rule",
         ],
         "align": [
             "snakemake_rules/align/wgs_sentieon_bam_postprocess.rule",
@@ -153,6 +155,7 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
             "snakemake_rules/quality_control/sentieon_qc_metrics.rule",
             "snakemake_rules/quality_control/picard_wgs.rule",
             "snakemake_rules/quality_control/somalier.rule",
+            "snakemake_rules/quality_control/samtools_qc_wgs.rule",
         ],
         "align": [
             "snakemake_rules/align/wgs_sentieon_bam_postprocess.rule",
