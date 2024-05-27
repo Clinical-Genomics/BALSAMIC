@@ -3,7 +3,7 @@
 
 
 
-rule manta_germline:
+rule manta_germline_wgs:
     input:
         fa = config["reference"]["reference_genome"],
         bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_type = wildcards.sample_type),

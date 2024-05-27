@@ -379,8 +379,7 @@ class ConfigModel(BaseModel):
         return bam_names
 
     def get_final_bam_name(
-        self, bam_dir: str, sample_name: str = None, sample_type: str = None
-    ) -> str:
+        self, bam_dir: str, sample_name: str = None, sample_type: str = None, specified_output: str = None) -> str:
         """Return final bam name to be used in downstream analysis."""
 
         if not sample_name and not sample_type:
@@ -404,9 +403,12 @@ class ConfigModel(BaseModel):
             # Only dedup is necessary for panel of normals
             final_bam_suffix = "dedup"
         elif self.analysis.sequencing_type == SequencingType.TARGETED:
-            # Only dedup is necessary for TGA
+            # TGA uses UMIs
             final_bam_suffix = "consensuscalled_umi"
 
+            if specified_output == "quality_capped":
+                # If quality cap is specified add this to final bam suffix
+                final_bam_suffix += "_qualcapped"
         else:
             # For WGS the bamfiles are realigned
             final_bam_suffix = "dedup.realign"
