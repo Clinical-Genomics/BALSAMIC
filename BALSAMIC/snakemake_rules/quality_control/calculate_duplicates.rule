@@ -29,7 +29,7 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 -i {input.bam} \
 --algo LocusCollector \
 --fun score_info \
-{output.score};
+{params.tmpdir}/tmp_{params.sample_id}_dedup.score ;
 
 {params.sentieon_exec} driver \
 -t {threads} \
