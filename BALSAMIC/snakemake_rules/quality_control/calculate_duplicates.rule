@@ -35,7 +35,7 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 -t {threads} \
 -i {input.bam} \
 --algo Dedup \
---score_info {output.score} \
+--score_info {params.tmpdir}/tmp_{params.sample_id}_dedup.score \
 --metrics {output.metrics} \
 {params.tmpdir}/tmp_{params.sample_id}_dedup.bam ;
 
