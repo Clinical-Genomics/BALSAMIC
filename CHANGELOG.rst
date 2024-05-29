@@ -5,10 +5,15 @@ Changed:
 ^^^^^^^^
 * Cluster scheduler script for immediate submit https://github.com/Clinical-Genomics/BALSAMIC/pull/1372
 * `SLEEP_BEFORE_START` to 600s https://github.com/Clinical-Genomics/BALSAMIC/pull/1372
+* updated multiqc to latest version https://github.com/Clinical-Genomics/BALSAMIC/pull/1441
 
 Removed:
 ^^^^^^^^
 * SGE (qsub) support https://github.com/Clinical-Genomics/BALSAMIC/pull/1372
+
+Fixed:
+^^^^^^
+* corrected tool name in deduplication metrics https://github.com/Clinical-Genomics/BALSAMIC/pull/1441
 
 [15.0.0]
 --------
