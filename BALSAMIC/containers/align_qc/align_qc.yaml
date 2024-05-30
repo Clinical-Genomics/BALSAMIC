@@ -122,7 +122,6 @@ dependencies:
   - markdown=3.4.1
   - markupsafe=2.1.1
   - matplotlib-base=3.6.2
-  - multiqc=1.22.1
   - munkres=1.1.4
   - ncurses=6.4
   - networkx=2.8.4
