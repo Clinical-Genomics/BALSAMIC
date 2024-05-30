@@ -41,7 +41,7 @@ class CacheVersion(StrEnum):
 class DockerContainers(StrEnum):
     """Docker containers names."""
 
-    ALIGN_QC: str = "align_qc_multiqcPR"
+    ALIGN_QC: str = "align_qc"
     ANNOTATE: str = "annotate"
     ASCAT: str = "ascatNgs"
     CADD: str = "cadd"
