@@ -4,7 +4,8 @@
 
 Removed:
 ^^^^^^^^
-* GATK3 https://github.com/Clinical-Genomics/BALSAMIC/pull/
+* GATK3 https://github.com/Clinical-Genomics/BALSAMIC/pull/1432
+* `gatk_contest` rule https://github.com/Clinical-Genomics/BALSAMIC/pull/1432
 
 
 [15.0.0]
