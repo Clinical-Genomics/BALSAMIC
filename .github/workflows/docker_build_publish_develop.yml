@@ -1,8 +1,8 @@
 name: Docker develop containers
 on:
   push:
-    branches:
-      - "develop"
+#    branches:
+#      - "develop"
   pull_request:
     branches-ignore:
       - "master"
