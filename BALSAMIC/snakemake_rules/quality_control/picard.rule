@@ -15,7 +15,7 @@ rule picard_CollectHsMetrics:
     output:
         hs_metrics = bam_dir + "{sample_type}.{sample}.hsmetric.txt"
     benchmark:
-        Path(benchmark_dir + "picard_CollectHsMetrics_{sample}.tsv").as_posix()
+        Path(benchmark_dir + "picard_CollectHsMetrics_{sample_type}_{sample}.tsv").as_posix()
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("picard") + ".sif").as_posix()
     params:
