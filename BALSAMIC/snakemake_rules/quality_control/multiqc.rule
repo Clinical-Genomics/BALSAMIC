@@ -1,13 +1,14 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
 
-# fastqc metrics
-multiqc_input.extend(expand(fastqc_dir + "{fastq_file_names}_fastqc.zip", fastq_file_names=config_model.get_all_fastq_names(remove_suffix = True)))
 
 # get bamfile
 multiqc_input = [config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample)]
 if config['analysis']['analysis_type'] == "paired":
     multiqc_input.append(config_model.get_final_bam_name(bam_dir=bam_dir,sample_name= normal_sample))
+
+# fastqc metrics
+multiqc_input.extend(expand(fastqc_dir + "{fastq_file_names}_fastqc.zip", fastq_file_names=config_model.get_all_fastq_names(remove_suffix = True)))
 
 # get cramfile
 multiqc_input.extend(expand(bam_dir + "tumor.{sample}.cram", sample=tumor_sample))
