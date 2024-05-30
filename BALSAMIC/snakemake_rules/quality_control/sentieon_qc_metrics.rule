@@ -55,3 +55,34 @@ gzip -c {output.coverage_metrics}_tmp > {output.coverage_metrics} ;
 rm {output.coverage_metrics}_tmp ;
 rm -rf {params.tmpdir} ;
         """
+
+rule sentieon_plot_qc_metrics_tga:
+    input:
+        insert_size_metrics = Path(qc_dir,"{sample_type}.{sample}.insert_size_metric.txt").as_posix(),
+        gc_bias_metrics = Path(qc_dir,"{sample_type}.{sample}.gc_bias.txt").as_posix(),
+        quality_by_cycle_metric = Path(qc_dir,"{sample_type}.{sample}.quality_by_cycle_metrics.txt").as_posix(),
+        quality_distribution_metric= Path(qc_dir,"{sample_type}.{sample}.quality_distribution_metrics.txt").as_posix()
+    output:
+        insert_size_pdf =  Path(qc_dir,"{sample_type}.{sample}.insert_size_metric.pdf").as_posix(),
+        gc_bias_pdf = Path(qc_dir,"{sample_type}.{sample}.gc_bias.pdf").as_posix(),
+        quality_by_cycle_pdf = Path(qc_dir,"{sample_type}.{sample}.quality_by_cycle_metrics.pdf").as_posix(),
+        quality_distribution_pdf = Path(qc_dir,"{sample_type}.{sample}.quality_distribution_metrics.pdf").as_posix(),
+    benchmark:
+        Path(benchmark_dir, "sentieon_dedup_{sample_type}.{sample}.tsv").as_posix()
+    params:
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
+        sentieon_exec = config["SENTIEON_EXEC"],
+        sentieon_lic = config["SENTIEON_LICENSE"],
+        sample_id = "{sample}",
+    threads:
+        get_threads(cluster_config,'sentieon_dedup')
+    message:
+        ("Creates plots from various QC metrics by Sentieon mimicking Picard tools"
+        "Current sample: {params.sample_id}")
+    shell:
+        """
+{params.sentieon_exec} plot InsertSizeMetricAlgo {input.insert_size_metrics} {output.insert_size_pdf} ; 
+{params.sentieon_exec} plot GCBias {input.qc_bias_metrics} {output.gc_bias_pdf} ; 
+{params.sentieon_exec} plot MeanQualityByCycle {input.quality_by_cycle_metric} {output.quality_by_cycle_pdf} ; 
+{params.sentieon_exec} plot QualDistribution {input.quality_distribution_metric} {output.quality_distribution_pdf} ; 
+        """
