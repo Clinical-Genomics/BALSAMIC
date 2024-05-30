@@ -9,7 +9,7 @@ CONTAINERS_DIR: Path = Path(BALSAMIC_DIR, "containers")
 ASSETS_DIR: Path = Path(BALSAMIC_DIR, "assets")
 SCRIPT_DIR: Path = Path(ASSETS_DIR, "scripts")
 REFSEQ_SCRIPT_PATH: Path = Path(SCRIPT_DIR, "refseq_sql.awk")
-SCHEDULER_PATH: Path = Path(BALSAMIC_DIR, "utils", "scheduler.py")
+IMMEDIATE_SUBMIT_PATH: Path = Path(SCRIPT_DIR, "immediate_submit.py")
 
 # Sentieon specific constants
 SENTIEON_MODELS_DIR: Path = Path(BALSAMIC_DIR, "assets", "sentieon_models")
