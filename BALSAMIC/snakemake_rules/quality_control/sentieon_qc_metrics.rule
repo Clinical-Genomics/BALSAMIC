@@ -56,7 +56,7 @@ rm {output.coverage_metrics}_tmp ;
 rm -rf {params.tmpdir} ;
         """
 
-rule sentieon_plot_qc_metrics_tga:
+rule sentieon_plot_qc_metrics:
     input:
         insert_size_metrics = Path(qc_dir,"{sample_type}.{sample}.insert_size_metrics.txt").as_posix(),
         gc_bias_metrics = Path(qc_dir,"{sample_type}.{sample}.gc_bias.txt").as_posix(),
@@ -82,7 +82,7 @@ rule sentieon_plot_qc_metrics_tga:
     shell:
         """
 {params.sentieon_exec} plot InsertSizeMetricAlgo {input.insert_size_metrics} {output.insert_size_pdf} ; 
-{params.sentieon_exec} plot GCBias {input.qc_bias_metrics} {output.gc_bias_pdf} ; 
+{params.sentieon_exec} plot GCBias {input.gc_bias_metrics} {output.gc_bias_pdf} ; 
 {params.sentieon_exec} plot MeanQualityByCycle {input.quality_by_cycle_metrics} {output.quality_by_cycle_pdf} ; 
 {params.sentieon_exec} plot QualDistribution {input.quality_distribution_metrics} {output.quality_distribution_pdf} ; 
         """
