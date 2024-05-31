@@ -4,13 +4,16 @@ from pathlib import Path
 from typing import Dict, List
 
 import pytest
+from _pytest.logging import LogCaptureFixture
 from pydantic import ValidationError
 
 from BALSAMIC.constants.analysis import FastqName, SampleType, SequencingType
 from BALSAMIC.models.config import AnalysisModel, ConfigModel, SampleInstanceModel
 
 
-def test_analysis_model(test_data_dir: Path, timestamp_now: datetime):
+def test_analysis_model(
+    test_data_dir: Path, timestamp_now: datetime, caplog: LogCaptureFixture
+):
     """Test analysis model instantiation."""
 
     # GIVEN valid input arguments
@@ -31,21 +34,18 @@ def test_analysis_model(test_data_dir: Path, timestamp_now: datetime):
     }
 
     # THEN we can successfully create a config dict
-    assert AnalysisModel.model_validate(valid_args)
+    analysis_model: AnalysisModel = AnalysisModel.model_validate(valid_args)
+    assert analysis_model
+    assert analysis_model.script == test_data_dir.as_posix()
 
-    # GIVEN invalid input arguments
-    invalid_args = {
-        "case_id": "case_id",
-        "gender": "unknown",
-        "analysis_type": "odd",
-        "sequencing_type": "wrong",
-        "analysis_dir": "tests/test_data",
-        "analysis_workflow": "umi",
-    }
+    # GIVEN invalid input arguments for the log directory
+    valid_args["log"] = "/not/a/directory"
 
     # THEN should trigger ValueError
     with pytest.raises(ValueError):
-        AnalysisModel.model_validate(invalid_args)
+        AnalysisModel.model_validate(valid_args)
+
+    assert "The supplied directory path /not/a/directory does not exist" in caplog.text
 
 
 def test_sample_instance_model(config_dict_w_fastqs: Dict):
