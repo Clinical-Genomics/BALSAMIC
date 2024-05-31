@@ -8,7 +8,7 @@ rule sentieon_dedup:
         score = Path(bam_dir, "{sample_type}.{sample}.dedup.score").as_posix(),
         metrics = Path(qc_dir, "{sample_type}.{sample}.dedup.metrics").as_posix(),
         alignment_metrics = Path(qc_dir,"{sample_type}.{sample}.alignment_summary_metrics.txt").as_posix(),
-        insert_size_metrics = Path(qc_dir,"{sample_type}.{sample}.insert_size_metric.txt").as_posix(),
+        insert_size_metrics = Path(qc_dir,"{sample_type}.{sample}.insert_size_metrics.txt").as_posix(),
         gc_bias_metrics = Path(qc_dir,"{sample_type}.{sample}.gc_bias.txt").as_posix(),
         gc_bias_summary = Path(qc_dir,"{sample_type}.{sample}.gc_bias_summary.txt").as_posix(),
         quality_by_cycle_metric = Path(qc_dir,"{sample_type}.{sample}.quality_by_cycle_metrics.txt").as_posix(),

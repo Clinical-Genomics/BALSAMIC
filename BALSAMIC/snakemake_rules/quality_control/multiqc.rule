@@ -30,7 +30,7 @@ qc_metrics_wildcards = ["alignment_summary_metrics.txt", "base_distribution_by_c
                         "insert_size_metrics.pdf", "insert_size_metrics.txt",
                         "quality_by_cycle_metrics.txt", "quality_by_cycle_metrics.pdf",
                         "quality_distribution_metrics.txt", "quality_distribution_metrics.pdf",
-                        "gc_bias.txt", "gc_bias_sumamry.txt", "gc_bias.pdf", "hsmetric.txt"]
+                        "gc_bias.txt", "gc_bias_summary.txt", "gc_bias.pdf", "hsmetric.txt"]
 
 multiqc_input.extend(expand(qc_dir + "tumor.{sample}.{metrics_wc}", sample=tumor_sample ,metrics_wc=qc_metrics_wildcards))
 if config['analysis']['analysis_type'] == "paired":
