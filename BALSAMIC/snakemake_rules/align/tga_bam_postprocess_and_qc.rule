@@ -91,7 +91,7 @@ export TMPDIR={params.tmpdir};
 export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
         
-samtools collate -@ {threads} -O -u {bam} {params.tmpdir} | \
+samtools collate -@ {threads} -O -u {input.bam} {params.tmpdir} | \
 samtools fixmate --reference {input.ref} -@ {threads} - - | \
 {params.sentieon_exec} util sort -i - -o {output.bam}
         """
