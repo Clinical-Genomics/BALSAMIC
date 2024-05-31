@@ -14,9 +14,9 @@ rule sentieon_dedup_consensus:
         insert_size_metrics = Path(qc_dir,"{sample_type}.{sample}.insert_size_metrics.txt").as_posix(),
         gc_bias_metrics = Path(qc_dir,"{sample_type}.{sample}.gc_bias.txt").as_posix(),
         gc_bias_summary = Path(qc_dir,"{sample_type}.{sample}.gc_bias_summary.txt").as_posix(),
-        quality_by_cycle_metric = Path(qc_dir,"{sample_type}.{sample}.quality_by_cycle_metrics.txt").as_posix(),
-        quality_distribution_metric = Path(qc_dir,"{sample_type}.{sample}.quality_distribution_metrics.txt").as_posix(),
-        base_distribution_metric = Path(qc_dir,"{sample_type}.{sample}.base_distribution_by_cycle_metrics.txt").as_posix()
+        quality_by_cycle_metrics = Path(qc_dir,"{sample_type}.{sample}.quality_by_cycle_metrics.txt").as_posix(),
+        quality_distribution_metrics = Path(qc_dir,"{sample_type}.{sample}.quality_distribution_metrics.txt").as_posix(),
+        base_distribution_metrics = Path(qc_dir,"{sample_type}.{sample}.base_distribution_by_cycle_metrics.txt").as_posix()
     benchmark:
         Path(benchmark_dir, "sentieon_dedup_{sample_type}.{sample}.tsv").as_posix()
     params:
@@ -44,11 +44,11 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 --umi_ecc_dist 0 \
 --consensus --umi_tag XR --fun score_info {output.score} \
 --algo AlignmentStat --adapter_seq {params.adapter} {output.alignment_metrics} \
---algo InsertSizeMetricAlgo --min_read_ratio 0.01 {output.insertsize_metrics} \
---algo GCBias --summary {output.gcbias_summary} {output.gcbias_metrics} \
---algo MeanQualityByCycle {output.qualitybycycle_metric} \
---algo QualDistribution {output.qualitydistribution_metric} \
---algo BaseDistributionByCycle {output.basedistribution_metric} ;
+--algo InsertSizeMetricAlgo --min_read_ratio 0.01 {output.insert_size_metrics} \
+--algo GCBias --summary {output.gc_bias_summary} {output.gc_bias_metrics} \
+--algo MeanQualityByCycle {output.quality_by_cycle_metrics} \
+--algo QualDistribution {output.quality_distribution_metrics} \
+--algo BaseDistributionByCycle {output.base_distribution_metrics} ;
 
 {params.sentieon_exec} driver \
 -t {threads} \

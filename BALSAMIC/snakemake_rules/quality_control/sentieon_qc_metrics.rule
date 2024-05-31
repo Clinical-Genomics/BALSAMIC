@@ -60,8 +60,8 @@ rule sentieon_plot_qc_metrics_tga:
     input:
         insert_size_metrics = Path(qc_dir,"{sample_type}.{sample}.insert_size_metrics.txt").as_posix(),
         gc_bias_metrics = Path(qc_dir,"{sample_type}.{sample}.gc_bias.txt").as_posix(),
-        quality_by_cycle_metric = Path(qc_dir,"{sample_type}.{sample}.quality_by_cycle_metrics.txt").as_posix(),
-        quality_distribution_metric= Path(qc_dir,"{sample_type}.{sample}.quality_distribution_metrics.txt").as_posix()
+        quality_by_cycle_metrics = Path(qc_dir,"{sample_type}.{sample}.quality_by_cycle_metrics.txt").as_posix(),
+        quality_distribution_metrics = Path(qc_dir,"{sample_type}.{sample}.quality_distribution_metrics.txt").as_posix()
     output:
         insert_size_pdf =  Path(qc_dir,"{sample_type}.{sample}.insert_size_metrics.pdf").as_posix(),
         gc_bias_pdf = Path(qc_dir,"{sample_type}.{sample}.gc_bias.pdf").as_posix(),
@@ -83,6 +83,6 @@ rule sentieon_plot_qc_metrics_tga:
         """
 {params.sentieon_exec} plot InsertSizeMetricAlgo {input.insert_size_metrics} {output.insert_size_pdf} ; 
 {params.sentieon_exec} plot GCBias {input.qc_bias_metrics} {output.gc_bias_pdf} ; 
-{params.sentieon_exec} plot MeanQualityByCycle {input.quality_by_cycle_metric} {output.quality_by_cycle_pdf} ; 
-{params.sentieon_exec} plot QualDistribution {input.quality_distribution_metric} {output.quality_distribution_pdf} ; 
+{params.sentieon_exec} plot MeanQualityByCycle {input.quality_by_cycle_metrics} {output.quality_by_cycle_pdf} ; 
+{params.sentieon_exec} plot QualDistribution {input.quality_distribution_metrics} {output.quality_distribution_pdf} ; 
         """
