@@ -21,7 +21,7 @@ if config['analysis']['analysis_type'] == "paired":
     multiqc_input.extend(expand(qc_dir + "normal.{sample}.dedup.metrics", sample=normal_sample))
 
 # get samtools stats
-multiqc_input.extend(expand(bam_dir + "{sample}.samtools.{stats}.txt",
+multiqc_input.extend(expand(qc_dir + "{sample}.samtools.{stats}.txt",
     sample=sample_names, stats=['flagstats', 'idxstats', 'stats']))
 
 
