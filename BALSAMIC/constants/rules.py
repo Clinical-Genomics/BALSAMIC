@@ -36,6 +36,7 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
             "snakemake_rules/quality_control/multiqc.rule",
             "snakemake_rules/quality_control/qc_metrics.rule",
             "snakemake_rules/quality_control/samtools_qc.rule",
+            "snakemake_rules/quality_control/sentieon_qc_metrics.rule",
         ],
         "report": [
             "snakemake_rules/report/generate_pdf.rule",
@@ -126,7 +127,6 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
     "single_wgs": {
         "qc": [
             "snakemake_rules/quality_control/fastp_wgs.rule",
-            "snakemake_rules/quality_control/sentieon_qc_metrics.rule",
             "snakemake_rules/quality_control/picard_wgs.rule",
         ],
         "align": [
@@ -147,7 +147,6 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
     "paired_wgs": {
         "qc": [
             "snakemake_rules/quality_control/fastp_wgs.rule",
-            "snakemake_rules/quality_control/sentieon_qc_metrics.rule",
             "snakemake_rules/quality_control/picard_wgs.rule",
             "snakemake_rules/quality_control/somalier.rule",
         ],

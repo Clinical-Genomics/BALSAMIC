@@ -58,12 +58,12 @@ rm -rf {params.tmpdir} ;
 
 rule sentieon_plot_qc_metrics_tga:
     input:
-        insert_size_metrics = Path(qc_dir,"{sample_type}.{sample}.insert_size_metric.txt").as_posix(),
+        insert_size_metrics = Path(qc_dir,"{sample_type}.{sample}.insert_size_metrics.txt").as_posix(),
         gc_bias_metrics = Path(qc_dir,"{sample_type}.{sample}.gc_bias.txt").as_posix(),
         quality_by_cycle_metric = Path(qc_dir,"{sample_type}.{sample}.quality_by_cycle_metrics.txt").as_posix(),
         quality_distribution_metric= Path(qc_dir,"{sample_type}.{sample}.quality_distribution_metrics.txt").as_posix()
     output:
-        insert_size_pdf =  Path(qc_dir,"{sample_type}.{sample}.insert_size_metric.pdf").as_posix(),
+        insert_size_pdf =  Path(qc_dir,"{sample_type}.{sample}.insert_size_metrics.pdf").as_posix(),
         gc_bias_pdf = Path(qc_dir,"{sample_type}.{sample}.gc_bias.pdf").as_posix(),
         quality_by_cycle_pdf = Path(qc_dir,"{sample_type}.{sample}.quality_by_cycle_metrics.pdf").as_posix(),
         quality_distribution_pdf = Path(qc_dir,"{sample_type}.{sample}.quality_distribution_metrics.pdf").as_posix(),
