@@ -405,10 +405,10 @@ class ConfigModel(BaseModel):
             final_bam_suffix = "dedup"
         elif self.analysis.sequencing_type == SequencingType.TARGETED:
             # Only dedup is necessary for TGA
-            final_bam_suffix = "dedup.fixmate"
+            final_bam_suffix = "dedup.fixmate.qualcapped"
         else:
             # For WGS the bamfiles are realigned
-            final_bam_suffix = "dedup.realign.qualcapped"
+            final_bam_suffix = "dedup.realign"
 
         if specified_suffix:
             final_bam_suffix = specified_suffix

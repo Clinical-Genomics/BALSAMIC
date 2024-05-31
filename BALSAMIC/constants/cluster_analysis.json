@@ -136,7 +136,7 @@
 		"time": "02:30:00",
 		"n": 8
 	},
-	"samtools_sort_index": {
+	"samtools_fixmate": {
 		"time": "02:30:00",
 		"n": 16
 	},

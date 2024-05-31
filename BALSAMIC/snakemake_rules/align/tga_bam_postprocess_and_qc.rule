@@ -70,16 +70,16 @@ rule samtools_fixmate:
         ref = config["reference"]["reference_genome"],
         bam = Path(bam_dir,"{sample_type}.{sample}.dedup.bam").as_posix(),
     output:
-        bam = Path(bam_dir,"{sample_type}.{sample}.dedup.fixed.bam").as_posix(),
+        bam = Path(bam_dir,"{sample_type}.{sample}.dedup.fixmate.bam").as_posix(),
     benchmark:
-        Path(benchmark_dir,"samtools_sort_index_{sample_type}_{sample}.tsv").as_posix()
+        Path(benchmark_dir,"samtools_fixmate_{sample_type}_{sample}.tsv").as_posix()
     singularity:
         Path(singularity_image,config["bioinfo_tools"].get("samtools") + ".sif").as_posix()
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         sample_id="{sample}"
     threads:
-        get_threads(cluster_config,"samtools_sort_index")
+        get_threads(cluster_config,"samtools_fixmate")
     message:
         "Calculating alignment stats for sample: {params.sample_id}"
     shell:
@@ -97,9 +97,9 @@ sentieon util sort -i - -o {output.bam}
 
 rule cap_base_quality:
     input:
-        bam = Path(bam_dir,"{sample_type}.{sample}.dedup.fixed.bam").as_posix()
+        bam = Path(bam_dir,"{sample_type}.{sample}.dedup.fixmate.bam").as_posix()
     output:
-        bam = Path(bam_dir,"{sample_type}.{sample}.dedup.fixed.qualcapped.bam").as_posix(),
+        bam = Path(bam_dir,"{sample_type}.{sample}.dedup.fixmate.qualcapped.bam").as_posix(),
     benchmark:
         Path(benchmark_dir,"cap_base_quality_{sample_type}_{sample}.tsv").as_posix()
     singularity:
