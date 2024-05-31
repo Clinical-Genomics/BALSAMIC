@@ -77,7 +77,9 @@ rule samtools_fixmate:
         Path(singularity_image,config["bioinfo_tools"].get("samtools") + ".sif").as_posix()
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-        sample_id="{sample}"
+        sample_id="{sample}",
+        sentieon_exec= config["SENTIEON_EXEC"],
+        sentieon_lic= config["SENTIEON_LICENSE"],
     threads:
         get_threads(cluster_config,"samtools_fixmate")
     message:
@@ -91,7 +93,7 @@ export SENTIEON_LICENSE={params.sentieon_lic};
         
 samtools collate -@ {threads} -O -u {bam} {params.tmpdir} | \
 samtools fixmate --reference {input.ref} -@ {threads} - - | \
-sentieon util sort -i - -o {output.bam}
+{params.sentieon_exec} util sort -i - -o {output.bam}
         """
 
 
