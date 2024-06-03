@@ -105,7 +105,7 @@ else:
     rule sentieon_qc_metrics:
         input:
             ref=config["reference"]["reference_genome"],
-            bam=Path(bam_dir,"{sample}_align_sort.bam").as_posix(),
+            bam=Path(bam_dir,"{sample}.align_sort.bam").as_posix(),
         output:
             alignment_metrics=Path(qc_dir,"{sample_type}.{sample}.alignment_summary_metrics.txt").as_posix(),
             insert_size_metrics=Path(qc_dir,"{sample_type}.{sample}.insert_size_metrics.txt").as_posix(),

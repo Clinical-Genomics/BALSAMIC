@@ -73,7 +73,7 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
         ],
         "align": [
             "snakemake_rules/align/tga_sentieon_alignment.rule",
-            "snakemake_rules/align/tga_bam_postprocess_and_qc.rule",
+            "snakemake_rules/align/tga_bam_postprocess.rule",
             "snakemake_rules/umi/sentieon_umiextract.rule",
             "snakemake_rules/umi/sentieon_consensuscall.rule",
         ],
@@ -105,7 +105,7 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
         ],
         "align": [
             "snakemake_rules/align/tga_sentieon_alignment.rule",
-            "snakemake_rules/align/tga_bam_postprocess_and_qc.rule",
+            "snakemake_rules/align/tga_bam_postprocess.rule",
             "snakemake_rules/umi/sentieon_umiextract.rule",
             "snakemake_rules/umi/sentieon_consensuscall.rule",
         ],
@@ -129,7 +129,7 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
             "snakemake_rules/quality_control/picard_wgs.rule",
         ],
         "align": [
-            "snakemake_rules/align/wgs_sentieon_bam_postprocess_and_qc.rule",
+            "snakemake_rules/align/wgs_bam_postprocess.rule",
             "snakemake_rules/align/wgs_sentieon_alignment.rule",
         ],
         "varcall": [
@@ -150,7 +150,7 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
             "snakemake_rules/quality_control/somalier.rule",
         ],
         "align": [
-            "snakemake_rules/align/wgs_sentieon_bam_postprocess_and_qc.rule",
+            "snakemake_rules/align/wgs_bam_postprocess.rule",
             "snakemake_rules/align/wgs_sentieon_alignment.rule",
         ],
         "varcall": [

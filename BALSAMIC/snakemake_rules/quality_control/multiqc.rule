@@ -20,17 +20,18 @@ multiqc_input.extend(expand(qc_dir + "tumor.{sample}.dedup.metrics", sample=tumo
 if config['analysis']['analysis_type'] == "paired":
     multiqc_input.extend(expand(qc_dir + "normal.{sample}.dedup.metrics", sample=normal_sample))
 
-# get samtools stats
-multiqc_input.extend(expand(qc_dir + "{sample}.samtools.{stats}.txt",
-    sample=sample_names, stats=['flagstats', 'idxstats', 'stats']))
-
-
 # common alignment qc metrics
 qc_metrics_wildcards = ["alignment_summary_metrics.txt", "base_distribution_by_cycle_metrics.txt",
                         "insert_size_metrics.pdf", "insert_size_metrics.txt",
                         "quality_by_cycle_metrics.txt", "quality_by_cycle_metrics.pdf",
                         "quality_distribution_metrics.txt", "quality_distribution_metrics.pdf",
-                        "gc_bias.txt", "gc_bias_summary.txt", "gc_bias.pdf", "hsmetric.txt"]
+                        "gc_bias.txt", "gc_bias_summary.txt", "gc_bias.pdf", "hsmetric.txt",
+                        "samtools.flagstats.txt", "samtools.idxstats.txt", "samtools.stats.txt"]
+
+if config["analysis"]["sequencing_type"] == 'targeted':
+    qc_metrics_wildcards.extend(["umi_collapsed.samtools.flagstats.txt",
+                                 "umi_collapsed.samtools.idxstats.txt",
+                                 "umi_collapsed.samtools.stats.txt"])
 
 multiqc_input.extend(expand(qc_dir + "tumor.{sample}.{metrics_wc}", sample=tumor_sample ,metrics_wc=qc_metrics_wildcards))
 if config['analysis']['analysis_type'] == "paired":
@@ -39,7 +40,6 @@ if config['analysis']['analysis_type'] == "paired":
 # pair check output
 if config['analysis']['analysis_type'] == "paired":
     multiqc_input.append(qc_dir + "somalier/somalier.pairs.tsv")
-
 
 
 if config["analysis"]["sequencing_type"] == 'wgs':
