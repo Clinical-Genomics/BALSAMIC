@@ -81,8 +81,8 @@ rule sentieon_plot_qc_metrics:
         "Current sample: {params.sample_id}")
     shell:
         """
-{params.sentieon_exec} plot InsertSizeMetricAlgo {input.insert_size_metrics} {output.insert_size_pdf} ; 
-{params.sentieon_exec} plot GCBias {input.gc_bias_metrics} {output.gc_bias_pdf} ; 
-{params.sentieon_exec} plot MeanQualityByCycle {input.quality_by_cycle_metrics} {output.quality_by_cycle_pdf} ; 
-{params.sentieon_exec} plot QualDistribution {input.quality_distribution_metrics} {output.quality_distribution_pdf} ; 
+{params.sentieon_exec} plot InsertSizeMetricAlgo {input.insert_size_metrics} -o {output.insert_size_pdf} ; 
+{params.sentieon_exec} plot GCBias {input.gc_bias_metrics} -o {output.gc_bias_pdf} ; 
+{params.sentieon_exec} plot MeanQualityByCycle {input.quality_by_cycle_metrics} -o {output.quality_by_cycle_pdf} ; 
+{params.sentieon_exec} plot QualDistribution {input.quality_distribution_metrics} -o {output.quality_distribution_pdf} ; 
         """
