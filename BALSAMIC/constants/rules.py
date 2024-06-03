@@ -101,7 +101,6 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
             "snakemake_rules/concatenation/concatenation.rule",
             "snakemake_rules/umi/mergetype_tumor_umi.rule",
             "snakemake_rules/umi/mergetype_normal_umi.rule",
-            "snakemake_rules/quality_control/contest.rule",
             "snakemake_rules/umi/generate_AF_tables.rule",
         ],
         "align": [

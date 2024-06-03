@@ -5,10 +5,12 @@ Changed:
 ^^^^^^^^
 * Cluster scheduler script for immediate submit https://github.com/Clinical-Genomics/BALSAMIC/pull/1372
 * `SLEEP_BEFORE_START` to 600s https://github.com/Clinical-Genomics/BALSAMIC/pull/1372
-* updated multiqc to latest version https://github.com/Clinical-Genomics/BALSAMIC/pull/1441
+* updated multiqc to version 1.18 https://github.com/Clinical-Genomics/BALSAMIC/pull/1441
 
 Removed:
 ^^^^^^^^
+* GATK3 https://github.com/Clinical-Genomics/BALSAMIC/pull/1432
+* `gatk_contest` rule https://github.com/Clinical-Genomics/BALSAMIC/pull/1432
 * SGE (qsub) support https://github.com/Clinical-Genomics/BALSAMIC/pull/1372
 
 Fixed:

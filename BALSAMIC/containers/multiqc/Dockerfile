@@ -7,7 +7,7 @@ LABEL about.license="MIT License (MIT)"
 LABEL about.description="Bioinformatic analysis pipeline for somatic mutations in cancer"
 
 RUN python -m pip install --upgrade --no-cache-dir pip && \
-    pip install multiqc==1.22.1
+    pip install multiqc==1.18
 
 RUN adduser --disabled-password --gecos '' ubuntu && \
 chsh -s /bin/bash && \
