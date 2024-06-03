@@ -39,6 +39,7 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 
 {params.sentieon_exec} driver \
 -t {threads} \
+-r {input.ref} \
 -i {input.bam} \
 --algo LocusCollector \
 --umi_ecc_dist 0 \
