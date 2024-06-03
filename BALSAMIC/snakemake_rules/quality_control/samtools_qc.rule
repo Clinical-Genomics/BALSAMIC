@@ -10,7 +10,7 @@ if config["analysis"]["sequencing_type"] == 'wgs':
             idxstats = Path(qc_dir, "{sample_type}.{sample}.samtools.idxstats.txt").as_posix(),
             stats = Path(qc_dir, "{sample_type}.{sample}.samtools.stats.txt").as_posix(),
         benchmark:
-            Path(benchmark_dir,"samtools_qc_{sample}.tsv").as_posix()
+            Path(benchmark_dir,"samtools_qc_{sample_type}_{sample}.tsv").as_posix()
         singularity:
             Path(singularity_image,config["bioinfo_tools"].get("samtools") + ".sif").as_posix()
         params:
@@ -34,7 +34,7 @@ else:
             idxstats = Path(qc_dir, "{sample_type}.{sample}.samtools.idxstats.txt").as_posix(),
             stats = Path(qc_dir, "{sample_type}.{sample}.samtools.stats.txt").as_posix(),
         benchmark:
-            Path(benchmark_dir,"samtools_qc_{sample}.tsv").as_posix()
+            Path(benchmark_dir,"samtools_qc_{sample_type}_{sample}.tsv").as_posix()
         singularity:
             Path(singularity_image,config["bioinfo_tools"].get("samtools") + ".sif").as_posix()
         params:
@@ -58,7 +58,7 @@ else:
             idxstats = Path(qc_dir, "{sample_type}.{sample}.umi_collapsed.samtools.idxstats.txt").as_posix(),
             stats = Path(qc_dir, "{sample_type}.{sample}.umi_collapsed.samtools.stats.txt").as_posix(),
         benchmark:
-            Path(benchmark_dir,"samtools_qc_umi_collapsed_{sample}.tsv").as_posix()
+            Path(benchmark_dir,"samtools_qc_umi_collapsed_{sample_type}_{sample}.tsv").as_posix()
         singularity:
             Path(singularity_image,config["bioinfo_tools"].get("samtools") + ".sif").as_posix()
         params:
@@ -66,7 +66,7 @@ else:
         threads:
             get_threads(cluster_config, "samtools_qc")
         message:
-            "Calculating alignment stats for sample: {params.sample_id}"
+            "Calculating alignment stats for sample after UMI collapse: {params.sample_id}"
         shell:
             """
     samtools flagstats --threads {threads} {input.bam} > {output.flagstats};
