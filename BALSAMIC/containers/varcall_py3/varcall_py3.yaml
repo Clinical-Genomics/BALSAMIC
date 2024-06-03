@@ -41,7 +41,6 @@ dependencies:
   - fonts-conda-forge=1
   - freetype=2.12.1
   - fribidi=1.0.10
-  - gatk=3.8
   - gcc_impl_linux-64=9.3.0
   - gcc_linux-64=9.3.0
   - gettext=0.21.1

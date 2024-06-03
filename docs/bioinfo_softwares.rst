@@ -71,12 +71,6 @@ fastqc
 :Article: `Babraham` `<https://www.bioinformatics.babraham.ac.uk/projects/fastqc/>`_
 :Version: `0.11.9`
 
-gatk
-~~~~
-:Source code: `Github` `<https://github.com/broadinstitute/gatk>`_
-:Article: `Current Protocols in Bioinformatics` `<https://pubmed.ncbi.nlm.nih.gov/25431634/>`_
-:Version: `3.8`
-
 genmod
 ~~~~~~
 :Source code: `Github` `<https://github.com/Clinical-Genomics/genmod>`_
@@ -98,7 +92,7 @@ multiqc
 ~~~~~~~
 :Source code: `GitHub` `<https://github.com/ewels/MultiQC>`_
 :Article: `Bioinformatics` `<https://doi.org/10.1093/bioinformatics/btw354>`_
-:Version: `1.22.1`
+:Version: `1.18`
 
 picard
 ~~~~~~
