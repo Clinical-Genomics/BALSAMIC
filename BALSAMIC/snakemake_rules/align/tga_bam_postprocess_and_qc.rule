@@ -85,12 +85,13 @@ rule samtools_fixmate:
         "Running samtools collate and fixmate for: {params.sample_id}"
     shell:
         """
-mkdir -p {params.tmpdir};
-export TMPDIR={params.tmpdir};
-        
-samtools collate -@ {threads} -O -u {input.bam} {params.tmpdir} | \
-samtools fixmate --reference {input.ref} -@ {threads} - - | \
-samtools sort - -o {output} 
+mkdir -p {params.tmpdir}/collate ;
+mkdir -p {params.tmpdir}/fixmate ;
+mkdir -p {params.tmpdir}/sort ;    
+
+samtools collate -@ {threads} -O -u {input.bam} -T {params.tmpdir}/collate | \
+samtools fixmate --reference {input.ref} -@ {threads} -T {params.tmpdir}/fixmate - - | \
+samtools sort -T {params.tmpdir}/sort - -o {output} 
         """
 
 rule cap_base_quality:
