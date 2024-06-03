@@ -13,9 +13,9 @@ rule picard_CollectHsMetrics:
         bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample),
         fa = config["reference"]["reference_genome"],
     output:
-        hs_metrics = bam_dir + "{sample}.dedup.hsmetric.txt"
+        hs_metrics = qc_dir + "{sample_type}.{sample}.hsmetric.txt"
     benchmark:
-        Path(benchmark_dir + "picard_CollectHsMetrics_{sample}.tsv").as_posix()
+        Path(benchmark_dir + "picard_CollectHsMetrics_{sample_type}_{sample}.tsv").as_posix()
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("picard") + ".sif").as_posix()
     params:
@@ -48,71 +48,3 @@ BAIT_SET_NAME={params.baitsetname} \
 COVERAGE_CAP=50000 \
 METRIC_ACCUMULATION_LEVEL=ALL_READS;
       """
-
-
-rule picard_CollectAlignmentSummaryMetrics:
-    input:
-        bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample, specified_suffix="align_sort"),
-        fa = config["reference"]["reference_genome"]
-    output:
-        bam_dir + "{sample}.alignmetric.txt"
-    benchmark:
-        Path(benchmark_dir, "CollectAlignmentSummaryMetrics_{sample}.tsv").as_posix()
-    singularity:
-        Path(singularity_image,config["bioinfo_tools"].get("picard") + ".sif").as_posix()
-    params:
-        mem = "16g",
-        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-        adapter = config["QC"]["adapter"],
-        sample = "{sample}"
-    threads:
-        get_threads(cluster_config,"picard_CollectAlignmentSummaryMetrics")
-    message:
-        "Calculating picard alignment summary metrics for sample {params.sample}"
-    shell:
-        """
-export TMPDIR={params.tmpdir};
-
-picard -Djava.io.tmpdir={params.tmpdir} -Xmx{params.mem} \
-CollectAlignmentSummaryMetrics \
-R={input.fa} \
-I={input.bam} \
-O={output} \
-ADAPTER_SEQUENCE={params.adapter} \
-METRIC_ACCUMULATION_LEVEL=ALL_READS \
-METRIC_ACCUMULATION_LEVEL=LIBRARY;
-        """
-
-
-rule picard_CollectInsertSizeMetrics:
-    input:
-        bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample, specified_suffix="align_sort")
-    output:
-        pdf = bam_dir + "{sample}.insertsizemetric.pdf",
-        txt = bam_dir + "{sample}.insertsizemetric.txt"
-    benchmark:
-        Path(benchmark_dir, "picard_CollectInsertSizeMetrics_{sample}.tsv").as_posix()
-    singularity:
-        Path(singularity_image, config["bioinfo_tools"].get("picard") + ".sif").as_posix()
-    params:
-        mem = "16g",
-        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-        sample = "{sample}"
-    threads:
-        get_threads(cluster_config,"picard_CollectInsertSizeMetrics")
-    message:
-        "Calculating picard InsertSize metrics for sample {params.sample}"
-    shell:
-        """
-export TMPDIR={params.tmpdir};
-
-picard -Djava.io.tmpdir={params.tmpdir} -Xmx{params.mem} \
-CollectInsertSizeMetrics \
-I={input.bam} \
-H={output.pdf} \
-O={output.txt} \
-M=0.01 \
-INCLUDE_DUPLICATES=TRUE \
-METRIC_ACCUMULATION_LEVEL=ALL_READS \
-METRIC_ACCUMULATION_LEVEL=LIBRARY;
-        """

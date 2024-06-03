@@ -37,6 +37,7 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 {params.ds_params} {input.fastq_r1} {input.fastq_r2} \
 -o {output.ds_umi};
         """
+
 # Align the UMI-extracted reads
 
 

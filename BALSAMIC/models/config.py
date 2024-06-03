@@ -404,8 +404,7 @@ class ConfigModel(BaseModel):
             final_bam_suffix = "dedup"
         elif self.analysis.sequencing_type == SequencingType.TARGETED:
             # TGA uses UMIs
-            final_bam_suffix = "consensuscalled_umi"
-
+            final_bam_suffix = "dedup.fixmate"
         else:
             # For WGS the bamfiles are realigned
             final_bam_suffix = "dedup.realign"
