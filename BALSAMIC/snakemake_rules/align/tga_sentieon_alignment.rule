@@ -7,9 +7,9 @@ rule sentieon_align_sort_umireads:
         fastq_r2 = Path(fastq_dir, "{sample}_2.fp.fastq.gz").as_posix(),
         refidx = expand(config["reference"]["reference_genome"] + ".{prefix}", prefix=["amb","ann","bwt","pac","sa"])
     output:
-        bam_out = Path(bam_dir, "{sample}_align_sort.bam").as_posix()
+        bam_out = Path(bam_dir, "{sample_type}.{sample}.align_sort.bam").as_posix()
     benchmark:
-        Path(benchmark_dir, "sentieon_align_sort_{sample}.tsv").as_posix()
+        Path(benchmark_dir, "sentieon_align_sort_{sample_type}_{sample}.tsv").as_posix()
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         sentieon_install_dir= config["SENTIEON_INSTALL_DIR"],
