@@ -78,31 +78,50 @@ rule samtools_fixmate:
         Path(singularity_image,config["bioinfo_tools"].get("samtools") + ".sif").as_posix()
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-        sample_id="{sample}",
-        sentieon_exec= config["SENTIEON_EXEC"],
-        sentieon_lic= config["SENTIEON_LICENSE"],
+        sample_id="{sample}"
     threads:
         get_threads(cluster_config,"samtools_fixmate")
     message:
-        "Calculating alignment stats for sample: {params.sample_id}"
+        "Running samtools collate and fixmate for: {params.sample_id}"
     shell:
         """
 mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
-export SENTIEON_TMPDIR={params.tmpdir};
-export SENTIEON_LICENSE={params.sentieon_lic};
         
 samtools collate -@ {threads} -O -u {input.bam} {params.tmpdir} | \
-samtools fixmate --reference {input.ref} -@ {threads} - - | \
-{params.sentieon_exec} util sort -i - -o {output.bam}
+samtools fixmate --reference {input.ref} -@ {threads} -O BAM {output.bam} 
         """
 
-
-rule cap_base_quality:
+rule sentieon_sort_bam:
     input:
         bam = Path(bam_dir,"{sample_type}.{sample}.dedup.fixmate.bam").as_posix()
     output:
-        bam = Path(bam_dir,"{sample_type}.{sample}.dedup.fixmate.qualcapped.bam").as_posix(),
+        bam = Path(bam_dir,"{sample_type}.{sample}.dedup.fixmate.sorted.bam").as_posix()
+    benchmark:
+        Path(benchmark_dir,"sentieon_sort_{sample_type}_{sample}.tsv").as_posix()
+    params:
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
+        sentieon_exec = config["SENTIEON_EXEC"],
+        sentieon_lic = config["SENTIEON_LICENSE"]
+    threads:
+        get_threads(cluster_config,"sentieon_sort_bam")
+    message:
+        "Calculating alignment stats for sample: {params.sample_id}"
+    shell:
+    """
+mkdir -p {params.tmpdir} ;
+export TMPDIR={params.tmpdir} ;
+export SENTIEON_TMPDIR={params.tmpdir} ;
+export SENTIEON_LICENSE={params.sentieon_lic} ;
+
+{params.sentieon_exec} util sort -t {threads} -i {input.bam} -o {output.bam}
+    """
+
+rule cap_base_quality:
+    input:
+        bam = Path(bam_dir,"{sample_type}.{sample}.dedup.fixmate.sorted.bam").as_posix()
+    output:
+        bam = Path(bam_dir,"{sample_type}.{sample}.dedup.fixmate.sorted.qualcapped.bam").as_posix(),
     benchmark:
         Path(benchmark_dir,"cap_base_quality_{sample_type}_{sample}.tsv").as_posix()
     singularity:
@@ -116,6 +135,6 @@ rule cap_base_quality:
         "Capping base qualities to 70 in bamfile using pysam in sample: {params.sample_id}"
     shell:
         """
-python {params.cap_base_qualities} --max_quality 70 {input.bam} {output.bam}
+python {params.cap_base_qualities} --max_quality 70 {input.bam} {output.bam} ; 
 samtools index -@ {threads} {output.bam}
         """
