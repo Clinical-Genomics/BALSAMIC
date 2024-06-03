@@ -9,6 +9,8 @@ Changed:
 
 Removed:
 ^^^^^^^^
+* GATK3 https://github.com/Clinical-Genomics/BALSAMIC/pull/1432
+* `gatk_contest` rule https://github.com/Clinical-Genomics/BALSAMIC/pull/1432
 * SGE (qsub) support https://github.com/Clinical-Genomics/BALSAMIC/pull/1372
 
 Fixed:

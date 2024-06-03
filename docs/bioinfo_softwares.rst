@@ -71,12 +71,6 @@ fastqc
 :Article: `Babraham` `<https://www.bioinformatics.babraham.ac.uk/projects/fastqc/>`_
 :Version: `0.11.9`
 
-gatk
-~~~~
-:Source code: `Github` `<https://github.com/broadinstitute/gatk>`_
-:Article: `Current Protocols in Bioinformatics` `<https://pubmed.ncbi.nlm.nih.gov/25431634/>`_
-:Version: `3.8`
-
 genmod
 ~~~~~~
 :Source code: `Github` `<https://github.com/Clinical-Genomics/genmod>`_
