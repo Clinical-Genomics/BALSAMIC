@@ -5,8 +5,8 @@
 rule manta_tumor_normal:
     input:
         fa = config["reference"]["reference_genome"],
-        bamN = config_model.get_final_bam_name(bam_dir=bam_dir, sample_name=normal_sample, specified_suffix="consensuscalled_umi_qualcapped"),
-        bamT = config_model.get_final_bam_name(bam_dir=bam_dir, sample_name=tumor_sample, specified_suffix="consensuscalled_umi_qualcapped"),
+        bamN = config_model.get_final_bam_name(bam_dir=bam_dir, sample_name=normal_sample, specified_suffix="dedup.fixmate.qualcapped"),
+        bamT = config_model.get_final_bam_name(bam_dir=bam_dir, sample_name=tumor_sample, specified_suffix="dedup.fixmate.qualcapped"),
     output:
         final = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".manta.vcf.gz",
         namemap = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".manta.sample_name_map",

@@ -5,7 +5,7 @@
 rule manta_tumor_only:
     input:
         fa = config["reference"]["reference_genome"],
-        bamT = expand(bam_dir + "tumor.{sample}.consensuscalled_umi_qualcapped.bam", sample=tumor_sample)
+        bamT = config_model.get_final_bam_name(bam_dir=bam_dir, sample_name=tumor_name, specified_suffix="dedup.fixmate.qualcapped"),
     output:
         final = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".manta.vcf.gz",
         namemap = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".manta.sample_name_map"
