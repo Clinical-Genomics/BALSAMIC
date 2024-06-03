@@ -8,13 +8,13 @@ rule mosdepth_coverage:
         bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample),
         bed = config["panel"]["capture_kit"]
     output:
-        bam_dir + "{sample}_{sample_type}.mosdepth.global.dist.txt",
-        bam_dir + "{sample}_{sample_type}.mosdepth.region.dist.txt",
-        bam_dir + "{sample}_{sample_type}.mosdepth.summary.txt",
-        bam_dir + "{sample}_{sample_type}.per-base.bed.gz",
-        bam_dir + "{sample}_{sample_type}.regions.bed.gz"
+        qc_dir + "{sample_type}.{sample}.mosdepth.global.dist.txt",
+        qc_dir + "{sample_type}.{sample}.mosdepth.region.dist.txt",
+        qc_dir + "{sample_type}.{sample}.mosdepth.summary.txt",
+        qc_dir + "{sample_type}.{sample}.per-base.bed.gz",
+        qc_dir + "{sample_type}.{sample}.regions.bed.gz"
     benchmark:
-        Path(benchmark_dir, "mosdepth_coverage_" + "{sample}_{sample_type}.tsv").as_posix()
+        Path(benchmark_dir, "mosdepth_coverage_" + "{sample_type}_{sample}.tsv").as_posix()
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("mosdepth") + ".sif").as_posix()
     params:
