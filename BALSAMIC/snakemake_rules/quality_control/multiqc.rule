@@ -18,16 +18,19 @@ multiqc_input.extend(expand(qc_dir + "tumor.{sample}.dedup.metrics", sample=tumo
 if config['analysis']['analysis_type'] == "paired":
     multiqc_input.extend(expand(qc_dir + "normal.{sample}.dedup.metrics", sample=normal_sample))
 
-# get samtools stats
-multiqc_input.extend(expand(qc_dir + "{sample}.samtools.{stats}.txt",
-    sample=sample_names, stats=['flagstats', 'idxstats', 'stats']))
-
 # common alignment qc metrics
 qc_metrics_wildcards = ["alignment_summary_metrics.txt", "base_distribution_by_cycle_metrics.txt",
                         "insert_size_metrics.pdf", "insert_size_metrics.txt",
                         "quality_by_cycle_metrics.txt", "quality_by_cycle_metrics.pdf",
                         "quality_distribution_metrics.txt", "quality_distribution_metrics.pdf",
-                        "gc_bias.txt", "gc_bias_summary.txt", "gc_bias.pdf", "hsmetric.txt"]
+                        "gc_bias.txt", "gc_bias_summary.txt", "gc_bias.pdf", "hsmetric.txt",
+                        "samtools.flagstats.txt", "samtools.idxstats.txt", "samtools.stats.txt"]
+
+if config["analysis"]["sequencing_type"] == 'targeted':
+    # for post UMI collapse
+    qc_metrics_wildcards.extend(["umi_collapsed.samtools.flagstats.txt",
+                                 "umi_collapsed.samtools.idxstats.txt",
+                                 "umi_collapsed.samtools.stats.txt"])
 
 multiqc_input.extend(expand(qc_dir + "tumor.{sample}.{metrics_wc}", sample=tumor_sample ,metrics_wc=qc_metrics_wildcards))
 if config['analysis']['analysis_type'] == "paired":
@@ -62,10 +65,6 @@ if config["analysis"]["sequencing_type"] == 'wgs':
             multiqc_input.append(bam_dir + "normal.recal_data.table")
 
 else:
-    # Samtools stats for post-UMI collapse
-    multiqc_input.extend(expand(bam_dir + "{sample}_umi_dedup.samtools.{stats}.txt",
-        sample=sample_names,stats=['flagstats', 'idxstats', 'stats']))
-
     # fastp metrics
     multiqc_input.extend(expand(qc_dir + "fastp/tumor.{sample}_fastp.json", sample=tumor_sample))
     multiqc_input.extend(expand(qc_dir + "fastp/tumor.{sample}_fastp.html", sample=tumor_sample))

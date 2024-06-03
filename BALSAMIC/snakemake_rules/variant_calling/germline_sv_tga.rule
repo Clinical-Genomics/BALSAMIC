@@ -6,7 +6,7 @@
 rule manta_germline_tga:
     input:
         fa = config["reference"]["reference_genome"],
-        bam = lambda wildcards: config_model.get_final_bam_name(bam_dir=bam_dir, sample_type=wildcards.sample_type, specified_suffix="consensuscalled_umi_qualcapped")
+        bam = lambda wildcards: config_model.get_final_bam_name(bam_dir=bam_dir, sample_type=wildcards.sample_type, specified_suffix="dedup.fixmate.qualcapped")
     output:
         final = vcf_dir + "SV.germline.{sample_type}.manta_germline.vcf.gz",
     benchmark:

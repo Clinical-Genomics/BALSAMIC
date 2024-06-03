@@ -5,7 +5,7 @@
 rule sentieon_dedup_consensus:
     input:
         ref = config["reference"]["reference_genome"],
-        bam = Path(bam_dir, "{sample}_align_sort.bam").as_posix(),
+        bam = Path(bam_dir, "{sample_type}.{sample}.align_sort.bam").as_posix(),
     output:
         bam = Path(bam_dir, "{sample_type}.{sample}.dedup.bam").as_posix(),
         score = Path(bam_dir, "{sample_type}.{sample}.dedup.score").as_posix(),
