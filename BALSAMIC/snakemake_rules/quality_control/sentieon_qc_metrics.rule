@@ -9,52 +9,142 @@ def repeat(param, values):
 
     return " ".join(param_values)
 
+if config["analysis"]["sequencing_type"] == 'wgs':
+    rule sentieon_wgs_metrics:
+        input:
+            bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample),
+            reference = config["reference"]["reference_genome"]
+        output:
+            wgs_metrics = qc_dir + "{sample}_sentieon_wgs_metrics.txt",
+            coverage_metrics = qc_dir + "{sample}_coverage.gz"
+        benchmark:
+            Path(benchmark_dir,'sentieon_wgs_metrics_' + "{sample}.tsv").as_posix()
+        params:
+            tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
+            min_base_qual = '10',
+            gene_list = config["reference"]["refgene_txt"],
+            cov_threshold = repeat("--cov_thresh", [50, 100, 150, 200, 250]),
+            sentieon_exec = config["SENTIEON_EXEC"],
+            sentieon_lic = config["SENTIEON_LICENSE"],
+            sample = '{sample}'
+        threads:
+            get_threads(cluster_config, 'sentieon_wgs_metrics')
+        message:
+            "Calculate coverage metrics for wgs cases using sentieon tools for sample {params.sample}"
+        shell:
+            """
+    export TMPDIR={params.tmpdir};
+    export SENTIEON_TMPDIR={params.tmpdir};
+    export SENTIEON_LICENSE={params.sentieon_lic};
+    
+    {params.sentieon_exec} driver \
+    -i {input.bam} \
+    -r {input.reference} \
+    --algo WgsMetricsAlgo \
+    --min_base_qual {params.min_base_qual} \
+    {output.wgs_metrics};
+    
+    {params.sentieon_exec} driver \
+    -i {input.bam} \
+    -r {input.reference} \
+    --algo CoverageMetrics \
+    --gene_list {params.gene_list} {params.cov_threshold} \
+    {output.coverage_metrics}_tmp;
+    
+    gzip -c {output.coverage_metrics}_tmp > {output.coverage_metrics} ;
+    rm {output.coverage_metrics}_tmp ;
+    rm -rf {params.tmpdir} ;
+            """
 
-rule sentieon_wgs_metrics:
-    input:
-        bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample),
-        reference = config["reference"]["reference_genome"]
-    output:
-        wgs_metrics = qc_dir + "{sample}_sentieon_wgs_metrics.txt",
-        coverage_metrics = qc_dir + "{sample}_coverage.gz"
-    benchmark:
-        Path(benchmark_dir,'sentieon_wgs_metrics_' + "{sample}.tsv").as_posix()
-    params:
-        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-        min_base_qual = '10',
-        gene_list = config["reference"]["refgene_txt"],
-        cov_threshold = repeat("--cov_thresh", [50, 100, 150, 200, 250]),
-        sentieon_exec = config["SENTIEON_EXEC"],
-        sentieon_lic = config["SENTIEON_LICENSE"],
-        sample = '{sample}'
-    threads:
-        get_threads(cluster_config, 'sentieon_wgs_metrics')
-    message:
-        "Calculate coverage metrics for wgs cases using sentieon tools for sample {params.sample}"
-    shell:
-        """
-export TMPDIR={params.tmpdir};
-export SENTIEON_TMPDIR={params.tmpdir};
-export SENTIEON_LICENSE={params.sentieon_lic};
+    rule sentieon_qc_metrics:
+        input:
+            ref = config["reference"]["reference_genome"],
+            bam_files = lambda wildcards: config_model.get_bam_name_per_lane(bam_dir = bam_dir, sample_name = wildcards.sample)
+        output:
+            alignment_metrics = Path(qc_dir,"{sample_type}.{sample}.alignment_summary_metrics.txt").as_posix(),
+            insert_size_metrics = Path(qc_dir,"{sample_type}.{sample}.insert_size_metrics.txt").as_posix(),
+            gc_bias_metrics = Path(qc_dir,"{sample_type}.{sample}.gc_bias.txt").as_posix(),
+            gc_bias_summary = Path(qc_dir,"{sample_type}.{sample}.gc_bias_summary.txt").as_posix(),
+            quality_by_cycle_metrics = Path(qc_dir,"{sample_type}.{sample}.quality_by_cycle_metrics.txt").as_posix(),
+            quality_distribution_metrics = Path(qc_dir,"{sample_type}.{sample}.quality_distribution_metrics.txt").as_posix(),
+            base_distribution_metrics = Path(qc_dir,"{sample_type}.{sample}.base_distribution_by_cycle_metrics.txt").as_posix()
+        benchmark:
+            Path(benchmark_dir, "sentieon_qc_metrics_{sample_type}.{sample}.tsv").as_posix()
+        params:
+            tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
+            sentieon_exec = config["SENTIEON_EXEC"],
+            sentieon_lic = config["SENTIEON_LICENSE"],
+            sample_id = "{sample}",
+            adapter = config["QC"]["adapter"]
+        threads:
+            get_threads(cluster_config, 'sentieon_qc_metrics')
+        message:
+            ("Creates multiple different alignment QC metrics based on Picard tools"
+             "Current sample: {params.sample_id}")
+        shell:
+            """
+    mkdir -p {params.tmpdir};
+    export TMPDIR={params.tmpdir};
+    export SENTIEON_TMPDIR={params.tmpdir};
+    export SENTIEON_LICENSE={params.sentieon_lic};
+    
+    shell_bam_files=$(echo {input.bam_files} | sed 's/ / -i /g') ;
+    
+    {params.sentieon_exec} driver \
+    -t {threads} \
+    -r {input.ref} \
+    -i $shell_bam_files \
+    --algo AlignmentStat --adapter_seq {params.adapter} {output.alignment_metrics} \
+    --algo InsertSizeMetricAlgo --min_read_ratio 0.01 {output.insert_size_metrics} \
+    --algo GCBias --summary {output.gc_bias_summary} {output.gc_bias_metrics} \
+    --algo MeanQualityByCycle {output.quality_by_cycle_metrics} \
+    --algo QualDistribution {output.quality_distribution_metrics} \
+    --algo BaseDistributionByCycle {output.base_distribution_metrics} ;
+            """
+else:
+    rule sentieon_qc_metrics:
+        input:
+            ref=config["reference"]["reference_genome"],
+            bam=Path(bam_dir,"{sample}_align_sort.bam").as_posix(),
+        output:
+            alignment_metrics=Path(qc_dir,"{sample_type}.{sample}.alignment_summary_metrics.txt").as_posix(),
+            insert_size_metrics=Path(qc_dir,"{sample_type}.{sample}.insert_size_metrics.txt").as_posix(),
+            gc_bias_metrics=Path(qc_dir,"{sample_type}.{sample}.gc_bias.txt").as_posix(),
+            gc_bias_summary=Path(qc_dir,"{sample_type}.{sample}.gc_bias_summary.txt").as_posix(),
+            quality_by_cycle_metrics=Path(qc_dir,"{sample_type}.{sample}.quality_by_cycle_metrics.txt").as_posix(),
+            quality_distribution_metrics=Path(qc_dir,"{sample_type}.{sample}.quality_distribution_metrics.txt").as_posix(),
+            base_distribution_metrics=Path(qc_dir,"{sample_type}.{sample}.base_distribution_by_cycle_metrics.txt").as_posix()
+        benchmark:
+            Path(benchmark_dir,"sentieon_qc_metrics_{sample_type}.{sample}.tsv").as_posix()
+        params:
+            tmpdir=tempfile.mkdtemp(prefix=tmp_dir),
+            sentieon_exec=config["SENTIEON_EXEC"],
+            sentieon_lic=config["SENTIEON_LICENSE"],
+            sample_id="{sample}",
+            adapter=config["QC"]["adapter"]
+        threads:
+            get_threads(cluster_config,'sentieon_qc_metrics')
+        message:
+            ("Creates multiple different alignment QC metrics based on Picard tools"
+             "Current sample: {params.sample_id}")
+        shell:
+            """
+    mkdir -p {params.tmpdir};
+    export TMPDIR={params.tmpdir};
+    export SENTIEON_TMPDIR={params.tmpdir};
+    export SENTIEON_LICENSE={params.sentieon_lic};
 
-{params.sentieon_exec} driver \
--i {input.bam} \
--r {input.reference} \
---algo WgsMetricsAlgo \
---min_base_qual {params.min_base_qual} \
-{output.wgs_metrics};
-
-{params.sentieon_exec} driver \
--i {input.bam} \
--r {input.reference} \
---algo CoverageMetrics \
---gene_list {params.gene_list} {params.cov_threshold} \
-{output.coverage_metrics}_tmp;
-
-gzip -c {output.coverage_metrics}_tmp > {output.coverage_metrics} ;
-rm {output.coverage_metrics}_tmp ;
-rm -rf {params.tmpdir} ;
-        """
+    {params.sentieon_exec} driver \
+    -t {threads} \
+    -r {input.ref} \
+    -i {input.bam} \
+    --algo AlignmentStat --adapter_seq {params.adapter} {output.alignment_metrics} \
+    --algo InsertSizeMetricAlgo --min_read_ratio 0.01 {output.insert_size_metrics} \
+    --algo GCBias --summary {output.gc_bias_summary} {output.gc_bias_metrics} \
+    --algo MeanQualityByCycle {output.quality_by_cycle_metrics} \
+    --algo QualDistribution {output.quality_distribution_metrics} \
+    --algo BaseDistributionByCycle {output.base_distribution_metrics} ;
+            """
 
 rule sentieon_plot_qc_metrics:
     input:
@@ -68,14 +158,14 @@ rule sentieon_plot_qc_metrics:
         quality_by_cycle_pdf = Path(qc_dir,"{sample_type}.{sample}.quality_by_cycle_metrics.pdf").as_posix(),
         quality_distribution_pdf = Path(qc_dir,"{sample_type}.{sample}.quality_distribution_metrics.pdf").as_posix(),
     benchmark:
-        Path(benchmark_dir, "sentieon_dedup_{sample_type}.{sample}.tsv").as_posix()
+        Path(benchmark_dir, "sentieon_plot_qc_metrics_{sample_type}.{sample}.tsv").as_posix()
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
         sample_id = "{sample}",
     threads:
-        get_threads(cluster_config,'sentieon_dedup')
+        get_threads(cluster_config,'sentieon_plot_qc_metrics')
     message:
         ("Creates plots from various QC metrics by Sentieon mimicking Picard tools"
         "Current sample: {params.sample_id}")
