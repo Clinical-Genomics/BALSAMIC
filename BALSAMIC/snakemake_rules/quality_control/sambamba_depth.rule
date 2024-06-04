@@ -8,7 +8,7 @@ rule sambamba_panel_depth:
         bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample),
         bed = config["panel"]["capture_kit"]
     output:
-        qc_dir + "{sample_type}.{sample}.dedup.cov.bed"
+        qc_dir + "{sample_type}.{sample}.cov.bed"
     benchmark:
         Path(benchmark_dir, "sambamba_panel_depth_" + "{sample_type}_{sample}.tsv").as_posix()
     singularity:
@@ -42,7 +42,7 @@ rule sambamba_exon_depth:
         bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample),
         bed = config["reference"]["refgene_bed"]
     output:
-        qc_dir + "{sample_type}.{sample}.dedup.exon.cov.bed"
+        qc_dir + "{sample_type}.{sample}.exon.cov.bed"
     benchmark:
         Path(benchmark_dir, "sambamba_exon_depth_" + "{sample_type}_{sample}.tsv").as_posix()
     singularity:
