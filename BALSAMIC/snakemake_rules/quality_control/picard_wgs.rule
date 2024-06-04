@@ -50,9 +50,9 @@ rule picard_CollectWgsMetrics:
         bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample),
         reference = config["reference"]["reference_genome"]
     output:
-        qc_dir + "{sample}_picard_wgs_metrics.txt"
+        qc_dir + "{sample_type}.{sample}_picard_wgs_metrics.txt"
     benchmark:
-        Path(benchmark_dir + "picard_CollectWgsMetrics_{sample}.tsv").as_posix()
+        Path(benchmark_dir + "picard_CollectWgsMetrics_{sample_type}_{sample}.tsv").as_posix()
     singularity:
         Path(singularity_image,config[ "bioinfo_tools" ].get("picard") + ".sif").as_posix()
     params:
