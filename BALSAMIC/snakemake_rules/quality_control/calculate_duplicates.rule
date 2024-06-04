@@ -40,6 +40,4 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 {params.tmpdir}/tmp_{params.sample_id}_dedup.bam ;
 
 rm {params.tmpdir}/tmp_{params.sample_id}_dedup.bam ;
-
-sed 's/^LIBRARY/\\n## METRICS CLASS\tpicard\.sam\.DuplicationMetrics\\nLIBRARY/' -i {output.metrics}
         """
