@@ -296,7 +296,8 @@
         "delly": "delly",
         "ascatNgs": "ascatNgs",
         "vcf2cytosure": "vcf2cytosure",
-        "somalier": "somalier"
+        "somalier": "somalier",
+        "msisensorpro": "msisensorpro",
     },
     "bioinfo_tools_version": {
         "bcftools": [
@@ -380,6 +381,9 @@
         ],
         "cnvpytor": [
             "1.2.1"
+        ],
+        "msisensorpro": [
+            "1.2.0"
         ]
     },
     "panel": {
