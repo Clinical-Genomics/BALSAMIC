@@ -21,7 +21,7 @@ RUN cd /tmp && \
   git clone https://github.com/xjtu-omics/msisensor-pro && \
   cd msisensor-pro && \
   git checkout v1.2.0 && \
-  ./INSTALL
+  /tmp/msisensor-pro/INSTALL
 
 RUN  cp -r /tmp/msisensor-pro/binary/msisensor-pro /usr/bin/ && \
   cp -r /tmp/msisensor-pro/vendor/htslib-1.11/libhts.so* /lib/x86_64-linux-gnu
