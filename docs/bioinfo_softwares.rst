@@ -92,7 +92,7 @@ multiqc
 ~~~~~~~
 :Source code: `GitHub` `<https://github.com/ewels/MultiQC>`_
 :Article: `Bioinformatics` `<https://doi.org/10.1093/bioinformatics/btw354>`_
-:Version: `1.22.2`
+:Version: `1.18`
 
 picard
 ~~~~~~
