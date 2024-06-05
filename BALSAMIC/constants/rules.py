@@ -83,7 +83,7 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
             "snakemake_rules/variant_calling/somatic_cnv_tumor_only_tga.rule",
             "snakemake_rules/variant_calling/somatic_sv_tumor_only_tga.rule",
             "snakemake_rules/variant_calling/sentieon_split_snv_sv.rule",
-            "snakemake_rules/variant_calling/sentieon_tn_varcall_tga.rule",
+            "snakemake_rules/variant_calling/sentieon_t_varcall_tga.rule",
         ],
         "annotate": [
             "snakemake_rules/annotation/rankscore.rule",
