@@ -61,6 +61,7 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 {output.vcf_tnscope};
 
 
-echo -e \"{params.tumor}\\tTUMOR\\n{params.normal}\\tNORMAL\" > {output.namemap_snv};
-cp {output.namemap_snv} {output.namemap_sv} 
+echo -e \"{params.case_name}\\tTUMOR\" > {output.namemap_snv};
+cp {output.namemap_snv} {output.namemap_sv}
         """
+
