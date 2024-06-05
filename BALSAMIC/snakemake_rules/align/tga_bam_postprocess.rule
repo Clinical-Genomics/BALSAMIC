@@ -76,7 +76,8 @@ mkdir -p {params.tmpdir}/collate ;
 
 samtools collate -@ {threads} -O -u {input.bam} {params.tmpdir}/collate/{wildcards.sample}_collate_tmp | \
 samtools fixmate --reference {input.ref} -@ {threads} - - | \
-samtools sort -T {params.tmpdir} - -o {output} 
+samtools sort -T {params.tmpdir} - -o {output.bam} ;
+samtools index {output.bam}
         """
 
 rule cap_base_quality:
