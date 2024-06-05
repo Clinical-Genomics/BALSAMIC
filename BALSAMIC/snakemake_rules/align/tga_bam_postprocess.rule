@@ -72,8 +72,9 @@ rule samtools_fixmate:
     shell:
         """
 mkdir -p {params.tmpdir} ;    
+mkdir -p {params.tmpdir}/collate ; 
 
-samtools collate -@ {threads} -O -u {input.bam}  | \
+samtools collate -@ {threads} -O -u {input.bam} {params.tmpdir}/collate/{wildcards.sample}_collate_tmp | \
 samtools fixmate --reference {input.ref} -@ {threads} - - | \
 samtools sort -T {params.tmpdir} - -o {output} 
         """
