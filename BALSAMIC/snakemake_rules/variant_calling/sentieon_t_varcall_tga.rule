@@ -60,8 +60,7 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 --prune_factor {params.prune_factor} \
 {output.vcf_tnscope};
 
-
-echo -e \"{params.case_name}\\tTUMOR\" > {output.namemap_snv};
-cp {output.namemap_snv} {output.namemap_sv}
+echo -e \"{params.tumor}\\tTUMOR\" > {output.namemap_snv};
+cp {output.namemap_snv} {output.namemap_sv};
+rm -rf {params.tmpdir};
         """
-
