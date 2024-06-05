@@ -20,7 +20,6 @@ RUN apt-get update && apt-get -y upgrade && \
 RUN cd /tmp && \
   git clone https://github.com/xjtu-omics/msisensor-pro && \
   cd msisensor-pro && \
-  git checkout v1.2.0 && \
   /tmp/msisensor-pro/INSTALL
 
 RUN  cp -r /tmp/msisensor-pro/binary/msisensor-pro /usr/bin/ && \
