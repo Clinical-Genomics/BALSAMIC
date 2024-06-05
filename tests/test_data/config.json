@@ -297,7 +297,7 @@
         "ascatNgs": "ascatNgs",
         "vcf2cytosure": "vcf2cytosure",
         "somalier": "somalier",
-        "msisensorpro": "msisensorpro",
+        "msisensorpro": "msisensorpro"
     },
     "bioinfo_tools_version": {
         "bcftools": [
