@@ -22,7 +22,7 @@ rule mosdepth_coverage:
         samflag = '1796',
         quantize = '0:1:50:150:',
         sample_name = '{sample}',
-        output_dir = bam_dir,
+        output_dir = qc_dir,
     threads:
         get_threads(cluster_config, "mosdepth_coverage")
     message:
@@ -40,6 +40,6 @@ mosdepth \
 --flag {params.samflag} \
 --quantize {params.quantize} \
 --threads {threads} \
-{params.output_dir}/{wildcards.sample_type}_{wildcards.sample} \
+{params.output_dir}{wildcards.sample_type}_{wildcards.sample} \
 {input.bam};
         """
