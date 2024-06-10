@@ -40,6 +40,6 @@ mosdepth \
 --flag {params.samflag} \
 --quantize {params.quantize} \
 --threads {threads} \
-{params.output_dir}{wildcards.sample_type}_{wildcards.sample} \
+{params.output_dir}{wildcards.sample_type}.{wildcards.sample} \
 {input.bam};
         """
