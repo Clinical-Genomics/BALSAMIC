@@ -9,7 +9,7 @@ rule fastp_adapter_trim_tga:
         fastq_r1 = temp(fastq_dir + "{sample}_1.adapter_trimmed.fastq.gz"),
         fastq_r2 = temp(fastq_dir + "{sample}_2.adapter_trimmed.fastq.gz"),
         json = qc_dir + "fastp/{sample}_adaptertrim_fastp.json",
-        html = qc_dir + "fastp/{sample}_adaptertrim_fastp_fastp.html"
+        html = qc_dir + "fastp/{sample}_adaptertrim_fastp.html"
     benchmark:
         Path(benchmark_dir, "fastp_quality_trim" + "{sample}.tsv").as_posix()
     singularity:
