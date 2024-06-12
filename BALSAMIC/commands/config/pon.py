@@ -8,7 +8,6 @@ import click
 
 from BALSAMIC import __version__ as balsamic_version
 from BALSAMIC.commands.options import (
-    OPTION_ADAPTER_TRIM,
     OPTION_ANALYSIS_DIR,
     OPTION_BALSAMIC_CACHE,
     OPTION_CACHE_VERSION,
@@ -19,15 +18,12 @@ from BALSAMIC.commands.options import (
     OPTION_PANEL_BED,
     OPTION_PON_VERSION,
     OPTION_PON_WORKFLOW,
-    OPTION_QUALITY_TRIM,
-    OPTION_UMI,
-    OPTION_UMI_TRIM_LENGTH,
 )
 from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV, PONWorkflow
 from BALSAMIC.constants.cache import GenomeVersion
 from BALSAMIC.constants.constants import FileType
 from BALSAMIC.constants.paths import CONTAINERS_DIR
-from BALSAMIC.models.config import ConfigModel
+from BALSAMIC.models.config import ConfigModel, QCModel
 from BALSAMIC.utils.cli import (
     generate_graph,
     get_analysis_fastq_files_directory,
@@ -41,7 +37,6 @@ LOG = logging.getLogger(__name__)
 
 
 @click.command("pon", short_help="Create a sample config file for PON analysis")
-@OPTION_ADAPTER_TRIM
 @OPTION_ANALYSIS_DIR
 @OPTION_BALSAMIC_CACHE
 @OPTION_CACHE_VERSION
@@ -52,13 +47,9 @@ LOG = logging.getLogger(__name__)
 @OPTION_PANEL_BED
 @OPTION_PON_WORKFLOW
 @OPTION_PON_VERSION
-@OPTION_QUALITY_TRIM
-@OPTION_UMI
-@OPTION_UMI_TRIM_LENGTH
 @click.pass_context
 def pon_config(
     context: click.Context,
-    adapter_trim: bool,
     analysis_dir: Path,
     balsamic_cache: Path,
     cache_version: str,
@@ -68,9 +59,6 @@ def pon_config(
     genome_interval: Path,
     panel_bed: Path,
     pon_workflow: PONWorkflow,
-    quality_trim: bool,
-    umi: bool,
-    umi_trim_length: bool,
     version: str,
 ):
     references_path: Path = Path(balsamic_cache, cache_version, genome_version)
@@ -105,12 +93,7 @@ def pon_config(
         directory.mkdir(exist_ok=True)
 
     config_collection_dict = ConfigModel(
-        QC={
-            "adapter_trim": adapter_trim,
-            "quality_trim": quality_trim,
-            "umi_trim": umi if panel_bed else False,
-            "umi_trim_length": umi_trim_length,
-        },
+        QC=QCModel,
         analysis={
             "case_id": case_id,
             "analysis_dir": analysis_dir,
