@@ -1,13 +1,13 @@
 """Rules for TGA fastq pre-processing: removal UMIs and quality and adapter-trimming."""
 
 rule fastp_adapter_trim_tga:
-    """Fastq data pre-processing after extraction of UMIs."""
+    """Fastq adapter trimming before extraction of UMIs."""
     input:
-        fastq_fwd = fastq_dir + "concat.{sample}_1.pre_umi.fastq.gz",
-        fastq_rev = fastq_dir + "concat.{sample}_2.pre_umi.fastq.gz"
+        fastq_r1 = fastq_dir + "concat.{sample}_1.fastq.gz",
+        fastq_r2 = fastq_dir + "concat.{sample}_2.fastq.gz"
     output:
-        fastq_fwd = temp(fastq_dir + "{sample}_1.adapter_trimmed.fastq.gz"),
-        fastq_rev = temp(fastq_dir + "{sample}_2.adapter_trimmed.fastq.gz"),
+        fastq_r1 = temp(fastq_dir + "{sample}_1.adapter_trimmed.fastq.gz"),
+        fastq_r2 = temp(fastq_dir + "{sample}_2.adapter_trimmed.fastq.gz"),
         json = qc_dir + "fastp/{sample}_adaptertrim_fastp.json",
         html = qc_dir + "fastp/{sample}_adaptertrim_fastp_fastp.html"
     benchmark:
@@ -16,7 +16,6 @@ rule fastp_adapter_trim_tga:
         Path(singularity_image, config["bioinfo_tools"].get("fastp") + ".sif").as_posix()
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-        quality_trim = " ".join(fastp_parameters["fastp_trim_qual"]),
         adapter_trim = " ".join(fastp_parameters["fastp_trim_adapter"]),
         sample = "{sample}"
     threads:
@@ -29,22 +28,22 @@ export TMPDIR={params.tmpdir};
 
 fastp \
 --thread {threads} \
---in1 {input.interleaved_fastq} \
---interleaved_in \
+--in1 {input.fastq_r1} \
+--in2 {input.fastq_r2} \
 --out1 {output.fastq_r1} \
 --out2 {output.fastq_r2} \
 --json {output.json} \
 --html {output.html} \
 --overrepresentation_analysis \
-{params.quality_trim}
+{params.adapter_trim}
         """
 
 
 rule sentieon_umiextract_tga:
     """Extract UMIs into tags in read header."""
     input:
-        fastq_fwd = fastq_dir + "concat.{sample}_1.pre_umi.fastq.gz",
-        fastq_rev = fastq_dir + "concat.{sample}_2.pre_umi.fastq.gz"
+        fastq_r1 = fastq_dir + "{sample}_1.adapter_trimmed.fastq.gz",
+        fastq_r2 = fastq_dir + "{sample}_2.adapter_trimmed.fastq.gz"
     output:
         ds_umi = temp(fastq_dir + "{sample}_umiextract_interleaved.fastq.gz")
     benchmark:
@@ -71,12 +70,12 @@ export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
 
 {params.sentieon_exec} umi extract \
-{params.ds_params} {input.fastq_fwd} {input.fastq_rev} | gzip > {output.ds_umi} ;
+{params.ds_params} {input.fastq_r1} {input.fastq_r2} | gzip > {output.ds_umi} ;
         """
 
 
 rule fastp_quality_trim_tga:
-    """Fastq data pre-processing after extraction of UMIs."""
+    """Fastq quality-trimming after extraction of UMIs."""
     input:
         interleaved_fastq = fastq_dir + "{sample}_umiextract_interleaved.fastq.gz"
     output:
@@ -91,7 +90,6 @@ rule fastp_quality_trim_tga:
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         quality_trim = " ".join(fastp_parameters["fastp_trim_qual"]),
-        adapter_trim = " ".join(fastp_parameters["fastp_trim_adapter"]),
         sample = "{sample}"
     threads:
         get_threads(cluster_config, 'fastp_quality_trim')

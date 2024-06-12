@@ -11,8 +11,8 @@ rule concatenate_reads:
             sample_name=wildcards.sample, fastq_types=[FastqName.REV]
         ),
     output:
-        fastq_fwd=fastq_dir + "concat.{sample}_1.pre_umi.fastq.gz",
-        fastq_rev=fastq_dir + "concat.{sample}_2.pre_umi.fastq.gz",
+        fastq_fwd=fastq_dir + "concat.{sample}_1.fastq.gz",
+        fastq_rev=fastq_dir + "concat.{sample}_2.fastq.gz",
     benchmark:
         Path(benchmark_dir, "concatenate_umi_reads_{sample}.tsv").as_posix()
     params:
