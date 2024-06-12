@@ -4,7 +4,7 @@
 
 Added:
 ^^^^^^
-* MSIsensor-pro container 
+* MSIsensor-pro container https://github.com/Clinical-Genomics/BALSAMIC/pull/1444
 
 Changed:
 ^^^^^^^^
