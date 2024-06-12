@@ -17,7 +17,7 @@ rule fastp_quality_trim_wgs:
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("fastp") + ".sif").as_posix()
     params:
-        tmpdir = tmp_dir,
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         quality_trim = " ".join(fastp_parameters["fastp_trim_qual"]),
         adapter_trim = " ".join(fastp_parameters["fastp_trim_adapter"]),
         fastq_pattern = "{fastq_pattern}"

@@ -407,19 +407,4 @@ OPTION_TUMOR_SAMPLE_NAME = click.option(
     type=click.STRING,
     help="Tumor sample name",
 )
-
-OPTION_UMI = click.option(
-    "--umi/--no-umi",
-    default=True,
-    show_default=True,
-    is_flag=True,
-    help="UMI processing steps for samples with UMI tags. For WGS cases, UMI is always disabled.",
-)
-
-OPTION_UMI_TRIM_LENGTH = click.option(
-    "--umi-trim-length",
-    default=5,
-    show_default=True,
-    type=click.INT,
-    help="Trim N bases from reads in FASTQ file",
 )

@@ -58,7 +58,6 @@ LOG = logging.getLogger(__name__)
 
 
 @click.command("case", short_help="Create a sample config file from input sample data")
-@OPTION_ADAPTER_TRIM
 @OPTION_ANALYSIS_DIR
 @OPTION_ANALYSIS_WORKFLOW
 @OPTION_BACKGROUND_VARIANTS
@@ -81,16 +80,12 @@ LOG = logging.getLogger(__name__)
 @OPTION_NORMAL_SAMPLE_NAME
 @OPTION_PANEL_BED
 @OPTION_PON_CNN
-@OPTION_QUALITY_TRIM
 @OPTION_SWEGEN_SNV
 @OPTION_SWEGEN_SV
 @OPTION_TUMOR_SAMPLE_NAME
-@OPTION_UMI
-@OPTION_UMI_TRIM_LENGTH
 @click.pass_context
 def case_config(
     context: click.Context,
-    adapter_trim: bool,
     analysis_dir: Path,
     analysis_workflow: AnalysisWorkflow,
     background_variants: Path,
@@ -117,8 +112,6 @@ def case_config(
     swegen_snv: Path,
     swegen_sv: Path,
     tumor_sample_name: str,
-    umi: bool,
-    umi_trim_length: int,
 ):
     references_path: Path = Path(balsamic_cache, cache_version, genome_version)
     references: Dict[str, Path] = get_absolute_paths_dict(
@@ -187,8 +180,6 @@ def case_config(
         QC={
             "quality_trim": quality_trim,
             "adapter_trim": adapter_trim,
-            "umi_trim": umi if panel_bed else False,
-            "umi_trim_length": umi_trim_length,
         },
         analysis={
             "case_id": case_id,

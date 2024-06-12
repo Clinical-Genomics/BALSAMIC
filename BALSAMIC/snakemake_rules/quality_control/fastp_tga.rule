@@ -1,5 +1,44 @@
 """Rules for TGA fastq pre-processing: removal UMIs and quality and adapter-trimming."""
 
+rule fastp_adapter_trim_tga:
+    """Fastq data pre-processing after extraction of UMIs."""
+    input:
+        fastq_fwd = fastq_dir + "concat.{sample}_1.pre_umi.fastq.gz",
+        fastq_rev = fastq_dir + "concat.{sample}_2.pre_umi.fastq.gz"
+    output:
+        fastq_fwd = temp(fastq_dir + "{sample}_1.adapter_trimmed.fastq.gz"),
+        fastq_rev = temp(fastq_dir + "{sample}_2.adapter_trimmed.fastq.gz"),
+        json = qc_dir + "fastp/{sample}_adaptertrim_fastp.json",
+        html = qc_dir + "fastp/{sample}_adaptertrim_fastp_fastp.html"
+    benchmark:
+        Path(benchmark_dir, "fastp_quality_trim" + "{sample}.tsv").as_posix()
+    singularity:
+        Path(singularity_image, config["bioinfo_tools"].get("fastp") + ".sif").as_posix()
+    params:
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
+        quality_trim = " ".join(fastp_parameters["fastp_trim_qual"]),
+        adapter_trim = " ".join(fastp_parameters["fastp_trim_adapter"]),
+        sample = "{sample}"
+    threads:
+        get_threads(cluster_config, 'fastp_quality_trim')
+    message:
+        "Adapter trimming for fastqs for sample: {params.sample}"
+    shell:
+        """
+export TMPDIR={params.tmpdir};
+
+fastp \
+--thread {threads} \
+--in1 {input.interleaved_fastq} \
+--interleaved_in \
+--out1 {output.fastq_r1} \
+--out2 {output.fastq_r2} \
+--json {output.json} \
+--html {output.html} \
+--overrepresentation_analysis \
+{params.quality_trim}
+        """
+
 
 rule sentieon_umiextract_tga:
     """Extract UMIs into tags in read header."""
@@ -41,23 +80,23 @@ rule fastp_quality_trim_tga:
     input:
         interleaved_fastq = fastq_dir + "{sample}_umiextract_interleaved.fastq.gz"
     output:
-        fastq_r1 = temp(fastq_dir + "{sample}_1.fp.fastq.gz"),
-        fastq_r2 = temp(fastq_dir + "{sample}_2.fp.fastq.gz"),
-        json = qc_dir + "fastp/{sample}_fastp.json",
-        html = qc_dir + "fastp/{sample}_fastp.html"
+        fastq_r1 = temp(fastq_dir + "{sample}_1.quality_trimmed.fastq.gz"),
+        fastq_r2 = temp(fastq_dir + "{sample}_2.quality_trimmed.fastq.gz"),
+        json = qc_dir + "fastp/{sample}_qualitytrim_fastp.json",
+        html = qc_dir + "fastp/{sample}_qualitytrim_fastp.html"
     benchmark:
         Path(benchmark_dir, "fastp_quality_trim" + "{sample}.tsv").as_posix()
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("fastp") + ".sif").as_posix()
     params:
-        tmpdir = tmp_dir,
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         quality_trim = " ".join(fastp_parameters["fastp_trim_qual"]),
         adapter_trim = " ".join(fastp_parameters["fastp_trim_adapter"]),
         sample = "{sample}"
     threads:
         get_threads(cluster_config, 'fastp_quality_trim')
     message:
-        "Quality and adapter trimming for fastqs for fastq pattern: {params.sample}"
+        "Quality for fastqs for sample: {params.sample}"
     shell:
         """
 export TMPDIR={params.tmpdir};
