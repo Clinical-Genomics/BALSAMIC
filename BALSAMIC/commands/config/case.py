@@ -39,7 +39,7 @@ from BALSAMIC.constants.cache import GenomeVersion
 from BALSAMIC.constants.constants import FileType
 from BALSAMIC.constants.paths import CONTAINERS_DIR
 from BALSAMIC.constants.workflow_params import VCF_DICT
-from BALSAMIC.models.config import ConfigModel, QCModel
+from BALSAMIC.models.config import ConfigModel
 from BALSAMIC.utils.cli import (
     generate_graph,
     get_analysis_fastq_files_directory,
@@ -172,7 +172,7 @@ def case_config(
         directory.mkdir(exist_ok=True)
 
     config_collection_dict = ConfigModel(
-        QC=QCModel,
+        QC={},
         analysis={
             "case_id": case_id,
             "gender": gender,
