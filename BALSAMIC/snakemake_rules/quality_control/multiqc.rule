@@ -76,8 +76,10 @@ else:
         multiqc_input.extend(expand(qc_dir + "normal.{sample}.dedup_conensus.metrics",sample=normal_sample))
 
     # fastp metrics
-    multiqc_input.extend(expand(qc_dir + "fastp/{sample}_fastp.json", sample=sample_names))
-    multiqc_input.extend(expand(qc_dir + "fastp/{sample}_fastp.html", sample=sample_names))
+    multiqc_input.extend(expand(qc_dir + "fastp/{sample}_adaptertrim_fastp.json", sample=sample_names))
+    multiqc_input.extend(expand(qc_dir + "fastp/{sample}_adaptertrim_fastp.html", sample=sample_names))
+    multiqc_input.extend(expand(qc_dir + "fastp/{sample}_qualitytrim_fastp.json", sample=sample_names))
+    multiqc_input.extend(expand(qc_dir + "fastp/{sample}_qualitytrim_fastp.html", sample=sample_names))
 
     # sambamba metrics
     multiqc_input.extend(expand(qc_dir + "tumor.{sample}.cov.bed", sample=tumor_sample))
