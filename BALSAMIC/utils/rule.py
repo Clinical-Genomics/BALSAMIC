@@ -415,24 +415,25 @@ def get_fastp_parameters(config_model: ConfigModel) -> Dict:
 
     # Add quality trimming parameters
     fastp_trim_qual = [
-            "--trim_tail1",
-            "1",
-            "--n_base_limit",
-            config_model.QC.n_base_limit,
-            "--length_required",
-            config_model.QC.min_seq_length,
-            "--low_complexity_filter",
-            "--trim_poly_g",
-            "--dont_eval_duplication",
-            "--disable_adapter_trimming"]
+        "--trim_tail1",
+        "1",
+        "--n_base_limit",
+        config_model.QC.n_base_limit,
+        "--length_required",
+        config_model.QC.min_seq_length,
+        "--low_complexity_filter",
+        "--trim_poly_g",
+        "--dont_eval_duplication",
+        "--disable_adapter_trimming",
+    ]
 
     # Add adapter trimming parameters
-    fastp_trim_adapter = ["--detect_adapter_for_pe"
-                          "--disable_quality_filtering",
-                          "--dont_eval_duplication",
-                          "--length_required",
-                          config_model.QC.min_seq_length]
-
+    fastp_trim_adapter = [
+        "--detect_adapter_for_pe" "--disable_quality_filtering",
+        "--dont_eval_duplication",
+        "--length_required",
+        config_model.QC.min_seq_length,
+    ]
 
     fastp_parameters_dict["fastp_trim_qual"] = fastp_trim_qual
     fastp_parameters_dict["fastp_trim_adapter"] = fastp_trim_adapter

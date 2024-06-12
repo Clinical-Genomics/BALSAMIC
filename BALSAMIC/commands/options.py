@@ -407,4 +407,3 @@ OPTION_TUMOR_SAMPLE_NAME = click.option(
     type=click.STRING,
     help="Tumor sample name",
 )
-)
