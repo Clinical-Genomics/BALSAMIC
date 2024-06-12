@@ -8,7 +8,6 @@ import click
 
 from BALSAMIC import __version__ as balsamic_version
 from BALSAMIC.commands.options import (
-    OPTION_ADAPTER_TRIM,
     OPTION_ANALYSIS_DIR,
     OPTION_ANALYSIS_WORKFLOW,
     OPTION_BACKGROUND_VARIANTS,
@@ -31,12 +30,9 @@ from BALSAMIC.commands.options import (
     OPTION_NORMAL_SAMPLE_NAME,
     OPTION_PANEL_BED,
     OPTION_PON_CNN,
-    OPTION_QUALITY_TRIM,
     OPTION_SWEGEN_SNV,
     OPTION_SWEGEN_SV,
     OPTION_TUMOR_SAMPLE_NAME,
-    OPTION_UMI,
-    OPTION_UMI_TRIM_LENGTH,
 )
 from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV, AnalysisWorkflow, Gender
 from BALSAMIC.constants.cache import GenomeVersion

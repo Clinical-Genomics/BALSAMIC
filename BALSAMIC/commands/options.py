@@ -24,14 +24,6 @@ from BALSAMIC.constants.rules import DELIVERY_RULES
 from BALSAMIC.constants.workflow_params import VCF_DICT
 from BALSAMIC.utils.cli import validate_cache_version, validate_exome_option
 
-OPTION_ADAPTER_TRIM = click.option(
-    "--adapter-trim/--no-adapter-trim",
-    default=True,
-    show_default=True,
-    is_flag=True,
-    help="Trim adapters from reads in FASTQ file",
-)
-
 OPTION_ANALYSIS_DIR = click.option(
     "--analysis-dir",
     type=click.Path(exists=True, resolve_path=True),
@@ -312,14 +304,6 @@ OPTION_PRINT_FILES = click.option(
     default=False,
     show_default=True,
     help="Print list of analysis files. Otherwise only final count will be printed.",
-)
-
-OPTION_QUALITY_TRIM = click.option(
-    "--quality-trim/--no-quality-trim",
-    default=True,
-    show_default=True,
-    is_flag=True,
-    help="Trim low quality reads in FASTQ file",
 )
 
 OPTION_QUIET = click.option(
