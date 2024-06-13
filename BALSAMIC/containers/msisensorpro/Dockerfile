@@ -12,7 +12,7 @@ LABEL base.image="ubuntu:22.04" \
 
 ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get update && apt-get -y upgrade && \
-    apt-get -y install -y --no-install-recommends git make build-essential \
+    apt-get install -y --no-install-recommends git make build-essential \
     liblzma-dev libbz2-dev zlib1g-dev libncurses5-dev libncursesw5-dev ca-certificates && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
