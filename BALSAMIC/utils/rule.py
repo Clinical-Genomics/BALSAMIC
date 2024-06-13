@@ -429,7 +429,8 @@ def get_fastp_parameters(config_model: ConfigModel) -> Dict:
 
     # Add adapter trimming parameters
     fastp_trim_adapter = [
-        "--detect_adapter_for_pe" "--disable_quality_filtering",
+        "--detect_adapter_for_pe",
+        "--disable_quality_filtering",
         "--dont_eval_duplication",
         "--length_required",
         config_model.QC.min_seq_length,
