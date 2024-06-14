@@ -526,7 +526,7 @@ if config["analysis"]["sequencing_type"] == SequencingType.WGS and "gens_coverag
     analysis_specific_results.extend(
         expand(cnv_dir + "{sample}.{gens_input}.bed.gz", sample=sample_names, gens_input=["cov", "baf"])
     )
-if config["analysis"]["sequencing_type"] == SequencingType.TARGETED:
+if config["analysis"]["sequencing_type"] == SequencingType.TARGETED and "gnomad_min_af5" in config["reference"]:
     analysis_specific_results.extend(
         expand(cnv_dir + "{sample}.{gens_input}.bed.gz", sample=sample_names, gens_input=["cov", "baf"])
     )

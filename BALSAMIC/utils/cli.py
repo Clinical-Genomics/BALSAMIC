@@ -215,6 +215,42 @@ def bioinfo_tool_version_conda(
     return conda_bioinfo_version
 
 
+def get_gens_references(
+    genome_interval: Optional[str],
+    gens_coverage_pon: Optional[str],
+    gnomad_min_af5: Optional[str],
+    panel_bed: Optional[str],
+    references: Dict[str, str],
+) -> Dict:
+
+    gens_arguments = [genome_interval, gens_coverage_pon, gnomad_min_af5]
+
+    # Check if any of the gens arguments are provided
+    if any(gens_arguments):
+        # Ensure all required arguments are provided or raise an error if panel_bed is not set
+        if not all(gens_arguments) and not panel_bed:
+            raise click.BadParameter(
+                "All three arguments (genome_interval, gens_coverage_pon, gnomad_min_af5) are required for GENS in WGS."
+            )
+
+        # Construct the gens_ref_files dictionary
+        gens_ref_files = (
+            {"gnomad_min_af5": gnomad_min_af5}
+            if panel_bed
+            else {
+                "genome_interval": genome_interval,
+                "gens_coverage_pon": gens_coverage_pon,
+                "gnomad_min_af5": gnomad_min_af5,
+            }
+        )
+
+        # Update references dictionary with gens values
+        references.update(
+            {gens_file: path for gens_file, path in gens_ref_files.items() if path}
+        )
+        return references
+
+
 def get_bioinfo_tools_version(
     bioinfo_tools: dict, container_conda_env_path: Path
 ) -> dict:
