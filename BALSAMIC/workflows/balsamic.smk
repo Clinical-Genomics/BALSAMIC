@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Dict, List
 
 from BALSAMIC.constants.constants import FileType
-from BALSAMIC.constants.analysis import FastqName, MutationType, SampleType
+from BALSAMIC.constants.analysis import FastqName, MutationType, SampleType, SequencingType
 from BALSAMIC.constants.paths import BALSAMIC_DIR, SENTIEON_DNASCOPE_DIR, SENTIEON_TNSCOPE_DIR
 from BALSAMIC.constants.rules import SNAKEMAKE_RULES
 from BALSAMIC.constants.variant_filters import (
@@ -522,10 +522,15 @@ if config['analysis']['analysis_type'] == "single":
     )
 
 # GENS Outputs
-if config["analysis"]["sequencing_type"] == "wgs" and "gens_coverage_pon" in config["reference"]:
+if config["analysis"]["sequencing_type"] == SequencingType.WGS and "gens_coverage_pon" in config["reference"]:
     analysis_specific_results.extend(
         expand(cnv_dir + "{sample}.{gens_input}.bed.gz", sample=sample_names, gens_input=["cov", "baf"])
     )
+if config["analysis"]["sequencing_type"] == SequencingType.TARGETED:
+    analysis_specific_results.extend(
+        expand(cnv_dir + "{sample}.{gens_input}.bed.gz", sample=sample_names, gens_input=["cov", "baf"])
+    )
+
 
 # Dragen
 if config["analysis"]["sequencing_type"] == "wgs" and config['analysis']['analysis_type'] == "single":
