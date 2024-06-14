@@ -2045,6 +2045,7 @@ def fixture_develop_containers() -> Dict[str, str]:
         DockerContainers.HTSLIB: "docker://clinicalgenomics/balsamic:develop-htslib",
         DockerContainers.PURECN: "docker://clinicalgenomics/balsamic:develop-purecn",
         DockerContainers.GATK: "docker://clinicalgenomics/balsamic:develop-gatk",
+        DockerContainers.MSISENSORPRO: "docker://clinicalgenomics/balsamic:develop-msisensorpro",
     }
 
 

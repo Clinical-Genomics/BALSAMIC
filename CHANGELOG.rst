@@ -1,6 +1,11 @@
 [X.X.X]
 -------
 
+
+Added:
+^^^^^^
+* MSIsensor-pro container https://github.com/Clinical-Genomics/BALSAMIC/pull/1444
+
 Changed:
 ^^^^^^^^
 * Cluster scheduler script for immediate submit https://github.com/Clinical-Genomics/BALSAMIC/pull/1372
