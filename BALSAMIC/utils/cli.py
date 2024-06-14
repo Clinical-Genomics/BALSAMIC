@@ -247,7 +247,7 @@ def get_gens_references(
         references.update(
             {gens_file: path for gens_file, path in gens_ref_files.items() if path is not None}
         )
-        return references
+    return references
 
 
 def get_bioinfo_tools_version(
