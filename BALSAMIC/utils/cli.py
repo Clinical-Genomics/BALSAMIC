@@ -222,7 +222,6 @@ def get_gens_references(
     panel_bed: Optional[str],
     references: Dict[str, str],
 ) -> Dict:
-
     gens_arguments = [genome_interval, gens_coverage_pon, gnomad_min_af5]
 
     # Check if any of the gens arguments are provided

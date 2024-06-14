@@ -130,7 +130,9 @@ def case_config(
     if cadd_annotations:
         references.update(cadd_annotations_path)
 
-    references = get_gens_references(genome_interval, gens_coverage_pon, gnomad_min_af5, panel_bed, references)
+    references = get_gens_references(
+        genome_interval, gens_coverage_pon, gnomad_min_af5, panel_bed, references
+    )
 
     variants_observations = {
         "clinical_snv_observations": clinical_snv_observations,
