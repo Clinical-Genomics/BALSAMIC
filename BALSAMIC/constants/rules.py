@@ -77,6 +77,7 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
             "snakemake_rules/align/postprocess_bam.rule",
         ],
         "varcall": [
+            "snakemake_rules/variant_calling/gens_preprocessing.rule",
             "snakemake_rules/variant_calling/germline.rule",
             "snakemake_rules/variant_calling/split_bed.rule",
             "snakemake_rules/variant_calling/somatic_cnv_tumor_only_tga.rule",
@@ -108,6 +109,7 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
             "snakemake_rules/align/postprocess_bam.rule",
         ],
         "varcall": [
+            "snakemake_rules/variant_calling/gens_preprocessing.rule",
             "snakemake_rules/variant_calling/germline.rule",
             "snakemake_rules/variant_calling/split_bed.rule",
             "snakemake_rules/variant_calling/somatic_tumor_normal.rule",
