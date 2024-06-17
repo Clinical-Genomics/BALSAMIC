@@ -257,7 +257,11 @@ def get_gens_references(
 
         # Update references dictionary with gens values
         references.update(
-            {gens_file: path for gens_file, path in gens_ref_files.items() if path is not None}
+            {
+                gens_file: path
+                for gens_file, path in gens_ref_files.items()
+                if path is not None
+            }
         )
     return references
 

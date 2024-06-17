@@ -135,7 +135,7 @@ def case_config(
         gens_coverage_pon=gens_coverage_pon,
         gnomad_min_af5=gnomad_min_af5,
         panel_bed=panel_bed,
-        references=references
+        references=references,
     )
 
     variants_observations = {
