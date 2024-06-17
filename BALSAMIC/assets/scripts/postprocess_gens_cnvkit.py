@@ -17,10 +17,17 @@ import pandas as pd
     type=click.Path(exists=True),
     help="Input CNVkit cnr result.",
 )
-def create_gens_cov_file(output_file, ormalised_coverage_path):
+def create_gens_cov_file(output_file, normalised_coverage_path):
+    """
+    Post-processes the CNVkit cnr output for upload to GENS.
+    Removing Antitarget regions and outputting the coverages in multiple resolution-formats.
+
+    :param output_file: Path to GENS output.cov file
+    :param normalised_coverage_path: Path to input CNVkit cnr file.
+    """
     # Process CNVkit file
     log2_data = []
-    cnvkit_df = pd.read_csv(ormalised_coverage_path, sep="\t")
+    cnvkit_df = pd.read_csv(normalised_coverage_path, sep="\t")
     for index, row in cnvkit_df.iterrows():
         if row["gene"] == "Antitarget":
             continue
