@@ -124,7 +124,7 @@ else:
       -r {input.ref} \
       -i {input.bam} \
       --interval {input.bed} \
-      --interval_padding 100 \
+      --interval_padding 20 \
       --algo DNAscope \
       --pcr_indel_mode {params.pcr_model} \
       --given {input.gnomad_af5} {output.gnomad_af5_vcf};
