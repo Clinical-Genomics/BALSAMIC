@@ -140,6 +140,7 @@ else:
             gens_baf_bed = cnv_dir + "{sample}.baf.bed",
             gens_cov_bed = cnv_dir + "{sample}.cov.bed"
         params:
+            sequencing_type = sequencing_type,
             gens_preprocessing = get_script_path("preprocess_gens.py"),
             gens_preprocess_cnvkit = get_script_path("postprocess_gens_cnvkit.py"),
             sample="{sample}"
