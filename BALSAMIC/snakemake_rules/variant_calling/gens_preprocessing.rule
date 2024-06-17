@@ -26,7 +26,6 @@ if config["analysis"]["sequencing_type"] == 'wgs':
       export TMPDIR={params.tmpdir};
       export SENTIEON_TMPDIR={params.tmpdir};
       export SENTIEON_LICENSE={params.sentieon_lic};
-      export SENTIEON_DNASCOPE={params.sentieon_ml_dnascope};
   
       {params.sentieon_exec} driver \
       -t {threads} \
@@ -119,7 +118,6 @@ else:
       export TMPDIR={params.tmpdir};
       export SENTIEON_TMPDIR={params.tmpdir};
       export SENTIEON_LICENSE={params.sentieon_lic};
-      export SENTIEON_DNASCOPE={params.sentieon_ml_dnascope};
   
       {params.sentieon_exec} driver \
       -t {threads} \
