@@ -131,7 +131,11 @@ def case_config(
         references.update(cadd_annotations_path)
 
     references = get_gens_references(
-        genome_interval, gens_coverage_pon, gnomad_min_af5, panel_bed, references
+        genome_interval=genome_interval,
+        gens_coverage_pon=gens_coverage_pon,
+        gnomad_min_af5=gnomad_min_af5,
+        panel_bed=panel_bed,
+        references=references
     )
 
     variants_observations = {

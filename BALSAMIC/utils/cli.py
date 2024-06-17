@@ -222,6 +222,18 @@ def get_gens_references(
     panel_bed: Optional[str],
     references: Dict[str, str],
 ) -> Dict:
+    """
+    Assigns reference-files required for GENS if they have been supplied.
+
+    :param genome_interval: Coverage-regions. (required for WGS GENS)
+    :param gens_coverage_pon: PON for GATK CollectReadCounts. (required for WGS GENS)
+    :param gnomad_min_af5: gnomad VCF filtered to keep variants above 5% VAF. (required for WGS and TGA GENS)
+    :param panel_bed: Bedfile supplied for TGA analyses.
+    :param references: Reference dictionary to be updated.
+
+    :return: references: Updated reference dictionary.
+    """
+
     gens_arguments = [genome_interval, gens_coverage_pon, gnomad_min_af5]
 
     # Check if any of the gens arguments are provided
