@@ -407,8 +407,9 @@ if "dragen" in config:
 
 # Add rule for GENS
 if "gnomad_min_af5" in config["reference"]:
-    rules_to_include.append("snakemake_rules/variant_calling/gatk_read_counts.rule")
     rules_to_include.append("snakemake_rules/variant_calling/gens_preprocessing.rule")
+if "gnomad_min_af5" in config["reference"] and sequence_type == SequencingType.WGS:
+    rules_to_include.append("snakemake_rules/variant_calling/gatk_read_counts.rule")
 
 LOG.info(f"The following rules will be included in the workflow: {rules_to_include}")
 LOG.info(f"The following Germline variant callers will be included in the workflow: {germline_caller}")
