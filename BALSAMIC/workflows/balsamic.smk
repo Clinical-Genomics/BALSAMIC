@@ -406,7 +406,7 @@ if "dragen" in config:
     rules_to_include.append("snakemake_rules/concatenation/concatenation.rule")
 
 # Add rule for GENS
-if "gens_coverage_pon" in config["reference"]:
+if "gnomad_min_af5" in config["reference"]:
     rules_to_include.append("snakemake_rules/variant_calling/gatk_read_counts.rule")
     rules_to_include.append("snakemake_rules/variant_calling/gens_preprocessing.rule")
 
@@ -522,11 +522,7 @@ if config['analysis']['analysis_type'] == "single":
     )
 
 # GENS Outputs
-if config["analysis"]["sequencing_type"] == SequencingType.WGS and "gens_coverage_pon" in config["reference"]:
-    analysis_specific_results.extend(
-        expand(cnv_dir + "{sample}.{gens_input}.bed.gz", sample=sample_names, gens_input=["cov", "baf"])
-    )
-if config["analysis"]["sequencing_type"] == SequencingType.TARGETED and "gnomad_min_af5" in config["reference"]:
+if "gnomad_min_af5" in config["reference"]:
     analysis_specific_results.extend(
         expand(cnv_dir + "{sample}.{gens_input}.bed.gz", sample=sample_names, gens_input=["cov", "baf"])
     )
