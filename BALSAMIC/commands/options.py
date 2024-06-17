@@ -1,4 +1,5 @@
 """Balsamic command options."""
+
 import click
 
 from BALSAMIC import __version__ as balsamic_version
@@ -422,4 +423,10 @@ OPTION_UMI_TRIM_LENGTH = click.option(
     show_default=True,
     type=click.INT,
     help="Trim N bases from reads in FASTQ file",
+)
+
+OPTION_UMI_MIN_READS = click.option(
+    "--umi-min-reads",
+    type=click.STRING,
+    help="Minimum raw reads supporting each UMI group. Format: 'x,y,z'.",
 )
