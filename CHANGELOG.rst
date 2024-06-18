@@ -1,3 +1,10 @@
+[15.0.1]
+-------
+
+Added:
+^^^^^^
+* CLI option for the minimum raw reads supporting each UMI group filter
+
 [15.0.0]
 -------
 
