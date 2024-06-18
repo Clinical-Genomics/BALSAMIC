@@ -17,23 +17,41 @@ import pandas as pd
     type=click.Path(exists=True),
     help="Input CNVkit cnr result.",
 )
-def create_gens_cov_file(output_file, normalised_coverage_path):
+@click.option(
+    "-p",
+    "--tumor-purity-path",
+    required=False,
+    type=click.Path(exists=True),
+    help="Tumor purity file from PureCN",
+)
+def create_gens_cov_file(output_file, normalised_coverage_path, tumor_purity_path):
     """
     Post-processes the CNVkit cnr output for upload to GENS.
     Removing Antitarget regions and outputting the coverages in multiple resolution-formats.
 
     :param output_file: Path to GENS output.cov file
     :param normalised_coverage_path: Path to input CNVkit cnr file.
+    :param tumor_purity_path: Path to PureCN purity estimate csv file
     """
     # Process CNVkit file
     log2_data = []
     cnvkit_df = pd.read_csv(normalised_coverage_path, sep="\t")
+
+    # Process PureCN purity file
+    purity = None
+    if tumor_purity_path:
+        purecn_df = pd.read_csv(tumor_purity_path, sep=",")
+        purity = float(purecn_df.iloc[0]["Purity"])
+
     for index, row in cnvkit_df.iterrows():
         if row["gene"] == "Antitarget":
             continue
         midpoint = row["start"] + int((row["end"] - row["start"]) / 2)
+        log2 = row['log2']
+        if purity:
+            log2 = round(float(log2) / purity, 4)
         log2_data.append(
-            f"{row['chromosome']}\t{midpoint-1}\t{midpoint}\t{row['log2']}"
+            f"{row['chromosome']}\t{midpoint-1}\t{midpoint}\t{log2}"
         )
 
     # Write log2 data to output file

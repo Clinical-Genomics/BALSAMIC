@@ -65,7 +65,7 @@ if config["analysis"]["sequencing_type"] == 'wgs':
     --count-panel-of-normals {input.gens_pon} \
     --tmp-dir {params.tmpdir} \
     --standardized-copy-ratios {output.standardized_cr} \
-    --denoised-copy-ratios {output.denoised_cr}
+    --denoised-copy-ratios {output.denoised_cr} ;
 
     rm -rf {params.tmpdir}
             """
@@ -89,7 +89,7 @@ if config["analysis"]["sequencing_type"] == 'wgs':
             "Formatting output for GENS for sample: {params.sample}."
         shell:
             """
-    python {params.gens_preprocessing} -s {params.sequencing_type} -o {output.gens_baf_bed} calculate-bafs --vcf-file-path {input.gnomad_af5_vcf}
+    python {params.gens_preprocessing} -s {params.sequencing_type} -o {output.gens_baf_bed} calculate-bafs --vcf-file-path {input.gnomad_af5_vcf} ;
     python {params.gens_preprocessing} -s {params.sequencing_type} -o {output.gens_cov_bed} create-coverage-regions --normalised-coverage-path {input.denoised_cr}
             """
 else:
@@ -136,6 +136,7 @@ else:
         input:
             cnvkit_cnr = cnv_dir + "tumor.merged.cnr",
             gnomad_af5_vcf = cnv_dir + "SNV.germline.{sample}.dnascope_gnomad_af5.vcf.gz",
+            purecn_purity_csv = cnv_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".purecn.purity.csv",
         output:
             gens_baf_bed = cnv_dir + "{sample}.baf.bed",
             gens_cov_bed = cnv_dir + "{sample}.cov.bed"
@@ -152,8 +153,8 @@ else:
             "Formatting output for GENS for sample: {params.sample}."
         shell:
             """
-    python {params.gens_preprocessing} -s {params.sequencing_type} -o {output.gens_baf_bed} calculate-bafs --vcf-file-path {input.gnomad_af5_vcf}
-    python {params.gens_preprocess_cnvkit} -o {output.gens_cov_bed} --normalised-coverage-path {input.cnvkit_cnr}
+    python {params.gens_preprocessing} -s {params.sequencing_type} -o {output.gens_baf_bed} calculate-bafs --vcf-file-path {input.gnomad_af5_vcf} ;
+    python {params.gens_preprocess_cnvkit} -o {output.gens_cov_bed} --normalised-coverage-path {input.cnvkit_cnr} --tumor-purity-path {input.purecn_purity_csv} 
             """
 
 rule finalize_gens_outputfiles:
@@ -175,7 +176,7 @@ rule finalize_gens_outputfiles:
         "Bgzip and index GENS output: {params.gens_input} for sample: {params.sample_id}."
     shell:
         """
-bgzip {input.gens_input}
+bgzip {input.gens_input} ;
 tabix {input.gens_input}.gz
         """
 
