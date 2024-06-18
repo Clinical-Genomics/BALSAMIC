@@ -1076,7 +1076,7 @@ def test_validate_cache_version_wrong_format():
 
 @pytest.mark.parametrize(
     "umi_min_reads, should_fail",
-    [("3,2,1", False), ("1,0,0", False), ("3,2", True), ("a,b,c", True)],
+    [("3,2,1", False), ("1,0,0", False), ("3,2", True), ("a,b,c", True), (None, False)],
 )
 def test_validate_umi_min_reads(umi_min_reads: str, should_fail: bool):
     """Test UMI min reads option validation."""
