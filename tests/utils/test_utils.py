@@ -1,10 +1,11 @@
 """Test helper functions."""
+
 import json
 import logging
 import subprocess
 import sys
 from pathlib import Path
-from typing import Dict, List, Any
+from typing import Any, Dict, List
 from unittest import mock
 
 import click
@@ -40,6 +41,7 @@ from BALSAMIC.utils.cli import (
     job_id_dump_to_yaml,
     validate_cache_version,
     validate_exome_option,
+    validate_umi_min_reads,
 )
 from BALSAMIC.utils.exc import BalsamicError, WorkflowRunError
 from BALSAMIC.utils.io import (
@@ -1070,6 +1072,23 @@ def test_validate_cache_version_wrong_format():
     # THEN a bad parameter error should be raised
     with pytest.raises(click.BadParameter):
         validate_cache_version(click.Context, click.Parameter, cli_version)
+
+
+@pytest.mark.parametrize(
+    "umi_min_reads, should_fail",
+    [("3,2,1", False), ("1,0,0", False), ("3,2", True), ("a,b,c", True)],
+)
+def test_validate_umi_min_reads(umi_min_reads: str, should_fail: bool):
+    """Test UMI min reads option validation."""
+    if should_fail:
+        with pytest.raises(click.BadParameter):
+            validate_umi_min_reads(
+                _ctx=click.Context, _param=click.Parameter, umi_min_reads=umi_min_reads
+            )
+    else:
+        validate_umi_min_reads(
+            _ctx=click.Context, _param=click.Parameter, umi_min_reads=umi_min_reads
+        )
 
 
 def test_read_vcf(vcf_file_path, vcf_file_gz_path):
