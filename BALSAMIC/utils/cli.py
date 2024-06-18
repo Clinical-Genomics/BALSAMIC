@@ -526,5 +526,5 @@ def validate_umi_min_reads(
         if len(umi_min_reads_parts) == 3 and all(
             part.isdigit() for part in umi_min_reads_parts
         ):
-            return umi_min_reads_parts
+            return umi_min_reads
         raise click.BadParameter("Invalid UMI minimum reads format. Use 'x,y,z'.")
