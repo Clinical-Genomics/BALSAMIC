@@ -1,7 +1,7 @@
 
 
 if config["analysis"]["sequencing_type"] == 'wgs' and config["analysis"]["analysis_type"] == 'single':
-    rule bcftools_quality_filter_tnscope_tumor_only:
+    rule bcftools_quality_filter_tnscope_tumor_only_wgs:
       input:
         vcf_snv = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.vcf.gz",
         wgs_calling_file = config["reference"]["wgs_calling_regions"],
@@ -13,12 +13,12 @@ if config["analysis"]["sequencing_type"] == 'wgs' and config["analysis"]["analys
         Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
       params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-        DP = [SENTIEON_CALLER.DP.tag_value, SENTIEON_CALLER.DP.filter_name],
-        AD = [SENTIEON_CALLER.AD.tag_value, SENTIEON_CALLER.AD.filter_name],
-        AF_min = [SENTIEON_CALLER.AF_min.tag_value, SENTIEON_CALLER.AF_min.filter_name],
-        strand_reads = [SENTIEON_CALLER.strand_reads.tag_value, SENTIEON_CALLER.strand_reads.filter_name],
-        qss = [SENTIEON_CALLER.qss.tag_value, SENTIEON_CALLER.qss.filter_name],
-        sor = [SENTIEON_CALLER.sor.tag_value, SENTIEON_CALLER.sor.filter_name],
+        DP = [SNV_FILTER_SETTINGS.DP.tag_value, SNV_FILTER_SETTINGS.DP.filter_name],
+        AD = [SNV_FILTER_SETTINGS.AD.tag_value, SNV_FILTER_SETTINGS.AD.filter_name],
+        AF_min = [SNV_FILTER_SETTINGS.AF_min.tag_value, SNV_FILTER_SETTINGS.AF_min.filter_name],
+        strand_reads = [SNV_FILTER_SETTINGS.strand_reads.tag_value, SNV_FILTER_SETTINGS.strand_reads.filter_name],
+        qss = [SNV_FILTER_SETTINGS.qss.tag_value, SNV_FILTER_SETTINGS.qss.filter_name],
+        sor = [SNV_FILTER_SETTINGS.sor.tag_value, SNV_FILTER_SETTINGS.sor.filter_name],
         case_name = config["analysis"]["case_id"],
       threads:
         get_threads(cluster_config, 'bcftools_quality_filter_tnscope_tumor_only')
@@ -31,20 +31,20 @@ mkdir -p {params.tmpdir};
 
 grep -v '^@' {input.wgs_calling_file} > {input.wgs_calling_file}.bed
 
-bcftools view -f PASS,triallelic_site --threads {threads} --regions-file {input.wgs_calling_file}.bed {input.vcf_snv} \
+bcftools view --threads {threads} --regions-file {input.wgs_calling_file}.bed {input.vcf_snv} \
 | bcftools filter --threads {threads} --include 'SUM(FORMAT/AD[0:0]+FORMAT/AD[0:1]) >= {params.DP[0]}' --soft-filter '{params.DP[1]}' --mode '+' \
 | bcftools filter --threads {threads} --include 'FORMAT/AD[0:1] > {params.AD[0]}' --soft-filter '{params.AD[1]}' --mode '+' \
 | bcftools filter --threads {threads} --include 'FORMAT/AF > {params.AF_min[0]}' --soft-filter '{params.AF_min[1]}' --mode '+' \
 | bcftools filter --threads {threads} --include 'SUM(FORMAT/QSS)/SUM(FORMAT/AD) >= {params.qss[0]}' --soft-filter '{params.qss[1]}' --mode '+' \
 | bcftools filter --threads {threads} --include 'FORMAT/ALT_F1R2 > {params.strand_reads[0]} && (FORMAT/ALT_F1R2 > 0  && FORMAT/ALT_F2R1 > {params.strand_reads[0]} &&  FORMAT/REF_F1R2 > {params.strand_reads[0]} && FORMAT/REF_F2R1 > {params.strand_reads[0]})' --soft-filter '{params.strand_reads[1]}' --mode '+' \
 | bcftools filter --threads {threads} --include "INFO/SOR < {params.sor[0]}" --soft-filter '{params.sor[1]}' --mode '+' \
-| bcftools view -f PASS,triallelic_site -O z -o {output.vcf_snv_research};
+| bcftools view -i 'FILTER == "PASS" || FILTER == "triallelic_site"' -O z -o {output.vcf_snv_research};
 
 tabix -p vcf -f {output.vcf_snv_research};
           """
 
 elif config["analysis"]["sequencing_type"] == 'wgs' and config["analysis"]["analysis_type"] == 'paired':
-    rule bcftools_quality_filter_tnscope_tumor_normal:
+    rule bcftools_quality_filter_tnscope_tumor_normal_wgs:
       input:
         vcf_snv = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.vcf.gz",
         wgs_calling_file = config["reference"]["wgs_calling_regions"],
@@ -55,11 +55,11 @@ elif config["analysis"]["sequencing_type"] == 'wgs' and config["analysis"]["anal
       singularity:
         Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
       params:
-        AD = [SENTIEON_CALLER.AD.tag_value, SENTIEON_CALLER.AD.filter_name],
-        DP = [SENTIEON_CALLER.DP.tag_value, SENTIEON_CALLER.DP.filter_name],
-        AF_min = [SENTIEON_CALLER.AF_min.tag_value, SENTIEON_CALLER.AF_min.filter_name],
-        high_normal_tumor_af_frac_filter_name=SENTIEON_CALLER.high_normal_tumor_af_frac.filter_name,
-        high_normal_tumor_af_frac_value=SENTIEON_CALLER.high_normal_tumor_af_frac.tag_value,
+        AD = [SNV_FILTER_SETTINGS.AD.tag_value, SNV_FILTER_SETTINGS.AD.filter_name],
+        DP = [SNV_FILTER_SETTINGS.DP.tag_value, SNV_FILTER_SETTINGS.DP.filter_name],
+        AF_min = [SNV_FILTER_SETTINGS.AF_min.tag_value, SNV_FILTER_SETTINGS.AF_min.filter_name],
+        high_normal_tumor_af_frac_filter_name=SNV_FILTER_SETTINGS.high_normal_tumor_af_frac.filter_name,
+        high_normal_tumor_af_frac_value=SNV_FILTER_SETTINGS.high_normal_tumor_af_frac.tag_value,
         case_name = config["analysis"]["case_id"],
       threads:
         get_threads(cluster_config, 'bcftools_quality_filter_tnscope_tumor_normal')
@@ -73,27 +73,26 @@ bcftools view {input.vcf_snv} \
 | bcftools filter --threads {threads} --include 'FORMAT/AF[0] >= {params.AF_min[0]}' --soft-filter '{params.AF_min[1]}' --mode '+' \
 | bcftools annotate -x FILTER/alt_allele_in_normal \
 | bcftools filter --threads {threads} --exclude 'sum(FORMAT/AF[1])/sum(FORMAT/AF[0])>{params.high_normal_tumor_af_frac_value}' --soft-filter '{params.high_normal_tumor_af_frac_filter_name}' --mode '+' \
-| bcftools view -f PASS,triallelic_site -O z -o {output.vcf_snv_research}; 
+| bcftools view -i 'FILTER == "PASS" || FILTER == "triallelic_site"' -O z -o {output.vcf_snv_research}; 
 
 tabix -p vcf -f {output.vcf_snv_research};
           """
 
 if config["analysis"]["sequencing_type"] == 'targeted' and config["analysis"]["analysis_type"] == 'single':
 
-  rule bcftools_quality_filter_vardict_tumor_only:
+  rule bcftools_quality_filter_tnscope_tumor_only_tga:
     input:
-      vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.vcf.gz",
+      vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.vcf.gz",
     output:
-      vcf_filtered = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.research.vcf.gz",
+      vcf_filtered = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.research.vcf.gz",
     benchmark:
       Path(benchmark_dir,'bcftools_quality_filter_vardict_tumor_only_' + config["analysis"]["case_id"] + ".tsv").as_posix()
     singularity:
       Path(singularity_image,config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
     params:
-      MQ=[VARDICT.MQ.tag_value, VARDICT.MQ.filter_name],
-      AD=[VARDICT.AD.tag_value, VARDICT.AD.filter_name],
-      DP=[VARDICT.DP.tag_value, VARDICT.DP.filter_name],
-      AF_min=[VARDICT.AF_min.tag_value, VARDICT.AF_min.filter_name],
+      AD=[SNV_FILTER_SETTINGS.AD.tag_value, SNV_FILTER_SETTINGS.AD.filter_name],
+      DP=[SNV_FILTER_SETTINGS.DP.tag_value, SNV_FILTER_SETTINGS.DP.filter_name],
+      AF_min=[SNV_FILTER_SETTINGS.AF_min.tag_value, SNV_FILTER_SETTINGS.AF_min.filter_name],
       case_name = config["analysis"]["case_id"],
     threads:
       get_threads(cluster_config,'bcftools_quality_filter_vardict_tumor_only')
@@ -101,12 +100,11 @@ if config["analysis"]["sequencing_type"] == 'targeted' and config["analysis"]["a
       "Quality filtering vardict tumor-only annotated variants using bcftools for {params.case_name}"
     shell:
       """
-bcftools view -f PASS {input.vcf} | \
-bcftools filter --include 'INFO/MQ >= {params.MQ[0]}' --soft-filter '{params.MQ[1]}' --mode '+' | \
-bcftools filter --include 'INFO/DP >= {params.DP[0]}' --soft-filter '{params.DP[1]}' --mode '+' | \
-bcftools filter --include 'INFO/VD >= {params.AD[0]}' --soft-filter '{params.AD[1]}' --mode '+' | \
-bcftools filter --include 'INFO/AF >= {params.AF_min[0]}' --soft-filter '{params.AF_min[1]}' --mode '+' | \
-bcftools view -f PASS -o {output.vcf_filtered} -O z;
+bcftools view {input.vcf} \
+| bcftools filter --include 'SUM(FORMAT/AD[0:0]+FORMAT/AD[0:1]) >= {params.DP[0]}' --soft-filter '{params.DP[1]}' --mode '+' \
+| bcftools filter --include 'FORMAT/AD[0:1] >= {params.AD[0]}' --soft-filter '{params.AD[1]}' --mode '+' \
+| bcftools filter --include 'FORMAT/AF[0] >= {params.AF_min[0]}' --soft-filter '{params.AF_min[1]}' --mode '+' \
+| bcftools view -i 'FILTER == "PASS" || FILTER == "triallelic_site"' -o {output.vcf_filtered} -O z;
 
 tabix -p vcf -f {output.vcf_filtered};
       """
@@ -129,8 +127,8 @@ tabix -p vcf -f {output.vcf_filtered};
       "Quality filtering tnscope_umi tumor-only variants using bcftools for {params.case_name}"
     shell:
       """
-bcftools view {input.vcf} | \
-bcftools view -f PASS,triallelic_site -o {output.vcf_filtered} -O z;
+bcftools view {input.vcf} \
+| bcftools view -i 'FILTER == "PASS" || FILTER == "triallelic_site"' -o {output.vcf_filtered} -O z;
 
 tabix -p vcf -f {output.vcf_filtered};
       """
@@ -138,21 +136,21 @@ tabix -p vcf -f {output.vcf_filtered};
 
 elif config["analysis"]["sequencing_type"] == 'targeted' and config["analysis"]["analysis_type"] == 'paired':
 
-  rule bcftools_quality_filter_vardict_tumor_normal:
+  rule bcftools_quality_filter_tnscope_tumor_normal_tga:
     input:
-      vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.vcf.gz",
+      vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.vcf.gz",
     output:
-      vcf_filtered = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.research.vcf.gz",
+      vcf_filtered = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.research.vcf.gz",
     benchmark:
       Path(benchmark_dir,'bcftools_quality_filter_vardict_tumor_normal_' + config["analysis"]["case_id"] + ".tsv").as_posix()
     singularity:
       Path(singularity_image,config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
     params:
-      MQ=[VARDICT.MQ.tag_value, VARDICT.MQ.filter_name],
-      AD=[VARDICT.AD.tag_value, VARDICT.AD.filter_name],
-      DP=[VARDICT.DP.tag_value, VARDICT.DP.filter_name],
-      AF_min=[VARDICT.AF_min.tag_value, VARDICT.AF_min.filter_name],
-      possible_germline="balsamic_possible_germline",
+      AD=[SNV_FILTER_SETTINGS.AD.tag_value, SNV_FILTER_SETTINGS.AD.filter_name],
+      DP=[SNV_FILTER_SETTINGS.DP.tag_value, SNV_FILTER_SETTINGS.DP.filter_name],
+      AF_min=[SNV_FILTER_SETTINGS.AF_min.tag_value, SNV_FILTER_SETTINGS.AF_min.filter_name],
+      high_normal_tumor_af_frac_filter_name=SNV_FILTER_SETTINGS.high_normal_tumor_af_frac.filter_name,
+      high_normal_tumor_af_frac_value=SNV_FILTER_SETTINGS.high_normal_tumor_af_frac.tag_value,
       case_name = config["analysis"]["case_id"],
     threads:
       get_threads(cluster_config,'bcftools_quality_filter_vardict_tumor_normal')
@@ -160,13 +158,13 @@ elif config["analysis"]["sequencing_type"] == 'targeted' and config["analysis"][
       "Quality filtering vardict tumor-normal variants using bcftools for {params.case_name} "
     shell:
       """
-bcftools view {input.vcf} | \
-bcftools filter --include 'SMPL_MIN(FMT/MQ) >= {params.MQ[0]}' --soft-filter '{params.MQ[1]}' --mode + | \
-bcftools filter --include 'INFO/DP >= {params.DP[0]}' --soft-filter '{params.DP[1]}' --mode '+' | \
-bcftools filter --include 'INFO/VD >= {params.AD[0]}' --soft-filter '{params.AD[1]}' --mode '+' | \
-bcftools filter --include 'INFO/AF >= {params.AF_min[0]}' --soft-filter '{params.AF_min[1]}' --mode '+' | \
-bcftools filter --exclude 'INFO/STATUS ~ "germline/i"' --soft-filter '{params.possible_germline}' --mode '+' | \
-bcftools view -f PASS -o {output.vcf_filtered} -O z;
+bcftools view {input.vcf} \
+| bcftools annotate -x FILTER/alt_allele_in_normal \
+| bcftools filter --threads {threads} --exclude 'sum(FORMAT/AF[1])/sum(FORMAT/AF[0])>{params.high_normal_tumor_af_frac_value}' --soft-filter '{params.high_normal_tumor_af_frac_filter_name}' --mode '+' \
+| bcftools filter --include 'SUM(FORMAT/AD[0:0]+FORMAT/AD[0:1]) >= {params.DP[0]} || SUM(FORMAT/AD[1:0]+FORMAT/AD[1:1]) >= {params.DP[0]}' --soft-filter '{params.DP[1]}' --mode '+' \
+| bcftools filter --include 'FORMAT/AD[0:1] >= {params.AD[0]}' --soft-filter '{params.AD[1]}' --mode '+' \
+| bcftools filter --include 'FORMAT/AF[0] >= {params.AF_min[0]}' --soft-filter '{params.AF_min[1]}' --mode '+' \
+| bcftools view -i 'FILTER == "PASS" || FILTER == "triallelic_site"' -o {output.vcf_filtered} -O z;
 
 tabix -p vcf -f {output.vcf_filtered};
       """
@@ -183,8 +181,8 @@ tabix -p vcf -f {output.vcf_filtered};
       Path(singularity_image,config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
     params:
       case_name = config["analysis"]["case_id"],
-      high_normal_tumor_af_frac_filter_name=SENTIEON_CALLER.high_normal_tumor_af_frac.filter_name,
-      high_normal_tumor_af_frac_value=SENTIEON_CALLER.high_normal_tumor_af_frac.tag_value,
+      high_normal_tumor_af_frac_filter_name=SNV_FILTER_SETTINGS.high_normal_tumor_af_frac.filter_name,
+      high_normal_tumor_af_frac_value=SNV_FILTER_SETTINGS.high_normal_tumor_af_frac.tag_value,
     threads:
       get_threads(cluster_config,'bcftools_quality_filter_TNscope_umi_tumor_normal')
     message:
@@ -194,7 +192,7 @@ tabix -p vcf -f {output.vcf_filtered};
 bcftools view {input.vcf} \
 | bcftools annotate -x FILTER/alt_allele_in_normal \
 | bcftools filter --threads {threads} --exclude 'sum(FORMAT/AF[1])/sum(FORMAT/AF[0])>{params.high_normal_tumor_af_frac_value}' --soft-filter '{params.high_normal_tumor_af_frac_filter_name}' --mode '+' \
-| bcftools view -f PASS,triallelic_site -o {output.vcf_filtered} -O z;
+| bcftools view -i 'FILTER == "PASS" || FILTER == "triallelic_site"' -o {output.vcf_filtered} -O z;
 
 tabix -p vcf -f {output.vcf_filtered};
       """

@@ -3,15 +3,15 @@
 rule fastp_adapter_trim_tga:
     """Fastq adapter trimming before extraction of UMIs."""
     input:
-        fastq_r1 = fastq_dir + "concat.{sample}_1.fastq.gz",
-        fastq_r2 = fastq_dir + "concat.{sample}_2.fastq.gz"
+        fastq_r1 = fastq_dir + "concat.{sample_type}.{sample}_1.fastq.gz",
+        fastq_r2 = fastq_dir + "concat.{sample_type}.{sample}_2.fastq.gz"
     output:
-        fastq_r1 = temp(fastq_dir + "{sample}_1.adapter_trimmed.fastq.gz"),
-        fastq_r2 = temp(fastq_dir + "{sample}_2.adapter_trimmed.fastq.gz"),
-        json = qc_dir + "fastp/{sample}_adaptertrim_fastp.json",
-        html = qc_dir + "fastp/{sample}_adaptertrim_fastp.html"
+        fastq_r1 = temp(fastq_dir + "{sample_type}.{sample}_1.adapter_trimmed.fastq.gz"),
+        fastq_r2 = temp(fastq_dir + "{sample_type}.{sample}_2.adapter_trimmed.fastq.gz"),
+        json = qc_dir + "fastp/{sample_type}.{sample}_adaptertrim_fastp.json",
+        html = qc_dir + "fastp/{sample_type}.{sample}_adaptertrim_fastp.html"
     benchmark:
-        Path(benchmark_dir, "fastp_quality_trim" + "{sample}.tsv").as_posix()
+        Path(benchmark_dir, "fastp_quality_trim" + "{sample_type}_{sample}.tsv").as_posix()
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("fastp") + ".sif").as_posix()
     params:
@@ -42,12 +42,12 @@ fastp \
 rule sentieon_umiextract_tga:
     """Extract UMIs into tags in read header."""
     input:
-        fastq_r1 = fastq_dir + "{sample}_1.adapter_trimmed.fastq.gz",
-        fastq_r2 = fastq_dir + "{sample}_2.adapter_trimmed.fastq.gz"
+        fastq_r1 = fastq_dir + "{sample_type}.{sample}_1.adapter_trimmed.fastq.gz",
+        fastq_r2 = fastq_dir + "{sample_type}.{sample}_2.adapter_trimmed.fastq.gz"
     output:
-        ds_umi = temp(fastq_dir + "{sample}_umiextract_interleaved.fastq.gz")
+        ds_umi = fastq_dir + "{sample_type}.{sample}_umiextract_interleaved.fastq.gz"
     benchmark:
-        Path(benchmark_dir, "sentieon_umiextract_tga_{sample}.tsv").as_posix()
+        Path(benchmark_dir, "sentieon_umiextract_tga_{sample_type}_{sample}.tsv").as_posix()
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         sentieon_install_dir = config["SENTIEON_INSTALL_DIR"],
@@ -61,7 +61,6 @@ rule sentieon_umiextract_tga:
         "Extracing UMI tags using sentieon for {params.sample}"
     shell:
         """
-export LD_PRELOAD={params.sentieon_install_dir}/lib/libjemalloc.so.1
 export MALLOC_CONF=lg_dirty_mult:-1
 
 mkdir -p {params.tmpdir};
@@ -77,14 +76,14 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 rule fastp_quality_trim_tga:
     """Fastq quality-trimming after extraction of UMIs."""
     input:
-        interleaved_fastq = fastq_dir + "{sample}_umiextract_interleaved.fastq.gz"
+        interleaved_fastq = fastq_dir + "{sample_type}.{sample}_umiextract_interleaved.fastq.gz"
     output:
-        fastq_r1 = temp(fastq_dir + "{sample}_1.quality_trimmed.fastq.gz"),
-        fastq_r2 = temp(fastq_dir + "{sample}_2.quality_trimmed.fastq.gz"),
-        json = qc_dir + "fastp/{sample}_qualitytrim_fastp.json",
-        html = qc_dir + "fastp/{sample}_qualitytrim_fastp.html"
+        fastq_r1 = temp(fastq_dir + "{sample_type}.{sample}_1.quality_trimmed.fastq.gz"),
+        fastq_r2 = temp(fastq_dir + "{sample_type}.{sample}_2.quality_trimmed.fastq.gz"),
+        json = qc_dir + "fastp/{sample_type}.{sample}_qualitytrim_fastp.json",
+        html = qc_dir + "fastp/{sample_type}.{sample}_qualitytrim_fastp.html"
     benchmark:
-        Path(benchmark_dir, "fastp_quality_trim" + "{sample}.tsv").as_posix()
+        Path(benchmark_dir, "fastp_quality_trim" + "{sample_type}_{sample}.tsv").as_posix()
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("fastp") + ".sif").as_posix()
     params:

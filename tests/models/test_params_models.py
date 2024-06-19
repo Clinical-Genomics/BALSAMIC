@@ -10,7 +10,6 @@ from BALSAMIC.models.params import BalsamicWorkflowConfig
 from BALSAMIC.models.config import VarcallerAttribute
 from BALSAMIC.models.params import (
     ParamsManta,
-    ParamsVardict,
     ParamsVEP,
     QCModel,
     UMIParamsCommon,
@@ -61,31 +60,10 @@ def test_get_manta_settings_wgs():
     assert manta_settings == ""
 
 
-def test_params_vardict():
-    """test UMIParamsVardict model for correct validation"""
-
-    # GIVEN vardict params
-    test_vardict_params = {
-        "allelic_frequency": 0.01,
-        "max_pval": 0.5,
-        "max_mm": 2,
-        "column_info": "-a 1 -b 2 -c 3",
-    }
-
-    # WHEN building the model
-    test_vardict_built = ParamsVardict(**test_vardict_params)
-
-    # THEN assert values
-    assert isclose(test_vardict_built.allelic_frequency, 0.01)
-    assert isclose(test_vardict_built.max_pval, 0.5)
-    assert test_vardict_built.max_mm == 2
-    assert test_vardict_built.column_info == "-a 1 -b 2 -c 3"
-
-
 def test_params_vep():
     """test UMIParamsVEP model for correct validation"""
 
-    # GIVEN vardict params
+    # GIVEN params
     test_vep = {"vep_filters": "all defaults params"}
 
     # WHEN building the model

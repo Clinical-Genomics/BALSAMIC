@@ -13,12 +13,10 @@ from BALSAMIC.constants.analysis import FastqName, MutationType, SampleType
 from BALSAMIC.constants.paths import BALSAMIC_DIR, SENTIEON_DNASCOPE_DIR, SENTIEON_TNSCOPE_DIR
 from BALSAMIC.constants.rules import SNAKEMAKE_RULES
 from BALSAMIC.constants.variant_filters import (
-    COMMON_SETTINGS,
-    SENTIEON_VARCALL_SETTINGS,
+    SNV_BCFTOOLS_SETTINGS_PANEL,
+    SNV_BCFTOOLS_SETTINGS_EXOME,
+    SNV_BCFTOOLS_SETTINGS_WGS,
     SVDB_FILTER_SETTINGS,
-    VARDICT_SETTINGS_PANEL,
-    VARDICT_SETTINGS_EXOME,
-    VARDICT_SETTINGS_COMMON,
     MANTA_FILTER_SETTINGS,
 )
 from BALSAMIC.constants.workflow_params import VARCALL_PARAMS, WORKFLOW_PARAMS, SLEEP_BEFORE_START
@@ -116,16 +114,16 @@ else:
     status_to_sample_id = "TUMOR" + "\\\\t" + tumor_sample
 
 
-# Varcaller filter settings
-COMMON_FILTERS = VarCallerFilter.model_validate(COMMON_SETTINGS)
-
 # Set VarDict settings depending on if panel is exome or not
-VARDICT = VarCallerFilter.model_validate(VARDICT_SETTINGS_PANEL)
+if not config_model.panel:
+    SNV_FILTER_SETTINGS = VarCallerFilter.model_validate(SNV_BCFTOOLS_SETTINGS_WGS)
+else:
+    SNV_FILTER_SETTINGS = VarCallerFilter.model_validate(SNV_BCFTOOLS_SETTINGS_PANEL)
+
 if config_model.panel and config_model.panel.exome:
-    VARDICT = VarCallerFilter.model_validate(VARDICT_SETTINGS_EXOME)
+    SNV_FILTER_SETTINGS = VarCallerFilter.model_validate(SNV_BCFTOOLS_SETTINGS_EXOME)
 
 
-SENTIEON_CALLER = VarCallerFilter.model_validate(SENTIEON_VARCALL_SETTINGS)
 SVDB_FILTERS = VarCallerFilter.model_validate(SVDB_FILTER_SETTINGS)
 MANTA_FILTERS = VarCallerFilter.model_validate(MANTA_FILTER_SETTINGS)
 
@@ -474,10 +472,6 @@ if config["analysis"]["sequencing_type"] != "wgs":
         case_name=case_id,
         var_caller=["cnvkit"]
     ))
-    # VarDict
-    analysis_specific_results.extend(
-        expand(vep_dir + "{vcf}.research.filtered.pass.ranked.vcf.gz", vcf=get_vcf(config, ["vardict"], [case_id]))
-    )
     # UMI
     if config["analysis"]["analysis_workflow"] == "balsamic-umi":
         analysis_specific_results.extend(expand(umi_qc_dir + "{sample}.umi.mean_family_depth", sample=config_model.get_all_sample_names()))
