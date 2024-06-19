@@ -75,11 +75,16 @@ else:
         multiqc_input.extend(expand(qc_dir + "normal.{sample}.dedup_conensus.metrics",sample=normal_sample))
 
     # fastp metrics
-    multiqc_input.extend(expand(qc_dir + "fastp/tumor.{sample}_fastp.json", sample=tumor_sample))
-    multiqc_input.extend(expand(qc_dir + "fastp/tumor.{sample}_fastp.html", sample=tumor_sample))
+    multiqc_input.extend(expand(qc_dir + "fastp/tumor.{sample}_adaptertrim_fastp.json", sample=tumor_sample))
+    multiqc_input.extend(expand(qc_dir + "fastp/tumor.{sample}_adaptertrim_fastp.html", sample=tumor_sample))
+    multiqc_input.extend(expand(qc_dir + "fastp/tumor.{sample}_qualitytrim_fastp.json", sample=tumor_sample))
+    multiqc_input.extend(expand(qc_dir + "fastp/tumor.{sample}_qualitytrim_fastp.html", sample=tumor_sample))
     if config['analysis']['analysis_type'] == "paired":
-        multiqc_input.extend(expand(qc_dir + "fastp/normal.{sample}_fastp.json",sample=normal_sample))
-        multiqc_input.extend(expand(qc_dir + "fastp/normal.{sample}_fastp.html",sample=normal_sample))
+        multiqc_input.extend(expand(qc_dir + "fastp/normal.{sample}_adaptertrim_fastp.json",sample=normal_sample))
+        multiqc_input.extend(expand(qc_dir + "fastp/normal.{sample}_adaptertrim_fastp.html",sample=normal_sample))
+        multiqc_input.extend(expand(qc_dir + "fastp/normal.{sample}_qualitytrim_fastp.json",sample=normal_sample))
+        multiqc_input.extend(expand(qc_dir + "fastp/normal.{sample}_qualitytrim_fastp.html",sample=normal_sample))
+
 
     # sambamba metrics
     multiqc_input.extend(expand(qc_dir + "tumor.{sample}.cov.bed", sample=tumor_sample))

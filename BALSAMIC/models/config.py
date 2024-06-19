@@ -379,7 +379,12 @@ class ConfigModel(BaseModel):
         return bam_names
 
     def get_final_bam_name(
-        self, bam_dir: str, sample_name: str = None, sample_type: str = None, specified_suffix: str = None) -> str:
+        self,
+        bam_dir: str,
+        sample_name: str = None,
+        sample_type: str = None,
+        specified_suffix: str = None,
+    ) -> str:
         """Return final bam name to be used in downstream analysis."""
 
         if not sample_name and not sample_type:

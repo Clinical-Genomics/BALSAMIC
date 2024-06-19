@@ -24,14 +24,6 @@ from BALSAMIC.constants.rules import DELIVERY_RULES
 from BALSAMIC.constants.workflow_params import VCF_DICT
 from BALSAMIC.utils.cli import validate_cache_version, validate_exome_option
 
-OPTION_ADAPTER_TRIM = click.option(
-    "--adapter-trim/--no-adapter-trim",
-    default=True,
-    show_default=True,
-    is_flag=True,
-    help="Trim adapters from reads in FASTQ file",
-)
-
 OPTION_ANALYSIS_DIR = click.option(
     "--analysis-dir",
     type=click.Path(exists=True, resolve_path=True),
@@ -314,14 +306,6 @@ OPTION_PRINT_FILES = click.option(
     help="Print list of analysis files. Otherwise only final count will be printed.",
 )
 
-OPTION_QUALITY_TRIM = click.option(
-    "--quality-trim/--no-quality-trim",
-    default=True,
-    show_default=True,
-    is_flag=True,
-    help="Trim low quality reads in FASTQ file",
-)
-
 OPTION_QUIET = click.option(
     "-q",
     "--quiet",
@@ -406,20 +390,4 @@ OPTION_TUMOR_SAMPLE_NAME = click.option(
     required=True,
     type=click.STRING,
     help="Tumor sample name",
-)
-
-OPTION_UMI = click.option(
-    "--umi/--no-umi",
-    default=True,
-    show_default=True,
-    is_flag=True,
-    help="UMI processing steps for samples with UMI tags. For WGS cases, UMI is always disabled.",
-)
-
-OPTION_UMI_TRIM_LENGTH = click.option(
-    "--umi-trim-length",
-    default=5,
-    show_default=True,
-    type=click.INT,
-    help="Trim N bases from reads in FASTQ file",
 )

@@ -3,8 +3,8 @@
 rule sentieon_align_sort_umireads:
     input:
         ref = config["reference"]["reference_genome"],
-        fastq_1 = fastq_dir + "{sample_type}.{sample}_1.trimmed_umi_extracted.fastq.gz",
-        fastq_2 = fastq_dir + "{sample_type}.{sample}_2.trimmed_umi_extracted.fastq.gz",
+        fastq_r1 = Path(fastq_dir, "{sample_type}.{sample}_1.quality_trimmed.fastq.gz").as_posix(),
+        fastq_r2 = Path(fastq_dir, "{sample_type}.{sample}_2.quality_trimmed.fastq.gz").as_posix(),
         refidx = expand(config["reference"]["reference_genome"] + ".{prefix}", prefix=["amb","ann","bwt","pac","sa"])
     output:
         bam_out = Path(bam_dir, "{sample_type}.{sample}.align_sort.bam").as_posix()
@@ -34,7 +34,7 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 -R '@RG\\tID:{params.sample_id}\\tSM:{params.sample_type}\\tLB:TargetPanel\\tPL:ILLUMINA' \
 -K {params.ip_bases} \
 -t {threads} -C \
-{input.ref} {input.fastq_1} {input.fastq_2} | \
+{input.ref} {input.fastq_r1} {input.fastq_r2} | \
 {params.sentieon_exec} util sort \
 -r {input.ref} \
 --sam2bam \
