@@ -64,13 +64,8 @@ class ParamsVEP(BaseModel):
 class QCModel(BaseModel):
     """Contains settings for quality control and pre-processing
     Attributes:
-        picard_rmdup : Field(bool); whether duplicate removal is to be applied in the workflow
         adapter : Field(str(AATGATACGGCGACCACCGAGATCTACACTCTTTCCCTACACGACGCTCTTCCGATCT)); adapter sequence to trim
-        quality_trim : Field(bool); whether quality trimming it to be performed in the workflow
-        adapter_trim : Field(bool); whether adapter trimming is to be performed in the workflow
-        umi_trim : Field(bool); whether UMI trimming is to be performed in the workflow
         min_seq_length : Field(str(int)); minimum sequence length cutoff for reads
-        umi_trim_length : Field(str(int)); length of UMI to be trimmed from reads
         n_base_limit : Field(str(int)); supports filtering by limiting the N base number
 
     Raises:
@@ -81,13 +76,8 @@ class QCModel(BaseModel):
     """
 
     model_config = ConfigDict(coerce_numbers_to_str=True)
-    picard_rmdup: bool = False
     adapter: str = "AATGATACGGCGACCACCGAGATCTACACTCTTTCCCTACACGACGCTCTTCCGATCT"
-    quality_trim: bool = True
-    adapter_trim: bool = False
-    umi_trim: bool = False
     min_seq_length: str = "25"
-    umi_trim_length: str = "5"
     n_base_limit: str = "50"
 
 

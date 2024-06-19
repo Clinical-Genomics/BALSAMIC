@@ -1,11 +1,13 @@
-
 import click
 import pysam
 
+
 @click.command()
-@click.argument('input_bam', type=click.Path(exists=True))
-@click.argument('output_bam', type=click.Path())
-@click.option('--max_quality', default=70, type=int, help='Maximum quality value to cap to.')
+@click.argument("input_bam", type=click.Path(exists=True))
+@click.argument("output_bam", type=click.Path())
+@click.option(
+    "--max_quality", default=70, type=int, help="Maximum quality value to cap to."
+)
 def cap_base_qualities(input_bam: str, output_bam: str, max_quality: int):
     """
     Cap the base qualities in a BAM file.
@@ -28,5 +30,6 @@ def cap_base_qualities(input_bam: str, output_bam: str, max_quality: int):
                 # Write the modified read to the output BAM file
                 out_bam.write(read)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     cap_base_qualities()
