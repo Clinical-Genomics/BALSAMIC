@@ -24,7 +24,7 @@ import pandas as pd
     type=click.Path(exists=True),
     help="Tumor purity file from PureCN",
 )
-def create_gens_cov_file(output_file, normalised_coverage_path, tumor_purity_path):
+def create_gens_cov_file(output_file: str, normalised_coverage_path: str, tumor_purity_path: str | None):
     """
     Post-processes the CNVkit cnr output for upload to GENS.
     Removing Antitarget regions and outputting the coverages in multiple resolution-formats.
