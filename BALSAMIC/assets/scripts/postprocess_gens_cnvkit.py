@@ -24,7 +24,9 @@ import pandas as pd
     type=click.Path(exists=True),
     help="Tumor purity file from PureCN",
 )
-def create_gens_cov_file(output_file: str, normalised_coverage_path: str, tumor_purity_path: str | None):
+def create_gens_cov_file(
+    output_file: str, normalised_coverage_path: str, tumor_purity_path: str | None
+):
     """
     Post-processes the CNVkit cnr output for upload to GENS.
     Removing Antitarget regions and outputting the coverages in multiple resolution-formats.
@@ -47,12 +49,10 @@ def create_gens_cov_file(output_file: str, normalised_coverage_path: str, tumor_
         if row["gene"] == "Antitarget":
             continue
         midpoint = row["start"] + int((row["end"] - row["start"]) / 2)
-        log2 = row['log2']
+        log2 = row["log2"]
         if purity:
             log2 = round(float(log2) / purity, 4)
-        log2_data.append(
-            f"{row['chromosome']}\t{midpoint-1}\t{midpoint}\t{log2}"
-        )
+        log2_data.append(f"{row['chromosome']}\t{midpoint-1}\t{midpoint}\t{log2}")
 
     # Write log2 data to output file
     with open(output_file, "w") as log2_out:
