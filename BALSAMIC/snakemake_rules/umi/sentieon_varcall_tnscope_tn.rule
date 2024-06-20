@@ -6,8 +6,8 @@
 
 rule sentieon_tnscope_umi_tn:
     input:
-        bamT = umi_dir + "tumor_umi_consensusfiltered.merged.bam",
-        bamN = umi_dir + "normal_umi_consensusfiltered.merged.bam",
+        bamT = umi_dir + "tumor.{sample}_consensusfiltered_umi.bam",
+        bamN = umi_dir + "normal.{sample}_consensusfiltered_umi.bam",
         ref_fa = config["reference"]["reference_genome"],
         bed = config["panel"]["capture_kit"],
         dbsnp = config["reference"]["dbsnp"]
