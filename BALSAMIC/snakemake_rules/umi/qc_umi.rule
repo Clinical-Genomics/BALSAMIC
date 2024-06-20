@@ -11,7 +11,7 @@ rule picard_umiaware:
         duplicates = umi_qc_dir + "{sample_type}.{sample}.umi.duplicatemetrics.txt",
         umimetrics = umi_qc_dir + "{sample_type}.{sample}.umi.metrics.txt"
     benchmark:
-        Path(benchmark_dir, "picard_umiaware_{sample}.tsv").as_posix()
+        Path(benchmark_dir, "picard_umiaware_{sample_type}_{sample}.tsv").as_posix()
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("picard") + ".sif").as_posix()
     params:
