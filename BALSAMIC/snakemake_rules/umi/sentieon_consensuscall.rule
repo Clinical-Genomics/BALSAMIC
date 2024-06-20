@@ -58,7 +58,8 @@ rule sentieon_bwa_umiconsensus:
         sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
         ip_bases = params.umicommon.align_intbases,
-        sample_id = "{sample}"
+        sample_id = "{sample}",
+        sample_type = lambda wildcards: config_model.get_sample_type_by_name(wildcards.sample, uppercase=True),
     threads:
         get_threads(cluster_config, "sentieon_bwa_umiconsensus")
     message:
@@ -74,7 +75,7 @@ export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
 
 {params.sentieon_exec} bwa mem \
--R '@RG\\tID:{params.sample_id}\\tSM:{wildcards.sample_type}\\tLB:TargetPanel\\tPL:ILLUMINA' \
+-R '@RG\\tID:{params.sample_id}\\tSM:{params.sample_type}\\tLB:TargetPanel\\tPL:ILLUMINA' \
 -t {threads} \
 -K {params.ip_bases} \
 -p -C {input.ref_fa} \
