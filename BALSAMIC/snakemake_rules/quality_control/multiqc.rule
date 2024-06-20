@@ -76,10 +76,15 @@ else:
         multiqc_input.extend(expand(qc_dir + "normal.{sample}.dedup_conensus.metrics",sample=normal_sample))
 
     # fastp metrics
-    multiqc_input.extend(expand(qc_dir + "fastp/{sample}_adaptertrim_fastp.json", sample=sample_names))
-    multiqc_input.extend(expand(qc_dir + "fastp/{sample}_adaptertrim_fastp.html", sample=sample_names))
-    multiqc_input.extend(expand(qc_dir + "fastp/{sample}_qualitytrim_fastp.json", sample=sample_names))
-    multiqc_input.extend(expand(qc_dir + "fastp/{sample}_qualitytrim_fastp.html", sample=sample_names))
+    multiqc_input.extend(expand(qc_dir + "fastp/tumor.{sample}_adaptertrim_fastp.json", sample=tumor_sample))
+    multiqc_input.extend(expand(qc_dir + "fastp/tumor.{sample}_adaptertrim_fastp.html", sample=tumor_sample))
+    multiqc_input.extend(expand(qc_dir + "fastp/tumor.{sample}_qualitytrim_fastp.json", sample=tumor_sample))
+    multiqc_input.extend(expand(qc_dir + "fastp/tumor.{sample}_qualitytrim_fastp.html", sample=tumor_sample))
+    if config['analysis']['analysis_type'] == "paired":
+        multiqc_input.extend(expand(qc_dir + "fastp/normal.{sample}_adaptertrim_fastp.json",sample=normal_sample))
+        multiqc_input.extend(expand(qc_dir + "fastp/normal.{sample}_adaptertrim_fastp.html",sample=normal_sample))
+        multiqc_input.extend(expand(qc_dir + "fastp/normal.{sample}_qualitytrim_fastp.json",sample=normal_sample))
+        multiqc_input.extend(expand(qc_dir + "fastp/normal.{sample}_qualitytrim_fastp.html",sample=normal_sample))
 
     # sambamba metrics
     multiqc_input.extend(expand(qc_dir + "tumor.{sample}.cov.bed", sample=tumor_sample))
@@ -99,9 +104,11 @@ else:
 
     if config["analysis"]["analysis_workflow"]=="balsamic-umi":
         # UMI picard metrics
-        multiqc_input.extend(expand(umi_qc_dir + "{sample}.umi.collect_hsmetric.txt", sample=sample_names))
-        multiqc_input.extend(expand(umi_qc_dir + "{sample}.umi.metrics.txt", sample=sample_names))
-
+        multiqc_input.extend(expand(umi_qc_dir + "tumor.{sample}.umi.collect_hsmetric.txt", sample=tumor_sample))
+        multiqc_input.extend(expand(umi_qc_dir + "tumor.{sample}.umi.metrics.txt", sample=tumor_sample))
+        if config['analysis']['analysis_type'] == "paired":
+            multiqc_input.extend(expand(umi_qc_dir + "normal.{sample}.umi.collect_hsmetric.txt",sample=normal_sample))
+            multiqc_input.extend(expand(umi_qc_dir + "normal.{sample}.umi.metrics.txt",sample=normal_sample))
 
 rule multiqc:
     input:
