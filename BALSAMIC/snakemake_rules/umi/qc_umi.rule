@@ -5,7 +5,7 @@
 
 rule picard_umiaware:
     input:
-        bam = umi_dir + "{sample_type}.{sample}_consensusfiltered_umi.bam"
+        bam = umi_dir + "{sample_type}.{sample}.consensusfiltered_umi.bam"
     output:
         bam = umi_qc_dir + "{sample_type}.{sample}.picard.umiaware.bam",
         duplicates = umi_qc_dir + "{sample_type}.{sample}.umi.duplicatemetrics.txt",
@@ -33,7 +33,7 @@ UMI_METRICS={output.umimetrics};
 
 rule picard_collecthsmetrics_umi:
     input:
-        bam = umi_dir + "{sample_type}.{sample}_consensusfiltered_umi.bam",
+        bam = umi_dir + "{sample_type}.{sample}.consensusfiltered_umi.bam",
         bed = config["panel"]["capture_kit"],
         fa = config["reference"]["reference_genome"],
         fadict = (config["reference"]["reference_genome"]).replace(".fasta",".dict"),
@@ -72,7 +72,7 @@ METRIC_ACCUMULATION_LEVEL=ALL_READS;
 
 rule samtools_view_calculatemeanfamilydepth_umi:
     input:
-        bam = umi_dir + "{sample_type}.{sample}_consensusfiltered_umi.bam"
+        bam = umi_dir + "{sample_type}.{sample}.consensusfiltered_umi.bam"
     output:
         temp_fl = temp (umi_qc_dir + "{sample_type}.{sample}.umi.temp.fl"),
         totalsum = umi_qc_dir + "{sample_type}.{sample}.umi.mean_family_depth"

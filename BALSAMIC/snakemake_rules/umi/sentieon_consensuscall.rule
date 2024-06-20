@@ -8,7 +8,7 @@ rule sentieon_consensuscall_umi:
     input:
         bam = Path(bam_dir, "{sample_type}.{sample}.align_sort.bam").as_posix()
     output:
-        fastq_consensus = temp(umi_dir + "{sample_type}.{sample}_consensuscall_umi.fastq.gz")
+        fastq_consensus = temp(umi_dir + "{sample_type}.{sample}.consensuscall_umi.fastq.gz")
     benchmark:
         Path(benchmark_dir, "sentieon_consensuscall_umi_{sample_type}_{sample}.tsv").as_posix()
     params:
@@ -47,9 +47,9 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 rule sentieon_bwa_umiconsensus:
     input:
         ref_fa = config["reference"]["reference_genome"],
-        fq_consensus = umi_dir + "{sample_type}.{sample}_consensuscall_umi.fastq.gz"
+        fq_consensus = umi_dir + "{sample_type}.{sample}.consensuscall_umi.fastq.gz"
     output:
-        align_consensus = umi_dir + "{sample_type}.{sample}_consensuscalled_umi.bam"
+        align_consensus = umi_dir + "{sample_type}.{sample}.consensuscalled_umi.bam"
     benchmark:
         Path(benchmark_dir, "sentieon_bwa_umiconsensus_{sample_type}_{sample}.tsv").as_posix()
     params:
@@ -91,9 +91,9 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 
 rule sentieon_consensusfilter_umi:
     input:
-        umi_dir + "{sample_type}.{sample}_consensuscalled_umi.bam"
+        umi_dir + "{sample_type}.{sample}.consensuscalled_umi.bam"
     output:
-        temp(umi_dir + "{sample_type}.{sample}_consensusfiltered_umi.bam")
+        temp(umi_dir + "{sample_type}.{sample}.consensusfiltered_umi.bam")
     benchmark:
         Path(benchmark_dir, "sentieon_consensusfilter_umi_{sample_type}_{sample}.tsv").as_posix()
     singularity:

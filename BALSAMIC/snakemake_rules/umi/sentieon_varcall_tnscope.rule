@@ -7,7 +7,7 @@
 
 rule sentieon_tnscope_umi:
     input:
-        bam = umi_dir + "tumor.{sample}_consensusfiltered_umi.bam",
+        bamT = config_model.get_final_bam_name(bam_dir=umi_dir, sample_name=tumor_sample, specified_suffix="consensusfiltered_umi"),
         ref_fa = config["reference"]["reference_genome"],
         bed = config["panel"]["capture_kit"],
         dbsnp = config["reference"]["dbsnp"]
