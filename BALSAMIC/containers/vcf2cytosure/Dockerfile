@@ -1,8 +1,9 @@
 FROM python:3.11.3-slim AS builder
 
 ARG CONTAINER_NAME
-ENV WORK_DIR /opt/
+ENV WORK_DIR /opt
 ENV VENV ${WORK_DIR}/venv
+ENV PATH="${VENV}/bin:$PATH"
 
 RUN apt-get update && \
     apt-get -y upgrade && \
@@ -13,11 +14,11 @@ RUN apt-get update && \
 RUN python -m pip install --upgrade --no-cache-dir pip && \
     python -m venv ${VENV}
 
-ENV PATH="${VENV}/bin:$PATH"
+RUN git clone https://github.com/NBISweden/vcf2cytosure.git
 
-RUN git clone https://github.com/NBISweden/vcf2cytosure.git && \
-    cd ${WORK_DIR}/${CONTAINER_NAME} && \
-    git checkout v0.9.1 && \
+WORKDIR /opt/${CONTAINER_NAME}
+
+RUN git checkout v0.9.1 && \
     pip install --no-cache-dir .
 
 FROM python:3.11-slim
@@ -34,7 +35,7 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-ENV WORK_DIR /opt/
+ENV WORK_DIR /opt
 ENV VENV ${WORK_DIR}/venv
 ENV PATH="${VENV}/bin:$PATH"
 
