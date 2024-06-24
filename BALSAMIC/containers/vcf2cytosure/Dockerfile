@@ -1,7 +1,7 @@
 FROM python:3.11.3-slim AS builder
 
 ARG CONTAINER_NAME
-ENV WORK_DIR /opt/
+ENV WORK_DIR /opt
 ENV VENV ${WORK_DIR}/venv
 
 RUN apt-get update && \
@@ -35,7 +35,7 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-ENV WORK_DIR /opt/
+ENV WORK_DIR /opt
 ENV VENV ${WORK_DIR}/venv
 ENV PATH="${VENV}/bin:$PATH"
 
