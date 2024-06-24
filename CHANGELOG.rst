@@ -5,7 +5,7 @@
 Added:
 ^^^^^^
 * MSIsensor-pro container https://github.com/Clinical-Genomics/BALSAMIC/pull/1444
-* MSI anslysis to the tumor-normal workflow 
+* MSI anslysis to the tumor-normal workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1454 
 
 
 Changed:
