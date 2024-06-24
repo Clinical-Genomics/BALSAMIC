@@ -14,11 +14,6 @@ RUN python -m pip install --upgrade --no-cache-dir pip
 RUN python -m venv ${VENV}
 ENV PATH="${VENV}/bin:$PATH"
 
-RUN pip install --no-cache-dir \
-cyvcf2==0.30.22 \
-lxml==4.9.2 \
-pandas==2.0.1
-
 RUN cd /opt &&\
     git clone https://github.com/NBISweden/vcf2cytosure.git && \
     cd /opt/${CONTAINER_NAME}/ && \
