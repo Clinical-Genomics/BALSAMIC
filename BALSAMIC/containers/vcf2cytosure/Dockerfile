@@ -22,7 +22,7 @@ pandas==2.0.1
 RUN cd /opt &&\
     git clone https://github.com/NBISweden/vcf2cytosure.git && \
     cd /opt/${CONTAINER_NAME}/ && \
-    git checkout v0.8 && \
+    git checkout v0.9.1 && \
 	pip install --no-cache-dir -e .
 
 FROM python:3.11-slim
