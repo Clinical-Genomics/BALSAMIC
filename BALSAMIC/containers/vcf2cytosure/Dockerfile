@@ -19,7 +19,7 @@ RUN cd ${WORK_DIR} && \
     git clone https://github.com/NBISweden/vcf2cytosure.git && \
     cd ${WORK_DIR}/${CONTAINER_NAME} && \
     git checkout v0.9.1 && \
-    pip install --no-cache-dir -e .
+    pip install --no-cache-dir .
 
 FROM python:3.11-slim
 
