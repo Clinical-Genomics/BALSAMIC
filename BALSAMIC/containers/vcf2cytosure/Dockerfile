@@ -15,8 +15,7 @@ RUN python -m pip install --upgrade --no-cache-dir pip && \
 
 ENV PATH="${VENV}/bin:$PATH"
 
-RUN cd ${WORK_DIR} && \
-    git clone https://github.com/NBISweden/vcf2cytosure.git && \
+RUN git clone https://github.com/NBISweden/vcf2cytosure.git && \
     cd ${WORK_DIR}/${CONTAINER_NAME} && \
     git checkout v0.9.1 && \
     pip install --no-cache-dir .
@@ -24,10 +23,10 @@ RUN cd ${WORK_DIR} && \
 FROM python:3.11-slim
 
 LABEL base.image="python:3.11-slim" \
-      about.home="https://github.com/Clinical-Genomics/BALSAMIC" \
-      about.documentation="https://balsamic.readthedocs.io/" \
-      about.license="MIT License (MIT)" \
-      about.description="vcf2cytosure for BALSAMIC"
+    about.home="https://github.com/Clinical-Genomics/BALSAMIC" \
+    about.documentation="https://balsamic.readthedocs.io/" \
+    about.license="MIT License (MIT)" \
+    about.description="vcf2cytosure for BALSAMIC"
 
 RUN apt-get update && \
     apt-get -y upgrade && \
