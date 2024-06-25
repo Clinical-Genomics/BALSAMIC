@@ -16,7 +16,7 @@ ENV PYTHONUNBUFFERED=1 \
 RUN python -m pip install --upgrade pip && \
     pip install multiqc==1.22.3 && \
     adduser --disabled-password --gecos '' "$USER" && \
-    mkdir -p $HOME && \
+    mkdir -p "$HOME" && \
     chown -R "$USER:$USER" "$HOME"
 
 # Switch to the non-root user
