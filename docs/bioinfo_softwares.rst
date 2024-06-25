@@ -82,6 +82,12 @@ manta
 :Article: `Bioinformatics` `<https://doi.org/10.1093/bioinformatics/btv710>`_
 :Version: `1.6.0`
 
+msisensor-pro
+~~~~~~~~~~~~~
+:Source code: `GitHub` `<https://github.com/xjtu-omics/msisensor-pro>`_
+:Article: `Bioinformatics` `<https://doi.org/10.1016/j.gpb.2020.02.001>`_
+:Version: `1.2.0`
+
 mosdepth
 ~~~~~~~~
 :Source code: `GitHub` `<https://github.com/brentp/mosdepth>`_
