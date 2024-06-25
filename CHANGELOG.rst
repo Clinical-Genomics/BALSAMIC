@@ -10,6 +10,7 @@ Changed:
 ^^^^^^^^
 * Cluster scheduler script for immediate submit https://github.com/Clinical-Genomics/BALSAMIC/pull/1372
 * `SLEEP_BEFORE_START` to 600s https://github.com/Clinical-Genomics/BALSAMIC/pull/1372
+* Update CNVkit to version 0.9.11 and clean container https://github.com/Clinical-Genomics/BALSAMIC/pull/1457
 
 Removed:
 ^^^^^^^^
