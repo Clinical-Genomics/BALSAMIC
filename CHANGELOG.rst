@@ -1,5 +1,24 @@
-[15.0.0]
+[X.X.X]
 -------
+
+
+Added:
+^^^^^^
+* MSIsensor-pro container https://github.com/Clinical-Genomics/BALSAMIC/pull/1444
+
+Changed:
+^^^^^^^^
+* Cluster scheduler script for immediate submit https://github.com/Clinical-Genomics/BALSAMIC/pull/1372
+* `SLEEP_BEFORE_START` to 600s https://github.com/Clinical-Genomics/BALSAMIC/pull/1372
+
+Removed:
+^^^^^^^^
+* GATK3 https://github.com/Clinical-Genomics/BALSAMIC/pull/1432
+* `gatk_contest` rule https://github.com/Clinical-Genomics/BALSAMIC/pull/1432
+* SGE (qsub) support https://github.com/Clinical-Genomics/BALSAMIC/pull/1372
+
+[15.0.0]
+--------
 
 Added:
 ^^^^^^
@@ -23,9 +42,8 @@ Fixed:
 ^^^^^^
 * initial filter keeping only PASS or triallelic-site from T+N bcftools quality filter rule has been removed https://github.com/Clinical-Genomics/BALSAMIC/pull/1424
 
-
 [14.0.1]
--------
+--------
 
 Fixed:
 ^^^^^^
@@ -33,7 +51,7 @@ Fixed:
 * Corrected name of CNVkit container in the CNVkit PON creation workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1412
 
 [14.0.0]
--------
+--------
 
 Added:
 ^^^^^^
@@ -52,7 +70,7 @@ Fixed:
 * bcftools in manta_tumor_normal uses correct column for tumor read filtering https://github.com/Clinical-Genomics/BALSAMIC/pull/1400
 
 [13.0.1]
--------
+--------
 
 Added:
 ^^^^^^
@@ -62,9 +80,8 @@ Fixed:
 ^^^^^^
 * Missing `__init__.py` in `snakemake_rules` folders https://github.com/Clinical-Genomics/BALSAMIC/pull/1383
 
-
 [13.0.0]
--------
+--------
 
 Added:
 ^^^^^^
@@ -99,7 +116,6 @@ Added:
 * CNV report for TGA workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1339
 * `wkhtmltopdf` to system requirements https://github.com/Clinical-Genomics/BALSAMIC/pull/1339
 * Store WGS CNV report plots https://github.com/Clinical-Genomics/BALSAMIC/pull/1347
-
 
 Changed:
 ^^^^^^^^
