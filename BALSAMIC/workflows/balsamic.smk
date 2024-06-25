@@ -234,12 +234,12 @@ if len(cluster_config.keys()) == 0:
 # Find and set Sentieon binary and license server from env variables
 try:
     config["SENTIEON_LICENSE"] = os.environ["SENTIEON_LICENSE"]
-    config["SENTIEON_INSTALL_DIR"] = "/home/proj/bin/sentieon/sentieon-genomics-202308.02/"
+    config["SENTIEON_INSTALL_DIR"] = os.environ["SENTIEON_INSTALL_DIR"]
 
     if os.getenv("SENTIEON_EXEC") is not None:
         config["SENTIEON_EXEC"] = os.environ["SENTIEON_EXEC"]
     else:
-        config["SENTIEON_EXEC"] = Path("/home/proj/bin/sentieon/sentieon-genomics-202308.02/", "bin", "sentieon").as_posix()
+        config["SENTIEON_EXEC"] = Path(os.environ["SENTIEON_INSTALL_DIR"], "bin", "sentieon").as_posix()
 
     config["SENTIEON_TNSCOPE"] = SENTIEON_TNSCOPE_DIR.as_posix()
     config["SENTIEON_DNASCOPE"] = SENTIEON_DNASCOPE_DIR.as_posix()
