@@ -86,6 +86,7 @@ delivery_dir: str = Path(result_dir, "delivery").as_posix() + "/"
 umi_dir: str = Path(result_dir, "umi").as_posix() + "/"
 umi_qc_dir: str = Path(qc_dir, "umi_qc").as_posix() + "/"
 
+
 # Annotations
 research_annotations = []
 clinical_annotations = []
@@ -234,12 +235,12 @@ if len(cluster_config.keys()) == 0:
 # Find and set Sentieon binary and license server from env variables
 try:
     config["SENTIEON_LICENSE"] = os.environ["SENTIEON_LICENSE"]
-    config["SENTIEON_INSTALL_DIR"] = os.environ["SENTIEON_INSTALL_DIR"]
+    config["SENTIEON_INSTALL_DIR"] = "/home/proj/bin/sentieon/sentieon-genomics-202308.02/"
 
     if os.getenv("SENTIEON_EXEC") is not None:
         config["SENTIEON_EXEC"] = os.environ["SENTIEON_EXEC"]
     else:
-        config["SENTIEON_EXEC"] = Path(os.environ["SENTIEON_INSTALL_DIR"], "bin", "sentieon").as_posix()
+        config["SENTIEON_EXEC"] = Path("/home/proj/bin/sentieon/sentieon-genomics-202308.02/", "bin", "sentieon").as_posix()
 
     config["SENTIEON_TNSCOPE"] = SENTIEON_TNSCOPE_DIR.as_posix()
     config["SENTIEON_DNASCOPE"] = SENTIEON_DNASCOPE_DIR.as_posix()
@@ -479,7 +480,9 @@ if config["analysis"]["sequencing_type"] != "wgs":
     )
     # UMI
     if config["analysis"]["analysis_workflow"] == "balsamic-umi":
-        analysis_specific_results.extend(expand(umi_qc_dir + "{sample}.umi.mean_family_depth", sample=config_model.get_all_sample_names()))
+        analysis_specific_results.extend(expand(umi_qc_dir + "tumor.{sample}.umi.mean_family_depth", sample=tumor_sample))
+        if config['analysis']['analysis_type'] == "paired":
+            analysis_specific_results.extend(expand(umi_qc_dir + "normal.{sample}.umi.mean_family_depth",sample=normal_sample))
         if background_variant_file:
             analysis_specific_results.extend(
                 expand(umi_qc_dir + "{case_name}.{var_caller}.AFtable.txt", case_name=case_id, var_caller=["tnscope_umi"])

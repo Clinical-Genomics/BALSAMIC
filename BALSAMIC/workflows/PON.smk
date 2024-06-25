@@ -49,6 +49,9 @@ bam_dir: str = Path(result_dir, "bam", "").as_posix() + "/"
 cnv_dir: str = Path(result_dir, "cnv", "").as_posix() + "/"
 qc_dir: str = Path(result_dir, "qc", "").as_posix() + "/"
 
+# Pre run parameters
+seconds_before_start: int = SLEEP_BEFORE_START
+
 # PON setting
 pon_workflow: PONWorkflow = config_model.analysis.pon_workflow
 
@@ -88,7 +91,8 @@ if sequence_type == SequencingType.TARGETED:
 else:
     rules_to_include.append("snakemake_rules/quality_control/fastp_wgs.rule")
 
-rules_to_include.append("snakemake_rules/align/sentieon_alignment.rule")
+rules_to_include.append("snakemake_rules/align/tga_sentieon_alignment.rule")
+rules_to_include.append("snakemake_rules/align/tga_bam_postprocess.rule")
 
 if pon_workflow == PONWorkflow.CNVKIT:
     reffasta: str = config_model.reference["reference_genome"]

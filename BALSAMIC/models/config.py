@@ -380,7 +380,11 @@ class ConfigModel(BaseModel):
         return bam_names
 
     def get_final_bam_name(
-        self, bam_dir: str, sample_name: str = None, sample_type: str = None
+        self,
+        bam_dir: str,
+        sample_name: str = None,
+        sample_type: str = None,
+        specified_suffix: str = None,
     ) -> str:
         """Return final bam name to be used in downstream analysis."""
 
@@ -406,10 +410,13 @@ class ConfigModel(BaseModel):
             final_bam_suffix = "dedup"
         elif self.analysis.sequencing_type == SequencingType.TARGETED:
             # Only dedup is necessary for TGA
-            final_bam_suffix = "dedup_sorted"
+            final_bam_suffix = "dedup.fixmate"
         else:
             # For WGS the bamfiles are realigned
             final_bam_suffix = "dedup.realign"
+
+        if specified_suffix:
+            final_bam_suffix = specified_suffix
 
         return f"{bam_dir}{sample_type}.{sample_name}.{final_bam_suffix}.bam"
 
