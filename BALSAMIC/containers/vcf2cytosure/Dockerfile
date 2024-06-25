@@ -1,8 +1,8 @@
 FROM python:3.11.3-slim AS builder
 
 ARG CONTAINER_NAME
-ENV WORK_DIR /opt
-ENV VENV ${WORK_DIR}/venv
+WORKDIR /opt
+ENV VENV /opt/venv
 
 RUN apt-get update && \
     apt-get -y upgrade && \
@@ -15,10 +15,11 @@ RUN python -m pip install --upgrade --no-cache-dir pip && \
 
 ENV PATH="${VENV}/bin:$PATH"
 
-RUN cd ${WORK_DIR} && \
-    git clone https://github.com/NBISweden/vcf2cytosure.git && \
-    cd ${WORK_DIR}/${CONTAINER_NAME} && \
-    git checkout v0.9.1 && \
+RUN git clone https://github.com/NBISweden/vcf2cytosure.git
+
+WORKDIR ${CONTAINER_NAME}
+
+RUN git checkout v0.9.1 && \
     pip install --no-cache-dir .
 
 FROM python:3.11-slim
@@ -35,11 +36,11 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-ENV WORK_DIR /opt
-ENV VENV ${WORK_DIR}/venv
+ENV INSTALLATION_DIR /opt
+ENV VENV ${INSTALLATION_DIR}/venv
 ENV PATH="${VENV}/bin:$PATH"
 
-COPY --from=builder ${WORK_DIR} ${WORK_DIR}
+COPY --from=builder ${INSTALLATION_DIR} ${INSTALLATION_DIR}
 
 RUN adduser --disabled-password --gecos '' ubuntu && \
     chsh -s /bin/bash ubuntu && \
