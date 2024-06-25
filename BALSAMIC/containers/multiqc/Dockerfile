@@ -6,13 +6,25 @@ LABEL about.documentation="https://balsamic.readthedocs.io/"
 LABEL about.license="MIT License (MIT)"
 LABEL about.description="Bioinformatic analysis pipeline for somatic mutations in cancer"
 
-RUN python -m pip install --upgrade --no-cache-dir pip && \
-    pip install multiqc==1.18
+# Set environment variables
+ENV PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1 \
+    USER=ubuntu \
+    HOME=/home/ubuntu
 
-RUN adduser --disabled-password --gecos '' ubuntu && \
-chsh -s /bin/bash && \
-mkdir -p /home/ubuntu
+# Install pip and multiqc, create user and home directory
+RUN python -m pip install --upgrade pip && \
+    pip install multiqc==1.22.3 && \
+    adduser --disabled-password --gecos '' $USER && \
+    mkdir -p $HOME && \
+    chown -R $USER:$USER $HOME
 
-USER ubuntu
-WORKDIR /home/ubuntu
+# Switch to the non-root user
+USER $USER
+WORKDIR $HOME
+
+# Set the default shell
+SHELL ["/bin/bash", "-c"]
+
+# Define the default command
 CMD ["/bin/bash"]
