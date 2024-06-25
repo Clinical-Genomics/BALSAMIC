@@ -10,7 +10,8 @@ Changed:
 ^^^^^^^^
 * Cluster scheduler script for immediate submit https://github.com/Clinical-Genomics/BALSAMIC/pull/1372
 * `SLEEP_BEFORE_START` to 600s https://github.com/Clinical-Genomics/BALSAMIC/pull/1372
-* updated multiqc to version 1.22.3 https://github.com/Clinical-Genomics/BALSAMIC/pull/1441
+* Updated multiqc to version 1.22.3 https://github.com/Clinical-Genomics/BALSAMIC/pull/1441
+* Upgrade `vcf2cytosure` version to 0.9.1 and remove hardcoded versions https://github.com/Clinical-Genomics/BALSAMIC/pull/1456
 
 Removed:
 ^^^^^^^^
