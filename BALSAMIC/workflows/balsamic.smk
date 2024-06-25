@@ -287,7 +287,7 @@ os.environ['TMPDIR'] = get_result_dir(config)
 cnv_report_paths = []
 if config["analysis"]["sequencing_type"] == "wgs":
     if config['analysis']['analysis_type'] == "paired":
-        cnv_report_paths.append(f"{vcf_dir}CNV.somatic.{config['analysis']['case_id']}.msisensorpro.msi")
+        cnv_report_paths.append(f"{vcf_dir}MSI.somatic.{config['analysis']['case_id']}.msisensorpro.msi")
         cnv_report_paths.append(f"{vcf_dir}CNV.somatic.{config['analysis']['case_id']}.ascat.samplestatistics.txt.pdf")
         cnv_report_paths.extend(expand(
             f"{vcf_dir}CNV.somatic.{config['analysis']['case_id']}.ascat.{{output_suffix}}.png.pdf",
@@ -300,7 +300,7 @@ if config["analysis"]["sequencing_type"] == "wgs":
         ))
 else:
     if config["analysis"]["analysis_type"] == "paired":
-        cnv_report_paths.append(f"{vcf_dir}CNV.somatic.{config['analysis']['case_id']}.msisensorpro.msi")
+        cnv_report_paths.append(f"{vcf_dir}MSI.somatic.{config['analysis']['case_id']}.msisensorpro.msi")
     cnv_report_paths.extend(expand(f"{cnv_dir}tumor.merged-{{plot}}.pdf",plot=["diagram", "scatter"]))
     cnv_report_paths.append(f"{cnv_dir}CNV.somatic.{config['analysis']['case_id']}.purecn.purity.csv.pdf")
 
