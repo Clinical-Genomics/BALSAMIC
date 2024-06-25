@@ -1,4 +1,5 @@
 """Input/Output utility methods."""
+
 import gzip
 import json
 import logging
@@ -101,3 +102,14 @@ def write_finish_file(file_path: str) -> None:
     """Write finish file indicating the analysis completion."""
     with open(file_path, mode="w") as finish_file:
         finish_file.write(f"{datetime.now().strftime('%Y-%m-%d %H:%M')}\n")
+
+
+def write_sacct_to_yaml(
+    case_id: str, sacct_file_path: Path, yaml_file_path: Path
+) -> None:
+    """Extracts the first element before comma (job ID) from the file content and saves it in a YAML file."""
+    with open(sacct_file_path, "r") as file:
+        lines: List[str] = file.readlines()
+    job_ids: List[str] = [line.strip().split(",")[0] for line in lines]
+    with open(yaml_file_path, "w") as yaml_file:
+        yaml.dump({case_id: job_ids}, yaml_file)

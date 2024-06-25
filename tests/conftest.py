@@ -27,6 +27,7 @@ from BALSAMIC.constants.cluster import (
     ClusterAccount,
     ClusterConfigType,
     ClusterProfile,
+    ClusterMailType,
 )
 from BALSAMIC.constants.constants import FileType
 from BALSAMIC.constants.paths import CONSTANTS_DIR, FASTQ_TEST_INFO, TEST_DATA_DIR
@@ -39,6 +40,7 @@ from BALSAMIC.models.cache import (
     ReferencesHg,
 )
 from BALSAMIC.models.config import ConfigModel
+from BALSAMIC.models.scheduler import Scheduler
 from BALSAMIC.models.snakemake import SingularityBindPath, SnakemakeExecutable
 from BALSAMIC.utils.io import read_json, read_yaml, write_json
 from .helpers import ConfigHelper, Map
@@ -64,6 +66,26 @@ def fastq_pattern_ids() -> list:
     fastq_pattern_types = fastq_test_info_dict["fastq_pattern_types"]
     fastq_pattern_ids = ["FastqPattern{}".format(p["id"]) for p in fastq_pattern_types]
     return fastq_pattern_ids
+
+
+@pytest.fixture(scope="session")
+def empty_dir(tmp_path_factory: TempPathFactory) -> Path:
+    """Return an empty directory path."""
+    return tmp_path_factory.mktemp("empty_dir")
+
+
+@pytest.fixture(scope="session")
+def empty_file(empty_dir: Path) -> Path:
+    """Return an empty directory path."""
+    empty_file: Path = Path(empty_dir, "file.empty")
+    empty_file.touch()
+    return empty_file
+
+
+@pytest.fixture(scope="session")
+def sacct_file(case_id_tumor_only: str) -> Path:
+    """Return sacct file path."""
+    return Path(TEST_DATA_DIR, "logs", f"{case_id_tumor_only}.sacct")
 
 
 @pytest.fixture(scope="session")
@@ -2023,6 +2045,7 @@ def fixture_develop_containers() -> Dict[str, str]:
         DockerContainers.HTSLIB: "docker://clinicalgenomics/balsamic:develop-htslib",
         DockerContainers.PURECN: "docker://clinicalgenomics/balsamic:develop-purecn",
         DockerContainers.GATK: "docker://clinicalgenomics/balsamic:develop-gatk",
+        DockerContainers.MSISENSORPRO: "docker://clinicalgenomics/balsamic:develop-msisensorpro",
     }
 
 
@@ -2354,7 +2377,7 @@ def fixture_snakemake_executable_data(
 ) -> Dict[str, Any]:
     """Return snakemake executable model data."""
     return {
-        "account": ClusterAccount.DEVELOPMENT,
+        "account": ClusterAccount.DEVELOPMENT.value,
         "case_id": case_id_tumor_only,
         "cluster_config_path": reference_file,
         "config_path": reference_file,
@@ -2364,7 +2387,6 @@ def fixture_snakemake_executable_data(
         "profile": ClusterProfile.SLURM,
         "qos": QOS.HIGH,
         "quiet": True,
-        "result_dir": session_tmp_path,
         "run_analysis": True,
         "run_mode": RunMode.CLUSTER,
         "script_dir": session_tmp_path,
@@ -2394,7 +2416,7 @@ def fixture_snakemake_executable_validated_data(
 ) -> Dict[str, Any]:
     """Return snakemake model expected data."""
     return {
-        "account": ClusterAccount.DEVELOPMENT,
+        "account": ClusterAccount.DEVELOPMENT.value,
         "benchmark": False,
         "case_id": case_id_tumor_only,
         "cluster_config_path": reference_file,
@@ -2404,12 +2426,11 @@ def fixture_snakemake_executable_validated_data(
         "force": False,
         "log_dir": session_tmp_path,
         "mail_type": None,
-        "mail_user": f"--mail-user {mail_user_option}",
+        "mail_user": mail_user_option,
         "profile": ClusterProfile.SLURM,
         "qos": QOS.HIGH,
         "quiet": True,
         "report_path": None,
-        "result_dir": session_tmp_path,
         "run_analysis": True,
         "run_mode": RunMode.CLUSTER,
         "script_dir": session_tmp_path,
@@ -2418,3 +2439,77 @@ def fixture_snakemake_executable_validated_data(
         "snakemake_options": snakemake_options_command,
         "working_dir": session_tmp_path,
     }
+
+
+@pytest.fixture(scope="session")
+def job_id() -> str:
+    """Return cluster job identifier."""
+    return "12345"
+
+
+@pytest.fixture(scope="session")
+def job_properties() -> Dict[str, Any]:
+    """Cluster job properties."""
+    return {
+        "cluster": {
+            "partition": "core",
+            "n": "1",
+            "time": "10:00:00",
+            "mail_type": ClusterMailType.ALL.value,
+        }
+    }
+
+
+@pytest.fixture(scope="session")
+def scheduler_data(
+    case_id_tumor_only: str,
+    job_properties: Dict[str, Any],
+    empty_file: Path,
+    empty_dir: Path,
+    mail_user_option: str,
+) -> Dict[str, Any]:
+    """Return raw scheduler model data."""
+    return {
+        "account": ClusterAccount.DEVELOPMENT.value,
+        "case_id": case_id_tumor_only,
+        "dependencies": ["1", "2", "3"],
+        "job_properties": job_properties,
+        "job_script": empty_file.as_posix(),
+        "log_dir": empty_dir.as_posix(),
+        "mail_user": mail_user_option,
+        "mail_type": ClusterMailType.FAIL.value,
+        "profile": ClusterProfile.SLURM.value,
+        "qos": QOS.HIGH,
+    }
+
+
+@pytest.fixture(scope="session")
+def scheduler_validated_data(
+    case_id_tumor_only: str,
+    job_properties: Dict[str, Any],
+    empty_file: Path,
+    empty_dir: Path,
+    mail_user_option: str,
+) -> Dict[str, Any]:
+    """Return scheduler model validated data."""
+    return {
+        "account": f"--account {ClusterAccount.DEVELOPMENT}",
+        "benchmark": False,
+        "case_id": case_id_tumor_only,
+        "dependencies": ["1", "2", "3"],
+        "job_properties": job_properties,
+        "job_script": empty_file,
+        "log_dir": empty_dir,
+        "mail_type": "--mail-type FAIL",
+        "mail_user": f"--mail-user {mail_user_option}",
+        "profile": ClusterProfile.SLURM,
+        "profiling_interval": 10,
+        "profiling_type": "task",
+        "qos": "--qos high",
+    }
+
+
+@pytest.fixture(scope="session")
+def scheduler_model(scheduler_data: Dict[str, Any]) -> Scheduler:
+    """Return scheduler pydantic model."""
+    return Scheduler(**scheduler_data)

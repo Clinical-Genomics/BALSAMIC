@@ -115,7 +115,7 @@ VCF_DICT = {
     },
 }
 
-SLEEP_BEFORE_START = 300
+SLEEP_BEFORE_START = 600
 
 WORKFLOW_PARAMS = {
     "common": {

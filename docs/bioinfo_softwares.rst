@@ -71,12 +71,6 @@ fastqc
 :Article: `Babraham` `<https://www.bioinformatics.babraham.ac.uk/projects/fastqc/>`_
 :Version: `0.11.9`
 
-gatk
-~~~~
-:Source code: `Github` `<https://github.com/broadinstitute/gatk>`_
-:Article: `Current Protocols in Bioinformatics` `<https://pubmed.ncbi.nlm.nih.gov/25431634/>`_
-:Version: `3.8`
-
 genmod
 ~~~~~~
 :Source code: `Github` `<https://github.com/Clinical-Genomics/genmod>`_
@@ -87,6 +81,12 @@ manta
 :Source code: `GitHub` `<https://github.com/Illumina/manta>`_
 :Article: `Bioinformatics` `<https://doi.org/10.1093/bioinformatics/btv710>`_
 :Version: `1.6.0`
+
+msisensor-pro
+~~~~~~~~~~~~~
+:Source code: `GitHub` `<https://github.com/xjtu-omics/msisensor-pro>`_
+:Article: `Bioinformatics` `<https://doi.org/10.1016/j.gpb.2020.02.001>`_
+:Version: `1.2.0`
 
 mosdepth
 ~~~~~~~~

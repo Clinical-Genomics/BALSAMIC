@@ -2,20 +2,13 @@
 import copy
 import sys
 from pathlib import Path
-from typing import Dict, Any
+from typing import Any, Dict
 
 import pytest
-from pydantic import ValidationError
-
-from BALSAMIC.constants.cluster import (
-    ClusterMailType,
-    MAX_JOBS,
-    ClusterProfile,
-    ClusterAccount,
-    QOS,
-)
-from BALSAMIC.constants.paths import SCHEDULER_PATH
+from BALSAMIC.constants.cluster import MAX_JOBS, QOS, ClusterAccount, ClusterProfile
+from BALSAMIC.constants.paths import IMMEDIATE_SUBMIT_PATH
 from BALSAMIC.models.snakemake import SingularityBindPath, SnakemakeExecutable
+from pydantic import ValidationError
 
 
 def test_singularity_bind_path_model(singularity_bind_path_data: Dict[str, Path]):
@@ -117,20 +110,6 @@ def test_get_force_flag(snakemake_executable: SnakemakeExecutable):
     assert force_flag == "--forceall"
 
 
-def test_get_mail_type_option(snakemake_executable: SnakemakeExecutable):
-    """Test formatting of the mail type option."""
-
-    # GIVEN a snakemake model with a mail type option
-    snakemake_model: SnakemakeExecutable = copy.deepcopy(snakemake_executable)
-    snakemake_model.mail_type = ClusterMailType.FAIL
-
-    # WHEN calling the method
-    mail_type_option: str = snakemake_model.get_mail_type_option()
-
-    # THEN the expected format should be returned
-    assert mail_type_option == "--mail-type FAIL"
-
-
 def test_quiet_flag(snakemake_executable: SnakemakeExecutable):
     """Test formatting of the quiet flag."""
 
@@ -199,20 +178,6 @@ def test_get_singularity_bind_paths_option(
     )
 
 
-def test_get_slurm_profiler_option(snakemake_executable: SnakemakeExecutable):
-    """Test formatting of the snakemake slurm profiler option."""
-
-    # GIVEN a snakemake executable model
-    snakemake_model: SnakemakeExecutable = copy.deepcopy(snakemake_executable)
-    snakemake_model.benchmark = True
-
-    # WHEN calling the method
-    slurm_profiler: str = snakemake_model.get_slurm_profiler_option()
-
-    # THEN the expected format should be returned
-    assert slurm_profiler == "--slurm-profiler task"
-
-
 def test_get_snakemake_options_command(snakemake_executable: SnakemakeExecutable):
     """Test formatting of the snakemake options command."""
 
@@ -225,6 +190,56 @@ def test_get_snakemake_options_command(snakemake_executable: SnakemakeExecutable
 
     # THEN the expected format should be returned
     assert snakemake_options_command == "--cores 36"
+
+
+def test_get_cluster_submit_command(
+    case_id_tumor_only: str,
+    mail_user_option: str,
+    session_tmp_path: Path,
+    snakemake_executable: SnakemakeExecutable,
+):
+    """Test formatting of the cluster submit command."""
+
+    # GIVEN a snakemake executable model with working environment paths
+
+    # WHEN calling the method
+    snakemake_cluster_submit_command: str = (
+        snakemake_executable.get_cluster_submit_command()
+    )
+
+    # THEN the expected format should be returned
+    assert snakemake_cluster_submit_command == (
+        f"'{sys.executable} {IMMEDIATE_SUBMIT_PATH.as_posix()} --account {ClusterAccount.DEVELOPMENT} "
+        f"--log-dir {session_tmp_path} --mail-user {mail_user_option} --profile {ClusterProfile.SLURM} "
+        f"--qos {QOS.HIGH} --script-dir {session_tmp_path} {case_id_tumor_only} {{dependencies}}'"
+    )
+
+
+def test_get_snakemake_cluster_options(
+    case_id_tumor_only: str,
+    mail_user_option: str,
+    reference_file: Path,
+    session_tmp_path: Path,
+    snakemake_executable: SnakemakeExecutable,
+):
+    """Test formatting of the snakemake cluster options."""
+
+    # GIVEN a snakemake executable model with working environment paths
+
+    # WHEN calling the method
+    snakemake_cluster_options: str = (
+        snakemake_executable.get_snakemake_cluster_options()
+    )
+
+    # THEN the expected format should be returned
+    assert (
+        snakemake_cluster_options
+        == f"--immediate-submit -j {MAX_JOBS} --jobname BALSAMIC.{case_id_tumor_only}.{{rulename}}.{{jobid}}.sh "
+        f"--cluster-config {reference_file.as_posix()} --cluster '{sys.executable} {IMMEDIATE_SUBMIT_PATH.as_posix()} "
+        f"--account {ClusterAccount.DEVELOPMENT} --log-dir {session_tmp_path} --mail-user {mail_user_option} "
+        f"--profile {ClusterProfile.SLURM} --qos {QOS.HIGH} --script-dir {session_tmp_path} {case_id_tumor_only} "
+        "{dependencies}'"
+    )
 
 
 def test_get_snakemake_command(
@@ -249,62 +264,8 @@ def test_get_snakemake_command(
         f"--configfiles {reference_file.as_posix()} {reference_file.as_posix()} "
         f"--use-singularity --singularity-args '--cleanenv --bind {session_tmp_path.as_posix()}:/' --quiet "
         f"--immediate-submit -j {MAX_JOBS} --jobname BALSAMIC.{case_id_tumor_only}.{{rulename}}.{{jobid}}.sh "
-        f"--cluster-config {reference_file.as_posix()} --cluster '{sys.executable} {SCHEDULER_PATH} "
-        f"--sample-config {reference_file.as_posix()} --profile {ClusterProfile.SLURM} "
-        f"--account {ClusterAccount.DEVELOPMENT} --qos {QOS.HIGH} --log-dir {session_tmp_path} "
-        f"--script-dir {session_tmp_path} --result-dir {session_tmp_path} --mail-user {mail_user_option} "
-        f"{{dependencies}} ' --config disable_variant_caller=tnscope,vardict --cores 36"
-    )
-
-
-def test_get_snakemake_cluster_options(
-    case_id_tumor_only: str,
-    mail_user_option: str,
-    reference_file: Path,
-    session_tmp_path: Path,
-    snakemake_executable: SnakemakeExecutable,
-):
-    """Test formatting of the snakemake cluster options."""
-
-    # GIVEN a snakemake executable model with working environment paths
-
-    # WHEN calling the method
-    snakemake_cluster_options: str = (
-        snakemake_executable.get_snakemake_cluster_options()
-    )
-
-    # THEN the expected format should be returned
-    assert (
-        snakemake_cluster_options
-        == f"--immediate-submit -j {MAX_JOBS} --jobname BALSAMIC.{case_id_tumor_only}.{{rulename}}.{{jobid}}.sh "
-        f"--cluster-config {reference_file.as_posix()} --cluster '{sys.executable} {SCHEDULER_PATH.as_posix()} "
-        f"--sample-config {reference_file.as_posix()} --profile {ClusterProfile.SLURM} "
-        f"--account {ClusterAccount.DEVELOPMENT} --qos {QOS.HIGH} --log-dir {session_tmp_path} "
-        f"--script-dir {session_tmp_path} --result-dir {session_tmp_path} --mail-user {mail_user_option} "
-        "{dependencies} '"
-    )
-
-
-def test_get_cluster_submit_command(
-    mail_user_option: str,
-    reference_file: Path,
-    session_tmp_path: Path,
-    snakemake_executable: SnakemakeExecutable,
-):
-    """Test formatting of the cluster submit command."""
-
-    # GIVEN a snakemake executable model with working environment paths
-
-    # WHEN calling the method
-    snakemake_cluster_submit_command: str = (
-        snakemake_executable.get_cluster_submit_command()
-    )
-
-    # THEN the expected format should be returned
-    assert snakemake_cluster_submit_command == (
-        f"'{sys.executable} {SCHEDULER_PATH.as_posix()} "
-        f"--sample-config {reference_file.as_posix()} --profile {ClusterProfile.SLURM} "
-        f"--account {ClusterAccount.DEVELOPMENT} --qos {QOS.HIGH} --log-dir {session_tmp_path} "
-        f"--script-dir {session_tmp_path} --result-dir {session_tmp_path} --mail-user {mail_user_option} "
-        "{dependencies} '"
+        f"--cluster-config {reference_file.as_posix()} --cluster '{sys.executable} {IMMEDIATE_SUBMIT_PATH.as_posix()} "
+        f"--account {ClusterAccount.DEVELOPMENT} --log-dir {session_tmp_path} --mail-user {mail_user_option} "
+        f"--profile {ClusterProfile.SLURM} --qos {QOS.HIGH} --script-dir {session_tmp_path} {case_id_tumor_only} "
+        "{dependencies}' --config disable_variant_caller=tnscope,vardict --cores 36"
     )
