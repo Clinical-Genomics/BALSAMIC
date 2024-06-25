@@ -15,13 +15,13 @@ ENV PYTHONUNBUFFERED=1 \
 # Install pip and multiqc, create user and home directory
 RUN python -m pip install --upgrade pip && \
     pip install multiqc==1.22.3 && \
-    adduser --disabled-password --gecos '' $USER && \
+    adduser --disabled-password --gecos '' "$USER" && \
     mkdir -p $HOME && \
-    chown -R $USER:$USER $HOME
+    chown -R "$USER:$USER" "$HOME"
 
 # Switch to the non-root user
-USER $USER
-WORKDIR $HOME
+USER "$USER"
+WORKDIR "$HOME"
 
 # Set the default shell
 SHELL ["/bin/bash", "-c"]
