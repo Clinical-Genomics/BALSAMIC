@@ -5,7 +5,7 @@ import logging
 import subprocess
 import sys
 from pathlib import Path
-from typing import Dict, List, Any
+from typing import Any, Dict, List
 from unittest import mock
 
 import click
@@ -250,7 +250,7 @@ def test_get_bioinfo_pip_tools_version():
     bioinfo_tools: dict = get_bioinfo_tools_version(BIOINFO_TOOL_ENV, CONTAINERS_DIR)
 
     # THEN assert that the PIP specific packages are correctly retrieved
-    assert set(bioinfo_tools["cnvkit"]).issubset({"0.9.10"})
+    assert set(bioinfo_tools["cnvkit"]).issubset({"0.9.11"})
 
 
 def test_get_delivery_id():
