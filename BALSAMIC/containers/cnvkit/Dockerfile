@@ -10,9 +10,9 @@ LABEL about.home="https://github.com/etal/cnvkit"
 LABEL about.documentation="https://cnvkit.readthedocs.io"
 LABEL about.license="MIT License (MIT)"
 
-ENV DEBIAN_FRONTEND noninteractive \
-    VENV /opt/venv \
-    PATH="${VENV}/bin:$PATH"
+ENV DEBIAN_FRONTEND noninteractive
+ENV VENV /opt/venv
+ENV PATH="${VENV}/bin:$PATH"
 
 RUN apt-get update && apt-get -y upgrade && \
     apt-get -y install --no-install-recommends tabix liblzma-dev zlib1g-dev \
