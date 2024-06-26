@@ -284,9 +284,14 @@ def test_collect_qc_metrics_counts(
     assert result.exit_code == 0
     assert Path(output_path).exists()
 
+
 def test_get_sample_id():
     """Tests sample id extraction from multiqc_key"""
-    multiqc_sampleid_keys = ["tumor.sampleid", "tumor.sampleid_R1", "sampleid_align_sort_HMYLNDSXX_sampleid_S165_L001"]
+    multiqc_sampleid_keys = [
+        "tumor.sampleid",
+        "tumor.sampleid_R1",
+        "sampleid_align_sort_HMYLNDSXX_sampleid_S165_L001",
+    ]
     for multiqc_key in multiqc_sampleid_keys:
         assert get_sample_id(multiqc_key) == "sampleid"
 
