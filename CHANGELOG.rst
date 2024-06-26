@@ -21,7 +21,7 @@ Removed:
 
 Fixed:
 ^^^^^^
-* corrected tool name in deduplication metrics https://github.com/Clinical-Genomics/BALSAMIC/pull/1441
+* Corrected tool name in deduplication metrics https://github.com/Clinical-Genomics/BALSAMIC/pull/1441
 
 [15.0.0]
 --------
