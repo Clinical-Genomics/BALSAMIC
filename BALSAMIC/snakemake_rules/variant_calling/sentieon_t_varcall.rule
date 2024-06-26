@@ -73,53 +73,6 @@ rm -rf {params.tmpdir};
         """
 
 
-rule sentieon_TNhaplotyper_tumor_only:
-    input:
-        bam = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
-        recal_data_table = expand(bam_dir + "tumor.merged.recal_data.table"),
-        ref = config["reference"]["reference_genome"],
-        dbsnp = config["reference"]["dbsnp"],
-        cosmic = config["reference"]["cosmic"],
-    output:
-        vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnhaplotyper.vcf.gz",
-        namemap = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnhaplotyper.sample_name_map",
-    benchmark:
-        Path(benchmark_dir, "sentieon_TNhaplotyper_tumor_only_" + config["analysis"]["case_id"] + ".tsv").as_posix()
-    params:
-        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-        tumor = "TUMOR",
-        pon = " " if get_pon(config) is None else " ".join(["--pon", get_pon(config)]),
-        pcr_model = params.common.pcr_model,
-        sentieon_exec = config["SENTIEON_EXEC"],
-        sentieon_lic = config["SENTIEON_LICENSE"],
-        case_name = config["analysis"]["case_id"]
-    threads:
-        get_threads(cluster_config, 'sentieon_TNhaplotyper_tumor_only')
-    message:
-        "Calling SNVs using sentieon TNhaplotyper for {params.case_name}"
-    shell:
-        """
-mkdir -p {params.tmpdir};
-export TMPDIR={params.tmpdir};
-export SENTIEON_TMPDIR={params.tmpdir};
-export SENTIEON_LICENSE={params.sentieon_lic};
-
-{params.sentieon_exec} driver \
--r {input.ref} \
--t {threads} \
--i {input.bam} \
--q {input.recal_data_table} \
---algo TNhaplotyper \
---tumor_sample {params.tumor} {params.pon} \
---pcr_indel_mode {params.pcr_model} \
---cosmic {input.cosmic} \
---dbsnp {input.dbsnp} {output.vcf};
-
-echo -e \"{params.tumor}\\tTUMOR\" > {output.namemap}; 
-rm -rf {params.tmpdir};
-        """
-
-
 rule sentieon_TNscope_tumor_only:
     input:
         ref = config["reference"]["reference_genome"],
@@ -139,7 +92,6 @@ rule sentieon_TNscope_tumor_only:
         tumor_options = VARCALL_PARAMS["tnscope"]["tumor"],
         pon = " " if get_pon(config) is None else " ".join(["--pon", get_pon(config)]),
         pcr_model = params.common.pcr_model,
-        sentieon_ml_tnscope = config["SENTIEON_TNSCOPE"],
         sentieon_exec = config["SENTIEON_EXEC"],
         sentieon_lic = config["SENTIEON_LICENSE"],
         case_name =  config["analysis"]["case_id"]
