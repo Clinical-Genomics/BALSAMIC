@@ -15,6 +15,7 @@ from BALSAMIC.assets.scripts.collect_qc_metrics import (
     get_variant_metrics,
     get_metric_condition,
     get_relatedness_metrics,
+    get_sample_id,
 )
 
 
@@ -282,6 +283,12 @@ def test_collect_qc_metrics_counts(
     # THEN check if the YAML is correctly created and there are no errors
     assert result.exit_code == 0
     assert Path(output_path).exists()
+
+def test_get_sample_id():
+    """Tests sample id extraction from multiqc_key"""
+    multiqc_sampleid_keys = ["tumor.sampleid", "tumor.sampleid_R1", "sampleid_align_sort_HMYLNDSXX_sampleid_S165_L001"]
+    for multiqc_key in multiqc_sampleid_keys:
+        assert get_sample_id(multiqc_key) == "sampleid"
 
 
 def test_get_relatedness_metrics(multiqc_data_dict):
