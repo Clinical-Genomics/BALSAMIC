@@ -1,4 +1,5 @@
 """Balsamic command options."""
+
 import click
 
 from BALSAMIC import __version__ as balsamic_version
@@ -22,7 +23,11 @@ from BALSAMIC.constants.cluster import (
 from BALSAMIC.constants.constants import LOG_LEVELS, LogLevel
 from BALSAMIC.constants.rules import DELIVERY_RULES
 from BALSAMIC.constants.workflow_params import VCF_DICT
-from BALSAMIC.utils.cli import validate_cache_version, validate_exome_option
+from BALSAMIC.utils.cli import (
+    validate_cache_version,
+    validate_exome_option,
+    validate_umi_min_reads,
+)
 
 OPTION_ADAPTER_TRIM = click.option(
     "--adapter-trim/--no-adapter-trim",
@@ -422,4 +427,11 @@ OPTION_UMI_TRIM_LENGTH = click.option(
     show_default=True,
     type=click.INT,
     help="Trim N bases from reads in FASTQ file",
+)
+
+OPTION_UMI_MIN_READS = click.option(
+    "--umi-min-reads",
+    type=click.STRING,
+    callback=validate_umi_min_reads,
+    help="Minimum raw reads supporting each UMI group. Format: 'x,y,z'.",
 )
