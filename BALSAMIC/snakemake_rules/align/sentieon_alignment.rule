@@ -84,9 +84,6 @@ shell_bam_files=$(echo {input.bam_files} | sed 's/ / -i /g') ;
 --score_info {output.score} \
 --metrics {output.metrics} \
 {output.bam};
-
-
-sed 's/^LIBRARY/\\n## METRICS CLASS\tpicard\.sam\.DuplicationMetrics\\nLIBRARY/' -i {output.metrics}
         """
 
 rule sentieon_realign:

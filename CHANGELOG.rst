@@ -10,6 +10,7 @@ Changed:
 ^^^^^^^^
 * Cluster scheduler script for immediate submit https://github.com/Clinical-Genomics/BALSAMIC/pull/1372
 * `SLEEP_BEFORE_START` to 600s https://github.com/Clinical-Genomics/BALSAMIC/pull/1372
+* Updated Multiqc to version 1.22.3 https://github.com/Clinical-Genomics/BALSAMIC/pull/1441
 * Upgrade `vcf2cytosure` version to 0.9.1 and remove hardcoded versions https://github.com/Clinical-Genomics/BALSAMIC/pull/1456
 
 Removed:
@@ -17,6 +18,10 @@ Removed:
 * GATK3 https://github.com/Clinical-Genomics/BALSAMIC/pull/1432
 * `gatk_contest` rule https://github.com/Clinical-Genomics/BALSAMIC/pull/1432
 * SGE (qsub) support https://github.com/Clinical-Genomics/BALSAMIC/pull/1372
+
+Fixed:
+^^^^^^
+* Corrected tool name in deduplication metrics https://github.com/Clinical-Genomics/BALSAMIC/pull/1441
 
 [15.0.0]
 --------
@@ -27,11 +32,13 @@ Added:
 * New option for exome samples `--exome` with modified bcftools filters compared to standard targeted workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1414
 * Custom samtools script for the detection of IGH::DUX4 rearrangements https://github.com/Clinical-Genomics/BALSAMIC/pull/1397
 
+
 Changed:
 ^^^^^^^^
 * Reduced stringency of minimum MQ for all TGA to 30 from 40 https://github.com/Clinical-Genomics/BALSAMIC/pull/1414
 * Removed -u flag from VarDict T+N and T only rules to remove calling only in reverse reads of overlapping mates https://github.com/Clinical-Genomics/BALSAMIC/pull/1414
 * Removed -U flag to VarDict T+N rule to start calling SVs https://github.com/Clinical-Genomics/BALSAMIC/pull/1414
+
 
 Removed:
 ^^^^^^^^
