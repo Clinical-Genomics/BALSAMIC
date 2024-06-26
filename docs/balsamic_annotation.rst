@@ -209,7 +209,7 @@ SWEGEN
 MSI
 ---
 
-`BALSAMIC` generates the following table using `´MSIsensor-pro`` that is included in the CNV report.
+`BALSAMIC` generates the following table using `MSIsensor-pro` that is included in the CNV report.
 See https://github.com/xjtu-omics/msisensor-pro/wiki for more details.
 
 .. list-table:: MSI
