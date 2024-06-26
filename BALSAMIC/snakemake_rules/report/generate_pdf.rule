@@ -53,10 +53,10 @@ rule msi_to_pdf:
     threads:
         get_threads(cluster_config=cluster_config, rule_name="txt_to_pdf")
     message:
-        "Converting AscatNgs statistics TXT file to PDF"
+        "Converting MSI TXT file to PDF"
     shell:
         """
-python "{params.csv_to_pdf_script}" "{input.msi_result}" "{output.msi_result_pdf}" --delimiter " "
+python "{params.csv_to_pdf_script}" "{input.msi_result}" "{output.msi_result_pdf}" --delimiter "\t"
         """
 
 rule image_to_pdf:
