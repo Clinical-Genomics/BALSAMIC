@@ -187,7 +187,7 @@ def get_metric_condition(
 
 
 def get_sample_id(multiqc_key: str):
-    """Extracts sample-id or case-id from multiqc data json key
+    """Returns extracted sample ID from MultiQC data JSON key.
 
     Example of possible sample-formats below from "report_saved_raw_data":
     tumor.ACCXXXXXX
