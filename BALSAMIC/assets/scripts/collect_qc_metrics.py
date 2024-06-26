@@ -186,7 +186,7 @@ def get_metric_condition(
     return req_metrics
 
 
-def get_sample_id(multiqc_key: str):
+def get_sample_id(multiqc_key: str) -> str:
     """Returns extracted sample ID from MultiQC data JSON key.
 
     Example of possible sample-formats below from "report_saved_raw_data":
@@ -194,7 +194,8 @@ def get_sample_id(multiqc_key: str):
     tumor.ACCXXXXXX_FR
     ACCXXXXXX_align_sort_HMYLNDSXX_ACCXXXXXX_S165_L001
 
-    returns ACCXXXXXX
+    Returns
+        str: The extracted sample ID with the ACCXXXXXX format.
     """
 
     if "_align_sort_" in multiqc_key:

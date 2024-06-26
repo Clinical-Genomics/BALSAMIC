@@ -1,13 +1,13 @@
 FROM python:3.11.3-slim
 
-LABEL base.image="python:3.11.3-slim"
-LABEL maintainer="Clinical Genomics"
-LABEL about.contact="support@clinicalgenomics.se"
-LABEL about.home="https://github.com/MultiQC/MultiQC"
-LABEL software.version="1.22.3"
-LABEL about.documentation="https://multiqc.info/"
-LABEL about.license="MIT License (MIT)"
-LABEL about.description="Aggregate bioinformatics results across many samples into a single report"
+LABEL base.image="python:3.11.3-slim" \
+    maintainer="Clinical Genomics" \
+    about.contact="support@clinicalgenomics.se" \
+    about.home="https://github.com/MultiQC/MultiQC" \
+    software.version="1.22.3" \
+    about.documentation="https://multiqc.info/" \
+    about.license="MIT License (MIT)" \
+    about.description="Aggregate bioinformatics results across many samples into a single report"
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1 \

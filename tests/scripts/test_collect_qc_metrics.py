@@ -285,15 +285,15 @@ def test_collect_qc_metrics_counts(
     assert Path(output_path).exists()
 
 
-def test_get_sample_id():
-    """Tests sample id extraction from multiqc_key"""
+def test_get_sample_id(tumor_sample_name):
+    """Tests sample ID extraction from multiqc_key."""
     multiqc_sampleid_keys = [
-        "tumor.sampleid",
-        "tumor.sampleid_R1",
-        "sampleid_align_sort_HMYLNDSXX_sampleid_S165_L001",
+        f"tumor.{tumor_sample_name}",
+        f"tumor.{tumor_sample_name}_R1",
+        f"{tumor_sample_name}_align_sort_HMYLNDSXX_{tumor_sample_name}_S165_L001",
     ]
     for multiqc_key in multiqc_sampleid_keys:
-        assert get_sample_id(multiqc_key) == "sampleid"
+        assert get_sample_id(multiqc_key) == tumor_sample_name
 
 
 def test_get_relatedness_metrics(multiqc_data_dict):
