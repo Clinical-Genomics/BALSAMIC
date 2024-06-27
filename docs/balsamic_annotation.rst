@@ -206,6 +206,26 @@ SWEGEN
      - allele count
      - SV
 
+MSI
+---
+
+`BALSAMIC` generates the following table using `MSIsensor-pro` that is included in the CNV report.
+See https://github.com/xjtu-omics/msisensor-pro/wiki for more details.
+
+.. list-table:: MSI
+   :widths: 50 50
+   :header-rows: 1
+
+   * - Column
+     - description
+   * - Total_Number_of_Sites
+     - all detected microsatellites
+   * - Number_of_Somatic_Sites
+     - the unstable(somatic) microsatellites
+   * - %
+     - The MSI score
+
+
 
 ENSEMBL-VEP annotations
 -----------------------

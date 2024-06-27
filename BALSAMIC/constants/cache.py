@@ -51,6 +51,8 @@ class DockerContainers(StrEnum):
     DELLY: str = "delly"
     GATK: str = "gatk"
     HTSLIB: str = "htslib"
+    MULTIQC: str = "multiqc"
+    MSISENSORPRO: str = "msisensorpro"
     PURECN: str = "purecn"
     PYTHON_3: str = "varcall_py3"
     PYTHON_27: str = "varcall_py27"

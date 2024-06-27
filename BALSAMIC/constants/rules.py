@@ -100,7 +100,6 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
             "snakemake_rules/umi/concatenation_umi.rule",
             "snakemake_rules/umi/mergetype_tumor_umi.rule",
             "snakemake_rules/umi/mergetype_normal_umi.rule",
-            "snakemake_rules/quality_control/contest.rule",
             "snakemake_rules/umi/generate_AF_tables.rule",
         ],
         "align": [
@@ -120,6 +119,7 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
             "snakemake_rules/annotation/rankscore.rule",
             "snakemake_rules/annotation/varcaller_filter_tumor_normal.rule",
             "snakemake_rules/annotation/vcfheader_rename.rule",
+            "snakemake_rules/annotation/msi_tumor_normal.rule",
         ],
     },
     "single_wgs": {
@@ -155,6 +155,7 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
         "annotate": [
             "snakemake_rules/annotation/varcaller_wgs_filter_tumor_normal.rule",
             "snakemake_rules/annotation/vcfheader_rename.rule",
+            "snakemake_rules/annotation/msi_tumor_normal.rule",
         ],
     },
     "cache": {

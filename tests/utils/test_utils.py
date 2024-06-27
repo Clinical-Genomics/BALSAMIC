@@ -1,14 +1,16 @@
 """Test helper functions."""
+
 import json
 import logging
 import subprocess
 import sys
 from pathlib import Path
-from typing import Dict, List, Any
+from typing import Any, Dict, List
 from unittest import mock
 
 import click
 import pytest
+import yaml
 from _pytest.logging import LogCaptureFixture
 from _pytest.tmpdir import TempPathFactory
 
@@ -37,9 +39,9 @@ from BALSAMIC.utils.cli import (
     get_resolved_fastq_files_directory,
     get_sample_list,
     get_snakefile,
-    job_id_dump_to_yaml,
     validate_cache_version,
     validate_exome_option,
+    validate_umi_min_reads,
 )
 from BALSAMIC.utils.exc import BalsamicError, WorkflowRunError
 from BALSAMIC.utils.io import (
@@ -48,6 +50,7 @@ from BALSAMIC.utils.io import (
     read_yaml,
     write_finish_file,
     write_json,
+    write_sacct_to_yaml,
     write_yaml,
 )
 from BALSAMIC.utils.rule import (
@@ -689,24 +692,6 @@ def test_check_executable_not_existing():
     assert not check_executable(test_command)
 
 
-def test_job_id_dump_to_yaml(tmp_path):
-    # GIVEN a file with one job id per line, a key (case name), and an output file name
-    dummy_dir = tmp_path / "job_id_dump_dir"
-    dummy_dir.mkdir()
-    dummy_job_id_dump = dummy_dir / "jod_id.dump"
-    dummy_job_id_dump.write_text("01234\n56789")
-
-    dummy_name = "angrybird"
-
-    dummy_yaml_out = dummy_dir / "jod_id.yaml"
-
-    # WHEN creating yaml from job id dump
-    job_id_dump_to_yaml(dummy_job_id_dump, dummy_yaml_out, dummy_name)
-
-    # THEN file should exist
-    assert dummy_yaml_out.exists()
-
-
 def test_generate_h5(tmp_path):
     # GIVEN a job name, a path, and a job id
     dummy_path = tmp_path / "h5dir"
@@ -1072,6 +1057,23 @@ def test_validate_cache_version_wrong_format():
         validate_cache_version(click.Context, click.Parameter, cli_version)
 
 
+@pytest.mark.parametrize(
+    "umi_min_reads, should_fail",
+    [("3,2,1", False), ("1,0,0", False), ("3,2", True), ("a,b,c", True), (None, False)],
+)
+def test_validate_umi_min_reads(umi_min_reads: str, should_fail: bool):
+    """Test UMI min reads option validation."""
+    if should_fail:
+        with pytest.raises(click.BadParameter):
+            validate_umi_min_reads(
+                _ctx=click.Context, _param=click.Parameter, umi_min_reads=umi_min_reads
+            )
+    else:
+        validate_umi_min_reads(
+            _ctx=click.Context, _param=click.Parameter, umi_min_reads=umi_min_reads
+        )
+
+
 def test_read_vcf(vcf_file_path, vcf_file_gz_path):
     """Test correct reading of VCF files."""
     # GIVEN a path to two identical VCF files, one gzipped and one not
@@ -1091,3 +1093,23 @@ def test_read_vcf(vcf_file_path, vcf_file_gz_path):
 
     # THEN the contents from the gzipped VCF should match the non-gzipped VCF
     assert vcf_contents == vcf_contents_from_gz
+
+
+def test_write_sacct_to_yaml(case_id_tumor_only: str, sacct_file: Path, tmp_path: Path):
+    """Tests parsing of the sacct file to create a job IDs yaml file."""
+
+    # GIVEN a sacct file and an output yaml file
+    yaml_file_path: Path = Path(tmp_path, "slurm_jobids.yaml")
+
+    # WHEN writing the yaml file
+    write_sacct_to_yaml(
+        case_id=case_id_tumor_only,
+        sacct_file_path=sacct_file,
+        yaml_file_path=yaml_file_path,
+    )
+
+    # THEN the content should be a list of job IDs associated with a case_id
+    assert yaml_file_path.is_file()
+    with open(yaml_file_path, "r") as file:
+        data: Dict[str, List[str]] = yaml.safe_load(file)
+    assert case_id_tumor_only in data
