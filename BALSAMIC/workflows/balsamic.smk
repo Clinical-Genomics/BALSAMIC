@@ -9,17 +9,12 @@ from pathlib import Path
 from typing import Dict, List
 
 from BALSAMIC.constants.constants import FileType
-<<<<<<< HEAD
 from BALSAMIC.constants.analysis import FastqName, MutationType, SampleType, SequencingType
-from BALSAMIC.constants.paths import BALSAMIC_DIR, SENTIEON_DNASCOPE_DIR, SENTIEON_TNSCOPE_DIR
-=======
-from BALSAMIC.constants.analysis import FastqName, MutationType, SampleType
 from BALSAMIC.constants.paths import (
     BALSAMIC_DIR,
     SENTIEON_DNASCOPE_DIR,
     SENTIEON_TNSCOPE_DIR,
 )
->>>>>>> develop
 from BALSAMIC.constants.rules import SNAKEMAKE_RULES
 from BALSAMIC.constants.variant_filters import (
     COMMON_SETTINGS,
