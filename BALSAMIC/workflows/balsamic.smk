@@ -698,14 +698,7 @@ if config["analysis"]["analysis_type"] == "single":
     )
 
 # GENS Outputs
-<<<<<<< HEAD
 if "gnomad_min_af5" in config["reference"]:
-=======
-if (
-    config["analysis"]["sequencing_type"] == "wgs"
-    and "gens_coverage_pon" in config["reference"]
-):
->>>>>>> develop
     analysis_specific_results.extend(
         expand(
             cnv_dir + "{sample}.{gens_input}.bed.gz",
