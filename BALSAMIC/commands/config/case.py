@@ -1,4 +1,5 @@
 """Balsamic config case CLI."""
+
 import logging
 from datetime import datetime
 from pathlib import Path
@@ -36,6 +37,7 @@ from BALSAMIC.commands.options import (
     OPTION_SWEGEN_SV,
     OPTION_TUMOR_SAMPLE_NAME,
     OPTION_UMI,
+    OPTION_UMI_MIN_READS,
     OPTION_UMI_TRIM_LENGTH,
 )
 from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV, AnalysisWorkflow, Gender
@@ -88,6 +90,7 @@ LOG = logging.getLogger(__name__)
 @OPTION_TUMOR_SAMPLE_NAME
 @OPTION_UMI
 @OPTION_UMI_TRIM_LENGTH
+@OPTION_UMI_MIN_READS
 @click.pass_context
 def case_config(
     context: click.Context,
@@ -120,6 +123,7 @@ def case_config(
     tumor_sample_name: str,
     umi: bool,
     umi_trim_length: int,
+    umi_min_reads: str | None,
 ):
     references_path: Path = Path(balsamic_cache, cache_version, genome_version)
     references: Dict[str, Path] = get_absolute_paths_dict(
@@ -190,6 +194,7 @@ def case_config(
             "analysis_workflow": analysis_workflow,
             "config_creation_date": datetime.now().strftime("%Y-%m-%d %H:%M"),
         },
+        custom_filters={"umi_min_reads": umi_min_reads if umi_min_reads else None},
         reference=references,
         singularity={
             "image": Path(balsamic_cache, cache_version, "containers").as_posix()
@@ -206,14 +211,16 @@ def case_config(
             bioinfo_tools=BIOINFO_TOOL_ENV,
             container_conda_env_path=CONTAINERS_DIR,
         ),
-        panel={
-            "exome": exome,
-            "capture_kit": panel_bed,
-            "chrom": get_panel_chrom(panel_bed),
-            "pon_cnn": pon_cnn,
-        }
-        if panel_bed
-        else None,
+        panel=(
+            {
+                "exome": exome,
+                "capture_kit": panel_bed,
+                "chrom": get_panel_chrom(panel_bed),
+                "pon_cnn": pon_cnn,
+            }
+            if panel_bed
+            else None
+        ),
     ).model_dump(by_alias=True, exclude_none=True)
     LOG.info("Balsamic config model instantiated successfully")
 

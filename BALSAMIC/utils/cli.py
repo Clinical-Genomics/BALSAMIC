@@ -347,12 +347,16 @@ def get_fastq_info(sample_name: str, fastq_path: str) -> Dict[str, FastqInfoMode
                 "fwd": fwd_fastq,
                 "rev": rev_fastq,
             }
-            fastq_dict[fastq_pair_pattern].update(
-                {
-                    "fwd_resolved": Path(fwd_fastq).resolve().as_posix(),
-                    "rev_resolved": Path(rev_fastq).resolve().as_posix(),
-                }
-            ) if Path(fwd_fastq).is_symlink() or Path(rev_fastq).is_symlink() else None
+            (
+                fastq_dict[fastq_pair_pattern].update(
+                    {
+                        "fwd_resolved": Path(fwd_fastq).resolve().as_posix(),
+                        "rev_resolved": Path(rev_fastq).resolve().as_posix(),
+                    }
+                )
+                if Path(fwd_fastq).is_symlink() or Path(rev_fastq).is_symlink()
+                else None
+            )
 
     if not fastq_dict:
         error_message = f"No fastqs found for: {sample_name} in {fastq_path}"
@@ -555,3 +559,16 @@ def validate_cache_version(
     raise click.BadParameter(
         f"Invalid cache version format. Use '{CacheVersion.DEVELOP}' or 'X.X.X'."
     )
+
+
+def validate_umi_min_reads(
+    _ctx: click.Context, _param: click.Parameter, umi_min_reads: str | None
+) -> str:
+    """Validate the provided cache version."""
+    if umi_min_reads:
+        umi_min_reads_parts: List[str] = umi_min_reads.split(",")
+        if len(umi_min_reads_parts) == 3 and all(
+            part.isdigit() for part in umi_min_reads_parts
+        ):
+            return umi_min_reads
+        raise click.BadParameter("Invalid UMI minimum reads format. Use 'x,y,z'.")

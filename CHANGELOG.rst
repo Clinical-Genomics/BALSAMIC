@@ -1,22 +1,37 @@
 [X.X.X]
 -------
 
-
 Added:
 ^^^^^^
 * MSIsensor-pro container https://github.com/Clinical-Genomics/BALSAMIC/pull/1444
+* MSI analysis to the tumor-normal workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1454
 * GENS input files for TGA https://github.com/Clinical-Genomics/BALSAMIC/pull/1448
 
 Changed:
 ^^^^^^^^
 * Cluster scheduler script for immediate submit https://github.com/Clinical-Genomics/BALSAMIC/pull/1372
 * `SLEEP_BEFORE_START` to 600s https://github.com/Clinical-Genomics/BALSAMIC/pull/1372
+* Updated Multiqc to version 1.22.3 https://github.com/Clinical-Genomics/BALSAMIC/pull/1441
+* Upgrade `vcf2cytosure` version to 0.9.1 and remove hardcoded versions https://github.com/Clinical-Genomics/BALSAMIC/pull/1456
 
 Removed:
 ^^^^^^^^
 * GATK3 https://github.com/Clinical-Genomics/BALSAMIC/pull/1432
 * `gatk_contest` rule https://github.com/Clinical-Genomics/BALSAMIC/pull/1432
 * SGE (qsub) support https://github.com/Clinical-Genomics/BALSAMIC/pull/1372
+
+Fixed:
+^^^^^^
+* Corrected tool name in deduplication metrics https://github.com/Clinical-Genomics/BALSAMIC/pull/1441
+* MSI table https://github.com/Clinical-Genomics/BALSAMIC/pull/1459
+
+
+[15.0.1]
+--------
+
+Added:
+^^^^^^
+* CLI option for the minimum raw reads supporting each UMI group filter
 
 [15.0.0]
 --------

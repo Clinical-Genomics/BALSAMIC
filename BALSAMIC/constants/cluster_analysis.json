@@ -415,5 +415,13 @@
 	"igh_dux4_detection": {
 		"time": "02:00:00",
 		"n": 1
+	},
+	"msisensorpro_scan_reference": {
+		"time": "04:00:00",
+		"n": 1
+	},
+	"msisensorpro_msi_tumor_normal": {
+		"time": "08:00:00",
+		"n": 24
 	}
 }
