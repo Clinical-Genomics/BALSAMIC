@@ -44,6 +44,7 @@ def create_gens_cov_file(
     if tumor_purity_path:
         purecn_df = pd.read_csv(tumor_purity_path, sep=",")
         purity = float(purecn_df.iloc[0]["Purity"])
+        ploidy = float(purecn_df.iloc[0]["Ploidy"])
 
     for index, row in cnvkit_df.iterrows():
         if row["gene"] == "Antitarget":
@@ -51,7 +52,7 @@ def create_gens_cov_file(
         midpoint = row["start"] + int((row["end"] - row["start"]) / 2)
         log2 = row["log2"]
         if purity:
-            log2 = round(float(log2) / purity, 4)
+            log2 = round(float(1 - purity) + purity * (log2 / ploidy), 4)
         log2_data.append(f"{row['chromosome']}\t{midpoint-1}\t{midpoint}\t{log2}")
 
     # Write log2 data to output file
