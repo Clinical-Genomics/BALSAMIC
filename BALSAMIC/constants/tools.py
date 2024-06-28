@@ -40,6 +40,9 @@ GENS_PARAMS = {
                 "c": 1000,
                 "d": 100,
             },
-        }
+        },
+        SequencingType.TARGETED: {
+            "BAF_SKIP_N": {"o": 0, "a": 0, "b": 0, "c": 0, "d": 0},
+        },
     },
 }

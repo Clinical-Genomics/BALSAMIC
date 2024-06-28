@@ -5,6 +5,7 @@ Added:
 ^^^^^^
 * MSIsensor-pro container https://github.com/Clinical-Genomics/BALSAMIC/pull/1444
 * MSI analysis to the tumor-normal workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1454
+* GENS input files for TGA https://github.com/Clinical-Genomics/BALSAMIC/pull/1448
 
 Changed:
 ^^^^^^^^

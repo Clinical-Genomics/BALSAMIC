@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Dict, List
 
 from BALSAMIC.constants.constants import FileType
-from BALSAMIC.constants.analysis import FastqName, MutationType, SampleType
+from BALSAMIC.constants.analysis import FastqName, MutationType, SampleType, SequencingType
 from BALSAMIC.constants.paths import (
     BALSAMIC_DIR,
     SENTIEON_DNASCOPE_DIR,
@@ -528,9 +528,10 @@ if "dragen" in config:
     rules_to_include.append("snakemake_rules/concatenation/concatenation.rule")
 
 # Add rule for GENS
-if "gens_coverage_pon" in config["reference"]:
-    rules_to_include.append("snakemake_rules/variant_calling/gatk_read_counts.rule")
+if "gnomad_min_af5" in config["reference"]:
     rules_to_include.append("snakemake_rules/variant_calling/gens_preprocessing.rule")
+if "gnomad_min_af5" in config["reference"] and sequence_type == SequencingType.WGS:
+    rules_to_include.append("snakemake_rules/variant_calling/gatk_read_counts.rule")
 
 LOG.info(f"The following rules will be included in the workflow: {rules_to_include}")
 LOG.info(
@@ -697,10 +698,7 @@ if config["analysis"]["analysis_type"] == "single":
     )
 
 # GENS Outputs
-if (
-    config["analysis"]["sequencing_type"] == "wgs"
-    and "gens_coverage_pon" in config["reference"]
-):
+if "gnomad_min_af5" in config["reference"]:
     analysis_specific_results.extend(
         expand(
             cnv_dir + "{sample}.{gens_input}.bed.gz",
@@ -708,6 +706,7 @@ if (
             gens_input=["cov", "baf"],
         )
     )
+
 
 # Dragen
 if (

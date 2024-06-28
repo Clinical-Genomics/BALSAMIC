@@ -26,7 +26,7 @@ LOG.setLevel(logging.INFO)
     "-s",
     "--sequencing-type",
     required=True,
-    type=click.Choice([SequencingType.WGS]),
+    type=click.Choice([SequencingType.WGS, SequencingType.TARGETED]),
     help="Sequencing type used.",
 )
 @click.pass_context

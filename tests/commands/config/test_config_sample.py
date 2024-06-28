@@ -367,7 +367,7 @@ def test_missing_required_gens_arguments(
     # THEN the CLI should exit code 2 and display an informative error message
     assert result.exit_code == 2
     assert (
-        "All three arguments (genome_interval gens_coverage_pon, gnomad_min_af5) are required for GENS."
+        "All three arguments (genome_interval, gens_coverage_pon, gnomad_min_af5) are required for GENS in WGS."
         in result.output
     )
 
@@ -448,21 +448,17 @@ def test_config_with_gens_arguments_for_tga(
             balsamic_cache,
             "--tumor-sample-name",
             tumor_sample_name,
-            "--gens-coverage-pon",
-            gens_cov_pon_file,
             "--gnomad-min-af5",
             gens_min_5_af_gnomad_file,
-            "--genome-interval",
-            gens_hg19_interval_list,
             "-p",
             panel_bed_file,
         ],
     )
-    # THEN config should fail with error message
-    assert result.exit_code == 2
-    assert (
-        "GENS is currently not compatible with TGA analysis, only WGS." in result.output
-    )
+    # THEN a config should be created and exist
+    assert result.exit_code == 0
+    assert Path(
+        analysis_dir, case_id_tumor_only, f"{case_id_tumor_only}.{FileType.JSON}"
+    ).exists()
 
 
 def test_config_wgs_with_exome(

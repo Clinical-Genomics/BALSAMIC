@@ -1,0 +1,66 @@
+import click
+import pandas as pd
+
+
+@click.command()
+@click.option(
+    "-o",
+    "--output-file",
+    required=True,
+    type=click.Path(exists=False),
+    help="Name of output-file.",
+)
+@click.option(
+    "-c",
+    "--normalised-coverage-path",
+    required=True,
+    type=click.Path(exists=True),
+    help="Input CNVkit cnr result.",
+)
+@click.option(
+    "-p",
+    "--tumor-purity-path",
+    required=False,
+    type=click.Path(exists=True),
+    help="Tumor purity file from PureCN",
+)
+def create_gens_cov_file(
+    output_file: str, normalised_coverage_path: str, tumor_purity_path: str | None
+):
+    """
+    Post-processes the CNVkit cnr output for upload to GENS.
+    Removing Antitarget regions and outputting the coverages in multiple resolution-formats.
+
+    :param output_file: Path to GENS output.cov file
+    :param normalised_coverage_path: Path to input CNVkit cnr file.
+    :param tumor_purity_path: Path to PureCN purity estimate csv file
+    """
+    # Process CNVkit file
+    log2_data = []
+    cnvkit_df = pd.read_csv(normalised_coverage_path, sep="\t")
+
+    # Process PureCN purity file
+    purity = None
+    if tumor_purity_path:
+        purecn_df = pd.read_csv(tumor_purity_path, sep=",")
+        purity = float(purecn_df.iloc[0]["Purity"])
+        ploidy = float(purecn_df.iloc[0]["Ploidy"])
+
+    for index, row in cnvkit_df.iterrows():
+        if row["gene"] == "Antitarget":
+            continue
+        midpoint = row["start"] + int((row["end"] - row["start"]) / 2)
+        log2 = row["log2"]
+        if purity:
+            log2 = round(float(1 - purity) + purity * (log2 / ploidy), 4)
+        log2_data.append(f"{row['chromosome']}\t{midpoint-1}\t{midpoint}\t{log2}")
+
+    # Write log2 data to output file
+    with open(output_file, "w") as log2_out:
+        for resolution in ["o", "a", "b", "c", "d"]:
+            for line in log2_data:
+                log2_out.write(f"{resolution}_{line}\n")
+
+
+if __name__ == "__main__":
+    create_gens_cov_file()
