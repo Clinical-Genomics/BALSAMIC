@@ -2031,6 +2031,7 @@ def fixture_develop_containers() -> Dict[str, str]:
     """Return a dictionary of docker hub containers for develop branch."""
     return {
         DockerContainers.ASCAT: "docker://clinicalgenomics/balsamic:develop-ascatNgs",
+        DockerContainers.MULTIQC: "docker://clinicalgenomics/balsamic:develop-multiqc",
         DockerContainers.VCF2CYTOSURE: "docker://clinicalgenomics/balsamic:develop-vcf2cytosure",
         DockerContainers.PYTHON_3: "docker://clinicalgenomics/balsamic:develop-varcall_py3",
         DockerContainers.SOMALIER: "docker://clinicalgenomics/balsamic:develop-somalier",

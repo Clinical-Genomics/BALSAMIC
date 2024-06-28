@@ -66,7 +66,7 @@
     "delly": ["1.0.3"],
     "ascatNgs": ["4.5.0"],
     "somalier": ["0.2.16"],
-    "vcf2cytosure": ["0.8.1"],
+    "vcf2cytosure": ["0.9.1"],
     "bwa": ["0.7.17"],
     "gatk": ["3.8"],
     "svdb": ["2.8.1"],

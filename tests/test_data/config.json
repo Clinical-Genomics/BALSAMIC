@@ -222,7 +222,7 @@
     "vcfanno": ["0.3.3"],
     "genmod": ["3.7.4"],
     "ascatNgs": ["4.5.0"],
-    "vcf2cytosure": ["0.8.1"],
+    "vcf2cytosure": ["0.9.1"],
     "cnvpytor": ["1.2.1"],
     "msisensorpro": ["1.2.0"]
   },

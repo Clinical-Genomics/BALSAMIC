@@ -152,7 +152,7 @@ BIOINFO_TOOL_ENV: Dict[str, str] = {
     BioinfoTools.FASTQC: DockerContainers.ALIGN_QC,
     BioinfoTools.SAMTOOLS: DockerContainers.ALIGN_QC,
     BioinfoTools.PICARD: DockerContainers.ALIGN_QC,
-    BioinfoTools.MULTIQC: DockerContainers.ALIGN_QC,
+    BioinfoTools.MULTIQC: DockerContainers.MULTIQC,
     BioinfoTools.FASTP: DockerContainers.ALIGN_QC,
     BioinfoTools.CSVKIT: DockerContainers.ALIGN_QC,
     BioinfoTools.VEP: DockerContainers.ANNOTATE,
