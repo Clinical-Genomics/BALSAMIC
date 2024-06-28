@@ -2,7 +2,7 @@
 Tools and software
 =================================
 
-BALSAMIC ( **version** = 15.0.0 ) uses myriad of tools and softwares to analyze fastq files. This section covers why each
+BALSAMIC ( **version** = 15.0.1 ) uses myriad of tools and softwares to analyze fastq files. This section covers why each
 one is included: usage and parameters, and relevant external links.
 
 ascatNgs
@@ -98,7 +98,7 @@ multiqc
 ~~~~~~~
 :Source code: `GitHub` `<https://github.com/ewels/MultiQC>`_
 :Article: `Bioinformatics` `<https://doi.org/10.1093/bioinformatics/btw354>`_
-:Version: `1.12`
+:Version: `1.22.3`
 
 picard
 ~~~~~~
