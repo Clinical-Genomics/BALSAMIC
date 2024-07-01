@@ -22,7 +22,7 @@ RUN apt-get update && apt-get -y upgrade && \
 
 RUN python -m pip install --upgrade --no-cache-dir pip && \
     python -m venv ${VENV} && \
-    pip install --no-cache-dir "cnvkit==0.9.11" "Cython>=3.0.10" "numpy>=2.0.0"
+    pip install --no-cache-dir "cnvkit==0.9.11" "Cython>=3.0.10" "numpy<2.0.0"
 
 RUN adduser --disabled-password --gecos "" ubuntu && \
     chsh -s /bin/bash ubuntu && \
