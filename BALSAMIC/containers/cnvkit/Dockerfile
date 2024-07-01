@@ -11,6 +11,8 @@ LABEL base.image="python:3.10-slim" \
     about.license="MIT License (MIT)"
 
 ENV DEBIAN_FRONTEND noninteractive
+ENV VENV /opt/venv
+ENV PATH="${VENV}/bin:$PATH"
 
 RUN apt-get update && apt-get -y upgrade && \
     apt-get -y install --no-install-recommends tabix liblzma-dev zlib1g-dev \
@@ -18,18 +20,13 @@ RUN apt-get update && apt-get -y upgrade && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-ENV VENV /opt/venv
+RUN python -m pip install --upgrade --no-cache-dir pip && \
+    python -m venv ${VENV} && \
+    pip install --no-cache-dir cnvkit==0.9.10
 
-RUN python -m pip install --upgrade --no-cache-dir pip
-RUN python -m venv ${VENV}
-ENV PATH="${VENV}/bin:$PATH"
-
-RUN pip install --no-cache-dir --upgrade pip
-
-RUN pip install --no-cache-dir cnvkit==0.9.10
-
-RUN adduser --disabled-password --gecos '' ubuntu && \
-    chsh -s /bin/bash && mkdir -p /home/ubuntu
+RUN adduser --disabled-password --gecos "" ubuntu && \
+    chsh -s /bin/bash ubuntu && \
+    mkdir -p /home/ubuntu
 
 USER ubuntu
 WORKDIR /home/ubuntu
