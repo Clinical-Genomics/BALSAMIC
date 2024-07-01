@@ -18,7 +18,7 @@ RUN apt-get update && apt-get -y upgrade && \
     apt-get -y install --no-install-recommends tabix liblzma-dev zlib1g-dev \
     r-base-core r-bioc-dnacopy && \
     apt-get clean && \
-    rm -rf /var/lib/apt/lists/*xq
+    rm -rf /var/lib/apt/lists/*
 
 RUN python -m pip install --upgrade --no-cache-dir pip && \
     python -m venv ${VENV} && \
