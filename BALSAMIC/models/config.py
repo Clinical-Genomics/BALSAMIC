@@ -220,6 +220,7 @@ class ConfigModel(BaseModel):
     background_variants: Optional[str] = None
     analysis: AnalysisModel
     custom_filters: CustomFilters | None = None
+    sentieon_install_dir: Annotated[Optional[str], AfterValidator(is_dir)]
 
     @field_validator("reference")
     def abspath_as_str(cls, reference: Dict[str, Path]):

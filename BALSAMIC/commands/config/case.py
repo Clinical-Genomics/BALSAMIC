@@ -33,6 +33,7 @@ from BALSAMIC.commands.options import (
     OPTION_PANEL_BED,
     OPTION_PON_CNN,
     OPTION_QUALITY_TRIM,
+    OPTION_SENTIEON_INSTALL_DIR,
     OPTION_SWEGEN_SNV,
     OPTION_SWEGEN_SV,
     OPTION_TUMOR_SAMPLE_NAME,
@@ -84,6 +85,7 @@ LOG = logging.getLogger(__name__)
 @OPTION_PANEL_BED
 @OPTION_PON_CNN
 @OPTION_QUALITY_TRIM
+@OPTION_SENTIEON_INSTALL_DIR
 @OPTION_SWEGEN_SNV
 @OPTION_SWEGEN_SV
 @OPTION_TUMOR_SAMPLE_NAME
@@ -117,6 +119,7 @@ def case_config(
     panel_bed: Path,
     pon_cnn: Path,
     quality_trim: bool,
+    sentieon_install_dir: Path,
     swegen_snv: Path,
     swegen_sv: Path,
     tumor_sample_name: str,
@@ -188,6 +191,7 @@ def case_config(
         directory.mkdir(exist_ok=True)
 
     config_collection_dict = ConfigModel(
+        sentieon_install_dir=sentieon_install_dir.as_posix(),
         QC={
             "quality_trim": quality_trim,
             "adapter_trim": adapter_trim,

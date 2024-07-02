@@ -370,6 +370,13 @@ OPTION_SAMPLE_CONFIG = click.option(
     help="Sample configuration file",
 )
 
+OPTION_SENTIEON_INSTALL_DIR = click.option(
+    "--sentieon-install-dir",
+    type=click.Path(exists=True, resolve_path=True),
+    required=False,
+    help="Path to Sentieon install directory",
+)
+
 OPTION_SHOW_ONLY_MISSING_FILES = click.option(
     "-m",
     "--show-only-missing",
