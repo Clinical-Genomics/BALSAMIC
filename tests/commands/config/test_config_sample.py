@@ -60,7 +60,6 @@ def test_tumor_normal_config(
         analysis_dir, case_id_tumor_normal, f"{case_id_tumor_normal}.{FileType.JSON}"
     ).exists()
 
-
 def test_tumor_only_config(
     invoke_cli,
     case_id_tumor_only: str,
@@ -109,6 +108,54 @@ def test_tumor_only_config(
         analysis_dir, case_id_tumor_only, f"{case_id_tumor_only}.{FileType.JSON}"
     ).exists()
 
+def test_tumor_only_config_with_sentieon_install_dir_argument(
+    invoke_cli,
+    case_id_tumor_only: str,
+    tumor_sample_name: str,
+    analysis_dir: str,
+    fastq_dir_tumor_only: str,
+    balsamic_cache: str,
+    panel_bed_file: str,
+    sentieon_license: str,
+    sentieon_install_dir: str,
+):
+    """Test tumor only balsamic config case command with Sentieon install dir argument."""
+
+    # GIVEN a case ID, fastq files, and an analysis dir
+
+    # WHEN creating a case analysis
+    with mock.patch.dict(
+        MOCKED_OS_ENVIRON,
+        {
+            "SENTIEON_LICENSE": sentieon_license,
+        },
+    ):
+        result = invoke_cli(
+            [
+                "config",
+                "case",
+                "--case-id",
+                case_id_tumor_only,
+                "--analysis-dir",
+                analysis_dir,
+                "--fastq-path",
+                fastq_dir_tumor_only,
+                "-p",
+                panel_bed_file,
+                "--balsamic-cache",
+                balsamic_cache,
+                "--tumor-sample-name",
+                tumor_sample_name,
+                "--sentieon-install-dir",
+                sentieon_install_dir,
+            ],
+        )
+
+    # THEN a config should be created and exist
+    assert result.exit_code == 0
+    assert Path(
+        analysis_dir, case_id_tumor_only, f"{case_id_tumor_only}.{FileType.JSON}"
+    ).exists()
 
 def test_run_without_permissions(
     invoke_cli,
