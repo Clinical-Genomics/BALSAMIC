@@ -14,7 +14,7 @@ Software Requirements
 - Python 3.11
 - BALSAMIC is dependent on third-party bioinformatics software ``Sentieon-tools`` for all workflows.
 
-``Note: To run Sentieon you need to set the Sentieon license in the environment variables in your ~/.bashrc you also need to add the Sentieon install path (or alternatively supply it when configuring the analysis with argument --sentieon-install-dir)``
+``Note: To run Sentieon you need to set the Sentieon license in the environment variables in your ~/.bashrc you can also add the Sentieon install path to the environment variables, or alternatively supply it when configuring the analysis with argument --sentieon-install-dir``
 
 ::
 
