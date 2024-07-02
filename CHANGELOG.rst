@@ -23,6 +23,8 @@ Removed:
 Fixed:
 ^^^^^^
 * Corrected tool name in deduplication metrics https://github.com/Clinical-Genomics/BALSAMIC/pull/1441
+* MSI table https://github.com/Clinical-Genomics/BALSAMIC/pull/1459
+
 
 [15.0.1]
 --------
