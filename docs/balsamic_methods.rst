@@ -17,7 +17,7 @@ Apart from the Vardict filters to report the variants, the called-variants were 
 (*MQ >= 40, DP >= 100, VD >= 5, Minimum AF >= 0.007, Maximum AF < 1, GNOMADAF_popmax <= 0.005, swegen AF < 0.01*).
 Only those variants that fulfilled the filtering criteria and scored as `PASS` in the VCF file were reported.
 Structural variants (SV) were called using Manta v1.6.0 :superscript:`9` and Dellyv1.0.3 :superscript:`10`.
-Copy number variations (CNV) were called using CNVkit v0.9.11 :superscript:`11`.
+Copy number variations (CNV) were called using CNVkit v0.9.10 :superscript:`11`.
 The variant calls from CNVkit, Manta and Delly were merged using SVDB v2.8.1 :superscript:`12`.
 The clinical set of SNV and SV is also annotated and filtered against loqusDB curated frequency of observed variants (frequency < 0.01) from non-cancer cases and only annotated using frequency of observed variants from cancer cases (somatic and germline).
 All variants were annotated using Ensembl VEP v104.3 :superscript:`13`. We used vcfanno v0.3.3 :superscript:`14`
