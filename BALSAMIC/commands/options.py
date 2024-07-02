@@ -377,6 +377,13 @@ OPTION_SENTIEON_INSTALL_DIR = click.option(
     help="Path to Sentieon install directory",
 )
 
+OPTION_SENTIEON_LICENSE = click.option(
+    "--sentieon-license",
+    required=False,
+    type=click.STRING,
+    help="Sentieon license in format IP:Port",
+)
+
 OPTION_SHOW_ONLY_MISSING_FILES = click.option(
     "-m",
     "--show-only-missing",

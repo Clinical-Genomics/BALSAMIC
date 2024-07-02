@@ -149,13 +149,17 @@ if config_model.custom_filters and config_model.custom_filters.umi_min_reads:
     params.umiconsensuscall.filter_minreads = config_model.custom_filters.umi_min_reads
 
 # Set Sentieon license
-try:
-    config["SENTIEON_LICENSE"] = os.environ["SENTIEON_LICENSE"]
-except KeyError as error:
-    LOG.error(
-        "Set environment variable SENTIEON_LICENSE to a valid Sentieon license"
-    )
-    raise BalsamicError
+sentieon_license: str = config_model.sentieon_license
+if sentieon_license:
+    config["SENTIEON_LICENSE"] = sentieon_license
+else:
+    try:
+        config["SENTIEON_LICENSE"] = os.environ["SENTIEON_LICENSE"]
+    except KeyError as error:
+        LOG.error(
+            "Set environment variable SENTIEON_LICENSE to a valid Sentieon license"
+        )
+        raise BalsamicError
 
 # Set Sentieon binary from Sentieon path argument
 sentieon_install_dir: str = config_model.sentieon_install_dir

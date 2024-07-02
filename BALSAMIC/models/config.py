@@ -194,6 +194,8 @@ class ConfigModel(BaseModel):
         background_variants: Field(Path(optional)); path to BACKGROUND VARIANTS for UMI
         analysis: Field(AnalysisModel); Pydantic model containing workflow variables
         custom_filters: Field(CustomFilters); custom parameters for variant filtering
+        sentieon_install_dir: Field(optional); path to Sentieon installation directory
+        sentieon_license: Field(optional); Sentieon license string
 
     This class also contains functions that help retrieve sample and file information,
     facilitating BALSAMIC run operations in Snakemake.
@@ -221,6 +223,7 @@ class ConfigModel(BaseModel):
     analysis: AnalysisModel
     custom_filters: CustomFilters | None = None
     sentieon_install_dir: Annotated[Optional[str], AfterValidator(is_dir)] = None
+    sentieon_license: Optional[str] = None
 
     @field_validator("reference")
     def abspath_as_str(cls, reference: Dict[str, Path]):
