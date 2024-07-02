@@ -10,16 +10,18 @@ Software Requirements
 ~~~~~~~~~~~~~~~~~~~~~
 
 - Conda >=version 4.5.0: For detailed software and python requirements please see ``setup.py`` and ``BALSAMIC/conda/balsamic.yaml``
-- Singularity >=version 3.0.0: BALSAMIC uses singularity to run vairous parts of the workflow.
+- Singularity >=version 3.0.0: BALSAMIC uses singularity to run various parts of the workflow.
 - Python 3.11
-- BALSAMIC is dependent on third-party bioinformatics software ``Sentieon-tools``. Example: for running wgs variant calling using ``TNScope``, and to execute ``UMIworkflow``.
+- BALSAMIC is dependent on third-party bioinformatics software ``Sentieon-tools`` for all workflows.
 
-``Note: Set Sentieon envionment variables in your ~/.bashrc file by adding following two lines``
+``Note: To run Sentieon you need to set the Sentieon license in the environment variables in your ~/.bashrc you also need to add the Sentieon install path (or alternatively supply it when configuring the analysis with argument --sentieon-install-dir)``
 
 ::
 
-    export SENTIEON_INSTALL_DIR=path_to_sentieon_install_dir
     export SENTIEON_LICENSE=IP:Port
+    export SENTIEON_INSTALL_DIR=path_to_sentieon_install_dir
+
+
 
 Step 1. Installing BALSAMIC
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
