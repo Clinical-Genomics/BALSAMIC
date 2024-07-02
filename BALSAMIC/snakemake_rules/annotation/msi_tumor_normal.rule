@@ -47,7 +47,7 @@ rule msisensorpro_msi_tumor_normal:
     """
 msisensor-pro msi -b {threads} -z 1 -d {input.msi_list} -t {input.bamT} -n {input.bamN} -o  {params.tmpdir}/msi_{params.case_id};
 
-cp {params.tmpdir}/msi_{params.case_id} {output.msi_result}; 
+sed 's/\%/MSI/g' {params.tmpdir}/msi_{params.case_id} > {output.msi_result}; 
 
 rm -rf {params.tmpdir};
     """
