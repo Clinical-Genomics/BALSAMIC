@@ -60,6 +60,7 @@ def test_tumor_normal_config(
         analysis_dir, case_id_tumor_normal, f"{case_id_tumor_normal}.{FileType.JSON}"
     ).exists()
 
+
 def test_tumor_only_config(
     invoke_cli,
     case_id_tumor_only: str,
@@ -107,6 +108,7 @@ def test_tumor_only_config(
     assert Path(
         analysis_dir, case_id_tumor_only, f"{case_id_tumor_only}.{FileType.JSON}"
     ).exists()
+
 
 def test_tumor_only_config_with_sentieon_install_dir_argument(
     invoke_cli,
@@ -156,6 +158,7 @@ def test_tumor_only_config_with_sentieon_install_dir_argument(
     assert Path(
         analysis_dir, case_id_tumor_only, f"{case_id_tumor_only}.{FileType.JSON}"
     ).exists()
+
 
 def test_run_without_permissions(
     invoke_cli,
