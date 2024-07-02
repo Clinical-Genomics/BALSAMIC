@@ -12,7 +12,6 @@ Changed:
 * `SLEEP_BEFORE_START` to 600s https://github.com/Clinical-Genomics/BALSAMIC/pull/1372
 * Updated Multiqc to version 1.22.3 https://github.com/Clinical-Genomics/BALSAMIC/pull/1441
 * Upgrade `vcf2cytosure` version to 0.9.1 and remove hardcoded versions https://github.com/Clinical-Genomics/BALSAMIC/pull/1456
-* Update `CNVkit` to version 0.9.11 and clean container https://github.com/Clinical-Genomics/BALSAMIC/pull/1457
 
 Removed:
 ^^^^^^^^
@@ -24,7 +23,7 @@ Fixed:
 ^^^^^^
 * Corrected tool name in deduplication metrics https://github.com/Clinical-Genomics/BALSAMIC/pull/1441
 * MSI table https://github.com/Clinical-Genomics/BALSAMIC/pull/1459
-
+* Pin numpy version in CNVkit container https://github.com/Clinical-Genomics/BALSAMIC/pull/1457
 
 [15.0.1]
 --------
