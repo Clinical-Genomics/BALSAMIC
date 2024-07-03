@@ -1198,6 +1198,8 @@ def config_case_cli(
     somatic_sv_observations_path: str,
     cancer_germline_snv_observations_path: str,
     cancer_somatic_snv_observations_path: str,
+    sentieon_license: str,
+    sentieon_install_dir: str,
 ) -> List[str]:
     """Return common config case CLI."""
     return [
@@ -1221,6 +1223,10 @@ def config_case_cli(
         cancer_germline_snv_observations_path,
         "--cancer-somatic-snv-observations",
         cancer_somatic_snv_observations_path,
+        "--sentieon-install-dir",
+        sentieon_install_dir,
+        "--sentieon-license",
+        sentieon_license,
     ]
 
 
@@ -1231,21 +1237,13 @@ def tumor_only_config_qc(
     fastq_dir_tumor_only_qc: str,
     tumor_sample_name: str,
     panel_bed_file: str,
-    sentieon_license: str,
-    sentieon_install_dir: str,
     config_case_cli: list[str],
 ) -> str:
     """Invoke balsamic config sample to create sample configuration file for tumor-only TGA."""
 
-    with mock.patch.dict(
-        MOCKED_OS_ENVIRON,
-        {
-            "SENTIEON_LICENSE": sentieon_license,
-            "SENTIEON_INSTALL_DIR": sentieon_install_dir,
-        },
-    ):
-        runner = CliRunner()
-        runner.invoke(
+
+    runner = CliRunner()
+    runner.invoke(
             cli,
             [
                 "config",
@@ -1278,21 +1276,12 @@ def tumor_normal_config_qc(
     normal_sample_name: str,
     analysis_dir: str,
     fastq_dir_tumor_normal_qc: str,
-    sentieon_license: str,
-    sentieon_install_dir: str,
     config_case_cli: list[str],
 ) -> str:
     """Invoke balsamic config sample to create sample configuration file for tumor-normal TGA QC workflow."""
 
-    with mock.patch.dict(
-        MOCKED_OS_ENVIRON,
-        {
-            "SENTIEON_LICENSE": sentieon_license,
-            "SENTIEON_INSTALL_DIR": sentieon_install_dir,
-        },
-    ):
-        runner = CliRunner()
-        runner.invoke(
+    runner = CliRunner()
+    runner.invoke(
             cli,
             [
                 "config",
@@ -1327,21 +1316,13 @@ def tumor_normal_config_qc_wgs(
     fastq_dir_tumor_normal_qc_wgs: str,
     tumor_sample_name: str,
     normal_sample_name: str,
-    sentieon_license: str,
-    sentieon_install_dir: str,
     config_case_cli: List[str],
 ) -> str:
     """Invoke balsamic config sample to create sample configuration file for tumor-normal WGS QC workflow."""
 
-    with mock.patch.dict(
-        MOCKED_OS_ENVIRON,
-        {
-            "SENTIEON_LICENSE": sentieon_license,
-            "SENTIEON_INSTALL_DIR": sentieon_install_dir,
-        },
-    ):
-        runner = CliRunner()
-        runner.invoke(
+
+    runner = CliRunner()
+    runner.invoke(
             cli,
             [
                 "config",
@@ -1376,20 +1357,12 @@ def tumor_only_config(
     analysis_dir: str,
     fastq_dir_tumor_only: str,
     panel_bed_file: str,
-    sentieon_license: str,
-    sentieon_install_dir: str,
     config_case_cli: list[str],
 ) -> str:
     """Invoke balsamic config sample to create sample configuration file for tumor-only TGA."""
-    with mock.patch.dict(
-        MOCKED_OS_ENVIRON,
-        {
-            "SENTIEON_LICENSE": sentieon_license,
-            "SENTIEON_INSTALL_DIR": sentieon_install_dir,
-        },
-    ):
-        runner = CliRunner()
-        runner.invoke(
+
+    runner = CliRunner()
+    runner.invoke(
             cli,
             [
                 "config",
@@ -1422,21 +1395,13 @@ def tumor_normal_config(
     analysis_dir: str,
     fastq_dir_tumor_normal: str,
     panel_bed_file: str,
-    sentieon_license: str,
-    sentieon_install_dir: str,
     config_case_cli: list[str],
 ) -> str:
     """Invoke balsamic config sample to create sample configuration file for tumor-normal TGA."""
 
-    with mock.patch.dict(
-        MOCKED_OS_ENVIRON,
-        {
-            "SENTIEON_LICENSE": sentieon_license,
-            "SENTIEON_INSTALL_DIR": sentieon_install_dir,
-        },
-    ):
-        runner = CliRunner()
-        runner.invoke(
+
+    runner = CliRunner()
+    runner.invoke(
             cli,
             [
                 "config",
@@ -1471,21 +1436,13 @@ def tumor_only_umi_config(
     analysis_dir: str,
     fastq_dir_tumor_only: str,
     panel_bed_file: str,
-    sentieon_license: str,
-    sentieon_install_dir: str,
     config_case_cli: list[str],
 ) -> str:
     """Invoke balsamic config sample to create sample configuration file for tumor-only TGA."""
 
-    with mock.patch.dict(
-        MOCKED_OS_ENVIRON,
-        {
-            "SENTIEON_LICENSE": sentieon_license,
-            "SENTIEON_INSTALL_DIR": sentieon_install_dir,
-        },
-    ):
-        runner = CliRunner()
-        runner.invoke(
+
+    runner = CliRunner()
+    runner.invoke(
             cli,
             [
                 "config",
@@ -1521,21 +1478,13 @@ def tumor_normal_umi_config(
     analysis_dir: str,
     fastq_dir_tumor_normal: str,
     panel_bed_file: str,
-    sentieon_license: str,
-    sentieon_install_dir: str,
     config_case_cli: list[str],
 ) -> str:
     """Invoke balsamic config sample to create sample configuration file for tumor-normal TGA."""
 
-    with mock.patch.dict(
-        MOCKED_OS_ENVIRON,
-        {
-            "SENTIEON_LICENSE": sentieon_license,
-            "SENTIEON_INSTALL_DIR": sentieon_install_dir,
-        },
-    ):
-        runner = CliRunner()
-        runner.invoke(
+
+    runner = CliRunner()
+    runner.invoke(
             cli,
             [
                 "config",
@@ -1573,21 +1522,13 @@ def tumor_only_wgs_config(
     analysis_dir: str,
     fastq_dir_tumor_only_wgs: str,
     tumor_sample_name: str,
-    sentieon_license: str,
-    sentieon_install_dir: str,
     config_case_cli: List[str],
 ) -> str:
     """Invoke balsamic config sample to create sample configuration file for tumor-only WGS."""
 
-    with mock.patch.dict(
-        MOCKED_OS_ENVIRON,
-        {
-            "SENTIEON_LICENSE": sentieon_license,
-            "SENTIEON_INSTALL_DIR": sentieon_install_dir,
-        },
-    ):
-        runner = CliRunner()
-        runner.invoke(
+
+    runner = CliRunner()
+    runner.invoke(
             cli,
             [
                 "config",
@@ -1618,20 +1559,12 @@ def tumor_normal_wgs_config(
     fastq_dir_tumor_normal_wgs: str,
     tumor_sample_name: str,
     normal_sample_name: str,
-    sentieon_license: str,
-    sentieon_install_dir: str,
     config_case_cli: str,
 ) -> str:
     """Invoke balsamic config sample to create sample configuration file for tumor-normal WGS."""
-    with mock.patch.dict(
-        MOCKED_OS_ENVIRON,
-        {
-            "SENTIEON_LICENSE": sentieon_license,
-            "SENTIEON_INSTALL_DIR": sentieon_install_dir,
-        },
-    ):
-        runner = CliRunner()
-        runner.invoke(
+
+    runner = CliRunner()
+    runner.invoke(
             cli,
             [
                 "config",
@@ -1666,20 +1599,12 @@ def tumor_only_config_dummy_vep(
     fastq_dir_tumor_only_dummy_vep: str,
     panel_bed_file: str,
     background_variant_file: str,
-    sentieon_license: str,
-    sentieon_install_dir: str,
 ) -> str:
     """Invoke balsamic config sample to create sample configuration file for tumor-only TGA with dummy VEP file."""
 
-    with mock.patch.dict(
-        MOCKED_OS_ENVIRON,
-        {
-            "SENTIEON_LICENSE": sentieon_license,
-            "SENTIEON_INSTALL_DIR": sentieon_install_dir,
-        },
-    ):
-        runner = CliRunner()
-        runner.invoke(
+
+    runner = CliRunner()
+    runner.invoke(
             cli,
             [
                 "config",
@@ -1716,20 +1641,12 @@ def tumor_only_pon_config(
     panel_bed_file: str,
     pon_cnn_path: str,
     balsamic_cache: str,
-    sentieon_license: str,
-    sentieon_install_dir: str,
 ) -> str:
     """Invoke balsamic PON config sample to create sample configuration file for tumor-only TGA."""
 
-    with mock.patch.dict(
-        MOCKED_OS_ENVIRON,
-        {
-            "SENTIEON_LICENSE": sentieon_license,
-            "SENTIEON_INSTALL_DIR": sentieon_install_dir,
-        },
-    ):
-        runner = CliRunner()
-        runner.invoke(
+
+    runner = CliRunner()
+    runner.invoke(
             cli,
             [
                 "config",
@@ -1765,20 +1682,12 @@ def cnvkit_pon_creation_config(
     fastq_dir_pon: str,
     panel_bed_file: str,
     balsamic_cache: str,
-    sentieon_license: str,
-    sentieon_install_dir: str,
 ) -> str:
     """Invoke PON creation config configuration file for CNVkit PON workflow."""
 
-    with mock.patch.dict(
-        MOCKED_OS_ENVIRON,
-        {
-            "SENTIEON_LICENSE": sentieon_license,
-            "SENTIEON_INSTALL_DIR": sentieon_install_dir,
-        },
-    ):
-        runner = CliRunner()
-        runner.invoke(
+
+    runner = CliRunner()
+    runner.invoke(
             cli,
             [
                 "config",
@@ -1811,21 +1720,13 @@ def gens_pon_creation_config(
     analysis_dir: str,
     fastq_dir_gens_pon: str,
     balsamic_cache: str,
-    sentieon_license: str,
-    sentieon_install_dir: str,
     gens_hg19_interval_list: str,
 ) -> str:
     """Invoke PON creation config configuration file for GENS PON workflow."""
 
-    with mock.patch.dict(
-        MOCKED_OS_ENVIRON,
-        {
-            "SENTIEON_LICENSE": sentieon_license,
-            "SENTIEON_INSTALL_DIR": sentieon_install_dir,
-        },
-    ):
-        runner = CliRunner()
-        runner.invoke(
+
+    runner = CliRunner()
+    runner.invoke(
             cli,
             [
                 "config",
@@ -1857,6 +1758,8 @@ def sample_config(
     tumor_sample_name: str,
     normal_sample_name: str,
     tumor_normal_fastq_info_correct: dict,
+    sentieon_license: str,
+    sentieon_install_dir: str,
 ):
     """Create and return sample config dict to test workflow utils"""
     sample_config = {
@@ -1892,6 +1795,8 @@ def sample_config(
             "pon_cnn": "tests/test_data/references/panel/test_panel_ponn.cnn",
         },
         "umiworkflow": "true",
+        "sentieon_license": sentieon_license,
+        "sentieon_install_dir": sentieon_install_dir,
     }
 
     return sample_config
