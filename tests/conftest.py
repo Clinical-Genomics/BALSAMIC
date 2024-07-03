@@ -1593,6 +1593,8 @@ def tumor_only_config_dummy_vep(
     fastq_dir_tumor_only_dummy_vep: str,
     panel_bed_file: str,
     background_variant_file: str,
+    sentieon_license: str,
+    sentieon_install_dir: str,
 ) -> str:
     """Invoke balsamic config sample to create sample configuration file for tumor-only TGA with dummy VEP file."""
 
@@ -1616,6 +1618,10 @@ def tumor_only_config_dummy_vep(
             background_variant_file,
             "--tumor-sample-name",
             tumor_sample_name,
+            "--sentieon-install-dir",
+            sentieon_install_dir,
+            "--sentieon-license",
+            sentieon_license,
         ],
     )
     return Path(
@@ -1634,6 +1640,8 @@ def tumor_only_pon_config(
     panel_bed_file: str,
     pon_cnn_path: str,
     balsamic_cache: str,
+    sentieon_license: str,
+    sentieon_install_dir: str,
 ) -> str:
     """Invoke balsamic PON config sample to create sample configuration file for tumor-only TGA."""
 
@@ -1657,6 +1665,10 @@ def tumor_only_pon_config(
             balsamic_cache,
             "--tumor-sample-name",
             tumor_sample_name,
+            "--sentieon-install-dir",
+            sentieon_install_dir,
+            "--sentieon-license",
+            sentieon_license,
         ],
     )
 
@@ -1674,6 +1686,8 @@ def cnvkit_pon_creation_config(
     fastq_dir_pon: str,
     panel_bed_file: str,
     balsamic_cache: str,
+    sentieon_license: str,
+    sentieon_install_dir: str,
 ) -> str:
     """Invoke PON creation config configuration file for CNVkit PON workflow."""
 
@@ -1697,6 +1711,10 @@ def cnvkit_pon_creation_config(
             balsamic_cache,
             "--pon-workflow",
             PONWorkflow.CNVKIT,
+            "--sentieon-install-dir",
+            sentieon_install_dir,
+            "--sentieon-license",
+            sentieon_license,
         ],
     )
 
@@ -1712,6 +1730,8 @@ def gens_pon_creation_config(
     fastq_dir_gens_pon: str,
     balsamic_cache: str,
     gens_hg19_interval_list: str,
+    sentieon_license: str,
+    sentieon_install_dir: str,
 ) -> str:
     """Invoke PON creation config configuration file for GENS PON workflow."""
 
@@ -1735,6 +1755,10 @@ def gens_pon_creation_config(
             PONWorkflow.GENS_MALE,
             "--genome-interval",
             gens_hg19_interval_list,
+            "--sentieon-install-dir",
+            sentieon_install_dir,
+            "--sentieon-license",
+            sentieon_license,
         ],
     )
 
