@@ -373,13 +373,13 @@ OPTION_SAMPLE_CONFIG = click.option(
 OPTION_SENTIEON_INSTALL_DIR = click.option(
     "--sentieon-install-dir",
     type=click.Path(exists=True, resolve_path=True),
-    required=False,
+    required=True,
     help="Path to Sentieon install directory",
 )
 
 OPTION_SENTIEON_LICENSE = click.option(
     "--sentieon-license",
-    required=False,
+    required=True,
     type=click.STRING,
     help="Sentieon license in format IP:Port",
 )

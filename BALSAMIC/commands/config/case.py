@@ -194,8 +194,8 @@ def case_config(
         directory.mkdir(exist_ok=True)
 
     config_collection_dict = ConfigModel(
-        sentieon_install_dir=sentieon_install_dir if sentieon_install_dir else None,
-        sentieon_license=sentieon_license if sentieon_license else None,
+        sentieon_install_dir=sentieon_install_dir,
+        sentieon_license=sentieon_license,
         QC={
             "quality_trim": quality_trim,
             "adapter_trim": adapter_trim,
