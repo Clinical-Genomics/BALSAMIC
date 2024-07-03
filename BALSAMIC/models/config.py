@@ -177,6 +177,22 @@ class CustomFilters(BaseModel):
 
     umi_min_reads: str | None = None
 
+class Sentieon(BaseModel):
+    """
+    Class providing common functions and variables for different balsamic workflows.
+
+    Attributes:
+        sentieon_install_dir: Field(required); path to Sentieon installation directory
+        sentieon_exec:  Field(required); path to Sentieon executeable
+        sentieon_license: Field(required); Sentieon license string
+    """
+
+    sentieon_install_dir: Annotated[str, AfterValidator(is_dir)]
+    sentieon_exec: Annotated[str, AfterValidator(is_file)]
+    sentieon_license: str
+    dnascope_model: Annotated[str, AfterValidator(is_file)]
+    tnscope_model: Annotated[str, AfterValidator(is_file)]
+
 
 class ConfigModel(BaseModel):
     """
@@ -222,8 +238,7 @@ class ConfigModel(BaseModel):
     background_variants: Optional[str] = None
     analysis: AnalysisModel
     custom_filters: CustomFilters | None = None
-    sentieon_install_dir: Annotated[str, AfterValidator(is_dir)]
-    sentieon_license: str
+    sentieon: Sentieon
 
     @field_validator("reference")
     def abspath_as_str(cls, reference: Dict[str, Path]):

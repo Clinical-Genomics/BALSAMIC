@@ -13,9 +13,9 @@ rule sentieon_consensuscall_umi:
         Path(benchmark_dir, "sentieon_consensuscall_umi_{sample}.tsv").as_posix()
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-        sentieon_install_dir = config["SENTIEON_INSTALL_DIR"],
-        sentieon_exec = config["SENTIEON_EXEC"],
-        sentieon_lic = config["SENTIEON_LICENSE"],
+        sentieon_install_dir = config_model.sentieon.sentieon_install_dir,
+        sentieon_exec = config_model.sentieon.sentieon_exec,
+        sentieon_lic = config_model.sentieon.sentieon_license,
         tag = params.umiconsensuscall.tag,
         ip_format = params.umiconsensuscall.align_format,
         sample_id = '{sample}'
@@ -54,9 +54,9 @@ rule sentieon_bwa_umiconsensus:
         Path(benchmark_dir, "sentieon_bwa_umiconsensus_{sample}.tsv").as_posix()
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-        sentieon_install_dir = config["SENTIEON_INSTALL_DIR"],
-        sentieon_exec = config["SENTIEON_EXEC"],
-        sentieon_lic = config["SENTIEON_LICENSE"],
+        sentieon_install_dir = config_model.sentieon.sentieon_install_dir,
+        sentieon_exec = config_model.sentieon.sentieon_exec,
+        sentieon_lic = config_model.sentieon.sentieon_license,
         sheader = params.umicommon.align_header,
         ip_bases = params.umicommon.align_intbases,
         sample_id = "{sample}"

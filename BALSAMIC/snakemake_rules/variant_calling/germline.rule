@@ -13,7 +13,7 @@ rule sentieon_DNAscope:
         Path(benchmark_dir, "sentieon_dnascope_{sample_type}.tsv").as_posix()
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-        sentieon_exec = config["SENTIEON_EXEC"],
+        sentieon_exec = config_model.sentieon.sentieon_exec,
         sentieon_lic = config["SENTIEON_LICENSE"],
         sample = '{sample_type}'
     threads:

@@ -60,16 +60,6 @@ sample_names: List[str] = config_model.get_all_sample_names()
 # Fastp parameters
 fastp_parameters: Dict = get_fastp_parameters(config_model)
 
-# Set Sentieon license and Sentieon install dir environment variables
-config["SENTIEON_LICENSE"] = config_model.sentieon_license
-config["SENTIEON_INSTALL_DIR"] = Path(config_model.sentieon_install_dir).as_posix()
-config["SENTIEON_EXEC"] = Path(config_model.sentieon_install_dir, "bin", "sentieon").as_posix()
-
-if not Path(config["SENTIEON_EXEC"]).exists():
-    LOG.error("Sentieon executable not found {}".format(Path(config["SENTIEON_EXEC"]).as_posix()))
-    raise BalsamicError
-
-
 sequence_type = config['analysis']["sequencing_type"]
 rules_to_include = []
 rules_to_include.append("snakemake_rules/misc/sleep.rule")

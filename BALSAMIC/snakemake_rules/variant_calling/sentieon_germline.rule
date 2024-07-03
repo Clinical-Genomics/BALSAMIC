@@ -13,7 +13,7 @@ rule sentieon_DNAscope:
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         pcr_model = params.common.pcr_model,
-        sentieon_exec = config["SENTIEON_EXEC"],
+        sentieon_exec = config_model.sentieon.sentieon_exec,
         sentieon_lic = config["SENTIEON_LICENSE"],
         sentieon_ml_dnascope = config["SENTIEON_DNASCOPE"],
         sample = "{sample_type}"

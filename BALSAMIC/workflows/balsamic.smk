@@ -10,11 +10,7 @@ from typing import Dict, List
 
 from BALSAMIC.constants.constants import FileType
 from BALSAMIC.constants.analysis import FastqName, MutationType, SampleType
-from BALSAMIC.constants.paths import (
-    BALSAMIC_DIR,
-    SENTIEON_DNASCOPE_DIR,
-    SENTIEON_TNSCOPE_DIR,
-)
+from BALSAMIC.constants.paths import BALSAMIC_DIR
 from BALSAMIC.constants.rules import SNAKEMAKE_RULES
 from BALSAMIC.constants.variant_filters import (
     COMMON_SETTINGS,
@@ -147,21 +143,6 @@ params = BalsamicWorkflowConfig.model_validate(WORKFLOW_PARAMS)
 # Custom filter to set the minimum number of reads required to support each UMI tag group
 if config_model.custom_filters and config_model.custom_filters.umi_min_reads:
     params.umiconsensuscall.filter_minreads = config_model.custom_filters.umi_min_reads
-
-# Set Sentieon license and Sentieon install dir environment variables
-config["SENTIEON_LICENSE"] = config_model.sentieon_license
-config["SENTIEON_INSTALL_DIR"] = Path(config_model.sentieon_install_dir).as_posix()
-config["SENTIEON_EXEC"] = Path(config_model.sentieon_install_dir, "bin", "sentieon").as_posix()
-config["SENTIEON_TNSCOPE"] = SENTIEON_TNSCOPE_DIR.as_posix()
-config["SENTIEON_DNASCOPE"] = SENTIEON_DNASCOPE_DIR.as_posix()
-
-if not Path(config["SENTIEON_EXEC"]).exists():
-    LOG.error(
-        "Sentieon executable not found {}".format(
-            Path(config["SENTIEON_EXEC"]).as_posix()
-        )
-    )
-    raise BalsamicError
 
 # vcfanno annotations
 research_annotations.append(
