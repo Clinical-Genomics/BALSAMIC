@@ -30,7 +30,7 @@ from BALSAMIC.constants.cluster import (
     ClusterMailType,
 )
 from BALSAMIC.constants.constants import FileType
-from BALSAMIC.constants.paths import CONSTANTS_DIR, FASTQ_TEST_INFO, TEST_DATA_DIR
+from BALSAMIC.constants.paths import (CONSTANTS_DIR, FASTQ_TEST_INFO, TEST_DATA_DIR, SENTIEON_TNSCOPE_MODEL, SENTIEON_DNASCOPE_MODEL)
 from BALSAMIC.constants.workflow_params import VCF_DICT
 from BALSAMIC.models.cache import (
     AnalysisReferencesHg,
@@ -402,6 +402,8 @@ def config_dict_w_singularity(
             "singularity": {"image": f"{balsamic_cache}/{balsamic_version}/containers"},
             "sentieon_install_dir": sentieon_install_dir,
             "sentieon_license": sentieon_license,
+            "dnascope_model": SENTIEON_DNASCOPE_MODEL.as_posix(),
+            "tnscope_model": SENTIEON_TNSCOPE_MODEL.as_posix(),
         }
     )
     return modify_dict
@@ -433,6 +435,8 @@ def pon_config_dict_w_singularity(
             "singularity": {"image": f"{balsamic_cache}/{balsamic_version}/containers"},
             "sentieon_install_dir": sentieon_install_dir,
             "sentieon_license": sentieon_license,
+            "dnascope_model": SENTIEON_DNASCOPE_MODEL.as_posix(),
+            "tnscope_model": SENTIEON_TNSCOPE_MODEL.as_posix(),
         }
     )
 

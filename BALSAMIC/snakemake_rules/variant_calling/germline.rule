@@ -14,7 +14,7 @@ rule sentieon_DNAscope:
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         sentieon_exec = config_model.sentieon.sentieon_exec,
-        sentieon_lic = config["SENTIEON_LICENSE"],
+        sentieon_lic = config_model.sentieon.sentieon_license,
         sample = '{sample_type}'
     threads:
         get_threads(cluster_config, 'sentieon_DNAscope')

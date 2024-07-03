@@ -86,8 +86,8 @@ rule sentieon_TNscope:
         tumor_options = VARCALL_PARAMS["tnscope"]["tumor"],
         normal_options = VARCALL_PARAMS["tnscope"]["normal"],
         sentieon_ml_tnscope = config_model.sentieon.tnscope_model,
-        sentieon_exec = config_model.sentieon.sentieon_exec,,
-        sentieon_lic = config_model.sentieon.sentieon_license,,
+        sentieon_exec = config_model.sentieon.sentieon_exec,
+        sentieon_lic = config_model.sentieon.sentieon_license,
         case_name = config["analysis"]["case_id"]
     threads:
         get_threads(cluster_config, 'sentieon_TNscope')

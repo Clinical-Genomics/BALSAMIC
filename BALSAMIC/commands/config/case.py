@@ -198,8 +198,8 @@ def case_config(
             "sentieon_install_dir": sentieon_install_dir,
             "sentieon_license": sentieon_license,
             "sentieon_exec": Path(sentieon_install_dir, "bin", "sentieon").as_posix(),
-            "dnascope_model": SENTIEON_DNASCOPE_MODEL,
-            "tnscope_model": SENTIEON_TNSCOPE_MODEL,
+            "dnascope_model": SENTIEON_DNASCOPE_MODEL.as_posix(),
+            "tnscope_model": SENTIEON_TNSCOPE_MODEL.as_posix(),
         },
         QC={
             "quality_trim": quality_trim,
