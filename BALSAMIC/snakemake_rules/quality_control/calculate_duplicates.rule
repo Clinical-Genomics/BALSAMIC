@@ -9,8 +9,8 @@ rule sentieon_dedup:
         Path(benchmark_dir, "sentieon_dedup_{sample_type}.{sample}.tsv").as_posix()
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-        sentieon_exec = config["SENTIEON_EXEC"],
-        sentieon_lic = config["SENTIEON_LICENSE"],
+        sentieon_exec = config_model.sentieon.sentieon_exec,
+        sentieon_lic = config_model.sentieon.sentieon_license,
         sample_id = "{sample}"
     threads:
         get_threads(cluster_config, 'sentieon_dedup')
