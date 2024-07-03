@@ -28,7 +28,11 @@ from BALSAMIC.commands.options import (
 from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV, PONWorkflow
 from BALSAMIC.constants.cache import GenomeVersion
 from BALSAMIC.constants.constants import FileType
-from BALSAMIC.constants.paths import (CONTAINERS_DIR, SENTIEON_DNASCOPE_MODEL, SENTIEON_TNSCOPE_MODEL)
+from BALSAMIC.constants.paths import (
+    CONTAINERS_DIR,
+    SENTIEON_DNASCOPE_MODEL,
+    SENTIEON_TNSCOPE_MODEL,
+)
 from BALSAMIC.models.config import ConfigModel
 from BALSAMIC.utils.cli import (
     generate_graph,

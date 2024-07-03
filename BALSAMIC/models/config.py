@@ -177,6 +177,7 @@ class CustomFilters(BaseModel):
 
     umi_min_reads: str | None = None
 
+
 class Sentieon(BaseModel):
     """
     Class providing common functions and variables for different balsamic workflows.
