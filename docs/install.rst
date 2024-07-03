@@ -14,13 +14,7 @@ Software Requirements
 - Python 3.11
 - BALSAMIC is dependent on third-party bioinformatics software ``Sentieon-tools`` for all workflows.
 
-``Note: To run Balsamic you need to either supply the --sentieon-install-dir and --sentieon-license arguments during the config step or set the environment variables in your ~/.bashrc``
-
-::
-
-    export SENTIEON_LICENSE=IP:Port
-    export SENTIEON_INSTALL_DIR=path_to_sentieon_install_dir
-
+``Note: To run Balsamic you need to supply the --sentieon-install-dir and --sentieon-license arguments during the config``
 
 
 Step 1. Installing BALSAMIC
