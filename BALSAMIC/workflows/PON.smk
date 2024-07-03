@@ -60,20 +60,10 @@ sample_names: List[str] = config_model.get_all_sample_names()
 # Fastp parameters
 fastp_parameters: Dict = get_fastp_parameters(config_model)
 
-# Find and set Sentieon binary and license server from env variables
-try:
-    config["SENTIEON_LICENSE"] = os.environ["SENTIEON_LICENSE"]
-    config["SENTIEON_INSTALL_DIR"] = os.environ["SENTIEON_INSTALL_DIR"]
-
-    if os.getenv("SENTIEON_EXEC") is not None:
-        config["SENTIEON_EXEC"] = os.environ["SENTIEON_EXEC"]
-    else:
-        config["SENTIEON_EXEC"] = Path(os.environ["SENTIEON_INSTALL_DIR"], "bin", "sentieon").as_posix()
-
-except KeyError as error:
-    LOG.error("Set environment variables SENTIEON_LICENSE, SENTIEON_INSTALL_DIR, SENTIEON_EXEC "
-              "to run SENTIEON variant callers")
-    raise BalsamicError
+# Set Sentieon license and Sentieon install dir environment variables
+config["SENTIEON_LICENSE"] = config_model.sentieon_license
+config["SENTIEON_INSTALL_DIR"] = Path(config_model.sentieon_install_dir).as_posix()
+config["SENTIEON_EXEC"] = Path(config_model.sentieon_install_dir, "bin", "sentieon").as_posix()
 
 if not Path(config["SENTIEON_EXEC"]).exists():
     LOG.error("Sentieon executable not found {}".format(Path(config["SENTIEON_EXEC"]).as_posix()))

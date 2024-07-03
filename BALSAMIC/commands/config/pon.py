@@ -16,6 +16,8 @@ from BALSAMIC.commands.options import (
     OPTION_FASTQ_PATH,
     OPTION_GENOME_INTERVAL,
     OPTION_GENOME_VERSION,
+    OPTION_SENTIEON_INSTALL_DIR,
+    OPTION_SENTIEON_LICENSE,
     OPTION_PANEL_BED,
     OPTION_PON_VERSION,
     OPTION_PON_WORKFLOW,
@@ -49,6 +51,8 @@ LOG = logging.getLogger(__name__)
 @OPTION_FASTQ_PATH
 @OPTION_GENOME_VERSION
 @OPTION_GENOME_INTERVAL
+@OPTION_SENTIEON_INSTALL_DIR
+@OPTION_SENTIEON_LICENSE
 @OPTION_PANEL_BED
 @OPTION_PON_WORKFLOW
 @OPTION_PON_VERSION
@@ -66,6 +70,8 @@ def pon_config(
     fastq_path: Path,
     genome_version: GenomeVersion,
     genome_interval: Path,
+    sentieon_install_dir: Path,
+    sentieon_license: str,
     panel_bed: Path,
     pon_workflow: PONWorkflow,
     quality_trim: bool,
@@ -105,6 +111,8 @@ def pon_config(
         directory.mkdir(exist_ok=True)
 
     config_collection_dict = ConfigModel(
+        sentieon_install_dir=sentieon_install_dir,
+        sentieon_license=sentieon_license,
         QC={
             "adapter_trim": adapter_trim,
             "quality_trim": quality_trim,
