@@ -13,9 +13,9 @@ rule sentieon_DNAscope:
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         pcr_model = params.common.pcr_model,
-        sentieon_exec = config["SENTIEON_EXEC"],
-        sentieon_lic = config["SENTIEON_LICENSE"],
-        sentieon_ml_dnascope = config["SENTIEON_DNASCOPE"],
+        sentieon_exec = config_model.sentieon.sentieon_exec,
+        sentieon_lic = config_model.sentieon.sentieon_license,
+        sentieon_ml_dnascope = config_model.sentieon.dnascope_model,
         sample = "{sample_type}"
     benchmark:
         Path(benchmark_dir, 'sentieon_DNAscope_' + "{sample_type}.tsv").as_posix()

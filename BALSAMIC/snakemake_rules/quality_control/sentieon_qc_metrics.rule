@@ -24,8 +24,8 @@ rule sentieon_wgs_metrics:
         min_base_qual = '10',
         gene_list = config["reference"]["refgene_txt"],
         cov_threshold = repeat("--cov_thresh", [50, 100, 150, 200, 250]),
-        sentieon_exec = config["SENTIEON_EXEC"],
-        sentieon_lic = config["SENTIEON_LICENSE"],
+        sentieon_exec = config_model.sentieon.sentieon_exec,
+        sentieon_lic = config_model.sentieon.sentieon_license,
         sample = '{sample}'
     threads:
         get_threads(cluster_config, 'sentieon_wgs_metrics')

@@ -97,8 +97,8 @@ rule sentieon_TNhaplotyper_tumor_only:
     params:
         tumor = "TUMOR",
         tmpdir= tempfile.mkdtemp(prefix=tmp_dir),
-        sentieon_exec = config["SENTIEON_EXEC"],
-        sentieon_lic = config["SENTIEON_LICENSE"],
+        sentieon_exec = config_model.sentieon.sentieon_exec,
+        sentieon_lic = config_model.sentieon.sentieon_license,
         case_name = config["analysis"]["case_id"]
     threads:
         get_threads(cluster_config, 'sentieon_TNhaplotyper_tumor_only')
