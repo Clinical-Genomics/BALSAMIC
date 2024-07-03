@@ -389,12 +389,21 @@ def config_dict(config_path: str) -> str:
 
 
 @pytest.fixture(scope="session")
-def config_dict_w_singularity(config_dict: str, balsamic_cache: str) -> str:
+def config_dict_w_singularity(
+    config_dict: str,
+    balsamic_cache: str,
+    sentieon_install_dir: str,
+    sentieon_license: str,
+) -> str:
     """Read and return config from json with singularity image path."""
     modify_dict = copy.deepcopy(config_dict)
-    modify_dict["singularity"] = {
-        "image": f"{balsamic_cache}/{balsamic_version}/containers"
-    }
+    modify_dict.update(
+        {
+            "singularity": {"image": f"{balsamic_cache}/{balsamic_version}/containers"},
+            "sentieon_install_dir": sentieon_install_dir,
+            "sentieon_license": sentieon_license,
+        }
+    )
     return modify_dict
 
 
@@ -411,12 +420,22 @@ def pon_config_dict(pon_config_path: str) -> str:
 
 
 @pytest.fixture(scope="session")
-def pon_config_dict_w_singularity(pon_config_dict: str, balsamic_cache: str) -> str:
+def pon_config_dict_w_singularity(
+    pon_config_dict: str,
+    balsamic_cache: str,
+    sentieon_install_dir: str,
+    sentieon_license: str,
+) -> str:
     """Read and return PON config from json with singularity image path."""
     modify_pon_config_dict = copy.deepcopy(pon_config_dict)
-    modify_pon_config_dict["singularity"] = {
-        "image": f"{balsamic_cache}/{balsamic_version}/containers"
-    }
+    modify_pon_config_dict.update(
+        {
+            "singularity": {"image": f"{balsamic_cache}/{balsamic_version}/containers"},
+            "sentieon_install_dir": sentieon_install_dir,
+            "sentieon_license": sentieon_license,
+        }
+    )
+
     return modify_pon_config_dict
 
 
