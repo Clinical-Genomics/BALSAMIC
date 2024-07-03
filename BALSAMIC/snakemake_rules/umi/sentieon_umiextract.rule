@@ -14,9 +14,9 @@ rule sentieon_umiextract:
         Path(benchmark_dir, "sentieon_umiextract_{sample}.tsv").as_posix()
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-        sentieon_install_dir = config["SENTIEON_INSTALL_DIR"],
-        sentieon_exec = config["SENTIEON_EXEC"],
-        sentieon_lic = config["SENTIEON_LICENSE"],
+        sentieon_install_dir = config_model.sentieon.sentieon_install_dir,
+        sentieon_exec = config_model.sentieon.sentieon_exec,
+        sentieon_lic = config_model.sentieon.sentieon_license,
         ds_params = params.umiextract.read_structure,
         sample = "{sample}"
     threads:
@@ -50,9 +50,9 @@ rule sentieon_bwa_umiextract:
         Path(benchmark_dir, "sentieon_bwa_umiextract_{sample}.tsv").as_posix()
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-        sentieon_install_dir = config["SENTIEON_INSTALL_DIR"],
-        sentieon_exec = config["SENTIEON_EXEC"],
-        sentieon_lic = config["SENTIEON_LICENSE"],
+        sentieon_install_dir = config_model.sentieon.sentieon_install_dir,
+        sentieon_exec = config_model.sentieon.sentieon_exec,
+        sentieon_lic = config_model.sentieon.sentieon_license,
         sample_id = '{sample}',
         sheader = params.umicommon.align_header,
         ip_bases = params.umicommon.align_intbases
