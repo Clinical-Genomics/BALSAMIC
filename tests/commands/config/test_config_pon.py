@@ -141,7 +141,12 @@ def test_gens_pon_config(
 
 
 def test_cnvkit_pon_config_failed(
-    invoke_cli, tmp_path: str, balsamic_cache: str, panel_bed_file: str, sentieon_license: str, sentieon_install_dir: str,
+    invoke_cli,
+    tmp_path: str,
+    balsamic_cache: str,
+    panel_bed_file: str,
+    sentieon_license: str,
+    sentieon_install_dir: str,
 ):
     """Test detection of missing option for a PON config without required arguments.."""
     # GIVEN a case ID, fastq files, and an analysis dir
@@ -175,7 +180,12 @@ def test_cnvkit_pon_config_failed(
 
 
 def test_cnvkit_pon_config_missing_panel(
-    invoke_cli, tmp_path: str, balsamic_cache: str, fastq_dir_pon: str, sentieon_license: str, sentieon_install_dir: str,
+    invoke_cli,
+    tmp_path: str,
+    balsamic_cache: str,
+    fastq_dir_pon: str,
+    sentieon_license: str,
+    sentieon_install_dir: str,
 ):
     """Test detection of missing panel which is optional but required for CNVkit."""
 

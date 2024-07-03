@@ -1241,28 +1241,27 @@ def tumor_only_config_qc(
 ) -> str:
     """Invoke balsamic config sample to create sample configuration file for tumor-only TGA."""
 
-
     runner = CliRunner()
     runner.invoke(
-            cli,
-            [
-                "config",
-                "case",
-                "--case-id",
-                case_id_tumor_only_qc,
-                "--analysis-workflow",
-                AnalysisWorkflow.BALSAMIC_QC,
-                "--analysis-dir",
-                analysis_dir,
-                "--fastq-path",
-                fastq_dir_tumor_only_qc,
-                "--tumor-sample-name",
-                tumor_sample_name,
-                "-p",
-                panel_bed_file,
-            ]
-            + config_case_cli,
-        )
+        cli,
+        [
+            "config",
+            "case",
+            "--case-id",
+            case_id_tumor_only_qc,
+            "--analysis-workflow",
+            AnalysisWorkflow.BALSAMIC_QC,
+            "--analysis-dir",
+            analysis_dir,
+            "--fastq-path",
+            fastq_dir_tumor_only_qc,
+            "--tumor-sample-name",
+            tumor_sample_name,
+            "-p",
+            panel_bed_file,
+        ]
+        + config_case_cli,
+    )
 
     return Path(
         analysis_dir, case_id_tumor_only_qc, f"{case_id_tumor_only_qc}.{FileType.JSON}"
@@ -1282,25 +1281,25 @@ def tumor_normal_config_qc(
 
     runner = CliRunner()
     runner.invoke(
-            cli,
-            [
-                "config",
-                "case",
-                "--case-id",
-                case_id_tumor_normal_qc,
-                "--analysis-workflow",
-                AnalysisWorkflow.BALSAMIC_QC,
-                "--analysis-dir",
-                analysis_dir,
-                "--fastq-path",
-                fastq_dir_tumor_normal_qc,
-                "--tumor-sample-name",
-                tumor_sample_name,
-                "--normal-sample-name",
-                normal_sample_name,
-            ]
-            + config_case_cli,
-        )
+        cli,
+        [
+            "config",
+            "case",
+            "--case-id",
+            case_id_tumor_normal_qc,
+            "--analysis-workflow",
+            AnalysisWorkflow.BALSAMIC_QC,
+            "--analysis-dir",
+            analysis_dir,
+            "--fastq-path",
+            fastq_dir_tumor_normal_qc,
+            "--tumor-sample-name",
+            tumor_sample_name,
+            "--normal-sample-name",
+            normal_sample_name,
+        ]
+        + config_case_cli,
+    )
 
     return Path(
         analysis_dir,
@@ -1320,28 +1319,27 @@ def tumor_normal_config_qc_wgs(
 ) -> str:
     """Invoke balsamic config sample to create sample configuration file for tumor-normal WGS QC workflow."""
 
-
     runner = CliRunner()
     runner.invoke(
-            cli,
-            [
-                "config",
-                "case",
-                "--case-id",
-                case_id_tumor_normal_qc_wgs,
-                "--analysis-workflow",
-                AnalysisWorkflow.BALSAMIC_QC,
-                "--analysis-dir",
-                analysis_dir,
-                "--fastq-path",
-                fastq_dir_tumor_normal_qc_wgs,
-                "--tumor-sample-name",
-                tumor_sample_name,
-                "--normal-sample-name",
-                normal_sample_name,
-            ]
-            + config_case_cli,
-        )
+        cli,
+        [
+            "config",
+            "case",
+            "--case-id",
+            case_id_tumor_normal_qc_wgs,
+            "--analysis-workflow",
+            AnalysisWorkflow.BALSAMIC_QC,
+            "--analysis-dir",
+            analysis_dir,
+            "--fastq-path",
+            fastq_dir_tumor_normal_qc_wgs,
+            "--tumor-sample-name",
+            tumor_sample_name,
+            "--normal-sample-name",
+            normal_sample_name,
+        ]
+        + config_case_cli,
+    )
 
     return Path(
         analysis_dir,
@@ -1363,23 +1361,23 @@ def tumor_only_config(
 
     runner = CliRunner()
     runner.invoke(
-            cli,
-            [
-                "config",
-                "case",
-                "--case-id",
-                case_id_tumor_only,
-                "--analysis-dir",
-                analysis_dir,
-                "--fastq-path",
-                fastq_dir_tumor_only,
-                "--tumor-sample-name",
-                tumor_sample_name,
-                "-p",
-                panel_bed_file,
-            ]
-            + config_case_cli,
-        )
+        cli,
+        [
+            "config",
+            "case",
+            "--case-id",
+            case_id_tumor_only,
+            "--analysis-dir",
+            analysis_dir,
+            "--fastq-path",
+            fastq_dir_tumor_only,
+            "--tumor-sample-name",
+            tumor_sample_name,
+            "-p",
+            panel_bed_file,
+        ]
+        + config_case_cli,
+    )
     return Path(
         analysis_dir,
         case_id_tumor_only,
@@ -1399,28 +1397,27 @@ def tumor_normal_config(
 ) -> str:
     """Invoke balsamic config sample to create sample configuration file for tumor-normal TGA."""
 
-
     runner = CliRunner()
     runner.invoke(
-            cli,
-            [
-                "config",
-                "case",
-                "--case-id",
-                case_id_tumor_normal,
-                "--analysis-dir",
-                analysis_dir,
-                "--fastq-path",
-                fastq_dir_tumor_normal,
-                "--tumor-sample-name",
-                tumor_sample_name,
-                "--normal-sample-name",
-                normal_sample_name,
-                "-p",
-                panel_bed_file,
-            ]
-            + config_case_cli,
-        )
+        cli,
+        [
+            "config",
+            "case",
+            "--case-id",
+            case_id_tumor_normal,
+            "--analysis-dir",
+            analysis_dir,
+            "--fastq-path",
+            fastq_dir_tumor_normal,
+            "--tumor-sample-name",
+            tumor_sample_name,
+            "--normal-sample-name",
+            normal_sample_name,
+            "-p",
+            panel_bed_file,
+        ]
+        + config_case_cli,
+    )
 
     return Path(
         analysis_dir,
@@ -1440,28 +1437,27 @@ def tumor_only_umi_config(
 ) -> str:
     """Invoke balsamic config sample to create sample configuration file for tumor-only TGA."""
 
-
     runner = CliRunner()
     runner.invoke(
-            cli,
-            [
-                "config",
-                "case",
-                "--case-id",
-                case_id_tumor_only_umi,
-                "--analysis-workflow",
-                AnalysisWorkflow.BALSAMIC_UMI,
-                "--analysis-dir",
-                analysis_dir,
-                "--fastq-path",
-                fastq_dir_tumor_only,
-                "--tumor-sample-name",
-                tumor_sample_name,
-                "-p",
-                panel_bed_file,
-            ]
-            + config_case_cli,
-        )
+        cli,
+        [
+            "config",
+            "case",
+            "--case-id",
+            case_id_tumor_only_umi,
+            "--analysis-workflow",
+            AnalysisWorkflow.BALSAMIC_UMI,
+            "--analysis-dir",
+            analysis_dir,
+            "--fastq-path",
+            fastq_dir_tumor_only,
+            "--tumor-sample-name",
+            tumor_sample_name,
+            "-p",
+            panel_bed_file,
+        ]
+        + config_case_cli,
+    )
 
     return Path(
         analysis_dir,
@@ -1482,32 +1478,31 @@ def tumor_normal_umi_config(
 ) -> str:
     """Invoke balsamic config sample to create sample configuration file for tumor-normal TGA."""
 
-
     runner = CliRunner()
     runner.invoke(
-            cli,
-            [
-                "config",
-                "case",
-                "-p",
-                panel_bed_file,
-                "--case-id",
-                case_id_tumor_normal_umi,
-                "--analysis-workflow",
-                AnalysisWorkflow.BALSAMIC_UMI,
-                "--analysis-dir",
-                analysis_dir,
-                "--fastq-path",
-                fastq_dir_tumor_normal,
-                "--tumor-sample-name",
-                tumor_sample_name,
-                "--normal-sample-name",
-                normal_sample_name,
-                "-p",
-                panel_bed_file,
-            ]
-            + config_case_cli,
-        )
+        cli,
+        [
+            "config",
+            "case",
+            "-p",
+            panel_bed_file,
+            "--case-id",
+            case_id_tumor_normal_umi,
+            "--analysis-workflow",
+            AnalysisWorkflow.BALSAMIC_UMI,
+            "--analysis-dir",
+            analysis_dir,
+            "--fastq-path",
+            fastq_dir_tumor_normal,
+            "--tumor-sample-name",
+            tumor_sample_name,
+            "--normal-sample-name",
+            normal_sample_name,
+            "-p",
+            panel_bed_file,
+        ]
+        + config_case_cli,
+    )
 
     return Path(
         analysis_dir,
@@ -1526,24 +1521,23 @@ def tumor_only_wgs_config(
 ) -> str:
     """Invoke balsamic config sample to create sample configuration file for tumor-only WGS."""
 
-
     runner = CliRunner()
     runner.invoke(
-            cli,
-            [
-                "config",
-                "case",
-                "--case-id",
-                case_id_tumor_only_wgs,
-                "--analysis-dir",
-                analysis_dir,
-                "--fastq-path",
-                fastq_dir_tumor_only_wgs,
-                "--tumor-sample-name",
-                tumor_sample_name,
-            ]
-            + config_case_cli,
-        )
+        cli,
+        [
+            "config",
+            "case",
+            "--case-id",
+            case_id_tumor_only_wgs,
+            "--analysis-dir",
+            analysis_dir,
+            "--fastq-path",
+            fastq_dir_tumor_only_wgs,
+            "--tumor-sample-name",
+            tumor_sample_name,
+        ]
+        + config_case_cli,
+    )
 
     return Path(
         analysis_dir,
@@ -1565,23 +1559,23 @@ def tumor_normal_wgs_config(
 
     runner = CliRunner()
     runner.invoke(
-            cli,
-            [
-                "config",
-                "case",
-                "--case-id",
-                case_id_tumor_normal_wgs,
-                "--analysis-dir",
-                analysis_dir,
-                "--fastq-path",
-                fastq_dir_tumor_normal_wgs,
-                "--tumor-sample-name",
-                tumor_sample_name,
-                "--normal-sample-name",
-                normal_sample_name,
-            ]
-            + config_case_cli,
-        )
+        cli,
+        [
+            "config",
+            "case",
+            "--case-id",
+            case_id_tumor_normal_wgs,
+            "--analysis-dir",
+            analysis_dir,
+            "--fastq-path",
+            fastq_dir_tumor_normal_wgs,
+            "--tumor-sample-name",
+            tumor_sample_name,
+            "--normal-sample-name",
+            normal_sample_name,
+        ]
+        + config_case_cli,
+    )
 
     return Path(
         analysis_dir,
@@ -1602,29 +1596,28 @@ def tumor_only_config_dummy_vep(
 ) -> str:
     """Invoke balsamic config sample to create sample configuration file for tumor-only TGA with dummy VEP file."""
 
-
     runner = CliRunner()
     runner.invoke(
-            cli,
-            [
-                "config",
-                "case",
-                "--case-id",
-                case_id_tumor_only_dummy_vep,
-                "--analysis-dir",
-                analysis_dir,
-                "--fastq-path",
-                fastq_dir_tumor_only_dummy_vep,
-                "-p",
-                panel_bed_file,
-                "--balsamic-cache",
-                balsamic_cache,
-                "--background-variants",
-                background_variant_file,
-                "--tumor-sample-name",
-                tumor_sample_name,
-            ],
-        )
+        cli,
+        [
+            "config",
+            "case",
+            "--case-id",
+            case_id_tumor_only_dummy_vep,
+            "--analysis-dir",
+            analysis_dir,
+            "--fastq-path",
+            fastq_dir_tumor_only_dummy_vep,
+            "-p",
+            panel_bed_file,
+            "--balsamic-cache",
+            balsamic_cache,
+            "--background-variants",
+            background_variant_file,
+            "--tumor-sample-name",
+            tumor_sample_name,
+        ],
+    )
     return Path(
         analysis_dir,
         case_id_tumor_only_dummy_vep,
@@ -1644,29 +1637,28 @@ def tumor_only_pon_config(
 ) -> str:
     """Invoke balsamic PON config sample to create sample configuration file for tumor-only TGA."""
 
-
     runner = CliRunner()
     runner.invoke(
-            cli,
-            [
-                "config",
-                "case",
-                "--case-id",
-                case_id_tumor_only_pon_cnn,
-                "--analysis-dir",
-                analysis_dir,
-                "--fastq-path",
-                fastq_dir_tumor_only_pon_cnn,
-                "-p",
-                panel_bed_file,
-                "--pon-cnn",
-                pon_cnn_path,
-                "--balsamic-cache",
-                balsamic_cache,
-                "--tumor-sample-name",
-                tumor_sample_name,
-            ],
-        )
+        cli,
+        [
+            "config",
+            "case",
+            "--case-id",
+            case_id_tumor_only_pon_cnn,
+            "--analysis-dir",
+            analysis_dir,
+            "--fastq-path",
+            fastq_dir_tumor_only_pon_cnn,
+            "-p",
+            panel_bed_file,
+            "--pon-cnn",
+            pon_cnn_path,
+            "--balsamic-cache",
+            balsamic_cache,
+            "--tumor-sample-name",
+            tumor_sample_name,
+        ],
+    )
 
     return Path(
         analysis_dir,
@@ -1685,29 +1677,28 @@ def cnvkit_pon_creation_config(
 ) -> str:
     """Invoke PON creation config configuration file for CNVkit PON workflow."""
 
-
     runner = CliRunner()
     runner.invoke(
-            cli,
-            [
-                "config",
-                "pon",
-                "--case-id",
-                case_id_pon,
-                "--analysis-dir",
-                analysis_dir,
-                "--fastq-path",
-                fastq_dir_pon,
-                "-p",
-                panel_bed_file,
-                "--version",
-                "v5",
-                "--balsamic-cache",
-                balsamic_cache,
-                "--pon-workflow",
-                PONWorkflow.CNVKIT,
-            ],
-        )
+        cli,
+        [
+            "config",
+            "pon",
+            "--case-id",
+            case_id_pon,
+            "--analysis-dir",
+            analysis_dir,
+            "--fastq-path",
+            fastq_dir_pon,
+            "-p",
+            panel_bed_file,
+            "--version",
+            "v5",
+            "--balsamic-cache",
+            balsamic_cache,
+            "--pon-workflow",
+            PONWorkflow.CNVKIT,
+        ],
+    )
 
     return Path(
         analysis_dir, case_id_pon, f"{case_id_pon}_PON.{FileType.JSON}"
@@ -1724,29 +1715,28 @@ def gens_pon_creation_config(
 ) -> str:
     """Invoke PON creation config configuration file for GENS PON workflow."""
 
-
     runner = CliRunner()
     runner.invoke(
-            cli,
-            [
-                "config",
-                "pon",
-                "--case-id",
-                case_id_gens_pon,
-                "--analysis-dir",
-                analysis_dir,
-                "--fastq-path",
-                fastq_dir_gens_pon,
-                "--version",
-                "v5",
-                "--balsamic-cache",
-                balsamic_cache,
-                "--pon-workflow",
-                PONWorkflow.GENS_MALE,
-                "--genome-interval",
-                gens_hg19_interval_list,
-            ],
-        )
+        cli,
+        [
+            "config",
+            "pon",
+            "--case-id",
+            case_id_gens_pon,
+            "--analysis-dir",
+            analysis_dir,
+            "--fastq-path",
+            fastq_dir_gens_pon,
+            "--version",
+            "v5",
+            "--balsamic-cache",
+            balsamic_cache,
+            "--pon-workflow",
+            PONWorkflow.GENS_MALE,
+            "--genome-interval",
+            gens_hg19_interval_list,
+        ],
+    )
 
     return Path(
         analysis_dir, case_id_gens_pon, f"{case_id_gens_pon}_PON.{FileType.JSON}"
