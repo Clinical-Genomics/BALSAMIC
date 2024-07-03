@@ -19,8 +19,8 @@ rule sentieon_tnscope_umi_tn:
     params:
         housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "research"},
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-        sentieon_exec = config["SENTIEON_EXEC"],
-        sentieon_lic = config["SENTIEON_LICENSE"],
+        sentieon_exec = config_model.sentieon.sentieon_exec,
+        sentieon_lic = config_model.sentieon.sentieon_license,
         tumor_af = params.umicommon.filter_tumor_af,
         algo = params.tnscope_umi.algo,
         disable_detect = params.tnscope_umi.disable_detect,

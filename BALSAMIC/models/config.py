@@ -178,6 +178,23 @@ class CustomFilters(BaseModel):
     umi_min_reads: str | None = None
 
 
+class Sentieon(BaseModel):
+    """
+    Class providing common functions and variables for different balsamic workflows.
+
+    Attributes:
+        sentieon_install_dir: Field(required); path to Sentieon installation directory
+        sentieon_exec:  Field(required); path to Sentieon executeable
+        sentieon_license: Field(required); Sentieon license string
+    """
+
+    sentieon_install_dir: Annotated[str, AfterValidator(is_dir)]
+    sentieon_exec: Annotated[str, AfterValidator(is_file)]
+    sentieon_license: str
+    dnascope_model: Annotated[str, AfterValidator(is_file)]
+    tnscope_model: Annotated[str, AfterValidator(is_file)]
+
+
 class ConfigModel(BaseModel):
     """
     Class providing common functions and variables for different balsamic workflows.
@@ -194,6 +211,7 @@ class ConfigModel(BaseModel):
         background_variants: Field(Path(optional)); path to BACKGROUND VARIANTS for UMI
         analysis: Field(AnalysisModel); Pydantic model containing workflow variables
         custom_filters: Field(CustomFilters); custom parameters for variant filtering
+        sentieon: Field(required); Sentieon model attributes
 
     This class also contains functions that help retrieve sample and file information,
     facilitating BALSAMIC run operations in Snakemake.
@@ -220,6 +238,7 @@ class ConfigModel(BaseModel):
     background_variants: Optional[str] = None
     analysis: AnalysisModel
     custom_filters: CustomFilters | None = None
+    sentieon: Sentieon
 
     @field_validator("reference")
     def abspath_as_str(cls, reference: Dict[str, Path]):

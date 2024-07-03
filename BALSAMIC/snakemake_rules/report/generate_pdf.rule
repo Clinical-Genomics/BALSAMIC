@@ -56,7 +56,7 @@ rule msi_to_pdf:
         "Converting MSI TXT file to PDF"
     shell:
         """
-python "{params.csv_to_pdf_script}" "{input.msi_result}" "{output.msi_result_pdf}" --delimiter "\t"
+python "{params.csv_to_pdf_script}" "{input.msi_result}" "{output.msi_result_pdf}" --delimiter "\t" --header
         """
 
 rule image_to_pdf:

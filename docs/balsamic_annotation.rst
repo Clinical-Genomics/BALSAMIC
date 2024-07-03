@@ -222,7 +222,7 @@ See https://github.com/xjtu-omics/msisensor-pro/wiki for more details.
      - all detected microsatellites
    * - Number_of_Somatic_Sites
      - the unstable(somatic) microsatellites
-   * - %
+   * - MSI
      - The MSI score
 
 

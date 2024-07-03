@@ -24,8 +24,8 @@ if config["analysis"]["sequencing_type"] == 'wgs':
             min_base_qual = '10',
             gene_list = config["reference"]["refgene_txt"],
             cov_threshold = repeat("--cov_thresh", [50, 100, 150, 200, 250]),
-            sentieon_exec = config["SENTIEON_EXEC"],
-            sentieon_lic = config["SENTIEON_LICENSE"],
+            sentieon_exec = config_model.sentieon.sentieon_exec,
+            sentieon_lic = config_model.sentieon.sentieon_license,
             sample = '{sample}'
         threads:
             get_threads(cluster_config, 'sentieon_wgs_metrics')
@@ -72,8 +72,8 @@ if config["analysis"]["sequencing_type"] == 'wgs':
             Path(benchmark_dir, "sentieon_qc_metrics_{sample_type}.{sample}.tsv").as_posix()
         params:
             tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-            sentieon_exec = config["SENTIEON_EXEC"],
-            sentieon_lic = config["SENTIEON_LICENSE"],
+            sentieon_exec = config_model.sentieon.sentieon_exec,
+            sentieon_lic = config_model.sentieon.sentieon_license,
             sample_id = "{sample}",
             adapter = config["QC"]["adapter"]
         threads:
@@ -118,8 +118,8 @@ else:
             Path(benchmark_dir,"sentieon_qc_metrics_{sample_type}.{sample}.tsv").as_posix()
         params:
             tmpdir=tempfile.mkdtemp(prefix=tmp_dir),
-            sentieon_exec=config["SENTIEON_EXEC"],
-            sentieon_lic=config["SENTIEON_LICENSE"],
+            sentieon_exec=config_model.sentieon.sentieon_exec,
+            sentieon_lic=config_model.sentieon.sentieon_license,
             sample_id="{sample}",
             adapter=config["QC"]["adapter"]
         threads:
@@ -161,9 +161,12 @@ rule sentieon_plot_qc_metrics:
         Path(benchmark_dir, "sentieon_plot_qc_metrics_{sample_type}.{sample}.tsv").as_posix()
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-        sentieon_exec = config["SENTIEON_EXEC"],
-        sentieon_lic = config["SENTIEON_LICENSE"],
         sample_id = "{sample}",
+        min_base_qual = '10',
+        gene_list = config["reference"]["refgene_txt"],
+        cov_threshold = repeat("--cov_thresh", [50, 100, 150, 200, 250]),
+        sentieon_exec = config_model.sentieon.sentieon_exec,
+        sentieon_lic = config_model.sentieon.sentieon_license,
     threads:
         get_threads(cluster_config,'sentieon_plot_qc_metrics')
     message:
