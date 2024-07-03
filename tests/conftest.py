@@ -409,7 +409,7 @@ def config_dict_w_singularity(
             "sentieon": {
                 "sentieon_install_dir": sentieon_install_dir,
                 "sentieon_exec": Path(
-                    sentieon_install_dir, "sentieon", "bin"
+                    sentieon_install_dir, "bin", "sentieon"
                 ).as_posix(),
                 "sentieon_license": sentieon_license,
                 "dnascope_model": SENTIEON_DNASCOPE_MODEL.as_posix(),
@@ -447,7 +447,7 @@ def pon_config_dict_w_singularity(
             "sentieon": {
                 "sentieon_install_dir": sentieon_install_dir,
                 "sentieon_exec": Path(
-                    sentieon_install_dir, "sentieon", "bin"
+                    sentieon_install_dir, "bin", "sentieon"
                 ).as_posix(),
                 "sentieon_license": sentieon_license,
                 "dnascope_model": SENTIEON_DNASCOPE_MODEL.as_posix(),
@@ -1848,8 +1848,13 @@ def sample_config(
             "pon_cnn": "tests/test_data/references/panel/test_panel_ponn.cnn",
         },
         "umiworkflow": "true",
-        "sentieon_license": sentieon_license,
-        "sentieon_install_dir": sentieon_install_dir,
+        "sentieon": {
+            "sentieon_license": sentieon_license,
+            "sentieon_install_dir": sentieon_install_dir,
+            "sentieon_exec": Path(sentieon_install_dir, "bin", "sentieon").as_posix(),
+            "dnascope_model": SENTIEON_DNASCOPE_MODEL.as_posix(),
+            "tnscope_model": SENTIEON_TNSCOPE_MODEL.as_posix(),
+        },
     }
 
     return sample_config
