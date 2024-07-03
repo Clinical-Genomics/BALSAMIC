@@ -406,12 +406,16 @@ def config_dict_w_singularity(
     modify_dict.update(
         {
             "singularity": {"image": f"{balsamic_cache}/{balsamic_version}/containers"},
-            "sentieon_install_dir": sentieon_install_dir,
-            "sentieon_exec": Path(sentieon_install_dir, "sentieon", "bin").as_posix(),
-            "sentieon_license": sentieon_license,
-            "dnascope_model": SENTIEON_DNASCOPE_MODEL.as_posix(),
-            "tnscope_model": SENTIEON_TNSCOPE_MODEL.as_posix(),
-        }
+            "sentieon": {
+                "sentieon_install_dir": sentieon_install_dir,
+                "sentieon_exec": Path(
+                    sentieon_install_dir, "sentieon", "bin"
+                ).as_posix(),
+                "sentieon_license": sentieon_license,
+                "dnascope_model": SENTIEON_DNASCOPE_MODEL.as_posix(),
+                "tnscope_model": SENTIEON_TNSCOPE_MODEL.as_posix(),
+            },
+        },
     )
     return modify_dict
 
