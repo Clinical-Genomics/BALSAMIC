@@ -118,11 +118,12 @@ LOG.info(f"The following rules will be included in the workflow: {rules_to_inclu
 quality_control_results = [
     Path(qc_dir, case_id + "_metrics_deliverables.yaml").as_posix(),
     Path(qc_dir, "multiqc_report.html").as_posix(),
+    Path(qc_dir, "multiqc_data/multiqc_data.json").as_posix(),
 ]
 
 if 'delivery' in config:
     wildcard_dict = {
-        "sample": config_model.get_all_sample_names() + ["tumor", "normal"],
+        "sample": sample_names + ["tumor", "normal"],
         "case_name": case_id,
         "allow_missing": True
     }
@@ -150,6 +151,10 @@ if 'delivery' in config:
     delivery_ready = Path(get_result_dir(config), "delivery_report", case_id + "_delivery_ready.hk").as_posix()
     write_json(output_files_ready, delivery_ready)
     FormatFile(delivery_ready)
+
+wildcard_constraints:
+    sample="|".join(sample_names),
+
 
 rule all:
     input:
