@@ -185,6 +185,7 @@ def get_metric_condition(
 
     return req_metrics
 
+
 def get_sample_id(multiqc_key: str) -> str:
     """Returns extracted sample ID from MultiQC data JSON key.
 
