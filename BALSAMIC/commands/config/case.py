@@ -29,6 +29,7 @@ from BALSAMIC.commands.options import (
     OPTION_GENOME_VERSION,
     OPTION_GENS_COV_PON,
     OPTION_GNOMAD_AF5,
+    OPTION_MSI_PON,
     OPTION_NORMAL_SAMPLE_NAME,
     OPTION_PANEL_BED,
     OPTION_PON_CNN,
@@ -80,6 +81,7 @@ LOG = logging.getLogger(__name__)
 @OPTION_GENOME_INTERVAL
 @OPTION_GENS_COV_PON
 @OPTION_GNOMAD_AF5
+@OPTION_MSI_PON
 @OPTION_NORMAL_SAMPLE_NAME
 @OPTION_PANEL_BED
 @OPTION_PON_CNN
@@ -113,6 +115,7 @@ def case_config(
     genome_interval: Path,
     gens_coverage_pon: Path,
     gnomad_min_af5: Path,
+    msi_pon: Path,
     normal_sample_name: str,
     panel_bed: Path,
     pon_cnn: Path,
@@ -156,6 +159,10 @@ def case_config(
                 if path is not None
             }
         )
+
+    msi_pon_path = {"msi_pon": msi_pon}
+    if msi_pon:
+        references.update(msi_pon_path)
 
     variants_observations = {
         "clinical_snv_observations": clinical_snv_observations,

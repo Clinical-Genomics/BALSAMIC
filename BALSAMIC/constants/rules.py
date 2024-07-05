@@ -87,6 +87,7 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
         "annotate": [
             "snakemake_rules/annotation/rankscore.rule",
             "snakemake_rules/annotation/varcaller_filter_tumor_only.rule",
+            "snakemake_rules/annotation/msi_tumor_only.rule",
         ],
     },
     "paired_targeted": {
@@ -137,6 +138,7 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
         ],
         "annotate": [
             "snakemake_rules/annotation/varcaller_wgs_filter_tumor_only.rule",
+            "snakemake_rules/annotation/msi_tumor_only.rule",
         ],
     },
     "paired_wgs": {

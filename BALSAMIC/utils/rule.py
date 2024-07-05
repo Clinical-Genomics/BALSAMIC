@@ -385,6 +385,17 @@ def get_swegen_sv(config: dict) -> str:
     """
     return Path(config["reference"]["swegen_sv_frequency"]).as_posix()
 
+def get_msi_pon(config: dict) -> str:
+    """Returns path for MSI PON baseline
+
+    Args:
+        config: a config dictionary
+
+    Returns:
+        Path for MSI PON baseline file
+
+    """
+    return Path(config["reference"]["msi_pon"]).as_posix()
 
 def dump_toml(annotations: list) -> str:
     """Returns list of converted annotation in toml format

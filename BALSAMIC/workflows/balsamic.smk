@@ -43,6 +43,7 @@ from BALSAMIC.utils.rule import (
     get_clinical_snv_observations,
     get_clinical_sv_observations,
     get_fastp_parameters,
+    get_msi_pon,
     get_pon_cnn,
     get_result_dir,
     get_rule_output,
@@ -104,6 +105,7 @@ swegen_snv = ""
 clinical_sv = ""
 somatic_sv = ""
 swegen_sv = ""
+msi_pon = ""
 
 if config["analysis"]["sequencing_type"] != "wgs":
     pon_cnn: str = get_pon_cnn(config)
@@ -284,6 +286,8 @@ if "cancer_somatic_sv_observations" in config["reference"]:
 if "swegen_sv_frequency" in config["reference"]:
     swegen_sv: str = get_swegen_sv(config)
 
+if "msi_pon" in config["reference"]:
+    msi_pon: str = get_msi_pon(config)
 
 # Capture kit name
 if config["analysis"]["sequencing_type"] != "wgs":
@@ -357,11 +361,12 @@ os.environ["TMPDIR"] = get_result_dir(config)
 
 # CNV report input files
 cnv_report_paths = []
+cnv_report_paths.append(
+    f"{vcf_dir}MSI.somatic.{config['analysis']['case_id']}.msisensorpro.msi.pdf"
+)
+
 if config["analysis"]["sequencing_type"] == "wgs":
     if config["analysis"]["analysis_type"] == "paired":
-        cnv_report_paths.append(
-            f"{vcf_dir}MSI.somatic.{config['analysis']['case_id']}.msisensorpro.msi.pdf"
-        )
         cnv_report_paths.append(
             f"{vcf_dir}CNV.somatic.{config['analysis']['case_id']}.ascat.samplestatistics.txt.pdf"
         )
@@ -386,10 +391,6 @@ if config["analysis"]["sequencing_type"] == "wgs":
             )
         )
 else:
-    if config["analysis"]["analysis_type"] == "paired":
-        cnv_report_paths.append(
-            f"{vcf_dir}MSI.somatic.{config['analysis']['case_id']}.msisensorpro.msi.pdf"
-        )
     cnv_report_paths.extend(
         expand(f"{cnv_dir}tumor.merged-{{plot}}.pdf", plot=["diagram", "scatter"])
     )

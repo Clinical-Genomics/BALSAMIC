@@ -264,6 +264,14 @@ OPTION_LOG_LEVEL = click.option(
     show_default=True,
 )
 
+OPTION_MSI_PON = click.option(
+    "--msi-pon",
+    type=click.Path(exists=True, resolve_path=True),
+    required=False,
+    help="Path of MSI PON baseline file",
+)
+
+
 OPTION_NORMAL_SAMPLE_NAME = click.option(
     "--normal-sample-name",
     required=False,
