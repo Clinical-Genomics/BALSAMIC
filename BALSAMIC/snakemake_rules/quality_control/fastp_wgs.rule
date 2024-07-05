@@ -1,7 +1,7 @@
 """Rules for WGS fastq pre-processing: quality and adapter-trimming."""
 
 
-rule fastp_quality_trim_wgs:
+rule fastp_quality_and_adapter_trim_wgs:
     """Fastq data pre-processing for WGS."""
     input:
         wake_up = result_dir + "start_analysis",

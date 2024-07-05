@@ -57,7 +57,6 @@ rule sentieon_bwa_umiconsensus:
         sentieon_install_dir = config_model.sentieon.sentieon_install_dir,
         sentieon_exec = config_model.sentieon.sentieon_exec,
         sentieon_lic = config_model.sentieon.sentieon_license,
-        sheader = params.umicommon.align_header,
         ip_bases = params.umicommon.align_intbases,
         sample_id = "{sample}",
         sample_type = lambda wildcards: config_model.get_sample_type_by_name(wildcards.sample, uppercase=True),

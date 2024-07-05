@@ -362,7 +362,7 @@ def test_get_final_bam_name(balsamic_model: ConfigModel):
     )
 
     # Then retrieved final bam names should match the expected format and be identical regardless of request parameter
-    expected_final_bam_name = f"{bam_dir}{sample_type}.{sample_name}.dedup_sorted.bam"
+    expected_final_bam_name = f"{bam_dir}{sample_type}.{sample_name}.dedup.fixmate.bam"
     assert expected_final_bam_name == bam_name_sample_name
     assert bam_name_sample_name == bam_name_sample_type
 
@@ -373,6 +373,14 @@ def test_get_final_bam_name(balsamic_model: ConfigModel):
     bam_name_sample_type = balsamic_model.get_final_bam_name(
         bam_dir, sample_type=sample_type
     )
+    assert expected_final_bam_name == bam_name_sample_type
+
+    # WHEN submitting custom bam suffix
+    bam_name_sample_type = balsamic_model.get_final_bam_name(
+        bam_dir, sample_type=sample_type, specified_suffix="dedup.fixmate.qualcapped"
+    )
+    # Then the bam name should end with the specified suffix
+    expected_final_bam_name = f"{bam_dir}{sample_type}.{sample_name}.dedup.fixmate.qualcapped.bam"
     assert expected_final_bam_name == bam_name_sample_type
 
 
