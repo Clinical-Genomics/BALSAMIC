@@ -15,7 +15,7 @@ from BALSAMIC.models.config import ConfigModel
 from BALSAMIC.models.params import BalsamicWorkflowConfig
 from BALSAMIC.utils.exc import BalsamicError
 from BALSAMIC.utils.io import write_finish_file
-from BALSAMIC.utils.rule import get_fastp_parameters, get_result_dir, get_threads
+from BALSAMIC.utils.rule import get_fastp_parameters, get_result_dir, get_threads, get_script_path
 
 
 # Initialize ConfigModel
