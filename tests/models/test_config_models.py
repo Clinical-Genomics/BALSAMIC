@@ -380,7 +380,9 @@ def test_get_final_bam_name(balsamic_model: ConfigModel):
         bam_dir, sample_type=sample_type, specified_suffix="dedup.fixmate.qualcapped"
     )
     # Then the bam name should end with the specified suffix
-    expected_final_bam_name = f"{bam_dir}{sample_type}.{sample_name}.dedup.fixmate.qualcapped.bam"
+    expected_final_bam_name = (
+        f"{bam_dir}{sample_type}.{sample_name}.dedup.fixmate.qualcapped.bam"
+    )
     assert expected_final_bam_name == bam_name_sample_type
 
 
