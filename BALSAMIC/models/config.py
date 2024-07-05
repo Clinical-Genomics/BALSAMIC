@@ -414,7 +414,7 @@ class ConfigModel(BaseModel):
         sample_type: str = None,
         specified_suffix: str = None,
     ) -> str:
-        """Return final bam name to be used in downstream analysis."""
+        """Return bam name to be used in downstream analysis."""
 
         if not sample_name and not sample_type:
             raise ValueError(

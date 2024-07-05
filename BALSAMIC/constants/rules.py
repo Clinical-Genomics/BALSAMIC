@@ -74,6 +74,7 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
         "align": [
             "snakemake_rules/align/tga_sentieon_alignment.rule",
             "snakemake_rules/align/tga_bam_postprocess.rule",
+            "snakemake_rules/umi/umi_sentieon_alignment.rule",
             "snakemake_rules/umi/sentieon_consensuscall.rule",
         ],
         "varcall": [
