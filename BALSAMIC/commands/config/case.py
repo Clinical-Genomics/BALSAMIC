@@ -170,9 +170,8 @@ def case_config(
             }
         )
 
-    msi_pon_path = {"msi_pon": msi_pon}
     if msi_pon:
-        references.update(msi_pon_path)
+        references.update({"msi_pon": msi_pon})
 
     variants_observations = {
         "clinical_snv_observations": clinical_snv_observations,

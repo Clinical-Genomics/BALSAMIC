@@ -640,6 +640,8 @@ def test_msi_pon_file_tumor_only(
     msi_pon_path: str,
     fastq_dir_tumor_only: str,
     case_id_tumor_only: str,
+    sentieon_license: str,
+    sentieon_install_dir: str,
 ):
     """Test balsamic config case with a PON reference."""
 
@@ -664,6 +666,10 @@ def test_msi_pon_file_tumor_only(
             balsamic_cache,
             "--tumor-sample-name",
             tumor_sample_name,
+            "--sentieon-install-dir",
+            sentieon_install_dir,
+            "--sentieon-license",
+            sentieon_license,
         ],
     )
 
