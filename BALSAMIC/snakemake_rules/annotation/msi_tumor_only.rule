@@ -2,27 +2,31 @@
 # coding: utf-8
 # Computation of MSI score.
 
-rule msisensorpro_msi_tumor_normal:
+rule msisensorpro_msi_tumor_only:
   input:
     msi_list=f"{vcf_dir}MSI.somatic.{config['analysis']['case_id']}.msisensorpro.list",
-    bamN= config_model.get_final_bam_name(bam_dir = bam_dir,sample_name=normal_sample),
     bamT= config_model.get_final_bam_name(bam_dir = bam_dir,sample_name=tumor_sample),
   output:
     msi_result = f"{vcf_dir}MSI.somatic.{config['analysis']['case_id']}.msisensorpro.msi"
   benchmark:
-    Path(f"{benchmark_dir}/msisensorpro_msi_tumor_normal_{config['analysis']['case_id']}.tsv").as_posix()
+    Path(f"{benchmark_dir}/msisensorpro_msi_tumor_only_{config['analysis']['case_id']}.tsv").as_posix()
   singularity:
     Path(singularity_image,config["bioinfo_tools"].get("msisensorpro") + ".sif").as_posix()
   threads:
-    get_threads(cluster_config,"msisensorpro_msi_tumor_normal")
+    get_threads(cluster_config,"msisensorpro_msi_tumor_only")
   params:
     tmpdir=tempfile.mkdtemp(prefix=tmp_dir),
     case_id=config["analysis"]["case_id"],
+    msi_pon_baseline=msi_pon,
   message:
     "Analysing MSI using msisensor-pro for {params.case_id}"
   shell:
     """
-msisensor-pro msi -b {threads} -z 1 -d {input.msi_list} -t {input.bamT} -n {input.bamN} -o  {params.tmpdir}/msi_{params.case_id};
+if [[ -f "{params.msi_pon_baseline}" ]]; then
+    msisensor-pro pro -b {threads} -d {params.msi_pon_baseline} -t {input.bamT} -o  {params.tmpdir}/msi_{params.case_id};
+else
+    msisensor-pro pro -b {threads} -d {input.msi_list} -t {input.bamT} -o  {params.tmpdir}/msi_{params.case_id};
+fi
 
 sed 's/\%/MSI/g' {params.tmpdir}/msi_{params.case_id} > {output.msi_result}; 
 

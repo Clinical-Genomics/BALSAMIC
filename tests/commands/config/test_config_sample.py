@@ -629,3 +629,50 @@ def test_config_tga_with_exome(
     assert Path(
         analysis_dir, case_id_tumor_only, f"{case_id_tumor_only}.{FileType.JSON}"
     ).exists()
+
+
+def test_msi_pon_file_tumor_only(
+    invoke_cli,
+    tumor_sample_name: str,
+    analysis_dir: str,
+    balsamic_cache: str,
+    panel_bed_file: str,
+    msi_pon_path: str,
+    fastq_dir_tumor_only: str,
+    case_id_tumor_only: str,
+    sentieon_license: str,
+    sentieon_install_dir: str,
+):
+    """Test balsamic config case with a PON reference."""
+
+    # GIVEN CLI arguments including optional pon reference ".cnn" file
+
+    # WHEN invoking the config case command
+    result = invoke_cli(
+        [
+            "config",
+            "case",
+            "--case-id",
+            case_id_tumor_only,
+            "--analysis-dir",
+            analysis_dir,
+            "--fastq-path",
+            fastq_dir_tumor_only,
+            "-p",
+            panel_bed_file,
+            "--msi-pon",
+            msi_pon_path,
+            "--balsamic-cache",
+            balsamic_cache,
+            "--tumor-sample-name",
+            tumor_sample_name,
+            "--sentieon-install-dir",
+            sentieon_install_dir,
+            "--sentieon-license",
+            sentieon_license,
+        ],
+    )
+
+    # THEN program exits and checks for filepath
+    assert result.exit_code == 0
+    assert Path(msi_pon_path).exists()
