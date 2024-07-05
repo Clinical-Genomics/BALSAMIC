@@ -5,6 +5,7 @@
 rule msisensorpro_scan_reference:
   input:
     fa = config["reference"]["reference_genome"],
+    wake_up = result_dir + "start_analysis"
   output:
     msi_scan =  f"{vcf_dir}MSI.somatic.{config['analysis']['case_id']}.msisensorpro.list"
   benchmark:
