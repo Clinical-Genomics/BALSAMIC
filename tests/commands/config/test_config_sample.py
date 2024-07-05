@@ -670,4 +670,3 @@ def test_msi_pon_file_tumor_only(
     # THEN program exits and checks for filepath
     assert result.exit_code == 0
     assert Path(msi_pon_path).exists()
-

@@ -607,10 +607,12 @@ def swegen_sv_frequency_path(reference_variants_dir_path: str) -> str:
     """Create path for Swegen SVs."""
     return Path(reference_variants_dir_path, "swegen_sv.vcf.gz").as_posix()
 
+
 @pytest.fixture(scope="session")
 def msi_pon_path(reference_variants_dir_path: str) -> str:
     """Create path for Swegen SVs."""
     return Path(reference_variants_dir_path, "msi_pon.list").as_posix()
+
 
 @pytest.fixture(scope="session", name="invalid_json_file")
 def fixture_invalid_json_file(session_tmp_path: Path) -> Path:
