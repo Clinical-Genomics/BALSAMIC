@@ -18,8 +18,8 @@ rule sentieon_base_calibration:
         Path(benchmark_dir, "sentieon_base_calibration_{sample_type}.tsv").as_posix()
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-        sentieon_exec = config["SENTIEON_EXEC"],
-        sentieon_lic = config["SENTIEON_LICENSE"],
+        sentieon_exec = config_model.sentieon.sentieon_exec,
+        sentieon_lic = config_model.sentieon.sentieon_license,
         sample = "{sample_type}"
     threads:
         get_threads(cluster_config, 'sentieon_base_calibration')
@@ -85,9 +85,9 @@ rule sentieon_TNscope:
         pcr_model = params.common.pcr_model,
         tumor_options = VARCALL_PARAMS["tnscope"]["tumor"],
         normal_options = VARCALL_PARAMS["tnscope"]["normal"],
-        sentieon_ml_tnscope = config["SENTIEON_TNSCOPE"],
-        sentieon_exec = config["SENTIEON_EXEC"],
-        sentieon_lic = config["SENTIEON_LICENSE"],
+        sentieon_ml_tnscope = config_model.sentieon.tnscope_model,
+        sentieon_exec = config_model.sentieon.sentieon_exec,
+        sentieon_lic = config_model.sentieon.sentieon_license,
         case_name = config["analysis"]["case_id"]
     threads:
         get_threads(cluster_config, 'sentieon_TNscope')

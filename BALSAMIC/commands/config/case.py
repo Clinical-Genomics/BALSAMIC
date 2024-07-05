@@ -34,6 +34,8 @@ from BALSAMIC.commands.options import (
     OPTION_PANEL_BED,
     OPTION_PON_CNN,
     OPTION_QUALITY_TRIM,
+    OPTION_SENTIEON_INSTALL_DIR,
+    OPTION_SENTIEON_LICENSE,
     OPTION_SWEGEN_SNV,
     OPTION_SWEGEN_SV,
     OPTION_TUMOR_SAMPLE_NAME,
@@ -44,7 +46,11 @@ from BALSAMIC.commands.options import (
 from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV, AnalysisWorkflow, Gender
 from BALSAMIC.constants.cache import GenomeVersion
 from BALSAMIC.constants.constants import FileType
-from BALSAMIC.constants.paths import CONTAINERS_DIR
+from BALSAMIC.constants.paths import (
+    CONTAINERS_DIR,
+    SENTIEON_DNASCOPE_MODEL,
+    SENTIEON_TNSCOPE_MODEL,
+)
 from BALSAMIC.constants.workflow_params import VCF_DICT
 from BALSAMIC.models.config import ConfigModel
 from BALSAMIC.utils.cli import (
@@ -86,6 +92,8 @@ LOG = logging.getLogger(__name__)
 @OPTION_PANEL_BED
 @OPTION_PON_CNN
 @OPTION_QUALITY_TRIM
+@OPTION_SENTIEON_INSTALL_DIR
+@OPTION_SENTIEON_LICENSE
 @OPTION_SWEGEN_SNV
 @OPTION_SWEGEN_SV
 @OPTION_TUMOR_SAMPLE_NAME
@@ -120,6 +128,8 @@ def case_config(
     panel_bed: Path,
     pon_cnn: Path,
     quality_trim: bool,
+    sentieon_install_dir: Path,
+    sentieon_license: str,
     swegen_snv: Path,
     swegen_sv: Path,
     tumor_sample_name: str,
@@ -195,6 +205,13 @@ def case_config(
         directory.mkdir(exist_ok=True)
 
     config_collection_dict = ConfigModel(
+        sentieon={
+            "sentieon_install_dir": sentieon_install_dir,
+            "sentieon_license": sentieon_license,
+            "sentieon_exec": Path(sentieon_install_dir, "bin", "sentieon").as_posix(),
+            "dnascope_model": SENTIEON_DNASCOPE_MODEL.as_posix(),
+            "tnscope_model": SENTIEON_TNSCOPE_MODEL.as_posix(),
+        },
         QC={
             "quality_trim": quality_trim,
             "adapter_trim": adapter_trim,

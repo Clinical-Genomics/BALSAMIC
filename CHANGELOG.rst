@@ -6,6 +6,7 @@ Added:
 * MSIsensor-pro container https://github.com/Clinical-Genomics/BALSAMIC/pull/1444
 * MSI analysis to the tumor-normal workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1454
 * MSI analysis to the tumor-only workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/
+* Sentieon install directory path to case config arguments https://github.com/Clinical-Genomics/BALSAMIC/pull/1461
 
 Changed:
 ^^^^^^^^
@@ -24,7 +25,8 @@ Fixed:
 ^^^^^^
 * Corrected tool name in deduplication metrics https://github.com/Clinical-Genomics/BALSAMIC/pull/1441
 * MSI table https://github.com/Clinical-Genomics/BALSAMIC/pull/1459
-
+* Pin numpy version in CNVkit container https://github.com/Clinical-Genomics/BALSAMIC/pull/1457
+* CNVkit incorrect version in the documentation https://github.com/Clinical-Genomics/BALSAMIC/pull/1457
 
 [15.0.1]
 --------
