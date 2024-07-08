@@ -62,7 +62,6 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
     "single_targeted": {
         "qc": [
             "snakemake_rules/quality_control/fastp_tga.rule",
-            "snakemake_rules/quality_control/calculate_duplicates.rule",
             "snakemake_rules/quality_control/picard.rule",
             "snakemake_rules/quality_control/sambamba_depth.rule",
             "snakemake_rules/quality_control/mosdepth.rule",
@@ -94,7 +93,6 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
         "qc": [
             "snakemake_rules/quality_control/fastp_tga.rule",
             "snakemake_rules/quality_control/picard.rule",
-            "snakemake_rules/quality_control/calculate_duplicates.rule",
             "snakemake_rules/quality_control/sambamba_depth.rule",
             "snakemake_rules/quality_control/mosdepth.rule",
             "snakemake_rules/umi/qc_umi.rule",
