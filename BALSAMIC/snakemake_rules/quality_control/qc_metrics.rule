@@ -32,3 +32,5 @@ rule collect_custom_qc_metrics:
         """
 python {params.collect_qc_metrics_script} {params.config_path} {output.yaml} {input.json} {input.bcftools_counts}
         """
+
+# Test snakefmt
