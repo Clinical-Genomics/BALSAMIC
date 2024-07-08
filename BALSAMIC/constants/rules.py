@@ -45,7 +45,6 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
             "snakemake_rules/align/bam_compress.rule",
         ],
         "varcall": [
-            "snakemake_rules/variant_calling/germline_sv.rule",
             "snakemake_rules/variant_calling/sentieon_quality_filter.rule",
             "snakemake_rules/variant_calling/somatic_sv_quality_filter.rule",
         ],
@@ -77,7 +76,7 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
             "snakemake_rules/umi/sentieon_consensuscall.rule",
         ],
         "varcall": [
-            "snakemake_rules/variant_calling/germline.rule",
+            "snakemake_rules/variant_calling/germline_tga.rule",
             "snakemake_rules/variant_calling/split_bed.rule",
             "snakemake_rules/variant_calling/somatic_cnv_tumor_only_tga.rule",
             "snakemake_rules/variant_calling/somatic_tumor_only.rule",
@@ -108,7 +107,7 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
             "snakemake_rules/umi/umi_sentieon_alignment.rule",
         ],
         "varcall": [
-            "snakemake_rules/variant_calling/germline.rule",
+            "snakemake_rules/variant_calling/germline_tga.rule",
             "snakemake_rules/variant_calling/split_bed.rule",
             "snakemake_rules/variant_calling/somatic_tumor_normal.rule",
             "snakemake_rules/variant_calling/somatic_sv_tumor_normal_tga.rule",
@@ -133,7 +132,7 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
             "snakemake_rules/align/wgs_sentieon_alignment.rule",
         ],
         "varcall": [
-            "snakemake_rules/variant_calling/sentieon_germline.rule",
+            "snakemake_rules/variant_calling/germline_wgs.rule",
             "snakemake_rules/variant_calling/sentieon_split_snv_sv.rule",
             "snakemake_rules/variant_calling/sentieon_t_varcall.rule",
             "snakemake_rules/variant_calling/somatic_sv_tumor_only_wgs.rule",
@@ -155,7 +154,7 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
             "snakemake_rules/align/wgs_sentieon_alignment.rule",
         ],
         "varcall": [
-            "snakemake_rules/variant_calling/sentieon_germline.rule",
+            "snakemake_rules/variant_calling/germline_wgs.rule",
             "snakemake_rules/variant_calling/sentieon_split_snv_sv.rule",
             "snakemake_rules/variant_calling/sentieon_tn_varcall.rule",
             "snakemake_rules/variant_calling/somatic_sv_tumor_normal_wgs.rule",
