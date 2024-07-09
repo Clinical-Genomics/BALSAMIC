@@ -24,7 +24,6 @@ rule sentieon_align_sort:
         "{params.sample_type} : {params.sample_id}, {params.fastq_pattern}")
     shell:
         """
-mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
 export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
@@ -39,5 +38,7 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 -t {threads} \
 --block_size 3G \
 --sam2bam -i -;
+
+rm -rf {params.tmpdir}
         """
 

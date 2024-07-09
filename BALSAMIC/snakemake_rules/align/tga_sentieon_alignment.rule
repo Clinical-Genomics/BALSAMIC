@@ -25,7 +25,6 @@ rule sentieon_align_sort_umireads:
         "{params.sample_type} : {params.sample_id}")
     shell:
         """
-mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
 export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
@@ -39,4 +38,6 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 -r {input.ref} \
 --sam2bam \
 -o {output.bam_out} -i - ;
+
+rm -rf {params.tmpdir}
         """

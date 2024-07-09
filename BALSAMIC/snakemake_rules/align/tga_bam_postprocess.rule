@@ -24,7 +24,6 @@ rule sentieon_dedup_consensus:
          "Current sample: {params.sample_id}")
     shell:
         """
-mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
 export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
@@ -45,14 +44,18 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 --score_info {output.score} \
 --metrics {output.dedup_metrics} \
 {output.bam} ;
+
+rm -rf {params.tmpdir}
         """
 
-# NOTE: This rule is added to fix a bug in Sentieon dedup with consensus
-# SAM validation error: ERROR::INVALID_UNALIGNED_MATE_START:Record 12,
-# Read name UMI-CTC-GAC-db9f21d8-A01901:175:H23G3DSX7:1:2231:18376:10739-D1,
-# The unaligned mate start position is 10125, should be 0
-
 rule samtools_fixmate:
+    """
+    This rule is added to fix a bug in Sentieon dedup with UMI consensus argument
+    
+    SAM validation error: 
+    ERROR::INVALID_UNALIGNED_MATE_START:Record 12,Read name UMI-CTC-GAC-db9f21d8-A01901:175:H23G3DSX7:1:2231:18376:10739-D1,
+    The unaligned mate start position is 10125, should be 0
+    """
     input:
         ref = config["reference"]["reference_genome"],
         bam = Path(bam_dir,"{sample_type}.{sample}.dedup.bam").as_posix(),
@@ -71,13 +74,14 @@ rule samtools_fixmate:
         "Running samtools collate and fixmate for: {params.sample_id}"
     shell:
         """
-mkdir -p {params.tmpdir} ;    
 mkdir -p {params.tmpdir}/collate ; 
 
 samtools collate -@ {threads} -O -u {input.bam} {params.tmpdir}/collate/{wildcards.sample}_collate_tmp | \
 samtools fixmate --reference {input.ref} -@ {threads} - - | \
 samtools sort -T {params.tmpdir} - -o {output.bam} ;
-samtools index {output.bam}
+samtools index {output.bam} ;
+
+rm -rf {params.tmpdir}
         """
 
 rule cap_base_quality:

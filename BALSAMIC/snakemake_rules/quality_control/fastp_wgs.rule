@@ -40,4 +40,6 @@ fastp \
 --overrepresentation_analysis \
 {params.quality_trim} \
 {params.adapter_trim};
+
+rm -rf {params.tmpdir}
         """

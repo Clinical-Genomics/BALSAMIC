@@ -28,7 +28,6 @@ rule sentieon_consensuscall_umi:
 export LD_PRELOAD={params.sentieon_install_dir}/lib/libjemalloc.so.1
 export MALLOC_CONF=lg_dirty_mult:-1
 
-mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
 export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
@@ -40,6 +39,8 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 --input_format {params.ip_format} \
 --umi_tag {params.tag} \
 --read_name_prefix 'UMI-'; 
+
+rm -rf {params.tmpdir}
         """
 
 # Alignment of consensus reads
@@ -69,7 +70,6 @@ rule sentieon_bwa_umiconsensus:
 export LD_PRELOAD={params.sentieon_install_dir}/lib/libjemalloc.so.1
 export MALLOC_CONF=lg_dirty_mult:-1
 
-mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
 export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
@@ -86,6 +86,8 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 --umi_post_process \
 -o {output.align_consensus} \
 -i - ;
+
+rm -rf {params.tmpdir}
         """
 
 # Filter consensus called reads based on 'XZ' filtering

@@ -34,7 +34,6 @@ rule sentieon_base_calibration:
         "Recalibrating bases using sentieon tools for {params.sample}"
     shell:
         """
-mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
 export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};

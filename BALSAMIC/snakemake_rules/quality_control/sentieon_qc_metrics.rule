@@ -83,7 +83,6 @@ if config["analysis"]["sequencing_type"] == 'wgs':
              "Current sample: {params.sample_id}")
         shell:
             """
-    mkdir -p {params.tmpdir};
     export TMPDIR={params.tmpdir};
     export SENTIEON_TMPDIR={params.tmpdir};
     export SENTIEON_LICENSE={params.sentieon_lic};
@@ -100,6 +99,8 @@ if config["analysis"]["sequencing_type"] == 'wgs':
     --algo MeanQualityByCycle {output.quality_by_cycle_metrics} \
     --algo QualDistribution {output.quality_distribution_metrics} \
     --algo BaseDistributionByCycle {output.base_distribution_metrics} ;
+    
+    rm -rf {params.tmpdir}
             """
 else:
     rule sentieon_qc_metrics:
@@ -129,7 +130,6 @@ else:
              "Current sample: {params.sample_id}")
         shell:
             """
-    mkdir -p {params.tmpdir};
     export TMPDIR={params.tmpdir};
     export SENTIEON_TMPDIR={params.tmpdir};
     export SENTIEON_LICENSE={params.sentieon_lic};
@@ -144,6 +144,8 @@ else:
     --algo MeanQualityByCycle {output.quality_by_cycle_metrics} \
     --algo QualDistribution {output.quality_distribution_metrics} \
     --algo BaseDistributionByCycle {output.base_distribution_metrics} ;
+    
+    rm -rf {params.tmpdir}
             """
 
 rule sentieon_plot_qc_metrics:

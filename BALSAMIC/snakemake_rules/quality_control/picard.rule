@@ -47,4 +47,6 @@ R={input.fa} \
 BAIT_SET_NAME={params.baitsetname} \
 COVERAGE_CAP=50000 \
 METRIC_ACCUMULATION_LEVEL=ALL_READS;
+
+rm -rf {params.tmpdir}
       """

@@ -22,7 +22,6 @@ rule sentieon_DNAscope:
         "Calling germline variants using Sentieon DNAscope for {params.sample}"
     shell:
         """
-mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
 export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
@@ -59,6 +58,8 @@ rule manta_germline:
         "Calling germline variants using manta for {params.sample}"
     shell:
         """
+export TMPDIR={params.tmpdir};        
+
 configManta.py \
 --bam={input.bam} \
 --referenceFasta={input.fa} \

@@ -227,7 +227,7 @@ class ConfigModel(BaseModel):
         - get_final_bam_name: Return final bam name for downstream analysis.
     """
 
-    QC: QCModel
+    QC: QCModel = QCModel()
     samples: List[SampleInstanceModel]
     reference: Dict[str, Path]
     singularity: Dict[str, str]

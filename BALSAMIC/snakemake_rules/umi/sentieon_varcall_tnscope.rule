@@ -37,7 +37,6 @@ rule sentieon_tnscope_umi:
         "Calling single nucleotide variants using TNscope for {params.tumor}"
     shell:
         """
-mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
 export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
@@ -62,4 +61,6 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 {output.vcf_tnscope_umi};
 
 echo -e \"{params.tumor}\\tTUMOR\" > {output.namemap}; 
+
+rm -rf {params.tmpdir}
         """

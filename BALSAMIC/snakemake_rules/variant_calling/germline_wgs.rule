@@ -63,6 +63,8 @@ rule manta_germline:
         "Calling germline variants using manta for {params.sample}"
     shell:
         """
+export TMPDIR={params.tmpdir};
+
 configManta.py \
 --bam={input.bam} \
 --referenceFasta={input.fa} \

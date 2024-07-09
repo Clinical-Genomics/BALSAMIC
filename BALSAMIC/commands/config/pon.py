@@ -103,7 +103,6 @@ def pon_config(
         directory.mkdir(exist_ok=True)
 
     config_collection_dict = ConfigModel(
-        QC={},
         sentieon={
             "sentieon_install_dir": sentieon_install_dir,
             "sentieon_license": sentieon_license,

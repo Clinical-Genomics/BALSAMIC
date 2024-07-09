@@ -28,7 +28,6 @@ rule vardict_tumor_normal:
         "Calling variants using vardict for {params.case_name}"
     shell:
         """
-mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
 export VAR_DICT_OPTS='\"-Djava.io.tmpdir={params.tmpdir}\" \"-Xmx90G\"';
 
@@ -67,8 +66,6 @@ rule vardict_merge:
         ("Merging multiple VCFs from vardict into single VCF using bcftools for {params.case_name}")
     shell:
         """
-mkdir -p {params.tmpdir};
-
 bcftools concat {input} | bcftools sort --temp-dir {params.tmpdir} - | bgzip > {output.vcf_vardict}; 
 tabix -f -p vcf {output.vcf_vardict};
 

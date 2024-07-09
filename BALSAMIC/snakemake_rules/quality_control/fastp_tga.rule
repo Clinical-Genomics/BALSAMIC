@@ -35,7 +35,9 @@ fastp \
 --json {output.json} \
 --html {output.html} \
 --overrepresentation_analysis \
-{params.adapter_trim}
+{params.adapter_trim} ;
+
+rm -rf {params.tmpdir}
         """
 
 
@@ -63,13 +65,14 @@ rule sentieon_umiextract_tga:
         """
 export MALLOC_CONF=lg_dirty_mult:-1
 
-mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
 export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
 
 {params.sentieon_exec} umi extract \
 {params.ds_params} {input.fastq_r1} {input.fastq_r2} | gzip > {output.ds_umi} ;
+
+rm -rf {params.tmpdir}
         """
 
 
@@ -107,5 +110,7 @@ fastp \
 --json {output.json} \
 --html {output.html} \
 --overrepresentation_analysis \
-{params.quality_trim}
+{params.quality_trim} ;
+
+rm -rf {params.tmpdir}
         """
