@@ -1,7 +1,7 @@
 """Balsamic analysis parameters models."""
 from typing import Optional
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, field_validator
 from BALSAMIC.constants.analysis import SequencingType
 
 
@@ -22,6 +22,13 @@ class ParamsCommon(BaseModel):
     picard_RG_normal: str
     picard_RG_tumor: str
 
+class ParamsInsertSizeMetrics(BaseModel):
+    """This class defines the common params settings used for the InsertSizeMetricsAlgo
+
+    Attributes:
+        min_read_ratio: float(required). Minimum ratio of reads for a read category to be included in the output histogram (Default 0.05)
+    """
+    min_read_ratio: float
 
 class ParamsManta(BaseModel):
     """This class defines the params settings used as constants in Manta rule.
@@ -34,6 +41,36 @@ class ParamsManta(BaseModel):
     wgs_settings: str
     tga_settings: str
 
+class ParamsMosdepth(BaseModel):
+    """This class defines the params settings used as constants in Mosdepth rule.
+
+    Attributes:
+        mapq: str(required); mapping quality threshold, reads with a quality less than this value are ignored [default: 0]
+        samflag: str(required); exclude reads with any of the bits in FLAG set [default: 1796]
+        quantize: str(required); merges adjacent bases as long as they fall in the same coverage bins e.g. (10-20)
+    """
+
+    mapq: int
+    samflag: int
+    quantize: str
+
+class ParamsSentieonWGSMetrics(BaseModel):
+    """This class defines the params settings used as constants in Sentieon WGS Metrics rule.
+
+    Attributes:
+        min_base_qual: int(required); base quality threshold, bases with a quality less than this value are ignored
+        cov_threshold: list(required); coverage threshold list
+    """
+
+    min_base_qual: int
+    cov_threshold: list[int]
+
+    @field_validator("cov_threshold")
+    def parse_into_arguments(cls, cov_threshold: list[int]):
+        param_values = []
+        for value in cov_threshold:
+            param_values.append(" ".join(map(str, ["--cov_thresh", value])))
+        return " ".join(param_values)
 
 class ParamsVardict(BaseModel):
     """This class defines the params settings used as constants in vardict rule.
@@ -156,7 +193,9 @@ class BalsamicWorkflowConfig(BaseModel):
 
     Attributes:
         common: global params defined across all rules in balsamic workflow
+        bam_post_processing: params used in bam post-processing rules
         manta: params used in the manta rules
+        mosdepth: params used in mosdepth rule
         umicommon: global params defined across specific rules in UMI workflow
         vep: global params defined in the rule vep
         vardict: params defined in the rule vardict
@@ -168,15 +207,18 @@ class BalsamicWorkflowConfig(BaseModel):
         - get_manta_settings: Return setting for manta rule
     """
 
+    bam_post_processing: BAMPostProcessingParams
     common: ParamsCommon
     manta: ParamsManta
+    mosdepth: ParamsMosdepth
+    sentieon_wgs_metrics: ParamsSentieonWGSMetrics
     vardict: ParamsVardict
     vep: ParamsVEP
     umicommon: UMIParamsCommon
     umiextract: UMIParamsUMIextract
     umiconsensuscall: UMIParamsConsensuscall
     tnscope_umi: UMIParamsTNscope
-    bam_post_processing: BAMPostProcessingParams
+
 
     def get_manta_settings(self, sequencing_type) -> str:
         """Return correct setting for manta rules depending on sequencing type."""

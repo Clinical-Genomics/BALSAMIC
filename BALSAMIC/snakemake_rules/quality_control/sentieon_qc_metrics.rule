@@ -1,14 +1,6 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
 
-def repeat(param, values):
-    param_values = []
-
-    for value in values:
-        param_values.append(" ".join(map(str, [param, value])))
-
-    return " ".join(param_values)
-
 if config["analysis"]["sequencing_type"] == 'wgs':
     rule sentieon_wgs_metrics:
         input:
@@ -21,9 +13,9 @@ if config["analysis"]["sequencing_type"] == 'wgs':
             Path(benchmark_dir,'sentieon_wgs_metrics_' + "{sample_type}_{sample}.tsv").as_posix()
         params:
             tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-            min_base_qual = '10',
+            min_base_qual = params.ParamsSentieonWGSMetrics.min_base_qual,
             gene_list = config["reference"]["refgene_txt"],
-            cov_threshold = repeat("--cov_thresh", [50, 100, 150, 200, 250]),
+            cov_threshold = params.ParamsSentieonWGSMetrics.cov_threshold,
             sentieon_exec = config_model.sentieon.sentieon_exec,
             sentieon_lic = config_model.sentieon.sentieon_license,
             sample = '{sample}'
@@ -122,7 +114,8 @@ else:
             sentieon_exec=config_model.sentieon.sentieon_exec,
             sentieon_lic=config_model.sentieon.sentieon_license,
             sample_id="{sample}",
-            adapter=config["QC"]["adapter"]
+            adapter=config["QC"]["adapter"],
+            min_read_ratio=params.ParamsInsertSizeMetrics.min_read_ratio,
         threads:
             get_threads(cluster_config,'sentieon_qc_metrics')
         message:
@@ -139,7 +132,7 @@ else:
     -r {input.ref} \
     -i {input.bam} \
     --algo AlignmentStat --adapter_seq {params.adapter} {output.alignment_metrics} \
-    --algo InsertSizeMetricAlgo --min_read_ratio 0.01 {output.insert_size_metrics} \
+    --algo InsertSizeMetricAlgo --min_read_ratio {params.min_read_ratio} {output.insert_size_metrics} \
     --algo GCBias --summary {output.gc_bias_summary} {output.gc_bias_metrics} \
     --algo MeanQualityByCycle {output.quality_by_cycle_metrics} \
     --algo QualDistribution {output.quality_distribution_metrics} \
@@ -163,9 +156,6 @@ rule sentieon_plot_qc_metrics:
         Path(benchmark_dir, "sentieon_plot_qc_metrics_{sample_type}.{sample}.tsv").as_posix()
     params:
         sample_id = "{sample}",
-        min_base_qual = '10',
-        gene_list = config["reference"]["refgene_txt"],
-        cov_threshold = repeat("--cov_thresh", [50, 100, 150, 200, 250]),
         sentieon_exec = config_model.sentieon.sentieon_exec,
         sentieon_lic = config_model.sentieon.sentieon_license,
     threads:
