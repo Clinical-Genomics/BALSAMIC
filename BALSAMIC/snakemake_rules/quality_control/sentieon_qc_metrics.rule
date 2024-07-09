@@ -13,9 +13,9 @@ if config["analysis"]["sequencing_type"] == 'wgs':
             Path(benchmark_dir,'sentieon_wgs_metrics_' + "{sample_type}_{sample}.tsv").as_posix()
         params:
             tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-            min_base_qual = params.ParamsSentieonWGSMetrics.min_base_qual,
+            min_base_qual = params.sentieon_wgs_metrics.min_base_qual,
             gene_list = config["reference"]["refgene_txt"],
-            cov_threshold = params.ParamsSentieonWGSMetrics.cov_threshold,
+            cov_threshold = params.sentieon_wgs_metrics.cov_threshold,
             sentieon_exec = config_model.sentieon.sentieon_exec,
             sentieon_lic = config_model.sentieon.sentieon_license,
             sample = '{sample}'
@@ -67,6 +67,7 @@ if config["analysis"]["sequencing_type"] == 'wgs':
             sentieon_exec = config_model.sentieon.sentieon_exec,
             sentieon_lic = config_model.sentieon.sentieon_license,
             sample_id = "{sample}",
+            min_read_ratio=params.insert_size_metrics.min_read_ratio,
             adapter = config["QC"]["adapter"]
         threads:
             get_threads(cluster_config, 'sentieon_qc_metrics')
@@ -86,7 +87,7 @@ if config["analysis"]["sequencing_type"] == 'wgs':
     -r {input.ref} \
     -i $shell_bam_files \
     --algo AlignmentStat --adapter_seq {params.adapter} {output.alignment_metrics} \
-    --algo InsertSizeMetricAlgo --min_read_ratio 0.01 {output.insert_size_metrics} \
+    --algo InsertSizeMetricAlgo --min_read_ratio {params.min_read_ratio} {output.insert_size_metrics} \
     --algo GCBias --summary {output.gc_bias_summary} {output.gc_bias_metrics} \
     --algo MeanQualityByCycle {output.quality_by_cycle_metrics} \
     --algo QualDistribution {output.quality_distribution_metrics} \
@@ -115,7 +116,7 @@ else:
             sentieon_lic=config_model.sentieon.sentieon_license,
             sample_id="{sample}",
             adapter=config["QC"]["adapter"],
-            min_read_ratio=params.ParamsInsertSizeMetrics.min_read_ratio,
+            min_read_ratio=params.insert_size_metrics.min_read_ratio,
         threads:
             get_threads(cluster_config,'sentieon_qc_metrics')
         message:

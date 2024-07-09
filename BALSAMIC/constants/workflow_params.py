@@ -158,7 +158,7 @@ WORKFLOW_PARAMS = {
         ),
     },
     "insert_size_metrics": {
-        "min_read_ratio": 0.01
+        "min_read_ratio": 0.01,
     },
     "manta": {
         "wgs_settings": "",

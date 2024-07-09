@@ -96,7 +96,7 @@ rule cap_base_quality:
     params:
         sample_id = "{sample}",
         cap_base_qualities = get_script_path("cap_base_quality_in_bam.py"),
-        max_quality = params.BAMPostProcessingParams.manta_max_base_quality
+        max_quality = params.bam_post_processing.manta_max_base_quality
     threads:
         get_threads(cluster_config, "cap_base_quality")
     message:
