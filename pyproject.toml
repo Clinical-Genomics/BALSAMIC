@@ -1,0 +1,2 @@
+[tool.snakefmt]
+include = '\.smk$|\.rule$'
