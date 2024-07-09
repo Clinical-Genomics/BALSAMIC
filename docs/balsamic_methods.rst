@@ -8,10 +8,10 @@ Target Genome Analysis
 BALSAMIC :superscript:`1` (**version** = 15.0.1) was used to analyze the data from raw FASTQ files.
 We first quality controlled FASTQ files using FastQC v0.11.9 :superscript:`2`.
 Adapter sequences and low-quality bases were trimmed using fastp v0.23.2 :superscript:`3`.
-Trimmed reads were mapped to the reference genome hg19 using sentieon-tools 202010.02 :superscript:`15`.
-Duplicated reads were marked using Dedup from sentieon-tools 202010.02 :superscript:`15`.
+Trimmed reads were mapped to the reference genome hg19 using sentieon-tools 202308.03 :superscript:`15`.
+Duplicated reads were marked using Dedup from sentieon-tools 202308.03 :superscript:`15`.
 The final BAM is promptly quality controlled using CollectHsMetrics, CollectInsertSizeMetrics and CollectAlignmentSummaryMetrics functionalities from Picard tools v2.27.1 :superscript:`6`.
-Results of the quality controlled steps were summarized by MultiQC v1.12 :superscript:`7`.
+Results of the quality controlled steps were summarized by MultiQC v1.22.3 :superscript:`7`.
 Small somatic mutations (SNVs and INDELs) were called for each sample using VarDict v1.8.2 :superscript:`8`.
 Apart from the Vardict filters to report the variants, the called-variants were also further second filtered using the criteria
 (*MQ >= 40, DP >= 100, VD >= 5, Minimum AF >= 0.007, Maximum AF < 1, GNOMADAF_popmax <= 0.005, swegen AF < 0.01*).
@@ -29,11 +29,11 @@ Whole Genome Analysis
 BALSAMIC :superscript:`1` (**version** = 15.0.1) was used to analyze the data from raw FASTQ files.
 We first quality controlled FASTQ files using FastQC v0.11.9 :superscript:`2`.
 Adapter sequences and low-quality bases were trimmed using fastp v0.23.2 :superscript:`3`.
-Trimmed reads were mapped to the reference genome hg19 using sentieon-tools 202010.02 :superscript:`15`.
-Duplicated reads were marked using Dedup from sentieon-tools 202010.02 :superscript:`15`.
-The BAM file was then realigned using Realign from sentieon-tools 202010.02 :superscript:`15` and common population InDels.
+Trimmed reads were mapped to the reference genome hg19 using sentieon-tools 202308.03 :superscript:`15`.
+Duplicated reads were marked using Dedup from sentieon-tools 202308.03 :superscript:`15`.
+The BAM file was then realigned using Realign from sentieon-tools 202308.03 :superscript:`15` and common population InDels.
 The final BAM is quality controlled using WgsMetricsAlgo and CoverageMetrics from sentieon-tools 202010.02 :superscript:`15` and CollectWgsMetrics, CollectMultipleMetrics, CollectGcBiasMetrics, and CollectHsMetrics functionalities from Picard tools v2.27.1 :superscript:`6`.
-Results of the quality controlled steps were summarized by MultiQC v1.12 :superscript:`7`.
+Results of the quality controlled steps were summarized by MultiQC v1.22.3 :superscript:`7`.
 Small somatic mutations (SNVs and INDELs) were called for each sample using Sentieon TNscope :superscript:`16`.
 The called-variants were also further second filtered using the criteria (DP(tumor,normal) >= 10; AD(tumor) >= 3; AF(tumor) >= 0.05, Maximum AF(tumor < 1;  GNOMADAF_popmax <= 0.001; normalized base quality scores >= 20, read_counts of alt,ref alle > 0).
 Structural variants were called using Manta v1.6.0 :superscript:`9`, Delly v1.0.3 :superscript:`10` and TIDDIT v3.3.2 :superscript:`12`.
@@ -48,13 +48,13 @@ UMI Data Analysis
 
 BALSAMIC :superscript:`1` (**version** = 15.0.1) was used to analyze the data from raw FASTQ files.
 We first quality controlled FASTQ files using FastQC v0.11.9 :superscript:`2`.
-UMI tag extraction and consensus generation were performed using Sentieon tools v202010.02 :superscript:`15`.
+UMI tag extraction and consensus generation were performed using Sentieon tools 202308.03 :superscript:`15`.
 Adapter sequences and low-quality bases were trimmed using fastp v0.23.2 :superscript:`3`.
 The alignment of UMI extracted and consensus called reads to the human reference genome (hg19) was done by bwa-mem and
 samtools using Sentieon utils. Consensus reads were filtered based on the number of minimum reads supporting each UMI tag group.
 We applied a criteria filter of minimum reads `3,1,1`. It means that at least three UMI tag groups should be ideally considered from both DNA strands,
 where a minimum of at least one UMI tag group should exist in each single-stranded consensus read.
-The filtered consensus reads were quality controlled using Picard CollectHsMetrics v2.27.1 :superscript:`5`. Results of the quality controlled steps were summarized by MultiQC v1.12 :superscript:`6`.
+The filtered consensus reads were quality controlled using Picard CollectHsMetrics v2.27.1 :superscript:`5`. Results of the quality controlled steps were summarized by MultiQC v1.22.3 :superscript:`6`.
 For each sample, somatic mutations were called using Sentieon TNscope :superscript:`16`, with non-default parameters for passing the final list of variants
 (--min_tumor_allele_frac 0.0005, --filter_t_alt_frac 0.0005, --min_init_tumor_lod 0.5, min_tumor_lod 4, --max_error_per_read 5  --pcr_indel_model NONE, GNOMADAF_popmax <= 0.02).
 The clinical set of SNV and SV is also annotated and filtered against loqusDB curated frequency of observed variants (frequency < 0.01) from non-cancer cases and only annotated using frequency of observed variants from cancer cases (somatic and germline).
