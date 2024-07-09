@@ -21,4 +21,5 @@ jobs:
           DEFAULT_BRANCH: master
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+          VALIDATE_SNAKEMAKE_LINT: true
           VALIDATE_SNAKEMAKE_SNAKEFMT: true
