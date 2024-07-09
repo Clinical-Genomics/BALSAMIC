@@ -1,2 +1,5 @@
 [tool.snakefmt]
 include = '\.smk$|\.rule$'
+
+[tool.black]
+skip_string_normalization = true
