@@ -186,4 +186,7 @@ WORKFLOW_PARAMS = {
         "padding": 100,
         "disable_detect": "sv",
     },
+    "bam_post_processing": {
+        "manta_max_base_quality": 70,
+    }
 }

@@ -162,7 +162,6 @@ rule sentieon_plot_qc_metrics:
     benchmark:
         Path(benchmark_dir, "sentieon_plot_qc_metrics_{sample_type}.{sample}.tsv").as_posix()
     params:
-        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         sample_id = "{sample}",
         min_base_qual = '10',
         gene_list = config["reference"]["refgene_txt"],
@@ -179,5 +178,5 @@ rule sentieon_plot_qc_metrics:
 {params.sentieon_exec} plot InsertSizeMetricAlgo {input.insert_size_metrics} -o {output.insert_size_pdf} ; 
 {params.sentieon_exec} plot GCBias {input.gc_bias_metrics} -o {output.gc_bias_pdf} ; 
 {params.sentieon_exec} plot MeanQualityByCycle {input.quality_by_cycle_metrics} -o {output.quality_by_cycle_pdf} ; 
-{params.sentieon_exec} plot QualDistribution {input.quality_distribution_metrics} -o {output.quality_distribution_pdf} ; 
+{params.sentieon_exec} plot QualDistribution {input.quality_distribution_metrics} -o {output.quality_distribution_pdf} ;
         """

@@ -2,9 +2,8 @@
 # coding: utf-8
 
 
-# UMI-consensus calling
-
 rule sentieon_consensuscall_umi:
+    """UMI-consensus calling"""
     input:
         bam = Path(bam_dir, "{sample_type}.{sample}.umi_align_sort.bam").as_posix()
     output:
@@ -43,9 +42,9 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 rm -rf {params.tmpdir}
         """
 
-# Alignment of consensus reads
 
 rule sentieon_bwa_umiconsensus:
+    """Alignment of consensus reads"""
     input:
         ref_fa = config["reference"]["reference_genome"],
         fq_consensus = umi_dir + "{sample_type}.{sample}.consensuscall_umi.fastq.gz"
@@ -90,9 +89,9 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 rm -rf {params.tmpdir}
         """
 
-# Filter consensus called reads based on 'XZ' filtering
 
 rule sentieon_consensusfilter_umi:
+    """Filter consensus called reads based on 'XZ' filtering"""
     input:
         umi_dir + "{sample_type}.{sample}.consensuscalled_umi.bam"
     output:

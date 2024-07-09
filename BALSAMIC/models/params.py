@@ -140,6 +140,14 @@ class UMIParamsTNscope(BaseModel):
     padding: int
     disable_detect: str
 
+class BAMPostProcessingParams(BaseModel):
+    """This class defines the params settings used as constants bam post processing rules
+
+     Attributes:
+        manta_max_base_quality: int (required); the maximum base quality in bamfile used downstream in Manta rules
+    """
+    manta_max_base_quality: int
+
 
 class BalsamicWorkflowConfig(BaseModel):
     """Defines set of rules in balsamic workflow
@@ -168,6 +176,7 @@ class BalsamicWorkflowConfig(BaseModel):
     umiextract: UMIParamsUMIextract
     umiconsensuscall: UMIParamsConsensuscall
     tnscope_umi: UMIParamsTNscope
+    bam_post_processing: BAMPostProcessingParams
 
     def get_manta_settings(self, sequencing_type) -> str:
         """Return correct setting for manta rules depending on sequencing type."""

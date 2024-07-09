@@ -95,13 +95,14 @@ rule cap_base_quality:
         Path(singularity_image,config["bioinfo_tools"].get("pysam") + ".sif").as_posix()
     params:
         sample_id = "{sample}",
-        cap_base_qualities = get_script_path("cap_base_quality_in_bam.py")
+        cap_base_qualities = get_script_path("cap_base_quality_in_bam.py"),
+        max_quality = params.BAMPostProcessingParams.manta_max_base_quality
     threads:
         get_threads(cluster_config, "cap_base_quality")
     message:
-        "Capping base qualities to 70 in bamfile using pysam in sample: {params.sample_id}"
+        "Capping base qualities to {params.max_quality} in bamfile using pysam in sample: {params.sample_id}"
     shell:
         """
-python {params.cap_base_qualities} --max_quality 70 {input.bam} {output.bam} ; 
+python {params.cap_base_qualities} --max-quality {params.max_quality} {input.bam} {output.bam} ; 
 samtools index -@ {threads} {output.bam}
         """
