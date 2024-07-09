@@ -34,4 +34,3 @@ python {params.collect_qc_metrics_script} {params.config_path} {output.yaml} {in
         """
 
 # Test snakefmt
-# EOF
