@@ -15,7 +15,7 @@ jobs:
           fetch-depth: 0
 
       - name: Super Linter Snakefmt
-        uses: github/super-linter@v6
+        uses: github/super-linter@v3
         env:
           VALIDATE_ALL_CODEBASE: false
           DEFAULT_BRANCH: master
