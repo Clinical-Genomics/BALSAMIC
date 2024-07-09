@@ -63,14 +63,16 @@ class ParamsSentieonWGSMetrics(BaseModel):
     """
 
     min_base_qual: int
-    cov_threshold: list[int]
+    cov_threshold: str
 
-    @field_validator("cov_threshold")
-    def parse_into_arguments(cls, cov_threshold: list[int]):
-        param_values = []
-        for value in cov_threshold:
-            param_values.append(" ".join(map(str, ["--cov_thresh", value])))
-        return " ".join(param_values)
+    @field_validator("cov_threshold", mode="before")
+    def parse_into_arguments(cls, cov_threshold):
+        if isinstance(cov_threshold, list):
+            param_values = []
+            for value in cov_threshold:
+                param_values.append(f"--cov_thresh {value}")
+            return " ".join(param_values)
+        return cov_threshold
 
 class ParamsVardict(BaseModel):
     """This class defines the params settings used as constants in vardict rule.
@@ -209,6 +211,7 @@ class BalsamicWorkflowConfig(BaseModel):
 
     bam_post_processing: BAMPostProcessingParams
     common: ParamsCommon
+    insert_size_metrics: ParamsInsertSizeMetrics
     manta: ParamsManta
     mosdepth: ParamsMosdepth
     sentieon_wgs_metrics: ParamsSentieonWGSMetrics
