@@ -22,13 +22,16 @@ class ParamsCommon(BaseModel):
     picard_RG_normal: str
     picard_RG_tumor: str
 
+
 class ParamsInsertSizeMetrics(BaseModel):
     """This class defines the common params settings used for the InsertSizeMetricsAlgo
 
     Attributes:
         min_read_ratio: float(required). Minimum ratio of reads for a read category to be included in the output histogram (Default 0.05)
     """
+
     min_read_ratio: float
+
 
 class ParamsManta(BaseModel):
     """This class defines the params settings used as constants in Manta rule.
@@ -40,6 +43,7 @@ class ParamsManta(BaseModel):
 
     wgs_settings: str
     tga_settings: str
+
 
 class ParamsMosdepth(BaseModel):
     """This class defines the params settings used as constants in Mosdepth rule.
@@ -53,6 +57,7 @@ class ParamsMosdepth(BaseModel):
     mapq: int
     samflag: int
     quantize: str
+
 
 class ParamsSentieonWGSMetrics(BaseModel):
     """This class defines the params settings used as constants in Sentieon WGS Metrics rule.
@@ -73,6 +78,7 @@ class ParamsSentieonWGSMetrics(BaseModel):
                 param_values.append(f"--cov_thresh {value}")
             return " ".join(param_values)
         return cov_threshold
+
 
 class ParamsVardict(BaseModel):
     """This class defines the params settings used as constants in vardict rule.
@@ -179,12 +185,14 @@ class UMIParamsTNscope(BaseModel):
     padding: int
     disable_detect: str
 
+
 class BAMPostProcessingParams(BaseModel):
     """This class defines the params settings used as constants bam post processing rules
 
-     Attributes:
-        manta_max_base_quality: int (required); the maximum base quality in bamfile used downstream in Manta rules
+    Attributes:
+       manta_max_base_quality: int (required); the maximum base quality in bamfile used downstream in Manta rules
     """
+
     manta_max_base_quality: int
 
 
@@ -221,7 +229,6 @@ class BalsamicWorkflowConfig(BaseModel):
     umiextract: UMIParamsUMIextract
     umiconsensuscall: UMIParamsConsensuscall
     tnscope_umi: UMIParamsTNscope
-
 
     def get_manta_settings(self, sequencing_type) -> str:
         """Return correct setting for manta rules depending on sequencing type."""

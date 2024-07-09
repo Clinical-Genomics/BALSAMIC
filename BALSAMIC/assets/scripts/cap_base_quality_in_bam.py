@@ -2,6 +2,7 @@ import click
 import pysam
 import numpy as np
 
+
 @click.command()
 @click.argument("input_bam", type=click.Path(exists=True))
 @click.argument("output_bam", type=click.Path())
@@ -27,6 +28,7 @@ def cap_base_qualities(input_bam: str, output_bam: str, max_quality: int):
         read.query_qualities = capped_qualities.tolist()
         # Write the modified read to the output BAM file
         out_bam.write(read)
+
 
 if __name__ == "__main__":
     cap_base_qualities()

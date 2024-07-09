@@ -171,7 +171,7 @@ WORKFLOW_PARAMS = {
     },
     "sentieon_wgs_metrics": {
         "min_base_qual": 10,
-        "cov_threshold": [50, 100, 150, 200, 250]
+        "cov_threshold": [50, 100, 150, 200, 250],
     },
     "vardict": {
         "allelic_frequency": "0.001",
