@@ -76,12 +76,10 @@ class ParamsSentieonWGSMetrics(BaseModel):
 
     @field_validator("cov_threshold", mode="before")
     def parse_into_arguments(cls, cov_threshold):
-        if isinstance(cov_threshold, list):
-            param_values = []
-            for value in cov_threshold:
-                param_values.append(f"--cov_thresh {value}")
-            return " ".join(param_values)
-        return cov_threshold
+        param_values = []
+        for value in cov_threshold:
+            param_values.append(f"--cov_thresh {value}")
+        return " ".join(param_values)
 
 
 class ParamsVardict(BaseModel):
