@@ -28,8 +28,9 @@ def test_params_sentieon_wgs_metrics():
 
     # GIVEN Manta params
     test_sentieon_wgs_metrics_params = {
-            "min_base_qual": 10,
-            "cov_threshold": [50, 100, 150, 200, 250],}
+        "min_base_qual": 10,
+        "cov_threshold": [50, 100, 150, 200, 250],
+    }
 
     # WHEN building the model
     test_sentieon_wgs_metrics_built = ParamsSentieonWGSMetrics(
