@@ -27,7 +27,7 @@ class ParamsInsertSizeMetrics(BaseModel):
     """This class defines the common params settings used for the InsertSizeMetricsAlgo
 
     Attributes:
-        min_read_ratio: float(required). Minimum ratio of reads for a read category to be included in the output histogram (Default 0.05)
+        min_read_ratio: float(required). Minimum ratio of reads for a read category to be included in the output histogram
     """
 
     min_read_ratio: float
@@ -49,8 +49,8 @@ class ParamsMosdepth(BaseModel):
     """This class defines the params settings used as constants in Mosdepth rule.
 
     Attributes:
-        mapq: str(required); mapping quality threshold, reads with a quality less than this value are ignored [default: 0]
-        samflag: str(required); exclude reads with any of the bits in FLAG set [default: 1796]
+        mapq: str(required); mapping quality threshold, reads with a quality less than this value are ignored
+        samflag: str(required); exclude reads with any of the bits in FLAG set
         quantize: str(required); merges adjacent bases as long as they fall in the same coverage bins e.g. (10-20)
     """
 
