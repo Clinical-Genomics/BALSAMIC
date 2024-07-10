@@ -42,6 +42,8 @@ R={input.fa} \
 BAIT_SET_NAME={params.bed_name} \
 COVERAGE_CAP=50000 \
 METRIC_ACCUMULATION_LEVEL=ALL_READS;
+
+rm -rf {params.tmpdir}
       """
 
 
@@ -72,4 +74,6 @@ CollectWgsMetrics \
 I={input.bam} \
 O={output} \
 R={input.reference};
+
+rm -rf {params.tmpdir}
         """

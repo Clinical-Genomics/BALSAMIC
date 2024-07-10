@@ -149,14 +149,12 @@ def test_umiparams_common():
 
     # GIVEN a UMI workflow common params
     test_commonparams = {
-        "align_header": "test_header_name",
         "align_intbases": 100,
         "filter_tumor_af": 0.01,
     }
     # WHEN building the model
     test_commonparams_built = UMIParamsCommon(**test_commonparams)
     # THEN assert values
-    assert test_commonparams_built.align_header == "test_header_name"
     assert isclose(test_commonparams_built.filter_tumor_af, 0.01)
     assert test_commonparams_built.align_intbases == 100
 

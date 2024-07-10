@@ -1,4 +1,5 @@
 """Balsamic config case CLI."""
+
 import logging
 from datetime import datetime
 from pathlib import Path
@@ -30,14 +31,21 @@ from BALSAMIC.commands.options import (
     OPTION_NORMAL_SAMPLE_NAME,
     OPTION_PANEL_BED,
     OPTION_PON_CNN,
+    OPTION_SENTIEON_INSTALL_DIR,
+    OPTION_SENTIEON_LICENSE,
     OPTION_SWEGEN_SNV,
     OPTION_SWEGEN_SV,
     OPTION_TUMOR_SAMPLE_NAME,
+    OPTION_UMI_MIN_READS,
 )
 from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV, AnalysisWorkflow, Gender
 from BALSAMIC.constants.cache import GenomeVersion
 from BALSAMIC.constants.constants import FileType
-from BALSAMIC.constants.paths import CONTAINERS_DIR
+from BALSAMIC.constants.paths import (
+    CONTAINERS_DIR,
+    SENTIEON_DNASCOPE_MODEL,
+    SENTIEON_TNSCOPE_MODEL,
+)
 from BALSAMIC.constants.workflow_params import VCF_DICT
 from BALSAMIC.models.config import ConfigModel
 from BALSAMIC.utils.cli import (
@@ -76,9 +84,12 @@ LOG = logging.getLogger(__name__)
 @OPTION_NORMAL_SAMPLE_NAME
 @OPTION_PANEL_BED
 @OPTION_PON_CNN
+@OPTION_SENTIEON_INSTALL_DIR
+@OPTION_SENTIEON_LICENSE
 @OPTION_SWEGEN_SNV
 @OPTION_SWEGEN_SV
 @OPTION_TUMOR_SAMPLE_NAME
+@OPTION_UMI_MIN_READS
 @click.pass_context
 def case_config(
     context: click.Context,
@@ -104,9 +115,12 @@ def case_config(
     normal_sample_name: str,
     panel_bed: Path,
     pon_cnn: Path,
+    sentieon_install_dir: Path,
+    sentieon_license: str,
     swegen_snv: Path,
     swegen_sv: Path,
     tumor_sample_name: str,
+    umi_min_reads: str | None,
 ):
     references_path: Path = Path(balsamic_cache, cache_version, genome_version)
     references: Dict[str, Path] = get_absolute_paths_dict(
@@ -172,7 +186,13 @@ def case_config(
         directory.mkdir(exist_ok=True)
 
     config_collection_dict = ConfigModel(
-        QC={},
+        sentieon={
+            "sentieon_install_dir": sentieon_install_dir,
+            "sentieon_license": sentieon_license,
+            "sentieon_exec": Path(sentieon_install_dir, "bin", "sentieon").as_posix(),
+            "dnascope_model": SENTIEON_DNASCOPE_MODEL.as_posix(),
+            "tnscope_model": SENTIEON_TNSCOPE_MODEL.as_posix(),
+        },
         analysis={
             "case_id": case_id,
             "gender": gender,
@@ -188,6 +208,7 @@ def case_config(
             "analysis_workflow": analysis_workflow,
             "config_creation_date": datetime.now().strftime("%Y-%m-%d %H:%M"),
         },
+        custom_filters={"umi_min_reads": umi_min_reads if umi_min_reads else None},
         reference=references,
         singularity={
             "image": Path(balsamic_cache, cache_version, "containers").as_posix()
@@ -204,14 +225,16 @@ def case_config(
             bioinfo_tools=BIOINFO_TOOL_ENV,
             container_conda_env_path=CONTAINERS_DIR,
         ),
-        panel={
-            "exome": exome,
-            "capture_kit": panel_bed,
-            "chrom": get_panel_chrom(panel_bed),
-            "pon_cnn": pon_cnn,
-        }
-        if panel_bed
-        else None,
+        panel=(
+            {
+                "exome": exome,
+                "capture_kit": panel_bed,
+                "chrom": get_panel_chrom(panel_bed),
+                "pon_cnn": pon_cnn,
+            }
+            if panel_bed
+            else None
+        ),
     ).model_dump(by_alias=True, exclude_none=True)
     LOG.info("Balsamic config model instantiated successfully")
 

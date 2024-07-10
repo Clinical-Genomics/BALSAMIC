@@ -35,7 +35,9 @@ fastp \
 --json {output.json} \
 --html {output.html} \
 --overrepresentation_analysis \
-{params.adapter_trim}
+{params.adapter_trim} ;
+
+rm -rf {params.tmpdir}
         """
 
 
@@ -50,9 +52,9 @@ rule sentieon_umiextract_tga:
         Path(benchmark_dir, "sentieon_umiextract_tga_{sample_type}_{sample}.tsv").as_posix()
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-        sentieon_install_dir = config["SENTIEON_INSTALL_DIR"],
-        sentieon_exec = config["SENTIEON_EXEC"],
-        sentieon_lic = config["SENTIEON_LICENSE"],
+        sentieon_install_dir = config_model.sentieon.sentieon_install_dir,
+        sentieon_exec = config_model.sentieon.sentieon_exec,
+        sentieon_lic = config_model.sentieon.sentieon_license,
         ds_params = params.umiextract.read_structure,
         sample = "{sample}"
     threads:
@@ -63,13 +65,14 @@ rule sentieon_umiextract_tga:
         """
 export MALLOC_CONF=lg_dirty_mult:-1
 
-mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
 export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
 
 {params.sentieon_exec} umi extract \
 {params.ds_params} {input.fastq_r1} {input.fastq_r2} | gzip > {output.ds_umi} ;
+
+rm -rf {params.tmpdir}
         """
 
 
@@ -107,5 +110,7 @@ fastp \
 --json {output.json} \
 --html {output.html} \
 --overrepresentation_analysis \
-{params.quality_trim}
+{params.quality_trim} ;
+
+rm -rf {params.tmpdir}
         """

@@ -13,10 +13,10 @@ IMMEDIATE_SUBMIT_PATH: Path = Path(SCRIPT_DIR, "immediate_submit.py")
 
 # Sentieon specific constants
 SENTIEON_MODELS_DIR: Path = Path(BALSAMIC_DIR, "assets", "sentieon_models")
-SENTIEON_DNASCOPE_DIR: Path = Path(
+SENTIEON_DNASCOPE_MODEL: Path = Path(
     SENTIEON_MODELS_DIR, "SentieonDNAscopeModelBeta0.4a-201808.05.model"
 )
-SENTIEON_TNSCOPE_DIR: Path = Path(
+SENTIEON_TNSCOPE_MODEL: Path = Path(
     SENTIEON_MODELS_DIR, "SentieonTNscopeModel_GiAB_HighAF_LowFP-201711.05.model"
 )
 

@@ -424,17 +424,24 @@ def get_fastp_parameters(config_model: ConfigModel) -> Dict:
         "--low_complexity_filter",
         "--trim_poly_g",
         "--dont_eval_duplication",
-        "--disable_adapter_trimming",
     ]
 
     # Add adapter trimming parameters
     fastp_trim_adapter = [
         "--detect_adapter_for_pe",
-        "--disable_quality_filtering",
         "--dont_eval_duplication",
-        "--length_required",
-        config_model.QC.min_seq_length,
     ]
+
+    # Add unique parameters to TGA trimming which is done separately for adapter and quality trim
+    if config_model.analysis.sequencing_type == SequencingType.TARGETED:
+        fastp_trim_qual.append("--disable_adapter_trimming")
+        fastp_trim_adapter.extend(
+            [
+                "--disable_quality_filtering",
+                "--length_required",
+                config_model.QC.min_seq_length,
+            ]
+        )
 
     fastp_parameters_dict["fastp_trim_qual"] = fastp_trim_qual
     fastp_parameters_dict["fastp_trim_adapter"] = fastp_trim_adapter

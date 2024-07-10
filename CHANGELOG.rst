@@ -1,21 +1,40 @@
 [X.X.X]
 -------
 
+Added:
+^^^^^^
+* MSIsensor-pro container https://github.com/Clinical-Genomics/BALSAMIC/pull/1444
+* MSI analysis to the tumor-normal workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1454
+* Sentieon install directory path to case config arguments https://github.com/Clinical-Genomics/BALSAMIC/pull/1461
+* UMI extraction and deduplication to TGA workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1358
+
 Changed:
 ^^^^^^^^
 * Cluster scheduler script for immediate submit https://github.com/Clinical-Genomics/BALSAMIC/pull/1372
 * `SLEEP_BEFORE_START` to 600s https://github.com/Clinical-Genomics/BALSAMIC/pull/1372
-* updated multiqc to version 1.18 https://github.com/Clinical-Genomics/BALSAMIC/pull/1441
+* Updated Multiqc to version 1.22.3 https://github.com/Clinical-Genomics/BALSAMIC/pull/1441
+* Upgrade `vcf2cytosure` version to 0.9.1 and remove hardcoded versions https://github.com/Clinical-Genomics/BALSAMIC/pull/1456
 
 Removed:
 ^^^^^^^^
 * GATK3 https://github.com/Clinical-Genomics/BALSAMIC/pull/1432
 * `gatk_contest` rule https://github.com/Clinical-Genomics/BALSAMIC/pull/1432
 * SGE (qsub) support https://github.com/Clinical-Genomics/BALSAMIC/pull/1372
+* Fastq quality and UMI trimming command-line options https://github.com/Clinical-Genomics/BALSAMIC/pull/1358
 
 Fixed:
 ^^^^^^
-* corrected tool name in deduplication metrics https://github.com/Clinical-Genomics/BALSAMIC/pull/1441
+* Corrected tool name in deduplication metrics https://github.com/Clinical-Genomics/BALSAMIC/pull/1441
+* MSI table https://github.com/Clinical-Genomics/BALSAMIC/pull/1459
+* Pin numpy version in CNVkit container https://github.com/Clinical-Genomics/BALSAMIC/pull/1457
+* CNVkit incorrect version in the documentation https://github.com/Clinical-Genomics/BALSAMIC/pull/1457
+
+[15.0.1]
+--------
+
+Added:
+^^^^^^
+* CLI option for the minimum raw reads supporting each UMI group filter
 
 [15.0.0]
 --------

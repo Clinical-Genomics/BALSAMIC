@@ -10,7 +10,7 @@ from typing import Dict, List
 
 from BALSAMIC.constants.constants import FileType
 from BALSAMIC.constants.analysis import FastqName, MutationType, SampleType
-from BALSAMIC.constants.paths import BALSAMIC_DIR, SENTIEON_DNASCOPE_DIR, SENTIEON_TNSCOPE_DIR
+from BALSAMIC.constants.paths import BALSAMIC_DIR
 from BALSAMIC.constants.rules import SNAKEMAKE_RULES
 from BALSAMIC.constants.variant_filters import (
     SNV_BCFTOOLS_SETTINGS_PANEL,
@@ -19,7 +19,11 @@ from BALSAMIC.constants.variant_filters import (
     SVDB_FILTER_SETTINGS,
     MANTA_FILTER_SETTINGS,
 )
-from BALSAMIC.constants.workflow_params import VARCALL_PARAMS, WORKFLOW_PARAMS, SLEEP_BEFORE_START
+from BALSAMIC.constants.workflow_params import (
+    VARCALL_PARAMS,
+    WORKFLOW_PARAMS,
+    SLEEP_BEFORE_START,
+)
 from BALSAMIC.models.config import ConfigModel
 from BALSAMIC.models.params import BalsamicWorkflowConfig, VarCallerFilter
 from BALSAMIC.utils.cli import check_executable, generate_h5
@@ -100,7 +104,7 @@ if config["analysis"]["sequencing_type"] != "wgs":
     pon_cnn: str = get_pon_cnn(config)
 
 # Run information
-singularity_image: str = config_model.singularity['image']
+singularity_image: str = config_model.singularity["image"]
 sample_names: List[str] = config_model.get_all_sample_names()
 tumor_sample: str = config_model.get_sample_name_by_type(SampleType.TUMOR)
 sequencing_type = config_model.analysis.sequencing_type
@@ -109,7 +113,9 @@ if config_model.analysis.analysis_type == "paired":
 
 # Sample status to sampleID namemap
 if config_model.analysis.analysis_type == "paired":
-    status_to_sample_id = "TUMOR" + "\\\\t" + tumor_sample + "\\\\n" + "NORMAL" + "\\\\t" + normal_sample
+    status_to_sample_id = (
+        "TUMOR" + "\\\\t" + tumor_sample + "\\\\n" + "NORMAL" + "\\\\t" + normal_sample
+    )
 else:
     status_to_sample_id = "TUMOR" + "\\\\t" + tumor_sample
 
@@ -133,82 +139,134 @@ fastp_parameters: Dict = get_fastp_parameters(config_model)
 # parse parameters as constants to workflows
 params = BalsamicWorkflowConfig.model_validate(WORKFLOW_PARAMS)
 
+# Custom filter to set the minimum number of reads required to support each UMI tag group
+if config_model.custom_filters and config_model.custom_filters.umi_min_reads:
+    params.umiconsensuscall.filter_minreads = config_model.custom_filters.umi_min_reads
+
 # vcfanno annotations
-research_annotations.append( {
-    'annotation': [{
-    'file': Path(config["reference"]["gnomad_variant"]).as_posix(),
-    'fields': ["AF", "AF_popmax"],
-    'ops': ["self", "self"],
-    'names': ["GNOMADAF", "GNOMADAF_popmax"]
-    }]
-}
+research_annotations.append(
+    {
+        "annotation": [
+            {
+                "file": Path(config["reference"]["gnomad_variant"]).as_posix(),
+                "fields": ["AF", "AF_popmax"],
+                "ops": ["self", "self"],
+                "names": ["GNOMADAF", "GNOMADAF_popmax"],
+            }
+        ]
+    }
 )
 
-research_annotations.append( {
-    'annotation': [{
-    'file': Path(config["reference"]["clinvar"]).as_posix(),
-    'fields': ["CLNACC", "CLNREVSTAT", "CLNSIG", "ORIGIN", "CLNVC", "CLNVCSO"],
-    'ops': ["self", "self", "self", "self", "self", "self"],
-    'names': ["CLNACC", "CLNREVSTAT", "CLNSIG", "ORIGIN", "CLNVC", "CLNVCSO"]
-    }]
-}
+research_annotations.append(
+    {
+        "annotation": [
+            {
+                "file": Path(config["reference"]["clinvar"]).as_posix(),
+                "fields": [
+                    "CLNACC",
+                    "CLNREVSTAT",
+                    "CLNSIG",
+                    "ORIGIN",
+                    "CLNVC",
+                    "CLNVCSO",
+                ],
+                "ops": ["self", "self", "self", "self", "self", "self"],
+                "names": [
+                    "CLNACC",
+                    "CLNREVSTAT",
+                    "CLNSIG",
+                    "ORIGIN",
+                    "CLNVC",
+                    "CLNVCSO",
+                ],
+            }
+        ]
+    }
 )
 
-research_annotations.append( {
-    'annotation': [{
-    'file': Path(config["reference"]["cadd_snv"]).as_posix(),
-    'names': ["CADD"],
-    'ops': ["mean"],
-    'columns': [6]
-    }]
-}
+research_annotations.append(
+    {
+        "annotation": [
+            {
+                "file": Path(config["reference"]["cadd_snv"]).as_posix(),
+                "names": ["CADD"],
+                "ops": ["mean"],
+                "columns": [6],
+            }
+        ]
+    }
 )
 
 
 if "swegen_snv_frequency" in config["reference"]:
-    research_annotations.append( {
-        'annotation': [{
-            'file': get_swegen_snv(config),
-            'fields': ["AF", "AC_Hom", "AC_Het", "AC_Hemi"],
-            'ops': ["self", "self", "self","self"],
-            'names': ["SWEGENAF", "SWEGENAAC_Hom", "SWEGENAAC_Het", "SWEGENAAC_Hemi"]
-        }]
-    }
+    research_annotations.append(
+        {
+            "annotation": [
+                {
+                    "file": get_swegen_snv(config),
+                    "fields": ["AF", "AC_Hom", "AC_Het", "AC_Hemi"],
+                    "ops": ["self", "self", "self", "self"],
+                    "names": [
+                        "SWEGENAF",
+                        "SWEGENAAC_Hom",
+                        "SWEGENAAC_Het",
+                        "SWEGENAAC_Hemi",
+                    ],
+                }
+            ]
+        }
     )
 
 if "clinical_snv_observations" in config["reference"]:
-    clinical_annotations.append( {
-        'annotation': [{
-            'file': get_clinical_snv_observations(config),
-            'fields': ["Frq", "Obs", "Hom"],
-            'ops': ["self", "self", "self"],
-            'names': ["Frq", "Obs", "Hom"]
-        }]
-    }
+    clinical_annotations.append(
+        {
+            "annotation": [
+                {
+                    "file": get_clinical_snv_observations(config),
+                    "fields": ["Frq", "Obs", "Hom"],
+                    "ops": ["self", "self", "self"],
+                    "names": ["Frq", "Obs", "Hom"],
+                }
+            ]
+        }
     )
     clinical_snv_obs: str = get_clinical_snv_observations(config)
 
 if "cancer_germline_snv_observations" in config["reference"]:
-    clinical_annotations.append( {
-        'annotation': [{
-            'file': get_cancer_germline_snv_observations(config),
-            'fields': ["Frq", "Obs", "Hom"],
-            'ops': ["self", "self", "self"],
-            'names': ["Cancer_Germline_Frq", "Cancer_Germline_Obs", "Cancer_Germline_Hom"]
-        }]
-    }
+    clinical_annotations.append(
+        {
+            "annotation": [
+                {
+                    "file": get_cancer_germline_snv_observations(config),
+                    "fields": ["Frq", "Obs", "Hom"],
+                    "ops": ["self", "self", "self"],
+                    "names": [
+                        "Cancer_Germline_Frq",
+                        "Cancer_Germline_Obs",
+                        "Cancer_Germline_Hom",
+                    ],
+                }
+            ]
+        }
     )
     cancer_germline_snv_obs: str = get_cancer_germline_snv_observations(config)
 
 if "cancer_somatic_snv_observations" in config["reference"]:
-    clinical_annotations.append( {
-        'annotation': [{
-            'file': get_cancer_somatic_snv_observations(config),
-            'fields': ["Frq", "Obs", "Hom"],
-            'ops': ["self", "self", "self"],
-            'names': ["Cancer_Somatic_Frq", "Cancer_Somatic_Obs", "Cancer_Somatic_Hom"]
-        }]
-    }
+    clinical_annotations.append(
+        {
+            "annotation": [
+                {
+                    "file": get_cancer_somatic_snv_observations(config),
+                    "fields": ["Frq", "Obs", "Hom"],
+                    "ops": ["self", "self", "self"],
+                    "names": [
+                        "Cancer_Somatic_Frq",
+                        "Cancer_Somatic_Obs",
+                        "Cancer_Somatic_Hom",
+                    ],
+                }
+            ]
+        }
     )
     cancer_somatic_snv_obs: str = get_cancer_somatic_snv_observations(config)
 
@@ -230,44 +288,24 @@ if config["analysis"]["sequencing_type"] != "wgs":
 if len(cluster_config.keys()) == 0:
     cluster_config = config
 
-# Find and set Sentieon binary and license server from env variables
-try:
-    config["SENTIEON_LICENSE"] = os.environ["SENTIEON_LICENSE"]
-    config["SENTIEON_INSTALL_DIR"] = "/home/proj/bin/sentieon/sentieon-genomics-202308.02/"
-
-    if os.getenv("SENTIEON_EXEC") is not None:
-        config["SENTIEON_EXEC"] = os.environ["SENTIEON_EXEC"]
-    else:
-        config["SENTIEON_EXEC"] = Path("/home/proj/bin/sentieon/sentieon-genomics-202308.02/", "bin", "sentieon").as_posix()
-
-    config["SENTIEON_TNSCOPE"] = SENTIEON_TNSCOPE_DIR.as_posix()
-    config["SENTIEON_DNASCOPE"] = SENTIEON_DNASCOPE_DIR.as_posix()
-
-except KeyError as error:
-    LOG.error("Set environment variables SENTIEON_LICENSE, SENTIEON_INSTALL_DIR, SENTIEON_EXEC "
-              "to run SENTIEON variant callers")
-    raise BalsamicError
-
-if not Path(config["SENTIEON_EXEC"]).exists():
-    LOG.error("Sentieon executable not found {}".format(Path(config["SENTIEON_EXEC"]).as_posix()))
-    raise BalsamicError
-
 if "hg38" in config["reference"]["reference_genome"]:
     config["reference"]["genome_version"] = "hg38"
 elif "canfam3" in config["reference"]["reference_genome"]:
     config["reference"]["genome_version"] = "canfam3"
-    LOG.error("The main BALSAMIC workflow is not compatible with the canfam3 genome version "
-             "use '--analysis-workflow balsamic-qc' instead")
+    LOG.error(
+        "The main BALSAMIC workflow is not compatible with the canfam3 genome version "
+        "use '--analysis-workflow balsamic-qc' instead"
+    )
     raise BalsamicError
 else:
     config["reference"]["genome_version"] = "hg19"
 
-LOG.info('Genome version set to %s', config["reference"]["genome_version"])
+LOG.info("Genome version set to %s", config["reference"]["genome_version"])
 
 
 # Add normal sample if analysis is paired
 germline_call_samples = ["tumor"]
-if config['analysis']['analysis_type'] == "paired":
+if config["analysis"]["analysis_type"] == "paired":
     germline_call_samples.append("normal")
 
 # Create list of chromosomes in panel for panel only variant calling to be used in rules
@@ -280,25 +318,49 @@ if "background_variants" in config:
 
 # Set temporary dir environment variable
 os.environ["SENTIEON_TMPDIR"] = result_dir
-os.environ['TMPDIR'] = get_result_dir(config)
+os.environ["TMPDIR"] = get_result_dir(config)
 
 # CNV report input files
 cnv_report_paths = []
 if config["analysis"]["sequencing_type"] == "wgs":
-    if config['analysis']['analysis_type'] == "paired":
-        cnv_report_paths.append(f"{vcf_dir}CNV.somatic.{config['analysis']['case_id']}.ascat.samplestatistics.txt.pdf")
-        cnv_report_paths.extend(expand(
-            f"{vcf_dir}CNV.somatic.{config['analysis']['case_id']}.ascat.{{output_suffix}}.png.pdf",
-            output_suffix=["ascatprofile", "rawprofile", "ASPCF", "tumor", "germline", "sunrise"]
-        ))
+    if config["analysis"]["analysis_type"] == "paired":
+        cnv_report_paths.append(
+            f"{vcf_dir}MSI.somatic.{config['analysis']['case_id']}.msisensorpro.msi.pdf"
+        )
+        cnv_report_paths.append(
+            f"{vcf_dir}CNV.somatic.{config['analysis']['case_id']}.ascat.samplestatistics.txt.pdf"
+        )
+        cnv_report_paths.extend(
+            expand(
+                f"{vcf_dir}CNV.somatic.{config['analysis']['case_id']}.ascat.{{output_suffix}}.png.pdf",
+                output_suffix=[
+                    "ascatprofile",
+                    "rawprofile",
+                    "ASPCF",
+                    "tumor",
+                    "germline",
+                    "sunrise",
+                ],
+            )
+        )
     else:
-        cnv_report_paths.extend(expand(
-            f"{vcf_dir}CNV.somatic.{config['analysis']['case_id']}.cnvpytor.{{output_suffix}}.png.pdf",
-            output_suffix=["circular", "scatter"]
-        ))
+        cnv_report_paths.extend(
+            expand(
+                f"{vcf_dir}CNV.somatic.{config['analysis']['case_id']}.cnvpytor.{{output_suffix}}.png.pdf",
+                output_suffix=["circular", "scatter"],
+            )
+        )
 else:
-    cnv_report_paths.extend(expand(f"{cnv_dir}tumor.merged-{{plot}}.pdf",plot=["diagram", "scatter"]))
-    cnv_report_paths.append(f"{cnv_dir}CNV.somatic.{config['analysis']['case_id']}.purecn.purity.csv.pdf")
+    if config["analysis"]["analysis_type"] == "paired":
+        cnv_report_paths.append(
+            f"{vcf_dir}MSI.somatic.{config['analysis']['case_id']}.msisensorpro.msi.pdf"
+        )
+    cnv_report_paths.extend(
+        expand(f"{cnv_dir}tumor.merged-{{plot}}.pdf", plot=["diagram", "scatter"])
+    )
+    cnv_report_paths.append(
+        f"{cnv_dir}CNV.somatic.{config['analysis']['case_id']}.purecn.purity.csv.pdf"
+    )
 
 # Extract variant callers for the workflow
 germline_caller = []
@@ -306,58 +368,78 @@ somatic_caller = []
 somatic_caller_cnv = []
 somatic_caller_sv = []
 for m in set(MutationType):
-    germline_caller_balsamic = get_variant_callers(config=config,
-                                            analysis_type=config['analysis']['analysis_type'],
-                                            workflow_solution="BALSAMIC",
-                                            mutation_type=m,
-                                            sequencing_type=config["analysis"]["sequencing_type"],
-                                            mutation_class="germline")
+    germline_caller_balsamic = get_variant_callers(
+        config=config,
+        analysis_type=config["analysis"]["analysis_type"],
+        workflow_solution="BALSAMIC",
+        mutation_type=m,
+        sequencing_type=config["analysis"]["sequencing_type"],
+        mutation_class="germline",
+    )
 
-    germline_caller_sentieon = get_variant_callers(config=config,
-                                           analysis_type=config['analysis']['analysis_type'],
-                                           workflow_solution="Sentieon",
-                                           mutation_type=m,
-                                           sequencing_type=config["analysis"]["sequencing_type"],
-                                           mutation_class="germline")
+    germline_caller_sentieon = get_variant_callers(
+        config=config,
+        analysis_type=config["analysis"]["analysis_type"],
+        workflow_solution="Sentieon",
+        mutation_type=m,
+        sequencing_type=config["analysis"]["sequencing_type"],
+        mutation_class="germline",
+    )
 
-    germline_caller = germline_caller + germline_caller_balsamic + germline_caller_sentieon
+    germline_caller = (
+        germline_caller + germline_caller_balsamic + germline_caller_sentieon
+    )
 
+    somatic_caller_balsamic = get_variant_callers(
+        config=config,
+        analysis_type=config["analysis"]["analysis_type"],
+        workflow_solution="BALSAMIC",
+        mutation_type=m,
+        sequencing_type=config["analysis"]["sequencing_type"],
+        mutation_class="somatic",
+    )
 
-    somatic_caller_balsamic = get_variant_callers(config=config,
-                                           analysis_type=config['analysis']['analysis_type'],
-                                           workflow_solution="BALSAMIC",
-                                           mutation_type=m,
-                                           sequencing_type=config["analysis"]["sequencing_type"],
-                                           mutation_class="somatic")
+    somatic_caller_sentieon = get_variant_callers(
+        config=config,
+        analysis_type=config["analysis"]["analysis_type"],
+        workflow_solution="Sentieon",
+        mutation_type=m,
+        sequencing_type=config["analysis"]["sequencing_type"],
+        mutation_class="somatic",
+    )
 
-    somatic_caller_sentieon = get_variant_callers(config=config,
-                                             analysis_type=config['analysis']['analysis_type'],
-                                             workflow_solution="Sentieon",
-                                             mutation_type=m,
-                                             sequencing_type=config["analysis"]["sequencing_type"],
-                                             mutation_class="somatic")
+    somatic_caller_sentieon_umi = get_variant_callers(
+        config=config,
+        analysis_type=config["analysis"]["analysis_type"],
+        workflow_solution="Sentieon_umi",
+        mutation_type=m,
+        sequencing_type=config["analysis"]["sequencing_type"],
+        mutation_class="somatic",
+    )
+    somatic_caller = (
+        somatic_caller
+        + somatic_caller_sentieon_umi
+        + somatic_caller_balsamic
+        + somatic_caller_sentieon
+    )
 
-    somatic_caller_sentieon_umi = get_variant_callers(config=config,
-                                             analysis_type=config['analysis']['analysis_type'],
-                                             workflow_solution="Sentieon_umi",
-                                             mutation_type=m,
-                                             sequencing_type=config["analysis"]["sequencing_type"],
-                                             mutation_class="somatic")
-    somatic_caller = somatic_caller + somatic_caller_sentieon_umi + somatic_caller_balsamic + somatic_caller_sentieon
+somatic_caller_sv = get_variant_callers(
+    config=config,
+    analysis_type=config["analysis"]["analysis_type"],
+    workflow_solution="BALSAMIC",
+    mutation_type="SV",
+    sequencing_type=config["analysis"]["sequencing_type"],
+    mutation_class="somatic",
+)
 
-somatic_caller_sv = get_variant_callers(config=config,
-                                            analysis_type=config['analysis']['analysis_type'],
-                                            workflow_solution="BALSAMIC",
-                                            mutation_type="SV",
-                                            sequencing_type=config["analysis"]["sequencing_type"],
-                                            mutation_class="somatic")
-
-somatic_caller_cnv = get_variant_callers(config=config,
-                                            analysis_type=config['analysis']['analysis_type'],
-                                            workflow_solution="BALSAMIC",
-                                            mutation_type="CNV",
-                                            sequencing_type=config["analysis"]["sequencing_type"],
-                                            mutation_class="somatic")
+somatic_caller_cnv = get_variant_callers(
+    config=config,
+    analysis_type=config["analysis"]["analysis_type"],
+    workflow_solution="BALSAMIC",
+    mutation_type="CNV",
+    sequencing_type=config["analysis"]["sequencing_type"],
+    mutation_class="somatic",
+)
 somatic_caller_sv.remove("svdb")
 svdb_callers_prio = somatic_caller_sv + somatic_caller_cnv
 
@@ -367,14 +449,16 @@ for var_caller in svdb_callers_prio:
 
 # Collect only snv callers for calculating tmb
 somatic_caller_tmb = []
-for ws in ["BALSAMIC","Sentieon","Sentieon_umi"]:
-    somatic_caller_snv = get_variant_callers(config=config,
-                                           analysis_type=config['analysis']['analysis_type'],
-                                           workflow_solution=ws,
-                                           mutation_type="SNV",
-                                           sequencing_type=config["analysis"]["sequencing_type"],
-                                           mutation_class="somatic")
-    somatic_caller_tmb +=  somatic_caller_snv
+for ws in ["BALSAMIC", "Sentieon", "Sentieon_umi"]:
+    somatic_caller_snv = get_variant_callers(
+        config=config,
+        analysis_type=config["analysis"]["analysis_type"],
+        workflow_solution=ws,
+        mutation_type="SNV",
+        sequencing_type=config["analysis"]["sequencing_type"],
+        mutation_class="somatic",
+    )
+    somatic_caller_tmb += somatic_caller_snv
 
 
 # Remove variant callers from list of callers
@@ -387,18 +471,22 @@ if "disable_variant_caller" in config:
             germline_caller.remove(var_caller)
 
 rules_to_include = []
-analysis_type = config['analysis']["analysis_type"]
-sequence_type = config['analysis']["sequencing_type"]
+analysis_type = config["analysis"]["analysis_type"]
+sequence_type = config["analysis"]["sequencing_type"]
 
-for sub,value in SNAKEMAKE_RULES.items():
-  if sub in ["common", analysis_type + "_" + sequence_type]:
-    for module_name,module_rules in value.items():
-      rules_to_include.extend(module_rules)
+for sub, value in SNAKEMAKE_RULES.items():
+    if sub in ["common", analysis_type + "_" + sequence_type]:
+        for module_name, module_rules in value.items():
+            rules_to_include.extend(module_rules)
 
 if config["analysis"]["analysis_workflow"] == "balsamic":
     rules_to_include = [rule for rule in rules_to_include if "umi" not in rule]
-    somatic_caller = [var_caller for var_caller in somatic_caller if "umi" not in var_caller]
-    somatic_caller_tmb = [var_caller for var_caller in somatic_caller_tmb if "umi" not in var_caller]
+    somatic_caller = [
+        var_caller for var_caller in somatic_caller if "umi" not in var_caller
+    ]
+    somatic_caller_tmb = [
+        var_caller for var_caller in somatic_caller_tmb if "umi" not in var_caller
+    ]
 
 # Add rule for DRAGEN
 if "dragen" in config:
@@ -410,18 +498,24 @@ if "gens_coverage_pon" in config["reference"]:
     rules_to_include.append("snakemake_rules/variant_calling/gens_preprocessing.rule")
 
 LOG.info(f"The following rules will be included in the workflow: {rules_to_include}")
-LOG.info(f"The following Germline variant callers will be included in the workflow: {germline_caller}")
-LOG.info(f"The following somatic variant callers will be included in the workflow: {somatic_caller}")
+LOG.info(
+    f"The following Germline variant callers will be included in the workflow: {germline_caller}"
+)
+LOG.info(
+    f"The following somatic variant callers will be included in the workflow: {somatic_caller}"
+)
 
 
 for r in rules_to_include:
+
     include: Path(BALSAMIC_DIR, r).as_posix()
+
 
 # Define common and analysis specific outputs
 quality_control_results = [
     Path(qc_dir, case_id + "_metrics_deliverables.yaml").as_posix(),
     Path(qc_dir, "multiqc_report.html").as_posix(),
-    Path(qc_dir, "multiqc_data/multiqc_data.json").as_posix()
+    Path(qc_dir, "multiqc_data/multiqc_data.json").as_posix(),
 ]
 
 # Analysis results
@@ -429,7 +523,10 @@ analysis_specific_results = []
 
 # Germline SNVs/SVs
 analysis_specific_results.extend(
-    expand(vep_dir + "{vcf}.vcf.gz", vcf=get_vcf(config, germline_caller, germline_call_samples))
+    expand(
+        vep_dir + "{vcf}.vcf.gz",
+        vcf=get_vcf(config, germline_caller, germline_call_samples),
+    )
 )
 
 # Germline SNVs specifically for genotype
@@ -438,23 +535,35 @@ if config["analysis"]["analysis_type"] == "paired":
 
 # Raw VCFs
 analysis_specific_results.extend(
-    expand(vcf_dir + "{vcf}.research.vcf.gz", vcf=get_vcf(config, somatic_caller, [case_id]))
+    expand(
+        vcf_dir + "{vcf}.research.vcf.gz",
+        vcf=get_vcf(config, somatic_caller, [case_id]),
+    )
 )
 
 # Filtered and passed post annotation research VCFs
 analysis_specific_results.extend(
-    expand(vep_dir + "{vcf}.research.filtered.pass.vcf.gz", vcf=get_vcf(config, somatic_caller, [case_id]))
+    expand(
+        vep_dir + "{vcf}.research.filtered.pass.vcf.gz",
+        vcf=get_vcf(config, somatic_caller, [case_id]),
+    )
 )
 
 # Filtered and passed post annotation clinical VCFs
 analysis_specific_results.extend(
-    expand(vep_dir + "{vcf}.clinical.filtered.pass.vcf.gz", vcf=get_vcf(config, somatic_caller, [case_id]))
+    expand(
+        vep_dir + "{vcf}.clinical.filtered.pass.vcf.gz",
+        vcf=get_vcf(config, somatic_caller, [case_id]),
+    )
 )
 
 
 # TMB
 analysis_specific_results.extend(
-    expand(vep_dir + "{vcf}.balsamic_stat", vcf=get_vcf(config, somatic_caller_tmb, [case_id]))
+    expand(
+        vep_dir + "{vcf}.balsamic_stat",
+        vcf=get_vcf(config, somatic_caller_tmb, [case_id]),
+    )
 )
 
 # CNV report
@@ -464,8 +573,10 @@ analysis_specific_results.append(cnv_dir + "CNV.somatic." + case_id + ".report.p
 if config["analysis"]["sequencing_type"] != "wgs":
     # CNVkit
     analysis_specific_results.append(cnv_dir + "tumor.merged.cns")
-    analysis_specific_results.extend(expand(cnv_dir + "tumor.merged-{plot}", plot=["diagram.pdf", "scatter.pdf"]))
-    analysis_specific_results.append(cnv_dir + case_id +".gene_metrics")
+    analysis_specific_results.extend(
+        expand(cnv_dir + "tumor.merged-{plot}", plot=["diagram.pdf", "scatter.pdf"])
+    )
+    analysis_specific_results.append(cnv_dir + case_id + ".gene_metrics")
     # vcf2cytosure
     analysis_specific_results.extend(expand(
         vcf_dir + "CNV.somatic.{case_name}.{var_caller}.vcf2cytosure.cgh",
@@ -474,65 +585,103 @@ if config["analysis"]["sequencing_type"] != "wgs":
     ))
     # UMI
     if config["analysis"]["analysis_workflow"] == "balsamic-umi":
-        analysis_specific_results.extend(expand(umi_qc_dir + "{sample}.umi.mean_family_depth", sample=config_model.get_all_sample_names()))
+        analysis_specific_results.extend(expand(umi_qc_dir + "tumor.{sample}.umi.mean_family_depth", sample=tumor_sample))
+        if config['analysis']['analysis_type'] == "paired":
+            analysis_specific_results.extend(expand(umi_qc_dir + "normal.{sample}.umi.mean_family_depth",sample=normal_sample))
         if background_variant_file:
             analysis_specific_results.extend(
-                expand(umi_qc_dir + "{case_name}.{var_caller}.AFtable.txt", case_name=case_id, var_caller=["tnscope_umi"])
+                expand(
+                    umi_qc_dir + "{case_name}.{var_caller}.AFtable.txt",
+                    case_name=case_id,
+                    var_caller=["tnscope_umi"],
+                )
+            )
+
+
+if (
+    config["analysis"]["sequencing_type"] == "wgs"
+    and config["analysis"]["analysis_type"] == "paired"
+):
+    analysis_specific_results.extend(
+        expand(
+            vcf_dir + "{vcf}.copynumber.txt.gz",
+            vcf=get_vcf(config, ["ascat"], [case_id]),
         )
-
-
-
-if config["analysis"]["sequencing_type"] == "wgs" and config['analysis']['analysis_type'] == "paired":
-    analysis_specific_results.extend(
-        expand(vcf_dir + "{vcf}.copynumber.txt.gz", vcf=get_vcf(config, ["ascat"], [case_id]))
     )
     analysis_specific_results.extend(
-        expand(vcf_dir + "{vcf}.cov.gz", vcf=get_vcf(config,["dellycnv"],[case_id]))
+        expand(vcf_dir + "{vcf}.cov.gz", vcf=get_vcf(config, ["dellycnv"], [case_id]))
     )
-    analysis_specific_results.extend(expand(
-        vcf_dir + "SV.somatic.{case_name}.{sample_type}.tiddit_cov.bed",
-        case_name=case_id,
-        sample_type=["tumor", "normal"]
-    ))
-    analysis_specific_results.extend(expand(
-        vcf_dir + "CNV.somatic.{case_name}.{sample_type}.vcf2cytosure.cgh",
-        case_name=case_id,
-        sample_type=["tumor","normal"]
-    ))
-
-if config['analysis']['sequencing_type'] == "wgs" and config['analysis']['analysis_type'] == 'single':
-    analysis_specific_results.extend(expand(
-        vcf_dir + "CNV.somatic.{case_name}.{sample_type}.vcf2cytosure.cgh",
-        case_name=case_id,
-        sample_type=["tumor"]
-    ))
-    analysis_specific_results.extend(expand(
-        vcf_dir + "SV.somatic.{case_name}.tumor.tiddit_cov.bed",
-        case_name=case_id,
-    ))
-
-if config['analysis']['analysis_type'] == "single":
     analysis_specific_results.extend(
-        expand(vcf_dir + "{vcf}.cov.gz",vcf=get_vcf(config,["dellycnv"],[case_id]))
+        expand(
+            vcf_dir + "SV.somatic.{case_name}.{sample_type}.tiddit_cov.bed",
+            case_name=case_id,
+            sample_type=["tumor", "normal"],
+        )
+    )
+    analysis_specific_results.extend(
+        expand(
+            vcf_dir + "CNV.somatic.{case_name}.{sample_type}.vcf2cytosure.cgh",
+            case_name=case_id,
+            sample_type=["tumor", "normal"],
+        )
+    )
+
+if (
+    config["analysis"]["sequencing_type"] == "wgs"
+    and config["analysis"]["analysis_type"] == "single"
+):
+    analysis_specific_results.extend(
+        expand(
+            vcf_dir + "CNV.somatic.{case_name}.{sample_type}.vcf2cytosure.cgh",
+            case_name=case_id,
+            sample_type=["tumor"],
+        )
+    )
+    analysis_specific_results.extend(
+        expand(
+            vcf_dir + "SV.somatic.{case_name}.tumor.tiddit_cov.bed",
+            case_name=case_id,
+        )
+    )
+
+if config["analysis"]["analysis_type"] == "single":
+    analysis_specific_results.extend(
+        expand(vcf_dir + "{vcf}.cov.gz", vcf=get_vcf(config, ["dellycnv"], [case_id]))
     )
 
 # GENS Outputs
-if config["analysis"]["sequencing_type"] == "wgs" and "gens_coverage_pon" in config["reference"]:
+if (
+    config["analysis"]["sequencing_type"] == "wgs"
+    and "gens_coverage_pon" in config["reference"]
+):
     analysis_specific_results.extend(
-        expand(cnv_dir + "{sample}.{gens_input}.bed.gz", sample=sample_names, gens_input=["cov", "baf"])
+        expand(
+            cnv_dir + "{sample}.{gens_input}.bed.gz",
+            sample=sample_names,
+            gens_input=["cov", "baf"],
+        )
     )
 
 # Dragen
-if config["analysis"]["sequencing_type"] == "wgs" and config['analysis']['analysis_type'] == "single":
+if (
+    config["analysis"]["sequencing_type"] == "wgs"
+    and config["analysis"]["analysis_type"] == "single"
+):
     if "dragen" in config:
-        analysis_specific_results.extend([
-            Path(result_dir, "dragen", "SNV.somatic." + case_id + ".dragen_tumor.bam").as_posix(),
-            Path(result_dir, "dragen", "SNV.somatic." + case_id + ".dragen.vcf.gz").as_posix()
-        ])
+        analysis_specific_results.extend(
+            [
+                Path(
+                    result_dir, "dragen", "SNV.somatic." + case_id + ".dragen_tumor.bam"
+                ).as_posix(),
+                Path(
+                    result_dir, "dragen", "SNV.somatic." + case_id + ".dragen.vcf.gz"
+                ).as_posix(),
+            ]
+        )
 
 LOG.info(f"Following outputs will be delivered {analysis_specific_results}")
 
-if 'benchmark_plots' in config:
+if "benchmark_plots" in config:
     log_dir = config["analysis"]["log"]
     if not check_executable("sh5util"):
         LOG.warning("sh5util executable does not exist. Won't be able to plot analysis")
@@ -546,7 +695,11 @@ if 'benchmark_plots' in config:
             benchmark_plot = Path(benchmark_dir, job_name + ".pdf")
 
             log_file_plot = plot_analysis(log_file, h5_file, benchmark_plot)
-            logging.debug("Plot file for {} available at: {}".format(log_file.as_posix(), log_file_plot))
+            logging.debug(
+                "Plot file for {} available at: {}".format(
+                    log_file.as_posix(), log_file_plot
+                )
+            )
 
         # Merge plots into one based on rule name
         for my_rule in vars(rules).keys():
@@ -555,34 +708,36 @@ if 'benchmark_plots' in config:
             for plots in Path(benchmark_dir).glob(f"BALSAMIC*.{my_rule}.*.pdf"):
                 my_rule_pdf.append(plots.as_posix())
                 my_rule_plots.append(plots)
-            my_rule_pdf.write(Path(benchmark_dir, my_rule+".pdf").as_posix())
+            my_rule_pdf.write(Path(benchmark_dir, my_rule + ".pdf").as_posix())
             my_rule_pdf.close()
 
             # Delete previous plots after merging
             for plots in my_rule_plots:
                 plots.unlink()
 
-if 'delivery' in config:
+if "delivery" in config:
     wildcard_dict = {
         "sample": sample_names,
         "case_name": case_id,
-        "allow_missing": True
+        "allow_missing": True,
     }
 
-    if config['analysis']["analysis_type"] in ["paired", "single"]:
-        wildcard_dict.update({
-            "var_type": ["CNV", "SNV", "SV"],
-            "var_class": ["somatic", "germline"],
-            "var_caller": somatic_caller + germline_caller,
-            "bedchrom": config["panel"]["chrom"] if "panel" in config else [],
-        })
+    if config["analysis"]["analysis_type"] in ["paired", "single"]:
+        wildcard_dict.update(
+            {
+                "var_type": ["CNV", "SNV", "SV"],
+                "var_class": ["somatic", "germline"],
+                "var_caller": somatic_caller + germline_caller,
+                "bedchrom": config["panel"]["chrom"] if "panel" in config else [],
+            }
+        )
 
-    if 'rules_to_deliver' in config:
-        rules_to_deliver = config['rules_to_deliver'].split(",")
+    if "rules_to_deliver" in config:
+        rules_to_deliver = config["rules_to_deliver"].split(",")
     else:
-        rules_to_deliver = ['multiqc']
+        rules_to_deliver = ["multiqc"]
 
-    output_files_ready = [('path', 'path_index', 'step', 'tag', 'id', 'format')]
+    output_files_ready = [("path", "path_index", "step", "tag", "id", "format")]
 
     for my_rule in set(rules_to_deliver):
         try:
@@ -592,29 +747,36 @@ if 'delivery' in config:
             continue
 
         LOG.info("Delivering step (rule) {} {}.".format(my_rule, housekeeper_id))
-        files_to_deliver = get_rule_output(rules=rules, rule_name=my_rule, output_file_wildcards=wildcard_dict)
+        files_to_deliver = get_rule_output(
+            rules=rules, rule_name=my_rule, output_file_wildcards=wildcard_dict
+        )
         LOG.info("The following files added to delivery: {}".format(files_to_deliver))
         output_files_ready.extend(files_to_deliver)
 
-    output_files_ready = [dict(zip(output_files_ready[0], value)) for value in output_files_ready[1:]]
-    delivery_ready = Path(get_result_dir(config), "delivery_report", case_id + "_delivery_ready.hk").as_posix()
+    output_files_ready = [
+        dict(zip(output_files_ready[0], value)) for value in output_files_ready[1:]
+    ]
+    delivery_ready = Path(
+        get_result_dir(config), "delivery_report", case_id + "_delivery_ready.hk"
+    ).as_posix()
     write_json(output_files_ready, delivery_ready)
     FormatFile(delivery_ready)
 
 
 wildcard_constraints:
-    sample = "|".join(sample_names)
+    sample="|".join(sample_names),
+
 
 rule all:
     input:
-        quality_control_results + analysis_specific_results
+        quality_control_results + analysis_specific_results,
     output:
-        finish_file = Path(get_result_dir(config), "analysis_finish").as_posix()
+        finish_file=Path(get_result_dir(config), "analysis_finish").as_posix(),
     params:
-        tmp_dir = tmp_dir,
-        case_name = config["analysis"]["case_id"],
+        tmp_dir=tmp_dir,
+        case_name=config["analysis"]["case_id"],
     message:
-        "Finalizing analysis for {params.case_name}",
+        "Finalizing analysis for {params.case_name}"
     run:
         import datetime
         import shutil
@@ -628,11 +790,11 @@ rule all:
             LOG.error(val_exc)
             raise BalsamicError
 
-        # Remove temporary directory tree
+            # Remove temporary directory tree
         try:
             shutil.rmtree(params.tmp_dir)
         except OSError as e:
-            print ("Error: %s - %s." % (e.filename, e.strerror))
+            print("Error: %s - %s." % (e.filename, e.strerror))
 
-        # Finish timestamp file
+            # Finish timestamp file
         write_finish_file(file_path=output.finish_file)

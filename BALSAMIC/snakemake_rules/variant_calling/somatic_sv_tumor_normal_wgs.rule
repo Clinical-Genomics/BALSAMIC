@@ -327,7 +327,7 @@ rule igh_dux4_detection_tumor_normal:
     input:
         fa = config["reference"]["reference_genome"],
         bamT = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
-        bamN = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name=normal_sample),
+        bamN = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name= normal_sample),
     output:
         vcf = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".igh_dux4.vcf.gz",
     benchmark:

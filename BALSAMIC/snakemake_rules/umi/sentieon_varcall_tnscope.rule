@@ -7,7 +7,7 @@
 
 rule sentieon_tnscope_umi:
     input:
-        bam = umi_dir + "tumor_umi_consensusfiltered.merged.bam",
+        bamT = config_model.get_final_bam_name(bam_dir=umi_dir, sample_name=tumor_sample, specified_suffix="consensusfiltered_umi"),
         ref_fa = config["reference"]["reference_genome"],
         bed = config["panel"]["capture_kit"],
         dbsnp = config["reference"]["dbsnp"]
@@ -19,9 +19,9 @@ rule sentieon_tnscope_umi:
     params:
         housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "research"},
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-        sentieon_exec = config["SENTIEON_EXEC"],
-        sentieon_lic = config["SENTIEON_LICENSE"],
-        tumor_af = params.tnscope_umi.filter_tumor_af,
+        sentieon_exec = config_model.sentieon.sentieon_exec,
+        sentieon_lic = config_model.sentieon.sentieon_license,
+        tumor_af = params.umicommon.filter_tumor_af,
         algo = params.tnscope_umi.algo,
         disable_detect = params.tnscope_umi.disable_detect,
         tumor_lod = params.tnscope_umi.min_tumorLOD,
@@ -37,7 +37,6 @@ rule sentieon_tnscope_umi:
         "Calling single nucleotide variants using TNscope for {params.tumor}"
     shell:
         """
-mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
 export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
@@ -62,4 +61,6 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 {output.vcf_tnscope_umi};
 
 echo -e \"{params.tumor}\\tTUMOR\" > {output.namemap}; 
+
+rm -rf {params.tmpdir}
         """
