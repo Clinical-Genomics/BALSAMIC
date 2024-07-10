@@ -335,10 +335,10 @@ def test_get_bam_name_per_lane(balsamic_model: ConfigModel):
 
     # Then the bam names for all fastq patterns should be retrieved and match the expected format
     expected_bam_name_lane1 = (
-        f"{bam_dir}{normal_name}_align_sort_{normal_lane1_fastq_pattern}.bam"
+        f"{bam_dir}normal.{normal_name}.{normal_lane1_fastq_pattern}.align_sort.bam"
     )
     expected_bam_name_lane2 = (
-        f"{bam_dir}{normal_name}_align_sort_{normal_lane2_fastq_pattern}.bam"
+        f"{bam_dir}normal.{normal_name}.{normal_lane2_fastq_pattern}.align_sort.bam"
     )
     expected_bam_names = [expected_bam_name_lane1, expected_bam_name_lane2]
     compare_bam_file_lists(expected_bam_names, bam_names)

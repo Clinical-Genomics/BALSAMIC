@@ -14,6 +14,8 @@ class ParamsCommon(BaseModel):
         picard_fixmate: str (required), fix read mate information in bam file
         picard_RG_normal: str (required); replace readgroups in normal bam file
         picard_RG_tumor: str (required); replace readgroups in tumor bam file
+        header_per_lane: str (required); header used in per fastq-lane alignment
+        header_per_sample: str (required); header used in per sample alignment
     """
 
     pcr_model: str
@@ -21,13 +23,15 @@ class ParamsCommon(BaseModel):
     picard_fixmate: str
     picard_RG_normal: str
     picard_RG_tumor: str
+    header_per_lane: str
+    header_per_sample: str
 
 
 class ParamsInsertSizeMetrics(BaseModel):
     """This class defines the common params settings used for the InsertSizeMetricsAlgo
 
     Attributes:
-        min_read_ratio: float(required). Minimum ratio of reads for a read category to be included in the output histogram (Default 0.05)
+        min_read_ratio: float(required). Minimum ratio of reads for a read category to be included in the output histogram
     """
 
     min_read_ratio: float
@@ -49,8 +53,8 @@ class ParamsMosdepth(BaseModel):
     """This class defines the params settings used as constants in Mosdepth rule.
 
     Attributes:
-        mapq: str(required); mapping quality threshold, reads with a quality less than this value are ignored [default: 0]
-        samflag: str(required); exclude reads with any of the bits in FLAG set [default: 1796]
+        mapq: str(required); mapping quality threshold, reads with a quality less than this value are ignored
+        samflag: str(required); exclude reads with any of the bits in FLAG set
         quantize: str(required); merges adjacent bases as long as they fall in the same coverage bins e.g. (10-20)
     """
 
@@ -72,12 +76,10 @@ class ParamsSentieonWGSMetrics(BaseModel):
 
     @field_validator("cov_threshold", mode="before")
     def parse_into_arguments(cls, cov_threshold):
-        if isinstance(cov_threshold, list):
-            param_values = []
-            for value in cov_threshold:
-                param_values.append(f"--cov_thresh {value}")
-            return " ".join(param_values)
-        return cov_threshold
+        param_values = []
+        for value in cov_threshold:
+            param_values.append(f"--cov_thresh {value}")
+        return " ".join(param_values)
 
 
 class ParamsVardict(BaseModel):
