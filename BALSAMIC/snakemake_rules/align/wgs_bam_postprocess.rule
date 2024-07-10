@@ -81,7 +81,6 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 rm -rf {params.tmpdir}
         """
 
-
 rule sentieon_base_calibration:
     input:
         ref = config["reference"]["reference_genome"],
@@ -97,16 +96,15 @@ rule sentieon_base_calibration:
         Path(benchmark_dir, "sentieon_base_calibration_{sample_type}.tsv").as_posix()
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-        sentieon_exec=config_model.sentieon.sentieon_exec,
-        sentieon_lic=config_model.sentieon.sentieon_license,
-        sample = "sample_type"
+        sentieon_exec = config_model.sentieon.sentieon_exec,
+        sentieon_lic = config_model.sentieon.sentieon_license,
+        sample = "{sample_type}"
     threads:
         get_threads(cluster_config, 'sentieon_base_calibration')
     message:
-        "Recalibrating bases using sentieon tools for {params.sample}"
+        "Base recalibration using Sentieon tools for {params.sample}"
     shell:
         """
-mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
 export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
@@ -118,8 +116,7 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 --algo QualCal \
 -k {input.dbsnp} \
 -k {input.mills} \
--k {input.indel_1kg} \
-{output.recal_data_table};
+-k {input.indel_1kg} {output.recal_data_table};
 
 {params.sentieon_exec} driver \
 -r {input.ref} \
@@ -129,15 +126,13 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 --algo QualCal \
 -k {input.dbsnp} \
 -k {input.mills} \
--k {input.indel_1kg} \
-{output.recal_data_table}.post;
+-k {input.indel_1kg} {output.recal_data_table}.post;
 
 {params.sentieon_exec} driver \
 -t {threads} \
 --algo QualCal \
 --plot --before {output.recal_data_table} \
---after {output.recal_data_table}.post \
-{output.qual_recal};
+--after {output.recal_data_table}.post {output.qual_recal};
 
 {params.sentieon_exec} plot QualCal \
 -o {output.qual_recal_plot} {output.qual_recal};

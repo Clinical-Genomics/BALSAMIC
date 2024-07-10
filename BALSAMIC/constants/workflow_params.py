@@ -108,6 +108,8 @@ WORKFLOW_PARAMS = {
         "manta_max_base_quality": 70,
     },
     "common": {
+        "header_per_lane": "'@RG\\tID:{fastq_pattern}\\tSM:{sample_type}\\tPL:ILLUMINAi'",
+        "header_per_sample": "'@RG\\tID:{sample}\\tSM:{sample_type}\\tPL:ILLUMINAi'",
         "pcr_model": "NONE",
         "min_mapq": "20",
         "picard_fixmate": " ".join(

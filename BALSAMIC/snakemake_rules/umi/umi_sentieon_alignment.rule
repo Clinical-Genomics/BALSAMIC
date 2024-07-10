@@ -17,7 +17,8 @@ rule sentieon_align_sort_umireads_umi:
         sentieon_lic = config_model.sentieon.sentieon_license,
         sample_id = "{sample}",
         sample_type = lambda wildcards: config_model.get_sample_type_by_name(wildcards.sample, uppercase=True),
-        ip_bases = params.umicommon.align_intbases
+        ip_bases = params.umicommon.align_intbases,
+        header = params.common.header_per_sample
     threads:
         get_threads(cluster_config, 'sentieon_align_sort')
     message:
@@ -30,7 +31,7 @@ export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
 
 {params.sentieon_exec} bwa mem \
--R '@RG\\tID:{params.sample_id}\\tSM:{params.sample_type}\\tLB:TargetPanel\\tPL:ILLUMINA' \
+-R {params.header} \
 -K {params.ip_bases} \
 -p -t {threads} -C \
 {input.ref} {input.interleaved_fastq} | \

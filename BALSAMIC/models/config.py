@@ -398,9 +398,10 @@ class ConfigModel(BaseModel):
         bam_names = []
         for sample in self.samples:
             if sample.name == sample_name:
+                sample_type = self.get_sample_type_by_name(sample_name)
                 bam_names.extend(
                     [
-                        f"{bam_dir}{sample_name}_align_sort_{fastq_pattern}.bam"
+                        f"{bam_dir}{sample_type}.{sample_name}.{fastq_pattern}.align_sort.bam"
                         for fastq_pattern in sample.fastq_info
                     ]
                 )
