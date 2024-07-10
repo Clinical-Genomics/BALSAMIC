@@ -19,10 +19,9 @@ rule sentieon_TNscope_tumor_only:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         tumor = "TUMOR",
         tumor_options = VARCALL_PARAMS["tnscope"]["tumor"],
-        pon = " " if get_pon(config) is None else " ".join(["--pon", get_pon(config)]),
         pcr_model = params.common.pcr_model,
-        sentieon_exec = config["SENTIEON_EXEC"],
-        sentieon_lic = config["SENTIEON_LICENSE"],
+        sentieon_exec=config_model.sentieon.sentieon_exec,
+        sentieon_lic=config_model.sentieon.sentieon_license,
         case_name =  config["analysis"]["case_id"]
     threads:
         get_threads(cluster_config, 'sentieon_TNscope_tumor_only')
@@ -41,7 +40,7 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 -q {input.recal} \
 -t {threads} \
 --algo TNscope \
---tumor_sample {params.tumor} {params.pon} \
+--tumor_sample {params.tumor} \
 --dbsnp {input.dbsnp} \
 --cosmic {input.cosmic} \
 --pcr_indel_mode {params.pcr_model} \

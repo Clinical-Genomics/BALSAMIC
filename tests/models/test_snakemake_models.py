@@ -264,69 +264,8 @@ def test_get_snakemake_command(
         f"--configfiles {reference_file.as_posix()} {reference_file.as_posix()} "
         f"--use-singularity --singularity-args '--cleanenv --bind {session_tmp_path.as_posix()}:/' --quiet "
         f"--immediate-submit -j {MAX_JOBS} --jobname BALSAMIC.{case_id_tumor_only}.{{rulename}}.{{jobid}}.sh "
-<<<<<<< HEAD
-        f"--cluster-config {reference_file.as_posix()} --cluster '{sys.executable} {SCHEDULER_PATH} "
-        f"--sample-config {reference_file.as_posix()} --profile {ClusterProfile.SLURM} "
-        f"--account {ClusterAccount.DEVELOPMENT} --qos {QOS.HIGH} --log-dir {session_tmp_path} "
-        f"--script-dir {session_tmp_path} --result-dir {session_tmp_path} --mail-user {mail_user_option} "
-        f"{{dependencies}} ' --config disable_variant_caller=tnscope --cores 36"
-    )
-
-
-def test_get_snakemake_cluster_options(
-    case_id_tumor_only: str,
-    mail_user_option: str,
-    reference_file: Path,
-    session_tmp_path: Path,
-    snakemake_executable: SnakemakeExecutable,
-):
-    """Test formatting of the snakemake cluster options."""
-
-    # GIVEN a snakemake executable model with working environment paths
-
-    # WHEN calling the method
-    snakemake_cluster_options: str = (
-        snakemake_executable.get_snakemake_cluster_options()
-    )
-
-    # THEN the expected format should be returned
-    assert (
-        snakemake_cluster_options
-        == f"--immediate-submit -j {MAX_JOBS} --jobname BALSAMIC.{case_id_tumor_only}.{{rulename}}.{{jobid}}.sh "
-        f"--cluster-config {reference_file.as_posix()} --cluster '{sys.executable} {SCHEDULER_PATH.as_posix()} "
-        f"--sample-config {reference_file.as_posix()} --profile {ClusterProfile.SLURM} "
-        f"--account {ClusterAccount.DEVELOPMENT} --qos {QOS.HIGH} --log-dir {session_tmp_path} "
-        f"--script-dir {session_tmp_path} --result-dir {session_tmp_path} --mail-user {mail_user_option} "
-        "{dependencies} '"
-    )
-
-
-def test_get_cluster_submit_command(
-    mail_user_option: str,
-    reference_file: Path,
-    session_tmp_path: Path,
-    snakemake_executable: SnakemakeExecutable,
-):
-    """Test formatting of the cluster submit command."""
-
-    # GIVEN a snakemake executable model with working environment paths
-
-    # WHEN calling the method
-    snakemake_cluster_submit_command: str = (
-        snakemake_executable.get_cluster_submit_command()
-    )
-
-    # THEN the expected format should be returned
-    assert snakemake_cluster_submit_command == (
-        f"'{sys.executable} {SCHEDULER_PATH.as_posix()} "
-        f"--sample-config {reference_file.as_posix()} --profile {ClusterProfile.SLURM} "
-        f"--account {ClusterAccount.DEVELOPMENT} --qos {QOS.HIGH} --log-dir {session_tmp_path} "
-        f"--script-dir {session_tmp_path} --result-dir {session_tmp_path} --mail-user {mail_user_option} "
-        "{dependencies} '"
-=======
         f"--cluster-config {reference_file.as_posix()} --cluster '{sys.executable} {IMMEDIATE_SUBMIT_PATH.as_posix()} "
         f"--account {ClusterAccount.DEVELOPMENT} --log-dir {session_tmp_path} --mail-user {mail_user_option} "
         f"--profile {ClusterProfile.SLURM} --qos {QOS.HIGH} --script-dir {session_tmp_path} {case_id_tumor_only} "
         "{dependencies}' --config disable_variant_caller=tnscope,vardict --cores 36"
->>>>>>> deduplicate_with_umi
     )

@@ -20,8 +20,8 @@ rule sentieon_tnscope_tga_tumor_normal:
     params:
         housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "research"},
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-        sentieon_exec = config["SENTIEON_EXEC"],
-        sentieon_lic = config["SENTIEON_LICENSE"],
+        sentieon_exec=config_model.sentieon.sentieon_exec,
+        sentieon_lic=config_model.sentieon.sentieon_license,
         tumor_af = params.tnscope_tga.filter_tumor_af,
         algo = params.tnscope_tga.algo,
         tumor_lod = params.tnscope_tga.min_tumorLOD,
