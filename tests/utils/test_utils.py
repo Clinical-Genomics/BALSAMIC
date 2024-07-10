@@ -5,7 +5,7 @@ import logging
 import subprocess
 import sys
 from pathlib import Path
-from typing import Dict, List, Any
+from typing import Any, Dict, List
 from unittest import mock
 
 import click
@@ -41,6 +41,7 @@ from BALSAMIC.utils.cli import (
     get_snakefile,
     validate_cache_version,
     validate_exome_option,
+    validate_umi_min_reads,
 )
 from BALSAMIC.utils.exc import BalsamicError, WorkflowRunError
 from BALSAMIC.utils.io import (
@@ -955,36 +956,21 @@ def test_get_fastq_info_double_assigned_fastq_pattern(
 def test_get_fastp_parameters(balsamic_model: ConfigModel):
     """Validate correct retrieval of WGS and TGA specific fastp parameters."""
 
-    # GIVEN WGS config with quality trim
+    # GIVEN WGS config
     balsamic_model.analysis.sequencing_type = SequencingType.WGS
-    balsamic_model.QC.quality_trim = True
     fastp_params_wgs = get_fastp_parameters(balsamic_model)
-    # THEN no UMI trimming should be active
-    assert "fastp_trim_umi" not in fastp_params_wgs
-    # THEN quality trimming should be active
-    assert "--n_base_limit" in fastp_params_wgs["fastp_trim_qual"]
+    # THEN adapter trimming should be active in qual trim params
+    assert "--disable_adapter_trimming" not in fastp_params_wgs["fastp_trim_qual"]
+    # THEN quality trimming should be active in adapter trim params
+    assert "--disable_quality_filtering" not in fastp_params_wgs["fastp_trim_adapter"]
 
-    # GIVEN WGS config without quality trim
-    balsamic_model.QC.quality_trim = False
-    fastp_params_wgs = get_fastp_parameters(balsamic_model)
-    # THEN no quality trimming should be done
-    assert "--n_base_limit" not in fastp_params_wgs["fastp_trim_qual"]
-    assert "--disable_quality_filtering" in fastp_params_wgs["fastp_trim_qual"]
-
-    # GIVEN TGA with adapter trimming active
+    # GIVEN TGA config
     balsamic_model.analysis.sequencing_type = SequencingType.TARGETED
-    balsamic_model.QC.adapter_trim = True
     fastp_params_tga = get_fastp_parameters(balsamic_model)
-    # THEN UMI trimming should be active
-    assert "fastp_trim_umi" in fastp_params_tga
-    # THEN adapter trimming should be done
-    assert "--detect_adapter_for_pe" in fastp_params_tga["fastp_trim_adapter"]
-
-    # GIVEN TGA without adapter trimming active
-    balsamic_model.QC.adapter_trim = False
-    fastp_params_tga = get_fastp_parameters(balsamic_model)
-    # THEN no adapter trimming should be done
-    assert "--disable_adapter_trimming" in fastp_params_tga["fastp_trim_adapter"]
+    # THEN adapter trimming should NOT be active in qual trim params
+    assert "--disable_adapter_trimming" in fastp_params_tga["fastp_trim_qual"]
+    # THEN quality trimming should NOT be active in adapter trim params
+    assert "--disable_quality_filtering" in fastp_params_tga["fastp_trim_adapter"]
 
 
 def test_validate_exome_option(panel_bed_file: str):
@@ -1054,6 +1040,23 @@ def test_validate_cache_version_wrong_format():
     # THEN a bad parameter error should be raised
     with pytest.raises(click.BadParameter):
         validate_cache_version(click.Context, click.Parameter, cli_version)
+
+
+@pytest.mark.parametrize(
+    "umi_min_reads, should_fail",
+    [("3,2,1", False), ("1,0,0", False), ("3,2", True), ("a,b,c", True), (None, False)],
+)
+def test_validate_umi_min_reads(umi_min_reads: str, should_fail: bool):
+    """Test UMI min reads option validation."""
+    if should_fail:
+        with pytest.raises(click.BadParameter):
+            validate_umi_min_reads(
+                _ctx=click.Context, _param=click.Parameter, umi_min_reads=umi_min_reads
+            )
+    else:
+        validate_umi_min_reads(
+            _ctx=click.Context, _param=click.Parameter, umi_min_reads=umi_min_reads
+        )
 
 
 def test_read_vcf(vcf_file_path, vcf_file_gz_path):

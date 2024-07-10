@@ -4,7 +4,7 @@
 rule vardict_tumor_only:
     input:
         fa = config["reference"]["reference_genome"],
-        bamT = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample)
+        bamT = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
         bed = vcf_dir + "split_bed/{bedchrom}." + capture_kit,
     output:
         temp(vcf_dir + "vardict/split_vcf/{bedchrom}_vardict.vcf.gz")
@@ -27,7 +27,6 @@ rule vardict_tumor_only:
         """
 export PERL5LIB=;
 
-mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
 export VAR_DICT_OPTS='\"-Djava.io.tmpdir={params.tmpdir}\" \"-Xmx45G\"'; 
 
@@ -44,6 +43,7 @@ vardict-java -I 600 \
 | bgzip > {output};
 
 tabix -p vcf {output};
+rm -rf {params.tmpdir};
     """
 
 
@@ -68,7 +68,6 @@ rule vardict_merge:
         ("Merging multiple VCFs from vardict into single VCF using bcftools for {params.case_name}")
     shell:
         """
-mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
 
 bcftools concat {input} \
@@ -79,6 +78,8 @@ tabix -f -p vcf {output.vcf_vardict};
 echo -e \"{params.case_name}\\tTUMOR\" > {output.namemap};
 echo -e \"{params.case_name}\" > {output.namemap}.tumor; 
 echo '{{ vcf: {{ vardict: {{ name: vardict , path: {output.vcf_vardict} }} }} }}' > {output.yaml};
+
+rm -rf {params.tmpdir};
         """
 
 
@@ -97,8 +98,8 @@ rule sentieon_TNhaplotyper_tumor_only:
     params:
         tumor = "TUMOR",
         tmpdir= tempfile.mkdtemp(prefix=tmp_dir),
-        sentieon_exec = config["SENTIEON_EXEC"],
-        sentieon_lic = config["SENTIEON_LICENSE"],
+        sentieon_exec = config_model.sentieon.sentieon_exec,
+        sentieon_lic = config_model.sentieon.sentieon_license,
         case_name = config["analysis"]["case_id"]
     threads:
         get_threads(cluster_config, 'sentieon_TNhaplotyper_tumor_only')
@@ -106,7 +107,6 @@ rule sentieon_TNhaplotyper_tumor_only:
         "Calling variants using TNhaplotyper for sample {params.case_name}"
     shell:
         """
-mkdir -p {params.tmpdir}; 
 export TMPDIR={params.tmpdir}; 
 export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
@@ -122,4 +122,5 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 --dbsnp {input.dbsnp} {output.vcf};
  
 echo -e \"{params.tumor}\\tTUMOR\" > {output.namemap};
+rm -rf {params.tmpdir};
         """

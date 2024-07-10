@@ -14,8 +14,8 @@ rule sentieon_dedup_consensus:
         Path(benchmark_dir, "sentieon_dedup_{sample_type}.{sample}.tsv").as_posix()
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-        sentieon_exec = config["SENTIEON_EXEC"],
-        sentieon_lic = config["SENTIEON_LICENSE"],
+        sentieon_exec = config_model.sentieon.sentieon_exec,
+        sentieon_lic = config_model.sentieon.sentieon_license,
         sample_id = "{sample}"
     threads:
         get_threads(cluster_config, 'sentieon_dedup')
@@ -24,7 +24,6 @@ rule sentieon_dedup_consensus:
          "Current sample: {params.sample_id}")
     shell:
         """
-mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
 export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
@@ -45,14 +44,18 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 --score_info {output.score} \
 --metrics {output.dedup_metrics} \
 {output.bam} ;
+
+rm -rf {params.tmpdir}
         """
 
-# NOTE: This rule is added to fix a bug in Sentieon dedup with consensus
-# SAM validation error: ERROR::INVALID_UNALIGNED_MATE_START:Record 12,
-# Read name UMI-CTC-GAC-db9f21d8-A01901:175:H23G3DSX7:1:2231:18376:10739-D1,
-# The unaligned mate start position is 10125, should be 0
-
 rule samtools_fixmate:
+    """
+    This rule is added to fix a bug in Sentieon dedup with UMI consensus argument
+    
+    SAM validation error: 
+    ERROR::INVALID_UNALIGNED_MATE_START:Record 12,Read name UMI-CTC-GAC-db9f21d8-A01901:175:H23G3DSX7:1:2231:18376:10739-D1,
+    The unaligned mate start position is 10125, should be 0
+    """
     input:
         ref = config["reference"]["reference_genome"],
         bam = Path(bam_dir,"{sample_type}.{sample}.dedup.bam").as_posix(),
@@ -71,13 +74,14 @@ rule samtools_fixmate:
         "Running samtools collate and fixmate for: {params.sample_id}"
     shell:
         """
-mkdir -p {params.tmpdir} ;    
 mkdir -p {params.tmpdir}/collate ; 
 
 samtools collate -@ {threads} -O -u {input.bam} {params.tmpdir}/collate/{wildcards.sample}_collate_tmp | \
 samtools fixmate --reference {input.ref} -@ {threads} - - | \
 samtools sort -T {params.tmpdir} - -o {output.bam} ;
-samtools index {output.bam}
+samtools index {output.bam} ;
+
+rm -rf {params.tmpdir}
         """
 
 rule cap_base_quality:
@@ -91,13 +95,14 @@ rule cap_base_quality:
         Path(singularity_image,config["bioinfo_tools"].get("pysam") + ".sif").as_posix()
     params:
         sample_id = "{sample}",
-        cap_base_qualities = get_script_path("cap_base_quality_in_bam.py")
+        cap_base_qualities = get_script_path("cap_base_quality_in_bam.py"),
+        max_quality = params.bam_post_processing.manta_max_base_quality
     threads:
         get_threads(cluster_config, "cap_base_quality")
     message:
-        "Capping base qualities to 70 in bamfile using pysam in sample: {params.sample_id}"
+        "Capping base qualities to {params.max_quality} in bamfile using pysam in sample: {params.sample_id}"
     shell:
         """
-python {params.cap_base_qualities} --max_quality 70 {input.bam} {output.bam} ; 
+python {params.cap_base_qualities} --max-quality {params.max_quality} {input.bam} {output.bam} ; 
 samtools index -@ {threads} {output.bam}
         """

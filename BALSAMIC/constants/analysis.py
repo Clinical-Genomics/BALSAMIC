@@ -109,6 +109,7 @@ class BioinfoTools(StrEnum):
     GATK: str = "gatk"
     GENMOD: str = "genmod"
     MANTA: str = "manta"
+    MSISENSORPRO: str = "msisensorpro"
     MOSDEPTH: str = "mosdepth"
     MULTIQC: str = "multiqc"
     PICARD: str = "picard"
@@ -160,6 +161,7 @@ BIOINFO_TOOL_ENV: Dict[str, str] = {
     BioinfoTools.VCFANNO: DockerContainers.ANNOTATE,
     BioinfoTools.SAMBAMBA: DockerContainers.COVERAGE_QC,
     BioinfoTools.MOSDEPTH: DockerContainers.COVERAGE_QC,
+    BioinfoTools.MSISENSORPRO: DockerContainers.MSISENSORPRO,
     BioinfoTools.BCFTOOLS: DockerContainers.PYTHON_3,
     BioinfoTools.TABIX: DockerContainers.PYTHON_3,
     BioinfoTools.BGZIP: DockerContainers.PYTHON_3,

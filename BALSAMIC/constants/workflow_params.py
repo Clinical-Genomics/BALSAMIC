@@ -118,6 +118,9 @@ VCF_DICT = {
 SLEEP_BEFORE_START = 600
 
 WORKFLOW_PARAMS = {
+    "bam_post_processing": {
+        "manta_max_base_quality": 70,
+    },
     "common": {
         "pcr_model": "NONE",
         "min_mapq": "20",
@@ -154,9 +157,21 @@ WORKFLOW_PARAMS = {
             ]
         ),
     },
+    "insert_size_metrics": {
+        "min_read_ratio": 0.01,
+    },
     "manta": {
         "wgs_settings": "",
         "tga_settings": "--exome",
+    },
+    "mosdepth": {
+        "mapq": 20,
+        "samflag": 1796,
+        "quantize": "0:1:50:150:",
+    },
+    "sentieon_wgs_metrics": {
+        "min_base_qual": 10,
+        "cov_threshold": [50, 100, 150, 200, 250],
     },
     "vardict": {
         "allelic_frequency": "0.001",

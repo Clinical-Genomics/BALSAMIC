@@ -1,4 +1,5 @@
 """Balsamic command options."""
+
 import click
 
 from BALSAMIC import __version__ as balsamic_version
@@ -22,7 +23,11 @@ from BALSAMIC.constants.cluster import (
 from BALSAMIC.constants.constants import LOG_LEVELS, LogLevel
 from BALSAMIC.constants.rules import DELIVERY_RULES
 from BALSAMIC.constants.workflow_params import VCF_DICT
-from BALSAMIC.utils.cli import validate_cache_version, validate_exome_option
+from BALSAMIC.utils.cli import (
+    validate_cache_version,
+    validate_exome_option,
+    validate_umi_min_reads,
+)
 
 OPTION_ANALYSIS_DIR = click.option(
     "--analysis-dir",
@@ -349,6 +354,20 @@ OPTION_SAMPLE_CONFIG = click.option(
     help="Sample configuration file",
 )
 
+OPTION_SENTIEON_INSTALL_DIR = click.option(
+    "--sentieon-install-dir",
+    type=click.Path(exists=True, resolve_path=True),
+    required=True,
+    help="Path to Sentieon install directory",
+)
+
+OPTION_SENTIEON_LICENSE = click.option(
+    "--sentieon-license",
+    required=True,
+    type=click.STRING,
+    help="Sentieon license in format IP:Port",
+)
+
 OPTION_SHOW_ONLY_MISSING_FILES = click.option(
     "-m",
     "--show-only-missing",
@@ -390,4 +409,11 @@ OPTION_TUMOR_SAMPLE_NAME = click.option(
     required=True,
     type=click.STRING,
     help="Tumor sample name",
+)
+
+OPTION_UMI_MIN_READS = click.option(
+    "--umi-min-reads",
+    type=click.STRING,
+    callback=validate_umi_min_reads,
+    help="Minimum raw reads supporting each UMI group. Format: 'x,y,z'.",
 )

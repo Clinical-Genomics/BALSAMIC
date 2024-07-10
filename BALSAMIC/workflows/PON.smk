@@ -15,7 +15,7 @@ from BALSAMIC.models.config import ConfigModel
 from BALSAMIC.models.params import BalsamicWorkflowConfig
 from BALSAMIC.utils.exc import BalsamicError
 from BALSAMIC.utils.io import write_finish_file
-from BALSAMIC.utils.rule import get_fastp_parameters, get_result_dir, get_threads
+from BALSAMIC.utils.rule import get_fastp_parameters, get_result_dir, get_threads, get_script_path
 
 
 # Initialize ConfigModel
@@ -49,9 +49,6 @@ bam_dir: str = Path(result_dir, "bam", "").as_posix() + "/"
 cnv_dir: str = Path(result_dir, "cnv", "").as_posix() + "/"
 qc_dir: str = Path(result_dir, "qc", "").as_posix() + "/"
 
-# Pre run parameters
-seconds_before_start: int = SLEEP_BEFORE_START
-
 # PON setting
 pon_workflow: PONWorkflow = config_model.analysis.pon_workflow
 
@@ -63,36 +60,18 @@ sample_names: List[str] = config_model.get_all_sample_names()
 # Fastp parameters
 fastp_parameters: Dict = get_fastp_parameters(config_model)
 
-# Find and set Sentieon binary and license server from env variables
-try:
-    config["SENTIEON_LICENSE"] = os.environ["SENTIEON_LICENSE"]
-    config["SENTIEON_INSTALL_DIR"] = os.environ["SENTIEON_INSTALL_DIR"]
-
-    if os.getenv("SENTIEON_EXEC") is not None:
-        config["SENTIEON_EXEC"] = os.environ["SENTIEON_EXEC"]
-    else:
-        config["SENTIEON_EXEC"] = Path(os.environ["SENTIEON_INSTALL_DIR"], "bin", "sentieon").as_posix()
-
-except KeyError as error:
-    LOG.error("Set environment variables SENTIEON_LICENSE, SENTIEON_INSTALL_DIR, SENTIEON_EXEC "
-              "to run SENTIEON variant callers")
-    raise BalsamicError
-
-if not Path(config["SENTIEON_EXEC"]).exists():
-    LOG.error("Sentieon executable not found {}".format(Path(config["SENTIEON_EXEC"]).as_posix()))
-    raise BalsamicError
-
-
 sequence_type = config['analysis']["sequencing_type"]
 rules_to_include = []
 rules_to_include.append("snakemake_rules/misc/sleep.rule")
 if sequence_type == SequencingType.TARGETED:
+    rules_to_include.append("snakemake_rules/concatenation/concatenation.rule")
     rules_to_include.append("snakemake_rules/quality_control/fastp_tga.rule")
+    rules_to_include.append("snakemake_rules/align/tga_sentieon_alignment.rule")
+    rules_to_include.append("snakemake_rules/align/tga_bam_postprocess.rule")
 else:
     rules_to_include.append("snakemake_rules/quality_control/fastp_wgs.rule")
-
-rules_to_include.append("snakemake_rules/align/tga_sentieon_alignment.rule")
-rules_to_include.append("snakemake_rules/align/tga_bam_postprocess.rule")
+    rules_to_include.append("snakemake_rules/align/wgs_sentieon_alignment.rule")
+    rules_to_include.append("snakemake_rules/align/wgs_bam_postprocess.rule")
 
 if pon_workflow == PONWorkflow.CNVKIT:
     reffasta: str = config_model.reference["reference_genome"]

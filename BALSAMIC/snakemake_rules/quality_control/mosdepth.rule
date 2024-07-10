@@ -18,9 +18,9 @@ rule mosdepth_coverage:
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("mosdepth") + ".sif").as_posix()
     params:
-        mapq = '20',
-        samflag = '1796',
-        quantize = '0:1:50:150:',
+        mapq = params.mosdepth.mapq,
+        samflag = params.mosdepth.samflag,
+        quantize = params.mosdepth.quantize,
         sample_name = '{sample}',
         output_dir = qc_dir,
     threads:

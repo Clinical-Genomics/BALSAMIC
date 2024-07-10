@@ -2,7 +2,7 @@
 Tools and software
 =================================
 
-BALSAMIC ( **version** = 15.0.0 ) uses myriad of tools and softwares to analyze fastq files. This section covers why each
+BALSAMIC ( **version** = 15.0.1 ) uses myriad of tools and softwares to analyze fastq files. This section covers why each
 one is included: usage and parameters, and relevant external links.
 
 ascatNgs
@@ -39,7 +39,7 @@ cnvkit
 ~~~~~~
 :Source code: `GitHub` `<https://github.com/etal/cnvkit>`_
 :Article: `PLOS Computational Biology` `<https://doi.org/10.1371/journal.pcbi.1004873>`_
-:Version: `0.9.9`
+:Version: `0.9.10`
 
 cnvpytor
 ~~~~~~~~
@@ -82,6 +82,12 @@ manta
 :Article: `Bioinformatics` `<https://doi.org/10.1093/bioinformatics/btv710>`_
 :Version: `1.6.0`
 
+msisensor-pro
+~~~~~~~~~~~~~
+:Source code: `GitHub` `<https://github.com/xjtu-omics/msisensor-pro>`_
+:Article: `Bioinformatics` `<https://doi.org/10.1016/j.gpb.2020.02.001>`_
+:Version: `1.2.0`
+
 mosdepth
 ~~~~~~~~
 :Source code: `GitHub` `<https://github.com/brentp/mosdepth>`_
@@ -92,7 +98,7 @@ multiqc
 ~~~~~~~
 :Source code: `GitHub` `<https://github.com/ewels/MultiQC>`_
 :Article: `Bioinformatics` `<https://doi.org/10.1093/bioinformatics/btw354>`_
-:Version: `1.18`
+:Version: `1.22.3`
 
 picard
 ~~~~~~
