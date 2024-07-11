@@ -7,16 +7,15 @@ Target Genome Analysis
 
 BALSAMIC :superscript:`1` (**version** = 15.0.1) was used to analyze the data from raw FASTQ files.
 We first quality controlled FASTQ files using FastQC v0.11.9 :superscript:`2`.
-Adapter sequences and low-quality bases were trimmed using fastp v0.23.2 :superscript:`3`.
+Adapter sequences are trimmed using fastp v0.23.2 :superscript:`3` and then UMI sequences are extracted using the UMI extract tool from sentieon-tools 202308.03 :superscript:`15` and finally low-quality bases were trimmed using fastp v0.23.2 :superscript:`3`.
 Trimmed reads were mapped to the reference genome hg19 using sentieon-tools 202308.03 :superscript:`15`.
-Duplicated reads were marked using Dedup from sentieon-tools 202308.03 :superscript:`15`.
-The final BAM is promptly quality controlled using CollectHsMetrics, CollectInsertSizeMetrics and CollectAlignmentSummaryMetrics functionalities from Picard tools v2.27.1 :superscript:`6`.
+The resulting BAM is quality controlled using samtools v1.15.1 :superscript:`26`, and AlignmentStat, InsertSizeMetricAlgo, GCBias, MeanQualityByCycle, QualDistribution and BaseDistributionByCycle from sentieon-tools 202308.03 :superscript:`15`.
+Duplicate reads are collapsed using the UMI function in Dedup from sentieon-tools 202308.03 :superscript:`15`, and invalid mates are corrected with tools collate and fixmate from samtools v1.15.1 :superscript:`26`.
+Coverage metrics are collected from the final BAM using Sambamba v0.8.2 :superscript:`27`, Mosdepth v0.3.3 :superscript:`28` and CollectHsMetrics from Picard tools v2.27.1 :superscript:`6`.
 Results of the quality controlled steps were summarized by MultiQC v1.22.3 :superscript:`7`.
-Small somatic mutations (SNVs and INDELs) were called for each sample using VarDict v1.8.2 :superscript:`8`.
-Apart from the Vardict filters to report the variants, the called-variants were also further second filtered using the criteria
-(*MQ >= 40, DP >= 100, VD >= 5, Minimum AF >= 0.007, Maximum AF < 1, GNOMADAF_popmax <= 0.005, swegen AF < 0.01*).
+Small somatic mutations (SNVs and INDELs) were called for each sample using VarDict 2019.06.04 :superscript:`8` and filtered using the criteria (*MQ >= 30, DP >= 100 (20 for exome-samples), VD >= 5, Minimum AF >= 0.007, Maximum AF < 1, GNOMADAF_popmax <= 0.005, swegen AF < 0.01*).
 Only those variants that fulfilled the filtering criteria and scored as `PASS` in the VCF file were reported.
-Structural variants (SV) were called using Manta v1.6.0 :superscript:`9` and Dellyv1.0.3 :superscript:`10`.
+Structural variants (SV) were called using Manta v1.6.0 :superscript:`9` on a post-processed version of the BAM which was base-quality capped to 70, and Delly v1.0.3 :superscript:`10`.
 Copy number variations (CNV) were called using CNVkit v0.9.10 :superscript:`11`.
 The variant calls from CNVkit, Manta and Delly were merged using SVDB v2.8.1 :superscript:`12`.
 The clinical set of SNV and SV is also annotated and filtered against loqusDB curated frequency of observed variants (frequency < 0.01) from non-cancer cases and only annotated using frequency of observed variants from cancer cases (somatic and germline).
@@ -32,7 +31,7 @@ Adapter sequences and low-quality bases were trimmed using fastp v0.23.2 :supers
 Trimmed reads were mapped to the reference genome hg19 using sentieon-tools 202308.03 :superscript:`15`.
 Duplicated reads were marked using Dedup from sentieon-tools 202308.03 :superscript:`15`.
 The BAM file was then realigned using Realign from sentieon-tools 202308.03 :superscript:`15` and common population InDels.
-The final BAM is quality controlled using WgsMetricsAlgo and CoverageMetrics from sentieon-tools 202010.02 :superscript:`15` and CollectWgsMetrics, CollectMultipleMetrics, CollectGcBiasMetrics, and CollectHsMetrics functionalities from Picard tools v2.27.1 :superscript:`6`.
+The final BAM is quality controlled using WgsMetricsAlgo, CoverageMetrics, AlignmentStat, InsertSizeMetricAlgo, GCBias, MeanQualityByCycle, QualDistribution and BaseDistributionByCycle from sentieon-tools 202308.03 :superscript:`15`, and CollectWgsMetrics and CollectHsMetrics functionalities from Picard tools v2.27.1 :superscript:`6`.
 Results of the quality controlled steps were summarized by MultiQC v1.22.3 :superscript:`7`.
 Small somatic mutations (SNVs and INDELs) were called for each sample using Sentieon TNscope :superscript:`16`.
 The called-variants were also further second filtered using the criteria (DP(tumor,normal) >= 10; AD(tumor) >= 3; AF(tumor) >= 0.05, Maximum AF(tumor < 1;  GNOMADAF_popmax <= 0.001; normalized base quality scores >= 20, read_counts of alt,ref alle > 0).
@@ -43,7 +42,7 @@ The clinical set of SNV and SV is also annotated and filtered against loqusDB cu
 All variants were annotated using Ensembl VEP v104.3 :superscript:`13`. We used vcfanno v0.3.3 :superscript:`14`
 to annotate somatic single nucleotide variants for their population allele frequency from gnomAD v2.1.1 :superscript:`18`, CADD v1.6 :superscript:`24`, SweGen :superscript:`22`  and frequency of observed variants in normal samples. The MSI (MicroSatellite Instability) score was computed using MSIsensor-pro v1.2.0 :superscript:`25`.
 
-UMI Data Analysis
+Target Genome Analysis
 ~~~~~~~~~~~~~~~~~~~~~
 
 BALSAMIC :superscript:`1` (**version** = 15.0.1) was used to analyze the data from raw FASTQ files.
@@ -91,3 +90,6 @@ We used three commercially available products from SeraCare [Material numbers: 0
 23. Milovan Suvakov, Arijit Panda, Colin Diesh, Ian Holmes, Alexej Abyzov, CNVpytor: a tool for copy number variation detection and analysis from read depth and allele imbalance in whole-genome sequencing, GigaScience, Volume 10, Issue 11, November 2021, giab074, https://doi.org/10.1093/gigascience/giab074
 24. Rentzsch P., Witten D., Cooper G.M., Shendure J., Kircher M. CADD: predicting the deleteriousness of variants throughout the human genome. Nucleic Acids Res. 2018. https://doi.org/10.1093/nar/gky1016. PubMed PMID: 30371827.
 25. Peng Jia, Xiaofei Yang, Li Guo, Bowen Liu, Jiadong Lin, Hao Liang, et al. MSIsensor-pro: fast, accurate, and matched-normal-sample-free detection of microsatellite instability. Genomics Proteomics Bioinformatics 2020,18(1).
+26. Heng Li, Bob Handsaker, Alec Wysoker, Tim Fennell, Jue Ruan, Nils Homer, Gabor Marth, Goncalo Abecasis, Richard Durbin, and 1000 Genome Project Data Processing Subgroup. The Sequence Alignment/Map format and SAMtools. Bioinformatics 2009, 25(16): 2078-2079.
+27. Artem Tarasov, Anna Vilella, Ernesto Cuppen, Isaac Nijman, and Pjotr Prins. Sambamba: fast processing of NGS alignment formats. Bioinformatics 2015, 31(12): 2032-2034.
+28. Brent S. Pedersen, Aaron R. Quinlan. Mosdepth: quick coverage calculation for genomes and exomes. Bioinformatics 2018, 34(5): 867-868.
