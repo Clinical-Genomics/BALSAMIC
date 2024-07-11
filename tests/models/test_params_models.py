@@ -173,12 +173,10 @@ def test_umiparams_common():
     # GIVEN a UMI workflow common params
     test_commonparams = {
         "align_intbases": 100,
-        "filter_tumor_af": 0.01,
     }
     # WHEN building the model
     test_commonparams_built = UMIParamsCommon(**test_commonparams)
     # THEN assert values
-    assert isclose(test_commonparams_built.filter_tumor_af, 0.01)
     assert test_commonparams_built.align_intbases == 100
 
 
@@ -221,10 +219,12 @@ def test_umiparams_tnscope():
         "algo": "algoname",
         "init_tumorLOD": 0.5,
         "min_tumorLOD": 6,
+        "filter_tumor_af": 0.01,
         "error_rate": 5,
         "prunefactor": 3,
         "padding": 30,
         "disable_detect": "abc",
+        "pcr_model": "NONE"
     }
 
     # WHEN building the model
@@ -234,7 +234,9 @@ def test_umiparams_tnscope():
     assert test_tnscope_params_built.algo == "algoname"
     assert isclose(test_tnscope_params_built.init_tumorLOD, 0.5)
     assert test_tnscope_params_built.min_tumorLOD == 6
+    assert test_tnscope_params_built.filter_tumor_af == 0.01
     assert test_tnscope_params_built.error_rate == 5
     assert test_tnscope_params_built.prunefactor == 3
     assert test_tnscope_params_built.disable_detect == "abc"
+    assert test_tnscope_params_built.pcr_model == "NONE"
     assert test_tnscope_params_built.padding == 30
