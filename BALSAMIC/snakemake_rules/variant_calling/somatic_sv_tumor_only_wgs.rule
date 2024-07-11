@@ -54,6 +54,7 @@ echo -e \"{params.tumor}\\tTUMOR\" > {output.namemap};
 rm -rf {params.tmpdir};
       """
 
+
 rule delly_sv_tumor_only:
     input:
         fa = config["reference"]["reference_genome"],
