@@ -42,21 +42,18 @@ The clinical set of SNV and SV is also annotated and filtered against loqusDB cu
 All variants were annotated using Ensembl VEP v104.3 :superscript:`13`. We used vcfanno v0.3.3 :superscript:`14`
 to annotate somatic single nucleotide variants for their population allele frequency from gnomAD v2.1.1 :superscript:`18`, CADD v1.6 :superscript:`24`, SweGen :superscript:`22`  and frequency of observed variants in normal samples. The MSI (MicroSatellite Instability) score was computed using MSIsensor-pro v1.2.0 :superscript:`25`.
 
-Target Genome Analysis
+UMI workflow
 ~~~~~~~~~~~~~~~~~~~~~
 
 BALSAMIC :superscript:`1` (**version** = 15.0.1) was used to analyze the data from raw FASTQ files.
 We first quality controlled FASTQ files using FastQC v0.11.9 :superscript:`2`.
-UMI tag extraction and consensus generation were performed using Sentieon tools 202308.03 :superscript:`15`.
-Adapter sequences and low-quality bases were trimmed using fastp v0.23.2 :superscript:`3`.
-The alignment of UMI extracted and consensus called reads to the human reference genome (hg19) was done by bwa-mem and
-samtools using Sentieon utils. Consensus reads were filtered based on the number of minimum reads supporting each UMI tag group.
-We applied a criteria filter of minimum reads `3,1,1`. It means that at least three UMI tag groups should be ideally considered from both DNA strands,
-where a minimum of at least one UMI tag group should exist in each single-stranded consensus read.
+Adapter sequences were trimmed using fastp v0.23.2 :superscript:`3`.
+UMI tag extraction and alignment and consensus-calling of UMI groups were performed using Sentieon tools 202308.03 :superscript:`15`.
+Consensus reads were filtered based on a minimum reads `3,1,1`. supporting each UMI tag group, meaning that at least 3 read-pairs with at least 1 from each strand is required for each UMI-group.
 The filtered consensus reads were quality controlled using Picard CollectHsMetrics v2.27.1 :superscript:`5`. Results of the quality controlled steps were summarized by MultiQC v1.22.3 :superscript:`6`.
 For each sample, somatic mutations were called using Sentieon TNscope :superscript:`16`, with non-default parameters for passing the final list of variants
 (--min_tumor_allele_frac 0.0005, --filter_t_alt_frac 0.0005, --min_init_tumor_lod 0.5, min_tumor_lod 4, --max_error_per_read 5  --pcr_indel_model NONE, GNOMADAF_popmax <= 0.02).
-The clinical set of SNV and SV is also annotated and filtered against loqusDB curated frequency of observed variants (frequency < 0.01) from non-cancer cases and only annotated using frequency of observed variants from cancer cases (somatic and germline).
+The clinical sets of SNV and SV are also annotated and filtered against loqusDB curated frequency of observed variants (frequency < 0.01) from non-cancer cases and only annotated using frequency of observed variants from cancer cases (somatic and germline).
 All variants were annotated using Ensembl VEP v104.3 :superscript:`7`. We used vcfanno v0.3.3 :superscript:`8` to annotate somatic variants for their population allele frequency from gnomAD v2.1.1 :superscript:`18`, CADD v1.6 :superscript:`24`, SweGen :superscript:`22` and frequency of observed variants in normal samples.
 For exact parameters used for each software, please refer to  https://github.com/Clinical-Genomics/BALSAMIC.
 We used three commercially available products from SeraCare [Material numbers: 0710-067110 :superscript:`19`, 0710-067211 :superscript:`20`, 0710-067312 :superscript:`21`] for validating the efficiency of the UMI workflow in identifying 14 mutation sites at known allelic frequencies.
