@@ -21,7 +21,7 @@ rule sentieon_tnscope_umi:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         sentieon_exec = config_model.sentieon.sentieon_exec,
         sentieon_lic = config_model.sentieon.sentieon_license,
-        tumor_af = params.umicommon.filter_tumor_af,
+        tumor_af = params.tnscope_umi.filter_tumor_af,
         algo = params.tnscope_umi.algo,
         disable_detect = params.tnscope_umi.disable_detect,
         tumor_lod = params.tnscope_umi.min_tumorLOD,
