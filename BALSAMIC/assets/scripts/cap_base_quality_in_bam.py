@@ -1,7 +1,6 @@
 import click
 import pysam
 import numpy as np
-from BALSAMIC.constants.workflow_params import WORKFLOW_PARAMS
 
 
 @click.command()
@@ -9,7 +8,7 @@ from BALSAMIC.constants.workflow_params import WORKFLOW_PARAMS
 @click.argument("output_bam", type=click.Path())
 @click.option(
     "--max-quality",
-    default=WORKFLOW_PARAMS["bam_post_processing"]["manta_max_base_quality"],
+    default=70,
     type=int,
     help="Maximum quality value to cap to.",
 )
