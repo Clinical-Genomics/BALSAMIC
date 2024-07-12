@@ -14,7 +14,6 @@ rule sentieon_align_sort:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         sentieon_exec = config_model.sentieon.sentieon_exec,
         sentieon_lic = config_model.sentieon.sentieon_license,
-        header = params.common.header_per_lane,
         sample_id = "{sample}",
         sample_type = "{sample_type}",
         fastq_pattern = "{fastq_pattern}"
@@ -30,7 +29,7 @@ export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
 
 {params.sentieon_exec} bwa mem -M \
--R {params.header} \
+-R '@RG\\tID:{wildcards.fastq_pattern}\\tSM:{params.sample_type}\\tPL:ILLUMINA' \
 -t {threads} \
 -K 50000000 \
 {input.ref} {input.fastq_r1} {input.fastq_r2} \
