@@ -14,8 +14,6 @@ class ParamsCommon(BaseModel):
         picard_fixmate: str (required), fix read mate information in bam file
         picard_RG_normal: str (required); replace readgroups in normal bam file
         picard_RG_tumor: str (required); replace readgroups in tumor bam file
-        header_per_lane: str (required); header used in per fastq-lane alignment
-        header_per_sample: str (required); header used in per sample alignment
     """
 
     pcr_model: str
@@ -23,8 +21,6 @@ class ParamsCommon(BaseModel):
     picard_fixmate: str
     picard_RG_normal: str
     picard_RG_tumor: str
-    header_per_lane: str
-    header_per_sample: str
 
 
 class ParamsInsertSizeMetrics(BaseModel):
