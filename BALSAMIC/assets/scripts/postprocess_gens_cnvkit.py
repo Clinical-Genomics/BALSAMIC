@@ -55,7 +55,7 @@ def create_gens_cov_file(
         midpoint = row["start"] + int((row["end"] - row["start"]) / 2)
         log2 = row["log2"]
         if purity:
-            log2 = adjust_log2_ratio(log2, purity)
+            log2 = round(adjust_log2_ratio(log2, purity), 4)
         log2_data.append(f"{row['chromosome']}\t{midpoint-1}\t{midpoint}\t{log2}")
 
     # Write log2 data to output file
