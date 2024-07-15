@@ -1,6 +1,9 @@
 import click
 import pandas as pd
+import numpy as np
 
+def adjust_log2_ratio(log2_ratio, purity):
+    return np.log2((2**log2_ratio - (1 - purity)) / purity)
 
 @click.command()
 @click.option(
@@ -52,7 +55,7 @@ def create_gens_cov_file(
         midpoint = row["start"] + int((row["end"] - row["start"]) / 2)
         log2 = row["log2"]
         if purity:
-            log2 = round(float(1 - purity) + purity * (log2 / ploidy), 4)
+            log2 = adjust_log2_ratio(log2, purity)
         log2_data.append(f"{row['chromosome']}\t{midpoint-1}\t{midpoint}\t{log2}")
 
     # Write log2 data to output file
