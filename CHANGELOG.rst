@@ -14,6 +14,7 @@ Changed:
 * `SLEEP_BEFORE_START` to 600s https://github.com/Clinical-Genomics/BALSAMIC/pull/1372
 * Updated Multiqc to version 1.22.3 https://github.com/Clinical-Genomics/BALSAMIC/pull/1441
 * Upgrade `vcf2cytosure` version to 0.9.1 and remove hardcoded versions https://github.com/Clinical-Genomics/BALSAMIC/pull/1456
+* Replaced VarDict with TNscope for all TGA workflows https://github.com/Clinical-Genomics/BALSAMIC/pull/1429
 
 Removed:
 ^^^^^^^^
@@ -21,6 +22,7 @@ Removed:
 * `gatk_contest` rule https://github.com/Clinical-Genomics/BALSAMIC/pull/1432
 * SGE (qsub) support https://github.com/Clinical-Genomics/BALSAMIC/pull/1372
 * Fastq quality and UMI trimming command-line options https://github.com/Clinical-Genomics/BALSAMIC/pull/1358
+* ML model for TNscope https://github.com/Clinical-Genomics/BALSAMIC/pull/1429
 
 Fixed:
 ^^^^^^

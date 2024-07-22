@@ -77,6 +77,7 @@ class ParamsSentieonWGSMetrics(BaseModel):
             param_values.append(f"--cov_thresh {value}")
         return " ".join(param_values)
 
+
 class ParamsVEP(BaseModel):
     """This class defines the params settings used as constants in vep rule.
 
@@ -115,6 +116,7 @@ class UMIParamsCommon(BaseModel):
     """
 
     align_intbases: int
+
 
 class UMIParamsUMIextract(BaseModel):
     """This class defines the params settings used as constants in UMI workflow-rule umextract.
@@ -165,6 +167,7 @@ class UMIParamsTNscope(BaseModel):
     disable_detect: str
     pcr_model: str
 
+
 class TGAParamsTNscope(BaseModel):
     """This class defines the params settings used as constants in TGA workflow-rule tnscope.
 
@@ -187,6 +190,7 @@ class TGAParamsTNscope(BaseModel):
     prunefactor: int
     padding: int
     pcr_model: str
+
 
 class BAMPostProcessingParams(BaseModel):
     """This class defines the params settings used as constants bam post processing rules

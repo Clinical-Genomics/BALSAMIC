@@ -164,9 +164,7 @@ WORKFLOW_PARAMS = {
     "vep": {
         "vep_filters": "--compress_output bgzip --vcf --everything --hgvsg --allow_non_variant --dont_skip --buffer_size 30000 --max_sv_size 249250621 --format vcf --offline --variant_class --merged --cache --verbose --force_overwrite"
     },
-    "umicommon": {
-        "align_intbases": 1000000
-    },
+    "umicommon": {"align_intbases": 1000000},
     "umiconsensuscall": {
         "align_format": "BAM",
         "filter_minreads": "3,1,1",

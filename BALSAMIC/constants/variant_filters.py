@@ -1,4 +1,3 @@
-
 # Configuration of common SNV filter settings
 SNV_BCFTOOLS_SETTINGS_COMMON = {
     "swegen_snv_freq": {

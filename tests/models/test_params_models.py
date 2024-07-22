@@ -224,7 +224,7 @@ def test_umiparams_tnscope():
         "prunefactor": 3,
         "padding": 30,
         "disable_detect": "abc",
-        "pcr_model": "NONE"
+        "pcr_model": "NONE",
     }
 
     # WHEN building the model
