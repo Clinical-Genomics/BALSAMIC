@@ -16,7 +16,7 @@ rule sentieon_tnscope_tga_tumor_only:
         namemap_snv = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.sample_name_map",
         namemap_sv = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".tnscope.sample_name_map",
     benchmark:
-        Path(benchmark_dir, "sentieon_tnscope_umi_" + config["analysis"]["case_id"] + ".tsv").as_posix()
+        Path(benchmark_dir, "sentieon_tnscope_" + config["analysis"]["case_id"] + ".tsv").as_posix()
     params:
         housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "research"},
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
@@ -46,6 +46,7 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 -t {threads} \
 -r {input.ref_fa} \
 -i {input.bam} \
+--dbsnp {input.dbsnp} \
 --interval {input.bed} \
 --interval_padding {params.padding} \
 --algo {params.algo} \

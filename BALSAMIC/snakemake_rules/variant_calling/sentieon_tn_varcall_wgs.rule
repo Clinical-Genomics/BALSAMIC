@@ -2,7 +2,7 @@
 # coding: utf-8
 
 
-rule sentieon_TNscope:
+rule sentieon_tnscope_wgs_tumor_normal:
     input:
         ref = config["reference"]["reference_genome"],
         dbsnp = config["reference"]["dbsnp"],
