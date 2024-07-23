@@ -197,7 +197,6 @@ def get_sample_id(multiqc_key: str) -> str:
     Returns
         str: The extracted sample ID with the ACCXXXXXX format.
     """
-
     if "_align_sort_" in multiqc_key:
         return multiqc_key.split("_")[0]
     return multiqc_key.split(".")[1].split("_")[0]

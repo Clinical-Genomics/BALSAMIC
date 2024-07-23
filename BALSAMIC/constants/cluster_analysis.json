@@ -19,6 +19,10 @@
 		"time": "03:00:00",
 		"n": 12
 	},
+	"cap_base_quality": {
+		"time": "05:00:00",
+		"n": 10
+	},
 	"finalize_gens_outputfiles": {
 		"time": "01:00:00",
 		"n": 2
@@ -132,9 +136,17 @@
 		"time": "02:30:00",
 		"n": 8
 	},
-	"samtools_sort_index": {
+	"samtools_fixmate": {
 		"time": "02:30:00",
 		"n": 16
+	},
+	"sentieon_qc_metrics": {
+		"time": "06:00:00",
+		"n": 8
+	},
+	"sentieon_plot_qc_metrics": {
+		"time": "03:00:00",
+		"n": 2
 	},
 	"sentieon_DNAscope": {
 		"time": "24:00:00",

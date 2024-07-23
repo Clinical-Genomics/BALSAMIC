@@ -8,21 +8,21 @@ rule mosdepth_coverage:
         bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample),
         bed = config["panel"]["capture_kit"]
     output:
-        bam_dir + "{sample}_{sample_type}.mosdepth.global.dist.txt",
-        bam_dir + "{sample}_{sample_type}.mosdepth.region.dist.txt",
-        bam_dir + "{sample}_{sample_type}.mosdepth.summary.txt",
-        bam_dir + "{sample}_{sample_type}.per-base.bed.gz",
-        bam_dir + "{sample}_{sample_type}.regions.bed.gz"
+        qc_dir + "{sample_type}.{sample}.mosdepth.global.dist.txt",
+        qc_dir + "{sample_type}.{sample}.mosdepth.region.dist.txt",
+        qc_dir + "{sample_type}.{sample}.mosdepth.summary.txt",
+        qc_dir + "{sample_type}.{sample}.per-base.bed.gz",
+        qc_dir + "{sample_type}.{sample}.regions.bed.gz"
     benchmark:
-        Path(benchmark_dir, "mosdepth_coverage_" + "{sample}_{sample_type}.tsv").as_posix()
+        Path(benchmark_dir, "mosdepth_coverage_" + "{sample_type}_{sample}.tsv").as_posix()
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("mosdepth") + ".sif").as_posix()
     params:
-        mapq = '20',
-        samflag = '1796',
-        quantize = '0:1:50:150:',
+        mapq = params.mosdepth.mapq,
+        samflag = params.mosdepth.samflag,
+        quantize = params.mosdepth.quantize,
         sample_name = '{sample}',
-        output_dir = bam_dir,
+        output_dir = qc_dir,
     threads:
         get_threads(cluster_config, "mosdepth_coverage")
     message:
@@ -40,6 +40,6 @@ mosdepth \
 --flag {params.samflag} \
 --quantize {params.quantize} \
 --threads {threads} \
-{params.output_dir}/{params.sample_name}_{wildcards.sample_type} \
+{params.output_dir}{wildcards.sample_type}.{wildcards.sample} \
 {input.bam};
         """

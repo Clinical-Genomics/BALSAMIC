@@ -29,14 +29,6 @@ from BALSAMIC.utils.cli import (
     validate_umi_min_reads,
 )
 
-OPTION_ADAPTER_TRIM = click.option(
-    "--adapter-trim/--no-adapter-trim",
-    default=True,
-    show_default=True,
-    is_flag=True,
-    help="Trim adapters from reads in FASTQ file",
-)
-
 OPTION_ANALYSIS_DIR = click.option(
     "--analysis-dir",
     type=click.Path(exists=True, resolve_path=True),
@@ -319,14 +311,6 @@ OPTION_PRINT_FILES = click.option(
     help="Print list of analysis files. Otherwise only final count will be printed.",
 )
 
-OPTION_QUALITY_TRIM = click.option(
-    "--quality-trim/--no-quality-trim",
-    default=True,
-    show_default=True,
-    is_flag=True,
-    help="Trim low quality reads in FASTQ file",
-)
-
 OPTION_QUIET = click.option(
     "-q",
     "--quiet",
@@ -370,6 +354,20 @@ OPTION_SAMPLE_CONFIG = click.option(
     help="Sample configuration file",
 )
 
+OPTION_SENTIEON_INSTALL_DIR = click.option(
+    "--sentieon-install-dir",
+    type=click.Path(exists=True, resolve_path=True),
+    required=True,
+    help="Path to Sentieon install directory",
+)
+
+OPTION_SENTIEON_LICENSE = click.option(
+    "--sentieon-license",
+    required=True,
+    type=click.STRING,
+    help="Sentieon license in format IP:Port",
+)
+
 OPTION_SHOW_ONLY_MISSING_FILES = click.option(
     "-m",
     "--show-only-missing",
@@ -411,22 +409,6 @@ OPTION_TUMOR_SAMPLE_NAME = click.option(
     required=True,
     type=click.STRING,
     help="Tumor sample name",
-)
-
-OPTION_UMI = click.option(
-    "--umi/--no-umi",
-    default=True,
-    show_default=True,
-    is_flag=True,
-    help="UMI processing steps for samples with UMI tags. For WGS cases, UMI is always disabled.",
-)
-
-OPTION_UMI_TRIM_LENGTH = click.option(
-    "--umi-trim-length",
-    default=5,
-    show_default=True,
-    type=click.INT,
-    help="Trim N bases from reads in FASTQ file",
 )
 
 OPTION_UMI_MIN_READS = click.option(

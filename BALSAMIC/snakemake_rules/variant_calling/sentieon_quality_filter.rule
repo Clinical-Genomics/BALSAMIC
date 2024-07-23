@@ -27,7 +27,6 @@ if config["analysis"]["sequencing_type"] == 'wgs' and config["analysis"]["analys
       shell:
           """
 export TMPDIR={params.tmpdir};
-mkdir -p {params.tmpdir};
 
 grep -v '^@' {input.wgs_calling_file} > {input.wgs_calling_file}.bed
 
@@ -41,6 +40,8 @@ bcftools view -f PASS,triallelic_site --threads {threads} --regions-file {input.
 | bcftools view -f PASS,triallelic_site -O z -o {output.vcf_snv_research};
 
 tabix -p vcf -f {output.vcf_snv_research};
+
+rm -rf {params.tmpdir};
           """
 
 elif config["analysis"]["sequencing_type"] == 'wgs' and config["analysis"]["analysis_type"] == 'paired':

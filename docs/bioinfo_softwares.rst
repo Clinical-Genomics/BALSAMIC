@@ -39,7 +39,7 @@ cnvkit
 ~~~~~~
 :Source code: `GitHub` `<https://github.com/etal/cnvkit>`_
 :Article: `PLOS Computational Biology` `<https://doi.org/10.1371/journal.pcbi.1004873>`_
-:Version: `0.9.9`
+:Version: `0.9.10`
 
 cnvpytor
 ~~~~~~~~

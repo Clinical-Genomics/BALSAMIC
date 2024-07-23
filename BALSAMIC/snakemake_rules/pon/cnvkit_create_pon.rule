@@ -4,7 +4,8 @@ rule create_target:
     input:
         target_bait = target_bed,
         refgene_flat = refgene_flat,
-        access_bed = access_5kb_hg19
+        access_bed = access_5kb_hg19,
+        wake_up = result_dir + "start_analysis",
     output:
         target_bed = cnv_dir + "target.bed",
         offtarget_bed = cnv_dir + "antitarget.bed"

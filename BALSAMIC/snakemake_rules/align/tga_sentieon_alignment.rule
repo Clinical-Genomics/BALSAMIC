@@ -1,0 +1,43 @@
+"""Rules to align, mark duplicates and realign reads with Sentieon tools."""
+
+rule sentieon_align_sort_umireads:
+    input:
+        ref = config["reference"]["reference_genome"],
+        fastq_r1 = Path(fastq_dir, "{sample_type}.{sample}_1.quality_trimmed.fastq.gz").as_posix(),
+        fastq_r2 = Path(fastq_dir, "{sample_type}.{sample}_2.quality_trimmed.fastq.gz").as_posix(),
+        refidx = expand(config["reference"]["reference_genome"] + ".{prefix}", prefix=["amb","ann","bwt","pac","sa"])
+    output:
+        bam_out = Path(bam_dir, "{sample_type}.{sample}.align_sort.bam").as_posix()
+    benchmark:
+        Path(benchmark_dir, "sentieon_align_sort_{sample_type}_{sample}.tsv").as_posix()
+    params:
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
+        sentieon_install_dir = config_model.sentieon.sentieon_install_dir,
+        sentieon_exec = config_model.sentieon.sentieon_exec,
+        sentieon_lic = config_model.sentieon.sentieon_license,
+        sample_id = "{sample}",
+        sample_type = lambda wildcards: config_model.get_sample_type_by_name(wildcards.sample, uppercase=True),
+        ip_bases = params.umicommon.align_intbases,
+    threads:
+        get_threads(cluster_config, 'sentieon_align_sort')
+    message:
+        ("Align fastq reads using sentieon bwa-mem and sort reads using samtools for sample type: "
+        "{params.sample_type} : {params.sample_id}")
+    shell:
+        """
+export TMPDIR={params.tmpdir};
+export SENTIEON_TMPDIR={params.tmpdir};
+export SENTIEON_LICENSE={params.sentieon_lic};
+
+{params.sentieon_exec} bwa mem \
+-R '@RG\\tID:{params.sample_id}\\tSM:{params.sample_type}\\tPL:ILLUMINA' \
+-K {params.ip_bases} \
+-t {threads} -C \
+{input.ref} {input.fastq_r1} {input.fastq_r2} | \
+{params.sentieon_exec} util sort \
+-r {input.ref} \
+--sam2bam \
+-o {output.bam_out} -i - ;
+
+rm -rf {params.tmpdir}
+        """

@@ -335,10 +335,10 @@ def test_get_bam_name_per_lane(balsamic_model: ConfigModel):
 
     # Then the bam names for all fastq patterns should be retrieved and match the expected format
     expected_bam_name_lane1 = (
-        f"{bam_dir}{normal_name}_align_sort_{normal_lane1_fastq_pattern}.bam"
+        f"{bam_dir}normal.{normal_name}.{normal_lane1_fastq_pattern}.align_sort.bam"
     )
     expected_bam_name_lane2 = (
-        f"{bam_dir}{normal_name}_align_sort_{normal_lane2_fastq_pattern}.bam"
+        f"{bam_dir}normal.{normal_name}.{normal_lane2_fastq_pattern}.align_sort.bam"
     )
     expected_bam_names = [expected_bam_name_lane1, expected_bam_name_lane2]
     compare_bam_file_lists(expected_bam_names, bam_names)
@@ -362,7 +362,7 @@ def test_get_final_bam_name(balsamic_model: ConfigModel):
     )
 
     # Then retrieved final bam names should match the expected format and be identical regardless of request parameter
-    expected_final_bam_name = f"{bam_dir}{sample_type}.{sample_name}.dedup_sorted.bam"
+    expected_final_bam_name = f"{bam_dir}{sample_type}.{sample_name}.dedup.fixmate.bam"
     assert expected_final_bam_name == bam_name_sample_name
     assert bam_name_sample_name == bam_name_sample_type
 
@@ -372,6 +372,16 @@ def test_get_final_bam_name(balsamic_model: ConfigModel):
     expected_final_bam_name = f"{bam_dir}{sample_type}.{sample_name}.dedup.realign.bam"
     bam_name_sample_type = balsamic_model.get_final_bam_name(
         bam_dir, sample_type=sample_type
+    )
+    assert expected_final_bam_name == bam_name_sample_type
+
+    # WHEN submitting custom bam suffix
+    bam_name_sample_type = balsamic_model.get_final_bam_name(
+        bam_dir, sample_type=sample_type, specified_suffix="dedup.fixmate.qualcapped"
+    )
+    # Then the bam name should end with the specified suffix
+    expected_final_bam_name = (
+        f"{bam_dir}{sample_type}.{sample_name}.dedup.fixmate.qualcapped.bam"
     )
     assert expected_final_bam_name == bam_name_sample_type
 

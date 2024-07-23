@@ -1,12 +1,7 @@
 {
   "QC": {
-    "picard_rmdup": false,
     "adapter": "AATGATACGGCGACCACCGAGATCTACACTCTTTCCCTACACGACGCTCTTCCGATCT",
-    "quality_trim": true,
-    "adapter_trim": true,
-    "umi_trim": true,
     "min_seq_length": "25",
-    "umi_trim_length": "5",
     "n_base_limit": "50"
   },
   "samples": "Placeholder",
@@ -56,7 +51,7 @@
     "sambamba": ["0.8.2"],
     "bcftools": ["1.9", "1.10.2", "1.15.1"],
     "tabix": ["0.2.6", "1.11"],
-    "cnvkit": ["0.9.9"],
+    "cnvkit": ["0.9.10"],
     "bedtools": ["2.30.0"],
     "ensembl-vep": ["104.3"],
     "vcfanno": ["0.3.3"],

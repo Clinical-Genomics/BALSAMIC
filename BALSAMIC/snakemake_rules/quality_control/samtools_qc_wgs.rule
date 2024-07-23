@@ -5,11 +5,11 @@ rule samtools_qc:
     input:
         bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample)
     output:
-        flagstats = Path(bam_dir, "{sample}.samtools.flagstats.txt").as_posix(),
-        idxstats = Path(bam_dir, "{sample}.samtools.idxstats.txt").as_posix(),
-        stats = Path(bam_dir, "{sample}.samtools.stats.txt").as_posix(),
+        flagstats = Path(qc_dir, "{sample_type}.{sample}.samtools.flagstats.txt").as_posix(),
+        idxstats = Path(qc_dir, "{sample_type}.{sample}.samtools.idxstats.txt").as_posix(),
+        stats = Path(qc_dir, "{sample_type}.{sample}.samtools.stats.txt").as_posix(),
     benchmark:
-        Path(benchmark_dir,"samtools_qc_{sample}.tsv").as_posix()
+        Path(benchmark_dir,"samtools_qc_{sample_type}_{sample}.tsv").as_posix()
     singularity:
         Path(singularity_image,config["bioinfo_tools"].get("samtools") + ".sif").as_posix()
     params:

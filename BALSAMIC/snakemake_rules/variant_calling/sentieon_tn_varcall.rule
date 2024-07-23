@@ -2,67 +2,6 @@
 # coding: utf-8
 
 
-
-rule sentieon_base_calibration:
-    input:
-        ref = config["reference"]["reference_genome"],
-        mills = config["reference"]["mills_1kg"],
-        indel_1kg = config["reference"]["known_indel_1kg"],
-        dbsnp = config["reference"]["dbsnp"],
-        bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_type = wildcards.sample_type)
-    output:
-        recal_data_table = Path(bam_dir, "{sample_type}.recal_data.table").as_posix(),
-        qual_recal = Path(bam_dir, "{sample_type}.recal.csv").as_posix(),
-        qual_recal_plot = Path(bam_dir, "{sample_type}.recal.pdf").as_posix(),
-    benchmark:
-        Path(benchmark_dir, "sentieon_base_calibration_{sample_type}.tsv").as_posix()
-    params:
-        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-        sentieon_exec = config["SENTIEON_EXEC"],
-        sentieon_lic = config["SENTIEON_LICENSE"],
-        sample = "{sample_type}"
-    threads:
-        get_threads(cluster_config, 'sentieon_base_calibration')
-    message:
-        "Base recalibration using Sentieon tools for {params.sample}"
-    shell:
-        """
-export TMPDIR={params.tmpdir};
-export SENTIEON_TMPDIR={params.tmpdir};
-export SENTIEON_LICENSE={params.sentieon_lic};
-
-{params.sentieon_exec} driver \
--r {input.ref} \
--t {threads} \
--i {input.bam} \
---algo QualCal \
--k {input.dbsnp} \
--k {input.mills} \
--k {input.indel_1kg} {output.recal_data_table};
-
-{params.sentieon_exec} driver \
--r {input.ref} \
--t {threads} \
--i {input.bam} \
--q {output.recal_data_table} \
---algo QualCal \
--k {input.dbsnp} \
--k {input.mills} \
--k {input.indel_1kg} {output.recal_data_table}.post;
-
-{params.sentieon_exec} driver \
--t {threads} \
---algo QualCal \
---plot --before {output.recal_data_table} \
---after {output.recal_data_table}.post {output.qual_recal};
-
-{params.sentieon_exec} plot QualCal \
--o {output.qual_recal_plot} {output.qual_recal};
-
-rm -rf {params.tmpdir};
-        """
-
-
 rule sentieon_TNscope:
     input:
         ref = config["reference"]["reference_genome"],
@@ -85,9 +24,9 @@ rule sentieon_TNscope:
         pcr_model = params.common.pcr_model,
         tumor_options = VARCALL_PARAMS["tnscope"]["tumor"],
         normal_options = VARCALL_PARAMS["tnscope"]["normal"],
-        sentieon_ml_tnscope = config["SENTIEON_TNSCOPE"],
-        sentieon_exec = config["SENTIEON_EXEC"],
-        sentieon_lic = config["SENTIEON_LICENSE"],
+        sentieon_ml_tnscope = config_model.sentieon.tnscope_model,
+        sentieon_exec = config_model.sentieon.sentieon_exec,
+        sentieon_lic = config_model.sentieon.sentieon_license,
         case_name = config["analysis"]["case_id"]
     threads:
         get_threads(cluster_config, 'sentieon_TNscope')

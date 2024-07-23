@@ -9,12 +9,12 @@ from pathlib import Path
 from typing import Dict, List
 
 from BALSAMIC.constants.constants import FileType
-from BALSAMIC.constants.analysis import FastqName, MutationType, SampleType, SequencingType
-from BALSAMIC.constants.paths import (
-    BALSAMIC_DIR,
-    SENTIEON_DNASCOPE_DIR,
-    SENTIEON_TNSCOPE_DIR,
-)
+from BALSAMIC.constants.analysis import (
+    FastqName,
+    MutationType,
+    SampleType,
+    SequencingType)
+from BALSAMIC.constants.paths import BALSAMIC_DIR
 from BALSAMIC.constants.rules import SNAKEMAKE_RULES
 from BALSAMIC.constants.variant_filters import (
     COMMON_SETTINGS,
@@ -93,6 +93,7 @@ qc_dir: str = Path(result_dir, "qc").as_posix() + "/"
 delivery_dir: str = Path(result_dir, "delivery").as_posix() + "/"
 umi_dir: str = Path(result_dir, "umi").as_posix() + "/"
 umi_qc_dir: str = Path(qc_dir, "umi_qc").as_posix() + "/"
+
 
 # Annotations
 research_annotations = []
@@ -292,36 +293,6 @@ if config["analysis"]["sequencing_type"] != "wgs":
 # explicitly check if cluster_config dict has zero keys.
 if len(cluster_config.keys()) == 0:
     cluster_config = config
-
-# Find and set Sentieon binary and license server from env variables
-try:
-    config["SENTIEON_LICENSE"] = os.environ["SENTIEON_LICENSE"]
-    config["SENTIEON_INSTALL_DIR"] = os.environ["SENTIEON_INSTALL_DIR"]
-
-    if os.getenv("SENTIEON_EXEC") is not None:
-        config["SENTIEON_EXEC"] = os.environ["SENTIEON_EXEC"]
-    else:
-        config["SENTIEON_EXEC"] = Path(
-            os.environ["SENTIEON_INSTALL_DIR"], "bin", "sentieon"
-        ).as_posix()
-
-    config["SENTIEON_TNSCOPE"] = SENTIEON_TNSCOPE_DIR.as_posix()
-    config["SENTIEON_DNASCOPE"] = SENTIEON_DNASCOPE_DIR.as_posix()
-
-except KeyError as error:
-    LOG.error(
-        "Set environment variables SENTIEON_LICENSE, SENTIEON_INSTALL_DIR, SENTIEON_EXEC "
-        "to run SENTIEON variant callers"
-    )
-    raise BalsamicError
-
-if not Path(config["SENTIEON_EXEC"]).exists():
-    LOG.error(
-        "Sentieon executable not found {}".format(
-            Path(config["SENTIEON_EXEC"]).as_posix()
-        )
-    )
-    raise BalsamicError
 
 if "hg38" in config["reference"]["reference_genome"]:
     config["reference"]["genome_version"] = "hg38"
@@ -630,12 +601,9 @@ if config["analysis"]["sequencing_type"] != "wgs":
     )
     # UMI
     if config["analysis"]["analysis_workflow"] == "balsamic-umi":
-        analysis_specific_results.extend(
-            expand(
-                umi_qc_dir + "{sample}.umi.mean_family_depth",
-                sample=config_model.get_all_sample_names(),
-            )
-        )
+        analysis_specific_results.extend(expand(umi_qc_dir + "tumor.{sample}.umi.mean_family_depth", sample=tumor_sample))
+        if config['analysis']['analysis_type'] == "paired":
+            analysis_specific_results.extend(expand(umi_qc_dir + "normal.{sample}.umi.mean_family_depth",sample=normal_sample))
         if background_variant_file:
             analysis_specific_results.extend(
                 expand(

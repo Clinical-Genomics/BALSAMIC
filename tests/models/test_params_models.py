@@ -10,6 +10,7 @@ from BALSAMIC.models.params import BalsamicWorkflowConfig
 from BALSAMIC.models.config import VarcallerAttribute
 from BALSAMIC.models.params import (
     ParamsManta,
+    ParamsSentieonWGSMetrics,
     ParamsVardict,
     ParamsVEP,
     QCModel,
@@ -20,6 +21,28 @@ from BALSAMIC.models.params import (
     VarCallerFilter,
     VCFAttributes,
 )
+
+
+def test_params_sentieon_wgs_metrics():
+    """Test sentieon wgs metrics settings model for correct validation."""
+
+    # GIVEN Manta params
+    test_sentieon_wgs_metrics_params = {
+        "min_base_qual": 10,
+        "cov_threshold": [50, 100, 150, 200, 250],
+    }
+
+    # WHEN building the model
+    test_sentieon_wgs_metrics_built = ParamsSentieonWGSMetrics(
+        **test_sentieon_wgs_metrics_params
+    )
+
+    # THEN values should be correctly populated and parsed into the model
+    assert test_sentieon_wgs_metrics_built.min_base_qual == 10
+    assert (
+        test_sentieon_wgs_metrics_built.cov_threshold
+        == "--cov_thresh 50 --cov_thresh 100 --cov_thresh 150 --cov_thresh 200 --cov_thresh 250"
+    )
 
 
 def test_params_manta():
@@ -171,14 +194,12 @@ def test_umiparams_common():
 
     # GIVEN a UMI workflow common params
     test_commonparams = {
-        "align_header": "test_header_name",
         "align_intbases": 100,
         "filter_tumor_af": 0.01,
     }
     # WHEN building the model
     test_commonparams_built = UMIParamsCommon(**test_commonparams)
     # THEN assert values
-    assert test_commonparams_built.align_header == "test_header_name"
     assert isclose(test_commonparams_built.filter_tumor_af, 0.01)
     assert test_commonparams_built.align_intbases == 100
 

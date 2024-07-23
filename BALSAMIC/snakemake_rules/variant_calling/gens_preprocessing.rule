@@ -4,39 +4,41 @@
 if config["analysis"]["sequencing_type"] == 'wgs':
     rule sentieon_DNAscope_gnomad:
         input:
-            ref=config["reference"]["reference_genome"],
-            gnomad_af5=config["reference"]["gnomad_min_af5"],
-            bam=lambda wildcards: config_model.get_final_bam_name(bam_dir=bam_dir,sample_name=wildcards.sample)
+            ref = config["reference"]["reference_genome"],
+            gnomad_af5= config["reference"]["gnomad_min_af5"],
+            bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample)
         output:
-            gnomad_af5_vcf=cnv_dir + "SNV.germline.{sample}.dnascope_gnomad_af5.vcf.gz",
+            gnomad_af5_vcf = cnv_dir + "SNV.germline.{sample}.dnascope_gnomad_af5.vcf.gz",
         params:
-            tmpdir=tempfile.mkdtemp(prefix=tmp_dir),
-            pcr_model=params.common.pcr_model,
-            sentieon_exec=config["SENTIEON_EXEC"],
-            sentieon_lic=config["SENTIEON_LICENSE"],
-            sample="{sample}"
+            tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
+            pcr_model = params.common.pcr_model,
+            sentieon_exec = config_model.sentieon.sentieon_exec,
+            sentieon_lic =  config_model.sentieon.sentieon_license,
+            sentieon_ml_dnascope = config_model.sentieon.dnascope_model,
+            sample = "{sample}"
         benchmark:
-            Path(benchmark_dir,"sentieon_DNAscope_gnomad_{sample}.tsv").as_posix()
+            Path(benchmark_dir, "sentieon_DNAscope_gnomad_{sample}.tsv").as_posix()
         threads:
-            get_threads(cluster_config,"sentieon_DNAscope_gnomad")
+            get_threads(cluster_config, "sentieon_DNAscope_gnomad")
         message:
             "Calling germline variants on positions in Gnomad AF > 0.05 using Sentieon DNAscope for {params.sample}"
         shell:
-            """
-      export TMPDIR={params.tmpdir};
-      export SENTIEON_TMPDIR={params.tmpdir};
-      export SENTIEON_LICENSE={params.sentieon_lic};
-  
-      {params.sentieon_exec} driver \
-      -t {threads} \
-      -r {input.ref} \
-      -i {input.bam} \
-      --algo DNAscope \
-      --pcr_indel_mode {params.pcr_model} \
-      --given {input.gnomad_af5} {output.gnomad_af5_vcf};
-  
-      rm -rf {params.tmpdir};
-            """
+          """
+    export TMPDIR={params.tmpdir};
+    export SENTIEON_TMPDIR={params.tmpdir};
+    export SENTIEON_LICENSE={params.sentieon_lic};
+    export SENTIEON_DNASCOPE={params.sentieon_ml_dnascope};
+    
+    {params.sentieon_exec} driver \
+    -t {threads} \
+    -r {input.ref} \
+    -i {input.bam} \
+    --algo DNAscope \
+    --pcr_indel_mode {params.pcr_model} \
+    --given {input.gnomad_af5} {output.gnomad_af5_vcf};
+    
+    rm -rf {params.tmpdir};
+          """
 
     rule gatk_denoisereadcounts:
         input:
@@ -104,8 +106,8 @@ else:
         params:
             tmpdir=tempfile.mkdtemp(prefix=tmp_dir),
             pcr_model=params.common.pcr_model,
-            sentieon_exec=config["SENTIEON_EXEC"],
-            sentieon_lic=config["SENTIEON_LICENSE"],
+            sentieon_exec = config_model.sentieon.sentieon_exec,
+            sentieon_lic =  config_model.sentieon.sentieon_license,
             sample="{sample}"
         benchmark:
             Path(benchmark_dir,"sentieon_DNAscope_gnomad_{sample}.tsv").as_posix()

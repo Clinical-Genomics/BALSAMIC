@@ -9,7 +9,6 @@ import click
 
 from BALSAMIC import __version__ as balsamic_version
 from BALSAMIC.commands.options import (
-    OPTION_ADAPTER_TRIM,
     OPTION_ANALYSIS_DIR,
     OPTION_ANALYSIS_WORKFLOW,
     OPTION_BACKGROUND_VARIANTS,
@@ -32,18 +31,21 @@ from BALSAMIC.commands.options import (
     OPTION_NORMAL_SAMPLE_NAME,
     OPTION_PANEL_BED,
     OPTION_PON_CNN,
-    OPTION_QUALITY_TRIM,
+    OPTION_SENTIEON_INSTALL_DIR,
+    OPTION_SENTIEON_LICENSE,
     OPTION_SWEGEN_SNV,
     OPTION_SWEGEN_SV,
     OPTION_TUMOR_SAMPLE_NAME,
-    OPTION_UMI,
     OPTION_UMI_MIN_READS,
-    OPTION_UMI_TRIM_LENGTH,
 )
 from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV, AnalysisWorkflow, Gender
 from BALSAMIC.constants.cache import GenomeVersion
 from BALSAMIC.constants.constants import FileType
-from BALSAMIC.constants.paths import CONTAINERS_DIR
+from BALSAMIC.constants.paths import (
+    CONTAINERS_DIR,
+    SENTIEON_DNASCOPE_MODEL,
+    SENTIEON_TNSCOPE_MODEL,
+)
 from BALSAMIC.constants.workflow_params import VCF_DICT
 from BALSAMIC.models.config import ConfigModel
 from BALSAMIC.utils.cli import (
@@ -61,7 +63,6 @@ LOG = logging.getLogger(__name__)
 
 
 @click.command("case", short_help="Create a sample config file from input sample data")
-@OPTION_ADAPTER_TRIM
 @OPTION_ANALYSIS_DIR
 @OPTION_ANALYSIS_WORKFLOW
 @OPTION_BACKGROUND_VARIANTS
@@ -84,17 +85,15 @@ LOG = logging.getLogger(__name__)
 @OPTION_NORMAL_SAMPLE_NAME
 @OPTION_PANEL_BED
 @OPTION_PON_CNN
-@OPTION_QUALITY_TRIM
+@OPTION_SENTIEON_INSTALL_DIR
+@OPTION_SENTIEON_LICENSE
 @OPTION_SWEGEN_SNV
 @OPTION_SWEGEN_SV
 @OPTION_TUMOR_SAMPLE_NAME
-@OPTION_UMI
-@OPTION_UMI_TRIM_LENGTH
 @OPTION_UMI_MIN_READS
 @click.pass_context
 def case_config(
     context: click.Context,
-    adapter_trim: bool,
     analysis_dir: Path,
     analysis_workflow: AnalysisWorkflow,
     background_variants: Path,
@@ -117,12 +116,11 @@ def case_config(
     normal_sample_name: str,
     panel_bed: Path,
     pon_cnn: Path,
-    quality_trim: bool,
+    sentieon_install_dir: Path,
+    sentieon_license: str,
     swegen_snv: Path,
     swegen_sv: Path,
     tumor_sample_name: str,
-    umi: bool,
-    umi_trim_length: int,
     umi_min_reads: str | None,
 ):
     references_path: Path = Path(balsamic_cache, cache_version, genome_version)
@@ -173,11 +171,12 @@ def case_config(
         directory.mkdir(exist_ok=True)
 
     config_collection_dict = ConfigModel(
-        QC={
-            "quality_trim": quality_trim,
-            "adapter_trim": adapter_trim,
-            "umi_trim": umi if panel_bed else False,
-            "umi_trim_length": umi_trim_length,
+        sentieon={
+            "sentieon_install_dir": sentieon_install_dir,
+            "sentieon_license": sentieon_license,
+            "sentieon_exec": Path(sentieon_install_dir, "bin", "sentieon").as_posix(),
+            "dnascope_model": SENTIEON_DNASCOPE_MODEL.as_posix(),
+            "tnscope_model": SENTIEON_TNSCOPE_MODEL.as_posix(),
         },
         analysis={
             "case_id": case_id,
