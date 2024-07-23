@@ -1,5 +1,6 @@
 """Input/Output utility methods."""
 
+import csv
 import gzip
 import json
 import logging
@@ -65,6 +66,12 @@ def write_json(json_obj: dict, path: str) -> None:
     except OSError as error:
         raise OSError(f"Error while writing JSON file: {path}, error: {error}")
 
+
+def read_csv(csv_path: str, delimeter: str) -> List[dict]:
+    """Read data from a csv file."""
+    with open(csv_path, mode='r') as csv_file:
+        csv_reader = csv.DictReader(csv_file, delimiter=delimeter)
+        return [row for row in csv_reader]
 
 def read_yaml(yaml_path: str) -> dict:
     """Read data from a yaml file."""
