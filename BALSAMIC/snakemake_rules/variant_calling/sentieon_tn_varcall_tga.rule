@@ -51,10 +51,10 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 -i {input.bamN} \
 --interval {input.bed} \
 --interval_padding {params.padding} \
---dbsnp {input.dbsnp} \
 --algo {params.algo} \
 --tumor_sample {params.tumor} \
 --normal_sample {params.normal} \
+--dbsnp {input.dbsnp} \
 --min_tumor_allele_frac {params.tumor_af} \
 --filter_t_alt_frac {params.tumor_af} \
 --min_init_tumor_lod {params.init_tumor_lod} \
