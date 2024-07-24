@@ -69,7 +69,7 @@ def create_gens_cov_file(
         start = int(row["start"])
         end = int(row["end"])
         midpoint = start + int((end - start / 2))
-        log2 = row["log2"]
+        log2 = float(row["log2"])
         if purity:
             log2 = round(calculate_log2_ratio(purity, log2, ploidy), 4)
         log2_data.append(f"{row['chromosome']}\t{midpoint - 1}\t{midpoint}\t{log2}")
