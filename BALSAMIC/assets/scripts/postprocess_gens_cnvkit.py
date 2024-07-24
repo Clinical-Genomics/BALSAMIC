@@ -66,7 +66,9 @@ def create_gens_cov_file(
     for row in cnr_dict_list:
         if row["gene"] == "Antitarget":
             continue
-        midpoint = row["start"] + int((row["end"] - row["start"]) / 2)
+        start = int(row["start"])
+        end = int(row["end"])
+        midpoint = start + int((end - start / 2))
         log2 = row["log2"]
         if purity:
             log2 = round(calculate_log2_ratio(purity, log2, ploidy), 4)
