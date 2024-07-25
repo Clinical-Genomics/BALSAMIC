@@ -1,6 +1,7 @@
 import click
 from BALSAMIC.utils.io import read_csv
 import numpy as np
+import warnings
 
 def calculate_log2_ratio(purity, log2_ratio, ploidy):
     # Ensure that the inputs are within valid ranges
@@ -12,6 +13,10 @@ def calculate_log2_ratio(purity, log2_ratio, ploidy):
 
     # Calculate the log2 ratio
     numerator = (1 - purity) + (purity * log2_ratio)
+
+    if numerator <= 0:
+        return None
+
     log2_ratio = np.log2(numerator / ploidy)
 
     return log2_ratio
@@ -63,6 +68,7 @@ def create_gens_cov_file(
         purity = float(purecn_dict_list[0]["Purity"])
         ploidy = float(purecn_dict_list[0]["Ploidy"])
 
+    count_none_log2 = 0
     for row in cnr_dict_list:
         if row["gene"] == "Antitarget":
             continue
@@ -70,10 +76,15 @@ def create_gens_cov_file(
         end = int(row["end"])
         midpoint = start + int((end - start / 2))
         log2 = float(row["log2"])
-        #if purity:
-        #    log2 = round(calculate_log2_ratio(purity, log2, ploidy), 4)
-        log2_data.append(f"{row['chromosome']}\t{midpoint - 1}\t{midpoint}\t{log2}")
+        if purity:
+            log2 = round(calculate_log2_ratio(purity, log2, ploidy), 4)
+            if not log2:
+                count_none_log2 += 1
+                warnings.warn("Numerator is less than or equal to 0, returning None for region.")
+                continue
 
+        log2_data.append(f"{row['chromosome']}\t{midpoint - 1}\t{midpoint}\t{log2}")
+    warnings.warn(f"Some regions could not be transformed due to invalid values after plodiy and purity adjustment: {count_none_log2}")
 
     # Write log2 data to output file
     with open(output_file, "w") as log2_out:
