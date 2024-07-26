@@ -23,6 +23,14 @@
 		"time": "05:00:00",
 		"n": 10
 	},
+	"cnvkit_create_coverage": {
+		"time": "6:00:00",
+		"n": 18
+	},
+	"cnvkit_create_targets": {
+		"time": "6:00:00",
+		"n": 2
+	},
 	"finalize_gens_outputfiles": {
 		"time": "01:00:00",
 		"n": 2
