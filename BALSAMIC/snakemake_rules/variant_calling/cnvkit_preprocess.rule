@@ -22,7 +22,7 @@ cnvkit.py antitarget {input.target_bait} -g {input.access_bed} -o {output.antita
 rule create_coverage:
     input:
         bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample),
-        target_bed = cnv_dir + "target.bed",
+        target_bed = cnv_dir + "targets.bed",
         antitarget_bed = cnv_dir + "antitarget.bed"
     output:
         target_cnn = cnv_dir + "{sample}.targetcoverage.cnn",
