@@ -1,44 +1,5 @@
 """Rules for creation of CNVkit PON."""
 
-<<<<<<< HEAD
-rule create_target:
-    input:
-        bed_expanded_merged = Path(cnv_dir + "capture_kit_expanded_merged.bed").as_posix(),
-        refgene_flat = refgene_flat,
-        access_bed = access_5kb_hg19
-    output:
-        target_bed = cnv_dir + "target.bed",
-        offtarget_bed = cnv_dir + "antitarget.bed"
-    singularity:
-        Path(singularity_image, "cnvkit.sif").as_posix()
-    benchmark:
-        Path(benchmark_dir, "cnvkit.targets.tsv").as_posix()
-    shell:
-        """
-cnvkit.py target {input.target_bait} --annotate {input.refgene_flat} --split -o {output.target_bed};
-cnvkit.py antitarget {input.target_bait} -g {input.access_bed} -o {output.offtarget_bed};
-        """
-
-rule create_coverage:
-    input:
-        bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample),
-        target_bed = cnv_dir + "target.bed",
-        antitarget_bed = cnv_dir + "antitarget.bed"
-    output:
-        target_cnn = cnv_dir + "{sample}.targetcoverage.cnn",
-        antitarget_cnn = cnv_dir + "{sample}.antitargetcoverage.cnn"
-    singularity:
-        Path(singularity_image, "cnvkit.sif").as_posix()
-    benchmark:
-        Path(benchmark_dir, "cnvkit_{sample}.coverage.tsv").as_posix()
-    shell:
-        """
-cnvkit.py coverage {input.bam} {input.target_bed} -o {output.target_cnn};
-cnvkit.py coverage {input.bam} {input.antitarget_bed} -o {output.antitarget_cnn};
-        """
-
-=======
->>>>>>> update_cnvkit_pons
 rule create_reference:
     input:
         cnn = expand(cnv_dir + "{sample}.{prefix}coverage.cnn", sample=config_model.get_all_sample_names(), prefix=["target", "antitarget"]),
