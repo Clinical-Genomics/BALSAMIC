@@ -1,7 +1,7 @@
 
 rule expand_short_bedregions:
     input:
-        baits_bed = config["panel"]["capture_kit"],
+        baits_bed = config_model.panel.capture_kit,
         wake_up= result_dir + "start_analysis",
     output:
         baits_bed_expanded=Path(cnv_dir + "capture_kit_expanded.bed").as_posix(),
@@ -12,7 +12,7 @@ rule expand_short_bedregions:
     params:
         sample_id = "{sample}",
         bedfile_extend = get_script_path("bedfile_extend.py"),
-        minimum_region_size = 20
+        minimum_region_size = params.bed_pre_processing.minimum_region_size
     threads:
         get_threads(cluster_config, "expand_short_bedregions")
     message:
@@ -23,7 +23,7 @@ python {params.bedfile_extend} --min_region_size {params.minimum_region_size} {i
         """
 
 
-rule bedtools_merge:
+rule bedtools_sort_and_merge:
     input:
         bed_expanded = Path(cnv_dir + "capture_kit_expanded.bed").as_posix(),
     output:
@@ -35,8 +35,9 @@ rule bedtools_merge:
     threads:
         get_threads(cluster_config, "bedtools_merge")
     message:
-        "Running bedtools merge to merge potentially overlapping regions."
+        "Running bedtools sort and merge to merge potentially overlapping regions."
     shell:
         """
-bedtools merge {input.bed_expanded} {output.bed_expanded_merged}
+bedtools sort -i {input.bed_expanded} > {input.bed_expanded}_sorted.bed
+bedtools merge {input.bed_expanded}_sorted.bed {output.bed_expanded_merged}
         """

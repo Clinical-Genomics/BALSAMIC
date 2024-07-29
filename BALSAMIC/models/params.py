@@ -193,6 +193,14 @@ class BAMPostProcessingParams(BaseModel):
 
     manta_max_base_quality: int
 
+class BEDPreProcessingParams(BaseModel):
+    """This class defines the params settings used as constants in bed pre-processing rules
+
+    Attributes:
+       minimum_region_size: int (required); the minimum region size in input bedfiles for CNV analysis
+    """
+
+    minimum_region_size: int
 
 class BalsamicWorkflowConfig(BaseModel):
     """Defines set of rules in balsamic workflow
@@ -216,6 +224,7 @@ class BalsamicWorkflowConfig(BaseModel):
     """
 
     bam_post_processing: BAMPostProcessingParams
+    bed_pre_processing: BEDPreProcessingParams
     common: ParamsCommon
     insert_size_metrics: ParamsInsertSizeMetrics
     manta: ParamsManta

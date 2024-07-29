@@ -121,6 +121,9 @@ WORKFLOW_PARAMS = {
     "bam_post_processing": {
         "manta_max_base_quality": 70,
     },
+    "expand_short_bedregions": {
+        "minimum_region_size": 100,
+    },
     "common": {
         "header_per_lane": "'@RG\\tID:{fastq_pattern}\\tSM:{sample_type}\\tPL:ILLUMINAi'",
         "header_per_sample": "'@RG\\tID:{sample}\\tSM:{sample_type}\\tPL:ILLUMINAi'",

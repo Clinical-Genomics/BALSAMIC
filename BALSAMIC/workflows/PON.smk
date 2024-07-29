@@ -78,7 +78,6 @@ if pon_workflow == PONWorkflow.CNVKIT:
     reffasta: str = config_model.reference["reference_genome"]
     refgene_flat: str = config_model.reference["refgene_flat"]
     access_5kb_hg19: str = config_model.reference["access_regions"]
-    target_bed: str = config_model.panel.capture_kit
     panel_name = os.path.split(target_bed)[1].replace('.bed','')
 
     pon_reference = expand(cnv_dir + panel_name + "_CNVkit_PON_reference_" + version + ".cnn")
