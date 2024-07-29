@@ -15,9 +15,7 @@ def test_extend_bedfile(
     # GIVEN an input bedfile with regions smaller than minimum region size
 
     # GIVEN a minimum region size
-    minimum_region_size = WORKFLOW_PARAMS["bed_pre_processing"][
-        "minimum_region_size"
-    ]
+    minimum_region_size = WORKFLOW_PARAMS["bed_pre_processing"]["minimum_region_size"]
 
     # GIVEN an output bedfile
     extended_bed_path: Path = Path(tmp_path, "test_extended_bed.bed")
@@ -53,7 +51,7 @@ def test_extend_bedfile(
     assert lines_before[0] == lines_after[0]
 
     # THEN the second row should be extended by 99 bases
-    assert lines_before[1] == ['1', '10005000', '10005001']
-    assert lines_after[1] == ['1', '10004950', '10005050']
+    assert lines_before[1] == ["1", "10005000", "10005001"]
+    assert lines_after[1] == ["1", "10004950", "10005050"]
     region_size = int(lines_after[1][2]) - int(lines_after[1][1])
     assert region_size == minimum_region_size
