@@ -23,6 +23,10 @@
 		"time": "05:00:00",
 		"n": 10
 	},
+	"extend_short_bedregions": {
+		"time": "01:00:00",
+		"n": 1
+	},
 	"finalize_gens_outputfiles": {
 		"time": "01:00:00",
 		"n": 2
