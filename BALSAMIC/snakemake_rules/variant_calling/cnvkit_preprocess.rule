@@ -1,0 +1,45 @@
+rule create_target:
+    input:
+        target_bait = bed_expanded_merged = Path(cnv_dir + "capture_kit_expanded_merged.bed").as_posix(),,
+        refgene_flat = refgene_flat,
+        access_bed = access_5kb_hg19,
+        wake_up = result_dir + "start_analysis",
+    output:
+        targets = cnv_dir + "targets.bed",
+        antitargets = cnv_dir + "antitarget.bed",
+    singularity:
+        Path(singularity_image, "cnvkit.sif").as_posix()
+    threads:
+        get_threads(cluster_config, "cnvkit_create_targets")
+    benchmark:
+        Path(benchmark_dir, "cnvkit.targets.tsv").as_posix()
+    shell:
+        """
+cnvkit.py target {input.target_bait} --annotate {input.refgene_flat} --split -o {output.targets};
+cnvkit.py antitarget {input.target_bait} -g {input.access_bed} -o {output.antitargets};
+        """
+
+rule create_coverage:
+    input:
+        bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample),
+        target_bed = cnv_dir + "targets.bed",
+        antitarget_bed = cnv_dir + "antitarget.bed"
+    output:
+        target_cnn = cnv_dir + "{sample}.targetcoverage.cnn",
+        antitarget_cnn = cnv_dir + "{sample}.antitargetcoverage.cnn"
+    benchmark:
+        Path(benchmark_dir, "cnvkit_{sample}.coverage.tsv").as_posix()
+    params:
+        case_name = config["analysis"]["case_id"],
+        min_mapq = params.common.min_mapq,
+    singularity:
+        Path(singularity_image, "cnvkit.sif").as_posix()
+    threads:
+        get_threads(cluster_config, "cnvkit_create_coverage")
+    message:
+        "Segmenting genomic regions using CNVkit for {params.case_name}"
+    shell:
+        """
+cnvkit.py coverage {input.bam} {input.target_bed} -o {output.target_cnn} --min-mapq {params.min_mapq} --processes {threads} ;
+cnvkit.py coverage {input.bam} {input.antitarget_bed} -o {output.antitarget_cnn} --min-mapq {params.min_mapq} --processes {threads} ;
+        """

@@ -1,5 +1,6 @@
 """Rules for creation of CNVkit PON."""
 
+<<<<<<< HEAD
 rule create_target:
     input:
         bed_expanded_merged = Path(cnv_dir + "capture_kit_expanded_merged.bed").as_posix(),
@@ -36,6 +37,8 @@ cnvkit.py coverage {input.bam} {input.target_bed} -o {output.target_cnn};
 cnvkit.py coverage {input.bam} {input.antitarget_bed} -o {output.antitarget_cnn};
         """
 
+=======
+>>>>>>> update_cnvkit_pons
 rule create_reference:
     input:
         cnn = expand(cnv_dir + "{sample}.{prefix}coverage.cnn", sample=config_model.get_all_sample_names(), prefix=["target", "antitarget"]),
