@@ -7,6 +7,7 @@ Added:
 * MSI analysis to the tumor-normal workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1454
 * Sentieon install directory path to case config arguments https://github.com/Clinical-Genomics/BALSAMIC/pull/1461
 * UMI extraction and deduplication to TGA workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1358
+* Padding of bed-regions for CNVkit to minimum 100 bases https://github.com/Clinical-Genomics/BALSAMIC/pull/1469
 
 Changed:
 ^^^^^^^^
