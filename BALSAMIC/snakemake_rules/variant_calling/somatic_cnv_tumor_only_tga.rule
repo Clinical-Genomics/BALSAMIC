@@ -4,7 +4,7 @@
 rule cnvkit_segment_CNV_research:
     input:
         access_bed = config["reference"]["access_regions"],
-        baits_bed = config["panel"]["capture_kit"],
+        bed_expanded_merged = Path(cnv_dir + "capture_kit_expanded_merged.bed").as_posix(),
         fasta = config["reference"]["reference_genome"],
         refgene_flat = config["reference"]["refgene_flat"],
         bamT = config_model.get_final_bam_name(bam_dir = bam_dir,sample_name=tumor_sample),
@@ -180,7 +180,6 @@ rule cnvkit_call_CNV_research:
     input:
         access_bed = config["reference"]["access_regions"],
         fasta = config["reference"]["reference_genome"],
-        baits_bed = config["panel"]["capture_kit"],
         refgene_flat = config["reference"]["refgene_flat"],
         purity_ploidy = cnv_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".purecn.purity.csv",
         cns_initial= cnv_dir + "tumor.initial.cns",

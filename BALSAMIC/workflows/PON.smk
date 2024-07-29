@@ -68,6 +68,7 @@ if sequence_type == SequencingType.TARGETED:
     rules_to_include.append("snakemake_rules/quality_control/fastp_tga.rule")
     rules_to_include.append("snakemake_rules/align/tga_sentieon_alignment.rule")
     rules_to_include.append("snakemake_rules/align/tga_bam_postprocess.rule")
+    rules_to_include.append("snakemake_rules/variant_calling/expand_bed.rule")
 else:
     rules_to_include.append("snakemake_rules/quality_control/fastp_wgs.rule")
     rules_to_include.append("snakemake_rules/align/wgs_sentieon_alignment.rule")
