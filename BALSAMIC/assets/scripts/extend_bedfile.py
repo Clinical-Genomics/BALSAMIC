@@ -2,9 +2,9 @@ import click
 
 
 @click.command()
-@click.argument('input_bedfile', type=click.Path(exists=True))
-@click.argument('output_bedfile', type=click.Path())
-@click.option('--min-region-size', default=20, help='Minimum region size to enforce.')
+@click.argument("input_bedfile", type=click.Path(exists=True))
+@click.argument("output_bedfile", type=click.Path())
+@click.option("--min-region-size", default=20, help="Minimum region size to enforce.")
 def extend_bedfile(input_bedfile: str, output_bedfile: str, min_region_size: int):
     """
     Process a BED file to ensure regions are at least a minimum size.
@@ -14,9 +14,9 @@ def extend_bedfile(input_bedfile: str, output_bedfile: str, min_region_size: int
         output_bedfile (str): Output BED file path.
         min_region_size (int): Minimum region size to enforce.
     """
-    with open(input_bedfile, 'r') as infile, open(output_bedfile, 'w') as outfile:
+    with open(input_bedfile, "r") as infile, open(output_bedfile, "w") as outfile:
         for line in infile:
-            fields = line.strip().split('\t')
+            fields = line.strip().split("\t")
 
             chrom: str = fields[0]
             start = int(fields[1])
@@ -34,5 +34,5 @@ def extend_bedfile(input_bedfile: str, output_bedfile: str, min_region_size: int
             outfile.write(f"{chrom}\t{start}\t{end}\n")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     extend_bedfile()

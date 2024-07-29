@@ -193,6 +193,7 @@ class BAMPostProcessingParams(BaseModel):
 
     manta_max_base_quality: int
 
+
 class BEDPreProcessingParams(BaseModel):
     """This class defines the params settings used as constants in bed pre-processing rules
 
@@ -201,6 +202,7 @@ class BEDPreProcessingParams(BaseModel):
     """
 
     minimum_region_size: int
+
 
 class BalsamicWorkflowConfig(BaseModel):
     """Defines set of rules in balsamic workflow
