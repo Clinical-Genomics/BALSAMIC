@@ -121,7 +121,7 @@ WORKFLOW_PARAMS = {
     "bam_post_processing": {
         "manta_max_base_quality": 70,
     },
-    "expand_short_bedregions": {
+    "bed_pre_processing": {
         "minimum_region_size": 100,
     },
     "common": {

@@ -6,11 +6,10 @@ rule extend_short_bedregions:
     output:
         baits_bed_expanded=Path(cnv_dir + "capture_kit_expanded.bed").as_posix(),
     benchmark:
-        Path(benchmark_dir,"cap_base_quality_{sample_type}_{sample}.tsv").as_posix()
+        Path(benchmark_dir,"extend_short_bedregions.tsv").as_posix()
     singularity:
         Path(singularity_image,config["bioinfo_tools"].get("pysam") + ".sif").as_posix()
     params:
-        sample_id = "{sample}",
         bedfile_extend = get_script_path("extend_bedfile.py"),
         minimum_region_size = params.bed_pre_processing.minimum_region_size
     threads:
