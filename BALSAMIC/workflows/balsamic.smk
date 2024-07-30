@@ -90,7 +90,6 @@ delivery_dir: str = Path(result_dir, "delivery").as_posix() + "/"
 umi_dir: str = Path(result_dir, "umi").as_posix() + "/"
 umi_qc_dir: str = Path(qc_dir, "umi_qc").as_posix() + "/"
 
-
 # Annotations
 research_annotations = []
 clinical_annotations = []

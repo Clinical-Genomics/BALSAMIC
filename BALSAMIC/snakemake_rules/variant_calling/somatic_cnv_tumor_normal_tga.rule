@@ -43,7 +43,6 @@ rm -rf {params.tmpdir};
 rule cnvkit_segment_CNV_research:
     input:
         access_bed = config["reference"]["access_regions"],
-        baits_bed = config["panel"]["capture_kit"],
         fasta = config["reference"]["reference_genome"],
         refgene_flat = config["reference"]["refgene_flat"],
         tumor_target_cnn=expand(cnv_dir + "{sample}.targetcoverage.cnn", sample=tumor_sample),
@@ -78,21 +77,21 @@ if [[ ! -f "{params.pon}" ]]; then
 
 # Compile a coverage reference from the given list of files
 cnvkit.py reference \
-{output.normal_target_coverage} \
-{output.normal_antitarget_coverage} \
+{input.normal_target_cnn} \
+{input.normal_antitarget_cnn} \
 --fasta {input.fasta} \
 --output {params.normal_reference_cnn};
 
-cnvkit.py fix {output.tumor_target_coverage} \
-{output.tumor_antitarget_coverage} \
+cnvkit.py fix {input.tumor_target_cnn} \
+{input.tumor_antitarget_cnn} \
 {params.normal_reference_cnn} \
 --output {output.cnr};
 
 else
 
 echo "PON reference exists- Using it for coverage correction" 
-cnvkit.py fix {output.tumor_target_coverage} \
-{output.tumor_antitarget_coverage} \
+cnvkit.py fix {input.tumor_target_cnn} \
+{input.tumor_antitarget_cnn} \
 {params.pon} \
 --output {output.cnr};
 
@@ -203,14 +202,11 @@ rule cnvkit_call_CNV_research:
     input:
         access_bed = config["reference"]["access_regions"],
         fasta = config["reference"]["reference_genome"],
-        baits_bed = config["panel"]["capture_kit"],
         refgene_flat = config["reference"]["refgene_flat"],
         purity_ploidy = cnv_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".purecn.purity.csv",
         cns_initial = cnv_dir + "tumor.initial.cns",
         cnr = cnv_dir + "tumor.merged.cnr",
         snv_merged = vcf_dir + "SNV.germline.merged.dnascope.vcf.gz",
-        bamT = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
-        bamN = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = normal_sample),
     output:
         cns = cnv_dir + "tumor.merged.cns",
         gene_breaks = cnv_dir + config["analysis"]["case_id"] + ".gene_breaks",

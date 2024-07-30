@@ -23,6 +23,10 @@
 		"time": "05:00:00",
 		"n": 10
 	},
+	"extend_short_bedregions": {
+		"time": "01:00:00",
+		"n": 1
+	},
 	"cnvkit_create_coverage": {
 		"time": "6:00:00",
 		"n": 18
@@ -421,6 +425,10 @@
 		"n": 1
 	},
 	"somalier_relate": {
+		"time": "01:00:00",
+		"n": 1
+	},
+	"bedtools_merge": {
 		"time": "01:00:00",
 		"n": 1
 	},

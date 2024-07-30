@@ -1,8 +1,8 @@
 rule create_target:
     input:
-        target_bait = target_bed,
-        refgene_flat = refgene_flat,
-        access_bed = access_5kb_hg19,
+        bed_expanded_merged = Path(cnv_dir + "capture_kit_expanded_merged.bed").as_posix(),
+        refgene_flat = config_model.reference["refgene_flat"],
+        access_bed = config_model.reference["access_regions"],
         wake_up = result_dir + "start_analysis",
     output:
         targets = cnv_dir + "targets.bed",
@@ -15,8 +15,8 @@ rule create_target:
         Path(benchmark_dir, "cnvkit.targets.tsv").as_posix()
     shell:
         """
-cnvkit.py target {input.target_bait} --annotate {input.refgene_flat} --split -o {output.targets};
-cnvkit.py antitarget {input.target_bait} -g {input.access_bed} -o {output.antitargets};
+cnvkit.py target {input.bed_expanded_merged} --annotate {input.refgene_flat} --split -o {output.targets};
+cnvkit.py antitarget {input.bed_expanded_merged} -g {input.access_bed} -o {output.antitargets};
         """
 
 rule create_coverage:
