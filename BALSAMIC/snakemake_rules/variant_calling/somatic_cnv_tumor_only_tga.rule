@@ -4,7 +4,6 @@
 rule cnvkit_segment_CNV_research:
     input:
         access_bed = config["reference"]["access_regions"],
-        baits_bed = config["panel"]["capture_kit"],
         fasta = config["reference"]["reference_genome"],
         refgene_flat = config["reference"]["refgene_flat"],
         tumor_target_cnn=expand(cnv_dir + "{sample}.targetcoverage.cnn",sample=tumor_sample),
@@ -34,19 +33,19 @@ rule cnvkit_segment_CNV_research:
 if [[ ! -f "{params.pon}" ]]; then
 cnvkit.py reference --output {params.flat_reference_cnn} \
 --fasta {input.fasta} \
---targets {output.targets} \
---antitargets {output.antitargets};
+--targets {input.tumor_target_cnn} \
+--antitargets {input.tumor_antitarget_cnn};
 
-cnvkit.py fix {output.tumor_target_coverage} \
-{output.tumor_antitarget_coverage} \
+cnvkit.py fix {input.tumor_target_cnn} \
+{input.tumor_antitarget_cnn} \
 {params.flat_reference_cnn} \
 --output {output.cnr};
 
 else
 
 echo "PON reference exists- Using it for coverage correction"
-cnvkit.py fix {output.tumor_target_coverage} \
-{output.tumor_antitarget_coverage} \
+cnvkit.py fix {input.tumor_target_cnn} \
+{input.tumor_antitarget_cnn} \
 {params.pon} \
 --output {output.cnr};
 
@@ -153,7 +152,6 @@ rule cnvkit_call_CNV_research:
     input:
         access_bed = config["reference"]["access_regions"],
         fasta = config["reference"]["reference_genome"],
-        baits_bed = config["panel"]["capture_kit"],
         refgene_flat = config["reference"]["refgene_flat"],
         purity_ploidy = cnv_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".purecn.purity.csv",
         cns_initial= cnv_dir + "tumor.initial.cns",

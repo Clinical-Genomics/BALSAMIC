@@ -3,7 +3,7 @@
 
 rule gatk_collectreadcounts:
     input:
-        bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample),
+        bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample, specified_suffix="dedup"),
         genome_interval = config["reference"]["genome_interval"]
     output:
         readcounts_hdf5 = cnv_dir + "{sample}.collectreadcounts.hdf5"
