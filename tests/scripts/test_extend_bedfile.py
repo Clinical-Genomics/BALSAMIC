@@ -24,7 +24,7 @@ def test_extend_bedfile(
     result: Result = cli_runner.invoke(
         extend_bedfile,
         [
-            "--min-region-size",
+            "--extend-to-min-region-size",
             minimum_region_size,
             bedfile_path.as_posix(),
             extended_bed_path.as_posix(),

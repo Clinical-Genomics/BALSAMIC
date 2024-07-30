@@ -4,7 +4,7 @@ import click
 @click.command()
 @click.argument("input_bedfile", type=click.Path(exists=True))
 @click.argument("output_bedfile", type=click.Path())
-@click.option("--min-region-size", default=20, help="Minimum region size to enforce.")
+@click.option("--extend-to-min-region-size", default=100, help="Will extend regions shorter than the specified size to this minimum size.")
 def extend_bedfile(input_bedfile: str, output_bedfile: str, min_region_size: int):
     """
     Process a BED file to ensure regions are at least a minimum size.

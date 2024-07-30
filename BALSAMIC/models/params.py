@@ -185,7 +185,7 @@ class UMIParamsTNscope(BaseModel):
 
 
 class BAMPostProcessingParams(BaseModel):
-    """This class defines the params settings used as constants bam post processing rules
+    """This class defines the params settings used as constants bam post-processing rules.
 
     Attributes:
        manta_max_base_quality: int (required); the maximum base quality in bamfile used downstream in Manta rules
@@ -195,7 +195,7 @@ class BAMPostProcessingParams(BaseModel):
 
 
 class BEDPreProcessingParams(BaseModel):
-    """This class defines the params settings used as constants in bed pre-processing rules
+    """This class defines the params settings used as constants in bed pre-processing rules.
 
     Attributes:
        minimum_region_size: int (required); the minimum region size in input bedfiles for CNV analysis
