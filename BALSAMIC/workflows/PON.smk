@@ -90,7 +90,7 @@ if pon_workflow in [PONWorkflow.GENS_MALE, PONWorkflow.GENS_FEMALE]:
     rules_to_include.append("snakemake_rules/variant_calling/gatk_read_counts.rule")
     rules_to_include.append("snakemake_rules/pon/gens_create_pon.rule")
 
-pon_finish = expand(analysis_dir + "analysis_PON_finish")
+pon_finish = Path(analysis_dir + "analysis_PON_finish").as_posix()
 
 for r in rules_to_include:
     include: Path(BALSAMIC_DIR, r).as_posix()
