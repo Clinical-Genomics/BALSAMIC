@@ -37,6 +37,6 @@ rule bedtools_sort_and_merge:
         "Running bedtools sort and merge to merge potentially overlapping regions."
     shell:
         """
-sort -k1,1V {input.bed_expanded} > {input.bed_expanded}_sorted.bed ; 
+bedtools sort -i {input.bed_expanded} > {input.bed_expanded}_sorted.bed ; 
 bedtools merge {input.bed_expanded}_sorted.bed > {output.bed_expanded_merged}
         """
