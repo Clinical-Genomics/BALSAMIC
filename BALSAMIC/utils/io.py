@@ -67,7 +67,7 @@ def write_json(json_obj: dict, path: str) -> None:
         raise OSError(f"Error while writing JSON file: {path}, error: {error}")
 
 
-def read_csv(csv_path: str, delimeter: str) -> List[dict]:
+def read_csv(csv_path: str, delimeter: str = ",") -> List[dict]:
     """Read data from a csv file."""
     with open(csv_path, mode='r') as csv_file:
         csv_reader = csv.DictReader(csv_file, delimiter=delimeter)

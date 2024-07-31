@@ -40,12 +40,12 @@ def calculate_log2_ratio(purity, log2_ratio, ploidy):
 @click.option(
     "-p",
     "--tumor-purity-path",
-    required=False,
+    required=True,
     type=click.Path(exists=True),
     help="Tumor purity file from PureCN",
 )
 def create_gens_cov_file(
-    output_file: str, normalised_coverage_path: str, tumor_purity_path: str | None
+    output_file: str, normalised_coverage_path: str, tumor_purity_path: str
 ):
     """Post-processes the CNVkit .cnr output for upload to GENS.
 
@@ -62,11 +62,9 @@ def create_gens_cov_file(
     cnr_dict_list: list[dict] = read_csv(csv_path=normalised_coverage_path, delimeter="\t")
 
     # Process PureCN purity file
-    purity = None
-    if tumor_purity_path:
-        purecn_dict_list: list[dict] = read_csv(csv_path=tumor_purity_path, delimeter=",")
-        purity = float(purecn_dict_list[0]["Purity"])
-        ploidy = float(purecn_dict_list[0]["Ploidy"])
+    purecn_dict_list: list[dict] = read_csv(csv_path=tumor_purity_path, delimeter=",")
+    purity = float(purecn_dict_list[0]["Purity"])
+    ploidy = float(purecn_dict_list[0]["Ploidy"])
 
     count_none_log2 = 0
     for row in cnr_dict_list:
@@ -76,13 +74,12 @@ def create_gens_cov_file(
         end = int(row["end"])
         midpoint = start + int((end - start / 2))
         log2 = float(row["log2"])
-        #if purity:
-        #    log2 = calculate_log2_ratio(purity, log2, ploidy)
-        #    if not log2:
-        #        count_none_log2 += 1
-        #        warnings.warn("Numerator is less than or equal to 0, returning None for region.")
-        #        continue
-        #    log2 = round(log2, 4)
+        log2 = calculate_log2_ratio(purity, log2, ploidy)
+        if not log2:
+            count_none_log2 += 1
+            warnings.warn("Numerator is less than or equal to 0, returning None for region.")
+            continue
+            log2 = round(log2, 4)
         log2_data.append(f"{row['chromosome']}\t{midpoint - 1}\t{midpoint}\t{log2}")
     warnings.warn(f"Some regions could not be transformed due to invalid values after plodiy and purity adjustment: {count_none_log2}")
 
