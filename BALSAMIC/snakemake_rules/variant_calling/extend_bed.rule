@@ -38,5 +38,5 @@ rule bedtools_sort_and_merge:
     shell:
         """
 bedtools sort -i {input.bed_expanded} > {input.bed_expanded}_sorted.bed ; 
-bedtools merge {input.bed_expanded}_sorted.bed > {output.bed_expanded_merged}
+bedtools merge -i {input.bed_expanded}_sorted.bed > {output.bed_expanded_merged}
         """
