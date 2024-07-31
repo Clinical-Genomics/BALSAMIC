@@ -220,50 +220,37 @@ def get_gens_references(
     gens_coverage_pon: Optional[str],
     gnomad_min_af5: Optional[str],
     panel_bed: Optional[str],
-    references: Dict[str, str],
-) -> Dict:
+) -> Dict[str, str]:
     """
-    Assigns reference-files required for GENS if they have been supplied.
+    Assigns reference-files required for GENS if they have been supplied, else exists with error message.
 
-    :param genome_interval: Coverage-regions. (required for WGS GENS)
-    :param gens_coverage_pon: PON for GATK CollectReadCounts. (required for WGS GENS)
-    :param gnomad_min_af5: gnomad VCF filtered to keep variants above 5% VAF. (required for WGS and TGA GENS)
-    :param panel_bed: Bedfile supplied for TGA analyses.
-    :param references: Reference dictionary to be updated.
+    Args:
+        genome_interval: Optional[str]. Coverage-regions. (required for WGS GENS)
+        gens_coverage_pon: Optional[str]. PON for GATK CollectReadCounts. (required for WGS GENS)
+        gnomad_min_af5: Optional[str] gnomad VCF filtered to keep variants above 5% VAF (required for WGS and TGA GENS).
+        panel_bed: Optional[str] Bedfile supplied for TGA analyses.
 
-    :return: references: Updated reference dictionary.
+    Returns:
+         Dict[str, str] with paths to GENS reference files
     """
 
-    gens_arguments = [genome_interval, gens_coverage_pon, gnomad_min_af5]
+    if panel_bed and gnomad_min_af5:
+        return {"gnomad_min_af5": gnomad_min_af5}
 
-    # Check if any of the gens arguments are provided
-    if any(gens_arguments):
-        # Ensure all required arguments are provided or raise an error if panel_bed is not set
-        if not all(gens_arguments) and not panel_bed:
-            raise click.BadParameter(
-                "All three arguments (genome_interval, gens_coverage_pon, gnomad_min_af5) are required for GENS in WGS."
-            )
+    if gnomad_min_af5 and genome_interval and gens_coverage_pon:
+        return {
+            "genome_interval": genome_interval,
+            "gens_coverage_pon": gens_coverage_pon,
+            "gnomad_min_af5": gnomad_min_af5,
+        }
 
-        # Construct the gens_ref_files dictionary
-        gens_ref_files = (
-            {"gnomad_min_af5": gnomad_min_af5}
-            if panel_bed
-            else {
-                "genome_interval": genome_interval,
-                "gens_coverage_pon": gens_coverage_pon,
-                "gnomad_min_af5": gnomad_min_af5,
-            }
-        )
-
-        # Update references dictionary with gens values
-        references.update(
-            {
-                gens_file: path
-                for gens_file, path in gens_ref_files.items()
-                if path is not None
-            }
-        )
-    return references
+    error_message = (
+        "GENS reference file is always required to run BALSAMIC."
+        "WGS requires arguments: genome_interval, gens_coverage_pon, gnomad_min_af5"
+        "TGA requires argument: gnomad_min_af5"
+    )
+    LOG.error(error_message)
+    raise BalsamicError(error_message)
 
 
 def get_bioinfo_tools_version(

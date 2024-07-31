@@ -3,6 +3,7 @@ from BALSAMIC.utils.io import read_csv
 import numpy as np
 import warnings
 
+
 def calculate_log2_ratio(purity, log2_ratio, ploidy):
     # Ensure that the inputs are within valid ranges
     if not (0 <= purity <= 1):
@@ -59,7 +60,9 @@ def create_gens_cov_file(
     log2_data = []
 
     # Process CNVkit file
-    cnr_dict_list: list[dict] = read_csv(csv_path=normalised_coverage_path, delimeter="\t")
+    cnr_dict_list: list[dict] = read_csv(
+        csv_path=normalised_coverage_path, delimeter="\t"
+    )
 
     # Process PureCN purity file
     purecn_dict_list: list[dict] = read_csv(csv_path=tumor_purity_path, delimeter=",")
@@ -70,18 +73,22 @@ def create_gens_cov_file(
     for row in cnr_dict_list:
         if row["gene"] == "Antitarget":
             continue
-        start = int(row["start"])
-        end = int(row["end"])
-        midpoint = start + int((end - start / 2))
-        log2 = float(row["log2"])
-        log2 = calculate_log2_ratio(purity, log2, ploidy)
+        start: int = int(row["start"])
+        end: int = int(row["end"])
+        midpoint: int = start + int((end - start / 2))
+        log2: float = float(row["log2"])
+        log2: float | None = calculate_log2_ratio(purity, log2, ploidy)
         if not log2:
             count_none_log2 += 1
-            warnings.warn("Numerator is less than or equal to 0, returning None for region.")
+            warnings.warn(
+                "Numerator is less than or equal to 0, returning None for region."
+            )
             continue
-            log2 = round(log2, 4)
+            log2: float = round(log2, 4)
         log2_data.append(f"{row['chromosome']}\t{midpoint - 1}\t{midpoint}\t{log2}")
-    warnings.warn(f"Some regions could not be transformed due to invalid values after plodiy and purity adjustment: {count_none_log2}")
+    warnings.warn(
+        f"Some regions could not be transformed due to invalid values after plodiy and purity adjustment: {count_none_log2}"
+    )
 
     # Write log2 data to output file
     with open(output_file, "w") as log2_out:

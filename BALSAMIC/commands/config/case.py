@@ -132,12 +132,19 @@ def case_config(
     if cadd_annotations:
         references.update(cadd_annotations_path)
 
-    references = get_gens_references(
+    gens_references: dict[str, str] = get_gens_references(
         genome_interval=genome_interval,
         gens_coverage_pon=gens_coverage_pon,
         gnomad_min_af5=gnomad_min_af5,
         panel_bed=panel_bed,
-        references=references,
+    )
+    # Update references dictionary with GENS reference-files
+    references.update(
+        {
+            gens_file: path
+            for gens_file, path in gens_references.items()
+            if path is not None
+        }
     )
 
     variants_observations = {
