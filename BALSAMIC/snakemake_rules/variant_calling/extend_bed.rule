@@ -1,0 +1,42 @@
+
+rule extend_short_bedregions:
+    input:
+        baits_bed = config_model.panel.capture_kit,
+        wake_up= result_dir + "start_analysis",
+    output:
+        baits_bed_expanded=Path(cnv_dir + "capture_kit_expanded.bed").as_posix(),
+    benchmark:
+        Path(benchmark_dir,"extend_short_bedregions.tsv").as_posix()
+    singularity:
+        Path(singularity_image,config["bioinfo_tools"].get("pysam") + ".sif").as_posix()
+    params:
+        bedfile_extend_script = get_script_path("extend_bedfile.py"),
+        minimum_region_size = params.bed_pre_processing.minimum_region_size
+    threads:
+        get_threads(cluster_config, "extend_short_bedregions")
+    message:
+        "Extending regions in bedfile to a minimum size of {params.minimum_region_size}."
+    shell:
+        """
+python {params.bedfile_extend_script} --extend-to-min-region-size {params.minimum_region_size} {input.baits_bed} {output.baits_bed_expanded} ; 
+        """
+
+
+rule bedtools_sort_and_merge:
+    input:
+        bed_expanded = Path(cnv_dir + "capture_kit_expanded.bed").as_posix(),
+    output:
+        bed_expanded_merged = Path(cnv_dir + "capture_kit_expanded_merged.bed").as_posix(),
+    benchmark:
+        Path(benchmark_dir, 'bedtools_merge_expanded_bedfile.tsv').as_posix()
+    singularity:
+        Path(singularity_image, config["bioinfo_tools"].get("bedtools") + ".sif").as_posix()
+    threads:
+        get_threads(cluster_config, "bedtools_merge")
+    message:
+        "Running bedtools sort and merge to merge potentially overlapping regions."
+    shell:
+        """
+bedtools sort -i {input.bed_expanded} > {input.bed_expanded}_sorted.bed ; 
+bedtools merge -i {input.bed_expanded}_sorted.bed > {output.bed_expanded_merged}
+        """

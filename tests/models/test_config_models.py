@@ -418,5 +418,5 @@ def test_get_final_bam_name_pon(balsamic_pon_model: ConfigModel):
     )
 
     # Then retrieved final bam names should match the expected format and be identical regardless of request parameter
-    expected_final_bam_name = f"{bam_dir}{sample_type}.{sample_name}.dedup.bam"
+    expected_final_bam_name = f"{bam_dir}{sample_type}.{sample_name}.dedup.fixmate.bam"
     assert expected_final_bam_name == bam_name_sample_name
