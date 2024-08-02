@@ -245,8 +245,8 @@ def get_gens_references(
         }
 
     error_message = (
-        "GENS reference file is always required to run BALSAMIC."
-        "WGS requires arguments: genome_interval, gens_coverage_pon, gnomad_min_af5"
+        "GENS reference file is always required to run BALSAMIC.\n"
+        "WGS requires arguments: genome_interval, gens_coverage_pon, gnomad_min_af5\n"
         "TGA requires argument: gnomad_min_af5"
     )
     LOG.error(error_message)
