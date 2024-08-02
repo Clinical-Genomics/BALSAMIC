@@ -54,6 +54,7 @@ from BALSAMIC.utils.cli import (
     get_bioinfo_tools_version,
     get_panel_chrom,
     get_sample_list,
+    get_gens_references,
 )
 from BALSAMIC.utils.io import read_json, write_json
 from BALSAMIC.utils.utils import get_absolute_paths_dict
@@ -131,29 +132,20 @@ def case_config(
     if cadd_annotations:
         references.update(cadd_annotations_path)
 
-    if any([genome_interval, gens_coverage_pon, gnomad_min_af5]):
-        if panel_bed:
-            raise click.BadParameter(
-                "GENS is currently not compatible with TGA analysis, only WGS."
-            )
-        if not all([genome_interval, gens_coverage_pon, gnomad_min_af5]):
-            raise click.BadParameter(
-                "All three arguments (genome_interval gens_coverage_pon, gnomad_min_af5) are required for GENS."
-            )
-
-        gens_ref_files = {
-            "genome_interval": genome_interval,
-            "gens_coverage_pon": gens_coverage_pon,
-            "gnomad_min_af5": gnomad_min_af5,
+    gens_references: dict[str, str] = get_gens_references(
+        genome_interval=genome_interval,
+        gens_coverage_pon=gens_coverage_pon,
+        gnomad_min_af5=gnomad_min_af5,
+        panel_bed=panel_bed,
+    )
+    # Update references dictionary with GENS reference-files
+    references.update(
+        {
+            gens_file: path
+            for gens_file, path in gens_references.items()
+            if path is not None
         }
-
-        references.update(
-            {
-                gens_file: path
-                for gens_file, path in gens_ref_files.items()
-                if path is not None
-            }
-        )
+    )
 
     variants_observations = {
         "clinical_snv_observations": clinical_snv_observations,

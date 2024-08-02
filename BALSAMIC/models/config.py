@@ -435,7 +435,7 @@ class ConfigModel(BaseModel):
 
         if self.analysis.analysis_type == AnalysisType.PON:
             # Only dedup is necessary for panel of normals
-            final_bam_suffix = "dedup"
+            final_bam_suffix = "dedup.fixmate"
         elif self.analysis.sequencing_type == SequencingType.TARGETED:
             # TGA uses UMIs
             final_bam_suffix = "dedup.fixmate"

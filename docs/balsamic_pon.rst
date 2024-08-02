@@ -54,6 +54,9 @@ When creating a new PON reference file, the next steps have to be followed:
     /path/analysis/analysis_PON_finish
     /path/analysis/cnv/<panel_name>_CNVkit_PON_reference_<version>.cnn
 
+.. warning::
+    The bedfile from the bait-set will be padded in the generation of the PON according to the minimum bed region size set in Balsamic as well as during the analysis with CNVkit, this to avoid CNVkit filtering out short regions.
+
 Using the PON during analysis
 -----------------------------
 

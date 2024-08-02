@@ -7,6 +7,9 @@ Added:
 * MSI analysis to the tumor-normal workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1454
 * Sentieon install directory path to case config arguments https://github.com/Clinical-Genomics/BALSAMIC/pull/1461
 * UMI extraction and deduplication to TGA workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1358
+* GENS input files for TGA https://github.com/Clinical-Genomics/BALSAMIC/pull/1448
+* Padding of bed-regions for CNVkit to minimum 100 bases https://github.com/Clinical-Genomics/BALSAMIC/pull/1469
+* Added min mapq 20 to CNVkit PON workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1465
 
 Changed:
 ^^^^^^^^
@@ -15,6 +18,9 @@ Changed:
 * Updated Multiqc to version 1.22.3 https://github.com/Clinical-Genomics/BALSAMIC/pull/1441
 * Upgrade `vcf2cytosure` version to 0.9.1 and remove hardcoded versions https://github.com/Clinical-Genomics/BALSAMIC/pull/1456
 * Replaced VarDict with TNscope for all TGA workflows https://github.com/Clinical-Genomics/BALSAMIC/pull/1429
+* Create new PONs for GMCKSolid v4.1, GMSMyeloid v5.3, and GMSlymphoid v7.3 https://github.com/Clinical-Genomics/BALSAMIC/pull/1465
+* Refactored CNVkit rules https://github.com/Clinical-Genomics/BALSAMIC/pull/1465
+
 
 Removed:
 ^^^^^^^^

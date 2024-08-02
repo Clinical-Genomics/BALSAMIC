@@ -193,13 +193,23 @@ class TGAParamsTNscope(BaseModel):
 
 
 class BAMPostProcessingParams(BaseModel):
-    """This class defines the params settings used as constants bam post processing rules
+    """This class defines the params settings used as constants bam post-processing rules.
 
     Attributes:
        manta_max_base_quality: int (required); the maximum base quality in bamfile used downstream in Manta rules
     """
 
     manta_max_base_quality: int
+
+
+class BEDPreProcessingParams(BaseModel):
+    """This class defines the params settings used as constants in bed pre-processing rules.
+
+    Attributes:
+       minimum_region_size: int (required); the minimum region size in input bedfiles for CNV analysis
+    """
+
+    minimum_region_size: int
 
 
 class BalsamicWorkflowConfig(BaseModel):
@@ -223,6 +233,7 @@ class BalsamicWorkflowConfig(BaseModel):
     """
 
     bam_post_processing: BAMPostProcessingParams
+    bed_pre_processing: BEDPreProcessingParams
     common: ParamsCommon
     insert_size_metrics: ParamsInsertSizeMetrics
     manta: ParamsManta
