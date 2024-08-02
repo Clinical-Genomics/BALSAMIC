@@ -1232,7 +1232,7 @@ def balsamic_pon_model(
 
 
 @pytest.fixture(scope="session")
-def config_case_cli(
+def config_case_cli_wgs(
     balsamic_cache: str,
     background_variant_file: str,
     cadd_annotations: str,
@@ -1245,6 +1245,9 @@ def config_case_cli(
     cancer_somatic_snv_observations_path: str,
     sentieon_license: str,
     sentieon_install_dir: str,
+    gens_hg19_interval_list: str,
+    gens_min_5_af_gnomad_file: str,
+    gens_cov_pon_file: str,
 ) -> List[str]:
     """Return common config case CLI."""
     return [
@@ -1272,8 +1275,59 @@ def config_case_cli(
         sentieon_install_dir,
         "--sentieon-license",
         sentieon_license,
+        "--genome-interval",
+        gens_hg19_interval_list,
+        "--gnomad-min-af5",
+        gens_min_5_af_gnomad_file,
+        "--gens-coverage-pon",
+        gens_cov_pon_file,
     ]
 
+@pytest.fixture(scope="session")
+def config_case_cli_tga(
+    balsamic_cache: str,
+    background_variant_file: str,
+    cadd_annotations: str,
+    swegen_snv_frequency_path: str,
+    swegen_sv_frequency_path: str,
+    clinical_snv_observations_path: str,
+    clinical_sv_observations_path: str,
+    somatic_sv_observations_path: str,
+    cancer_germline_snv_observations_path: str,
+    cancer_somatic_snv_observations_path: str,
+    sentieon_license: str,
+    sentieon_install_dir: str,
+    gens_min_5_af_gnomad_file: str,
+) -> List[str]:
+    """Return common config case CLI."""
+    return [
+        "--balsamic-cache",
+        balsamic_cache,
+        "--background-variants",
+        background_variant_file,
+        "--cadd-annotations",
+        cadd_annotations,
+        "--swegen-snv",
+        swegen_snv_frequency_path,
+        "--swegen-sv",
+        swegen_sv_frequency_path,
+        "--clinical-snv-observations",
+        clinical_snv_observations_path,
+        "--clinical-sv-observations",
+        clinical_sv_observations_path,
+        "--cancer-somatic-sv-observations",
+        somatic_sv_observations_path,
+        "--cancer-germline-snv-observations",
+        cancer_germline_snv_observations_path,
+        "--cancer-somatic-snv-observations",
+        cancer_somatic_snv_observations_path,
+        "--sentieon-install-dir",
+        sentieon_install_dir,
+        "--sentieon-license",
+        sentieon_license,
+        "--gnomad-min-af5",
+        gens_min_5_af_gnomad_file,
+    ]
 
 @pytest.fixture(scope="session")
 def tumor_only_config_qc(
@@ -1282,7 +1336,7 @@ def tumor_only_config_qc(
     fastq_dir_tumor_only_qc: str,
     tumor_sample_name: str,
     panel_bed_file: str,
-    config_case_cli: list[str],
+    config_case_cli_tga: list[str],
 ) -> str:
     """Invoke balsamic config sample to create sample configuration file for tumor-only TGA."""
 
@@ -1305,7 +1359,7 @@ def tumor_only_config_qc(
             "-p",
             panel_bed_file,
         ]
-        + config_case_cli,
+        + config_case_cli_tga,
     )
 
     return Path(
@@ -1319,8 +1373,9 @@ def tumor_normal_config_qc(
     tumor_sample_name: str,
     normal_sample_name: str,
     analysis_dir: str,
+    panel_bed_file: str,
     fastq_dir_tumor_normal_qc: str,
-    config_case_cli: list[str],
+    config_case_cli_tga: list[str],
 ) -> str:
     """Invoke balsamic config sample to create sample configuration file for tumor-normal TGA QC workflow."""
 
@@ -1342,8 +1397,10 @@ def tumor_normal_config_qc(
             tumor_sample_name,
             "--normal-sample-name",
             normal_sample_name,
+            "-p",
+            panel_bed_file,
         ]
-        + config_case_cli,
+        + config_case_cli_tga,
     )
 
     return Path(
@@ -1360,7 +1417,7 @@ def tumor_normal_config_qc_wgs(
     fastq_dir_tumor_normal_qc_wgs: str,
     tumor_sample_name: str,
     normal_sample_name: str,
-    config_case_cli: List[str],
+    config_case_cli_wgs: List[str],
 ) -> str:
     """Invoke balsamic config sample to create sample configuration file for tumor-normal WGS QC workflow."""
 
@@ -1383,7 +1440,7 @@ def tumor_normal_config_qc_wgs(
             "--normal-sample-name",
             normal_sample_name,
         ]
-        + config_case_cli,
+        + config_case_cli_wgs,
     )
 
     return Path(
@@ -1400,7 +1457,7 @@ def tumor_only_config(
     analysis_dir: str,
     fastq_dir_tumor_only: str,
     panel_bed_file: str,
-    config_case_cli: list[str],
+    config_case_cli_tga: list[str],
 ) -> str:
     """Invoke balsamic config sample to create sample configuration file for tumor-only TGA."""
 
@@ -1421,7 +1478,7 @@ def tumor_only_config(
             "-p",
             panel_bed_file,
         ]
-        + config_case_cli,
+        + config_case_cli_tga,
     )
     return Path(
         analysis_dir,
@@ -1438,7 +1495,7 @@ def tumor_normal_config(
     analysis_dir: str,
     fastq_dir_tumor_normal: str,
     panel_bed_file: str,
-    config_case_cli: list[str],
+    config_case_cli_tga: list[str],
 ) -> str:
     """Invoke balsamic config sample to create sample configuration file for tumor-normal TGA."""
 
@@ -1461,7 +1518,7 @@ def tumor_normal_config(
             "-p",
             panel_bed_file,
         ]
-        + config_case_cli,
+        + config_case_cli_tga,
     )
 
     return Path(
@@ -1478,7 +1535,7 @@ def tumor_only_umi_config(
     analysis_dir: str,
     fastq_dir_tumor_only: str,
     panel_bed_file: str,
-    config_case_cli: list[str],
+    config_case_cli_tga: list[str],
 ) -> str:
     """Invoke balsamic config sample to create sample configuration file for tumor-only TGA."""
 
@@ -1501,7 +1558,7 @@ def tumor_only_umi_config(
             "-p",
             panel_bed_file,
         ]
-        + config_case_cli,
+        + config_case_cli_tga,
     )
 
     return Path(
@@ -1519,7 +1576,7 @@ def tumor_normal_umi_config(
     analysis_dir: str,
     fastq_dir_tumor_normal: str,
     panel_bed_file: str,
-    config_case_cli: list[str],
+    config_case_cli_tga: list[str],
 ) -> str:
     """Invoke balsamic config sample to create sample configuration file for tumor-normal TGA."""
 
@@ -1546,7 +1603,7 @@ def tumor_normal_umi_config(
             "-p",
             panel_bed_file,
         ]
-        + config_case_cli,
+        + config_case_cli_tga,
     )
 
     return Path(
@@ -1562,7 +1619,7 @@ def tumor_only_wgs_config(
     analysis_dir: str,
     fastq_dir_tumor_only_wgs: str,
     tumor_sample_name: str,
-    config_case_cli: List[str],
+    config_case_cli_wgs: List[str],
 ) -> str:
     """Invoke balsamic config sample to create sample configuration file for tumor-only WGS."""
 
@@ -1581,7 +1638,7 @@ def tumor_only_wgs_config(
             "--tumor-sample-name",
             tumor_sample_name,
         ]
-        + config_case_cli,
+        + config_case_cli_wgs,
     )
 
     return Path(
@@ -1598,7 +1655,7 @@ def tumor_normal_wgs_config(
     fastq_dir_tumor_normal_wgs: str,
     tumor_sample_name: str,
     normal_sample_name: str,
-    config_case_cli: str,
+    config_case_cli_wgs: List[str],
 ) -> str:
     """Invoke balsamic config sample to create sample configuration file for tumor-normal WGS."""
 
@@ -1619,7 +1676,7 @@ def tumor_normal_wgs_config(
             "--normal-sample-name",
             normal_sample_name,
         ]
-        + config_case_cli,
+        + config_case_cli_wgs,
     )
 
     return Path(
@@ -1638,8 +1695,7 @@ def tumor_only_config_dummy_vep(
     fastq_dir_tumor_only_dummy_vep: str,
     panel_bed_file: str,
     background_variant_file: str,
-    sentieon_license: str,
-    sentieon_install_dir: str,
+    config_case_cli_tga: list[str],
 ) -> str:
     """Invoke balsamic config sample to create sample configuration file for tumor-only TGA with dummy VEP file."""
 
@@ -1663,11 +1719,8 @@ def tumor_only_config_dummy_vep(
             background_variant_file,
             "--tumor-sample-name",
             tumor_sample_name,
-            "--sentieon-install-dir",
-            sentieon_install_dir,
-            "--sentieon-license",
-            sentieon_license,
-        ],
+        ]
+        + config_case_cli_tga,
     )
     return Path(
         analysis_dir,
@@ -1685,8 +1738,7 @@ def tumor_only_pon_config(
     panel_bed_file: str,
     pon_cnn_path: str,
     balsamic_cache: str,
-    sentieon_license: str,
-    sentieon_install_dir: str,
+    config_case_cli_tga: List[str],
 ) -> str:
     """Invoke balsamic PON config sample to create sample configuration file for tumor-only TGA."""
 
@@ -1706,15 +1758,10 @@ def tumor_only_pon_config(
             panel_bed_file,
             "--pon-cnn",
             pon_cnn_path,
-            "--balsamic-cache",
-            balsamic_cache,
             "--tumor-sample-name",
             tumor_sample_name,
-            "--sentieon-install-dir",
-            sentieon_install_dir,
-            "--sentieon-license",
-            sentieon_license,
-        ],
+        ]
+        + config_case_cli_tga
     )
 
     return Path(
