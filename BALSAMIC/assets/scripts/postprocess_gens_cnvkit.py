@@ -13,7 +13,9 @@ def calculate_log2_ratio(purity, log2_ratio, ploidy):
         raise ValueError("Ploidy must be a positive number")
 
     # Ploidy and purity adjustment formula reference to PureCN issue: https://github.com/lima1/PureCN/issues/40
-    log2_adjusted = (purity*log2_ratio*ploidy + 2*(1-purity)*log2_ratio - 2*(1-purity)) / (purity*ploidy)
+    log2_adjusted = (
+        purity * log2_ratio * ploidy + 2 * (1 - purity) * log2_ratio - 2 * (1 - purity)
+    ) / (purity * ploidy)
 
     return log2_adjusted
 
@@ -81,7 +83,6 @@ def create_gens_cov_file(
 
         # store values in list
         log2_data.append(f"{row['chromosome']}\t{midpoint - 1}\t{midpoint}\t{log2}")
-
 
     # Write log2 data to output file
     with open(output_file, "w") as log2_out:

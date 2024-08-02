@@ -424,6 +424,7 @@ def test_missing_required_gens_arguments_wgs(
         in result.output
     )
 
+
 def test_missing_required_gens_arguments_tga(
     invoke_cli,
     tumor_sample_name: str,
@@ -462,10 +463,8 @@ def test_missing_required_gens_arguments_tga(
     )
     # THEN the CLI should exit code 2 and display an informative error message
     assert result.exit_code == 1
-    assert (
-        "TGA requires argument: gnomad_min_af5"
-        in result.output
-    )
+    assert "TGA requires argument: gnomad_min_af5" in result.output
+
 
 def test_config_with_gens_arguments(
     invoke_cli,

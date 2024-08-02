@@ -1283,6 +1283,7 @@ def config_case_cli_wgs(
         gens_cov_pon_file,
     ]
 
+
 @pytest.fixture(scope="session")
 def config_case_cli_tga(
     balsamic_cache: str,
@@ -1328,6 +1329,7 @@ def config_case_cli_tga(
         "--gnomad-min-af5",
         gens_min_5_af_gnomad_file,
     ]
+
 
 @pytest.fixture(scope="session")
 def tumor_only_config_qc(
@@ -1761,7 +1763,7 @@ def tumor_only_pon_config(
             "--tumor-sample-name",
             tumor_sample_name,
         ]
-        + config_case_cli_tga
+        + config_case_cli_tga,
     )
 
     return Path(
