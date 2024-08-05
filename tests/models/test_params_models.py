@@ -237,7 +237,6 @@ def test_umiparams_tnscope():
     assert isclose(test_tnscope_params_built.init_tumorLOD, 0.5)
     assert test_tnscope_params_built.min_tumorLOD == 6
     assert math.isclose(test_tnscope_params_built.filter_tumor_af, 0.01, rel_tol=1e-9)
-    assert test_tnscope_params_built.filter_tumor_af == 0.01
     assert test_tnscope_params_built.error_rate == 5
     assert test_tnscope_params_built.prunefactor == 3
     assert test_tnscope_params_built.disable_detect == "abc"
