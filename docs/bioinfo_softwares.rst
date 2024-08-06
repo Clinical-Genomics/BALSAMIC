@@ -146,7 +146,7 @@ tiddit
 ~~~~~~
 :Source code: `Github` `<https://github.com/SciLifeLab/TIDDIT>`_
 :Article: `F1000Res` `<https://pubmed.ncbi.nlm.nih.gov/28781756/>`_
-:Version: `3.3.2`
+:Version: `3.8.0`
 
 vardict
 ~~~~~~~
