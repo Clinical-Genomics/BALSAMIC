@@ -13,6 +13,7 @@ Changed:
 * `SLEEP_BEFORE_START` to 600s https://github.com/Clinical-Genomics/BALSAMIC/pull/1372
 * Updated Multiqc to version 1.22.3 https://github.com/Clinical-Genomics/BALSAMIC/pull/1441
 * Upgrade `vcf2cytosure` version to 0.9.1 and remove hardcoded versions https://github.com/Clinical-Genomics/BALSAMIC/pull/1456
+* Upgrade `TIDDIT` version to 3.8.0 https://github.com/Clinical-Genomics/BALSAMIC/pull/1469
 
 Removed:
 ^^^^^^^^
