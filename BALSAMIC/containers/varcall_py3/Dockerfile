@@ -1,22 +1,28 @@
 FROM continuumio/miniconda3:4.10.3-alpine
 
-LABEL base.image="continuumio/miniconda3:4.10.3-alpine"
-LABEL about.home="https://github.com/Clinical-Genomics/BALSAMIC"
-LABEL about.documentation="https://balsamic.readthedocs.io/"
-LABEL about.license="MIT License (MIT)"
-LABEL about.description="Bioinformatic analysis pipeline for somatic mutations in cancer"
+LABEL base.image="continuumio/miniconda3:4.10.3-alpine" \
+      about.home="https://github.com/Clinical-Genomics/BALSAMIC" \
+      about.documentation="https://balsamic.readthedocs.io/" \
+      about.license="MIT License (MIT)" \
+      about.description="Bioinformatic analysis pipeline for somatic mutations in cancer"
 
 ENV PATH="/opt/conda/bin/:${PATH}"
 
+# Install necessary packages
 RUN apk add --no-cache bash gcc git
 
-ARG WORK_DIR=project
 ARG CONTAINER_NAME
 
-# Copy all project files
-COPY . /${WORK_DIR}
+# Set the working directory
+WORKDIR /project
 
-RUN cd /${WORK_DIR}/BALSAMIC/containers/${CONTAINER_NAME}/ && /bin/sh ${CONTAINER_NAME}.sh ${CONTAINER_NAME}
+# Copy all project files to WORKDIR
+COPY . .
 
-# Clean work environment
-RUN rm -rf /${WORK_DIR:?} && conda clean --all --yes
+# Execute the container specific script
+WORKDIR /project/BALSAMIC/containers/${CONTAINER_NAME}
+RUN /bin/sh ${CONTAINER_NAME}.sh ${CONTAINER_NAME}
+
+# Clean up work environment
+WORKDIR /
+RUN rm -rf /project && conda clean --all --yes
