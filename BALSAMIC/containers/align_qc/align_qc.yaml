@@ -158,7 +158,7 @@ dependencies:
   - requests=2.25.1
   - rich=12.5.1
   - ruamel_yaml=0.15.100
-  - samtools=1.15.1
+  - samtools=1.20
   - sed=4.8
   - setuptools=52.0.0
   - simplejson=3.17.6
