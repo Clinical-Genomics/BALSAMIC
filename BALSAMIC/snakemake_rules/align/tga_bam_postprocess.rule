@@ -67,6 +67,7 @@ rule samtools_fixmate:
         Path(singularity_image,config["bioinfo_tools"].get("samtools") + ".sif").as_posix()
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
+        postprocess_fixmate_script = get_script_path("postprocess_fixmate_bam.awk"),
         sample_id="{sample}"
     threads:
         get_threads(cluster_config,"samtools_fixmate")
@@ -74,10 +75,14 @@ rule samtools_fixmate:
         "Running samtools collate and fixmate for: {params.sample_id}"
     shell:
         """
+export TMPDIR={params.tmpdir} ;
 mkdir -p {params.tmpdir}/collate ; 
 
-samtools collate -@ {threads} -O -u {input.bam} {params.tmpdir}/collate/{wildcards.sample}_collate_tmp | \
-samtools fixmate --reference {input.ref} -@ {threads} - - | \
+samtools collate -@ {threads} -u {input.bam} {params.tmpdir}/collate/{wildcards.sample}_collate_tmp | \
+samtools fixmate -O SAM --reference {input.ref} -@ {threads} - - | \
+awk -f {params.postprocess_fixmate_script} | \
+samtools view -Sb - | \
+samtools calmd @ {threads} {input.ref} | \
 samtools sort -T {params.tmpdir} - -o {output.bam} ;
 samtools index {output.bam} ;
 
