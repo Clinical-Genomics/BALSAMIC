@@ -6,7 +6,7 @@ LABEL about.documentation="https://balsamic.readthedocs.io/"
 LABEL about.license="MIT License (MIT)"
 LABEL about.description="Bioinformatic analysis pipeline for somatic mutations in cancer"
 
-ARG nim_version=2.0.8
+ARG nim_version=1.6.6
 
 ENV CFLAGS="-fPIC -O3"
 
@@ -44,8 +44,7 @@ RUN cd / &&    \
     git clone -b v0.2.19 --depth 1 https://github.com/brentp/somalier.git && \
     cd somalier && \
     nimble install -y nimble && \
-    /root/.nimble/bin/nimble install -d -y && \
-    nimble install -y slivar
+    /root/.nimble/bin/nimble install -d -y &&
 
 RUN cd /somalier &&  \
     nim c -d:danger -d:nsb_static -d:release -d:openmp -d:blas=openblas -d:lapack=openblas -o:/usr/bin/somalier src/somalier && \
