@@ -10,12 +10,12 @@ ARG nim_version=1.6.6
 
 ENV CFLAGS="-fPIC -O3"
 
-RUN apk add --no-cache wget git autoconf tar xz xz-dev bzip2-dev curl curl-dev bash libzip-dev cmake openblas-dev build-base
+RUN apk add --no-cache wget git xz bzip2-static musl m4 autoconf tar xz-dev bzip2-dev build-base libpthread-stubs libzip-dev gfortran openssl-libs-static openblas-static pcre-dev curl llvm-dev curl-static bash curl-dev clang-static nghttp2-static  zlib-static cmake
 
 RUN mkdir -p /usr/local/include && \
-    git clone --depth 1 https://github.com/ebiggers/libdeflate.git && \
-    cd libdeflate && cmake -B build && cmake --build build && \
-    cp /libdeflate/build/libdeflate.a /usr/local/lib && cp /libdeflate/libdeflate.h /usr/local/include && \
+    git clone -b v1.18 --depth 1 https://github.com/ebiggers/libdeflate.git && \
+    cd libdeflate && cmake -B build && cmake --build build && cmake --install build  && \
+    ln -s /usr/local/lib64/* /usr/local/lib && \
     cd .. && rm -rf libdeflate
 
 RUN cd / && \
@@ -23,25 +23,24 @@ RUN cd / && \
     tar xf nim-${nim_version}-linux_x64.tar.xz && \
     echo 'PATH=/nim-${nim_version}/bin:$PATH' >> ~/.bashrc && \
     echo 'PATH=/nim-${nim_version}/bin:$PATH' >> ~/.bash_profile && \
-    echo 'PATH=/nim-${nim_version}/bin:$PATH' >> /etc/environment  && \
+    echo 'PATH=/nim-${nim_version}/bin:$PATH' >> /etc/environment && \
     rm -f nim-${nim_version}-linux_x64.tar.xz
 
 ENV PATH=/nim-${nim_version}/bin/:$PATH
 
 RUN cd / && \
-    git clone --depth 1 -b 1.15 --recursive https://github.com/samtools/htslib && \
+    git clone --depth 1 -b 1.18 --recursive https://github.com/samtools/htslib && \
     cd htslib && autoheader && autoconf && \
     ./configure --enable-s3 --enable-gcs --enable-libcurl --with-libdeflate && \
     make -j4 CFLAGS="-fPIC -O3" install && \
-    cd ../ && \
-    git clone --depth 1 -b 1.15 --recursive https://github.com/samtools/bcftools && \
+    cd ../ && git clone --depth 1 -b 1.18 --recursive https://github.com/samtools/bcftools && \
     cd bcftools && autoheader && autoconf && \
     ./configure --enable-s3 --enable-libcurl --with-libdeflate && \
     make -j4 CFLAGS="-fPIC -O3" install && \
     cd ../ && rm -rf htslib bcftools
 
 RUN cd / &&    \
-    git clone -b v0.2.16 --depth 1 https://github.com/brentp/somalier.git && \
+    git clone -b v0.2.19 --depth 1 https://github.com/brentp/somalier.git && \
     cd somalier && \
     nimble install -y nimble && \
     /root/.nimble/bin/nimble install -d -y
