@@ -31,4 +31,5 @@ RUN python -m pip install --upgrade pip
 
 # Clean up work environment
 WORKDIR /
-RUN rm -rf /project && conda clean --all --yes
+RUN rm -rf /project
+RUN conda clean --all --yes
