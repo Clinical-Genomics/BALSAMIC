@@ -24,7 +24,8 @@ RUN sh ${CONTAINER_NAME}.sh ${CONTAINER_NAME}
 
 # Install TIDDIT
 WORKDIR /project
-RUN python -m pip install --upgrade pip
+RUN python -m pip install --upgrade pip && \
+    pip install --upgrade requests
 #RUN git clone --branch v3.8.0 --single-branch https://github.com/TIDDIT/TIDDIT.git && \
 #    cd TIDDIT && \
 #    pip install . \
