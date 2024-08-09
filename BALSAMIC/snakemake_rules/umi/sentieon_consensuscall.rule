@@ -98,6 +98,7 @@ rule sentieon_consensusfilter_umi:
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("samtools") + ".sif").as_posix()
     params:
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         consensusfilter_script = get_script_path("FilterDuplexUMIconsensus.awk"),
         minreads = params.umiconsensuscall.filter_minreads,
         sample_id = '{sample}',
@@ -107,6 +108,8 @@ rule sentieon_consensusfilter_umi:
         "Filtering consensus reads based on XZ tag for {params.sample_id}"
     shell:
         """
+export TMPDIR={params.tmpdir};
+
 samtools view -h {input} | \
 awk -v MinR={params.minreads} -v OFS=\'\\t\' -f {params.consensusfilter_script} | \
 samtools view -bh - > {output};
