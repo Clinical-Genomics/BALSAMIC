@@ -26,7 +26,7 @@ RUN sh ${CONTAINER_NAME}.sh ${CONTAINER_NAME}
 WORKDIR /project
 RUN python -m pip install --upgrade pip && \
     pip install --upgrade requests && \
-    git clone --branch v3.8.0 --single-branch https://github.com/TIDDIT/TIDDIT.git && \
+    git clone --branch v3.8.0 --single-branch https://github.com/SciLifeLab/TIDDIT.git && \
     cd TIDDIT && \
     pip install .
 
