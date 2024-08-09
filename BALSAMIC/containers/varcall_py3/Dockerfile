@@ -13,17 +13,21 @@ RUN apk add --no-cache bash gcc git
 
 ARG CONTAINER_NAME
 
-# Set the working directory
-WORKDIR /project
-
-# Copy the relevant container folder into the image
+# Copy the container folder into the image
 COPY BALSAMIC/containers/${CONTAINER_NAME}/ /project/BALSAMIC/containers/${CONTAINER_NAME}/
 
 # Set the working directory to the container directory
 WORKDIR /project/BALSAMIC/containers/${CONTAINER_NAME}
 
-# Run the script
+# Run the package installation script
 RUN sh ${CONTAINER_NAME}.sh ${CONTAINER_NAME}
+
+# Install TIDDIT
+WORKDIR /project
+RUN python -m pip install --upgrade pip
+#RUN git clone --branch v3.8.0 --single-branch https://github.com/TIDDIT/TIDDIT.git && \
+#    cd TIDDIT && \
+#    pip install . \
 
 # Clean up work environment
 WORKDIR /
