@@ -6,6 +6,9 @@ LABEL about.documentation="https://balsamic.readthedocs.io/"
 LABEL about.license="MIT License (MIT)"
 LABEL about.description="Bioinformatic analysis pipeline for somatic mutations in cancer"
 
+WORKDIR /app
+CMD ["sh"]
+
 #ARG nim_version=1.6.6
 #
 #ENV CFLAGS="-fPIC -O3"
