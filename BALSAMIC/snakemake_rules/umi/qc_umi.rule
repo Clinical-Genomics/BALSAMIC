@@ -15,6 +15,7 @@ rule picard_umiaware:
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("picard") + ".sif").as_posix()
     params:
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         sample_id = "{sample}"
     threads:
         get_threads(cluster_config, "picard_umiaware")
@@ -22,6 +23,8 @@ rule picard_umiaware:
         "Marking duplicates using Picardtools with UmiAware for {params.sample_id}"
     shell:
         """
+export TMPDIR={params.tmpdir};
+
 picard UmiAwareMarkDuplicatesWithMateCigar \
 I={input.bam} \
 O={output.bam} \
@@ -44,6 +47,7 @@ rule picard_collecthsmetrics_umi:
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("picard") + ".sif").as_posix()
     params:
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         baitsetname = os.path.basename(config["panel"]["capture_kit"]),
         sample_id = "{sample}"
     threads:
@@ -52,6 +56,8 @@ rule picard_collecthsmetrics_umi:
         "Collecting HSmetrics using Picardtools for {params.sample_id}"
     shell:
         """
+export TMPDIR={params.tmpdir};
+
 picard BedToIntervalList \
 I={input.bed} \
 O={input.bam}.picard.bedintervals \
@@ -81,13 +87,16 @@ rule samtools_view_calculatemeanfamilydepth_umi:
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("samtools") + ".sif").as_posix()
     params:
-        sample_id = "{sample}"
+        sample_id = "{sample}",
+        tmpdir= tempfile.mkdtemp(prefix=tmp_dir),
     threads:
         get_threads(cluster_config, "samtools_view_calculatemeanfamilydepth_umi")
     message:
         "Calculating mean family depth using samtools and awk for {params.sample_id}"
     shell:
         """
+export TMPDIR={params.tmpdir};
+
 samtools view -@ {threads} {input.bam} | \
 grep 'RX:Z:' | \
 sed 's/.*RX:Z:\\([ACGT-].*\\).*/\\1/' | \
