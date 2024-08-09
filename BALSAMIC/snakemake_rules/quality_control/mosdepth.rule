@@ -18,6 +18,7 @@ rule mosdepth_coverage:
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("mosdepth") + ".sif").as_posix()
     params:
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         mapq = params.mosdepth.mapq,
         samflag = params.mosdepth.samflag,
         quantize = params.mosdepth.quantize,
@@ -29,6 +30,7 @@ rule mosdepth_coverage:
         "Calculate coverage using mosdepth for sample {params.sample_name}"
     shell:
         """
+export TMPDIR={params.tmpdir};
 export MOSDEPTH_Q0=NO_COVERAGE;
 export MOSDEPTH_Q1=LOW_COVERAGE;
 export MOSDEPTH_Q2=CALLABLE;
