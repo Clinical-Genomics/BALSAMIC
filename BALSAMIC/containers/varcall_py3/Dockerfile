@@ -24,7 +24,7 @@ RUN sh ${CONTAINER_NAME}.sh ${CONTAINER_NAME}
 
 # Install TIDDIT
 WORKDIR /project
-RUN python -m pip install --upgrade cython pip requests && \
+RUN python -m pip install --no-cache-dir --upgrade cython pip requests && \
     git clone --depth 1 --branch TIDDIT-3.8.0 https://github.com/SciLifeLab/TIDDIT.git && \
     cd TIDDIT && \
     pip install .
