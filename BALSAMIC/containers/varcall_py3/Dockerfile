@@ -16,12 +16,14 @@ ARG CONTAINER_NAME
 # Set the working directory
 WORKDIR /project
 
-# Copy all project files to WORKDIR
-COPY . .
+# Copy the relevant container folder into the image
+COPY BALSAMIC/containers/${CONTAINER_NAME}/ /project/BALSAMIC/containers/${CONTAINER_NAME}/
 
-# Execute the container specific script
+# Set the working directory to the container directory
 WORKDIR /project/BALSAMIC/containers/${CONTAINER_NAME}
-RUN /bin/sh ${CONTAINER_NAME}.sh ${CONTAINER_NAME}
+
+# Run the script
+RUN sh ${CONTAINER_NAME}.sh ${CONTAINER_NAME}
 
 # Clean up work environment
 WORKDIR /
