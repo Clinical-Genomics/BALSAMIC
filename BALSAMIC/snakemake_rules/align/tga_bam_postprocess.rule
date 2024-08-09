@@ -82,7 +82,7 @@ samtools collate -@ {threads} -O -u {input.bam} {params.tmpdir}/collate/{wildcar
 samtools fixmate -O SAM --reference {input.ref} -@ {threads} - - | \
 awk -f {params.postprocess_fixmate_script} | \
 samtools view -Sb - | \
-samtools calmd -@ {threads} {input.ref} | \
+samtools calmd -@ {threads} - {input.ref} | \
 samtools sort -T {params.tmpdir} - -o {output.bam} ;
 samtools index {output.bam} ;
 
