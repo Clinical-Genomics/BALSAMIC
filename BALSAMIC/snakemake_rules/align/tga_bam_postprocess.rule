@@ -76,14 +76,14 @@ rule samtools_fixmate:
     shell:
         """
 export TMPDIR={params.tmpdir} ;
-mkdir -p {params.tmpdir}/collate ; 
+mkdir -p {params.tmpdir}/collate ;
+mkdir -p {params.tmpdir}/sort
 
 samtools collate -@ {threads} -O -u {input.bam} {params.tmpdir}/collate/{wildcards.sample}_collate_tmp | \
 samtools fixmate -O SAM --reference {input.ref} -@ {threads} - - | \
 awk -f {params.postprocess_fixmate_script} | \
-samtools view -Sb - | \
-samtools calmd -@ {threads} - {input.ref} | \
-samtools sort -T {params.tmpdir} - -o {output.bam} ;
+samtools sort -@ {threads} -m 4G --input-fmt-option SAM -O BAM -T {params.tmpdir}/sort/{wildcards.sample}_sort_tmp - - | \
+samtools calmd -@ {threads} -b - {input.ref} > {output.bam} ;
 samtools index {output.bam} ;
 
 rm -rf {params.tmpdir}
