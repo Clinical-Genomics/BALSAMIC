@@ -224,6 +224,14 @@
 		"time": "4:00:00",
 		"n": 12
 	},
+	"sentieon_tnscope_tga_t_only": {
+		"time": "4:00:00",
+		"n": 10
+	},
+	"sentieon_tnscope_tga_tumor_normal": {
+		"time": "5:00:00",
+		"n": 14
+	},
 	"bcftools_get_somaticINDEL_research": {
 		"time": "1:00:00",
 		"n": 36

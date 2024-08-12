@@ -18,20 +18,20 @@ rule sentieon_tnscope_tga_tumor_only:
     benchmark:
         Path(benchmark_dir, "sentieon_tnscope_" + config["analysis"]["case_id"] + ".tsv").as_posix()
     params:
-        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
+        algo = params.tnscope_tga.algo,
+        error_rate = params.tnscope_tga.error_rate,
+        init_tumor_lod = params.tnscope_tga.init_tumorLOD,
+        padding = params.tnscope_tga.padding,
+        pcr_model = params.tnscope_tga.pcr_model,
+        prune_factor = params.tnscope_tga.prunefactor,
         sentieon_exec=config_model.sentieon.sentieon_exec,
         sentieon_lic=config_model.sentieon.sentieon_license,
-        tumor_af = params.tnscope_tga.filter_tumor_af,
-        algo = params.tnscope_tga.algo,
-        tumor_lod = params.tnscope_tga.min_tumorLOD,
-        init_tumor_lod = params.tnscope_tga.init_tumorLOD,
-        error_rate = params.tnscope_tga.error_rate,
-        prune_factor = params.tnscope_tga.prunefactor,
-        padding = params.tnscope_tga.padding,
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         tumor = "TUMOR",
-        pcr_model = params.tnscope_tga.pcr_model
+        tumor_af = params.tnscope_tga.filter_tumor_af,
+        tumor_lod = params.tnscope_tga.min_tumorLOD,
     threads:
-        get_threads(cluster_config, "sentieon_tnscope_umi")
+        get_threads(cluster_config, "sentieon_tnscope_tga_t_only")
     message:
         "Calling single nucleotide variants using TNscope for {params.tumor}"
     shell:
