@@ -366,7 +366,7 @@ def test_get_vcf(sample_config: Dict):
 
 def test_get_vcf_invalid_variant_caller(sample_config):
     # GIVEN a sample_config dict and an incorrect variant callers list
-    variant_callers = ["manta", "tnhaplotyper"]
+    variant_callers = ["manta"]
 
     # WHEN passing args to that function
     with pytest.raises(KeyError):
@@ -738,12 +738,12 @@ def test_get_sample_type_from_sample_name(config_dict: Dict):
     assert sample_type == SampleType.TUMOR
 
 
-def test_get_rule_output(snakemake_bcftools_filter_vardict_research_tumor_only):
+def test_get_rule_output(snakemake_bcftools_filter_tnscope_research_tumor_only):
     """Tests retrieval of existing output files from a specific workflow."""
 
     # GIVEN a snakemake fastqc rule object, a rule name and a list of associated wildcards
-    rules = snakemake_bcftools_filter_vardict_research_tumor_only
-    rule_name = "bcftools_filter_vardict_research_tumor_only"
+    rules = snakemake_bcftools_filter_tnscope_research_tumor_only
+    rule_name = "bcftools_filter_tnscope_research_tumor_only"
     output_file_wildcards = {
         "sample": ["ACC1", "tumor", "normal"],
         "case_name": "sample_tumor_only",
@@ -758,12 +758,12 @@ def test_get_rule_output(snakemake_bcftools_filter_vardict_research_tumor_only):
         # Expected file names
         assert (
             Path(file[0]).name
-            == "SNV.somatic.sample_tumor_only.vardict.research.filtered.pass.vcf.gz"
+            == "SNV.somatic.sample_tumor_only.tnscope.research.filtered.pass.vcf.gz"
         )
         # Expected tags
         assert (
             file[3]
-            == "SNV,sample-tumor-only,vcf-pass-vardict,research-vcf-pass-vardict"
+            == "SNV,sample-tumor-only,vcf-pass-tnscope,research-vcf-pass-tnscope"
         )
 
 

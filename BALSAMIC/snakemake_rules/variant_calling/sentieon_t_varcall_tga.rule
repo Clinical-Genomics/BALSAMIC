@@ -18,7 +18,6 @@ rule sentieon_tnscope_tga_tumor_only:
     benchmark:
         Path(benchmark_dir, "sentieon_tnscope_" + config["analysis"]["case_id"] + ".tsv").as_posix()
     params:
-        housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "research"},
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         sentieon_exec=config_model.sentieon.sentieon_exec,
         sentieon_lic=config_model.sentieon.sentieon_license,

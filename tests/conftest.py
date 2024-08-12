@@ -1986,10 +1986,10 @@ def qc_extracted_metrics(metrics_yaml_path: str) -> dict:
 
 
 @pytest.fixture(scope="function")
-def snakemake_bcftools_filter_vardict_research_tumor_only(
+def snakemake_bcftools_filter_tnscope_research_tumor_only(
     tumor_only_config_dummy_vep, helpers
 ):
-    """bcftools_filter_vardict_research_tumor_only snakemake mock rule"""
+    """bcftools_filter_tnscope_research_tumor_only snakemake mock rule"""
 
     helpers.read_config(tumor_only_config_dummy_vep)
     vep_path = os.path.join(
@@ -1997,11 +1997,11 @@ def snakemake_bcftools_filter_vardict_research_tumor_only(
         helpers.case_id,
         "analysis",
         "vep",
-        "{var_type}.somatic.{case_name}.vardict.research.filtered.pass.vcf.gz",
+        "{var_type}.somatic.{case_name}.tnscope.research.filtered.pass.vcf.gz",
     )
     return Map(
         {
-            "bcftools_filter_vardict_research_tumor_only": Map(
+            "bcftools_filter_tnscope_research_tumor_only": Map(
                 {
                     "params": Map(
                         {
@@ -2013,13 +2013,13 @@ def snakemake_bcftools_filter_vardict_research_tumor_only(
                     ),
                     "output": Map(
                         {
-                            "_names": Map({"vcf_pass_vardict": vep_path}),
-                            "vcf_pass_vardict": vep_path,
+                            "_names": Map({"vcf_pass_tnscope": vep_path}),
+                            "vcf_pass_tnscope": vep_path,
                         }
                     ),
                     "rule": Map(
                         {
-                            "name": "bcftools_filter_vardict_research_tumor_only",
+                            "name": "bcftools_filter_tnscope_research_tumor_only",
                             "output": [
                                 vep_path,
                             ],

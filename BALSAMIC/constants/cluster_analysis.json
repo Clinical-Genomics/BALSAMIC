@@ -172,14 +172,6 @@
 		"time": "24:00:00",
 		"n": 12
 	},
-	"sentieon_TNhaplotyper": {
-		"time": "24:00:00",
-		"n": 36
-	},
-	"sentieon_TNhaplotyper_tumor_only": {
-		"time": "24:00:00",
-		"n": 36
-	},
 	"sentieon_TNscope": {
 		"time": "24:00:00",
 		"n": 36
@@ -211,18 +203,6 @@
 	"somatic_snv_indel_vcf_merge": {
 		"time": "06:00:00",
 		"n": 10
-	},
-	"vardict_merge": {
-		"time": "01:30:00",
-		"n": 5
-	},
-	"vardict_tumor_normal": {
-		"time": "12:00:00",
-		"n": 18
-	},
-	"vardict_tumor_only": {
-		"time": "10:00:00",
-		"n": 9
 	},
 	"sentieon_bwa_umiextract": {
 		"time": "8:00:00",
@@ -388,28 +368,12 @@
 		"time": "03:00:00",
 		"n": 8
 	},
-	"bcftools_filter_vardict_research_tumor_only": {
-		"time": "04:00:00",
-		"n": 8
-	},
-	"bcftools_filter_vardict_clinical_tumor_only": {
-		"time": "03:00:00",
-		"n": 8
-	},
 	"bcftools_filter_tnscope_umi_research_tumor_only": {
 		"time": "04:00:00",
 		"n": 8
 	},
 	"bcftools_filter_tnscope_umi_tumor_only": {
 		"time": ":03:00:00",
-		"n": 8
-	},
-	"bcftools_filter_vardict_research_tumor_normal": {
-		"time": "04:00:00",
-		"n": 8
-	},
-	"bcftools_filter_vardict_clinical_tumor_normal": {
-		"time": "03:00:00",
 		"n": 8
 	},
 	"bcftools_filter_TNscope_umi_research_tumor_normal": {

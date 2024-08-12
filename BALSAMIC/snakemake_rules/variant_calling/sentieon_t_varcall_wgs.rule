@@ -22,7 +22,7 @@ rule sentieon_tnscope_wgs_tumor_only:
         pcr_model = params.common.pcr_model,
         sentieon_exec=config_model.sentieon.sentieon_exec,
         sentieon_lic=config_model.sentieon.sentieon_license,
-        case_name =  config["analysis"]["case_id"]
+        case_name = config["analysis"]["case_id"]
     threads:
         get_threads(cluster_config, 'sentieon_TNscope_tumor_only')
     message:
