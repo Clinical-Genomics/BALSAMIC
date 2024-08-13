@@ -29,6 +29,18 @@ RUN python -m pip install --no-cache-dir --upgrade cython joblib pip requests &&
     cd TIDDIT && \
     pip install .
 
+# Install fermi2
+WORKDIR /project
+RUN git clone https://github.com/lh3/fermi2.git && \
+    cd fermi2 && \
+    make
+
+# Install bwa (includes ropebwt2)
+WORKDIR /project
+RUN git clone https://github.com/lh3/bwa.git && \
+    cd bwa && \
+    make
+
 # Clean up work environment
 WORKDIR /
 RUN rm -rf /project && conda clean --all --yes
