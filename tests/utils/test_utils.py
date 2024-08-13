@@ -46,6 +46,7 @@ from BALSAMIC.utils.cli import (
 from BALSAMIC.utils.exc import BalsamicError, WorkflowRunError
 from BALSAMIC.utils.io import (
     read_json,
+    read_csv,
     read_vcf_file,
     read_yaml,
     write_finish_file,
@@ -477,6 +478,20 @@ def test_read_json(config_path: str):
 
     # THEN the config.json file should be correctly parsed
     assert type(config_dict) is dict
+
+
+def test_read_csv(purity_csv_path: str):
+    """Test data extraction from a CSV file."""
+
+    # GIVEN a CSV path
+
+    # WHEN calling the function
+    csv_list: list[Dict] = read_csv(purity_csv_path)
+
+    # THEN the config.json file should be correctly parsed
+    assert len(csv_list) == 1
+    assert csv_list[0]["Purity"] == "0.64"
+    assert csv_list[0]["Sampleid"] == "tumor.initial"
 
 
 def test_read_json_error():

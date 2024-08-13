@@ -139,14 +139,15 @@ def case_config(
             gnomad_min_af5=gnomad_min_af5,
             panel_bed=panel_bed,
         )
-        # Update references dictionary with GENS reference-files
-        references.update(
-            {
-                gens_file: path
-                for gens_file, path in gens_references.items()
-                if path is not None
-            }
-        )
+        if gens_references:
+            # Update references dictionary with GENS reference-files
+            references.update(
+                {
+                    gens_file: path
+                    for gens_file, path in gens_references.items()
+                    if path is not None
+                }
+            )
 
     variants_observations = {
         "clinical_snv_observations": clinical_snv_observations,

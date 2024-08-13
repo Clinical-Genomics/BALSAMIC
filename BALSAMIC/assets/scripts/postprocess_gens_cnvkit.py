@@ -1,8 +1,5 @@
 import click
 from BALSAMIC.utils.io import read_csv
-import numpy as np
-import warnings
-
 
 def calculate_log2_ratio(purity, log2_ratio, ploidy):
     # Ensure that the inputs are within valid ranges
