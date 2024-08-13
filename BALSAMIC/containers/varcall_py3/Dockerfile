@@ -9,7 +9,7 @@ LABEL base.image="continuumio/miniconda3:4.10.3-alpine" \
 ENV PATH="/opt/conda/bin/:${PATH}"
 
 # Install necessary packages
-RUN apk add --no-cache bash gcc git libssl-dev musl-dev
+RUN apk add --no-cache bash gcc git libressl-dev musl-dev
 
 ARG CONTAINER_NAME
 
