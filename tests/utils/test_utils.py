@@ -49,6 +49,7 @@ from BALSAMIC.utils.io import (
     read_csv,
     read_vcf_file,
     read_yaml,
+    write_list_of_strings,
     write_finish_file,
     write_json,
     write_sacct_to_yaml,
@@ -455,6 +456,25 @@ def test_write_json(tmp_path, reference):
 
     assert len(list(tmp.iterdir())) == 1
 
+def test_write_list_of_strings(tmp_path):
+    """Test writing list of strings to file"""
+
+    # GIVEN a list of strings and an output file path
+    list_of_strings = [f"header1\theader2\theader3", f"row1_col1\trow1_col2\trow1_col3"]
+    tmp = tmp_path / "tmp"
+    tmp.mkdir()
+    output_file: Path = Path(tmp / "output.csv")
+
+    # WHEN writing list of strings
+    write_list_of_strings(list_of_strings, output_file.as_posix())
+
+    # THEN file should have been written
+    assert output_file.exists()
+
+    # AND contain the same information
+    read_written_file = read_csv(csv_path=output_file, delimeter="\t")
+    assert read_written_file == [{"header1": "row1_col1", "header2": "row1_col2", "header3": "row1_col3"}]
+    assert len(read_written_file) == 1
 
 def test_write_json_error(tmp_path: Path):
     """Test JSON write error."""

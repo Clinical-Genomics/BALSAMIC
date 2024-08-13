@@ -73,6 +73,11 @@ def read_csv(csv_path: str, delimeter: str = ",") -> List[dict]:
         csv_reader = csv.DictReader(csv_file, delimiter=delimeter)
         return [row for row in csv_reader]
 
+def write_list_of_strings(list_of_strings: list[str], output_file: str):
+    """Writes a list of strings to a file, each on a new line."""
+    with open(output_file, 'w') as file:
+        for string in list_of_strings:
+            file.write(f"{string}\n")
 
 def read_yaml(yaml_path: str) -> dict:
     """Read data from a yaml file."""
