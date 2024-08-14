@@ -116,3 +116,49 @@ samtools view -bh - > {output};
 
 samtools index {output};
         """
+
+rule bam_compress_tumor_umi:
+    input:
+        bam = umi_dir + "tumor.{sample}.consensusfiltered_umi.bam",
+        fasta = config_model.reference["reference_genome"]
+    output:
+        cram = umi_dir + "tumor.{sample}.consensusfiltered_umi.cram",
+    benchmark:
+        Path(benchmark_dir, "bam_compress_tumor_umi_{sample}.tsv").as_posix()
+    singularity:
+        Path(singularity_image, config["bioinfo_tools"].get("compress") + ".sif").as_posix()
+    params:
+        sample_id = "{sample}",
+        housekeeper_id= {"id": "tumor_sample", "tags": "umi_tumor"}
+    threads:
+        get_threads(cluster_config, "bam_compress")
+    message:
+        "Compressing UMI bam to cram for {params.sample_id}"
+    shell:
+        """
+samtools view -h -T {input.fasta} --threads {threads} -C -o {output.cram} {input.bam}; 
+samtools index {output.cram}; 
+        """
+
+rule bam_compress_normal_umi:
+    input:
+        bam = umi_dir + "normal.{sample}.consensuscalled_umi.bam",
+        fasta = config_model.reference["reference_genome"]
+    output:
+        cram = umi_dir + "normal.{sample}.consensuscalled_umi.cram"
+    benchmark:
+        Path(benchmark_dir, "bam_compress_normal_umi_{sample}.tsv").as_posix()
+    singularity:
+        Path(singularity_image, config["bioinfo_tools"].get("compress") + ".sif").as_posix()
+    params:
+        sample_id = "{sample}",
+        housekeeper_id= {"id": "normal_sample", "tags": "normal"}
+    threads:
+        get_threads(cluster_config, "bam_compress")
+    message:
+        "Compressing UMI bam to cram for {params.sample_id}"
+    shell:
+        """
+samtools view -h -T {input.fasta} --threads {threads} -C -o {output.cram} {input.bam}; 
+samtools index {output.cram}; 
+        """

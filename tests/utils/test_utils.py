@@ -366,7 +366,7 @@ def test_get_vcf(sample_config: Dict):
 
 def test_get_vcf_invalid_variant_caller(sample_config):
     # GIVEN a sample_config dict and an incorrect variant callers list
-    variant_callers = ["manta"]
+    variant_callers = ["manta", "tnhaplotyper"]
 
     # WHEN passing args to that function
     with pytest.raises(KeyError):
@@ -752,8 +752,8 @@ def test_get_rule_output(snakemake_bcftools_filter_tnscope_research_tumor_only):
     # THEN retrieve the output files
     output_files = get_rule_output(rules, rule_name, output_file_wildcards)
 
-    # THEN check that the fastq files has been picked up by the function and that the tags has been correctly created
-    assert len(output_files) == 1
+    # THEN check that the output files and tags are correctly retrieved
+    assert len(output_files) == 2
     for file in output_files:
         # Expected file names
         assert (
