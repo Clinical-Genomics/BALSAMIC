@@ -33,7 +33,7 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 -r {input.ref} \
 -i {input.bam} \
 --algo LocusCollector \
---umi_ecc_dist 0 \
+--umi_ecc_dist 1 \
 --consensus --umi_tag XR --fun score_info {output.score} ;
 
 {params.sentieon_exec} driver \
