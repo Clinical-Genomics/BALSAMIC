@@ -123,14 +123,15 @@ else:
     status_to_sample_id = "TUMOR" + "\\\\t" + tumor_sample
 
 
-# Set VarDict settings depending on if panel is exome or not
-if not config_model.panel:
-    SNV_FILTER_SETTINGS = VarCallerFilter.model_validate(SNV_BCFTOOLS_SETTINGS_WGS)
+# Set SNV filter settings depending on if sample is panel / wes / wgs
+if config_model.panel:
+    if config_model.panel.exome:
+        SNV_FILTER_SETTINGS = VarCallerFilter.model_validate(SNV_BCFTOOLS_SETTINGS_EXOME)
+    else:
+        SNV_FILTER_SETTINGS = VarCallerFilter.model_validate(SNV_BCFTOOLS_SETTINGS_PANEL)
 else:
-    SNV_FILTER_SETTINGS = VarCallerFilter.model_validate(SNV_BCFTOOLS_SETTINGS_PANEL)
+    SNV_FILTER_SETTINGS = VarCallerFilter.model_validate(SNV_BCFTOOLS_SETTINGS_WGS)
 
-if config_model.panel and config_model.panel.exome:
-    SNV_FILTER_SETTINGS = VarCallerFilter.model_validate(SNV_BCFTOOLS_SETTINGS_EXOME)
 
 
 SVDB_FILTERS = VarCallerFilter.model_validate(SVDB_FILTER_SETTINGS)
