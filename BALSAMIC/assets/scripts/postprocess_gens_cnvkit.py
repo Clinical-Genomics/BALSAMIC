@@ -1,8 +1,5 @@
 import click
-from BALSAMIC.utils.io import read_csv
-import numpy as np
-import warnings
-
+from BALSAMIC.utils.io import read_csv, write_list_of_strings
 
 def calculate_log2_ratio(purity, log2_ratio, ploidy):
     # Ensure that the inputs are within valid ranges
@@ -85,10 +82,9 @@ def create_gens_cov_file(
         log2_data.append(f"{row['chromosome']}\t{midpoint - 1}\t{midpoint}\t{log2}")
 
     # Write log2 data to output file
-    with open(output_file, "w") as log2_out:
-        for resolution in ["o", "a", "b", "c", "d"]:
-            for line in log2_data:
-                log2_out.write(f"{resolution}_{line}\n")
+    resolutions = ["o", "a", "b", "c", "d"]
+    resolution_log2_lines = [f"{resolution}_{line}" for resolution in resolutions for line in log2_data]
+    write_list_of_strings(resolution_log2_lines, output_file)
 
 
 if __name__ == "__main__":

@@ -220,18 +220,18 @@ def get_gens_references(
     gens_coverage_pon: Optional[str],
     gnomad_min_af5: Optional[str],
     panel_bed: Optional[str],
-) -> Dict[str, str]:
+) -> Dict[str, str] | None:
     """
     Assigns reference-files required for GENS if they have been supplied, else exists with error message.
 
     Args:
-        genome_interval: Optional[str]. Coverage-regions. (required for WGS GENS)
-        gens_coverage_pon: Optional[str]. PON for GATK CollectReadCounts. (required for WGS GENS)
+        genome_interval: Optional[str] Coverage-regions. (required for WGS GENS)
+        gens_coverage_pon: Optional[str] PON for GATK CollectReadCounts. (required for WGS GENS)
         gnomad_min_af5: Optional[str] gnomad VCF filtered to keep variants above 5% VAF (required for WGS and TGA GENS).
         panel_bed: Optional[str] Bedfile supplied for TGA analyses.
 
     Returns:
-         Dict[str, str] with paths to GENS reference files
+         Dict[str, str] with paths to GENS reference files or None
     """
 
     if panel_bed and gnomad_min_af5:
@@ -243,14 +243,11 @@ def get_gens_references(
             "gens_coverage_pon": gens_coverage_pon,
             "gnomad_min_af5": gnomad_min_af5,
         }
-
-    error_message = (
-        "GENS reference file is always required to run BALSAMIC.\n"
-        "WGS requires arguments: genome_interval, gens_coverage_pon, gnomad_min_af5\n"
-        "TGA requires argument: gnomad_min_af5"
-    )
-    LOG.error(error_message)
-    raise BalsamicError(error_message)
+    if any([gnomad_min_af5, genome_interval, gens_coverage_pon]):
+        error_message = "GENS for WGS requires all arguments: genome_interval, gens_coverage_pon, gnomad_min_af5"
+        LOG.error(error_message)
+        raise BalsamicError(error_message)
+    return None
 
 
 def get_bioinfo_tools_version(

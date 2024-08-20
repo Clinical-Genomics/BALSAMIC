@@ -420,12 +420,12 @@ def test_missing_required_gens_arguments_wgs(
     # THEN the CLI should exit code 2 and display an informative error message
     assert result.exit_code == 1
     assert (
-        "WGS requires arguments: genome_interval, gens_coverage_pon, gnomad_min_af5"
+        "GENS for WGS requires all arguments: genome_interval, gens_coverage_pon, gnomad_min_af5"
         in result.output
     )
 
 
-def test_missing_required_gens_arguments_tga(
+def test_missing_gens_arguments_tga(
     invoke_cli,
     tumor_sample_name: str,
     analysis_dir: str,
@@ -461,9 +461,8 @@ def test_missing_required_gens_arguments_tga(
             sentieon_license,
         ],
     )
-    # THEN the CLI should exit code 2 and display an informative error message
-    assert result.exit_code == 1
-    assert "TGA requires argument: gnomad_min_af5" in result.output
+    # THEN the CLI should exit code 0
+    assert result.exit_code == 0
 
 
 def test_config_with_gens_arguments(
