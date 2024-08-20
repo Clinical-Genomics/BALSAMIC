@@ -912,7 +912,7 @@ def fastq_dir_tumor_only_dummy_vep(
     vep_dir: Path = Path(analysis_dir, case_id_tumor_only_dummy_vep, "analysis", "vep")
     vep_dir.mkdir(parents=True, exist_ok=True)
     vep_test_file = (
-        "SNV.somatic.sample_tumor_only.vardict.research.filtered.pass.vcf.gz"
+        "SNV.somatic.sample_tumor_only.tnscope.research.filtered.pass.vcf.gz"
     )
     Path(vep_dir, vep_test_file).touch()
 

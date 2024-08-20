@@ -753,7 +753,7 @@ def test_get_rule_output(snakemake_bcftools_filter_tnscope_research_tumor_only):
     output_files = get_rule_output(rules, rule_name, output_file_wildcards)
 
     # THEN check that the output files and tags are correctly retrieved
-    assert len(output_files) == 2
+    assert len(output_files) == 1
     for file in output_files:
         # Expected file names
         assert (
