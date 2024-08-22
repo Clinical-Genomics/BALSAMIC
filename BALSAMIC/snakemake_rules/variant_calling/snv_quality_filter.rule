@@ -101,15 +101,45 @@ if config["analysis"]["sequencing_type"] == 'targeted' and config["analysis"]["a
       "Quality filtering vardict tumor-only annotated variants using bcftools for {params.case_name}"
     shell:
       """
-bcftools view {input.vcf} \
-| bcftools filter --include 'SUM(FORMAT/AD[0:0]+FORMAT/AD[0:1]) >= {params.DP[0]}' --soft-filter '{params.DP[1]}' --mode '+' \
-| bcftools filter --include 'FORMAT/AD[0:1] >= {params.AD[0]}' --soft-filter '{params.AD[1]}' --mode '+' \
-| bcftools filter --include 'FORMAT/AF[0] >= {params.AF_min[0]}' --soft-filter '{params.AF_min[1]}' --mode '+' \
-| bcftools view -i 'FILTER == "PASS" || FILTER == "triallelic_site"' -o {output.vcf_filtered} -O z;
-
-tabix -p vcf -f {output.vcf_filtered};
+    bcftools view {input.vcf} \
+    | bcftools filter --include 'SUM(FORMAT/AD[0:0]+FORMAT/AD[0:1]) >= {params.DP[0]}' --soft-filter '{params.DP[1]}' --mode '+' \
+    | bcftools filter --include 'FORMAT/AD[0:1] >= {params.AD[0]}' --soft-filter '{params.AD[1]}' --mode '+' \
+    | bcftools filter --include 'FORMAT/AF[0] >= {params.AF_min[0]}' --soft-filter '{params.AF_min[1]}' --mode '+' \
+    | bcftools view -i 'FILTER == "PASS" || FILTER == "triallelic_site"' -o {output.vcf_filtered} -O z;
+    
+    tabix -p vcf -f {output.vcf_filtered};
       """
 
+  rule bcftools_quality_filter_vardict_tumor_only:
+    input:
+      vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.vcf.gz",
+    output:
+      vcf_filtered=vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.research.vcf.gz",
+    benchmark:
+      Path(benchmark_dir,'bcftools_quality_filter_vardict_tumor_only_' + config["analysis"]["case_id"] + ".tsv").as_posix()
+    singularity:
+      Path(singularity_image,config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
+    params:
+      MQ=[SNV_FILTER_SETTINGS.MQ.tag_value, SNV_FILTER_SETTINGS.MQ.filter_name],
+      AD=[SNV_FILTER_SETTINGS.AD.tag_value, SNV_FILTER_SETTINGS.AD.filter_name],
+      DP=[SNV_FILTER_SETTINGS.DP.tag_value, SNV_FILTER_SETTINGS.DP.filter_name],
+      AF_min=[SNV_FILTER_SETTINGS.AF_min.tag_value, SNV_FILTER_SETTINGS.AF_min.filter_name],
+      case_name=config["analysis"]["case_id"],
+    threads:
+      get_threads(cluster_config,'bcftools_quality_filter_vardict_tumor_only')
+    message:
+      "Quality filtering vardict tumor-only annotated variants using bcftools for {params.case_name}"
+    shell:
+      """
+    bcftools view -f PASS {input.vcf} | \
+    bcftools filter --include 'INFO/MQ >= {params.MQ[0]}' --soft-filter '{params.MQ[1]}' --mode '+' | \
+    bcftools filter --include 'INFO/DP >= {params.DP[0]}' --soft-filter '{params.DP[1]}' --mode '+' | \
+    bcftools filter --include 'INFO/VD >= {params.AD[0]}' --soft-filter '{params.AD[1]}' --mode '+' | \
+    bcftools filter --include 'INFO/AF >= {params.AF_min[0]}' --soft-filter '{params.AF_min[1]}' --mode '+' | \
+    bcftools view -f PASS -o {output.vcf_filtered} -O z;
+      
+    tabix -p vcf -f {output.vcf_filtered};
+      """
 
   rule bcftools_quality_filter_TNscope_umi_tumor_only:
     input:
@@ -128,10 +158,10 @@ tabix -p vcf -f {output.vcf_filtered};
       "Quality filtering tnscope_umi tumor-only variants using bcftools for {params.case_name}"
     shell:
       """
-bcftools view {input.vcf} \
-| bcftools view -i 'FILTER == "PASS" || FILTER == "triallelic_site"' -o {output.vcf_filtered} -O z;
-
-tabix -p vcf -f {output.vcf_filtered};
+    bcftools view {input.vcf} \
+    | bcftools view -i 'FILTER == "PASS" || FILTER == "triallelic_site"' -o {output.vcf_filtered} -O z;
+    
+    tabix -p vcf -f {output.vcf_filtered};
       """
 
 
@@ -159,17 +189,49 @@ elif config["analysis"]["sequencing_type"] == 'targeted' and config["analysis"][
       "Quality filtering vardict tumor-normal variants using bcftools for {params.case_name} "
     shell:
       """
-bcftools view {input.vcf} \
-| bcftools annotate -x FILTER/alt_allele_in_normal \
-| bcftools filter --threads {threads} --exclude 'sum(FORMAT/AF[1])/sum(FORMAT/AF[0])>{params.high_normal_tumor_af_frac_value}' --soft-filter '{params.high_normal_tumor_af_frac_filter_name}' --mode '+' \
-| bcftools filter --include 'SUM(FORMAT/AD[0:0]+FORMAT/AD[0:1]) >= {params.DP[0]} || SUM(FORMAT/AD[1:0]+FORMAT/AD[1:1]) >= {params.DP[0]}' --soft-filter '{params.DP[1]}' --mode '+' \
-| bcftools filter --include 'FORMAT/AD[0:1] >= {params.AD[0]}' --soft-filter '{params.AD[1]}' --mode '+' \
-| bcftools filter --include 'FORMAT/AF[0] >= {params.AF_min[0]}' --soft-filter '{params.AF_min[1]}' --mode '+' \
-| bcftools view -i 'FILTER == "PASS" || FILTER == "triallelic_site"' -o {output.vcf_filtered} -O z;
-
-tabix -p vcf -f {output.vcf_filtered};
+    bcftools view {input.vcf} \
+    | bcftools annotate -x FILTER/alt_allele_in_normal \
+    | bcftools filter --threads {threads} --exclude 'sum(FORMAT/AF[1])/sum(FORMAT/AF[0])>{params.high_normal_tumor_af_frac_value}' --soft-filter '{params.high_normal_tumor_af_frac_filter_name}' --mode '+' \
+    | bcftools filter --include 'SUM(FORMAT/AD[0:0]+FORMAT/AD[0:1]) >= {params.DP[0]} || SUM(FORMAT/AD[1:0]+FORMAT/AD[1:1]) >= {params.DP[0]}' --soft-filter '{params.DP[1]}' --mode '+' \
+    | bcftools filter --include 'FORMAT/AD[0:1] >= {params.AD[0]}' --soft-filter '{params.AD[1]}' --mode '+' \
+    | bcftools filter --include 'FORMAT/AF[0] >= {params.AF_min[0]}' --soft-filter '{params.AF_min[1]}' --mode '+' \
+    | bcftools view -i 'FILTER == "PASS" || FILTER == "triallelic_site"' -o {output.vcf_filtered} -O z;
+    
+    tabix -p vcf -f {output.vcf_filtered};
       """
 
+  rule bcftools_quality_filter_vardict_tumor_normal:
+    input:
+      vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.vcf.gz",
+    output:
+      vcf_filtered=vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.research.vcf.gz",
+    benchmark:
+      Path(benchmark_dir,'bcftools_quality_filter_vardict_tumor_normal_' + config["analysis"]["case_id"] + ".tsv").as_posix()
+    singularity:
+      Path(singularity_image,config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
+    params:
+      MQ=[SNV_FILTER_SETTINGS.MQ.tag_value, SNV_FILTER_SETTINGS.MQ.filter_name],
+      AD=[SNV_FILTER_SETTINGS.AD.tag_value, SNV_FILTER_SETTINGS.AD.filter_name],
+      DP=[SNV_FILTER_SETTINGS.DP.tag_value, SNV_FILTER_SETTINGS.DP.filter_name],
+      AF_min=[SNV_FILTER_SETTINGS.AF_min.tag_value, SNV_FILTER_SETTINGS.AF_min.filter_name],
+      possible_germline="balsamic_possible_germline",
+      case_name=config["analysis"]["case_id"],
+    threads:
+      get_threads(cluster_config,'bcftools_quality_filter_vardict_tumor_normal')
+    message:
+      "Quality filtering vardict tumor-normal variants using bcftools for {params.case_name} "
+    shell:
+      """
+    bcftools view {input.vcf} | \
+    bcftools filter --include 'SMPL_MIN(FMT/MQ) >= {params.MQ[0]}' --soft-filter '{params.MQ[1]}' --mode + | \
+    bcftools filter --include 'INFO/DP >= {params.DP[0]}' --soft-filter '{params.DP[1]}' --mode '+' | \
+    bcftools filter --include 'INFO/VD >= {params.AD[0]}' --soft-filter '{params.AD[1]}' --mode '+' | \
+    bcftools filter --include 'INFO/AF >= {params.AF_min[0]}' --soft-filter '{params.AF_min[1]}' --mode '+' | \
+    bcftools filter --exclude 'INFO/STATUS ~ "germline/i"' --soft-filter '{params.possible_germline}' --mode '+' | \
+    bcftools view -f PASS -o {output.vcf_filtered} -O z;
+    
+    tabix -p vcf -f {output.vcf_filtered};
+      """
 
   rule bcftools_quality_filter_TNscope_umi_tumor_normal:
     input:
@@ -190,11 +252,11 @@ tabix -p vcf -f {output.vcf_filtered};
       "Quality filtering TNscope_umi tumor-normal annotated variants using bcftools for {params.case_name} "
     shell:
       """
-bcftools view {input.vcf} \
-| bcftools annotate -x FILTER/alt_allele_in_normal \
-| bcftools filter --threads {threads} --exclude 'sum(FORMAT/AF[1])/sum(FORMAT/AF[0])>{params.high_normal_tumor_af_frac_value}' --soft-filter '{params.high_normal_tumor_af_frac_filter_name}' --mode '+' \
-| bcftools view -i 'FILTER == "PASS" || FILTER == "triallelic_site"' -o {output.vcf_filtered} -O z;
-
-tabix -p vcf -f {output.vcf_filtered};
+    bcftools view {input.vcf} \
+    | bcftools annotate -x FILTER/alt_allele_in_normal \
+    | bcftools filter --threads {threads} --exclude 'sum(FORMAT/AF[1])/sum(FORMAT/AF[0])>{params.high_normal_tumor_af_frac_value}' --soft-filter '{params.high_normal_tumor_af_frac_filter_name}' --mode '+' \
+    | bcftools view -i 'FILTER == "PASS" || FILTER == "triallelic_site"' -o {output.vcf_filtered} -O z;
+    
+    tabix -p vcf -f {output.vcf_filtered};
       """
 

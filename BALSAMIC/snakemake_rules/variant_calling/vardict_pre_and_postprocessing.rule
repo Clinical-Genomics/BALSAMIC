@@ -1,0 +1,63 @@
+
+
+rule bedtools_splitbed_by_chrom:
+    input:
+        bed = config["panel"]["capture_kit"],
+        chrom = config["reference"]["genome_chrom_size"],
+        bam = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample)
+    output:
+        bed = expand(vcf_dir + "split_bed/" + "{chrom}." + capture_kit, chrom=chromlist)
+    benchmark:
+        Path(benchmark_dir, 'bedtools_splitbed_by_chrom.tsv').as_posix()
+    singularity:
+        Path(singularity_image, config["bioinfo_tools"].get("bedtools") + ".sif").as_posix()
+    params:
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
+        split_bed_dir = vcf_dir + "split_bed/",
+        origin_bed = capture_kit,
+    message:
+        ("Splitting the panel bed per chromosome, flanking regions by 100bp and merging into single VCF using bedtools")
+    shell:
+        """
+mkdir -p {params.tmpdir};
+export TMPDIR={params.tmpdir};
+
+chromlist=`cut -f 1 {input.bed} | sort -u`;
+sed 's/^chr//g;/_/d' {input.chrom} | sort -k1,1 > {params.split_bed_dir}hg19.chrom.sizes;
+
+for c in $chromlist; do \
+awk -v C=$c '$1==C' {input.bed} \
+| bedtools slop -b 100 -i - -g {params.split_bed_dir}hg19.chrom.sizes \
+| sort -k1,1 -k2,2n \
+| bedtools merge > {params.split_bed_dir}$c.{params.origin_bed}; done;
+
+unset chromlist; 
+readlink -f {input.bam};
+        """
+
+rule gatk_update_vcf_sequence_dictionary:
+    input:
+        ref = config["reference"]["reference_genome"],
+        vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".preprocess_vardict.vcf.gz",
+    output:
+        vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.vcf.gz",
+    params:
+        tmpdir=tempfile.mkdtemp(prefix=tmp_dir),
+    benchmark:
+        Path(benchmark_dir,"gatk_update_vcf_sequence_dictionary" + config["analysis"]["case_id"] + ".tsv").as_posix()
+    singularity:
+        Path(singularity_image,config["bioinfo_tools"].get("gatk") + ".sif").as_posix()
+    threads:
+        get_threads(cluster_config,"gatk_collectreadcounts")
+    message:
+        "Running GATK UpdateVCFSequenceDictionary on VarDict VCF."
+    shell:
+        """
+export TMPDIR={params.tmpdir};  
+
+ref=$(echo {input.ref} | sed 's/.fasta/.dict/g') ;
+
+gatk UpdateVCFSequenceDictionary -V {input.vcf} --source-dictionary $ref --replace --output {output.vcf} ;
+      
+rm -rf {params.tmpdir}
+        """

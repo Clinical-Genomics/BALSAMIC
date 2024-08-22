@@ -368,7 +368,7 @@ else:
 
 # Extract variant callers for the workflow
 germline_caller = []
-somatic_caller = []
+somatic_caller_snv = []
 somatic_caller_cnv = []
 somatic_caller_sv = []
 for m in set(MutationType):
@@ -420,8 +420,8 @@ for m in set(MutationType):
         sequencing_type=config["analysis"]["sequencing_type"],
         mutation_class="somatic",
     )
-    somatic_caller = (
-        somatic_caller
+    somatic_caller_snv = (
+        somatic_caller_snv
         + somatic_caller_sentieon_umi
         + somatic_caller_balsamic
         + somatic_caller_sentieon

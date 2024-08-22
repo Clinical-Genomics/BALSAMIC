@@ -45,7 +45,7 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
             "snakemake_rules/align/bam_compress.rule",
         ],
         "varcall": [
-            "snakemake_rules/variant_calling/sentieon_quality_filter.rule",
+            "snakemake_rules/variant_calling/snv_quality_filter.rule",
             "snakemake_rules/variant_calling/sentieon_split_snv_sv.rule",
         ],
         "annotate": [
@@ -82,8 +82,10 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
             "snakemake_rules/variant_calling/somatic_cnv_tumor_only_tga.rule",
             "snakemake_rules/variant_calling/somatic_sv_tumor_only_tga.rule",
             "snakemake_rules/umi/sentieon_varcall_tnscope.rule",
-            "snakemake_rules/variant_calling/sentieon_t_varcall_tga.rule",
+            "snakemake_rules/variant_calling/snv_varcall_tga.rule",
             "snakemake_rules/variant_calling/somatic_sv_postprocess_and_filter_tumor_only.rule",
+            "snakemake_rules/variant_calling/merge_snv_vcfs.rule",
+            "snakemake_rules/variant_calling/vardict_pre_and_postprocessing.rule",
         ],
         "annotate": [
             "snakemake_rules/annotation/rankscore.rule",
@@ -116,8 +118,10 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
             "snakemake_rules/variant_calling/somatic_sv_tumor_normal_tga.rule",
             "snakemake_rules/variant_calling/somatic_cnv_tumor_normal_tga.rule",
             "snakemake_rules/umi/sentieon_varcall_tnscope_tn.rule",
-            "snakemake_rules/variant_calling/sentieon_tn_varcall_tga.rule",
+            "snakemake_rules/variant_calling/snv_tn_varcall_tga.rule",
             "snakemake_rules/variant_calling/somatic_sv_postprocess_and_filter_tumor_normal.rule",
+            "snakemake_rules/variant_calling/merge_snv_vcfs.rule",
+            "snakemake_rules/variant_calling/vardict_pre_and_postprocessing.rule",
         ],
         "annotate": [
             "snakemake_rules/annotation/rankscore.rule",

@@ -119,6 +119,7 @@ class BioinfoTools(StrEnum):
     SVDB: str = "svdb"
     TABIX: str = "tabix"
     TIDDIT: str = "tiddit"
+    VARDICT: str = "vardict"
     VCF2CYTOSURE: str = "vcf2cytosure"
     VCFANNO: str = "vcfanno"
     CADD: str = "cadd"
@@ -164,6 +165,7 @@ BIOINFO_TOOL_ENV: Dict[str, str] = {
     BioinfoTools.BCFTOOLS: DockerContainers.PYTHON_3,
     BioinfoTools.TABIX: DockerContainers.PYTHON_3,
     BioinfoTools.BGZIP: DockerContainers.PYTHON_3,
+    BioinfoTools.VARDICT: DockerContainers.PYTHON_3,
     BioinfoTools.SVDB: DockerContainers.PYTHON_3,
     BioinfoTools.TIDDIT: DockerContainers.PYTHON_3,
     BioinfoTools.CNVPYTOR: DockerContainers.CNVPYTOR,
