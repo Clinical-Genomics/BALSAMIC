@@ -188,6 +188,12 @@ WORKFLOW_PARAMS = {
         "tag": "XR",
     },
     "umiextract": {"read_structure": "-d '3M2S+T,3M2S+T'"},
+    "vardict": {
+        "allelic_frequency": "0.001",
+        "max_pval": "0.9",
+        "max_mm": "4.5",
+        "column_info": "-c 1 -S 2 -E 3 -g 4",
+    },
     "tnscope_umi": {
         "algo": "TNscope",
         "filter_tumor_af": 0.0005,
