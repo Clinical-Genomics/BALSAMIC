@@ -510,11 +510,9 @@ LOG.info(
     f"The following somatic variant callers will be included in the workflow: {somatic_caller}"
 )
 
-
 for r in rules_to_include:
 
     include: Path(BALSAMIC_DIR, r).as_posix()
-
 
 # Define common and analysis specific outputs
 quality_control_results = [
