@@ -540,10 +540,12 @@ if config["analysis"]["analysis_type"] == "paired":
 
 # BAD CODE JUST FOR DEVELOPMENT
 if config["analysis"]["sequencing_type"] != "wgs":
-    somatic_caller.remove("tnscope")
-    somatic_caller.remove("vardict")
-    somatic_caller_tmb.remove("tnscope")
-    somatic_caller_tmb.remove("vardict")
+    remove_caller_list = ["tnscope", "vardict"]
+    for remove_caller in remove_caller_list:
+        if remove_caller in somatic_caller:
+            somatic_caller.remove(remove_caller)
+        if remove_caller in somatic_caller_tmb:
+            somatic_caller_tmb.remove(remove_caller)
 
 # Raw VCFs
 analysis_specific_results.extend(
