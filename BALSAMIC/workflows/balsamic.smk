@@ -454,7 +454,7 @@ for var_caller in svdb_callers_prio:
 # Collect only snv callers for calculating tmb
 somatic_caller_tmb = []
 for ws in ["BALSAMIC", "Sentieon", "Sentieon_umi"]:
-    somatic_caller = get_variant_callers(
+    somatic_callers = get_variant_callers(
         config=config,
         analysis_type=config["analysis"]["analysis_type"],
         workflow_solution=ws,
@@ -462,7 +462,7 @@ for ws in ["BALSAMIC", "Sentieon", "Sentieon_umi"]:
         sequencing_type=config["analysis"]["sequencing_type"],
         mutation_class="somatic",
     )
-    somatic_caller_tmb += somatic_caller
+    somatic_caller_tmb += somatic_callers
 
 
 # Remove variant callers from list of callers
@@ -507,7 +507,7 @@ LOG.info(
     f"The following Germline variant callers will be included in the workflow: {germline_caller}"
 )
 LOG.info(
-    f"The following somatic variant callers will be included in the workflow: {somatic_caller}"
+    f"The following Somatic variant callers will be included in the workflow: {somatic_caller}"
 )
 
 for r in rules_to_include:
