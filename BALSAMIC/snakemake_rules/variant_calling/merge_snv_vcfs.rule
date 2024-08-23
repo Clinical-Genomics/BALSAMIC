@@ -2,9 +2,9 @@
 rule bcftools_normalise_vcfs:
     input:
         ref = config["reference"]["reference_genome"],
-        vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".{caller}.vcf.gz",
+        vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".{caller}.research.vcf.gz",
     output:
-        vcf_normalised = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".{caller}.normalised.vcf.gz",
+        vcf_normalised = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".{caller}.research.normalised.vcf.gz",
     benchmark:
         Path(benchmark_dir,'bcftools_norm_{caller}' + config["analysis"]["case_id"] + ".tsv").as_posix()
     singularity:
@@ -26,9 +26,9 @@ rule bcftools_normalise_vcfs:
 
 rule picard_merge_vcfs:
     input:
-        vcfs = expand(vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".{caller}.vcf.gz", caller=["tnscope", "vardict"])
+        vcfs = expand(vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".{caller}.research.normalised.vcf.gz", caller=["tnscope", "vardict"])
     output:
-        vcf_merged = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".merged.vcf.gz"
+        vcf_merged = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".merged.research.vcf.gz"
     benchmark:
         Path(benchmark_dir + "picard_merge_vcfs" + config["analysis"]["case_id"] + ".tsv").as_posix()
     singularity:
