@@ -5,10 +5,10 @@
 
 rule bcftools_filter_tnscope_research_tumor_normal:
   input:
-    vcf_snv_research = vep_dir + "{var_type}.somatic.{case_name}.tnscope.research.vcf.gz",
+    vcf_snv_research = vep_dir + "{var_type}.somatic.{case_name}.merged.research.vcf.gz",
   output:
-    vcf_pass_tnscope = vep_dir + "{var_type}.somatic.{case_name}.tnscope.research.filtered.pass.vcf.gz",
-    bcftools_counts_research = vep_dir + "{var_type}.somatic.{case_name}.tnscope.research.filtered.pass.stats"
+    vcf_pass_tnscope = vep_dir + "{var_type}.somatic.{case_name}.merged.research.filtered.pass.vcf.gz",
+    bcftools_counts_research = vep_dir + "{var_type}.somatic.{case_name}.merged.research.filtered.pass.stats"
   benchmark:
     Path(benchmark_dir, 'bcftools_filter_tnscope_research_tumor_normal_' + "{var_type}.somatic.{case_name}.tsv").as_posix()
   singularity:
@@ -37,11 +37,11 @@ bcftools +counts {output.vcf_pass_tnscope} > {output.bcftools_counts_research};
 
 rule bcftools_filter_tnscope_clinical_tumor_normal:
   input:
-    vcf_snv_clinical = vep_dir + "{var_type}.somatic.{case_name}.tnscope.clinical.vcf.gz",
+    vcf_snv_clinical = vep_dir + "{var_type}.somatic.{case_name}.merged.clinical.vcf.gz",
     namemap = vep_dir + "status_to_sample_id_namemap"
   output:
-    vcf_pass_tnscope = vep_dir + "{var_type}.somatic.{case_name}.tnscope.clinical.filtered.pass.vcf.gz",
-    bcftools_counts_clinical = vep_dir + "{var_type}.somatic.{case_name}.tnscope.clinical.filtered.pass.stats"
+    vcf_pass_tnscope = vep_dir + "{var_type}.somatic.{case_name}.merged.clinical.filtered.pass.vcf.gz",
+    bcftools_counts_clinical = vep_dir + "{var_type}.somatic.{case_name}.merged.clinical.filtered.pass.stats"
   benchmark:
     Path(benchmark_dir, 'bcftools_filter_tnscope_clinical_tumor_normal_' + "{var_type}.somatic.{case_name}.tsv").as_posix()
   singularity:
