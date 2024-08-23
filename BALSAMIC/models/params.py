@@ -211,6 +211,20 @@ class BEDPreProcessingParams(BaseModel):
 
     minimum_region_size: int
 
+class ParamsVardict(BaseModel):
+    """This class defines the params settings used as constants in vardict rule.
+
+    Attributes:
+        allelic_frequency: float (required); minimum allelic frequency to detect
+        max_pval: float (required); the maximum p-value. Vardict default: 0.05
+        max_mm: float (required); the maximum mean mismatches allowed. Vardict default: 5.25
+        column_info: str (required); set of vardict filters for passing final variants
+    """
+
+    allelic_frequency: float
+    max_pval: float
+    max_mm: float
+    column_info: str
 
 class BalsamicWorkflowConfig(BaseModel):
     """Defines set of rules in balsamic workflow
@@ -240,6 +254,7 @@ class BalsamicWorkflowConfig(BaseModel):
     mosdepth: ParamsMosdepth
     sentieon_wgs_metrics: ParamsSentieonWGSMetrics
     vep: ParamsVEP
+    vardict: ParamsVardict
     umicommon: UMIParamsCommon
     umiextract: UMIParamsUMIextract
     umiconsensuscall: UMIParamsConsensuscall
@@ -271,21 +286,6 @@ class VCFAttributes(BaseModel):
     tag_value: float
     filter_name: str
     field: str
-
-class ParamsVardict(BaseModel):
-    """This class defines the params settings used as constants in vardict rule.
-
-    Attributes:
-        allelic_frequency: float (required); minimum allelic frequency to detect
-        max_pval: float (required); the maximum p-value. Vardict default: 0.05
-        max_mm: float (required); the maximum mean mismatches allowed. Vardict default: 5.25
-        column_info: str (required); set of vardict filters for passing final variants
-    """
-
-    allelic_frequency: float
-    max_pval: float
-    max_mm: float
-    column_info: str
 
 class VarCallerFilter(BaseModel):
     """General purpose for variant caller filters
