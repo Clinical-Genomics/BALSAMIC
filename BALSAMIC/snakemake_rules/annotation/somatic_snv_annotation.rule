@@ -83,7 +83,6 @@ tabix -p vcf -f  {output.vcf_indel_research}
 rule vep_annotate_somaticSNV_research:
   input:
     vcf_snv_research = vep_dir + "SNV.somatic.{case_name}.{var_caller}.cadd_indel.research.vcf.gz",
-    header = vcf_dir + "SNV.somatic.{case_name}.{var_caller}.sample_name_map",
     cosmic = config["reference"]["cosmic"]
   output:
     vcf_snv_research = vep_dir + "SNV.somatic.{case_name}.{var_caller}.research.vcf.gz",
@@ -110,7 +109,6 @@ export PERL5LIB=;
 echo \'{params.vcfanno_research_annotations}\' > {output.vcfanno_research_toml};
 
 vcfanno -p {threads} {output.vcfanno_research_toml} {input.vcf_snv_research} \
-| bcftools reheader --threads {threads} -s {input.header} \
 | bcftools view --threads {threads} -O z -o {params.tmp_vcf_research} ;
 
 vep \
@@ -131,7 +129,6 @@ rm {params.tmp_vcf_research};
 rule vcfanno_annotate_somaticSNV_clinical:
   input:
     vcf_snv_research = vep_dir + "SNV.somatic.{case_name}.{var_caller}.research.vcf.gz",
-    header = vcf_dir + "SNV.somatic.{case_name}.{var_caller}.sample_name_map",
   output:
     vcf_snv_clinical = vep_dir + "SNV.somatic.{case_name}.{var_caller}.clinical.vcf.gz",
   benchmark:
@@ -154,7 +151,6 @@ rule vcfanno_annotate_somaticSNV_clinical:
 if [[ -f "{params.clinical_snv}" || -f "{params.cancer_germline_snv}" || -f "{params.cancer_somatic_snv}" ]]; then
     echo \'{params.vcfanno_clinical_annotations}\' > {params.vcfanno_clinical_toml};
     vcfanno -p {threads} {params.vcfanno_clinical_toml} {input.vcf_snv_research} | \
-    bcftools reheader --threads {threads} -s {input.header} | \
     bcftools view --threads {threads} -O z -o {output.vcf_snv_clinical};
 else
     cp {input.vcf_snv_research} {output.vcf_snv_clinical};
