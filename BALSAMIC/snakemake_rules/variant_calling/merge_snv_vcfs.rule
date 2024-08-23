@@ -26,7 +26,7 @@ rule bcftools_normalise_vcfs:
 
 rule picard_merge_vcfs:
     input:
-        vcfs = expand(vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".{caller}.vcf.gz", caller=somatic_caller_snv)
+        vcfs = expand(vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".{caller}.vcf.gz", caller=["tnscope", "vardict"])
     output:
         vcf_merged = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".merged.vcf.gz"
     benchmark:
