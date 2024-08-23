@@ -368,7 +368,7 @@ else:
 
 # Extract variant callers for the workflow
 germline_caller = []
-somatic_caller_snv = []
+somatic_caller = []
 somatic_caller_cnv = []
 somatic_caller_sv = []
 for m in set(MutationType):
@@ -420,8 +420,8 @@ for m in set(MutationType):
         sequencing_type=config["analysis"]["sequencing_type"],
         mutation_class="somatic",
     )
-    somatic_caller_snv = (
-        somatic_caller_snv
+    somatic_caller = (
+        somatic_caller
         + somatic_caller_sentieon_umi
         + somatic_caller_balsamic
         + somatic_caller_sentieon
@@ -454,7 +454,7 @@ for var_caller in svdb_callers_prio:
 # Collect only snv callers for calculating tmb
 somatic_caller_tmb = []
 for ws in ["BALSAMIC", "Sentieon", "Sentieon_umi"]:
-    somatic_caller_snv = get_variant_callers(
+    somatic_caller = get_variant_callers(
         config=config,
         analysis_type=config["analysis"]["analysis_type"],
         workflow_solution=ws,
@@ -462,7 +462,7 @@ for ws in ["BALSAMIC", "Sentieon", "Sentieon_umi"]:
         sequencing_type=config["analysis"]["sequencing_type"],
         mutation_class="somatic",
     )
-    somatic_caller_tmb += somatic_caller_snv
+    somatic_caller_tmb += somatic_caller
 
 
 # Remove variant callers from list of callers
@@ -537,6 +537,13 @@ analysis_specific_results.extend(
 # Germline SNVs specifically for genotype
 if config["analysis"]["analysis_type"] == "paired":
     analysis_specific_results.append(vep_dir + "SNV.genotype.normal.dnascope.vcf.gz")
+
+# BAD CODE JUST FOR DEVELOPMENT
+if config["analysis"]["sequencing_type"] != "wgs":
+    somatic_caller.remove("tnscope")
+    somatic_caller.remove("vardict")
+    somatic_caller_tmb.remove("tnscope")
+    somatic_caller_tmb.remove("vardict")
 
 # Raw VCFs
 analysis_specific_results.extend(

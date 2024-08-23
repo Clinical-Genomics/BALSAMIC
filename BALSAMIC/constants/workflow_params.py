@@ -43,6 +43,20 @@ VCF_DICT = {
         "sequencing_type": ["targeted"],
         "workflow_solution": ["BALSAMIC"],
     },
+    "vardict": {
+        "mutation": "somatic",
+        "mutation_type": "SNV",
+        "analysis_type": ["paired", "single"],
+        "sequencing_type": ["targeted"],
+        "workflow_solution": ["BALSAMIC"],
+    },
+    "merged": {
+        "mutation": "somatic",
+        "mutation_type": "SNV",
+        "analysis_type": ["paired", "single"],
+        "sequencing_type": ["targeted"],
+        "workflow_solution": ["BALSAMIC"],
+    },
     "manta_germline": {
         "mutation": "germline",
         "mutation_type": "SV",
