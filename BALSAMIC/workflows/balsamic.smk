@@ -447,14 +447,13 @@ somatic_caller_cnv = get_variant_callers(
 somatic_caller_sv.remove("svdb")
 svdb_callers_prio = somatic_caller_sv + somatic_caller_cnv
 
-for var_caller in svdb_callers_prio:
-    if var_caller in somatic_caller:
-        somatic_caller.remove(var_caller)
+wf_solutions = ["BALSAMIC", "Sentieon"]
+if config["analysis"]["analysis_workflow"] == "balsamic-umi":
+    wf_solutions.append("Sentieon_umi")
 
-# Collect only snv callers for calculating tmb
 somatic_caller_tmb = []
-for ws in ["BALSAMIC", "Sentieon", "Sentieon_umi"]:
-    somatic_callers = get_variant_callers(
+for ws in wf_solutions:
+    somatic_caller = get_variant_callers(
         config=config,
         analysis_type=config["analysis"]["analysis_type"],
         workflow_solution=ws,
@@ -462,8 +461,11 @@ for ws in ["BALSAMIC", "Sentieon", "Sentieon_umi"]:
         sequencing_type=config["analysis"]["sequencing_type"],
         mutation_class="somatic",
     )
-    somatic_caller_tmb += somatic_callers
+    somatic_caller_tmb += somatic_caller
 
+for var_caller in svdb_callers_prio:
+    if var_caller in somatic_caller:
+        somatic_caller.remove(var_caller)
 
 # Remove variant callers from list of callers
 if "disable_variant_caller" in config:
@@ -473,6 +475,7 @@ if "disable_variant_caller" in config:
             somatic_caller.remove(var_caller)
         if var_caller in germline_caller:
             germline_caller.remove(var_caller)
+
 
 rules_to_include = []
 analysis_type = config["analysis"]["analysis_type"]
@@ -510,6 +513,15 @@ LOG.info(
     f"The following Somatic variant callers will be included in the workflow: {somatic_caller}"
 )
 
+# BAD CODE JUST FOR DEVELOPMENT
+if config["analysis"]["sequencing_type"] != "wgs":
+    remove_caller_list = ["tnscope", "vardict"]
+    for remove_caller in remove_caller_list:
+        if remove_caller in somatic_caller:
+            somatic_caller.remove(remove_caller)
+        if remove_caller in somatic_caller_tmb:
+            somatic_caller_tmb.remove(remove_caller)
+
 for r in rules_to_include:
 
     include: Path(BALSAMIC_DIR, r).as_posix()
@@ -536,14 +548,7 @@ analysis_specific_results.extend(
 if config["analysis"]["analysis_type"] == "paired":
     analysis_specific_results.append(vep_dir + "SNV.genotype.normal.dnascope.vcf.gz")
 
-# BAD CODE JUST FOR DEVELOPMENT
-if config["analysis"]["sequencing_type"] != "wgs":
-    remove_caller_list = ["tnscope", "vardict"]
-    for remove_caller in remove_caller_list:
-        if remove_caller in somatic_caller:
-            somatic_caller.remove(remove_caller)
-        if remove_caller in somatic_caller_tmb:
-            somatic_caller_tmb.remove(remove_caller)
+
 
 # Raw VCFs
 analysis_specific_results.extend(
