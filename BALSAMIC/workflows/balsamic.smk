@@ -523,7 +523,6 @@ if config["analysis"]["sequencing_type"] != "wgs":
             somatic_caller_tmb.remove(remove_caller)
 
 for r in rules_to_include:
-
     include: Path(BALSAMIC_DIR, r).as_posix()
 
 # Define common and analysis specific outputs
