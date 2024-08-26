@@ -458,8 +458,9 @@ if config["analysis"]["analysis_workflow"] == "balsamic-umi":
     wf_solutions.append("Sentieon_umi")
 
 somatic_caller_tmb = []
+somatic_caller = []
 for ws in wf_solutions:
-    somatic_caller = get_variant_callers(
+    somatic_caller += get_variant_callers(
         config=config,
         analysis_type=config["analysis"]["analysis_type"],
         workflow_solution=ws,
@@ -467,7 +468,7 @@ for ws in wf_solutions:
         sequencing_type=config["analysis"]["sequencing_type"],
         mutation_class="somatic",
     )
-    somatic_caller_tmb += somatic_caller
+somatic_caller_tmb += somatic_caller
 
 if "merged" in somatic_caller:
     print("merged in caller")
@@ -507,9 +508,6 @@ if config["analysis"]["analysis_workflow"] == "balsamic":
     somatic_caller = [
         var_caller for var_caller in somatic_caller if "umi" not in var_caller
     ]
-    somatic_caller_tmb = [
-        var_caller for var_caller in somatic_caller_tmb if "umi" not in var_caller
-    ]
 
 if "merged" in somatic_caller:
     print("merged in caller")
@@ -545,8 +543,6 @@ if config["analysis"]["sequencing_type"] != "wgs":
     for remove_caller in remove_caller_list:
         if remove_caller in somatic_caller:
             somatic_caller.remove(remove_caller)
-        if remove_caller in somatic_caller_tmb:
-            somatic_caller_tmb.remove(remove_caller)
 
 for r in rules_to_include:
     include: Path(BALSAMIC_DIR, r).as_posix()
@@ -604,7 +600,7 @@ analysis_specific_results.extend(
 analysis_specific_results.extend(
     expand(
         vep_dir + "{vcf}.balsamic_stat",
-        vcf=get_vcf(config, somatic_caller_tmb, [case_id]),
+        vcf=get_vcf(config, somatic_caller, [case_id]),
     )
 )
 
