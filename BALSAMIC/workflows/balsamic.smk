@@ -456,9 +456,6 @@ for ws in wf_solutions:
         mutation_class="germline",
     )
 
-for r in rules_to_include:
-    include: Path(BALSAMIC_DIR, r).as_posix()
-
 LOG.info(
     f"The following Somatic SNV variant callers will be included in the workflow: {somatic_caller_snv}"
 )
@@ -508,6 +505,10 @@ analysis_specific_results.extend(
         vcf=get_vcf(config, germline_caller, germline_call_samples),
     )
 )
+
+for r in rules_to_include:
+    include: Path(BALSAMIC_DIR, r).as_posix()
+
 
 # Germline SNVs specifically for genotype
 if config["analysis"]["analysis_type"] == "paired":
