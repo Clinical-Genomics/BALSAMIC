@@ -463,6 +463,7 @@ for ws in wf_solutions:
         mutation_class="somatic",
     )
 somatic_caller_tmb += somatic_caller
+print(somatic_caller)
 
 for var_caller in svdb_callers_prio:
     if var_caller in somatic_caller:
