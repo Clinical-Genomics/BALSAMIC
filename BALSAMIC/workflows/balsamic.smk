@@ -366,118 +366,8 @@ else:
         f"{cnv_dir}CNV.somatic.{config['analysis']['case_id']}.purecn.purity.csv.pdf"
     )
 
-# Extract variant callers for the workflow
-germline_caller = []
-somatic_caller = []
-somatic_caller_cnv = []
-somatic_caller_sv = []
-for m in set(MutationType):
-    germline_caller_balsamic = get_variant_callers(
-        config=config,
-        analysis_type=config["analysis"]["analysis_type"],
-        workflow_solution="BALSAMIC",
-        mutation_type=m,
-        sequencing_type=config["analysis"]["sequencing_type"],
-        mutation_class="germline",
-    )
 
-    germline_caller_sentieon = get_variant_callers(
-        config=config,
-        analysis_type=config["analysis"]["analysis_type"],
-        workflow_solution="Sentieon",
-        mutation_type=m,
-        sequencing_type=config["analysis"]["sequencing_type"],
-        mutation_class="germline",
-    )
-
-    germline_caller += (
-        germline_caller + germline_caller_balsamic + germline_caller_sentieon
-    )
-
-    somatic_caller_balsamic = get_variant_callers(
-        config=config,
-        analysis_type=config["analysis"]["analysis_type"],
-        workflow_solution="BALSAMIC",
-        mutation_type=m,
-        sequencing_type=config["analysis"]["sequencing_type"],
-        mutation_class="somatic",
-    )
-
-    somatic_caller_sentieon = get_variant_callers(
-        config=config,
-        analysis_type=config["analysis"]["analysis_type"],
-        workflow_solution="Sentieon",
-        mutation_type=m,
-        sequencing_type=config["analysis"]["sequencing_type"],
-        mutation_class="somatic",
-    )
-
-    somatic_caller_sentieon_umi = get_variant_callers(
-        config=config,
-        analysis_type=config["analysis"]["analysis_type"],
-        workflow_solution="Sentieon_umi",
-        mutation_type=m,
-        sequencing_type=config["analysis"]["sequencing_type"],
-        mutation_class="somatic",
-    )
-    somatic_caller += (
-        somatic_caller
-        + somatic_caller_sentieon_umi
-        + somatic_caller_balsamic
-        + somatic_caller_sentieon
-    )
-
-somatic_caller_sv = get_variant_callers(
-    config=config,
-    analysis_type=config["analysis"]["analysis_type"],
-    workflow_solution="BALSAMIC",
-    mutation_type="SV",
-    sequencing_type=config["analysis"]["sequencing_type"],
-    mutation_class="somatic",
-)
-
-somatic_caller_cnv = get_variant_callers(
-    config=config,
-    analysis_type=config["analysis"]["analysis_type"],
-    workflow_solution="BALSAMIC",
-    mutation_type="CNV",
-    sequencing_type=config["analysis"]["sequencing_type"],
-    mutation_class="somatic",
-)
-
-somatic_caller_sv.remove("svdb")
-svdb_callers_prio = somatic_caller_sv + somatic_caller_cnv
-
-wf_solutions = ["BALSAMIC", "Sentieon"]
-if config["analysis"]["analysis_workflow"] == "balsamic-umi":
-    wf_solutions.append("Sentieon_umi")
-
-somatic_caller_tmb = []
-somatic_caller = []
-for ws in wf_solutions:
-    somatic_caller += get_variant_callers(
-        config=config,
-        analysis_type=config["analysis"]["analysis_type"],
-        workflow_solution=ws,
-        mutation_type="SNV",
-        sequencing_type=config["analysis"]["sequencing_type"],
-        mutation_class="somatic",
-    )
-somatic_caller_tmb += somatic_caller
-
-for var_caller in svdb_callers_prio:
-    if var_caller in somatic_caller:
-        somatic_caller.remove(var_caller)
-
-# Remove variant callers from list of callers
-if "disable_variant_caller" in config:
-    variant_callers_to_remove = config["disable_variant_caller"].split(",")
-    for var_caller in variant_callers_to_remove:
-        if var_caller in somatic_caller:
-            somatic_caller.remove(var_caller)
-        if var_caller in germline_caller:
-            germline_caller.remove(var_caller)
-
+# Collect all rules to be run
 
 rules_to_include = []
 analysis_type = config["analysis"]["analysis_type"]
@@ -490,9 +380,6 @@ for sub, value in SNAKEMAKE_RULES.items():
 
 if config["analysis"]["analysis_workflow"] == "balsamic":
     rules_to_include = [rule for rule in rules_to_include if "umi" not in rule]
-    somatic_caller = [
-        var_caller for var_caller in somatic_caller if "umi" not in var_caller
-    ]
 
 # Add rule for DRAGEN
 if "dragen" in config:
@@ -505,23 +392,103 @@ if "gnomad_min_af5" in config["reference"] and sequence_type == SequencingType.W
     rules_to_include.append("snakemake_rules/variant_calling/gatk_read_counts.rule")
 
 LOG.info(f"The following rules will be included in the workflow: {rules_to_include}")
+
+for r in rules_to_include:
+    include: Path(BALSAMIC_DIR, r).as_posix()
+
+# If workflow includes UMI filtered results, add these results
+wf_solutions = ["BALSAMIC", "Sentieon"]
+if config["analysis"]["analysis_workflow"] == "balsamic-umi":
+    wf_solutions.append("Sentieon_umi")
+
+# Extract variant callers for the workflow
+germline_caller_snv = []
+germline_caller_sv = []
+somatic_caller_snv = []
+somatic_caller_cnv = []
+somatic_caller_sv = []
+
+# Collect list of variant callers to be run
+for ws in wf_solutions:
+    somatic_caller_snv += get_variant_callers(
+        config=config,
+        analysis_type=config["analysis"]["analysis_type"],
+        workflow_solution=ws,
+        mutation_type="SNV",
+        sequencing_type=config["analysis"]["sequencing_type"],
+        mutation_class="somatic",
+    )
+    somatic_caller_sv += get_variant_callers(
+        config=config,
+        analysis_type=config["analysis"]["analysis_type"],
+        workflow_solution=ws,
+        mutation_type="SV",
+        sequencing_type=config["analysis"]["sequencing_type"],
+        mutation_class="somatic",
+    )
+    somatic_caller_cnv += get_variant_callers(
+        config=config,
+        analysis_type=config["analysis"]["analysis_type"],
+        workflow_solution=ws,
+        mutation_type="CNV",
+        sequencing_type=config["analysis"]["sequencing_type"],
+        mutation_class="somatic",
+    )
+    germline_caller_snv = get_variant_callers(
+        config=config,
+        analysis_type=config["analysis"]["analysis_type"],
+        workflow_solution=ws,
+        mutation_type="SNV",
+        sequencing_type=config["analysis"]["sequencing_type"],
+        mutation_class="germline",
+    )
+    germline_caller_sv = get_variant_callers(
+        config=config,
+        analysis_type=config["analysis"]["analysis_type"],
+        workflow_solution=ws,
+        mutation_type="SV",
+        sequencing_type=config["analysis"]["sequencing_type"],
+        mutation_class="germline",
+    )
+    germline_caller_cnv = get_variant_callers(
+        config=config,
+        analysis_type=config["analysis"]["analysis_type"],
+        workflow_solution=ws,
+        mutation_type="CNV",
+        sequencing_type=config["analysis"]["sequencing_type"],
+        mutation_class="germline",
+    )
+
 LOG.info(
-    f"The following Germline variant callers will be included in the workflow: {germline_caller}"
+    f"The following Somatic SNV variant callers will be included in the workflow: {somatic_caller_snv}"
 )
 LOG.info(
-    f"The following Somatic variant callers will be included in the workflow: {somatic_caller}"
+    f"The following Somatic SV variant callers will be included in the workflow: {somatic_caller_sv}"
+)
+LOG.info(
+    f"The following Somatic CNV variant callers will be included in the workflow: {somatic_caller_cnv}"
+)
+LOG.info(
+    f"The following Germline SNV variant callers will be included in the workflow: {germline_caller_snv}"
+)
+LOG.info(
+    f"The following Germline SV variant callers will be included in the workflow: {germline_caller_sv}"
+)
+LOG.info(
+    f"The following Germline CNV variant callers will be included in the workflow: {germline_caller_cnv}"
 )
 
+somatic_caller_sv.remove("svdb")
+svdb_callers_prio = somatic_caller_sv + somatic_caller_cnv
+
+
 # BAD CODE JUST FOR DEVELOPMENT
+somatic_caller = somatic_caller_snv + ["svdb"]
 if config["analysis"]["sequencing_type"] != "wgs":
     remove_caller_list = ["tnscope", "vardict"]
     for remove_caller in remove_caller_list:
         if remove_caller in somatic_caller:
             somatic_caller.remove(remove_caller)
-
-
-for r in rules_to_include:
-    include: Path(BALSAMIC_DIR, r).as_posix()
 
 # Define common and analysis specific outputs
 quality_control_results = [
@@ -534,6 +501,7 @@ quality_control_results = [
 analysis_specific_results = []
 
 # Germline SNVs/SVs
+germline_caller = germline_caller_cnv + germline_caller_sv
 analysis_specific_results.extend(
     expand(
         vep_dir + "{vcf}.vcf.gz",
@@ -544,7 +512,6 @@ analysis_specific_results.extend(
 # Germline SNVs specifically for genotype
 if config["analysis"]["analysis_type"] == "paired":
     analysis_specific_results.append(vep_dir + "SNV.genotype.normal.dnascope.vcf.gz")
-
 
 
 # Raw VCFs
@@ -571,12 +538,11 @@ analysis_specific_results.extend(
     )
 )
 
-
 # TMB
 analysis_specific_results.extend(
     expand(
         vep_dir + "{vcf}.balsamic_stat",
-        vcf=get_vcf(config, somatic_caller, [case_id]),
+        vcf=get_vcf(config, somatic_caller_snv, [case_id]),
     )
 )
 

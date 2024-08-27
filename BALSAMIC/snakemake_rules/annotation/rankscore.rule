@@ -5,10 +5,10 @@
 
 rule genmod_score_vardict:
   input:
-    vcf = vep_dir + "{var_type}.somatic.{case_name}.vardict.research.filtered.pass.vcf.gz",
+    vcf = vep_dir + "{var_type}.somatic.{case_name}.merged.research.filtered.pass.vcf.gz",
     rank_score = config["reference"]["rank_score"]
   output:
-    vcf_pass = vep_dir + "{var_type}.somatic.{case_name}.vardict.research.filtered.pass.ranked.vcf.gz",
+    vcf_pass = vep_dir + "{var_type}.somatic.{case_name}.merged.research.filtered.pass.ranked.vcf.gz",
   benchmark:
     Path(benchmark_dir, 'genmod_score_vardict_' + "{var_type}.somatic.{case_name}.tsv").as_posix()
   singularity:

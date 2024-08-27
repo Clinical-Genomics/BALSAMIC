@@ -204,7 +204,7 @@ elif config["analysis"]["sequencing_type"] == 'targeted' and config["analysis"][
     input:
       vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.vcf.gz",
     output:
-      vcf_filtered=vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.research.vcf.gz",
+      vcf_filtered = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.research.vcf.gz",
     benchmark:
       Path(benchmark_dir,'bcftools_quality_filter_vardict_tumor_normal_' + config["analysis"]["case_id"] + ".tsv").as_posix()
     singularity:
