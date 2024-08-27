@@ -426,6 +426,7 @@ for m in set(MutationType):
         + somatic_caller_balsamic
         + somatic_caller_sentieon
     )
+LOG.info("somatic callers: " + somatic_caller)
 
 somatic_caller_sv = get_variant_callers(
     config=config,
@@ -444,8 +445,12 @@ somatic_caller_cnv = get_variant_callers(
     sequencing_type=config["analysis"]["sequencing_type"],
     mutation_class="somatic",
 )
+LOG.info("somatic callers: " + somatic_caller)
+
 somatic_caller_sv.remove("svdb")
 svdb_callers_prio = somatic_caller_sv + somatic_caller_cnv
+
+LOG.info("somatic callers: " + somatic_caller)
 
 wf_solutions = ["BALSAMIC", "Sentieon"]
 if config["analysis"]["analysis_workflow"] == "balsamic-umi":
@@ -463,7 +468,9 @@ for ws in wf_solutions:
         mutation_class="somatic",
     )
 somatic_caller_tmb += somatic_caller
-print(somatic_caller)
+
+LOG.info("somatic callers: " + somatic_caller)
+
 
 for var_caller in svdb_callers_prio:
     if var_caller in somatic_caller:
@@ -493,6 +500,7 @@ if config["analysis"]["analysis_workflow"] == "balsamic":
     somatic_caller = [
         var_caller for var_caller in somatic_caller if "umi" not in var_caller
     ]
+LOG.info("somatic callers: " + somatic_caller)
 
 # Add rule for DRAGEN
 if "dragen" in config:
@@ -518,6 +526,8 @@ if config["analysis"]["sequencing_type"] != "wgs":
     for remove_caller in remove_caller_list:
         if remove_caller in somatic_caller:
             somatic_caller.remove(remove_caller)
+
+LOG.info("somatic callers: " + somatic_caller)
 
 for r in rules_to_include:
     include: Path(BALSAMIC_DIR, r).as_posix()
