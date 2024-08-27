@@ -390,7 +390,7 @@ for m in set(MutationType):
         mutation_class="germline",
     )
 
-    germline_caller = (
+    germline_caller += (
         germline_caller + germline_caller_balsamic + germline_caller_sentieon
     )
 
@@ -420,18 +420,12 @@ for m in set(MutationType):
         sequencing_type=config["analysis"]["sequencing_type"],
         mutation_class="somatic",
     )
-    somatic_caller = (
+    somatic_caller += (
         somatic_caller
         + somatic_caller_sentieon_umi
         + somatic_caller_balsamic
         + somatic_caller_sentieon
     )
-
-
-if "merged" in somatic_caller:
-    print("merged in caller")
-else:
-    print("merged NOT in caller")
 
 somatic_caller_sv = get_variant_callers(
     config=config,
@@ -470,11 +464,6 @@ for ws in wf_solutions:
     )
 somatic_caller_tmb += somatic_caller
 
-if "merged" in somatic_caller:
-    print("merged in caller")
-else:
-    print("merged NOT in caller")
-
 for var_caller in svdb_callers_prio:
     if var_caller in somatic_caller:
         somatic_caller.remove(var_caller)
@@ -498,21 +487,11 @@ for sub, value in SNAKEMAKE_RULES.items():
         for module_name, module_rules in value.items():
             rules_to_include.extend(module_rules)
 
-if "merged" in somatic_caller:
-    print("merged in caller")
-else:
-    print("merged NOT in caller")
-
 if config["analysis"]["analysis_workflow"] == "balsamic":
     rules_to_include = [rule for rule in rules_to_include if "umi" not in rule]
     somatic_caller = [
         var_caller for var_caller in somatic_caller if "umi" not in var_caller
     ]
-
-if "merged" in somatic_caller:
-    print("merged in caller")
-else:
-    print("merged NOT in caller")
 
 # Add rule for DRAGEN
 if "dragen" in config:
@@ -531,11 +510,6 @@ LOG.info(
 LOG.info(
     f"The following Somatic variant callers will be included in the workflow: {somatic_caller}"
 )
-
-if "merged" in somatic_caller:
-    print("merged in caller")
-else:
-    print("merged NOT in caller")
 
 # BAD CODE JUST FOR DEVELOPMENT
 if config["analysis"]["sequencing_type"] != "wgs":
