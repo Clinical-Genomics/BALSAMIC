@@ -393,9 +393,6 @@ if "gnomad_min_af5" in config["reference"] and sequence_type == SequencingType.W
 
 LOG.info(f"The following rules will be included in the workflow: {rules_to_include}")
 
-for r in rules_to_include:
-    include: Path(BALSAMIC_DIR, r).as_posix()
-
 # If workflow includes UMI filtered results, add these results
 wf_solutions = ["BALSAMIC", "Sentieon"]
 if config["analysis"]["analysis_workflow"] == "balsamic-umi":
@@ -458,6 +455,9 @@ for ws in wf_solutions:
         sequencing_type=config["analysis"]["sequencing_type"],
         mutation_class="germline",
     )
+
+for r in rules_to_include:
+    include: Path(BALSAMIC_DIR, r).as_posix()
 
 LOG.info(
     f"The following Somatic SNV variant callers will be included in the workflow: {somatic_caller_snv}"
