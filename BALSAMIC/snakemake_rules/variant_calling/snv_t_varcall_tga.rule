@@ -136,13 +136,13 @@ export TMPDIR={params.tmpdir};
 bcftools concat {input} | bcftools sort --temp-dir {params.tmpdir} - | awk '$1 ~ /^#/ {{print $0;next}} {{print $0 | \"sort -k1,1V -k2,2n\"}}' | bgzip > {params.tmpdir}/merged_vardict.vcf.gz ; 
 tabix -f -p vcf {params.tmpdir}/merged_vardict.vcf.gz ;
 
-echo \"TUMOR\" > {params.tmpdir}/reheader
+echo \"TUMOR\" > {params.tmpdir}/reheader ;
 
-bcftools reheader -s {params.tmpdir}/reheader {params.tmpdir}/merged_vardict.vcf.gz -o {output.vcf_vardict}
-tabix -f -p vcf {output.vcf_vardict}
+bcftools reheader -s {params.tmpdir}/reheader {params.tmpdir}/merged_vardict.vcf.gz -o {output.vcf_vardict} ;
+tabix -f -p vcf {output.vcf_vardict} ;
 
-echo -e \"tTUMOR\\tTUMOR\" > {output.namemap}; 
-echo -e \"tTUMOR\" > {output.namemap}.tumor;
+echo -e \"tTUMOR\\tTUMOR\" > {output.namemap} ; 
+echo -e \"tTUMOR\" > {output.namemap}.tumor ;
 
-rm -rf {params.tmpdir};
+rm -rf {params.tmpdir} ;
     """
