@@ -137,7 +137,7 @@ awk -f {params.sort_vcf} {params.tmpdir}/concatenated_vardict.vcf | bgzip > {par
 tabix -f -p vcf {params.tmpdir}/merged_vardict.vcf.gz ;
 
 echo \"TUMOR\" > {params.tmpdir}/reheader ;
-echo \"NORMAL\" > {params.tmpdir}/reheader ;
+echo \"NORMAL\" >> {params.tmpdir}/reheader ;
 
 bcftools reheader -s {params.tmpdir}/reheader {params.tmpdir}/merged_vardict.vcf.gz -o {output.vcf_vardict} ;
 tabix -f -p vcf {output.vcf_vardict} ;
