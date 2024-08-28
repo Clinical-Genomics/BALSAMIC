@@ -8,5 +8,5 @@ $1 ~ /^#/ {
 
 # Otherwise, send the body lines to an external sort command
 {
-    print $0 | "sort -k1,1V -k2,2n"
+    print $0 | "/usr/bin/sort -k1,1V -k2,2n"
 }
