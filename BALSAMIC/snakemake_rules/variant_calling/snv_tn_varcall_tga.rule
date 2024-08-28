@@ -132,7 +132,8 @@ rule vardict_merge:
 mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
 
-bcftools concat {input} | awk -f {params.sort_vcf} - | bgzip > {params.tmpdir}/merged_vardict.vcf.gz ; 
+bcftools concat {input} | awk -f {params.sort_vcf} - > {params.tmpdir}/merged_vardict.vcf ;
+bgzip {params.tmpdir}/merged_vardict.vcf ; 
 tabix -f -p vcf {params.tmpdir}/merged_vardict.vcf.gz ;
 
 echo \"TUMOR\" > {params.tmpdir}/reheader ;
