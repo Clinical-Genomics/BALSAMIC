@@ -117,6 +117,7 @@ rule vardict_merge:
     params:
         housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "research"},
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
+        sort_vcf = get_script_path("sort_vcf.awk"),
         case_name = config["analysis"]["case_id"],
     benchmark:
         Path(benchmark_dir,'vardict_merge_' + config["analysis"]["case_id"] + ".tsv").as_posix()
@@ -131,7 +132,7 @@ rule vardict_merge:
 mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
 
-bcftools concat {input} | bcftools sort --temp-dir {params.tmpdir} - | awk '$1 ~ /^#/ {{print $0;next}} {{print $0 | \"sort -k1,1V -k2,2n\"}}' | bgzip > {params.tmpdir}/merged_vardict.vcf.gz ; 
+bcftools concat {input} | bcftools sort --temp-dir {params.tmpdir} - | awk -f {params.sort_vcf} - | bgzip > {params.tmpdir}/merged_vardict.vcf.gz ; 
 tabix -f -p vcf {params.tmpdir}/merged_vardict.vcf.gz ;
 
 echo \"TUMOR\" > {params.tmpdir}/reheader ;
