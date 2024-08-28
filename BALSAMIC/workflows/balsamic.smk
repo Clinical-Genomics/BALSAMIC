@@ -401,6 +401,7 @@ if config["analysis"]["analysis_workflow"] == "balsamic-umi":
 # Extract variant callers for the workflow
 germline_caller_snv = []
 germline_caller_sv = []
+germline_caller_cnv = []
 somatic_caller_snv = []
 somatic_caller_cnv = []
 somatic_caller_sv = []
@@ -431,7 +432,7 @@ for ws in wf_solutions:
         sequencing_type=config["analysis"]["sequencing_type"],
         mutation_class="somatic",
     )
-    germline_caller_snv = get_variant_callers(
+    germline_caller_snv += get_variant_callers(
         config=config,
         analysis_type=config["analysis"]["analysis_type"],
         workflow_solution=ws,
@@ -439,7 +440,7 @@ for ws in wf_solutions:
         sequencing_type=config["analysis"]["sequencing_type"],
         mutation_class="germline",
     )
-    germline_caller_sv = get_variant_callers(
+    germline_caller_sv += get_variant_callers(
         config=config,
         analysis_type=config["analysis"]["analysis_type"],
         workflow_solution=ws,
@@ -447,7 +448,7 @@ for ws in wf_solutions:
         sequencing_type=config["analysis"]["sequencing_type"],
         mutation_class="germline",
     )
-    germline_caller_cnv = get_variant_callers(
+    germline_caller_cnv += get_variant_callers(
         config=config,
         analysis_type=config["analysis"]["analysis_type"],
         workflow_solution=ws,

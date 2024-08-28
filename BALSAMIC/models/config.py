@@ -99,6 +99,7 @@ class VCFModel(BaseModel):
     manta_germline: VarcallerAttribute
     merged: VarcallerAttribute
     manta: VarcallerAttribute
+    vardict: VarcallerAttribute
     dellysv: VarcallerAttribute
     cnvkit: VarcallerAttribute
     ascat: VarcallerAttribute
