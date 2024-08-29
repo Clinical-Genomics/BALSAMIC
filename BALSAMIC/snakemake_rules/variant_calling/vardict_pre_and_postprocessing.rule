@@ -110,7 +110,7 @@ export TMPDIR={params.tmpdir};
 
 ref=$(echo {input.ref} | sed 's/.fasta/.dict/g') ;
 
-gatk UpdateVCFSequenceDictionary -V {input.vcf} --source-dictionary $ref --replace --output {output.vcf} ;
+gatk UpdateVCFSequenceDictionary -V {input.vcf} --source-dictionary $ref --replace --output {output.vcf_vardict} ;
       
 rm -rf {params.tmpdir}
         """
