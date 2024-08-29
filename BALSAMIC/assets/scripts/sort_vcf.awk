@@ -1,5 +1,9 @@
 #!/usr/bin/awk -f
 
+BEGIN {
+    ENVIRON["LC_ALL"] = "C"
+}
+
 # If the line starts with a '#', it's a header, so print it as is
 $1 ~ /^#/ {
     print $0;

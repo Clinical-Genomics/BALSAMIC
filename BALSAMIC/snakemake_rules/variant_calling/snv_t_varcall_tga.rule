@@ -134,6 +134,9 @@ rule vardict_merge:
 mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
 
+env | grep LC ;
+which sort ;
+
 bcftools concat {input} > {params.tmpdir}/concatenated_vardict.vcf ;
 awk -f {params.sort_vcf} {params.tmpdir}/concatenated_vardict.vcf | bgzip > {params.tmpdir}/merged_vardict.vcf.gz ; 
 tabix -f -p vcf {params.tmpdir}/merged_vardict.vcf.gz ;
