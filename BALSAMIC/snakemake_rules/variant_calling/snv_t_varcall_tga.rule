@@ -135,7 +135,7 @@ mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
 
 bgzip {input.vcf_sorted} ; 
-tabix -f -p vcf {input.vcf_sorted} ;
+tabix -f -p vcf {input.vcf_sorted}.gz ;
 
 echo \"TUMOR\" > {params.tmpdir}/reheader ;
 
