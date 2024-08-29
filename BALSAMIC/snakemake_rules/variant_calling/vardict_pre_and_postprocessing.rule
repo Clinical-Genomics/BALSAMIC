@@ -90,10 +90,11 @@ rm -rf {params.tmpdir} ;
 rule gatk_update_vcf_sequence_dictionary:
     input:
         ref = config["reference"]["reference_genome"],
-        vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".preprocess_vardict.vcf.gz",
+        vcf = vcf_dir + "vardict/SNV.somatic." + config["analysis"]["case_id"] + ".vardict.vcf.gz",
     output:
-        vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.vcf.gz",
+        vcf_vardict = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.vcf.gz",
     params:
+        housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "research"},
         tmpdir=tempfile.mkdtemp(prefix=tmp_dir),
     benchmark:
         Path(benchmark_dir,"gatk_update_vcf_sequence_dictionary" + config["analysis"]["case_id"] + ".tsv").as_posix()

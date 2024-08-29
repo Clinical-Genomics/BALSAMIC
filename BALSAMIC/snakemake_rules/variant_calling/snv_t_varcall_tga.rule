@@ -114,12 +114,10 @@ rule post_process_vardict:
     input:
         vcf_sorted = vcf_dir + "vardict/merged_sorted.vardict.vcf"
     output:
-        vcf_vardict = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.vcf.gz",
+        vcf_vardict = vcf_dir + "vardict/SNV.somatic." + config["analysis"]["case_id"] + ".vardict.vcf.gz",
         namemap=vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.sample_name_map"
     params:
-        housekeeper_id={"id": config["analysis"]["case_id"], "tags": "research"},
         tmpdir=tempfile.mkdtemp(prefix=tmp_dir),
-        sort_vcf=get_script_path("sort_vcf.awk"),
         case_name=config["analysis"]["case_id"],
     benchmark:
         Path(benchmark_dir,'vardict_merge_' + config["analysis"]["case_id"] + ".tsv").as_posix()
