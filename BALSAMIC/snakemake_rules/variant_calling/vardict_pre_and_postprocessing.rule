@@ -73,6 +73,8 @@ rule vardict_sort:
         case_name=config["analysis"]["case_id"],
     benchmark:
         Path(benchmark_dir, 'vardict_sort_' + config["analysis"]["case_id"] + ".tsv").as_posix()
+    threads:
+        get_threads(cluster_config,"vardict_sort")
     message:
         ("Sorting merged vardict files with awk {params.case_name}")
     shell:
