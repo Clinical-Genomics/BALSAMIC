@@ -57,7 +57,7 @@ rule vardict_merge:
 mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
 
-bcftools concat {input} > {params.tmpdir}/concatenated_vardict.vcf ;
+bcftools concat {input} > {output.vcf_vardict} ;
 
 rm -rf {params.tmpdir} ;
     """
