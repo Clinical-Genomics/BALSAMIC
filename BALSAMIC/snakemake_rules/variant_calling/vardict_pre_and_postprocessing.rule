@@ -35,6 +35,56 @@ unset chromlist;
 readlink -f {input.bam};
         """
 
+rule vardict_merge:
+    input:
+        expand(vcf_dir + "vardict/split_vcf/{chrom}_vardict.vcf.gz", chrom=chromlist)
+    output:
+        vcf_vardict = vcf_dir + "vardict/merged.vardict.vcf"
+    params:
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
+        sort_vcf = get_script_path("sort_vcf.awk"),
+        case_name = config["analysis"]["case_id"],
+    benchmark:
+        Path(benchmark_dir,'vardict_merge_' + config["analysis"]["case_id"] + ".tsv").as_posix()
+    singularity:
+        Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
+    threads:
+        get_threads(cluster_config,"vardict_merge")
+    message:
+        ("Merging multiple VCFs from vardict into single VCF using bcftools for {params.case_name}")
+    shell:
+        """
+mkdir -p {params.tmpdir};
+export TMPDIR={params.tmpdir};
+
+bcftools concat {input} > {params.tmpdir}/concatenated_vardict.vcf ;
+
+rm -rf {params.tmpdir} ;
+    """
+
+rule vardict_sort:
+    input:
+        vcf = vcf_dir + "vardict/merged.vardict.vcf"
+    output:
+        vcf_sorted = vcf_dir + "vardict/merged_sorted.vardict.vcf"
+    params:
+        tmpdir=tempfile.mkdtemp(prefix=tmp_dir),
+        sort_vcf=get_script_path("sort_vcf.awk"),
+        case_name=config["analysis"]["case_id"],
+    benchmark:
+        Path(benchmark_dir, 'vardict_sort_' + config["analysis"]["case_id"] + ".tsv").as_posix()
+    message:
+        ("Sorting merged vardict files with awk {params.case_name}")
+    shell:
+        """
+mkdir -p {params.tmpdir};
+export TMPDIR={params.tmpdir};
+
+awk -f {params.sort_vcf} {input.vcf} > {output.vcf_sorted}
+
+rm -rf {params.tmpdir} ;
+    """
+
 rule gatk_update_vcf_sequence_dictionary:
     input:
         ref = config["reference"]["reference_genome"],

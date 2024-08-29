@@ -184,6 +184,10 @@
 		"time": "01:30:00",
 		"n": 5
 	},
+	"post_process_vardict": {
+		"time": "01:30:00",
+		"n": 2
+	},
 	"vardict_tumor_normal": {
 		"time": "12:00:00",
 		"n": 18
