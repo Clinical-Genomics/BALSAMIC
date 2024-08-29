@@ -71,6 +71,14 @@
 		"time": "4:00:00",
 		"n": 18
 	},
+	"bcftools_normalise_vcfs": {
+		"time": "2:00:00",
+		"n": 2
+	},
+	"bcftools_concatenate_vcfs": {
+		"time": "2:00:00",
+		"n": 2
+	},
 	"cnvkit_segment_CNV_research": {
 		"time": "6:00:00",
 		"n": 18
