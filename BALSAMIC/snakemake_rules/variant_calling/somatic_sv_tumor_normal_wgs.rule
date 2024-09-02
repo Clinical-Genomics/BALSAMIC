@@ -31,7 +31,8 @@ rule manta_tumor_normal:
         "index the compressed vcf file")
     shell:
         """
-samtools_path=$(readlink -f $(which samtools))
+export TMPDIR={params.tmpdir} ;
+samtools_path=$(readlink -f $(which samtools)) ;
 
 configManta.py \
 {params.settings} \
@@ -58,8 +59,6 @@ echo -e \"{params.normal}\\tNORMAL\\n{params.tumor}\\tTUMOR\" > {output.namemap}
 rm -rf {params.tmpdir};
         """
 
-
-
 rule delly_sv_tumor_normal:
     input:
         fa = config["reference"]["reference_genome"],
@@ -85,6 +84,8 @@ rule delly_sv_tumor_normal:
         "filter somatic variants and finally convert from bcf to compressed vcf file")
     shell:
         """
+export TMPDIR={params.tmpdir} ;
+
 delly call -x {input.excl} -o {params.tmpdir}/delly.bcf -g {input.fa} {input.bamT} {input.bamN};
 
 echo -e \"{params.tumor}\\ttumor\\n{params.normal}\\tcontrol\" > {params.tmpdir}/samples.tsv;
@@ -123,6 +124,8 @@ rule delly_cnv_tumor_normal:
         ("Calling copy number variants using delly for {params.case_name}")
     shell:
         """
+export TMPDIR={params.tmpdir} ;
+
 echo -e \"{params.tumor}\\ttumor\\n{params.normal}\\tcontrol\" > {params.tmpdir}/samples.tsv;
 
 delly cnv -u -z 10000 -m {input.map} -g {input.fa} -c {output.rd_delly} \
@@ -179,6 +182,7 @@ rule ascat_tumor_normal:
         ("Calling copy number variants using ascatNGS for {params.case_name}")
     shell:
         """
+export TMPDIR={params.tmpdir} ;
 export LD_LIBRARY_PATH=:/opt/wtsi-cgp/lib;
 
 if [[ "{params.gender}" = "female" ]]; then gender="XX"; else gender="XY"; fi
@@ -249,6 +253,8 @@ rule tiddit_sv_tumor_normal:
         ("Calling structural variants using tiddit for {params.case_name}")
     shell:
         """
+export TMPDIR={params.tmpdir} ;
+
 tiddit --cov -z 500 --ref {input.fa} --bam {input.bamT} -o {params.tmpdir}/{params.tumor}_cov &
 
 tiddit --cov -z 500 --ref {input.fa} --bam {input.bamN} -o {params.tmpdir}/{params.normal}_cov &

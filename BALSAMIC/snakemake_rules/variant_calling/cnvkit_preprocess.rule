@@ -31,6 +31,7 @@ rule create_coverage:
         Path(benchmark_dir, "cnvkit_{sample}.coverage.tsv").as_posix()
     params:
         case_name = config["analysis"]["case_id"],
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         min_mapq = params.common.min_mapq,
     singularity:
         Path(singularity_image, "cnvkit.sif").as_posix()
@@ -40,6 +41,10 @@ rule create_coverage:
         "Segmenting genomic regions using CNVkit for {params.case_name}"
     shell:
         """
+export TMPDIR={params.tmpdir} ;
+
 cnvkit.py coverage {input.bam} {input.target_bed} -o {output.target_cnn} --min-mapq {params.min_mapq} --processes {threads} ;
 cnvkit.py coverage {input.bam} {input.antitarget_bed} -o {output.antitarget_cnn} --min-mapq {params.min_mapq} --processes {threads} ;
+
+rm -rf {params.tmpdir}
         """

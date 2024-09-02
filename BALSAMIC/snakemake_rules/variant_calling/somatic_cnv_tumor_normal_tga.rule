@@ -61,6 +61,7 @@ rule cnvkit_segment_CNV_research:
         get_threads(cluster_config, "cnvkit_segment_CNV_research")
     params:
         housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "cnv"},
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         cnv_dir = cnv_dir,
         case_name = config["analysis"]["case_id"],
         sample_id = "TUMOR",
@@ -71,6 +72,8 @@ rule cnvkit_segment_CNV_research:
         "Segmenting genomic regions using CNVkit for {params.case_name}"
     shell:
         """
+export TMPDIR={params.tmpdir} ;
+
 # Combine the uncorrected target and antitarget coverage tables (.cnn) and
 # correct for biases in regional coverage and GC content, according to the given normal or PON reference
 if [[ ! -f "{params.pon}" ]]; then
@@ -111,6 +114,8 @@ cnvkit.py segment {output.cnr} \
 # Convert copy number segments (initial.cns) to standard SEG format to be used in PureCN
 cnvkit.py export seg {output.cns_initial} \
 --output {output.segment};
+
+rm -rf {params.tmpdir};
         """
 
 rule purecn_call_CNV_research:
@@ -144,8 +149,8 @@ rule purecn_call_CNV_research:
         "Computing tumor purity and ploidy using PureCN for {params.case_name}"
     shell:
         """
-export PURECN='/opt/PureCN/PureCN.R'
-
+export TMPDIR={params.tmpdir} ;
+export PURECN='/opt/PureCN/PureCN.R' ;
 
 # Run PureCN to estimate tumor-purity and ploidy
 
@@ -222,6 +227,7 @@ rule cnvkit_call_CNV_research:
         get_threads(cluster_config, "cnvkit_call_CNV_research")
     params:
         housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "cnv"},
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         cnv_dir = cnv_dir,
         cnsr = lambda wc: "tumor.merged.cn{s,r}",
         case_name = config["analysis"]["case_id"],
@@ -232,6 +238,8 @@ rule cnvkit_call_CNV_research:
         "Computing tumor purity and ploidy using PureCN for {params.case_name}"
     shell:
         """
+export TMPDIR={params.tmpdir} ;        
+
 purity=$(awk -F\\, 'NR>1 {{print $2}}' {input.purity_ploidy})
 ploidy=$(awk -F\\, 'NR>1 {{printf int($3)}}' {input.purity_ploidy})
 
@@ -274,6 +282,8 @@ cnvkit.py export vcf {output.cns} \
 -o {output.vcf} \
 --sample-id {params.tumor_sample_id} \
 --sample-sex {params.gender};
+
+rm -rf {params.tmpdir};
         """
 
 rule delly_cnv_tumor_normal:
@@ -303,6 +313,8 @@ rule delly_cnv_tumor_normal:
         ("Calling copy number variants using delly for {params.case_name}")
     shell:
         """
+export TMPDIR={params.tmpdir} ; 
+
 echo -e \"{params.tumor}\\ttumor\\n{params.normal}\\tcontrol\" > {params.tmpdir}/samples.tsv;
 
 delly cnv -u -z 10000 -i 10000 -m {input.map} -g {input.fa}  -b {input.baits_bed} -c {output.rd_delly} \
