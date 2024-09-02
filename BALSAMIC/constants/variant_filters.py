@@ -20,10 +20,10 @@ SNV_BCFTOOLS_SETTINGS_COMMON = {
         "filter_name": "balsamic_high_strand_oddsratio",
         "field": "INFO",
     },
-    "varcaller_name": "sentieon",
+    "varcaller_name": "None",
     "filter_type": "general",
     "analysis_type": "tumor_only,tumor_normal",
-    "description": "General purpose filters used for filtering TNscope",
+    "description": "General purpose filters used for filtering SNVs",
 }
 
 # Configuration of common TGA SNV filter settings
