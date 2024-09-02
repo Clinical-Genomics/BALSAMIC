@@ -3,14 +3,14 @@
 # NGS filters for various scenarios
 
 
-rule bcftools_filter_tnscope_research_tumor_only:
+rule bcftools_filter_merged_research_tumor_only:
   input:
-    vcf_snv_research = vep_dir + "{var_type}.somatic.{case_name}.tnscope.research.vcf.gz",
+    vcf_snv_research = vep_dir + "{var_type}.somatic.{case_name}.merged.research.vcf.gz",
   output:
-    vcf_pass_tnscope = vep_dir + "{var_type}.somatic.{case_name}.tnscope.research.filtered.pass.vcf.gz",
-    bcftools_counts_research = vep_dir + "{var_type}.somatic.{case_name}.tnscope.research.filtered.pass.stats"
+    vcf_pass_merged = vep_dir + "{var_type}.somatic.{case_name}.merged.research.filtered.pass.vcf.gz",
+    bcftools_counts_research = vep_dir + "{var_type}.somatic.{case_name}.merged.research.filtered.pass.stats"
   benchmark:
-    Path(benchmark_dir, 'bcftools_filter_tnscope_research_tumor_only_' + "{var_type}.somatic.{case_name}.tsv").as_posix()
+    Path(benchmark_dir, 'bcftools_filter_merged_research_tumor_only_' + "{var_type}.somatic.{case_name}.tsv").as_posix()
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
   params:
@@ -21,29 +21,29 @@ rule bcftools_filter_tnscope_research_tumor_only:
   threads:
     get_threads(cluster_config, 'bcftools_filter_tnscope_research_tumor_only')
   message:
-    "Filtering WGS tumor-only tnscope annotated research variants using bcftools for {params.case_name}"
+    "Filtering TGA tumor-only merged annotated research variants using bcftools for {params.case_name}"
   shell:
     """
 
 bcftools view -f PASS,triallelic_site --threads {threads} {input.vcf_snv_research} | \
 bcftools filter --threads {threads} --include 'INFO/GNOMADAF_popmax <= {params.pop_freq[0]} || INFO/GNOMADAF_popmax == \".\"' --soft-filter '{params.pop_freq[1]}' --mode '+' | \
 bcftools filter --threads {threads} --include 'INFO/SWEGENAF <= {params.swegen_freq[0]} || INFO/SWEGENAF == \".\"' --soft-filter '{params.swegen_freq[1]}' --mode '+' |\
-bcftools view --threads {threads} -i 'FILTER == "PASS" || FILTER == "triallelic_site"' -o {output.vcf_pass_tnscope} -O z;
+bcftools view --threads {threads} -i 'FILTER == "PASS" || FILTER == "triallelic_site"' -o {output.vcf_pass_merged} -O z;
 
-tabix -p vcf -f {output.vcf_pass_tnscope};
+tabix -p vcf -f {output.vcf_pass_merged};
 
-bcftools +counts {output.vcf_pass_tnscope} > {output.bcftools_counts_research};
+bcftools +counts {output.vcf_pass_merged} > {output.bcftools_counts_research};
     """
 
-rule bcftools_filter_tnscope_clinical_tumor_only:
+rule bcftools_filter_merged_clinical_tumor_only:
   input:
     vcf_snv_clinical = vep_dir + "{var_type}.somatic.{case_name}.merged.clinical.vcf.gz",
     namemap = vep_dir + "status_to_sample_id_namemap"
   output:
-    vcf_pass_tnscope = vep_dir + "{var_type}.somatic.{case_name}.merged.clinical.filtered.pass.vcf.gz",
+    vcf_pass_merged = vep_dir + "{var_type}.somatic.{case_name}.merged.clinical.filtered.pass.vcf.gz",
     bcftools_counts_clinical = vep_dir + "{var_type}.somatic.{case_name}.merged.clinical.filtered.pass.stats"
   benchmark:
-    Path(benchmark_dir, 'bcftools_filter_tnscope_clinical_tumor_only_' + "{var_type}.somatic.{case_name}.tsv").as_posix()
+    Path(benchmark_dir, 'bcftools_filter_merged_clinical_tumor_only_' + "{var_type}.somatic.{case_name}.tsv").as_posix()
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
   params:
@@ -55,7 +55,7 @@ rule bcftools_filter_tnscope_clinical_tumor_only:
   threads:
     get_threads(cluster_config, 'bcftools_filter_tnscope_clinical_tumor_only')
   message:
-    "Filtering WGS tumor-only tnscope annotated clinical variants using bcftools for {params.case_name}"
+    "Filtering TGA tumor-only merged annotated clinical variants using bcftools for {params.case_name}"
   shell:
     """
 
@@ -65,11 +65,11 @@ bcftools view -f PASS,triallelic_site --threads {threads} | \
 bcftools filter --threads {threads} --include 'INFO/GNOMADAF_popmax <= {params.pop_freq[0]} || INFO/GNOMADAF_popmax == \".\"' --soft-filter '{params.pop_freq[1]}' --mode '+' | \
 bcftools filter --threads {threads} --include 'INFO/SWEGENAF <= {params.swegen_freq[0]} || INFO/SWEGENAF == \".\"' --soft-filter '{params.swegen_freq[1]}' --mode '+' | \
 bcftools filter --threads {threads} --include 'INFO/Frq <= {params.loqusdb_clinical_freq[0]} || INFO/Frq == \".\"' --soft-filter '{params.loqusdb_clinical_freq[1]}' --mode '+' | \
-bcftools view --threads {threads} -i 'FILTER == "PASS" || FILTER == "triallelic_site"' -o {output.vcf_pass_tnscope} -O z;
+bcftools view --threads {threads} -i 'FILTER == "PASS" || FILTER == "triallelic_site"' -o {output.vcf_pass_merged} -O z;
 
-tabix -p vcf -f {output.vcf_pass_tnscope};
+tabix -p vcf -f {output.vcf_pass_merged};
 
-bcftools +counts {output.vcf_pass_tnscope} > {output.bcftools_counts_clinical};
+bcftools +counts {output.vcf_pass_merged} > {output.bcftools_counts_clinical};
     """
 
 

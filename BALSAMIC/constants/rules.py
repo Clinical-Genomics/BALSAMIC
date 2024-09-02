@@ -149,7 +149,7 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
             "snakemake_rules/variant_calling/somatic_sv_postprocess_and_filter_tumor_only.rule",
         ],
         "annotate": [
-            "snakemake_rules/annotation/varcaller_filter_tumor_only.rule",
+            "snakemake_rules/annotation/varcaller_filter_tumor_only_wgs.rule",
         ],
     },
     "paired_wgs": {
@@ -170,7 +170,7 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
             "snakemake_rules/variant_calling/somatic_sv_postprocess_and_filter_tumor_normal.rule",
         ],
         "annotate": [
-            "snakemake_rules/annotation/varcaller_filter_tumor_normal.rule",
+            "snakemake_rules/annotation/varcaller_filter_tumor_normal_wgs.rule",
             "snakemake_rules/annotation/vcfheader_rename.rule",
             "snakemake_rules/annotation/msi_tumor_normal.rule",
         ],
