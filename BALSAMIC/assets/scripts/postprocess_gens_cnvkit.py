@@ -84,8 +84,8 @@ def create_gens_cov_file(
         log2: float = float(row["log2"])
 
         # De-activate purity and ploidy adjustment
-        #log2: float = calculate_log2_ratio(purity, log2, ploidy)
-        #log2: float = round(log2, 4)
+        # log2: float = calculate_log2_ratio(purity, log2, ploidy)
+        # log2: float = round(log2, 4)
 
         # store values in list
         log2_data.append(f"{row['chromosome']}\t{midpoint - 1}\t{midpoint}\t{log2}")
