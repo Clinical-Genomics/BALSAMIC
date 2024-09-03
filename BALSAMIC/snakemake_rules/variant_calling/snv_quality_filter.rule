@@ -94,9 +94,9 @@ if config["analysis"]["sequencing_type"] == 'targeted' and config["analysis"]["a
       AD=[SNV_FILTER_SETTINGS.AD.tag_value, SNV_FILTER_SETTINGS.AD.filter_name],
       DP=[SNV_FILTER_SETTINGS.DP.tag_value, SNV_FILTER_SETTINGS.DP.filter_name],
       AF_min=[SNV_FILTER_SETTINGS.AF_min.tag_value, SNV_FILTER_SETTINGS.AF_min.filter_name],
-      strand_reads=[SNV_FILTER_SETTINGS.strand_reads.tag_value,SNV_FILTER_SETTINGS.strand_reads.filter_name],
-      qss=[SNV_FILTER_SETTINGS.qss.tag_value,SNV_FILTER_SETTINGS.qss.filter_name],
-      sor=[SNV_FILTER_SETTINGS.sor.tag_value,SNV_FILTER_SETTINGS.sor.filter_name],
+      strand_reads=[SNV_FILTER_SETTINGS.strand_reads.tag_value, SNV_FILTER_SETTINGS.strand_reads.filter_name],
+      qss=[SNV_FILTER_SETTINGS.qss.tag_value, SNV_FILTER_SETTINGS.qss.filter_name],
+      sor=[SNV_FILTER_SETTINGS.sor.tag_value, SNV_FILTER_SETTINGS.sor.filter_name],
       case_name = config["analysis"]["case_id"],
     threads:
       get_threads(cluster_config,'bcftools_quality_filter_vardict_tumor_only')

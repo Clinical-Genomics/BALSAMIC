@@ -20,6 +20,16 @@ SNV_BCFTOOLS_SETTINGS_COMMON = {
         "filter_name": "balsamic_high_strand_oddsratio",
         "field": "INFO",
     },
+    "qss": {
+        "tag_value": 20,
+        "filter_name": "balsamic_low_quality_scores",
+        "field": "FORMAT",
+    },
+    "strand_reads": {
+        "tag_value": 0,
+        "filter_name": "balsamic_low_strand_read_counts",
+        "field": "FORMAT",
+    },
     "varcaller_name": "None",
     "filter_type": "general",
     "analysis_type": "tumor_only,tumor_normal",
@@ -83,16 +93,6 @@ SNV_BCFTOOLS_SETTINGS_WGS = {
         "tag_value": 0.001,
         "filter_name": "balsamic_high_pop_freq",
         "field": "INFO",
-    },
-    "qss": {
-        "tag_value": 20,
-        "filter_name": "balsamic_low_quality_scores",
-        "field": "FORMAT",
-    },
-    "strand_reads": {
-        "tag_value": 0,
-        "filter_name": "balsamic_low_strand_read_counts",
-        "field": "FORMAT",
     },
 }
 
