@@ -94,6 +94,9 @@ if config["analysis"]["sequencing_type"] == 'targeted' and config["analysis"]["a
       AD=[SNV_FILTER_SETTINGS.AD.tag_value, SNV_FILTER_SETTINGS.AD.filter_name],
       DP=[SNV_FILTER_SETTINGS.DP.tag_value, SNV_FILTER_SETTINGS.DP.filter_name],
       AF_min=[SNV_FILTER_SETTINGS.AF_min.tag_value, SNV_FILTER_SETTINGS.AF_min.filter_name],
+      strand_reads=[SNV_FILTER_SETTINGS.strand_reads.tag_value,SNV_FILTER_SETTINGS.strand_reads.filter_name],
+      qss=[SNV_FILTER_SETTINGS.qss.tag_value,SNV_FILTER_SETTINGS.qss.filter_name],
+      sor=[SNV_FILTER_SETTINGS.sor.tag_value,SNV_FILTER_SETTINGS.sor.filter_name],
       case_name = config["analysis"]["case_id"],
     threads:
       get_threads(cluster_config,'bcftools_quality_filter_vardict_tumor_only')
@@ -104,6 +107,9 @@ if config["analysis"]["sequencing_type"] == 'targeted' and config["analysis"]["a
     bcftools view {input.vcf} \
     | bcftools filter --include 'SUM(FORMAT/AD[0:0]+FORMAT/AD[0:1]) >= {params.DP[0]}' --soft-filter '{params.DP[1]}' --mode '+' \
     | bcftools filter --include 'FORMAT/AD[0:1] >= {params.AD[0]}' --soft-filter '{params.AD[1]}' --mode '+' \
+    | bcftools filter --threads {threads} --include 'SUM(FORMAT/QSS)/SUM(FORMAT/AD) >= {params.qss[0]}' --soft-filter '{params.qss[1]}' --mode '+' \
+    | bcftools filter --threads {threads} --include 'FORMAT/ALT_F1R2 > {params.strand_reads[0]} && (FORMAT/ALT_F1R2 > 0  && FORMAT/ALT_F2R1 > {params.strand_reads[0]} &&  FORMAT/REF_F1R2 > {params.strand_reads[0]} && FORMAT/REF_F2R1 > {params.strand_reads[0]})' --soft-filter '{params.strand_reads[1]}' --mode '+' \
+    | bcftools filter --threads {threads} --include "INFO/SOR < {params.sor[0]}" --soft-filter '{params.sor[1]}' --mode '+' \
     | bcftools filter --include 'FORMAT/AF[0] >= {params.AF_min[0]}' --soft-filter '{params.AF_min[1]}' --mode '+' \
     | bcftools view -i 'FILTER == "PASS" || FILTER == "triallelic_site"' -o {output.vcf_filtered} -O z;
     
