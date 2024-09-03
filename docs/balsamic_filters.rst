@@ -24,6 +24,11 @@ In BALSAMIC, various bioinfo tools are integrated for reporting somatic and germ
      - tumor-normal, tumor-only
      - somatic
      - SNV, InDel
+   * - VarDict
+     - TGA
+     - tumor-normal, tumor-only
+     - somatic
+     - SNV, InDel
 
 
 Various filters (Pre-call and Post-call filtering) are applied at different levels to report high-confidence variant calls.
@@ -68,8 +73,8 @@ This is a two step process where variants are first filtered based on existing a
 At each step only variants with filters `PASS` and `triallelic_site` are kept and delivered as a final list of variants to the customer either via `Scout` or `Caesar`
 
 **Note:**
-**In BALSAMIC, the VCF file filtered only on public available databases is named as `*.research.filtered.pass.vcf.gz` (eg: `SNV.somatic.<CASE_ID>.tnscope.research.filtered.pass.vcf.gz`)**
-**In BALSAMIC, the VCF file filtered on both public and locally available databases is named as `*.<research/clinical>.filtered.pass.vcf.gz` (eg: `SNV.somatic.<CASE_ID>.vardict.<research/clinical>.filtered.pass.vcf.gz`)**
+**In BALSAMIC, the VCF file filtered only on public available databases is named as `*.research.filtered.pass.vcf.gz` (eg: for WGS `SNV.somatic.<CASE_ID>.tnscope.research.filtered.pass.vcf.gz`)**
+**In BALSAMIC, the VCF file filtered on both public and locally available databases is named as `*.clinical.filtered.pass.vcf.gz` (eg: for TGA `SNV.somatic.<CASE_ID>.merged.<research/clinical>.filtered.pass.vcf.gz`)**
 
 .. list-table:: Description of VCF files
    :widths: 30 50 20

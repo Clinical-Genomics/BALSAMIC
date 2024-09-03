@@ -540,11 +540,13 @@ analysis_specific_results.extend(
     )
 )
 
+
 # TMB
+somatic_caller.remove("svdb")
 analysis_specific_results.extend(
     expand(
         vep_dir + "{vcf}.balsamic_stat",
-        vcf=get_vcf(config, somatic_caller_snv, [case_id]),
+        vcf=get_vcf(config, somatic_caller, [case_id]),
     )
 )
 
