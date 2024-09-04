@@ -51,11 +51,6 @@ SNV_BCFTOOLS_SETTINGS_TGA = {
     },
     "AF_min": {"tag_value": 0.005, "filter_name": "balsamic_low_af", "field": "INFO"},
     "AD": {"tag_value": 5, "filter_name": "balsamic_low_tumor_ad", "field": "INFO"},
-    "AD_VarDict": {
-        "tag_value": 7,
-        "filter_name": "balsamic_low_tumor_ad",
-        "field": "INFO",
-    },
     "MQ": {"tag_value": 30, "filter_name": "balsamic_low_mq", "field": "INFO"},
 }
 
