@@ -7,13 +7,13 @@ Target Genome Analysis
 
 BALSAMIC :superscript:`1` (**version** = 15.0.1) was used to analyze the data from raw FASTQ files.
 We first quality controlled FASTQ files using FastQC v0.11.9 :superscript:`2`.
-Adapter sequences are trimmed using fastp v0.23.2 :superscript:`3` and then UMI sequences are extracted using the UMI extract tool from sentieon-tools 202308.03 :superscript:`15` and finally low-quality bases were trimmed using fastp v0.23.2 :superscript:`3`.
-Trimmed reads were mapped to the reference genome hg19 using sentieon-tools 202308.03 :superscript:`15`.
-The resulting BAM is quality controlled using samtools v1.15.1 :superscript:`26`, and AlignmentStat, InsertSizeMetricAlgo, GCBias, MeanQualityByCycle, QualDistribution and BaseDistributionByCycle from sentieon-tools 202308.03 :superscript:`15`.
-Duplicate reads are collapsed using the UMI function in Dedup from sentieon-tools 202308.03 :superscript:`15`, and invalid mates are corrected with tools collate and fixmate from samtools v1.15.1 :superscript:`26`.
+Adapter sequences are trimmed using fastp v0.23.2 :superscript:`3` and then UMI sequences are extracted using the UMI extract tool from sentieon-tools (version 202308.03) :superscript:`15` and finally low-quality bases were trimmed using fastp v0.23.2 :superscript:`3`.
+Trimmed reads were mapped to the reference genome hg19 using sentieon-tools :superscript:`15`.
+The resulting BAM is quality controlled using samtools v1.15.1 :superscript:`26`, and AlignmentStat, InsertSizeMetricAlgo, GCBias, MeanQualityByCycle, QualDistribution and BaseDistributionByCycle from sentieon-tools :superscript:`15`.
+Duplicate reads are collapsed using the UMI function in Dedup from sentieon-tools :superscript:`15`, and invalid mates are corrected with tools collate and fixmate from samtools v1.15.1 :superscript:`26`.
 Coverage metrics are collected from the final BAM using Sambamba v0.8.2 :superscript:`27`, Mosdepth v0.3.3 :superscript:`28` and CollectHsMetrics from Picard tools v2.27.1 :superscript:`6`.
 Results of the quality controlled steps were summarized by MultiQC v1.22.3 :superscript:`7`.
-Small somatic mutations (SNVs and INDELs) were called for each sample using VarDict 2019.06.04 :superscript:`8` and Sentieon TNscope 202308.03 :superscript:`16` and merged using bcftools  filtered using the criteria (*MQ >= 30, DP >= 50 (20 for exome-samples), VD >= 5, Minimum AF >= 0.005, Maximum AF < 1, GNOMADAF_popmax <= 0.005, swegen AF < 0.01*).
+Small somatic mutations (SNVs and INDELs) were called for each sample using VarDict 2019.06.04 :superscript:`8` and Sentieon TNscope :superscript:`16` and merged using bcftools norm and concat, and filtered using the criteria (*MQ >= 30, DP >= 50 (20 for exome-samples), VD >= 5, Minimum AF >= 0.005, Maximum AF < 1, GNOMADAF_popmax <= 0.005, swegen AF < 0.01*).
 Only those variants that fulfilled the filtering criteria and scored as `PASS` in the VCF file were reported.
 Structural variants (SV) were called using Manta v1.6.0 :superscript:`9` on a post-processed version of the BAM which was base-quality capped to 70, and Delly v1.0.3 :superscript:`10`.
 Copy number variations (CNV) were called using CNVkit v0.9.10 :superscript:`11`.

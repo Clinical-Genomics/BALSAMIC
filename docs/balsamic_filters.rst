@@ -171,7 +171,7 @@ Following is the set of criteria applied for filtering vardict results. It is us
 
 
 **Attention:**
-**BALSAMIC <= v8.2.7 uses minimum AF 1% (0.01). From Balsamic v8.2.8, minimum VAF is changed to 0.7% (0.007)**
+**BALSAMIC <= v8.2.7 uses minimum AF 1% (0.01). From Balsamic v8.2.8, minimum VAF is changed to 0.7% (0.007). From v16.0.0 minimum VAF is changed to 0.5% (0.005).**
 
 **For normal matched analyses**
 
@@ -270,6 +270,21 @@ The `TNscope <https://www.biorxiv.org/content/10.1101/250647v1.abstract>`_ algor
 ::
 
     Minimum AF >= 0.005
+
+
+**For tumor only analyses**
+
+*Average base quality score*
+
+::
+
+    SUM(QSS)/SUM(AD) >= 20
+
+*SOR*: Symmetric Odds Ratio of 2x2 contingency table to detect strand bias
+
+::
+
+    SOR < 2.7
 
 **Note:**
 **Additionally, variants labeled with triallelic site filter are not filtered out**
