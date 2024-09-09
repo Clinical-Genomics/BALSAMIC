@@ -397,7 +397,6 @@ It means that at least `3` read-pairs need to support the UMI-group (based on th
 
     bcftools annotate -x FILTER/alt_allele_in_normal
 
-
 *Relative tumor AF in normal*: Allows for maximum Tumor-In-Normal-Contamination of 30%.
 
 ::
@@ -610,5 +609,5 @@ The variants scored as `PASS` or `triallelic_sites` are included in the final vc
 **BALSAMIC <= v8.2.10 uses GNOMAD_popmax <= 0.005. From Balsamic v9.0.0, this settings is changed to 0.02, to reduce the stringency.**
 **BALSAMIC >= v11.0.0 removes unmapped reads from the bam and cram files for all the workflows.**
 **BALSAMIC >= v13.0.0 keeps unmapped reads in bam and cram files for all the workflows.**
-
+**BALSAMIC >= v16.0.0 uses UMIs for duplicate removal bam in standard TGA workflows.**
 

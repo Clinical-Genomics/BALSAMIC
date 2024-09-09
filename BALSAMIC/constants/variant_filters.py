@@ -15,11 +15,6 @@ SNV_BCFTOOLS_SETTINGS_COMMON = {
         "filter_name": "high_normal_tumor_af_frac",
         "field": "FORMAT",
     },
-    "sor": {
-        "tag_value": 3,
-        "filter_name": "balsamic_high_strand_oddsratio",
-        "field": "INFO",
-    },
     "qss": {
         "tag_value": 20,
         "filter_name": "balsamic_low_quality_scores",
@@ -47,6 +42,11 @@ SNV_BCFTOOLS_SETTINGS_TGA = {
     "pop_freq_umi": {
         "tag_value": 0.02,
         "filter_name": "balsamic_umi_high_pop_freq",
+        "field": "INFO",
+    },
+    "sor": {
+        "tag_value": 2.7,
+        "filter_name": "balsamic_high_strand_oddsratio",
         "field": "INFO",
     },
     "AF_min": {"tag_value": 0.005, "filter_name": "balsamic_low_af", "field": "INFO"},
@@ -77,6 +77,11 @@ SNV_BCFTOOLS_SETTINGS_EXOME = {
 # Configuration of unique WGS SNV filter settings
 SNV_BCFTOOLS_SETTINGS_WGS = {
     **SNV_BCFTOOLS_SETTINGS_COMMON,
+    "sor": {
+        "tag_value": 3,
+        "filter_name": "balsamic_high_strand_oddsratio",
+        "field": "INFO",
+    },
     "AD": {"tag_value": 3, "filter_name": "balsamic_low_tumor_ad", "field": "FORMAT"},
     "DP": {
         "tag_value": 10,
