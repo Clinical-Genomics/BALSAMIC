@@ -9,6 +9,7 @@ Added:
 * UMI extraction and deduplication to TGA workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1358
 * Padding of bed-regions for CNVkit to minimum 100 bases https://github.com/Clinical-Genomics/BALSAMIC/pull/1469
 * Added min mapq 20 to CNVkit PON workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1465
+* CNVkit PONs for Exome comprehensive 10.2, GMSsolid 15.2, GMCKsolid 4.2 https://github.com/Clinical-Genomics/BALSAMIC/pull/1465
 
 Changed:
 ^^^^^^^^
