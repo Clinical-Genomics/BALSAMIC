@@ -13,7 +13,7 @@ rule picard_CollectAlignmentSummaryMetrics:
     output:
         alignment_metrics = Path(qc_dir,"{sample_type}.{sample}.alignment_summary_metrics.txt").as_posix(),
     benchmark:
-        Path(benchmark_dir, "CollectAlignmentSummaryMetrics_{sample}.tsv").as_posix()
+        Path(benchmark_dir, "CollectAlignmentSummaryMetrics.{sample_type}.{sample}.tsv").as_posix()
     singularity:
         Path(singularity_image,config["bioinfo_tools"].get("picard") + ".sif").as_posix()
     params:
