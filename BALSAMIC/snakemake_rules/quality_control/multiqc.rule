@@ -140,3 +140,4 @@ multiqc --force --outdir {params.qc_dir} \
 
 chmod -R 777 {params.qc_dir};
         """
+

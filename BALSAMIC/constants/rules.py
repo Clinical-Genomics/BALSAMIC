@@ -35,6 +35,7 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
             "snakemake_rules/quality_control/fastqc.rule",
             "snakemake_rules/quality_control/multiqc.rule",
             "snakemake_rules/quality_control/qc_metrics.rule",
+            "snakemake_rules/quality_control/picard_common.rule",
             "snakemake_rules/quality_control/sentieon_qc_metrics.rule",
         ],
         "report": [
