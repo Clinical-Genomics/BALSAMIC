@@ -50,6 +50,7 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 --algo {params.algo} \
 --tumor_sample {params.tumor} \
 --dbsnp {input.dbsnp} \
+--trim_soft_clip \
 --min_tumor_allele_frac {params.tumor_af} \
 --filter_t_alt_frac {params.tumor_af} \
 --min_init_tumor_lod {params.init_tumor_lod} \
