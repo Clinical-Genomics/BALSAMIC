@@ -532,6 +532,14 @@ analysis_specific_results.extend(
     )
 )
 
+# Ranked clinical SNV VCFs
+analysis_specific_results.extend(
+    expand(
+        vep_dir + "{vcf}.clinical.ranked.vcf.gz",
+        vcf=get_vcf(config, somatic_caller,[case_id]),
+    )
+)
+
 # Filtered and passed post annotation clinical VCFs
 analysis_specific_results.extend(
     expand(

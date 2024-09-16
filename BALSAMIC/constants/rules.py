@@ -57,6 +57,7 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
             "snakemake_rules/annotation/varcaller_sv_filter.rule",
             "snakemake_rules/annotation/vcf2cytosure_convert.rule",
             "snakemake_rules/annotation/final_vcf_reheader.rule",
+            "snakemake_rules/annotation/rankscore.rule",
         ],
     },
     "single_targeted": {
@@ -89,7 +90,6 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
             "snakemake_rules/variant_calling/vardict_pre_and_postprocessing.rule",
         ],
         "annotate": [
-            "snakemake_rules/annotation/rankscore.rule",
             "snakemake_rules/annotation/varcaller_filter_tumor_only.rule",
             "snakemake_rules/annotation/varcaller_filter_tumor_only_umi.rule",
         ],
@@ -125,7 +125,6 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
             "snakemake_rules/variant_calling/vardict_pre_and_postprocessing.rule",
         ],
         "annotate": [
-            "snakemake_rules/annotation/rankscore.rule",
             "snakemake_rules/annotation/varcaller_filter_tumor_normal.rule",
             "snakemake_rules/annotation/varcaller_filter_tumor_normal_umi.rule",
             "snakemake_rules/annotation/vcfheader_rename.rule",

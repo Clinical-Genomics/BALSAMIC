@@ -128,6 +128,10 @@
 		"time": "60:00:00",
 		"n": 86
 	},
+	"genmod_score_snvs":{
+		"time": "05:00:00",
+		"n": 8
+	},
 	"manta_germline": {
 		"time": "05:00:00",
 		"n": 16
