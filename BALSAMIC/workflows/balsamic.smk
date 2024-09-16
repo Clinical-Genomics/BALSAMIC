@@ -487,6 +487,7 @@ if config["analysis"]["sequencing_type"] != "wgs":
     for remove_caller in remove_caller_list:
         if remove_caller in somatic_caller:
             somatic_caller.remove(remove_caller)
+final_somatic_snv_caller = somatic_caller.remove("svdb")
 
 # Define common and analysis specific outputs
 quality_control_results = [
@@ -536,7 +537,7 @@ analysis_specific_results.extend(
 analysis_specific_results.extend(
     expand(
         vep_dir + "{vcf}.clinical.ranked.vcf.gz",
-        vcf=get_vcf(config, somatic_caller,[case_id]),
+        vcf=get_vcf(config, final_somatic_snv_caller,[case_id]),
     )
 )
 
