@@ -24,7 +24,7 @@ rule genmod_score_snvs:
     """
 genmod score -r -c {input.rank_score} {input.vcf} | \
 
-bcftools view -o {output.vcf_pass} -O z;
+bcftools view -o {output.vcf_clinical_ranked} -O z;
 
-tabix -p vcf -f {output.vcf_pass};
+tabix -p vcf -f {output.vcf_clinical_ranked};
     """
