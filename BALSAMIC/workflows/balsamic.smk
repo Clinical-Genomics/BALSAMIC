@@ -479,15 +479,14 @@ LOG.info(
 somatic_caller_sv.remove("svdb")
 svdb_callers_prio = somatic_caller_sv + somatic_caller_cnv
 
-
-# BAD CODE JUST FOR DEVELOPMENT
 somatic_caller = somatic_caller_snv + ["svdb"]
+final_somatic_snv_caller = somatic_caller_snv
 if config["analysis"]["sequencing_type"] != "wgs":
     remove_caller_list = ["tnscope", "vardict"]
     for remove_caller in remove_caller_list:
         if remove_caller in somatic_caller:
             somatic_caller.remove(remove_caller)
-final_somatic_snv_caller = somatic_caller.remove("svdb")
+            final_somatic_snv_caller.remove(remove_caller)
 
 # Define common and analysis specific outputs
 quality_control_results = [
@@ -537,7 +536,7 @@ analysis_specific_results.extend(
 analysis_specific_results.extend(
     expand(
         vep_dir + "{vcf}.clinical.ranked.vcf.gz",
-        vcf=get_vcf(config, final_somatic_snv_caller,[case_id]),
+        vcf=get_vcf(config, final_somatic_snv_caller, [case_id]),
     )
 )
 
