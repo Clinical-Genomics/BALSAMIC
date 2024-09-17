@@ -207,6 +207,7 @@ DELIVERY_RULES: List[str] = [
     "bcftools_filter_TNscope_umi_research_tumor_normal",
     "bcftools_filter_TNscope_umi_clinical_tumor_only",
     "bcftools_filter_TNscope_umi_clinical_tumor_normal",
+    "genmod_score_snvs",
     # SVs
     "svdb_merge_tumor_only",
     "svdb_merge_tumor_normal",
