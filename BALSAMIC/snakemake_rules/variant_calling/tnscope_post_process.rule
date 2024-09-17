@@ -16,7 +16,7 @@ rule bcftools_split_tnscope_variants:
         Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
     params:
         housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "snv"},
-        modify_tnscope_infofield = get_script_path("modify_tnscope_infofield.py")
+        modify_tnscope_infofield = get_script_path("modify_tnscope_infofield.py"),
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         case_name = config["analysis"]["case_id"]
     threads:
