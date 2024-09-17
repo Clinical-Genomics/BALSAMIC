@@ -340,7 +340,7 @@ rule bcftools_sort_cnvkitCNV_research:
     input:
         vcf =  cnv_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".cnvkit.vcf",
     output:
-        namemap = temp(vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".cnvkit.sample_name_map"),
+        namemap = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".cnvkit.sample_name_map",
         vcf = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".cnvkit.vcf.gz"
     benchmark:
         Path(f"{benchmark_dir}/bcftools_sort_cnvkitCNV_research_{config['analysis']['case_id']}.tsv").as_posix()
