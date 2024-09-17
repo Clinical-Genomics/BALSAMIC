@@ -5,12 +5,12 @@
 
 rule genmod_score_snvs:
   input:
-    vcf = vep_dir + "{var_type}.somatic.{case_name}.merged.clinical.vcf.gz",
+    vcf = vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.clinical.vcf.gz",
     rank_score = config["reference"]["rank_score"]
   output:
-    vcf_clinical_ranked = vep_dir + "{var_type}.somatic.{case_name}.merged.clinical.ranked.vcf.gz",
+    vcf_clinical_ranked = vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.clinical.ranked.vcf.gz",
   benchmark:
-    Path(benchmark_dir, 'genmod_score_snvs_' + "{var_type}.somatic.{case_name}.tsv").as_posix()
+    Path(benchmark_dir, 'genmod_score_snvs_' + "{var_type}.{var_caller}.somatic.{case_name}.tsv").as_posix()
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("genmod") + ".sif").as_posix()
   params:
@@ -28,3 +28,4 @@ bcftools view -o {output.vcf_clinical_ranked} -O z;
 
 tabix -p vcf -f {output.vcf_clinical_ranked};
     """
+
