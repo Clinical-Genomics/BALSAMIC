@@ -3,7 +3,7 @@
 
 
 
-rule bcftools_view_split_variant:
+rule bcftools_split_tnscope_variants:
     input:
         ref = config["reference"]["reference_genome"],
         vcf = vcf_dir + "sentieon_tnscope/ALL.somatic." + config["analysis"]["case_id"] + ".tnscope.vcf.gz",
@@ -11,15 +11,16 @@ rule bcftools_view_split_variant:
         vcf_tnscope = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.vcf.gz",
         vcf_tnscope_sv = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".tnscope.research.vcf.gz",
     benchmark:
-        Path(benchmark_dir,'bcftools_view_split_variant_' + config[ "analysis" ][ "case_id" ] + ".tsv").as_posix()
+        Path(benchmark_dir,'bcftools_split_tnscope_variants_' + config[ "analysis" ][ "case_id" ] + ".tsv").as_posix()
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
     params:
         housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "snv"},
+        modify_tnscope_infofield = get_script_path("modify_tnscope_infofield.py")
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         case_name = config["analysis"]["case_id"]
     threads:
-        get_threads(cluster_config, 'bcftools_view_split_variant')
+        get_threads(cluster_config, 'bcftools_split_tnscope_variants')
     message:
         "Split tnscope snv and sv variants using bcftools for {params.case_name}"
     shell:
@@ -27,8 +28,10 @@ rule bcftools_view_split_variant:
 export TMPDIR={params.tmpdir};
 mkdir -p {params.tmpdir};
 
-bcftools view --include 'INFO/SVTYPE=="."' -O z -o {output.vcf_tnscope} {input.vcf}; 
-tabix -p vcf -f {output.vcf_tnscope};
+bcftools view --include 'INFO/SVTYPE=="."' -o {params.tmpdir}/vcf_tnscope_snvs.vcf {input.vcf} ; 
+python {params.modify_tnscope_infofield} {params.tmpdir}/vcf_tnscope_snvs.vcf {output.vcf_tnscope} ;
+bgzip {output.vcf_tnscope} ;
+tabix -p vcf -f {output.vcf_tnscope} ;
 
 bcftools view --include 'INFO/SVTYPE!="."' -O z -o {output.vcf_tnscope_sv} {input.vcf}; 
 tabix -p vcf -f {output.vcf_tnscope_sv};

@@ -47,7 +47,7 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
         ],
         "varcall": [
             "snakemake_rules/variant_calling/snv_quality_filter.rule",
-            "snakemake_rules/variant_calling/sentieon_split_snv_sv.rule",
+            "snakemake_rules/variant_calling/tnscope_post_process.rule",
         ],
         "annotate": [
             "snakemake_rules/annotation/somatic_snv_annotation.rule",
@@ -196,7 +196,7 @@ DELIVERY_RULES: List[str] = [
     "vep_annotate_germlineVAR_tumor",
     "vep_annotate_germlineVAR_normal",
     # SNVs
-    "bcftools_view_split_variant",
+    "bcftools_split_tnscope_variants",
     "gatk_update_vcf_sequence_dictionary",
     "bcftools_filter_tnscope_research_tumor_only",
     "bcftools_filter_tnscope_research_tumor_normal",
