@@ -1,0 +1,32 @@
+
+rule modify_tnscope_infofield_umi:
+    input:
+        vcf_tnscope_umi = vcf_dir +  "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope_umi.preprocess.vcf.gz",
+    output:
+        vcf_tnscope = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.vcf.gz",
+    benchmark:
+        Path(benchmark_dir,'modify_tnscope_infofield_umi_' + config[ "analysis" ][ "case_id" ] + ".tsv").as_posix()
+    singularity:
+        Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
+    params:
+        housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "snv", "tags": "research"},
+        modify_tnscope_infofield = get_script_path("modify_tnscope_infofield.py"),
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
+        case_name = config["analysis"]["case_id"]
+    threads:
+        get_threads(cluster_config, 'modify_tnscope_infofield')
+    message:
+        "Add AD and AF tumor sample info to INFO field for case: {params.case_name}"
+    shell:
+        """
+export TMPDIR={params.tmpdir};
+mkdir -p {params.tmpdir};
+
+cp {input.vcf_tnscope_umi} {params.tmpdir}/tnscope_umi_preprocess.vcf.gz ;
+gunzip {params.tmpdir}/tnscope_umi_preprocess.vcf.gz ;
+
+python {params.modify_tnscope_infofield} {params.tmpdir}/tnscope_umi_preprocess.vcf {params.tmpdir}/vcf_tnscope_snvs_modified.vcf ;
+bgzip {params.tmpdir}/vcf_tnscope_snvs_modified.vcf ;
+mv {params.tmpdir}/vcf_tnscope_snvs_modified.vcf.gz {output.vcf_tnscope} ;
+tabix -p vcf -f {output.vcf_tnscope} ;
+        """
