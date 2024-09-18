@@ -3,7 +3,7 @@ rule modify_tnscope_infofield_umi:
     input:
         vcf_tnscope_umi = vcf_dir +  "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope_umi.preprocess.vcf.gz",
     output:
-        vcf_tnscope = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.vcf.gz",
+        vcf_tnscope = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope_umi.vcf.gz",
     benchmark:
         Path(benchmark_dir,'modify_tnscope_infofield_umi_' + config[ "analysis" ][ "case_id" ] + ".tsv").as_posix()
     singularity:
