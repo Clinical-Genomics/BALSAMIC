@@ -9,7 +9,7 @@ rule modify_tnscope_infofield_umi:
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
     params:
-        housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "snv"},
+        housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "research"},
         modify_tnscope_infofield = get_script_path("modify_tnscope_infofield.py"),
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         case_name = config["analysis"]["case_id"]
