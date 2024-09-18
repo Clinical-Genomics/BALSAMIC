@@ -15,7 +15,7 @@ rule genmod_score_snvs:
     Path(singularity_image, config["bioinfo_tools"].get("genmod") + ".sif").as_posix()
   params:
     case_name = "{case_name}",
-    housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "research"}
+    housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "clinical"}
   threads:
     get_threads(cluster_config, 'genmod_score_snvs')
   message:
