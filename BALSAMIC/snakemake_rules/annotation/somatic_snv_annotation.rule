@@ -92,6 +92,7 @@ rule vep_annotate_somaticSNV_research:
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix()
   params:
+    housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "research"},
     message_text = "SNV.somatic.{case_name}.{var_caller}.research.vcf.gz",
     tmp_vcf_research = temp(vep_dir + "SNV.somatic.{case_name}.{var_caller}.tmp.research.vcf.gz"),
     vcfanno_research_annotations = dump_toml(research_annotations),
