@@ -512,7 +512,6 @@ for r in rules_to_include:
 
 
 # Germline SNVs specifically for genotype
-analysis_specific_results.append(vep_dir + "SNV.genotype.tumor.dnascope.vcf.gz")
 if config["analysis"]["analysis_type"] == "paired":
     analysis_specific_results.append(vep_dir + "SNV.genotype.normal.dnascope.vcf.gz")
 
