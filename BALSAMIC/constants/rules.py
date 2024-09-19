@@ -189,8 +189,8 @@ DELIVERY_RULES: List[str] = [
     "multiqc",
     "collect_custom_qc_metrics",
     # Alignment
-    "mergeBam_tumor_umiconsensus",
-    "mergeBam_normal_umiconsensus",
+    "bam_compress_tumor_umi",
+    "bam_compress_normal_umi",
     "bam_compress_tumor",
     "bam_compress_normal",
     # Germline

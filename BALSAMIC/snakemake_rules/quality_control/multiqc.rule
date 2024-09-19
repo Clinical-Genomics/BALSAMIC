@@ -104,10 +104,13 @@ else:
             sample=normal_sample, mosdepth_wc = mosdepth_metrics_wildcard))
 
     if config["analysis"]["analysis_workflow"]=="balsamic-umi":
+        # UMI cram file
+        multiqc_input.extend(umi_dir + "tumor.{sample}.consensusfiltered_umi.cram", sample=tumor_sample))
         # UMI picard metrics
         multiqc_input.extend(expand(umi_qc_dir + "tumor.{sample}.umi.collect_hsmetric.txt", sample=tumor_sample))
         multiqc_input.extend(expand(umi_qc_dir + "tumor.{sample}.umi.metrics.txt", sample=tumor_sample))
         if config['analysis']['analysis_type'] == "paired":
+            multiqc_input.extend(umi_dir + "normal.{sample}.consensusfiltered_umi.cram", sample=normal_sample))
             multiqc_input.extend(expand(umi_qc_dir + "normal.{sample}.umi.collect_hsmetric.txt",sample=normal_sample))
             multiqc_input.extend(expand(umi_qc_dir + "normal.{sample}.umi.metrics.txt",sample=normal_sample))
 
