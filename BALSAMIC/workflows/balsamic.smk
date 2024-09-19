@@ -499,7 +499,7 @@ quality_control_results = [
 analysis_specific_results = []
 
 # Germline SNVs/SVs
-germline_caller = germline_caller_cnv + germline_caller_sv
+germline_caller = germline_caller_cnv + germline_caller_sv + germline_caller_snv
 analysis_specific_results.extend(
     expand(
         vep_dir + "{vcf}.vcf.gz",
