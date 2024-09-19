@@ -8,14 +8,14 @@ rule genmod_score_snvs:
     vcf = vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.clinical.vcf.gz",
     rank_score = config["reference"]["rank_score"]
   output:
-    vcf_clinical_ranked = vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.clinical.ranked.vcf.gz",
+    vcf_clinical = vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.clinical.scored.vcf.gz",
   benchmark:
     Path(benchmark_dir, 'genmod_score_snvs_' + "{var_type}.{var_caller}.somatic.{case_name}.tsv").as_posix()
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("genmod") + ".sif").as_posix()
   params:
     case_name = "{case_name}",
-    housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "clinical"}
+    housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "scored"}
   threads:
     get_threads(cluster_config, 'genmod_score_snvs')
   message:

@@ -532,10 +532,10 @@ analysis_specific_results.extend(
     )
 )
 
-# Ranked clinical SNV VCFs
+# Scored clinical SNV VCFs
 analysis_specific_results.extend(
     expand(
-        vep_dir + "{vcf}.clinical.ranked.vcf.gz",
+        vep_dir + "{vcf}.clinical.scored.vcf.gz",
         vcf=get_vcf(config, final_somatic_snv_caller, [case_id]),
     )
 )
