@@ -85,7 +85,7 @@ rule vep_annotate_somaticSNV_research:
     vcf_snv_research = vep_dir + "SNV.somatic.{case_name}.{var_caller}.cadd_indel.research.vcf.gz",
     cosmic = config["reference"]["cosmic"]
   output:
-    vcf_snv_research = vep_dir + "SNV.somatic.{case_name}.{var_caller}.research.vcf.gz",
+    vcf_snv_unfiltered = vep_dir + "SNV.somatic.{case_name}.{var_caller}.research.vcf.gz",
     vcfanno_research_toml = vep_dir + "SNV.somatic.{case_name}.{var_caller}_vcfanno_research.toml"
   benchmark:
     Path(benchmark_dir, "vep_somatic_research_snv.{case_name}.{var_caller}.tsv").as_posix()
@@ -117,12 +117,12 @@ vep \
 --dir_cache {params.vep_cache} \
 --dir_plugins $vep_path \
 --input_file {params.tmp_vcf_research} \
---output_file {output.vcf_snv_research} \
+--output_file {output.vcf_snv_unfiltered} \
 --fork {threads} \
 {params.vep_defaults} \
 --custom {input.cosmic},COSMIC,vcf,exact,0,CDS,GENE,STRAND,CNT,AA ;
 
-tabix -p vcf -f {output.vcf_snv_research};
+tabix -p vcf -f {output.vcf_snv_unfiltered};
 
 rm {params.tmp_vcf_research};
         """
