@@ -6,6 +6,7 @@ Added:
 * MSIsensor-pro container https://github.com/Clinical-Genomics/BALSAMIC/pull/1444
 * MSI analysis to the tumor-normal workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1454
 * Sentieon install directory path to case config arguments https://github.com/Clinical-Genomics/BALSAMIC/pull/1461
+* QC threshold for lymphoma_MRD panel https://github.com/Clinical-Genomics/BALSAMIC/pull/1479
 
 Changed:
 ^^^^^^^^
