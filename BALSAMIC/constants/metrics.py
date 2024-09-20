@@ -54,6 +54,9 @@ METRICS: Dict[str, dict] = {
         "lymphomatic": {
             "PCT_TARGET_BASES_500X": {"condition": {"norm": "gt", "threshold": 0.90}},
         },
+        "lymphoma_MRD": {
+            "PCT_TARGET_BASES_1000X": {"condition": {"norm": "gt", "threshold": 0.95}},
+        },
         "probio": {
             "PCT_TARGET_BASES_250X": {"condition": {"norm": "gt", "threshold": 0.95}},
         },
