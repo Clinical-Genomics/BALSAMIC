@@ -35,7 +35,6 @@ from BALSAMIC.utils.exc import BalsamicError
 from BALSAMIC.utils.io import read_yaml, write_finish_file, write_json
 from BALSAMIC.utils.rule import (
     dump_toml,
-    get_artefact_snv_observations,
     get_cancer_germline_snv_observations,
     get_cancer_somatic_snv_observations,
     get_capture_kit,
@@ -228,7 +227,7 @@ if "artefact_snv_observations" in config["reference"]:
         {
             "annotation": [
                 {
-                    "file": get_artefact_snv_observations(config),
+                    "file": Path(config["reference"]["artefact_snv_observations"]).as_posix(),
                     "fields": ["Frq", "Obs", "Hom"],
                     "ops": ["self", "self", "self"],
                     "names": ["ArtefactFrq", "ArtefactObs", "ArtefactHom"],
@@ -236,7 +235,7 @@ if "artefact_snv_observations" in config["reference"]:
             ]
         }
     )
-    artefact_snv_obs: str = get_artefact_snv_observations(config)
+    artefact_snv_obs: str = Path(config["reference"]["artefact_snv_observations"]).as_posix()
 
 if "clinical_snv_observations" in config["reference"]:
     clinical_annotations.append(
