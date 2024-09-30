@@ -294,6 +294,7 @@ def get_pon_cnn(config: dict) -> str:
     """
     return config["panel"]["pon_cnn"] if "pon_cnn" in config["panel"] else " "
 
+
 def get_artefact_snv_observations(config: dict) -> str:
     """Returns path for artefact SNV observations
 
@@ -305,6 +306,7 @@ def get_artefact_snv_observations(config: dict) -> str:
 
     """
     return Path(config["reference"]["artefact_snv_observations"]).as_posix()
+
 
 def get_clinical_snv_observations(config: dict) -> str:
     """Returns path for clinical snv observations
