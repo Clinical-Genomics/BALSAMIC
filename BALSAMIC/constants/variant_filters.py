@@ -1,7 +1,7 @@
 # Configuration of common SNV filter settings
 SNV_BCFTOOLS_SETTINGS_COMMON = {
     "artefact_snv_freq": {
-        "tag_value": 0.08,
+        "tag_value": 0.06,
         "filter_name": "ArtefactFrq",
         "field": "INFO",
     },
