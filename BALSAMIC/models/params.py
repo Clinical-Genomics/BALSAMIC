@@ -306,6 +306,7 @@ class VarCallerFilter(BaseModel):
         strand_reads: VCFAttributes (optional); minimum strand specific read counts
         qss: VCFAttributes (optional); minimum sum of base quality scores
         sor: VCFAttributes (optional); minimum symmetrical log-odds ratio
+        artefact_snv_freq: VCFAttributes (optional); maximum artefact-database snv allele frequency
         swegen_snv_freq: VCFAttributes (optional); maximum swegen snv allele frequency
         swegen_sv_freq: VCFAttributes (optional); maximum swegen sv allele frequency
         loqusdb_clinical_snv_freq: VCFAttributes (optional); maximum loqusdb clinical snv allele frequency
@@ -327,6 +328,7 @@ class VarCallerFilter(BaseModel):
     strand_reads: Optional[VCFAttributes] = None
     qss: Optional[VCFAttributes] = None
     sor: Optional[VCFAttributes] = None
+    artefact_snv_freq: Optional[VCFAttributes] = None
     swegen_snv_freq: Optional[VCFAttributes] = None
     swegen_sv_freq: Optional[VCFAttributes] = None
     loqusdb_clinical_snv_freq: Optional[VCFAttributes] = None

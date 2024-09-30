@@ -35,6 +35,7 @@ from BALSAMIC.utils.exc import BalsamicError
 from BALSAMIC.utils.io import read_yaml, write_finish_file, write_json
 from BALSAMIC.utils.rule import (
     dump_toml,
+    get_artefact_snv_observations,
     get_cancer_germline_snv_observations,
     get_cancer_somatic_snv_observations,
     get_capture_kit,
@@ -95,6 +96,7 @@ umi_qc_dir: str = Path(qc_dir, "umi_qc").as_posix() + "/"
 # Annotations
 research_annotations = []
 clinical_annotations = []
+artefact_snv_obs = ""
 clinical_snv_obs = ""
 cancer_germline_snv_obs = ""
 cancer_somatic_snv_obs = ""
@@ -220,6 +222,21 @@ if "swegen_snv_frequency" in config["reference"]:
             ]
         }
     )
+
+if "artefact_snv_observations" in config["reference"]:
+    clinical_annotations.append(
+        {
+            "annotation": [
+                {
+                    "file": get_artefact_snv_observations(config),
+                    "fields": ["Frq", "Obs", "Hom"],
+                    "ops": ["self", "self", "self"],
+                    "names": ["ArtefactFrq", "ArtefactObs", "ArtefactHom"],
+                }
+            ]
+        }
+    )
+    artefact_snv_obs: str = get_artefact_snv_observations(config)
 
 if "clinical_snv_observations" in config["reference"]:
     clinical_annotations.append(
