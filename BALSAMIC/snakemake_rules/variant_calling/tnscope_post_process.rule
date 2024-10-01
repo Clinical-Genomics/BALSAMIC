@@ -44,19 +44,22 @@ rule modify_tnscope_infofield:
         housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "research"},
         modify_tnscope_infofield = get_script_path("modify_tnscope_infofield.py"),
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-        case_name = config["analysis"]["case_id"]
+        case_name = config["analysis"]["case_id"],
+        edit_vcf_script = get_script_path("edit_vcf_info.py"),
+        variant_caller= "tnscope"
     threads:
         get_threads(cluster_config, 'modify_tnscope_infofield')
     message:
-        "Add DP and AF tumor sample info to INFO field for case: {params.case_name}"
+        "Add DP and AF tumor sample info and FOUND_IN to INFO field for case: {params.case_name}"
     shell:
         """
 export TMPDIR={params.tmpdir};
 mkdir -p {params.tmpdir};
 
 python {params.modify_tnscope_infofield} {input.vcf_tnscope} {params.tmpdir}/vcf_tnscope_snvs_modified.vcf ;
-bgzip {params.tmpdir}/vcf_tnscope_snvs_modified.vcf ;
-mv {params.tmpdir}/vcf_tnscope_snvs_modified.vcf.gz {output.vcf_tnscope} ;
+python {params.modify_tnscope_infofield} {params.tmpdir}/vcf_tnscope_snvs_modified.vcf {params.tmpdir}/vcf_tnscope_snvs_modified_found_in_added.vcf ;
+bgzip {params.tmpdir}/vcf_tnscope_snvs_modified_found_in_added.vcf ;
+mv {params.tmpdir}/vcf_tnscope_snvs_modified_found_in_added.vcf  {output.vcf_tnscope} ;
 tabix -p vcf -f {output.vcf_tnscope} ;
         """
 
