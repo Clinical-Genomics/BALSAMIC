@@ -5,7 +5,8 @@ Added:
 ^^^^^^
 * MSIsensor-pro container https://github.com/Clinical-Genomics/BALSAMIC/pull/1444
 * MSI analysis to the tumor-normal workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1454
-* Sentieon install directory path to case config arguments https://github.com/Clinical-Genomics/BALSAMIC/pull/1461
+* Sentieon install directory path to case config arguments https://giithub.com/Clinical-Genomics/BALSAMIC/pull/1461
+* MSI tumor-normal analysis to storage https://github.com/Clinical-Genomics/BALSAMIC/pull/
 
 Changed:
 ^^^^^^^^
