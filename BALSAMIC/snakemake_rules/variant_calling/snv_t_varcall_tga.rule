@@ -120,6 +120,8 @@ rule post_process_vardict:
     params:
         tmpdir=tempfile.mkdtemp(prefix=tmp_dir),
         case_name=config["analysis"]["case_id"],
+        edit_vcf_script= get_script_path("edit_vcf_info.py"),
+        variant_caller= "vardict"
     benchmark:
         Path(benchmark_dir,'vardict_merge_' + config["analysis"]["case_id"] + ".tsv").as_posix()
     singularity:
@@ -127,18 +129,23 @@ rule post_process_vardict:
     threads:
         get_threads(cluster_config,"post_process_vardict")
     message:
-        ("Bgzip, index and reheader merged VarDict vcf for case: {params.case_name}")
+        ("Bgzip, index and reheader merged VarDict vcf and add FOUND_IN for case: {params.case_name}")
     shell:
         """
 mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
 
-bgzip {input.vcf_sorted} ; 
-tabix -f -p vcf {input.vcf_sorted}.gz ;
+python {params.edit_vcf_script} \
+--input_vcf {input.vcf_sorted} \
+--output_vcf {params.tmpdir}/vardict_merged_sorted.temp.vcf \
+--variant_caller {params.variant_caller};
+
+bgzip{params.tmpdir}/vardict_merged_sorted.temp.vcf  ; 
+tabix -f -p vcf {params.tmpdir}/vardict_merged_sorted.temp.vcf.gz ;
 
 echo \"TUMOR\" > {params.tmpdir}/reheader ;
 
-bcftools reheader -s {params.tmpdir}/reheader {input.vcf_sorted}.gz -o {output.vcf_vardict} ;
+bcftools reheader -s {params.tmpdir}/reheader {params.tmpdir}/vardict_merged_sorted.temp.vcf.gz -o {output.vcf_vardict} ;
 tabix -f -p vcf {output.vcf_vardict} ;
 
 echo -e \"tTUMOR\\tTUMOR\" > {output.namemap} ; 
