@@ -42,7 +42,6 @@ rule msisensorpro_msi_tumor_normal:
     tmpdir=tempfile.mkdtemp(prefix=tmp_dir),
     case_id=config["analysis"]["case_id"],
     housekeeper_id={"id": config["analysis"]["case_id"],"tags": "research"},
-
   message:
     "Analysing MSI using msisensor-pro for {params.case_id}"
   shell:
