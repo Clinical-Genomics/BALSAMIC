@@ -59,7 +59,7 @@ mkdir -p {params.tmpdir};
 python {params.modify_tnscope_infofield} {input.vcf_tnscope} {params.tmpdir}/vcf_tnscope_snvs_modified.vcf ;
 python {params.modify_tnscope_infofield} {params.tmpdir}/vcf_tnscope_snvs_modified.vcf {params.tmpdir}/vcf_tnscope_snvs_modified_found_in_added.vcf ;
 bgzip {params.tmpdir}/vcf_tnscope_snvs_modified_found_in_added.vcf ;
-mv {params.tmpdir}/vcf_tnscope_snvs_modified_found_in_added.vcf  {output.vcf_tnscope} ;
+mv {params.tmpdir}/vcf_tnscope_snvs_modified_found_in_added.vcf.gz {output.vcf_tnscope} ;
 tabix -p vcf -f {output.vcf_tnscope} ;
         """
 

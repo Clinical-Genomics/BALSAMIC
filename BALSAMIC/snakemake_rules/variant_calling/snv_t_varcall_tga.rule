@@ -140,7 +140,7 @@ python {params.edit_vcf_script} \
 --output_vcf {params.tmpdir}/vardict_merged_sorted.temp.vcf \
 --variant_caller {params.variant_caller};
 
-bgzip{params.tmpdir}/vardict_merged_sorted.temp.vcf  ; 
+bgzip {params.tmpdir}/vardict_merged_sorted.temp.vcf  ; 
 tabix -f -p vcf {params.tmpdir}/vardict_merged_sorted.temp.vcf.gz ;
 
 echo \"TUMOR\" > {params.tmpdir}/reheader ;
