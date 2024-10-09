@@ -26,7 +26,7 @@ rule bcftools_normalise_vcfs:
 
 rule bcftools_concatenate_vcfs:
     input:
-        vcfs = expand(vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".{caller}.research.normalised.vcf.gz", caller=["tnscope", "vardict"])
+        vcfs = expand(vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".{caller}.research.normalised.vcf.gz", caller=["vardict", "tnscope"])
     output:
         vcf_merged = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".merged.research.vcf.gz"
     benchmark:
