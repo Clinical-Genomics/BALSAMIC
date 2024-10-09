@@ -326,6 +326,13 @@ The `TNscope <https://www.biorxiv.org/content/10.1101/250647v1.abstract>`_ algor
 
     Frq <= 0.01  (or) Frq == "."
 
+*ArtefactFrq*: Frequency of observation of the variants from normal WGS samples merged to ~1200X coverage
+
+::
+
+    ArtefactFrq <= 0.08  (or) ArtefactFrq == "."
+
+This above corresponds to at least 3 observations in a database of 29 cases of merged WGS samples.
 
 **Target Genome Analysis with UMI's into account**
 **************************************************
