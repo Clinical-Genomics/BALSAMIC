@@ -8,7 +8,7 @@ from BALSAMIC.assets.scripts.postprocess_gens_cnvkit import create_gens_cov_file
 
 def test_create_gens_cov_file(
     gens_dummy_cnvkit_cnr,
-    gens_dummy_purecn_purity,
+    purity_csv_path,
     gens_dummy_cov_bed_expected,
     tmp_path: Path,
     cli_runner: CliRunner,
@@ -29,7 +29,7 @@ def test_create_gens_cov_file(
             "--normalised-coverage-path",
             gens_dummy_cnvkit_cnr,
             "--tumor-purity-path",
-            gens_dummy_purecn_purity,
+            purity_csv_path,
         ],
     )
 

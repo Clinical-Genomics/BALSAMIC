@@ -473,7 +473,9 @@ def test_write_list_of_strings(tmp_path):
     assert output_file.exists()
 
     # AND contain the same information
-    read_written_file = read_csv(csv_path=output_file, delimeter="\t")
+    read_written_file: list[Dict] = read_csv(
+        csv_path=output_file.as_posix(), delimeter="\t"
+    )
     assert read_written_file == [
         {"header1": "row1_col1", "header2": "row1_col2", "header3": "row1_col3"}
     ]
