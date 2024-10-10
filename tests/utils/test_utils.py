@@ -461,7 +461,7 @@ def test_write_list_of_strings(tmp_path):
     """Test writing list of strings to file"""
 
     # GIVEN a list of strings and an output file path
-    list_of_strings = [f"header1\theader2\theader3", f"row1_col1\trow1_col2\trow1_col3"]
+    list_of_strings = ["header1\theader2\theader3", "row1_col1\trow1_col2\trow1_col3"]
     tmp = tmp_path / "tmp"
     tmp.mkdir()
     output_file: Path = Path(tmp / "output.csv")
