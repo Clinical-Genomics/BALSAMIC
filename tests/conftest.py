@@ -533,6 +533,32 @@ def gens_dummy_cov_bed(test_data_dir: str) -> str:
         "dummy.cov.bed",
     ).as_posix()
 
+@pytest.fixture(scope="session")
+def gens_dummy_cnvkit_cnr(test_data_dir: str) -> str:
+    """Return path CNVkit cnr path for GENS TGA pre-processing script test."""
+    return Path(
+        test_data_dir,
+        "gens_files",
+        "tumor.merged.cnr",
+    ).as_posix()
+
+@pytest.fixture(scope="session")
+def gens_dummy_purecn_purity(test_data_dir: str) -> str:
+    """Return path purecn purity path for GENS TGA pre-processing script test."""
+    return Path(
+        test_data_dir,
+        "gens_files",
+        "purity.csv",
+    ).as_posix()
+
+@pytest.fixture(scope="session")
+def gens_dummy_cov_bed_expected(test_data_dir: str) -> str:
+    """Return path expected dummy result-file created from GENS pre-processing TGA test."""
+    return Path(
+        test_data_dir,
+        "gens_files",
+        "dummy_gens_tga.cov.bed",
+    ).as_posix()
 
 @pytest.fixture(scope="session")
 def gens_dummy_denoised_cov(test_data_dir: str) -> str:

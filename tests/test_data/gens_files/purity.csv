@@ -1,0 +1,2 @@
+"Sampleid","Purity","Ploidy","Sex","Contamination","Flagged","Failed","Curated","Comment"
+"tumor.initial",0.22,1.99455921914453,"Coverage: ? VCF: F",0,TRUE,FALSE,FALSE,"LOW PURITY"
