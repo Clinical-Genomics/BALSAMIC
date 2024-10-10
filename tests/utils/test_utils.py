@@ -456,6 +456,7 @@ def test_write_json(tmp_path, reference):
 
     assert len(list(tmp.iterdir())) == 1
 
+
 def test_write_list_of_strings(tmp_path):
     """Test writing list of strings to file"""
 
@@ -473,8 +474,11 @@ def test_write_list_of_strings(tmp_path):
 
     # AND contain the same information
     read_written_file = read_csv(csv_path=output_file, delimeter="\t")
-    assert read_written_file == [{"header1": "row1_col1", "header2": "row1_col2", "header3": "row1_col3"}]
+    assert read_written_file == [
+        {"header1": "row1_col1", "header2": "row1_col2", "header3": "row1_col3"}
+    ]
     assert len(read_written_file) == 1
+
 
 def test_write_json_error(tmp_path: Path):
     """Test JSON write error."""
