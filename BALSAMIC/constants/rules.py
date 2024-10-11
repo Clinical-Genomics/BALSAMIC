@@ -237,6 +237,7 @@ DELIVERY_RULES: List[str] = [
     "finalize_gens_outputfiles",
     # TMB
     "tmb_calculation",
+    "msisensorpro_msi_tumor_normal",
     # CNV report
     "merge_cnv_pdf_reports",
 ]
