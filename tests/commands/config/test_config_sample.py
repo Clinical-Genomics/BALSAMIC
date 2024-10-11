@@ -17,8 +17,7 @@ def test_tumor_normal_config(
     fastq_dir_tumor_normal_parameterize: str,
     balsamic_cache: str,
     panel_bed_file: str,
-    sentieon_license: str,
-    sentieon_install_dir: str,
+    config_case_cli_tga: list[str],
 ):
     """Test tumor normal balsamic config case command."""
 
@@ -44,11 +43,8 @@ def test_tumor_normal_config(
             tumor_sample_name,
             "--normal-sample-name",
             normal_sample_name,
-            "--sentieon-install-dir",
-            sentieon_install_dir,
-            "--sentieon-license",
-            sentieon_license,
-        ],
+        ]
+        + config_case_cli_tga,
     )
 
     # THEN a config should be created and exist
@@ -66,8 +62,7 @@ def test_tumor_only_config(
     fastq_dir_tumor_only: str,
     balsamic_cache: str,
     panel_bed_file: str,
-    sentieon_license: str,
-    sentieon_install_dir: str,
+    config_case_cli_tga: list[str],
 ):
     """Test tumor only balsamic config case command."""
 
@@ -90,11 +85,8 @@ def test_tumor_only_config(
             balsamic_cache,
             "--tumor-sample-name",
             tumor_sample_name,
-            "--sentieon-install-dir",
-            sentieon_install_dir,
-            "--sentieon-license",
-            sentieon_license,
-        ],
+        ]
+        + config_case_cli_tga,
     )
 
     # THEN a config should be created and exist
@@ -199,8 +191,7 @@ def test_tumor_only_umi_config_background_file(
     balsamic_cache: str,
     panel_bed_file: str,
     background_variant_file: str,
-    sentieon_license: str,
-    sentieon_install_dir: str,
+    config_case_cli_tga: list[str],
 ):
     """Test balsamic umi config case providing a background variants file."""
 
@@ -227,11 +218,8 @@ def test_tumor_only_umi_config_background_file(
             balsamic_cache,
             "--tumor-sample-name",
             tumor_sample_name,
-            "--sentieon-install-dir",
-            sentieon_install_dir,
-            "--sentieon-license",
-            sentieon_license,
-        ],
+        ]
+        + config_case_cli_tga
     )
 
     # THEN program exits and checks for filepath
@@ -250,6 +238,7 @@ def test_pon_cnn_file(
     case_id_tumor_only: str,
     sentieon_license: str,
     sentieon_install_dir: str,
+    config_case_cli_tga: list[str],
 ):
     """Test balsamic config case with a PON reference."""
 
@@ -274,11 +263,8 @@ def test_pon_cnn_file(
             balsamic_cache,
             "--tumor-sample-name",
             tumor_sample_name,
-            "--sentieon-install-dir",
-            sentieon_install_dir,
-            "--sentieon-license",
-            sentieon_license,
-        ],
+        ]
+        + config_case_cli_tga,
     )
 
     # THEN program exits and checks for filepath
@@ -390,7 +376,7 @@ def test_config_graph_failed(
     assert case_result.exit_code == 1
 
 
-def test_missing_required_gens_arguments(
+def test_missing_required_gens_arguments_wgs(
     invoke_cli,
     tumor_sample_name: str,
     analysis_dir: str,
@@ -432,11 +418,51 @@ def test_missing_required_gens_arguments(
         ],
     )
     # THEN the CLI should exit code 2 and display an informative error message
-    assert result.exit_code == 2
+    assert result.exit_code == 1
     assert (
-        "All three arguments (genome_interval gens_coverage_pon, gnomad_min_af5) are required for GENS."
+        "GENS for WGS requires all arguments: genome_interval, gens_coverage_pon, gnomad_min_af5"
         in result.output
     )
+
+
+def test_missing_gens_arguments_tga(
+    invoke_cli,
+    tumor_sample_name: str,
+    analysis_dir: str,
+    balsamic_cache: str,
+    fastq_dir_tumor_only: str,
+    panel_bed_file: str,
+    case_id_tumor_only: str,
+    sentieon_license: str,
+    sentieon_install_dir: str,
+):
+    """Test balsamic config case without required GENS arguments."""
+
+    # GIVEN CLI arguments including optional GENS input-files
+
+    # WHEN invoking the config case command
+    result = invoke_cli(
+        [
+            "config",
+            "case",
+            "--case-id",
+            case_id_tumor_only,
+            "--analysis-dir",
+            analysis_dir,
+            "--fastq-path",
+            fastq_dir_tumor_only,
+            "--balsamic-cache",
+            balsamic_cache,
+            "--tumor-sample-name",
+            tumor_sample_name,
+            "--sentieon-install-dir",
+            sentieon_install_dir,
+            "--sentieon-license",
+            sentieon_license,
+        ],
+    )
+    # THEN the CLI should exit code 0
+    assert result.exit_code == 0
 
 
 def test_config_with_gens_arguments(
@@ -523,12 +549,8 @@ def test_config_with_gens_arguments_for_tga(
             balsamic_cache,
             "--tumor-sample-name",
             tumor_sample_name,
-            "--gens-coverage-pon",
-            gens_cov_pon_file,
             "--gnomad-min-af5",
             gens_min_5_af_gnomad_file,
-            "--genome-interval",
-            gens_hg19_interval_list,
             "-p",
             panel_bed_file,
             "--sentieon-install-dir",
@@ -537,11 +559,11 @@ def test_config_with_gens_arguments_for_tga(
             sentieon_license,
         ],
     )
-    # THEN config should fail with error message
-    assert result.exit_code == 2
-    assert (
-        "GENS is currently not compatible with TGA analysis, only WGS." in result.output
-    )
+    # THEN a config should be created and exist
+    assert result.exit_code == 0
+    assert Path(
+        analysis_dir, case_id_tumor_only, f"{case_id_tumor_only}.{FileType.JSON}"
+    ).exists()
 
 
 def test_config_wgs_with_exome(
@@ -593,8 +615,7 @@ def test_config_tga_with_exome(
     fastq_dir_tumor_only: str,
     case_id_tumor_only: str,
     panel_bed_file: str,
-    sentieon_license: str,
-    sentieon_install_dir: str,
+    config_case_cli_tga: list[str],
 ):
     """Test balsamic config case with GENS arguments for TGA."""
 
@@ -618,11 +639,8 @@ def test_config_tga_with_exome(
             "-p",
             panel_bed_file,
             "--exome",
-            "--sentieon-install-dir",
-            sentieon_install_dir,
-            "--sentieon-license",
-            sentieon_license,
-        ],
+        ]
+        + config_case_cli_tga,
     )
     # THEN a config should be created and exist
     assert result.exit_code == 0
