@@ -185,6 +185,13 @@
 		"n": 36
 	},
 	"sentieon_DNAscope_gnomad_tga": {
+<<<<<<< HEAD
+=======
+		"time": "24:00:00",
+		"n": 12
+	},
+	"sentieon_TNhaplotyper": {
+>>>>>>> deduplicate_with_umi
 		"time": "24:00:00",
 		"n": 12
 	},

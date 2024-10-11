@@ -212,6 +212,7 @@ class BEDPreProcessingParams(BaseModel):
     minimum_region_size: int
 
 
+
 class ParamsVardict(BaseModel):
     """This class defines the params settings used as constants in vardict rule.
 
@@ -226,7 +227,6 @@ class ParamsVardict(BaseModel):
     max_pval: float
     max_mm: float
     column_info: str
-
 
 class BalsamicWorkflowConfig(BaseModel):
     """Defines set of rules in balsamic workflow
