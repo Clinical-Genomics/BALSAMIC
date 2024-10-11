@@ -43,20 +43,15 @@ rm -rf {params.tmpdir};
 rule cnvkit_segment_CNV_research:
     input:
         access_bed = config["reference"]["access_regions"],
-        baits_bed = config["panel"]["capture_kit"],
         fasta = config["reference"]["reference_genome"],
         refgene_flat = config["reference"]["refgene_flat"],
-        bamT = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
-        bamN = config_model.get_final_bam_name(bam_dir = bam_dir,sample_name = normal_sample),
+        tumor_target_cnn=expand(cnv_dir + "{sample}.targetcoverage.cnn", sample=tumor_sample),
+        tumor_antitarget_cnn=expand(cnv_dir + "{sample}.antitargetcoverage.cnn", sample=tumor_sample),
+        normal_target_cnn=expand(cnv_dir + "{sample}.targetcoverage.cnn",sample=normal_sample),
+        normal_antitarget_cnn=expand(cnv_dir + "{sample}.antitargetcoverage.cnn",sample=normal_sample),
     output:
         cns_initial = cnv_dir + "tumor.initial.cns",
         cnr = cnv_dir + "tumor.merged.cnr",
-        targets = cnv_dir + "targets.bed",
-        antitargets = cnv_dir + "antitarget.bed",
-        tumor_target_coverage = cnv_dir + "tumor.targetcoverage.cnn",
-        tumor_antitarget_coverage = cnv_dir + "tumor.antitargetcoverage.cnn",
-        normal_target_coverage = cnv_dir + "normal.targetcoverage.cnn",
-        normal_antitarget_coverage= cnv_dir + "normal.antitargetcoverage.cnn",
         segment = cnv_dir + "tumor.seg",
     benchmark:
         Path(f"{benchmark_dir}/cnvkit_segment_{config['analysis']['case_id']}.tsv").as_posix()
@@ -70,69 +65,33 @@ rule cnvkit_segment_CNV_research:
         case_name = config["analysis"]["case_id"],
         sample_id = "TUMOR",
         normal_id = "NORMAL",
-        min_mapq = params.common.min_mapq,
         normal_reference_cnn = cnv_dir + "normal_reference.cnn",
         pon = pon_cnn,
     message:
         "Segmenting genomic regions using CNVkit for {params.case_name}"
     shell:
         """
-# create target and anti-target bed files
-cnvkit.py target {input.baits_bed} \
---annotate {input.refgene_flat} \
---split \
---output {output.targets};
-
-cnvkit.py antitarget {input.baits_bed} \
---access {input.access_bed} \
---output {output.antitargets};
-
-# calculate coverage in the given regions from BAM read depths
-cnvkit.py coverage {input.bamT} \
-{output.targets} \
---min-mapq {params.min_mapq} \
---processes {threads} \
---output {output.tumor_target_coverage};
-
-cnvkit.py coverage {input.bamT} \
-{output.antitargets} \
---min-mapq {params.min_mapq} \
---processes {threads} \
---output {output.tumor_antitarget_coverage};
-
-cnvkit.py coverage {input.bamN} \
-{output.targets} \
---min-mapq {params.min_mapq} \
---processes {threads} \
---output {output.normal_target_coverage};
-
-cnvkit.py coverage {input.bamN} \
-{output.antitargets} \
---min-mapq {params.min_mapq} \
---processes {threads} \
---output {output.normal_antitarget_coverage};
-
 # Combine the uncorrected target and antitarget coverage tables (.cnn) and
 # correct for biases in regional coverage and GC content, according to the given normal or PON reference
 if [[ ! -f "{params.pon}" ]]; then
 
 # Compile a coverage reference from the given list of files
 cnvkit.py reference \
-{output.normal_target_coverage} \
-{output.normal_antitarget_coverage} \
+{input.normal_target_cnn} \
+{input.normal_antitarget_cnn} \
 --fasta {input.fasta} \
 --output {params.normal_reference_cnn};
 
-cnvkit.py fix {output.tumor_target_coverage} \
-{output.tumor_antitarget_coverage} \
+cnvkit.py fix {input.tumor_target_cnn} \
+{input.tumor_antitarget_cnn} \
 {params.normal_reference_cnn} \
 --output {output.cnr};
 
 else
 
 echo "PON reference exists- Using it for coverage correction" 
-cnvkit.py fix {output.tumor_target_coverage} \
-{output.tumor_antitarget_coverage} \
+cnvkit.py fix {input.tumor_target_cnn} \
+{input.tumor_antitarget_cnn} \
 {params.pon} \
 --output {output.cnr};
 
@@ -243,14 +202,11 @@ rule cnvkit_call_CNV_research:
     input:
         access_bed = config["reference"]["access_regions"],
         fasta = config["reference"]["reference_genome"],
-        baits_bed = config["panel"]["capture_kit"],
         refgene_flat = config["reference"]["refgene_flat"],
         purity_ploidy = cnv_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".purecn.purity.csv",
         cns_initial = cnv_dir + "tumor.initial.cns",
         cnr = cnv_dir + "tumor.merged.cnr",
         snv_merged = vcf_dir + "SNV.germline.merged.dnascope.vcf.gz",
-        bamT = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
-        bamN = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = normal_sample),
     output:
         cns = cnv_dir + "tumor.merged.cns",
         gene_breaks = cnv_dir + config["analysis"]["case_id"] + ".gene_breaks",
