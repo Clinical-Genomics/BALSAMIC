@@ -5,12 +5,14 @@ Added:
 ^^^^^^
 * MSIsensor-pro container https://github.com/Clinical-Genomics/BALSAMIC/pull/1444
 * MSI analysis to the tumor-normal workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1454
+* MSI tumor-normal analysis to housekeeper storage https://github.com/Clinical-Genomics/BALSAMIC/pull/1483
 * Sentieon install directory path to case config arguments https://github.com/Clinical-Genomics/BALSAMIC/pull/1461
 * UMI extraction and deduplication to TGA workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1358
 * GENS input files for TGA https://github.com/Clinical-Genomics/BALSAMIC/pull/1448
 * Padding of bed-regions for CNVkit to minimum 100 bases https://github.com/Clinical-Genomics/BALSAMIC/pull/1469
 * Added min mapq 20 to CNVkit PON workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1465
 * CNVkit PONs for Exome comprehensive 10.2, GMSsolid 15.2, GMCKsolid 4.2 https://github.com/Clinical-Genomics/BALSAMIC/pull/1465
+* Sentieon install directory path to case config arguments https://giithub.com/Clinical-Genomics/BALSAMIC/pull/1461
 
 Changed:
 ^^^^^^^^
