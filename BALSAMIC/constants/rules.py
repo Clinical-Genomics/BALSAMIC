@@ -75,6 +75,8 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
             "snakemake_rules/umi/sentieon_consensuscall.rule",
         ],
         "varcall": [
+            "snakemake_rules/variant_calling/extend_bed.rule",
+            "snakemake_rules/variant_calling/cnvkit_preprocess.rule",
             "snakemake_rules/variant_calling/germline_tga.rule",
             "snakemake_rules/variant_calling/split_bed.rule",
             "snakemake_rules/variant_calling/somatic_cnv_tumor_only_tga.rule",
@@ -107,6 +109,8 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
             "snakemake_rules/umi/umi_sentieon_alignment.rule",
         ],
         "varcall": [
+            "snakemake_rules/variant_calling/extend_bed.rule",
+            "snakemake_rules/variant_calling/cnvkit_preprocess.rule",
             "snakemake_rules/variant_calling/germline_tga.rule",
             "snakemake_rules/variant_calling/split_bed.rule",
             "snakemake_rules/variant_calling/somatic_tumor_normal.rule",
