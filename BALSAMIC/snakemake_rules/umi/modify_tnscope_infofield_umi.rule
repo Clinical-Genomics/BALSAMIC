@@ -27,6 +27,6 @@ gunzip {params.tmpdir}/tnscope_umi_preprocess.vcf.gz ;
 
 python {params.modify_tnscope_infofield} {params.tmpdir}/tnscope_umi_preprocess.vcf {params.tmpdir}/vcf_tnscope_snvs_modified.vcf ;
 bgzip {params.tmpdir}/vcf_tnscope_snvs_modified.vcf ;
-mv {params.tmpdir}/vcf_tnscope_snvs_modified.vcf.gz {output.vcf_tnscope} ;
-tabix -p vcf -f {output.vcf_tnscope} ;
+mv {params.tmpdir}/vcf_tnscope_snvs_modified.vcf.gz {output.vcf_tnscope_umi} ;
+tabix -p vcf -f {output.vcf_tnscope_umi} ;
         """
