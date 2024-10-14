@@ -6,7 +6,7 @@ LABEL about.documentation="https://balsamic.readthedocs.io/"
 LABEL about.license="MIT License (MIT)"
 LABEL about.description="Bioinformatic analysis pipeline for somatic mutations in cancer"
 
-ARG nim_version=1.6.6
+ARG nim_version=1.6.20
 
 ENV CFLAGS="-fPIC -O3"
 
@@ -29,7 +29,7 @@ RUN cd / && \
     echo 'PATH=/nim-${nim_version}/bin:$PATH' >> /etc/environment  && \
     rm -f nim-${nim_version}-linux_x64.tar.xz
 
-RUN wget https://libzip.org/download/libzip-1.6.1.tar.gz && \
+RUN wget -q https://libzip.org/download/libzip-1.6.1.tar.gz && \
 	tar xzvf libzip-1.6.1.tar.gz && \
 	cd libzip-1.6.1 && \
 	mkdir build && cd build && \
@@ -39,12 +39,12 @@ RUN wget https://libzip.org/download/libzip-1.6.1.tar.gz && \
 
 ENV PATH=:/root/.nimble/bin:/nim-${nim_version}/bin/:$PATH	
 
-RUN git clone --depth 1 -b 1.15 --recursive https://github.com/samtools/htslib && \
+RUN git clone --depth 1 -b 1.18 --recursive https://github.com/samtools/htslib && \
     cd htslib && autoheader && autoconf && \
     ./configure --enable-s3 --enable-gcs --enable-libcurl --with-libdeflate && \
     make -j4 CFLAGS="-fPIC -O3" install && \
     cd ../ && \
-    git clone --depth 1 -b 1.15 --recursive https://github.com/samtools/bcftools && \
+    git clone --depth 1 -b 1.18 --recursive https://github.com/samtools/bcftools && \
     cd bcftools && autoheader && autoconf && \
     ./configure --enable-s3 --enable-libcurl --with-libdeflate && \
     make -j4 CFLAGS="-fPIC -O3" install && \
@@ -61,7 +61,7 @@ RUN cd /somalier &&  \
     cp scripts/ancestry-labels-1kg.tsv / && \
     rm -rf /somalier && somalier --help
 
-ENV somalier_ancestry_labels /ancestry_labels-1kg.tsv
+ENV somalier_ancestry_labels=/ancestry_labels-1kg.tsv
 
 RUN adduser -D defaultuser
 
