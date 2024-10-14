@@ -16,7 +16,6 @@ rule bcftools_filter_merged_research_tumor_only:
   params:
     pop_freq = [SNV_FILTER_SETTINGS.pop_freq.tag_value, SNV_FILTER_SETTINGS.pop_freq.filter_name],
     swegen_freq = [SNV_FILTER_SETTINGS.swegen_snv_freq.tag_value, SNV_FILTER_SETTINGS.swegen_snv_freq.filter_name],
-    housekeeper_id= {"id": config["analysis"]["case_id"],"tags": "research"},
     case_name = '{case_name}'
   threads:
     get_threads(cluster_config, 'bcftools_filter_tnscope_research_tumor_only')
