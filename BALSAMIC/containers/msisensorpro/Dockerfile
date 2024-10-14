@@ -10,7 +10,7 @@ LABEL base.image="ubuntu:22.04" \
       about.documentation="https://github.com/xjtu-omics/msisensor-pro/wiki" \
       about.license="MIT License (MIT)"
 
-ENV DEBIAN_FRONTEND noninteractive
+ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get -y upgrade && \
     apt-get install -y --no-install-recommends git make build-essential \
     liblzma-dev libbz2-dev zlib1g-dev libncurses5-dev libncursesw5-dev ca-certificates && \
@@ -18,8 +18,8 @@ RUN apt-get update && apt-get -y upgrade && \
     rm -rf /var/lib/apt/lists/*
 
 RUN cd /tmp && \
-  git clone https://github.com/xjtu-omics/msisensor-pro
-RUN  cd /tmp/msisensor-pro && \
+  git clone https://github.com/xjtu-omics/msisensor-pro && \
+  cd /tmp/msisensor-pro && \
   git checkout v1.3.0 && \
   /tmp/msisensor-pro/INSTALL
 RUN  cp -r /tmp/msisensor-pro/binary/msisensor-pro /usr/bin/ && \
