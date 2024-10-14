@@ -330,9 +330,9 @@ The `TNscope <https://www.biorxiv.org/content/10.1101/250647v1.abstract>`_ algor
 
 ::
 
-    ArtefactFrq <= 0.08  (or) ArtefactFrq == "."
+    ArtefactFrq <= 0.1  (or) ArtefactFrq == "."
 
-This above corresponds to at least 3 observations in a database of 29 cases of merged WGS samples.
+This above corresponds to at least 4 observations in a database of 29 cases of merged WGS samples.
 
 **Target Genome Analysis with UMI's into account**
 **************************************************
