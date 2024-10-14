@@ -51,7 +51,7 @@ RUN git clone --depth 1 -b 1.18 --recursive https://github.com/samtools/htslib &
     cd ../ && rm -rf htslib bcftools
 
 RUN cd / &&    \
-    git clone -b v0.2.16 --depth 5 https://github.com/brentp/somalier.git && \
+    git clone -b v0.2.19 --depth 5 https://github.com/brentp/somalier.git && \
     cd somalier && \
     nimble install -y nimble && \
     /root/.nimble/bin/nimble install -d -y
