@@ -12,13 +12,13 @@ Added:
 * Padding of bed-regions for CNVkit to minimum 100 bases https://github.com/Clinical-Genomics/BALSAMIC/pull/1469
 * Added min mapq 20 to CNVkit PON workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1465
 * CNVkit PONs for Exome comprehensive 10.2, GMSsolid 15.2, GMCKsolid 4.2 https://github.com/Clinical-Genomics/BALSAMIC/pull/1465
-* Argument for SNV Artefact LoqusDB to all workflows https://github.com/Clinical-Genomics/BALSAMIC/pull/1481
 * Merged VarDict with TNscope in all TGA workflows https://github.com/Clinical-Genomics/BALSAMIC/pull/1475
 * New filter for VarDict for tumor in normal contamination https://github.com/Clinical-Genomics/BALSAMIC/pull/1475
 * Export TMP environment variables to rules that lack them https://github.com/Clinical-Genomics/BALSAMIC/pull/1475
 * Added genmod ranked VCFs to be delivered https://github.com/Clinical-Genomics/BALSAMIC/pull/1475
 * Added family-id to genmod in order to get ranked variants to Scout https://github.com/Clinical-Genomics/BALSAMIC/pull/1475
 * Added Raw TNscope calls and unfiltered research-annotated SNVs to delivery https://github.com/Clinical-Genomics/BALSAMIC/pull/1475
+* Argument for SNV Artefact LoqusDB to all workflows https://github.com/Clinical-Genomics/BALSAMIC/pull/1481
 
 Changed:
 ^^^^^^^^
@@ -42,7 +42,8 @@ Removed:
 * SGE (qsub) support https://github.com/Clinical-Genomics/BALSAMIC/pull/1372
 * Fastq quality and UMI trimming command-line options https://github.com/Clinical-Genomics/BALSAMIC/pull/1358
 * ML model for TNscope  https://github.com/Clinical-Genomics/BALSAMIC/pull/1475
-* All code associated with TNhaplotyper  https://github.com/Clinical-Genomics/BALSAMIC/pull/1475
+* All code associated with TNhaplotyper https://github.com/Clinical-Genomics/BALSAMIC/pull/1475
+* Removed research.filtered.pass files from delivery https://github.com/Clinical-Genomics/BALSAMIC/pull/1475
 
 Fixed:
 ^^^^^^

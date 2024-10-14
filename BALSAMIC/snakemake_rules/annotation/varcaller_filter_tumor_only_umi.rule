@@ -16,7 +16,10 @@ rule bcftools_filter_TNscope_umi_research_tumor_only:
   params:
     pop_freq = [SNV_FILTER_SETTINGS.pop_freq_umi.tag_value, SNV_FILTER_SETTINGS.pop_freq_umi.filter_name],
     swegen_freq = [SNV_FILTER_SETTINGS.swegen_snv_freq.tag_value, SNV_FILTER_SETTINGS.swegen_snv_freq.filter_name],
+<<<<<<< HEAD
     housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "research"},
+=======
+>>>>>>> deduplicate_with_umi
     case_name =  '{case_name}',
     edit_vcf_script = get_script_path("edit_vcf_info.py"),
     variant_caller = "tnscope_umi"
