@@ -3,27 +3,28 @@
 # Rank variants according to a rankscore model
 
 
-rule genmod_score_vardict:
+rule genmod_score_snvs:
   input:
-    vcf = vep_dir + "{var_type}.somatic.{case_name}.vardict.research.filtered.pass.vcf.gz",
+    vcf = vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.clinical.vcf.gz",
     rank_score = config["reference"]["rank_score"]
   output:
-    vcf_pass = vep_dir + "{var_type}.somatic.{case_name}.vardict.research.filtered.pass.ranked.vcf.gz",
+    vcf_clinical = vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.clinical.scored.vcf.gz",
   benchmark:
-    Path(benchmark_dir, 'genmod_score_vardict_' + "{var_type}.somatic.{case_name}.tsv").as_posix()
+    Path(benchmark_dir, 'genmod_score_snvs_' + "{var_type}.{var_caller}.somatic.{case_name}.tsv").as_posix()
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("genmod") + ".sif").as_posix()
   params:
-    case_name = "{case_name}"
+    case_name = "{case_name}",
+    housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "scored"}
   threads:
-    get_threads(cluster_config, 'genmod_score_vardict')
+    get_threads(cluster_config, 'genmod_score_snvs')
   message:
-    ("Scoring annotated vardict variants using genmod for {params.case_name}")
+    ("Scoring annotated SNV variants using genmod for {params.case_name}")
   shell:
     """
-genmod score -r -c {input.rank_score} {input.vcf} | \
+genmod score -i {params.case_name} -r -c {input.rank_score} {input.vcf} | \
+bcftools view -o {output.vcf_clinical} -O z;
 
-bcftools view -o {output.vcf_pass} -O z;
-
-tabix -p vcf -f {output.vcf_pass};
+tabix -p vcf -f {output.vcf_clinical};
     """
+

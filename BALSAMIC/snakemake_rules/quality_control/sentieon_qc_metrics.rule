@@ -53,7 +53,6 @@ if config["analysis"]["sequencing_type"] == 'wgs':
             ref = config["reference"]["reference_genome"],
             bam_files = lambda wildcards: config_model.get_bam_name_per_lane(bam_dir = bam_dir, sample_name = wildcards.sample)
         output:
-            alignment_metrics = Path(qc_dir,"{sample_type}.{sample}.alignment_summary_metrics.txt").as_posix(),
             insert_size_metrics = Path(qc_dir,"{sample_type}.{sample}.insert_size_metrics.txt").as_posix(),
             gc_bias_metrics = Path(qc_dir,"{sample_type}.{sample}.gc_bias.txt").as_posix(),
             gc_bias_summary = Path(qc_dir,"{sample_type}.{sample}.gc_bias_summary.txt").as_posix(),
@@ -86,7 +85,6 @@ if config["analysis"]["sequencing_type"] == 'wgs':
     -t {threads} \
     -r {input.ref} \
     -i $shell_bam_files \
-    --algo AlignmentStat --adapter_seq {params.adapter} {output.alignment_metrics} \
     --algo InsertSizeMetricAlgo --min_read_ratio {params.min_read_ratio} {output.insert_size_metrics} \
     --algo GCBias --summary {output.gc_bias_summary} {output.gc_bias_metrics} \
     --algo MeanQualityByCycle {output.quality_by_cycle_metrics} \
@@ -101,7 +99,6 @@ else:
             ref=config["reference"]["reference_genome"],
             bam=lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample, specified_suffix="align_sort"),
         output:
-            alignment_metrics=Path(qc_dir,"{sample_type}.{sample}.alignment_summary_metrics.txt").as_posix(),
             insert_size_metrics=Path(qc_dir,"{sample_type}.{sample}.insert_size_metrics.txt").as_posix(),
             gc_bias_metrics=Path(qc_dir,"{sample_type}.{sample}.gc_bias.txt").as_posix(),
             gc_bias_summary=Path(qc_dir,"{sample_type}.{sample}.gc_bias_summary.txt").as_posix(),
@@ -132,7 +129,6 @@ else:
     -t {threads} \
     -r {input.ref} \
     -i {input.bam} \
-    --algo AlignmentStat --adapter_seq {params.adapter} {output.alignment_metrics} \
     --algo InsertSizeMetricAlgo --min_read_ratio {params.min_read_ratio} {output.insert_size_metrics} \
     --algo GCBias --summary {output.gc_bias_summary} {output.gc_bias_metrics} \
     --algo MeanQualityByCycle {output.quality_by_cycle_metrics} \

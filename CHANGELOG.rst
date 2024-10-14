@@ -12,7 +12,12 @@ Added:
 * Padding of bed-regions for CNVkit to minimum 100 bases https://github.com/Clinical-Genomics/BALSAMIC/pull/1469
 * Added min mapq 20 to CNVkit PON workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1465
 * CNVkit PONs for Exome comprehensive 10.2, GMSsolid 15.2, GMCKsolid 4.2 https://github.com/Clinical-Genomics/BALSAMIC/pull/1465
-* Sentieon install directory path to case config arguments https://giithub.com/Clinical-Genomics/BALSAMIC/pull/1461
+* Merged VarDict with TNscope in all TGA workflows https://github.com/Clinical-Genomics/BALSAMIC/pull/1475
+* New filter for VarDict for tumor in normal contamination https://github.com/Clinical-Genomics/BALSAMIC/pull/1475
+* Export TMP environment variables to rules that lack them https://github.com/Clinical-Genomics/BALSAMIC/pull/1475
+* Added genmod ranked VCFs to be delivered https://github.com/Clinical-Genomics/BALSAMIC/pull/1475
+* Added family-id to genmod in order to get ranked variants to Scout https://github.com/Clinical-Genomics/BALSAMIC/pull/1475
+* Added Raw TNscope calls and unfiltered research-annotated SNVs to delivery https://github.com/Clinical-Genomics/BALSAMIC/pull/1475
 
 Changed:
 ^^^^^^^^
@@ -22,6 +27,12 @@ Changed:
 * Upgrade `vcf2cytosure` version to 0.9.1 and remove hardcoded versions https://github.com/Clinical-Genomics/BALSAMIC/pull/1456
 * Create new PONs for GMCKSolid v4.1, GMSMyeloid v5.3, and GMSlymphoid v7.3 https://github.com/Clinical-Genomics/BALSAMIC/pull/1465
 * Refactored CNVkit rules https://github.com/Clinical-Genomics/BALSAMIC/pull/1465
+* Refactored BCFtools filter rules https://github.com/Clinical-Genomics/BALSAMIC/pull/1475
+* Renamed final UMI bamfile to ensure hsmetrics is picked up by multiqc https://github.com/Clinical-Genomics/BALSAMIC/pull/1475
+* Changed ranking model VCF from research to clinical https://github.com/Clinical-Genomics/BALSAMIC/pull/1475
+* Lowered minimum AF for TGA from 0.007 to 0.005 https://github.com/Clinical-Genomics/BALSAMIC/pull/1475
+* Lowered maximal SOR for TNscope in TGA tumor only cases from 3 to 2.7 https://github.com/Clinical-Genomics/BALSAMIC/pull/1475
+* Fixed TNscope research VCF filters to either PASS or triallelic site https://github.com/Clinical-Genomics/BALSAMIC/pull/1475
 
 Removed:
 ^^^^^^^^
@@ -29,6 +40,9 @@ Removed:
 * `gatk_contest` rule https://github.com/Clinical-Genomics/BALSAMIC/pull/1432
 * SGE (qsub) support https://github.com/Clinical-Genomics/BALSAMIC/pull/1372
 * Fastq quality and UMI trimming command-line options https://github.com/Clinical-Genomics/BALSAMIC/pull/1358
+* ML model for TNscope  https://github.com/Clinical-Genomics/BALSAMIC/pull/1475
+* All code associated with TNhaplotyper https://github.com/Clinical-Genomics/BALSAMIC/pull/1475
+* Removed research.filtered.pass files from delivery https://github.com/Clinical-Genomics/BALSAMIC/pull/1475
 
 Fixed:
 ^^^^^^

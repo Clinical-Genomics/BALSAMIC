@@ -354,7 +354,7 @@ def test_get_snakefile():
 
 def test_get_vcf(sample_config: Dict):
     # GIVEN a sample_config dict and a variant callers list
-    variant_callers = ["tnscope", "vardict", "manta"]
+    variant_callers = ["tnscope", "manta"]
 
     # WHEN passing args to that function
     vcf_list = get_vcf(
@@ -363,13 +363,12 @@ def test_get_vcf(sample_config: Dict):
 
     # THEN It should return the list of vcf file names
     assert any("tnscope" in vcf_name for vcf_name in vcf_list)
-    assert any("vardict" in vcf_name for vcf_name in vcf_list)
     assert any("manta" in vcf_name for vcf_name in vcf_list)
 
 
 def test_get_vcf_invalid_variant_caller(sample_config):
     # GIVEN a sample_config dict and an incorrect variant callers list
-    variant_callers = ["vardict", "manta", "tnhaplotyper"]
+    variant_callers = ["manta", "tnhaplotyper"]
 
     # WHEN passing args to that function
     with pytest.raises(KeyError):
@@ -476,6 +475,7 @@ def test_write_list_of_strings(tmp_path):
     read_written_file: list[Dict] = read_csv(
         csv_path=output_file.as_posix(), delimeter="\t"
     )
+
     assert read_written_file == [
         {"header1": "row1_col1", "header2": "row1_col2", "header3": "row1_col3"}
     ]
@@ -780,12 +780,12 @@ def test_get_sample_type_from_sample_name(config_dict: Dict):
     assert sample_type == SampleType.TUMOR
 
 
-def test_get_rule_output(snakemake_bcftools_filter_vardict_research_tumor_only):
+def test_get_rule_output(snakemake_bcftools_filter_tnscope_research_tumor_only):
     """Tests retrieval of existing output files from a specific workflow."""
 
     # GIVEN a snakemake fastqc rule object, a rule name and a list of associated wildcards
-    rules = snakemake_bcftools_filter_vardict_research_tumor_only
-    rule_name = "bcftools_filter_vardict_research_tumor_only"
+    rules = snakemake_bcftools_filter_tnscope_research_tumor_only
+    rule_name = "bcftools_filter_tnscope_research_tumor_only"
     output_file_wildcards = {
         "sample": ["ACC1", "tumor", "normal"],
         "case_name": "sample_tumor_only",
@@ -794,18 +794,18 @@ def test_get_rule_output(snakemake_bcftools_filter_vardict_research_tumor_only):
     # THEN retrieve the output files
     output_files = get_rule_output(rules, rule_name, output_file_wildcards)
 
-    # THEN check that the fastq files has been picked up by the function and that the tags has been correctly created
+    # THEN check that the output files and tags are correctly retrieved
     assert len(output_files) == 1
     for file in output_files:
         # Expected file names
         assert (
             Path(file[0]).name
-            == "SNV.somatic.sample_tumor_only.vardict.research.filtered.pass.vcf.gz"
+            == "SNV.somatic.sample_tumor_only.tnscope.research.filtered.pass.vcf.gz"
         )
         # Expected tags
         assert (
             file[3]
-            == "SNV,sample-tumor-only,vcf-pass-vardict,research-vcf-pass-vardict"
+            == "SNV,sample-tumor-only,vcf-pass-tnscope,research-vcf-pass-tnscope"
         )
 
 

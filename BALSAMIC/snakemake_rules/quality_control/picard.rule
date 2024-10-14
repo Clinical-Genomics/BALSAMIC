@@ -24,7 +24,7 @@ rule picard_CollectHsMetrics:
         baitsetname = Path(config["panel"]["capture_kit"]).name,
         sample = "{sample}"
     threads:
-        get_threads(cluster_config, "picard_CollectHsMetrics")
+        get_threads(cluster_config, "picard_qc")
     message:
         "Calculating picard HsMetrics for sample {params.sample}"
     shell:

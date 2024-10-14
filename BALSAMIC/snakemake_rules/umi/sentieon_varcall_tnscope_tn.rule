@@ -6,29 +6,28 @@
 
 rule sentieon_tnscope_umi_tn:
     input:
-        bamT = config_model.get_final_bam_name(bam_dir=umi_dir, sample_name=tumor_sample, specified_suffix="consensusfiltered_umi"),
-        bamN = config_model.get_final_bam_name(bam_dir=umi_dir, sample_name=normal_sample, specified_suffix="consensusfiltered_umi"),
+        bamT = expand(umi_dir + "tumor.{sample}.consensusfiltered_umi.bam", sample=tumor_sample),
+        bamN = expand(umi_dir + "normal.{sample}.consensusfiltered_umi.bam", sample=normal_sample),
         ref_fa = config["reference"]["reference_genome"],
         bed = config["panel"]["capture_kit"],
         dbsnp = config["reference"]["dbsnp"]
     output:
-        vcf_tnscope_umi = vcf_dir +  "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope_umi.vcf.gz",
+        vcf_tnscope_umi = vcf_dir +  "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope_umi.preprocess.vcf.gz",
         namemap = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope_umi.sample_name_map"
     benchmark:
         Path(benchmark_dir, "sentieon_tnscope_umi_" + config["analysis"]["case_id"] + ".tsv").as_posix()
     params:
-        housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "research"},
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         sentieon_exec = config_model.sentieon.sentieon_exec,
         sentieon_lic = config_model.sentieon.sentieon_license,
-        tumor_af = params.umicommon.filter_tumor_af,
+        tumor_af = params.tnscope_umi.filter_tumor_af,
         algo = params.tnscope_umi.algo,
         disable_detect = params.tnscope_umi.disable_detect,
         tumor_lod = params.tnscope_umi.min_tumorLOD,
         init_tumor_lod = params.tnscope_umi.init_tumorLOD,
         error_rate = params.tnscope_umi.error_rate,
         prune_factor = params.tnscope_umi.prunefactor,
-        pcr_model = params.common.pcr_model,
+        pcr_model = params.tnscope_umi.pcr_model,
         padding = params.tnscope_umi.padding,
         tumor = "TUMOR",
         normal = "NORMAL",

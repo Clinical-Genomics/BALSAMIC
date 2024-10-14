@@ -79,7 +79,7 @@ def test_get_config_options(snakemake_executable: SnakemakeExecutable):
     snakemake_config_options: str = snakemake_executable.get_config_options()
 
     # THEN the expected format should be returned
-    assert snakemake_config_options == "--config disable_variant_caller=tnscope,vardict"
+    assert snakemake_config_options == "--config disable_variant_caller=tnscope"
 
 
 def test_get_dragen_flag(snakemake_executable: SnakemakeExecutable):
@@ -267,5 +267,5 @@ def test_get_snakemake_command(
         f"--cluster-config {reference_file.as_posix()} --cluster '{sys.executable} {IMMEDIATE_SUBMIT_PATH.as_posix()} "
         f"--account {ClusterAccount.DEVELOPMENT} --log-dir {session_tmp_path} --mail-user {mail_user_option} "
         f"--profile {ClusterProfile.SLURM} --qos {QOS.HIGH} --script-dir {session_tmp_path} {case_id_tumor_only} "
-        "{dependencies}' --config disable_variant_caller=tnscope,vardict --cores 36"
+        "{dependencies}' --config disable_variant_caller=tnscope --cores 36"
     )

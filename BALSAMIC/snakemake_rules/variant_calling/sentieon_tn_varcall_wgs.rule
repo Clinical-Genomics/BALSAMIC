@@ -2,7 +2,7 @@
 # coding: utf-8
 
 
-rule sentieon_TNscope:
+rule sentieon_tnscope_wgs_tumor_normal:
     input:
         ref = config["reference"]["reference_genome"],
         dbsnp = config["reference"]["dbsnp"],
@@ -24,22 +24,18 @@ rule sentieon_TNscope:
         pcr_model = params.common.pcr_model,
         tumor_options = VARCALL_PARAMS["tnscope"]["tumor"],
         normal_options = VARCALL_PARAMS["tnscope"]["normal"],
-        sentieon_ml_tnscope = config_model.sentieon.tnscope_model,
-        sentieon_exec = config_model.sentieon.sentieon_exec,
-        sentieon_lic = config_model.sentieon.sentieon_license,
+        sentieon_exec=config_model.sentieon.sentieon_exec,
+        sentieon_lic=config_model.sentieon.sentieon_license,
         case_name = config["analysis"]["case_id"]
     threads:
         get_threads(cluster_config, 'sentieon_TNscope')
     message:
-        ("Calling SNVs and SVs using Sentieon TNscope and "
-         "applying machine learning algorithm for sample {params.case_name}")
+        ("Calling SNVs and SVs using Sentieon TNscope for sample {params.case_name}")
     shell:
         """
 export TMPDIR={params.tmpdir};
 export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
-
-intermediate_vcf={params.tmpdir}/tn_sentieon_varcall_file
 
 {params.sentieon_exec} driver \
 -t {threads} \
@@ -55,13 +51,7 @@ intermediate_vcf={params.tmpdir}/tn_sentieon_varcall_file
 --cosmic {input.cosmic} \
 --pcr_indel_mode {params.pcr_model} \
 {params.tumor_options} \
-{params.normal_options} $intermediate_vcf;
-
-{params.sentieon_exec} driver \
--r {input.ref} \
---algo TNModelApply \
--m {params.sentieon_ml_tnscope} \
--v $intermediate_vcf {output.vcf_tnscope};
+{params.normal_options} {output.vcf_tnscope};
 
 echo -e \"{params.tumor}\\tTUMOR\\n{params.normal}\\tNORMAL\" > {output.namemap_snv};
 cp {output.namemap_snv} {output.namemap_sv}

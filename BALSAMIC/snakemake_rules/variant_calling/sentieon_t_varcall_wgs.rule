@@ -1,15 +1,8 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
 
-def get_pon(config):
-    """ return pon cli string, complete with file """
-    if "PON" in config["analysis"]:
-        return os.path.abspth(config["analysis"]["PON"])
-    else:
-        return None
 
-
-rule sentieon_TNscope_tumor_only:
+rule sentieon_tnscope_wgs_tumor_only:
     input:
         ref = config["reference"]["reference_genome"],
         dbsnp = config["reference"]["dbsnp"],
@@ -26,11 +19,10 @@ rule sentieon_TNscope_tumor_only:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         tumor = "TUMOR",
         tumor_options = VARCALL_PARAMS["tnscope"]["tumor"],
-        pon = " " if get_pon(config) is None else " ".join(["--pon", get_pon(config)]),
         pcr_model = params.common.pcr_model,
-        sentieon_exec = config_model.sentieon.sentieon_exec,
-        sentieon_lic = config_model.sentieon.sentieon_license,
-        case_name =  config["analysis"]["case_id"]
+        sentieon_exec=config_model.sentieon.sentieon_exec,
+        sentieon_lic=config_model.sentieon.sentieon_license,
+        case_name = config["analysis"]["case_id"]
     threads:
         get_threads(cluster_config, 'sentieon_TNscope_tumor_only')
     message:
@@ -48,7 +40,7 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 -q {input.recal} \
 -t {threads} \
 --algo TNscope \
---tumor_sample {params.tumor} {params.pon} \
+--tumor_sample {params.tumor} \
 --dbsnp {input.dbsnp} \
 --cosmic {input.cosmic} \
 --pcr_indel_mode {params.pcr_model} \

@@ -41,3 +41,4 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 
 rm -rf {params.tmpdir}
         """
+

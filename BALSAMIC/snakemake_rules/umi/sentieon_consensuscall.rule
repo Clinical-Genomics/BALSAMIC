@@ -1,7 +1,6 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
 
-
 rule sentieon_consensuscall_umi:
     """UMI-consensus calling"""
     input:
@@ -41,7 +40,6 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 
 rm -rf {params.tmpdir}
         """
-
 
 rule sentieon_bwa_umiconsensus:
     """Alignment of consensus reads"""
@@ -89,13 +87,12 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 rm -rf {params.tmpdir}
         """
 
-
 rule sentieon_consensusfilter_umi:
     """Filter consensus called reads based on 'XZ' filtering"""
     input:
         umi_dir + "{sample_type}.{sample}.consensuscalled_umi.bam"
     output:
-        temp(umi_dir + "{sample_type}.{sample}.consensusfiltered_umi.bam")
+        umi_dir + "{sample_type}.{sample}.consensusfiltered_umi.bam"
     benchmark:
         Path(benchmark_dir, "sentieon_consensusfilter_umi_{sample_type}_{sample}.tsv").as_posix()
     singularity:
@@ -119,3 +116,50 @@ samtools view -bh - > {output};
 
 samtools index {output};
         """
+
+rule bam_compress_tumor_umi:
+    input:
+        bam = umi_dir + "tumor.{sample}.consensusfiltered_umi.bam",
+        fasta = config_model.reference["reference_genome"]
+    output:
+        cram = umi_dir + "tumor.{sample}.consensusfiltered_umi.cram",
+    benchmark:
+        Path(benchmark_dir, "bam_compress_tumor_umi_{sample}.tsv").as_posix()
+    singularity:
+        Path(singularity_image, config["bioinfo_tools"].get("compress") + ".sif").as_posix()
+    params:
+        sample_id = "{sample}",
+        housekeeper_id= {"id": tumor_sample, "tags": "umi_tumor"}
+    threads:
+        get_threads(cluster_config, "bam_compress")
+    message:
+        "Compressing UMI bam to cram for {params.sample_id}"
+    shell:
+        """
+samtools view -h -T {input.fasta} --threads {threads} -C -o {output.cram} {input.bam}; 
+samtools index {output.cram}; 
+        """
+
+if config['analysis']['analysis_type'] == "paired":
+    rule bam_compress_normal_umi:
+        input:
+            bam = umi_dir + "normal.{sample}.consensusfiltered_umi.bam",
+            fasta = config_model.reference["reference_genome"]
+        output:
+            cram = umi_dir + "normal.{sample}.consensusfiltered_umi.cram"
+        benchmark:
+            Path(benchmark_dir, "bam_compress_normal_umi_{sample}.tsv").as_posix()
+        singularity:
+            Path(singularity_image, config["bioinfo_tools"].get("compress") + ".sif").as_posix()
+        params:
+            sample_id = "{sample}",
+            housekeeper_id= {"id": normal_sample, "tags": "umi_normal"}
+        threads:
+            get_threads(cluster_config, "bam_compress")
+        message:
+            "Compressing UMI bam to cram for {params.sample_id}"
+        shell:
+            """
+    samtools view -h -T {input.fasta} --threads {threads} -C -o {output.cram} {input.bam}; 
+    samtools index {output.cram}; 
+            """

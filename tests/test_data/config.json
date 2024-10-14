@@ -5,7 +5,15 @@
     "n_base_limit": "50"
   },
   "vcf": {
+
     "vardict": {
+      "mutation": "somatic",
+      "mutation_type": "SNV",
+      "analysis_type": ["paired", "single"],
+      "sequencing_type": ["targeted"],
+      "workflow_solution": ["BALSAMIC"]
+    },
+    "merged": {
       "mutation": "somatic",
       "mutation_type": "SNV",
       "analysis_type": ["paired", "single"],
