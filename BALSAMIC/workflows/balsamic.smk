@@ -95,6 +95,7 @@ umi_qc_dir: str = Path(qc_dir, "umi_qc").as_posix() + "/"
 # Annotations
 research_annotations = []
 clinical_annotations = []
+artefact_snv_obs = ""
 clinical_snv_obs = ""
 cancer_germline_snv_obs = ""
 cancer_somatic_snv_obs = ""
@@ -220,6 +221,21 @@ if "swegen_snv_frequency" in config["reference"]:
             ]
         }
     )
+
+if "artefact_snv_observations" in config["reference"]:
+    clinical_annotations.append(
+        {
+            "annotation": [
+                {
+                    "file": Path(config["reference"]["artefact_snv_observations"]).as_posix(),
+                    "fields": ["Frq", "Obs", "Hom"],
+                    "ops": ["self", "self", "self"],
+                    "names": ["ArtefactFrq", "ArtefactObs", "ArtefactHom"],
+                }
+            ]
+        }
+    )
+    artefact_snv_obs: str = Path(config["reference"]["artefact_snv_observations"]).as_posix()
 
 if "clinical_snv_observations" in config["reference"]:
     clinical_annotations.append(

@@ -203,6 +203,8 @@ DELIVERY_RULES: List[str] = [
     "gatk_update_vcf_sequence_dictionary",
     "bcftools_filter_tnscope_clinical_tumor_only",
     "bcftools_filter_tnscope_clinical_tumor_normal",
+    "bcftools_filter_tnscope_clinical_tumor_only",
+    "bcftools_filter_tnscope_clinical_tumor_normal",
     "bcftools_filter_merged_clinical_tumor_only",
     "bcftools_filter_merged_clinical_tumor_normal",
     "sentieon_tnscope_umi",

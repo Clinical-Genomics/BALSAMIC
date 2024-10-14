@@ -60,6 +60,7 @@ rule bcftools_filter_TNscope_umi_clinical_tumor_normal:
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
   params:
+    artefact_freq = [SNV_FILTER_SETTINGS.artefact_snv_freq.tag_value, SNV_FILTER_SETTINGS.artefact_snv_freq.filter_name],
     pop_freq = [SNV_FILTER_SETTINGS.pop_freq_umi.tag_value, SNV_FILTER_SETTINGS.pop_freq_umi.filter_name],
     swegen_freq = [SNV_FILTER_SETTINGS.swegen_snv_freq.tag_value, SNV_FILTER_SETTINGS.swegen_snv_freq.filter_name],
     loqusdb_clinical_freq = [SNV_FILTER_SETTINGS.loqusdb_clinical_snv_freq.tag_value, SNV_FILTER_SETTINGS.loqusdb_clinical_snv_freq.filter_name],
@@ -76,6 +77,7 @@ rule bcftools_filter_TNscope_umi_clinical_tumor_normal:
     """
 bcftools reheader --threads {threads} -s {input.namemap} {input.vcf_snv_clinical} |\
 bcftools view --threads {threads} -f PASS,triallelic_site | \
+bcftools filter --threads {threads} --include 'INFO/ArtefactFrq <= {params.artefact_freq[0]} || INFO/ArtefactFrq == \".\"' --soft-filter '{params.artefact_freq[1]}' --mode '+' |\
 bcftools filter --threads {threads} --include 'INFO/GNOMADAF_popmax <= {params.pop_freq[0]} || INFO/GNOMADAF_popmax == \".\"' --soft-filter '{params.pop_freq[1]}' --mode '+' | \
 bcftools filter --threads {threads} --include 'INFO/SWEGENAF <= {params.swegen_freq[0]} || INFO/SWEGENAF == \".\"' --soft-filter '{params.swegen_freq[1]}' --mode '+' |\
 bcftools filter --threads {threads} --include 'INFO/Frq <= {params.loqusdb_clinical_freq[0]} || INFO/Frq == \".\"' --soft-filter '{params.loqusdb_clinical_freq[1]}' --mode '+' |\
