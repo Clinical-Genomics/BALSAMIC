@@ -6,7 +6,7 @@ LABEL about.documentation="https://balsamic.readthedocs.io/"
 LABEL about.license="MIT License (MIT)"
 LABEL about.description="Bioinformatic analysis pipeline for somatic mutations in cancer"
 
-ARG nim_version=1.6.20
+ARG nim_version=1.6.6
 
 ENV CFLAGS="-fPIC -O3"
 
@@ -40,12 +40,12 @@ RUN apk add cmake openssl-dev && \
 ENV PATH=:/root/.nimble/bin:/nim-${nim_version}/bin/:$PATH	
 
 RUN \
-    git clone --depth 1 -b 1.19.1 --recursive https://github.com/samtools/htslib && \
+    git clone --depth 1 -b 1.15 --recursive https://github.com/samtools/htslib && \
     cd htslib && autoheader && autoconf && \
     ./configure --enable-s3 --enable-gcs --enable-libcurl --with-libdeflate && \
     make -j4 CFLAGS="-fPIC -O3" install && \
     cd ../ && \
-    git clone --depth 1 -b 1.18 --recursive https://github.com/samtools/bcftools && \
+    git clone --depth 1 -b 1.15 --recursive https://github.com/samtools/bcftools && \
     cd bcftools && autoheader && autoconf && \
     ./configure --enable-s3 --enable-libcurl --with-libdeflate && \
     make -j4 CFLAGS="-fPIC -O3" install && \
