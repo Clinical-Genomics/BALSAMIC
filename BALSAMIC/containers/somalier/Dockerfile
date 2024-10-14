@@ -10,8 +10,10 @@ ARG nim_version=1.6.6
 
 ENV CFLAGS="-fPIC -O3"
 
-RUN apk update && apk upgrade && apk add wget git xz bzip2-static musl m4 autoconf tar xz-dev bzip2-dev build-base libpthread-stubs libzip-dev gfortran \
-    openssl-libs-static openblas-static pcre-dev curl llvm-dev curl-static bash curl-dev clang-static nghttp2-static  zlib-static cmake
+RUN apk update && apk upgrade && apk add wget git xz bzip2-static musl m4 \
+    autoconf tar xz-dev bzip2-dev build-base libpthread-stubs libzip-dev gfortran \
+    openssl-libs-static openblas-static pcre-dev curl llvm-dev curl-static \
+    bash curl-dev clang-static nghttp2-static  zlib-static cmake openssl-dev procps
 
 RUN mkdir -p /usr/local/include && \
     git clone -b v1.18 --depth 1 https://github.com/ebiggers/libdeflate.git && \
@@ -27,8 +29,7 @@ RUN cd / && \
     echo 'PATH=/nim-${nim_version}/bin:$PATH' >> /etc/environment  && \
     rm -f nim-${nim_version}-linux_x64.tar.xz
 
-RUN apk add cmake openssl-dev && \
-	wget https://libzip.org/download/libzip-1.6.1.tar.gz && \
+RUN wget https://libzip.org/download/libzip-1.6.1.tar.gz && \
 	tar xzvf libzip-1.6.1.tar.gz && \
 	cd libzip-1.6.1 && \
 	mkdir build && cd build && \
@@ -36,11 +37,9 @@ RUN apk add cmake openssl-dev && \
 	make -j4 CFLAGS="-fPIC -O3" install && \
 	cd ../../ && rm -rf libzip-1.6.1*
 
-
 ENV PATH=:/root/.nimble/bin:/nim-${nim_version}/bin/:$PATH	
 
-RUN \
-    git clone --depth 1 -b 1.15 --recursive https://github.com/samtools/htslib && \
+RUN git clone --depth 1 -b 1.15 --recursive https://github.com/samtools/htslib && \
     cd htslib && autoheader && autoconf && \
     ./configure --enable-s3 --enable-gcs --enable-libcurl --with-libdeflate && \
     make -j4 CFLAGS="-fPIC -O3" install && \
@@ -52,7 +51,7 @@ RUN \
     cd ../ && rm -rf htslib bcftools
 
 RUN cd / &&    \
-    git clone -b v0.2.16 --depth 1 https://github.com/brentp/somalier.git && \
+    git clone -b v0.2.16 --depth 5 https://github.com/brentp/somalier.git && \
     cd somalier && \
     nimble install -y nimble && \
     /root/.nimble/bin/nimble install -d -y
