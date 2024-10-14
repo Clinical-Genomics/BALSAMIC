@@ -7,6 +7,8 @@ Added:
 * MSI analysis to the tumor-normal workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1454
 * Sentieon install directory path to case config arguments https://github.com/Clinical-Genomics/BALSAMIC/pull/1461
 * QC threshold for lymphoma_MRD panel https://github.com/Clinical-Genomics/BALSAMIC/pull/1479
+* Sentieon install directory path to case config arguments https://giithub.com/Clinical-Genomics/BALSAMIC/pull/1461
+* MSI tumor-normal analysis to housekeeper storage https://github.com/Clinical-Genomics/BALSAMIC/pull/1483
 
 Changed:
 ^^^^^^^^
