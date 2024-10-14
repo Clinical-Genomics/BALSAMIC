@@ -15,16 +15,15 @@ RUN apt-get update && apt-get -y upgrade && \
     apt-get install -y --no-install-recommends git make build-essential \
     liblzma-dev libbz2-dev zlib1g-dev libncurses5-dev libncursesw5-dev ca-certificates && \
     apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
-
-RUN cd /tmp && \
-  git clone https://github.com/xjtu-omics/msisensor-pro && \
-  cd /tmp/msisensor-pro && \
-  git checkout v1.3.0 && \
-  /tmp/msisensor-pro/INSTALL
-RUN  cp -r /tmp/msisensor-pro/binary/msisensor-pro /usr/bin/ && \
-  cp -r /tmp/msisensor-pro/vendor/htslib-1.11/libhts.so* /lib/x86_64-linux-gnu && \
-  rm -rf /tmp/msisensor-pro
+    rm -rf /var/lib/apt/lists/* && \
+    cd /tmp && \
+    git clone https://github.com/xjtu-omics/msisensor-pro && \
+    cd /tmp/msisensor-pro && \
+    git checkout v1.3.0 && \
+    /tmp/msisensor-pro/INSTALL && \
+    cp -r /tmp/msisensor-pro/binary/msisensor-pro /usr/bin/ && \
+    cp -r /tmp/msisensor-pro/vendor/htslib-1.11/libhts.so* /lib/x86_64-linux-gnu && \
+    rm -rf /tmp/msisensor-pro
 
 RUN adduser --disabled-password --gecos '' ubuntu && \
     chsh -s /bin/bash && mkdir -p /home/ubuntu
