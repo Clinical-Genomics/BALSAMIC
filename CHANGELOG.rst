@@ -41,7 +41,8 @@ Removed:
 * SGE (qsub) support https://github.com/Clinical-Genomics/BALSAMIC/pull/1372
 * Fastq quality and UMI trimming command-line options https://github.com/Clinical-Genomics/BALSAMIC/pull/1358
 * ML model for TNscope  https://github.com/Clinical-Genomics/BALSAMIC/pull/1475
-* All code associated with TNhaplotyper  https://github.com/Clinical-Genomics/BALSAMIC/pull/1475
+* All code associated with TNhaplotyper https://github.com/Clinical-Genomics/BALSAMIC/pull/1475
+* Removed research.filtered.pass files from delivery https://github.com/Clinical-Genomics/BALSAMIC/pull/1475
 
 Fixed:
 ^^^^^^
