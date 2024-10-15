@@ -145,9 +145,14 @@ def get_qc_supported_capture_kit(capture_kit, metrics: List[str]) -> str:
             available_panel_beds.append(k)
 
     return next(
-        (i for i in available_panel_beds if re.search(rf'{re.escape(i)}(?=_\d)', capture_kit)),
-        None
+        (
+            i
+            for i in available_panel_beds
+            if re.search(rf"{re.escape(i)}(?=_\d)", capture_kit)
+        ),
+        None,
     )
+
 
 def get_requested_metrics(config: dict, metrics: dict) -> dict:
     """Parses the defined and requested metrics and returns them as a dictionary"""
