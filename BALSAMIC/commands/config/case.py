@@ -9,9 +9,9 @@ import click
 
 from BALSAMIC import __version__ as balsamic_version
 from BALSAMIC.commands.options import (
-    OPTION_ADAPTER_TRIM,
     OPTION_ANALYSIS_DIR,
     OPTION_ANALYSIS_WORKFLOW,
+    OPTION_ARTEFACT_SNV_OBSERVATIONS,
     OPTION_BACKGROUND_VARIANTS,
     OPTION_BALSAMIC_CACHE,
     OPTION_CACHE_VERSION,
@@ -32,15 +32,12 @@ from BALSAMIC.commands.options import (
     OPTION_NORMAL_SAMPLE_NAME,
     OPTION_PANEL_BED,
     OPTION_PON_CNN,
-    OPTION_QUALITY_TRIM,
     OPTION_SENTIEON_INSTALL_DIR,
     OPTION_SENTIEON_LICENSE,
     OPTION_SWEGEN_SNV,
     OPTION_SWEGEN_SV,
     OPTION_TUMOR_SAMPLE_NAME,
-    OPTION_UMI,
     OPTION_UMI_MIN_READS,
-    OPTION_UMI_TRIM_LENGTH,
 )
 from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV, AnalysisWorkflow, Gender
 from BALSAMIC.constants.cache import GenomeVersion
@@ -58,6 +55,7 @@ from BALSAMIC.utils.cli import (
     get_bioinfo_tools_version,
     get_panel_chrom,
     get_sample_list,
+    get_gens_references,
 )
 from BALSAMIC.utils.io import read_json, write_json
 from BALSAMIC.utils.utils import get_absolute_paths_dict
@@ -66,9 +64,9 @@ LOG = logging.getLogger(__name__)
 
 
 @click.command("case", short_help="Create a sample config file from input sample data")
-@OPTION_ADAPTER_TRIM
 @OPTION_ANALYSIS_DIR
 @OPTION_ANALYSIS_WORKFLOW
+@OPTION_ARTEFACT_SNV_OBSERVATIONS
 @OPTION_BACKGROUND_VARIANTS
 @OPTION_BALSAMIC_CACHE
 @OPTION_CACHE_VERSION
@@ -89,21 +87,18 @@ LOG = logging.getLogger(__name__)
 @OPTION_NORMAL_SAMPLE_NAME
 @OPTION_PANEL_BED
 @OPTION_PON_CNN
-@OPTION_QUALITY_TRIM
 @OPTION_SENTIEON_INSTALL_DIR
 @OPTION_SENTIEON_LICENSE
 @OPTION_SWEGEN_SNV
 @OPTION_SWEGEN_SV
 @OPTION_TUMOR_SAMPLE_NAME
-@OPTION_UMI
-@OPTION_UMI_TRIM_LENGTH
 @OPTION_UMI_MIN_READS
 @click.pass_context
 def case_config(
     context: click.Context,
-    adapter_trim: bool,
     analysis_dir: Path,
     analysis_workflow: AnalysisWorkflow,
+    artefact_snv_observations: Path,
     background_variants: Path,
     balsamic_cache: Path,
     cache_version: str,
@@ -124,14 +119,11 @@ def case_config(
     normal_sample_name: str,
     panel_bed: Path,
     pon_cnn: Path,
-    quality_trim: bool,
     sentieon_install_dir: Path,
     sentieon_license: str,
     swegen_snv: Path,
     swegen_sv: Path,
     tumor_sample_name: str,
-    umi: bool,
-    umi_trim_length: int,
     umi_min_reads: str | None,
 ):
     references_path: Path = Path(balsamic_cache, cache_version, genome_version)
@@ -143,31 +135,25 @@ def case_config(
     if cadd_annotations:
         references.update(cadd_annotations_path)
 
-    if any([genome_interval, gens_coverage_pon, gnomad_min_af5]):
-        if panel_bed:
-            raise click.BadParameter(
-                "GENS is currently not compatible with TGA analysis, only WGS."
-            )
-        if not all([genome_interval, gens_coverage_pon, gnomad_min_af5]):
-            raise click.BadParameter(
-                "All three arguments (genome_interval gens_coverage_pon, gnomad_min_af5) are required for GENS."
-            )
-
-        gens_ref_files = {
-            "genome_interval": genome_interval,
-            "gens_coverage_pon": gens_coverage_pon,
-            "gnomad_min_af5": gnomad_min_af5,
-        }
-
-        references.update(
-            {
-                gens_file: path
-                for gens_file, path in gens_ref_files.items()
-                if path is not None
-            }
+    if analysis_workflow is not AnalysisWorkflow.BALSAMIC_QC:
+        gens_references: dict[str, str] = get_gens_references(
+            genome_interval=genome_interval,
+            gens_coverage_pon=gens_coverage_pon,
+            gnomad_min_af5=gnomad_min_af5,
+            panel_bed=panel_bed,
         )
+        if gens_references:
+            # Update references dictionary with GENS reference-files
+            references.update(
+                {
+                    gens_file: path
+                    for gens_file, path in gens_references.items()
+                    if path is not None
+                }
+            )
 
     variants_observations = {
+        "artefact_snv_observations": artefact_snv_observations,
         "clinical_snv_observations": clinical_snv_observations,
         "clinical_sv_observations": clinical_sv_observations,
         "cancer_germline_snv_observations": cancer_germline_snv_observations,
@@ -204,12 +190,6 @@ def case_config(
             "sentieon_exec": Path(sentieon_install_dir, "bin", "sentieon").as_posix(),
             "dnascope_model": SENTIEON_DNASCOPE_MODEL.as_posix(),
             "tnscope_model": SENTIEON_TNSCOPE_MODEL.as_posix(),
-        },
-        QC={
-            "quality_trim": quality_trim,
-            "adapter_trim": adapter_trim,
-            "umi_trim": umi if panel_bed else False,
-            "umi_trim_length": umi_trim_length,
         },
         analysis={
             "case_id": case_id,

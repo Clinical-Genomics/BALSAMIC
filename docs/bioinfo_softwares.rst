@@ -122,7 +122,7 @@ sentieon-tools
 ~~~~~~~~~~~~~~
 :Source code: `Commercial Tool` `<https://www.sentieon.com/>`_
 :Article: `Bioinformatics` `<https://www.biorxiv.org/content/10.1101/115717v2>`_
-:Version: `202010.02`
+:Version: `202308.03`
 
 somalier
 ~~~~~~~~

@@ -2,18 +2,20 @@
 # coding: utf-8
 
 ## UmiAwareMarkDuplicatesWithMateCigar - umimetrics
+
 rule picard_umiaware:
     input:
-        bam = umi_dir + "{sample}_consensusfiltered_umi.bam"
+        bam = umi_dir + "{sample_type}.{sample}.consensusfiltered_umi.bam"
     output:
-        bam = umi_qc_dir + "{sample}.picard.umiaware.bam",
-        duplicates = umi_qc_dir + "{sample}.umi.duplicatemetrics.txt",
-        umimetrics = umi_qc_dir + "{sample}.umi.metrics.txt"
+        bam = umi_qc_dir + "{sample_type}.{sample}.picard.umiaware.bam",
+        duplicates = umi_qc_dir + "{sample_type}.{sample}.umi.duplicatemetrics.txt",
+        umimetrics = umi_qc_dir + "{sample_type}.{sample}.umi.metrics.txt"
     benchmark:
-        Path(benchmark_dir, "picard_umiaware_{sample}.tsv").as_posix()
+        Path(benchmark_dir, "picard_umiaware_{sample_type}_{sample}.tsv").as_posix()
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("picard") + ".sif").as_posix()
     params:
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         sample_id = "{sample}"
     threads:
         get_threads(cluster_config, "picard_umiaware")
@@ -21,6 +23,8 @@ rule picard_umiaware:
         "Marking duplicates using Picardtools with UmiAware for {params.sample_id}"
     shell:
         """
+export TMPDIR={params.tmpdir};
+
 picard UmiAwareMarkDuplicatesWithMateCigar \
 I={input.bam} \
 O={output.bam} \
@@ -29,19 +33,21 @@ UMI_METRICS={output.umimetrics};
         """
 
 ## CollectHSmetrics - median target coverage-required
+
 rule picard_collecthsmetrics_umi:
     input:
-        bam = umi_dir + "{sample}_consensusfiltered_umi.bam",
+        bam = umi_dir + "{sample_type}.{sample}.consensusfiltered_umi.bam",
         bed = config["panel"]["capture_kit"],
         fa = config["reference"]["reference_genome"],
         fadict = (config["reference"]["reference_genome"]).replace(".fasta",".dict"),
     output:
-        mrkdup = umi_qc_dir + "{sample}.umi.collect_hsmetric.txt"
+        mrkdup = umi_qc_dir + "{sample_type}.{sample}.umi.collect_hsmetric.txt"
     benchmark:
-        Path(benchmark_dir, "picard_collecthsmetrics_umi_{sample}.tsv").as_posix()
+        Path(benchmark_dir, "picard_collecthsmetrics_umi_{sample_type}_{sample}.tsv").as_posix()
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("picard") + ".sif").as_posix()
     params:
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         baitsetname = os.path.basename(config["panel"]["capture_kit"]),
         sample_id = "{sample}"
     threads:
@@ -50,6 +56,8 @@ rule picard_collecthsmetrics_umi:
         "Collecting HSmetrics using Picardtools for {params.sample_id}"
     shell:
         """
+export TMPDIR={params.tmpdir};
+
 picard BedToIntervalList \
 I={input.bed} \
 O={input.bam}.picard.bedintervals \
@@ -67,24 +75,28 @@ METRIC_ACCUMULATION_LEVEL=ALL_READS;
         """
 
 ## SUM(Reads in each family)/ the number of families after correction, collapsing on supporting reads.
+
 rule samtools_view_calculatemeanfamilydepth_umi:
     input:
-        bam = umi_dir + "{sample}_consensusfiltered_umi.bam"
+        bam = umi_dir + "{sample_type}.{sample}.consensusfiltered_umi.bam"
     output:
-        temp_fl = temp (umi_qc_dir + "{sample}.umi.temp.fl"),
-        totalsum = umi_qc_dir + "{sample}.umi.mean_family_depth"
+        temp_fl = temp (umi_qc_dir + "{sample_type}.{sample}.umi.temp.fl"),
+        totalsum = umi_qc_dir + "{sample_type}.{sample}.umi.mean_family_depth"
     benchmark:
-        Path(benchmark_dir, "samtools_view_calculatemeanfamilydepth_umi_{sample}.tsv").as_posix()
+        Path(benchmark_dir, "samtools_view_calculatemeanfamilydepth_umi_{sample_type}_{sample}.tsv").as_posix()
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("samtools") + ".sif").as_posix()
     params:
-        sample_id = "{sample}"
+        sample_id = "{sample}",
+        tmpdir= tempfile.mkdtemp(prefix=tmp_dir),
     threads:
         get_threads(cluster_config, "samtools_view_calculatemeanfamilydepth_umi")
     message:
         "Calculating mean family depth using samtools and awk for {params.sample_id}"
     shell:
         """
+export TMPDIR={params.tmpdir};
+
 samtools view -@ {threads} {input.bam} | \
 grep 'RX:Z:' | \
 sed 's/.*RX:Z:\\([ACGT-].*\\).*/\\1/' | \
