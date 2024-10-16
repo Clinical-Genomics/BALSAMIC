@@ -56,4 +56,3 @@ ENV somalier_ancestry_labels /ancestry_labels-1kg.tsv
 RUN adduser -D defaultuser
 
 USER defaultuser
-
