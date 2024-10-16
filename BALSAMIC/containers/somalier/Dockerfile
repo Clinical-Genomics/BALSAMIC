@@ -13,7 +13,7 @@ LABEL base.image="alpine:3.11.5" \
 ARG nim_version=1.6.20
 ENV CFLAGS="-fPIC -O3"
 
-RUN apk update && apk upgrade && apk add wget git xz bzip2-static musl m4 \
+RUN apk upgrade && apk add --no-cache wget git xz bzip2-static musl m4 \
     autoconf tar xz-dev bzip2-dev build-base libpthread-stubs libzip-dev gfortran \
     openssl-libs-static openblas-static pcre-dev curl llvm-dev curl-static \
     bash curl-dev clang-static nghttp2-static  zlib-static cmake procps
@@ -32,7 +32,7 @@ RUN cd / && \
     echo 'PATH=/nim-${nim_version}/bin:$PATH' >> /etc/environment  && \
     rm -f nim-${nim_version}-linux_x64.tar.xz
 
-RUN apk add cmake openssl-dev && \
+RUN apk add --no-cache cmake openssl-dev && \
     wget -q https://libzip.org/download/libzip-1.6.1.tar.gz && \
 	tar xzvf libzip-1.6.1.tar.gz && \
 	cd libzip-1.6.1 && \
@@ -54,31 +54,19 @@ RUN git clone --depth 1 -b 1.18 --recursive https://github.com/samtools/htslib &
     make -j4 CFLAGS="-fPIC -O3" install && \
     cd ../ && rm -rf htslib bcftools
 
-ENV RUSTFLAGS=-Ctarget-feature=-crt-static
-
-RUN sh -c 'curl --proto "=https" --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -q -y' \
-    && ~/.cargo/bin/rustup target add x86_64-unknown-linux-musl \
-	&& git clone https://github.com/38/d4-format \
-	&& cd d4-format \
-    && ln -s /usr/bin/gcc /usr/bin/musl-gcc \
-    && ~/.cargo/bin/cargo build --package=d4binding --release && cd .. \
-    && install -m 644 d4-format/target/release/libd4binding.a /usr/lib \
-	&& install -m 644 d4-format/d4binding/include/d4.h /usr/include  \
-    && rm -rf d4-format/target/  \
-    && rm -rf /root/.rustup/  \
-    && rm -rf ~/.cargo
-
 RUN cd / && git clone -b v0.2.19 --depth 5 https://github.com/brentp/somalier.git && \
     nimble install -y nimble@0.14.2 && \
     cd somalier && nimble install -d -y
 
-RUN apk add openblas && \
+RUN apk add  --no-cache openblas && \
     cd /somalier && \
     nim c -d:danger -d:nsb_static -d:release -d:openmp -d:blas=openblas -d:lapack=openblas -o:/usr/bin/somalier src/somalier && \
     cp scripts/ancestry-labels-1kg.tsv / && \
     rm -rf /somalier && somalier --help
 
 ENV somalier_ancestry_labels=/ancestry_labels-1kg.tsv
+
+RUN rm -rf /var/cache/apk/*
 
 RUN adduser -D defaultuser
 
