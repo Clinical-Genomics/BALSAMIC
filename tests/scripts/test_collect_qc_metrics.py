@@ -23,10 +23,10 @@ def test_get_qc_supported_capture_kit(qc_requested_metrics):
     """test extraction of the capture kit name available for analysis"""
 
     # GIVEN a capture kit
-    capture_kit = "panel_1_v1.0_hg19_design.bed"
+    capture_kit = "panelA_1.0_hg19_design.bed"
 
     # GIVEN an expected output
-    expected_output = "panel_1"
+    expected_output = "panelA"
 
     # WHEN calling the function
     supported_capture_kit = get_qc_supported_capture_kit(
@@ -42,7 +42,7 @@ def test_get_requested_metrics_targeted(config_dict, qc_requested_metrics):
 
     # GIVEN a config_dict
     config = copy.deepcopy(config_dict)
-    config["panel"]["capture_kit"] = "tests/panel/panel_2_v1.0_hg19_design.bed"
+    config["panel"]["capture_kit"] = "tests/panel/panelB_1.0_hg19_design.bed"
 
     # GIVEN the expected output
     expected_output = {
