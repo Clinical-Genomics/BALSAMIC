@@ -12,6 +12,7 @@ LABEL base.image="alpine:3.11.5" \
 
 ARG nim_version=1.6.20
 ENV CFLAGS="-fPIC -O3"
+ENV HTTPS_METHOD=noredirect
 
 RUN apk upgrade && apk add --no-cache wget git xz bzip2-static musl m4 \
     autoconf tar xz-dev bzip2-dev build-base libpthread-stubs libzip-dev gfortran \
