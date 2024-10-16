@@ -28,7 +28,8 @@ rule manta_tumor_only:
         "index the compressed vcf file")
     shell:
       """
-samtools_path=$(readlink -f $(which samtools))
+export TMPDIR={params.tmpdir} ;
+samtools_path=$(readlink -f $(which samtools)) ;
 
 configManta.py \
 {params.settings} \
@@ -76,6 +77,8 @@ rule delly_sv_tumor_only:
         ("Calling structural variants using delly for {params.case_name}")
     shell:
         """
+export TMPDIR={params.tmpdir} ;
+
 delly call -x {input.excl} -o {output.bcf} -g {input.fa} {input.bamT}
 
 echo -e \"{params.tumor}\\tTUMOR\" > {output.namemap};

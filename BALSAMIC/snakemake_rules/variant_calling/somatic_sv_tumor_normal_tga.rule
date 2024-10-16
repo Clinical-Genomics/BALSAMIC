@@ -31,7 +31,8 @@ rule manta_tumor_normal:
         "index the compressed vcf file")
     shell:
         """
-samtools_path=$(readlink -f $(which samtools))
+export TMPDIR={params.tmpdir} ;
+samtools_path=$(readlink -f $(which samtools)) ;
 
 configManta.py \
 {params.settings} \
@@ -83,6 +84,8 @@ rule delly_sv_tumor_normal:
         "filter somatic variants and finally convert from bcf to compressed vcf file")
     shell:
         """
+export TMPDIR={params.tmpdir} ;
+
 delly call -x {input.excl} -o {params.tmpdir}/delly.bcf -g {input.fa} {input.bamT} {input.bamN};
 
 echo -e \"{params.tumor}\\ttumor\\n{params.normal}\\tcontrol\" > {params.tmpdir}/samples.tsv;

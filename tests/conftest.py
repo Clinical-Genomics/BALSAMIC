@@ -932,7 +932,7 @@ def fastq_dir_tumor_only_dummy_vep(
     vep_dir: Path = Path(analysis_dir, case_id_tumor_only_dummy_vep, "analysis", "vep")
     vep_dir.mkdir(parents=True, exist_ok=True)
     vep_test_file = (
-        "SNV.somatic.sample_tumor_only.vardict.research.filtered.pass.vcf.gz"
+        "SNV.somatic.sample_tumor_only.tnscope.research.filtered.pass.vcf.gz"
     )
     Path(vep_dir, vep_test_file).touch()
 
@@ -2006,10 +2006,10 @@ def qc_extracted_metrics(metrics_yaml_path: str) -> dict:
 
 
 @pytest.fixture(scope="function")
-def snakemake_bcftools_filter_vardict_research_tumor_only(
+def snakemake_bcftools_filter_tnscope_research_tumor_only(
     tumor_only_config_dummy_vep, helpers
 ):
-    """bcftools_filter_vardict_research_tumor_only snakemake mock rule"""
+    """bcftools_filter_tnscope_research_tumor_only snakemake mock rule"""
 
     helpers.read_config(tumor_only_config_dummy_vep)
     vep_path = os.path.join(
@@ -2017,11 +2017,11 @@ def snakemake_bcftools_filter_vardict_research_tumor_only(
         helpers.case_id,
         "analysis",
         "vep",
-        "{var_type}.somatic.{case_name}.vardict.research.filtered.pass.vcf.gz",
+        "{var_type}.somatic.{case_name}.tnscope.research.filtered.pass.vcf.gz",
     )
     return Map(
         {
-            "bcftools_filter_vardict_research_tumor_only": Map(
+            "bcftools_filter_tnscope_research_tumor_only": Map(
                 {
                     "params": Map(
                         {
@@ -2033,13 +2033,13 @@ def snakemake_bcftools_filter_vardict_research_tumor_only(
                     ),
                     "output": Map(
                         {
-                            "_names": Map({"vcf_pass_vardict": vep_path}),
-                            "vcf_pass_vardict": vep_path,
+                            "_names": Map({"vcf_pass_tnscope": vep_path}),
+                            "vcf_pass_tnscope": vep_path,
                         }
                     ),
                     "rule": Map(
                         {
-                            "name": "bcftools_filter_vardict_research_tumor_only",
+                            "name": "bcftools_filter_tnscope_research_tumor_only",
                             "output": [
                                 vep_path,
                             ],
@@ -2420,7 +2420,7 @@ def fixture_snakemake_executable_data(
         "case_id": case_id_tumor_only,
         "cluster_config_path": reference_file,
         "config_path": reference_file,
-        "disable_variant_caller": "tnscope,vardict",
+        "disable_variant_caller": "tnscope",
         "log_dir": session_tmp_path,
         "mail_user": mail_user_option,
         "profile": ClusterProfile.SLURM,
@@ -2460,7 +2460,7 @@ def fixture_snakemake_executable_validated_data(
         "case_id": case_id_tumor_only,
         "cluster_config_path": reference_file,
         "config_path": reference_file,
-        "disable_variant_caller": "disable_variant_caller=tnscope,vardict",
+        "disable_variant_caller": "disable_variant_caller=tnscope",
         "dragen": False,
         "force": False,
         "log_dir": session_tmp_path,

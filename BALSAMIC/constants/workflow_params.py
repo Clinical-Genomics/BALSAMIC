@@ -19,7 +19,7 @@ VCF_DICT = {
         "mutation": "somatic",
         "mutation_type": "SNV",
         "analysis_type": ["paired", "single"],
-        "sequencing_type": ["wgs"],
+        "sequencing_type": ["targeted", "wgs"],
         "workflow_solution": ["Sentieon"],
     },
     "dnascope": {
@@ -50,18 +50,18 @@ VCF_DICT = {
         "sequencing_type": ["targeted"],
         "workflow_solution": ["BALSAMIC"],
     },
+    "merged": {
+        "mutation": "somatic",
+        "mutation_type": "SNV",
+        "analysis_type": ["paired", "single"],
+        "sequencing_type": ["targeted"],
+        "workflow_solution": ["BALSAMIC"],
+    },
     "manta_germline": {
         "mutation": "germline",
         "mutation_type": "SV",
         "analysis_type": ["paired", "single"],
         "sequencing_type": ["targeted", "wgs"],
-        "workflow_solution": ["BALSAMIC"],
-    },
-    "haplotypecaller": {
-        "mutation": "germline",
-        "mutation_type": "SNV",
-        "analysis_type": ["paired", "single"],
-        "sequencing_type": ["targeted"],
         "workflow_solution": ["BALSAMIC"],
     },
     "dellysv": {
@@ -178,32 +178,41 @@ WORKFLOW_PARAMS = {
         "min_base_qual": 10,
         "cov_threshold": [50, 100, 150, 200, 250],
     },
-    "vardict": {
-        "allelic_frequency": "0.001",
-        "max_pval": "0.9",
-        "max_mm": "4.5",
-        "column_info": "-c 1 -S 2 -E 3 -g 4",
-    },
     "vep": {
         "vep_filters": "--compress_output bgzip --vcf --everything --hgvsg --allow_non_variant --dont_skip --buffer_size 30000 --max_sv_size 249250621 --format vcf --offline --variant_class --merged --cache --verbose --force_overwrite"
     },
-    "umicommon": {
-        "align_intbases": 1000000,
-        "filter_tumor_af": 0.0005,
-    },
+    "umicommon": {"align_intbases": 1000000},
     "umiconsensuscall": {
         "align_format": "BAM",
         "filter_minreads": "3,1,1",
         "tag": "XR",
     },
     "umiextract": {"read_structure": "-d '3M2S+T,3M2S+T'"},
+    "vardict": {
+        "allelic_frequency": "0.001",
+        "max_pval": "0.9",
+        "max_mm": "4.5",
+        "column_info": "-c 1 -S 2 -E 3 -g 4",
+    },
     "tnscope_umi": {
         "algo": "TNscope",
+        "filter_tumor_af": 0.0005,
+        "pcr_model": "NONE",
         "min_tumorLOD": 4,
         "init_tumorLOD": 0.5,
         "error_rate": 5,
         "prunefactor": 3,
         "padding": 100,
         "disable_detect": "sv",
+    },
+    "tnscope_tga": {
+        "algo": "TNscope",
+        "filter_tumor_af": 0.0005,
+        "pcr_model": "NONE",
+        "min_tumorLOD": 4,
+        "init_tumorLOD": 0.5,
+        "error_rate": 5,
+        "prunefactor": 3,
+        "padding": 100,
     },
 }

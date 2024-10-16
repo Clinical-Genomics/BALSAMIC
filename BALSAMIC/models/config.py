@@ -93,12 +93,13 @@ class VarcallerAttribute(BaseModel):
 class VCFModel(BaseModel):
     """Contains VCF config"""
 
-    vardict: VarcallerAttribute
     tnscope: VarcallerAttribute
     dnascope: VarcallerAttribute
     tnscope_umi: VarcallerAttribute
     manta_germline: VarcallerAttribute
+    merged: VarcallerAttribute
     manta: VarcallerAttribute
+    vardict: VarcallerAttribute
     dellysv: VarcallerAttribute
     cnvkit: VarcallerAttribute
     ascat: VarcallerAttribute
@@ -438,7 +439,7 @@ class ConfigModel(BaseModel):
             # Only dedup is necessary for panel of normals
             final_bam_suffix = "dedup.fixmate"
         elif self.analysis.sequencing_type == SequencingType.TARGETED:
-            # Only dedup is necessary for TGA
+            # TGA uses UMIs
             final_bam_suffix = "dedup.fixmate"
         else:
             # For WGS the bamfiles are realigned

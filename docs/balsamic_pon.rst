@@ -7,6 +7,10 @@ Currently two PON-methods are implemented in BALSAMIC to correct for biases and 
 
 - To produce normalised CN-profiles for WGS cases visualised in ``GENS``.
 
+Sharing PON for publications
+======================
+
+If a PON has been used for the analysis of samples in a research project and a publication requires that the PON is uploaded to some database, a request can be made to Clinical Genomics, and depending on the status of the consent of the individuals from which the samples used in the construction of the PON has been derived it may or may not be possible to share the PON.
 
 CNVkit PON
 ======================

@@ -44,7 +44,12 @@ OPTION_ANALYSIS_WORKFLOW = click.option(
     type=click.Choice(ANALYSIS_WORKFLOWS),
     help="Balsamic analysis workflow to be executed",
 )
-
+OPTION_ARTEFACT_SNV_OBSERVATIONS = click.option(
+    "--artefact-snv-observations",
+    type=click.Path(exists=True, resolve_path=True),
+    required=False,
+    help="VCF path of somatic SNVs called in high coverage normal samples (used in all workflows)",
+)
 OPTION_BACKGROUND_VARIANTS = click.option(
     "-b",
     "--background-variants",

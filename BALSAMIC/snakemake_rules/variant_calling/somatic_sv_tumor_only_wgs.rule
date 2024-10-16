@@ -28,7 +28,8 @@ rule manta_tumor_only:
         "index the compressed vcf file")
     shell:
       """
-samtools_path=$(readlink -f $(which samtools))
+export TMPDIR={params.tmpdir} ;
+samtools_path=$(readlink -f $(which samtools)) ;
 
 configManta.py \
 {params.settings} \
@@ -77,6 +78,8 @@ rule delly_sv_tumor_only:
         ("Calling structural variants using delly for {params.case_name}")
     shell:
         """
+export TMPDIR={params.tmpdir} ;
+
 delly call -x {input.excl} -o {output.bcf} -g {input.fa} {input.bamT}
 
 echo -e \"{params.tumor}\\tTUMOR\" > {output.namemap};
@@ -110,6 +113,8 @@ rule delly_cnv_tumor_only:
         ("Calling copy number variants using delly for {params.case_name}")
     shell:
         """
+export TMPDIR={params.tmpdir} ;
+
 delly cnv -m {input.map} -g {input.fa} -c {output.rd_delly} -o {output.cnv_delly} -l {input.bcf} {input.bamT}
 
 echo -e \"{params.tumor}\\tTUMOR\" > {output.namemap};
@@ -140,6 +145,8 @@ rule tiddit_sv_tumor_only:
         ("Calling structural variants using tiddit for {params.case_name}")
     shell:
         """
+export TMPDIR={params.tmpdir} ;
+
 tiddit --cov -z 500 --ref {input.fa} --bam {input.bamT} -o {params.tmpdir}/{params.tumor}_cov &
 
 tiddit --sv -p 6 -r 6 -z 1000 --ref {input.fa} --bam {input.bamT} -o {params.tmpdir}/{params.tumor};
@@ -179,6 +186,7 @@ rule cnvpytor_tumor_only:
         ("Calling copy number variants using cnvpytor for {params.case_name}")
     shell:
         """
+export TMPDIR={params.tmpdir} ;
 export tumor={params.tumor};
 
 export tumor_file={params.tmpdir}/$tumor

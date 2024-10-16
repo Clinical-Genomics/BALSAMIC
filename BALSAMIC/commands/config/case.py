@@ -11,6 +11,7 @@ from BALSAMIC import __version__ as balsamic_version
 from BALSAMIC.commands.options import (
     OPTION_ANALYSIS_DIR,
     OPTION_ANALYSIS_WORKFLOW,
+    OPTION_ARTEFACT_SNV_OBSERVATIONS,
     OPTION_BACKGROUND_VARIANTS,
     OPTION_BALSAMIC_CACHE,
     OPTION_CACHE_VERSION,
@@ -65,6 +66,7 @@ LOG = logging.getLogger(__name__)
 @click.command("case", short_help="Create a sample config file from input sample data")
 @OPTION_ANALYSIS_DIR
 @OPTION_ANALYSIS_WORKFLOW
+@OPTION_ARTEFACT_SNV_OBSERVATIONS
 @OPTION_BACKGROUND_VARIANTS
 @OPTION_BALSAMIC_CACHE
 @OPTION_CACHE_VERSION
@@ -96,6 +98,7 @@ def case_config(
     context: click.Context,
     analysis_dir: Path,
     analysis_workflow: AnalysisWorkflow,
+    artefact_snv_observations: Path,
     background_variants: Path,
     balsamic_cache: Path,
     cache_version: str,
@@ -150,6 +153,7 @@ def case_config(
             )
 
     variants_observations = {
+        "artefact_snv_observations": artefact_snv_observations,
         "clinical_snv_observations": clinical_snv_observations,
         "clinical_sv_observations": clinical_sv_observations,
         "cancer_germline_snv_observations": cancer_germline_snv_observations,
