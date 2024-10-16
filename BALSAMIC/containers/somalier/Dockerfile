@@ -26,7 +26,7 @@ RUN mkdir -p /usr/local/include && \
     cd .. && rm -rf libdeflate
 
 RUN cd / && \
-    wget -q https://nim-lang.org/download/nim-${nim_version}-linux_x64.tar.xz && \
+    wget --max-redirect=0 -q https://nim-lang.org/download/nim-${nim_version}-linux_x64.tar.xz && \
     tar xf nim-${nim_version}-linux_x64.tar.xz && \
     echo 'PATH=/nim-${nim_version}/bin:$PATH' >> ~/.bashrc && \
     echo 'PATH=/nim-${nim_version}/bin:$PATH' >> ~/.bash_profile && \
@@ -34,7 +34,7 @@ RUN cd / && \
     rm -f nim-${nim_version}-linux_x64.tar.xz
 
 RUN apk add --no-cache cmake openssl-dev && \
-    wget -q https://libzip.org/download/libzip-1.6.1.tar.gz && \
+    wget --max-redirect=0 -q https://libzip.org/download/libzip-1.6.1.tar.gz && \
 	tar xzvf libzip-1.6.1.tar.gz && \
 	cd libzip-1.6.1 && \
 	mkdir build && cd build && \
