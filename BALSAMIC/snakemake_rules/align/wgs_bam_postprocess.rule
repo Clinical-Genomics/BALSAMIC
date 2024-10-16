@@ -1,47 +1,5 @@
 """Rules to align, mark duplicates and realign reads with Sentieon tools."""
 
-rule sentieon_align_sort:
-    input:
-        ref = config["reference"]["reference_genome"],
-        fastq_r1 = Path(fastq_dir, "{fastq_pattern}_1.fp.fastq.gz").as_posix(),
-        fastq_r2 = Path(fastq_dir, "{fastq_pattern}_2.fp.fastq.gz").as_posix(),
-        refidx = expand(config["reference"]["reference_genome"] + ".{prefix}", prefix=["amb","ann","bwt","pac","sa"])
-    output:
-        bam_out = Path(bam_dir, "{sample}_align_sort_{fastq_pattern}.bam").as_posix()
-    benchmark:
-        Path(benchmark_dir, "sentieon_align_sort_{sample}_{fastq_pattern}.tsv").as_posix()
-    params:
-        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-        header = params.common.align_header,
-        sentieon_exec = config_model.sentieon.sentieon_exec,
-        sentieon_lic = config_model.sentieon.sentieon_license,
-        sample_id = "{sample}",
-        sample_type = lambda wildcards: config_model.get_sample_type_by_name(wildcards.sample, uppercase=True),
-        fastq_pattern = "{fastq_pattern}"
-    threads:
-        get_threads(cluster_config, 'sentieon_align_sort')
-    message:
-        ("Align fastq reads using sentieon bwa-mem and sort reads using samtools for sample type: "
-        "{params.sample_type} : {params.sample_id}, {params.fastq_pattern}")
-    shell:
-        """
-mkdir -p {params.tmpdir};
-export TMPDIR={params.tmpdir};
-export SENTIEON_TMPDIR={params.tmpdir};
-export SENTIEON_LICENSE={params.sentieon_lic};
-
-{params.sentieon_exec} bwa mem -M \
--R '@RG\\tID:{wildcards.fastq_pattern}\\tSM:{params.sample_type}\\tPL:ILLUMINA' \
--t {threads} \
--K 50000000 \
-{input.ref} {input.fastq_r1} {input.fastq_r2} \
-| {params.sentieon_exec} util sort \
--o {output.bam_out} \
--t {threads} \
---block_size 3G \
---sam2bam -i -;
-        """
-
 rule sentieon_dedup:
     input:
         bam_files = lambda wildcards: config_model.get_bam_name_per_lane(bam_dir = bam_dir, sample_name = wildcards.sample)
@@ -63,7 +21,6 @@ rule sentieon_dedup:
          "Current sample: {params.sample_id}")
     shell:
         """
-mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
 export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
@@ -74,8 +31,7 @@ shell_bam_files=$(echo {input.bam_files} | sed 's/ / -i /g') ;
 -t {threads} \
 -i $shell_bam_files \
 --algo LocusCollector \
---fun score_info \
-{output.score};
+--fun score_info {output.score} ;
 
 {params.sentieon_exec} driver \
 -t {threads} \
@@ -84,6 +40,8 @@ shell_bam_files=$(echo {input.bam_files} | sed 's/ / -i /g') ;
 --score_info {output.score} \
 --metrics {output.metrics} \
 {output.bam};
+
+rm -rf {params.tmpdir}
         """
 
 rule sentieon_realign:
@@ -107,18 +65,77 @@ rule sentieon_realign:
         "INDEL realignment using sentieon realigner for sample: {params.sample_id}"
     shell:
         """
-    mkdir -p {params.tmpdir};
-    export TMPDIR={params.tmpdir};
-    export SENTIEON_TMPDIR={params.tmpdir};
-    export SENTIEON_LICENSE={params.sentieon_lic};
-    
-    {params.sentieon_exec} driver \
-    -r {input.ref} \
-    -t {threads} \
-    -i {input.bam} \
-    --algo Realigner \
-    -k {input.mills} \
-    -k {input.indel_1kg} \
-    {output}; 
-            """
+export TMPDIR={params.tmpdir};
+export SENTIEON_TMPDIR={params.tmpdir};
+export SENTIEON_LICENSE={params.sentieon_lic};
 
+{params.sentieon_exec} driver \
+-r {input.ref} \
+-t {threads} \
+-i {input.bam} \
+--algo Realigner \
+-k {input.mills} \
+-k {input.indel_1kg} \
+{output}; 
+
+rm -rf {params.tmpdir}
+        """
+
+rule sentieon_base_calibration:
+    input:
+        ref = config["reference"]["reference_genome"],
+        mills = config["reference"]["mills_1kg"],
+        indel_1kg = config["reference"]["known_indel_1kg"],
+        dbsnp = config["reference"]["dbsnp"],
+        bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_type = wildcards.sample_type)
+    output:
+        recal_data_table = Path(bam_dir, "{sample_type}.recal_data.table").as_posix(),
+        qual_recal = Path(bam_dir, "{sample_type}.recal.csv").as_posix(),
+        qual_recal_plot = Path(bam_dir, "{sample_type}.recal.pdf").as_posix(),
+    benchmark:
+        Path(benchmark_dir, "sentieon_base_calibration_{sample_type}.tsv").as_posix()
+    params:
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
+        sentieon_exec = config_model.sentieon.sentieon_exec,
+        sentieon_lic = config_model.sentieon.sentieon_license,
+        sample = "{sample_type}"
+    threads:
+        get_threads(cluster_config, 'sentieon_base_calibration')
+    message:
+        "Base recalibration using Sentieon tools for {params.sample}"
+    shell:
+        """
+export TMPDIR={params.tmpdir};
+export SENTIEON_TMPDIR={params.tmpdir};
+export SENTIEON_LICENSE={params.sentieon_lic};
+
+{params.sentieon_exec} driver \
+-r {input.ref} \
+-t {threads} \
+-i {input.bam} \
+--algo QualCal \
+-k {input.dbsnp} \
+-k {input.mills} \
+-k {input.indel_1kg} {output.recal_data_table};
+
+{params.sentieon_exec} driver \
+-r {input.ref} \
+-t {threads} \
+-i {input.bam} \
+-q {output.recal_data_table} \
+--algo QualCal \
+-k {input.dbsnp} \
+-k {input.mills} \
+-k {input.indel_1kg} {output.recal_data_table}.post;
+
+{params.sentieon_exec} driver \
+-t {threads} \
+--algo QualCal \
+--plot --before {output.recal_data_table} \
+--after {output.recal_data_table}.post {output.qual_recal};
+
+{params.sentieon_exec} plot QualCal \
+-o {output.qual_recal_plot} {output.qual_recal};
+
+rm -rf {params.tmpdir};
+        """

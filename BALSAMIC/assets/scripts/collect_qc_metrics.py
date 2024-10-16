@@ -144,7 +144,14 @@ def get_qc_supported_capture_kit(capture_kit, metrics: List[str]) -> str:
         if k != "default":
             available_panel_beds.append(k)
 
-    return next((i for i in available_panel_beds if i in capture_kit), None)
+    return next(
+        (
+            i
+            for i in available_panel_beds
+            if re.search(rf"{re.escape(i)}(?=_\d)", capture_kit)
+        ),
+        None,
+    )
 
 
 def get_requested_metrics(config: dict, metrics: dict) -> dict:
@@ -197,7 +204,6 @@ def get_sample_id(multiqc_key: str) -> str:
     Returns
         str: The extracted sample ID with the ACCXXXXXX format.
     """
-
     if "_align_sort_" in multiqc_key:
         return multiqc_key.split("_")[0]
     return multiqc_key.split(".")[1].split("_")[0]
