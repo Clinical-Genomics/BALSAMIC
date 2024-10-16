@@ -1909,10 +1909,10 @@ def qc_requested_metrics():
                 "METRIC_1": {"condition": None},
                 "METRIC_2": {"condition": {"norm": "gt", "threshold": 2}},
             },
-            "panel_1": {
+            "panelA": {
                 "METRIC_3": {"condition": {"norm": "gt", "threshold": 3}},
             },
-            "panel_2": {
+            "panelB": {
                 "METRIC_1": {"condition": {"norm": "gt", "threshold": 1}},
                 "METRIC_2": {"condition": {"norm": "gt", "threshold": 22}},
                 "METRIC_4": {"condition": {"norm": "gt", "threshold": 4}},
