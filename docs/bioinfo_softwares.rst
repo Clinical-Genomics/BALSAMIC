@@ -86,7 +86,7 @@ msisensor-pro
 ~~~~~~~~~~~~~
 :Source code: `GitHub` `<https://github.com/xjtu-omics/msisensor-pro>`_
 :Article: `Bioinformatics` `<https://doi.org/10.1016/j.gpb.2020.02.001>`_
-:Version: `1.2.0`
+:Version: `1.3.0`
 
 mosdepth
 ~~~~~~~~
@@ -128,7 +128,7 @@ somalier
 ~~~~~~~~
 :Source code: `Github` `<https://github.com/brentp/somalier>`_
 :Article: `Genome Medicine` `<https://doi.org/10.1186/s13073-020-00761-2>`_
-:Version: `0.2.16`
+:Version: `0.2.19`
 
 svdb
 ~~~~
