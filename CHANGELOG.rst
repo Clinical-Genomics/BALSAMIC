@@ -52,8 +52,8 @@ Fixed:
 * MSI table https://github.com/Clinical-Genomics/BALSAMIC/pull/1459
 * Pin numpy version in CNVkit container https://github.com/Clinical-Genomics/BALSAMIC/pull/1457
 * CNVkit incorrect version in the documentation https://github.com/Clinical-Genomics/BALSAMIC/pull/1457
-* MSIsensor-pro container https://github.com/Clinical-Genomics/BALSAMIC/pull/1486
-* Somalier container https://github.com/Clinical-Genomics/BALSAMIC/pull/1487
+* MSIsensor-pro container and updated msisensor to version 1.3.0  https://github.com/Clinical-Genomics/BALSAMIC/pull/1486
+* Somalier container and updated somalier to version 0.2.19 https://github.com/Clinical-Genomics/BALSAMIC/pull/1487
 
 [15.0.1]
 --------
