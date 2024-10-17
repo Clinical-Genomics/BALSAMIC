@@ -30,7 +30,7 @@ References and other resources
 Sample datasets
 ---------------
 
-#. **TCRB**: The Texas Cancer Research Biobank (TCRB) was created to bridge the gap between doctors and scientific researchers to improve the prevention, diagnosis and treatment of cancer. This work occurred with funding from the Cancer Prevention & Research Institute of Texas (CPRIT) from 2010-2014. http://txcrb.org/data.html Article: https://www.nature.com/articles/sdata201610
+#. **TCRB**: The Texas Cancer Research Biobank (TCRB) was created to bridge the gap between doctors and scientific researchers to improve the prevention, diagnosis and treatment of cancer. This work occurred with funding from the Cancer Prevention & Research Institute of Texas (CPRIT) from 2010-2014. Article: https://www.nature.com/articles/sdata201610
 
 Relevant publications
 ---------------------
