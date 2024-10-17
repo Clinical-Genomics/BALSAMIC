@@ -4,6 +4,7 @@ on:
     branches:
       - master
       - develop
+      - fix_broken_cache_doc_links
 jobs:
   main:
     name: Find broken cache and documentation links
@@ -13,7 +14,7 @@ jobs:
         id: git_checkout
         uses: actions/checkout@v3
       - name: Link Checker
-        uses: lycheeverse/lychee-action@v1.8.0
+        uses: lycheeverse/lychee-action@v2.0.2
         with:
           args: --max-redirects 10 --verbose './BALSAMIC/constants/cache.py' './docs/*.rst'
           fail: true
