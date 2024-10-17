@@ -36,6 +36,7 @@ Changed:
 * Lowered maximal SOR for TNscope in TGA tumor only cases from 3 to 2.7 https://github.com/Clinical-Genomics/BALSAMIC/pull/1475
 * Fixed TNscope research VCF filters to either PASS or triallelic site https://github.com/Clinical-Genomics/BALSAMIC/pull/1475
 * Increased maximal amount of redirects for lychee test following links in docs to 10 https://github.com/Clinical-Genomics/BALSAMIC/pull/1488
+* Updated readthedocs tools versions https://github.com/Clinical-Genomics/BALSAMIC/pull/1489
 
 Removed:
 ^^^^^^^^
