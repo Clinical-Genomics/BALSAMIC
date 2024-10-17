@@ -19,7 +19,7 @@ References and other resources
 #. **Cancer genomics workflow**: MGI's CWL Cancer Pipelines. https://github.com/genome/cancer-genomics-workflow/wiki
 #. **GIAB**: The priority of GIAB is authoritative characterization of human genomes for use in analytical validation and technology development, optimization, and demonstration. https://github.com/genome-in-a-bottle
 #. **dbNSFP**: dbNSFP is a database developed for functional prediction and annotation of all potential non-synonymous single-nucleotide variants (nsSNVs) in the human genome. https://sites.google.com/site/jpopgen/dbNSFP
-#. **1000Genomes**: The goal of the 1000 Genomes Project was to find most genetic variants with frequencies of at least 1% in the populations studied. http://www.internationalgenome.org/ Download link: ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/
+#. **1000Genomes**: The goal of the 1000 Genomes Project was to find most genetic variants with frequencies of at least 1% in the populations studied. https://www.internationalgenome.org/ Download link: ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/
 #. **HapMap3**: The International HapMap Project was an organization that aimed to develop a haplotype map (HapMap) of the human genome, to describe the common patterns of human genetic variation. HapMap 3 is the third phase of the International HapMap project. http://www.sanger.ac.uk/resources/downloads/human/hapmap3.html Download link: ftp://ftp.ncbi.nlm.nih.gov/hapmap/
 #. **GRCh38.p11**: GRCh38.p11 is the eleventh patch release for the GRCh38 (human) reference assembly. https://www.ncbi.nlm.nih.gov/grc/human Download link: ftp://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/000/001/405/
 #. **dbVar**: dbVar is NCBI's database of genomic structural variation – insertions, deletions, duplications, inversions, mobile element insertions, translocations, and complex chromosomal rearrangements https://www.ncbi.nlm.nih.gov/dbvar Download link: https://www.ncbi.nlm.nih.gov/dbvar/content/ftp_manifest/
@@ -132,7 +132,7 @@ Methods and tools
 #. **BreakDancer**: SV detection from paired end reads mapping https://github.com/genome/breakdancer
 #. **pIndel**: Detect breakpoints of large deletions, medium sized insertions, inversions, and tandem duplications https://github.com/genome/pindel
 #. **VarScan**: Variant calling and somatic mutation/CNV detection https://github.com/dkoboldt/varscan
-#. **VEP**: Variant Effect Predictor https://www.ensembl.org/info/docs/tools/vep/index.html
+#. **VEP**: Variant Effect Predictor https://www.ensembl.org/info/docs/tools/vep
 #. **Probablistic2020**: Simulates somatic mutations, and calls statistically significant oncogenes and tumor suppressor genes based on a randomization-based test  https://github.com/KarchinLab/probabilistic2020
 #. **2020plus**: Classifies genes as an oncogene, tumor suppressor gene, or as a non-driver gene by using Random Forests https://github.com/KarchinLab/2020plus
 #. **vtools**: variant tools is a software tool for the manipulation, annotation, selection, simulation, and analysis of variants in the context of next-gen sequencing analysis. https://vatlab.github.io/vat-docs/
