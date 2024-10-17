@@ -15,7 +15,7 @@ bcftools
 ~~~~~~~~
 :Source code: `GitHub` `<https://github.com/samtools/bcftools>`_
 :Article: `Bioinformatics` `<https://pubmed.ncbi.nlm.nih.gov/21903627/>`_
-:Version: `>=1.10`
+:Version: `>=1.13`
 
 bedtools
 ~~~~~~~~
@@ -74,7 +74,7 @@ fastqc
 genmod
 ~~~~~~
 :Source code: `Github` `<https://github.com/Clinical-Genomics/genmod>`_
-:Version: `0.2.16`
+:Version: `3.7.4`
 
 manta
 ~~~~~
@@ -116,7 +116,7 @@ samtools
 ~~~~~~~~
 :Source code: `GitHub` `<https://github.com/samtools/samtools>`_
 :Article: `Bioinformatics` `<https://pubmed.ncbi.nlm.nih.gov/19505943/>`_
-:Version: `>1.11`
+:Version: `1.15.1`
 
 sentieon-tools
 ~~~~~~~~~~~~~~
@@ -164,4 +164,4 @@ vcf2cytosure
 ~~~~~~~~~~~~~
 :Source code: `GitHub` `<https://github.com/NBISweden/vcf2cytosure>`_
 :Article: `-`
-:Version: `0.8`
+:Version: `0.9.1`
