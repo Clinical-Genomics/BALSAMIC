@@ -4,7 +4,6 @@ on:
     branches:
       - master
       - develop
-      - fix_broken_cache_doc_links
 jobs:
   main:
     name: Find broken cache and documentation links
