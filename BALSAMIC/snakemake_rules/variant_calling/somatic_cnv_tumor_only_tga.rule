@@ -4,17 +4,13 @@
 rule cnvkit_segment_CNV_research:
     input:
         access_bed = config["reference"]["access_regions"],
-        baits_bed = config["panel"]["capture_kit"],
         fasta = config["reference"]["reference_genome"],
         refgene_flat = config["reference"]["refgene_flat"],
-        bamT = config_model.get_final_bam_name(bam_dir = bam_dir,sample_name=tumor_sample),
+        tumor_target_cnn=expand(cnv_dir + "{sample}.targetcoverage.cnn",sample=tumor_sample),
+        tumor_antitarget_cnn=expand(cnv_dir + "{sample}.antitargetcoverage.cnn",sample=tumor_sample),
     output:
         cns_initial = cnv_dir + "tumor.initial.cns",
         cnr = cnv_dir + "tumor.merged.cnr",
-        targets = cnv_dir + "targets.bed",
-        antitargets = cnv_dir + "antitarget.bed",
-        tumor_target_coverage = cnv_dir + "tumor.targetcoverage.cnn",
-        tumor_antitarget_coverage = cnv_dir + "tumor.antitargetcoverage.cnn",
         segment = cnv_dir + "tumor.seg",
     benchmark:
         Path(f"{benchmark_dir}/cnvkit_segment_{config['analysis']['case_id']}.tsv").as_posix()
@@ -23,8 +19,8 @@ rule cnvkit_segment_CNV_research:
     threads:
         get_threads(cluster_config,"cnvkit_segment_CNV_research")
     params:
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "cnv"},
-        min_mapq = params.common.min_mapq,
         case_name = config["analysis"]["case_id"],
         sample_id = "TUMOR",
         flat_reference_cnn = cnv_dir + "flat_reference.cnn",
@@ -33,47 +29,26 @@ rule cnvkit_segment_CNV_research:
         ("Segmenting genomic regions using CNVkit for {params.case_name}")
     shell:
       """
-# create target and anti-target bed files
-cnvkit.py target {input.baits_bed} \
---annotate {input.refgene_flat} \
---split \
---output {output.targets};
-
-cnvkit.py antitarget {input.baits_bed} \
---access {input.access_bed} \
---output {output.antitargets};
-
-# calculate coverage in the given regions from BAM read depths
-cnvkit.py coverage {input.bamT} \
-{output.targets} \
---min-mapq {params.min_mapq} \
---processes {threads} \
---output {output.tumor_target_coverage};
-
-cnvkit.py coverage {input.bamT} \
-{output.antitargets} \
---min-mapq {params.min_mapq} \
---processes {threads} \
---output {output.tumor_antitarget_coverage};
+export TMPDIR={params.tmpdir} ;
 
 # Combine the uncorrected target and antitarget coverage tables (.cnn) and
 # correct for biases in regional coverage and GC content, according to the given reference
 if [[ ! -f "{params.pon}" ]]; then
 cnvkit.py reference --output {params.flat_reference_cnn} \
 --fasta {input.fasta} \
---targets {output.targets} \
---antitargets {output.antitargets};
+--targets {input.tumor_target_cnn} \
+--antitargets {input.tumor_antitarget_cnn};
 
-cnvkit.py fix {output.tumor_target_coverage} \
-{output.tumor_antitarget_coverage} \
+cnvkit.py fix {input.tumor_target_cnn} \
+{input.tumor_antitarget_cnn} \
 {params.flat_reference_cnn} \
 --output {output.cnr};
 
 else
 
 echo "PON reference exists- Using it for coverage correction"
-cnvkit.py fix {output.tumor_target_coverage} \
-{output.tumor_antitarget_coverage} \
+cnvkit.py fix {input.tumor_target_cnn} \
+{input.tumor_antitarget_cnn} \
 {params.pon} \
 --output {output.cnr};
 
@@ -91,6 +66,8 @@ cnvkit.py segment {output.cnr} \
 
 # Convert copy number segments (initial.cns) to standard SEG format to be used for PureCN
 cnvkit.py export seg {output.cns_initial} --output {output.segment};
+
+rm -rf {params.tmpdir};
       """
 
 rule purecn_call_CNV_research:
@@ -123,7 +100,8 @@ rule purecn_call_CNV_research:
         ("Computing tumor purity and ploidy values using PureCN for {params.case_name}")
     shell:
       """
-export PURECN='/opt/PureCN/PureCN.R'
+export TMPDIR={params.tmpdir} ;
+export PURECN='/opt/PureCN/PureCN.R' ;
 
 # Run PureCN to estimate tumor-purity and ploidy
 
@@ -180,7 +158,6 @@ rule cnvkit_call_CNV_research:
     input:
         access_bed = config["reference"]["access_regions"],
         fasta = config["reference"]["reference_genome"],
-        baits_bed = config["panel"]["capture_kit"],
         refgene_flat = config["reference"]["refgene_flat"],
         purity_ploidy = cnv_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".purecn.purity.csv",
         cns_initial= cnv_dir + "tumor.initial.cns",
@@ -201,6 +178,7 @@ rule cnvkit_call_CNV_research:
     threads:
         get_threads(cluster_config, "cnvkit_call_CNV_research")
     params:
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "cnv"},
         cnv_dir = cnv_dir,
         cnsr = lambda wc: "tumor.merged.cn{s,r}",
@@ -212,6 +190,7 @@ rule cnvkit_call_CNV_research:
         ("Calling CNVs using CNVkit for {params.case_name}")
     shell:
       """
+export TMPDIR={params.tmpdir} ;
 purity=$(awk -F\\, 'NR>1 {{print $2}}' {input.purity_ploidy})
 ploidy=$(awk -F\\, 'NR>1 {{printf int($3)}}' {input.purity_ploidy})
 
@@ -251,13 +230,52 @@ cnvkit.py export vcf {output.cns} \
 --output {output.vcf} \
 --sample-sex {params.gender} \
 --sample-id {params.sample_id};
+
+rm -rf {params.tmpdir};
       """
+
+rule delly_cnv_tumor_only:
+    input:
+        fa = config["reference"]["reference_genome"],
+        bamT = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
+        bcf = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".delly.bcf",
+        map = config["reference"]["delly_mappability"],
+        baits_bed = config["panel"]["capture_kit"],
+    output:
+        cnv_delly=vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".delly.bcf",
+        rd_delly=vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".dellycnv.cov.gz",
+        namemap=vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".dellycnv.sample_name_map",
+    benchmark:
+        benchmark_dir + 'delly_cnv_tumor_only_' + config["analysis"]["case_id"] + ".tsv"
+    singularity:
+        Path(singularity_image,config["bioinfo_tools"].get("delly") + ".sif").as_posix()
+    params:
+        tmpdir=tempfile.mkdtemp(prefix=tmp_dir),
+        housekeeper_id={"id": config["analysis"]["case_id"], "tags": "clinical"},
+        tumor="TUMOR",
+        case_name=config["analysis"]["case_id"]
+    threads:
+        get_threads(cluster_config,"delly_tumor_only")
+    message:
+        ("Calling copy number variants using delly for {params.case_name}")
+    shell:
+        """
+export TMPDIR={params.tmpdir} ;
+
+delly cnv  -i 10000 -m {input.map} -g {input.fa} -b {input.baits_bed} \
+-c {output.rd_delly} -o {output.cnv_delly} -l {input.bcf} {input.bamT}
+
+echo -e \"{params.tumor}\\tTUMOR\" > {output.namemap};
+
+rm -rf {params.tmpdir};
+        """
+
 
 rule bcftools_sort_cnvkitCNV_research:
     input:
         vcf =  cnv_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".cnvkit.vcf",
     output:
-        namemap = temp(vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".cnvkit.sample_name_map"),
+        namemap = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".cnvkit.sample_name_map",
         vcf = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".cnvkit.vcf.gz"
     benchmark:
         Path(f"{benchmark_dir}/bcftools_sort_cnvkitCNV_research_{config['analysis']['case_id']}.tsv").as_posix()

@@ -8,9 +8,9 @@ rule sambamba_panel_depth:
         bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample),
         bed = config["panel"]["capture_kit"]
     output:
-        bam_dir + "{sample}.dedup.cov.bed"
+        qc_dir + "{sample_type}.{sample}.cov.bed"
     benchmark:
-        Path(benchmark_dir, "sambamba_panel_depth_" + "{sample}.tsv").as_posix()
+        Path(benchmark_dir, "sambamba_panel_depth_" + "{sample_type}_{sample}.tsv").as_posix()
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("sambamba") + ".sif").as_posix()
     params:
@@ -42,9 +42,9 @@ rule sambamba_exon_depth:
         bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample),
         bed = config["reference"]["refgene_bed"]
     output:
-        bam_dir + "{sample}.dedup.exon.cov.bed"
+        qc_dir + "{sample_type}.{sample}.exon.cov.bed"
     benchmark:
-        Path(benchmark_dir, "sambamba_exon_depth_" + "{sample}.tsv").as_posix()
+        Path(benchmark_dir, "sambamba_exon_depth_" + "{sample_type}_{sample}.tsv").as_posix()
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("sambamba") + ".sif").as_posix()
     params:
@@ -55,7 +55,7 @@ rule sambamba_exon_depth:
         cov_4 = "200",
         cov_5 = "250",
         filter_string = "'not (unmapped or mate_is_unmapped) and not duplicate and not failed_quality_control and mapping_quality > 10'",
-        sample = 'sample'
+        sample = '{sample}'
     threads:
         get_threads(cluster_config,'sambamba_exon_depth')
     message:

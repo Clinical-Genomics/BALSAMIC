@@ -27,9 +27,9 @@ done
 rule txt_to_pdf:
     """Converting AscatNgs statistics TXT file to PDF format."""
     input:
-        sample_statistics=f"{vcf_dir}CNV.somatic.{config['analysis']['case_id']}.ascat.samplestatistics.txt"
+        sample_statistics=f"{vcf_dir}CNV.somatic.{config['analysis']['case_id']}.ascat.samplestatistics.txt",
     output:
-        sample_statistics_pdf=f"{vcf_dir}CNV.somatic.{config['analysis']['case_id']}.ascat.samplestatistics.txt.pdf"
+        sample_statistics_pdf=f"{vcf_dir}CNV.somatic.{config['analysis']['case_id']}.ascat.samplestatistics.txt.pdf",
     params:
         csv_to_pdf_script=get_script_path("csv_to_pdf.py"),
     threads:
@@ -41,6 +41,23 @@ rule txt_to_pdf:
 python "{params.csv_to_pdf_script}" "{input.sample_statistics}" "{output.sample_statistics_pdf}" --delimiter " "
         """
 
+
+rule msi_to_pdf:
+    """Converting MSI TXT file to PDF format."""
+    input:
+        msi_result= f"{vcf_dir}MSI.somatic.{config['analysis']['case_id']}.msisensorpro.msi",
+    output:
+        msi_result_pdf= f"{vcf_dir}MSI.somatic.{config['analysis']['case_id']}.msisensorpro.msi.pdf",
+    params:
+        csv_to_pdf_script=get_script_path("csv_to_pdf.py"),
+    threads:
+        get_threads(cluster_config=cluster_config, rule_name="txt_to_pdf")
+    message:
+        "Converting MSI TXT file to PDF"
+    shell:
+        """
+python "{params.csv_to_pdf_script}" "{input.msi_result}" "{output.msi_result_pdf}" --delimiter "\t" --header
+        """
 
 rule image_to_pdf:
     """Converting CNV PNG files to PDF format."""

@@ -109,6 +109,7 @@ class BioinfoTools(StrEnum):
     GATK: str = "gatk"
     GENMOD: str = "genmod"
     MANTA: str = "manta"
+    MSISENSORPRO: str = "msisensorpro"
     MOSDEPTH: str = "mosdepth"
     MULTIQC: str = "multiqc"
     PICARD: str = "picard"
@@ -123,6 +124,7 @@ class BioinfoTools(StrEnum):
     VCFANNO: str = "vcfanno"
     CADD: str = "cadd"
     PURECN: str = "purecn"
+    PYSAM: str = "pysam"
 
 
 class FastqName(StrEnum):
@@ -151,7 +153,7 @@ BIOINFO_TOOL_ENV: Dict[str, str] = {
     BioinfoTools.FASTQC: DockerContainers.ALIGN_QC,
     BioinfoTools.SAMTOOLS: DockerContainers.ALIGN_QC,
     BioinfoTools.PICARD: DockerContainers.ALIGN_QC,
-    BioinfoTools.MULTIQC: DockerContainers.ALIGN_QC,
+    BioinfoTools.MULTIQC: DockerContainers.MULTIQC,
     BioinfoTools.FASTP: DockerContainers.ALIGN_QC,
     BioinfoTools.CSVKIT: DockerContainers.ALIGN_QC,
     BioinfoTools.VEP: DockerContainers.ANNOTATE,
@@ -159,6 +161,7 @@ BIOINFO_TOOL_ENV: Dict[str, str] = {
     BioinfoTools.VCFANNO: DockerContainers.ANNOTATE,
     BioinfoTools.SAMBAMBA: DockerContainers.COVERAGE_QC,
     BioinfoTools.MOSDEPTH: DockerContainers.COVERAGE_QC,
+    BioinfoTools.MSISENSORPRO: DockerContainers.MSISENSORPRO,
     BioinfoTools.BCFTOOLS: DockerContainers.PYTHON_3,
     BioinfoTools.TABIX: DockerContainers.PYTHON_3,
     BioinfoTools.BGZIP: DockerContainers.PYTHON_3,
@@ -175,4 +178,5 @@ BIOINFO_TOOL_ENV: Dict[str, str] = {
     BioinfoTools.CADD: DockerContainers.CADD,
     BioinfoTools.PURECN: DockerContainers.PURECN,
     BioinfoTools.GATK: DockerContainers.GATK,
+    BioinfoTools.PYSAM: DockerContainers.PYTHON_3,
 }

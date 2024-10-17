@@ -1,159 +1,120 @@
 {
-    "QC": {
-        "picard_rmdup": false,
-        "adapter": "AATGATACGGCGACCACCGAGATCTACACTCTTTCCCTACACGACGCTCTTCCGATCT",
-        "quality_trim": true,
-        "adapter_trim": true,
-        "umi_trim": true,
-        "min_seq_length": "25",
-        "umi_trim_length": "5",
-        "n_base_limit": "50"
-    },
-    "samples": "Placeholder",
-    "reference": {
-        "reference_genome": "tests/test_data/references/genome/human_g1k_v37_decoy.fasta",
-        "dbsnp": "tests/test_data/references/variants/dbsnp_grch37_b138.vcf.gz",
-        "vcf_1kg": "tests/test_data/references/variants/1k_genome_wgs_p1_v3_all_sites.vcf.gz",
-        "hc_vcf_1kg": "tests/test_data/references/variants/1kg_phase1_snps_high_confidence_b37.vcf.gz",
-        "mills_1kg": "tests/test_data/references/variants/mills_1kg_index.vcf.gz",
-        "cosmic": "tests/test_data/references/variants/cosmic_coding_muts_v89.vcf.gz",
-        "vep_dir": "tests/test_data/references/vep/",
-        "refgene_bed": "tests/test_data/references/genome/refseq.flat.bed",
-        "somalier_sites": "tests/test_data/references/variants/GRCh37.somalier.sites.vcf.gz"
-    },    
-    "bioinfo_tools": {
-        "bedtools": "align_qc",
-        "bwa": "align_qc",
-        "compress": "align_qc",
-        "fastqc": "align_qc",
-        "samtools": "align_qc",
-        "picard": "align_qc",
-        "multiqc": "align_qc",
-        "fastp": "align_qc",
-        "csvkit": "align_qc",
-        "ensembl-vep": "annotate",
-        "genmod": "annotate",
-        "vcfanno": "annotate",
-        "sambamba": "coverage_qc",
-        "mosdepth": "coverage_qc",
-        "bcftools": "varcall_py3",
-        "tabix": "varcall_py3",
-        "bgzip": "varcall_py3",
-        "gatk": "varcall_py3",
-        "vardict": "varcall_py3",
-        "svdb": "varcall_py3",
-        "tiddit": "varcall_py3",
-        "cnvpytor": "cnvpytor",
-        "manta": "varcall_py27",
-        "cnvkit": "varcall_cnvkit",
-        "delly": "delly",
-        "ascatNgs": "ascatNgs",
-        "vcf2cytosure": "vcf2cytosure",
-        "somalier": "somalier"
-    },
-    "bioinfo_tools_version": {
-        "mosdepth": [
-            "0.3.3"
-        ],
-        "sambamba": [
-            "0.8.2"
-        ],
-        "bcftools": [
-            "1.9",
-            "1.10.2",
-            "1.15.1"
-        ],
-        "tabix": [
-            "0.2.6",
-            "1.11"
-        ],
-        "cnvkit": [
-            "0.9.9"
-        ],
-        "bedtools": [
-            "2.30.0"
-        ],
-        "ensembl-vep": [
-            "104.3"
-        ],
-        "vcfanno": [
-            "0.3.3"
-        ],
-        "genmod": [
-            "3.7.4"
-        ],
-        "manta": [
-            "1.6.0"
-        ],
-        "samtools": [
-            "1.9",
-            "1.15.1"
-        ],
-        "delly": [
-            "1.0.3"
-        ],
-        "ascatNgs": [
-            "4.5.0"
-        ],
-        "somalier": [
-            "0.2.16"
-        ],
-        "vcf2cytosure": [
-            "0.8.1"
-        ],
-        "bwa": [
-            "0.7.17"
-        ],
-        "gatk": [
-            "3.8"
-        ],
-        "svdb": [
-            "2.8.1"
-        ],
-        "tiddit": [
-            "3.3.2"
-        ],
-        "vardict": [
-            "2019.06.04"
-        ],
-        "csvkit": [
-            "1.0.7"
-        ],
-        "fastp": [
-            "0.23.2"
-        ],
-        "fastqc": [
-            "0.11.9"
-        ],
-        "multiqc": [
-            "1.12"
-        ],
-        "picard": [
-            "2.27.1"
-        ],
-        "cnvpytor": [
-            "1.2.1"
-        ]
-    },
-    "panel": {
-        "capture_kit": "tests/test_data/references/panel/panel.bed",
-        "chrom": ["18", "14", "11", "4", "10", "12", "3", "5", "13", "20", "7", "2",
-                  "8", "21", "15", "9", "17", "16", "22", "19", "1", "6"]
-    },
-    "analysis": {
-        "case_id": "id1",
-        "analysis_type": "pon",
-        "sequencing_type": "targeted",
-        "analysis_workflow": "balsamic",
-        "analysis_dir": "tests/test_data/",
-        "fastq_path": "tests/test_data/fastq_pon",
-        "script": "tests/test_data/id1/scripts/",
-        "log": "tests/test_data/id1/logs/",
-        "result": "tests/test_data/id1/analysis",
-        "benchmark": "tests/test_data/id1/benchmarks/",
-        "dag": "tests/test_data/id1/id1_BALSAMIC_12.0.2_graph.pdf",
-        "BALSAMIC_version": "12.0.2",
-        "config_creation_date": "2023-08-10 10:07",
-        "pon_version": "v5"
-    }
+  "QC": {
+    "adapter": "AATGATACGGCGACCACCGAGATCTACACTCTTTCCCTACACGACGCTCTTCCGATCT",
+    "min_seq_length": "25",
+    "n_base_limit": "50"
+  },
+  "samples": "Placeholder",
+  "reference": {
+    "reference_genome": "tests/test_data/references/genome/human_g1k_v37_decoy.fasta",
+    "dbsnp": "tests/test_data/references/variants/dbsnp_grch37_b138.vcf.gz",
+    "vcf_1kg": "tests/test_data/references/variants/1k_genome_wgs_p1_v3_all_sites.vcf.gz",
+    "hc_vcf_1kg": "tests/test_data/references/variants/1kg_phase1_snps_high_confidence_b37.vcf.gz",
+    "mills_1kg": "tests/test_data/references/variants/mills_1kg_index.vcf.gz",
+    "cosmic": "tests/test_data/references/variants/cosmic_coding_muts_v89.vcf.gz",
+    "vep_dir": "tests/test_data/references/vep/",
+    "refgene_bed": "tests/test_data/references/genome/refseq.flat.bed",
+    "somalier_sites": "tests/test_data/references/variants/GRCh37.somalier.sites.vcf.gz"
+  },
+  "bioinfo_tools": {
+    "bedtools": "align_qc",
+    "bwa": "align_qc",
+    "compress": "align_qc",
+    "fastqc": "align_qc",
+    "samtools": "align_qc",
+    "picard": "align_qc",
+    "multiqc": "align_qc",
+    "fastp": "align_qc",
+    "csvkit": "align_qc",
+    "ensembl-vep": "annotate",
+    "genmod": "annotate",
+    "vcfanno": "annotate",
+    "sambamba": "coverage_qc",
+    "mosdepth": "coverage_qc",
+    "bcftools": "varcall_py3",
+    "tabix": "varcall_py3",
+    "bgzip": "varcall_py3",
+    "gatk": "varcall_py3",
+    "vardict": "varcall_py3",
+    "svdb": "varcall_py3",
+    "tiddit": "varcall_py3",
+    "cnvpytor": "cnvpytor",
+    "manta": "varcall_py27",
+    "cnvkit": "varcall_cnvkit",
+    "delly": "delly",
+    "ascatNgs": "ascatNgs",
+    "vcf2cytosure": "vcf2cytosure",
+    "somalier": "somalier"
+  },
+  "bioinfo_tools_version": {
+    "mosdepth": ["0.3.3"],
+    "sambamba": ["0.8.2"],
+    "bcftools": ["1.9", "1.10.2", "1.15.1"],
+    "tabix": ["0.2.6", "1.11"],
+    "cnvkit": ["0.9.10"],
+    "bedtools": ["2.30.0"],
+    "ensembl-vep": ["104.3"],
+    "vcfanno": ["0.3.3"],
+    "genmod": ["3.7.4"],
+    "manta": ["1.6.0"],
+    "samtools": ["1.9", "1.15.1"],
+    "delly": ["1.0.3"],
+    "ascatNgs": ["4.5.0"],
+    "somalier": ["0.2.16"],
+    "vcf2cytosure": ["0.9.1"],
+    "bwa": ["0.7.17"],
+    "gatk": ["3.8"],
+    "svdb": ["2.8.1"],
+    "tiddit": ["3.3.2"],
+    "vardict": ["2019.06.04"],
+    "csvkit": ["1.0.7"],
+    "fastp": ["0.23.2"],
+    "fastqc": ["0.11.9"],
+    "multiqc": ["1.12"],
+    "picard": ["2.27.1"],
+    "cnvpytor": ["1.2.1"]
+  },
+  "panel": {
+    "capture_kit": "tests/test_data/references/panel/panel.bed",
+    "chrom": [
+      "18",
+      "14",
+      "11",
+      "4",
+      "10",
+      "12",
+      "3",
+      "5",
+      "13",
+      "20",
+      "7",
+      "2",
+      "8",
+      "21",
+      "15",
+      "9",
+      "17",
+      "16",
+      "22",
+      "19",
+      "1",
+      "6"
+    ]
+  },
+  "analysis": {
+    "case_id": "id1",
+    "analysis_type": "pon",
+    "sequencing_type": "targeted",
+    "analysis_workflow": "balsamic",
+    "analysis_dir": "tests/test_data/",
+    "fastq_path": "tests/test_data/fastq_pon",
+    "script": "tests/test_data/id1/scripts/",
+    "log": "tests/test_data/id1/logs/",
+    "result": "tests/test_data/id1/analysis",
+    "benchmark": "tests/test_data/id1/benchmarks/",
+    "dag": "tests/test_data/id1/id1_BALSAMIC_12.0.2_graph.pdf",
+    "BALSAMIC_version": "12.0.2",
+    "config_creation_date": "2023-08-10 10:07",
+    "pon_version": "v5"
+  }
 }
