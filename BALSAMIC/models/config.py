@@ -1,4 +1,5 @@
 """Balsamic analysis config case models."""
+
 import re
 from glob import glob
 from pathlib import Path
@@ -92,12 +93,13 @@ class VarcallerAttribute(BaseModel):
 class VCFModel(BaseModel):
     """Contains VCF config"""
 
-    vardict: VarcallerAttribute
     tnscope: VarcallerAttribute
     dnascope: VarcallerAttribute
     tnscope_umi: VarcallerAttribute
     manta_germline: VarcallerAttribute
+    merged: VarcallerAttribute
     manta: VarcallerAttribute
+    vardict: VarcallerAttribute
     dellysv: VarcallerAttribute
     cnvkit: VarcallerAttribute
     ascat: VarcallerAttribute
@@ -171,6 +173,29 @@ class AnalysisModel(BaseModel):
         return pon_version
 
 
+class CustomFilters(BaseModel):
+    """Variant calling custom filters."""
+
+    umi_min_reads: str | None = None
+
+
+class Sentieon(BaseModel):
+    """
+    Class providing common functions and variables for different balsamic workflows.
+
+    Attributes:
+        sentieon_install_dir: Field(required); path to Sentieon installation directory
+        sentieon_exec:  Field(required); path to Sentieon executeable
+        sentieon_license: Field(required); Sentieon license string
+    """
+
+    sentieon_install_dir: Annotated[str, AfterValidator(is_dir)]
+    sentieon_exec: Annotated[str, AfterValidator(is_file)]
+    sentieon_license: str
+    dnascope_model: Annotated[str, AfterValidator(is_file)]
+    tnscope_model: Annotated[str, AfterValidator(is_file)]
+
+
 class ConfigModel(BaseModel):
     """
     Class providing common functions and variables for different balsamic workflows.
@@ -186,6 +211,8 @@ class ConfigModel(BaseModel):
         vcf : Field(VCFmodel); variables relevant for variant calling pipeline
         background_variants: Field(Path(optional)); path to BACKGROUND VARIANTS for UMI
         analysis: Field(AnalysisModel); Pydantic model containing workflow variables
+        custom_filters: Field(CustomFilters); custom parameters for variant filtering
+        sentieon: Field(required); Sentieon model attributes
 
     This class also contains functions that help retrieve sample and file information,
     facilitating BALSAMIC run operations in Snakemake.
@@ -201,7 +228,7 @@ class ConfigModel(BaseModel):
         - get_final_bam_name: Return final bam name for downstream analysis.
     """
 
-    QC: QCModel
+    QC: QCModel = QCModel()
     samples: List[SampleInstanceModel]
     reference: Dict[str, Path]
     singularity: Dict[str, str]
@@ -211,6 +238,8 @@ class ConfigModel(BaseModel):
     vcf: Optional[VCFModel] = None
     background_variants: Optional[str] = None
     analysis: AnalysisModel
+    custom_filters: CustomFilters | None = None
+    sentieon: Sentieon
 
     @field_validator("reference")
     def abspath_as_str(cls, reference: Dict[str, Path]):
@@ -371,18 +400,23 @@ class ConfigModel(BaseModel):
         bam_names = []
         for sample in self.samples:
             if sample.name == sample_name:
+                sample_type = self.get_sample_type_by_name(sample_name)
                 bam_names.extend(
                     [
-                        f"{bam_dir}{sample_name}_align_sort_{fastq_pattern}.bam"
+                        f"{bam_dir}{sample_type}.{sample_name}.{fastq_pattern}.align_sort.bam"
                         for fastq_pattern in sample.fastq_info
                     ]
                 )
         return bam_names
 
     def get_final_bam_name(
-        self, bam_dir: str, sample_name: str = None, sample_type: str = None
+        self,
+        bam_dir: str,
+        sample_name: str = None,
+        sample_type: str = None,
+        specified_suffix: str = None,
     ) -> str:
-        """Return final bam name to be used in downstream analysis."""
+        """Return bam name to be used in downstream analysis."""
 
         if not sample_name and not sample_type:
             raise ValueError(
@@ -403,13 +437,16 @@ class ConfigModel(BaseModel):
 
         if self.analysis.analysis_type == AnalysisType.PON:
             # Only dedup is necessary for panel of normals
-            final_bam_suffix = "dedup"
+            final_bam_suffix = "dedup.fixmate"
         elif self.analysis.sequencing_type == SequencingType.TARGETED:
-            # Only dedup is necessary for TGA
-            final_bam_suffix = "dedup_sorted"
+            # TGA uses UMIs
+            final_bam_suffix = "dedup.fixmate"
         else:
             # For WGS the bamfiles are realigned
             final_bam_suffix = "dedup.realign"
+
+        if specified_suffix:
+            final_bam_suffix = specified_suffix
 
         return f"{bam_dir}{sample_type}.{sample_name}.{final_bam_suffix}.bam"
 

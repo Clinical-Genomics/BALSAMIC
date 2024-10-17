@@ -2,7 +2,7 @@
 Tools and software
 =================================
 
-BALSAMIC ( **version** = 14.0.1 ) uses myriad of tools and softwares to analyze fastq files. This section covers why each
+BALSAMIC ( **version** = 15.0.1 ) uses myriad of tools and softwares to analyze fastq files. This section covers why each
 one is included: usage and parameters, and relevant external links.
 
 ascatNgs
@@ -39,7 +39,7 @@ cnvkit
 ~~~~~~
 :Source code: `GitHub` `<https://github.com/etal/cnvkit>`_
 :Article: `PLOS Computational Biology` `<https://doi.org/10.1371/journal.pcbi.1004873>`_
-:Version: `0.9.9`
+:Version: `0.9.10`
 
 cnvpytor
 ~~~~~~~~
@@ -71,12 +71,6 @@ fastqc
 :Article: `Babraham` `<https://www.bioinformatics.babraham.ac.uk/projects/fastqc/>`_
 :Version: `0.11.9`
 
-gatk
-~~~~
-:Source code: `Github` `<https://github.com/broadinstitute/gatk>`_
-:Article: `Current Protocols in Bioinformatics` `<https://pubmed.ncbi.nlm.nih.gov/25431634/>`_
-:Version: `3.8`
-
 genmod
 ~~~~~~
 :Source code: `Github` `<https://github.com/Clinical-Genomics/genmod>`_
@@ -88,6 +82,12 @@ manta
 :Article: `Bioinformatics` `<https://doi.org/10.1093/bioinformatics/btv710>`_
 :Version: `1.6.0`
 
+msisensor-pro
+~~~~~~~~~~~~~
+:Source code: `GitHub` `<https://github.com/xjtu-omics/msisensor-pro>`_
+:Article: `Bioinformatics` `<https://doi.org/10.1016/j.gpb.2020.02.001>`_
+:Version: `1.3.0`
+
 mosdepth
 ~~~~~~~~
 :Source code: `GitHub` `<https://github.com/brentp/mosdepth>`_
@@ -98,7 +98,7 @@ multiqc
 ~~~~~~~
 :Source code: `GitHub` `<https://github.com/ewels/MultiQC>`_
 :Article: `Bioinformatics` `<https://doi.org/10.1093/bioinformatics/btw354>`_
-:Version: `1.12`
+:Version: `1.22.3`
 
 picard
 ~~~~~~
@@ -122,13 +122,13 @@ sentieon-tools
 ~~~~~~~~~~~~~~
 :Source code: `Commercial Tool` `<https://www.sentieon.com/>`_
 :Article: `Bioinformatics` `<https://www.biorxiv.org/content/10.1101/115717v2>`_
-:Version: `202010.02`
+:Version: `202308.03`
 
 somalier
 ~~~~~~~~
 :Source code: `Github` `<https://github.com/brentp/somalier>`_
 :Article: `Genome Medicine` `<https://doi.org/10.1186/s13073-020-00761-2>`_
-:Version: `0.2.16`
+:Version: `0.2.19`
 
 svdb
 ~~~~
