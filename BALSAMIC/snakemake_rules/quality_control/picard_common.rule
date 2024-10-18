@@ -1,0 +1,39 @@
+# vim: syntax=python tabstop=4 expandtab
+# coding: utf-8
+
+if "canfam3" in config['reference']['reference_genome']:
+    memory = "20g"
+else:
+    memory = "16g"
+
+rule picard_CollectAlignmentSummaryMetrics:
+    input:
+        bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample),
+        fa = config["reference"]["reference_genome"]
+    output:
+        alignment_metrics = Path(qc_dir,"{sample_type}.{sample}.alignment_summary_metrics.txt").as_posix(),
+    benchmark:
+        Path(benchmark_dir, "CollectAlignmentSummaryMetrics.{sample_type}.{sample}.tsv").as_posix()
+    singularity:
+        Path(singularity_image,config["bioinfo_tools"].get("picard") + ".sif").as_posix()
+    params:
+        mem = "16g",
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
+        adapter = config["QC"]["adapter"],
+        sample = "{sample}"
+    threads:
+        get_threads(cluster_config, "picard_qc")
+    message:
+        "Calculating picard alignment summary metrics for sample {params.sample}"
+    shell:
+        """
+export TMPDIR={params.tmpdir};
+picard -Djava.io.tmpdir={params.tmpdir} -Xmx{params.mem} \
+CollectAlignmentSummaryMetrics \
+R={input.fa} \
+I={input.bam} \
+O={output} \
+ADAPTER_SEQUENCE={params.adapter} \
+METRIC_ACCUMULATION_LEVEL=ALL_READS \
+METRIC_ACCUMULATION_LEVEL=LIBRARY;
+        """

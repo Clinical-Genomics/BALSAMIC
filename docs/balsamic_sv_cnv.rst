@@ -50,13 +50,31 @@ Depending on the sequencing type, BALSAMIC is currently running the following st
      - somatic
      - SV
 
-Further details about a specific caller can be found in the links for the repositories containing the documentation for SV and CNV callers along with the links for the articles are listed in `bioinfo softwares <https://balsamic.readthedocs.io/en/latest/bioinfo_softwares.html>`_.
 
-Note that igh_dux4 is not a variant caller itself. This is a custom script that uses samtools to detect read pairs supporting IGH::DUX4 rearrangements. In short, the command identifies discordant reads mapping to the IGH region and to either DUX4 or its homologous DUX4-like regions (see references for details). The inclusion of this feature aims to alleviate the failure of callers to detect this rearrangement. It is important to note, however, that the reported breakpoints are fixed to the IGH and DUX4 coordinates and are, therefore, imprecise and uncertain. Therefore, we advise caution when interpreting this information.
-
+**Note:** igh_dux4 is not a variant caller itself. This is a custom script that uses samtools to detect read pairs supporting IGH::DUX4 rearrangements.
 
 It is mandatory to provide the gender of the sample from BALSAMIC version >= 10.0.0 For CNV analysis.
 
+Further details about a specific caller can be found in the links for the repositories containing the documentation for SV and CNV callers along with the links for the articles are listed in `bioinfo softwares <https://balsamic.readthedocs.io/en/latest/bioinfo_softwares.html>`_.
+
+**Difficult to detect clinically relevant SVs**
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+**IGH::DUX4 rearrangements**
+
+This is a custom script that uses samtools to detect read pairs supporting IGH::DUX4 rearrangements. In short, the command identifies discordant reads mapping to the IGH region and to either DUX4 or its homologous DUX4-like regions (see references for details). The inclusion of this feature aims to alleviate the failure of callers to detect this rearrangement.
+
+It is important to note, however, that the reported breakpoints are fixed to the IGH and DUX4 coordinates and are, therefore, imprecise and uncertain. Therefore, we advise caution when interpreting this information.
+
+The script used to detect this rearrangements can be found in: BALSAMIC/assets/scripts/igh_dux4_detection.sh (see `references <https://balsamic.readthedocs.io/en/latest/resources.html>`_ Detection of IGH::DUX4 rearrangement, for more information.)
+
+**FLT3-ITDs**
+
+FLT3 Internal Tandem Duplications are quite difficult to detect and can exist in sizes detectable by both small SNV and InDel callers such as VarDit and TNscope as well as Structural Variant callers like Manta, Delly and TIDDIT. In our experience however the variant is more commonly detected by SV callers and we strongly recommend that this variant is looked for in the SV results.
+
+It has also been observed in release 16.0.0 of Balsamic a decline in the ability of SNV callers to detect this variant, possibly as a result of collapsing overlapping mates of read-pairs into singletons as a result of UMI post processing. This adds further reasons to searching for this variant in the SV results!
+
+In the future we will aim to add further callers better able to detect this variant.
 
 
 **Pre-merge Filtrations**

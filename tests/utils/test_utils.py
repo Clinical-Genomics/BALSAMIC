@@ -10,6 +10,7 @@ from unittest import mock
 
 import click
 import pytest
+import yaml
 from _pytest.logging import LogCaptureFixture
 from _pytest.tmpdir import TempPathFactory
 
@@ -38,7 +39,6 @@ from BALSAMIC.utils.cli import (
     get_resolved_fastq_files_directory,
     get_sample_list,
     get_snakefile,
-    job_id_dump_to_yaml,
     validate_cache_version,
     validate_exome_option,
     validate_umi_min_reads,
@@ -46,10 +46,13 @@ from BALSAMIC.utils.cli import (
 from BALSAMIC.utils.exc import BalsamicError, WorkflowRunError
 from BALSAMIC.utils.io import (
     read_json,
+    read_csv,
     read_vcf_file,
     read_yaml,
+    write_list_of_strings,
     write_finish_file,
     write_json,
+    write_sacct_to_yaml,
     write_yaml,
 )
 from BALSAMIC.utils.rule import (
@@ -351,7 +354,7 @@ def test_get_snakefile():
 
 def test_get_vcf(sample_config: Dict):
     # GIVEN a sample_config dict and a variant callers list
-    variant_callers = ["tnscope", "vardict", "manta"]
+    variant_callers = ["tnscope", "manta"]
 
     # WHEN passing args to that function
     vcf_list = get_vcf(
@@ -360,13 +363,12 @@ def test_get_vcf(sample_config: Dict):
 
     # THEN It should return the list of vcf file names
     assert any("tnscope" in vcf_name for vcf_name in vcf_list)
-    assert any("vardict" in vcf_name for vcf_name in vcf_list)
     assert any("manta" in vcf_name for vcf_name in vcf_list)
 
 
 def test_get_vcf_invalid_variant_caller(sample_config):
     # GIVEN a sample_config dict and an incorrect variant callers list
-    variant_callers = ["vardict", "manta", "tnhaplotyper"]
+    variant_callers = ["manta", "tnhaplotyper"]
 
     # WHEN passing args to that function
     with pytest.raises(KeyError):
@@ -454,6 +456,32 @@ def test_write_json(tmp_path, reference):
     assert len(list(tmp.iterdir())) == 1
 
 
+def test_write_list_of_strings(tmp_path):
+    """Test writing list of strings to file"""
+
+    # GIVEN a list of strings and an output file path
+    list_of_strings = ["header1\theader2\theader3", "row1_col1\trow1_col2\trow1_col3"]
+    tmp = tmp_path / "tmp"
+    tmp.mkdir()
+    output_file: Path = Path(tmp / "output.csv")
+
+    # WHEN writing list of strings
+    write_list_of_strings(list_of_strings, output_file.as_posix())
+
+    # THEN file should have been written
+    assert output_file.exists()
+
+    # AND contain the same information
+    read_written_file: list[Dict] = read_csv(
+        csv_path=output_file.as_posix(), delimeter="\t"
+    )
+
+    assert read_written_file == [
+        {"header1": "row1_col1", "header2": "row1_col2", "header3": "row1_col3"}
+    ]
+    assert len(read_written_file) == 1
+
+
 def test_write_json_error(tmp_path: Path):
     """Test JSON write error."""
 
@@ -476,6 +504,20 @@ def test_read_json(config_path: str):
 
     # THEN the config.json file should be correctly parsed
     assert type(config_dict) is dict
+
+
+def test_read_csv(purity_csv_path: str):
+    """Test data extraction from a CSV file."""
+
+    # GIVEN a CSV path
+
+    # WHEN calling the function
+    csv_list: list[Dict] = read_csv(purity_csv_path)
+
+    # THEN the config.json file should be correctly parsed
+    assert len(csv_list) == 1
+    assert csv_list[0]["Purity"] == "0.64"
+    assert csv_list[0]["Sampleid"] == "tumor.initial"
 
 
 def test_read_json_error():
@@ -691,24 +733,6 @@ def test_check_executable_not_existing():
     assert not check_executable(test_command)
 
 
-def test_job_id_dump_to_yaml(tmp_path):
-    # GIVEN a file with one job id per line, a key (case name), and an output file name
-    dummy_dir = tmp_path / "job_id_dump_dir"
-    dummy_dir.mkdir()
-    dummy_job_id_dump = dummy_dir / "jod_id.dump"
-    dummy_job_id_dump.write_text("01234\n56789")
-
-    dummy_name = "angrybird"
-
-    dummy_yaml_out = dummy_dir / "jod_id.yaml"
-
-    # WHEN creating yaml from job id dump
-    job_id_dump_to_yaml(dummy_job_id_dump, dummy_yaml_out, dummy_name)
-
-    # THEN file should exist
-    assert dummy_yaml_out.exists()
-
-
 def test_generate_h5(tmp_path):
     # GIVEN a job name, a path, and a job id
     dummy_path = tmp_path / "h5dir"
@@ -756,12 +780,12 @@ def test_get_sample_type_from_sample_name(config_dict: Dict):
     assert sample_type == SampleType.TUMOR
 
 
-def test_get_rule_output(snakemake_bcftools_filter_vardict_research_tumor_only):
+def test_get_rule_output(snakemake_bcftools_filter_tnscope_research_tumor_only):
     """Tests retrieval of existing output files from a specific workflow."""
 
     # GIVEN a snakemake fastqc rule object, a rule name and a list of associated wildcards
-    rules = snakemake_bcftools_filter_vardict_research_tumor_only
-    rule_name = "bcftools_filter_vardict_research_tumor_only"
+    rules = snakemake_bcftools_filter_tnscope_research_tumor_only
+    rule_name = "bcftools_filter_tnscope_research_tumor_only"
     output_file_wildcards = {
         "sample": ["ACC1", "tumor", "normal"],
         "case_name": "sample_tumor_only",
@@ -770,18 +794,18 @@ def test_get_rule_output(snakemake_bcftools_filter_vardict_research_tumor_only):
     # THEN retrieve the output files
     output_files = get_rule_output(rules, rule_name, output_file_wildcards)
 
-    # THEN check that the fastq files has been picked up by the function and that the tags has been correctly created
+    # THEN check that the output files and tags are correctly retrieved
     assert len(output_files) == 1
     for file in output_files:
         # Expected file names
         assert (
             Path(file[0]).name
-            == "SNV.somatic.sample_tumor_only.vardict.research.filtered.pass.vcf.gz"
+            == "SNV.somatic.sample_tumor_only.tnscope.research.filtered.pass.vcf.gz"
         )
         # Expected tags
         assert (
             file[3]
-            == "SNV,sample-tumor-only,vcf-pass-vardict,research-vcf-pass-vardict"
+            == "SNV,sample-tumor-only,vcf-pass-tnscope,research-vcf-pass-tnscope"
         )
 
 
@@ -973,36 +997,21 @@ def test_get_fastq_info_double_assigned_fastq_pattern(
 def test_get_fastp_parameters(balsamic_model: ConfigModel):
     """Validate correct retrieval of WGS and TGA specific fastp parameters."""
 
-    # GIVEN WGS config with quality trim
+    # GIVEN WGS config
     balsamic_model.analysis.sequencing_type = SequencingType.WGS
-    balsamic_model.QC.quality_trim = True
     fastp_params_wgs = get_fastp_parameters(balsamic_model)
-    # THEN no UMI trimming should be active
-    assert "fastp_trim_umi" not in fastp_params_wgs
-    # THEN quality trimming should be active
-    assert "--n_base_limit" in fastp_params_wgs["fastp_trim_qual"]
+    # THEN adapter trimming should be active in qual trim params
+    assert "--disable_adapter_trimming" not in fastp_params_wgs["fastp_trim_qual"]
+    # THEN quality trimming should be active in adapter trim params
+    assert "--disable_quality_filtering" not in fastp_params_wgs["fastp_trim_adapter"]
 
-    # GIVEN WGS config without quality trim
-    balsamic_model.QC.quality_trim = False
-    fastp_params_wgs = get_fastp_parameters(balsamic_model)
-    # THEN no quality trimming should be done
-    assert "--n_base_limit" not in fastp_params_wgs["fastp_trim_qual"]
-    assert "--disable_quality_filtering" in fastp_params_wgs["fastp_trim_qual"]
-
-    # GIVEN TGA with adapter trimming active
+    # GIVEN TGA config
     balsamic_model.analysis.sequencing_type = SequencingType.TARGETED
-    balsamic_model.QC.adapter_trim = True
     fastp_params_tga = get_fastp_parameters(balsamic_model)
-    # THEN UMI trimming should be active
-    assert "fastp_trim_umi" in fastp_params_tga
-    # THEN adapter trimming should be done
-    assert "--detect_adapter_for_pe" in fastp_params_tga["fastp_trim_adapter"]
-
-    # GIVEN TGA without adapter trimming active
-    balsamic_model.QC.adapter_trim = False
-    fastp_params_tga = get_fastp_parameters(balsamic_model)
-    # THEN no adapter trimming should be done
-    assert "--disable_adapter_trimming" in fastp_params_tga["fastp_trim_adapter"]
+    # THEN adapter trimming should NOT be active in qual trim params
+    assert "--disable_adapter_trimming" in fastp_params_tga["fastp_trim_qual"]
+    # THEN quality trimming should NOT be active in adapter trim params
+    assert "--disable_quality_filtering" in fastp_params_tga["fastp_trim_adapter"]
 
 
 def test_validate_exome_option(panel_bed_file: str):
@@ -1110,3 +1119,23 @@ def test_read_vcf(vcf_file_path, vcf_file_gz_path):
 
     # THEN the contents from the gzipped VCF should match the non-gzipped VCF
     assert vcf_contents == vcf_contents_from_gz
+
+
+def test_write_sacct_to_yaml(case_id_tumor_only: str, sacct_file: Path, tmp_path: Path):
+    """Tests parsing of the sacct file to create a job IDs yaml file."""
+
+    # GIVEN a sacct file and an output yaml file
+    yaml_file_path: Path = Path(tmp_path, "slurm_jobids.yaml")
+
+    # WHEN writing the yaml file
+    write_sacct_to_yaml(
+        case_id=case_id_tumor_only,
+        sacct_file_path=sacct_file,
+        yaml_file_path=yaml_file_path,
+    )
+
+    # THEN the content should be a list of job IDs associated with a case_id
+    assert yaml_file_path.is_file()
+    with open(yaml_file_path, "r") as file:
+        data: Dict[str, List[str]] = yaml.safe_load(file)
+    assert case_id_tumor_only in data

@@ -13,6 +13,8 @@ def test_cnvkit_pon_config(
     panel_bed_file: str,
     fastq_dir_pon: str,
     case_id_pon: str,
+    sentieon_license: str,
+    sentieon_install_dir: str,
 ):
     """Test balsamic PON config case command for CNVkit."""
 
@@ -37,6 +39,10 @@ def test_cnvkit_pon_config(
             balsamic_cache,
             "--pon-workflow",
             PONWorkflow.CNVKIT,
+            "--sentieon-install-dir",
+            sentieon_install_dir,
+            "--sentieon-license",
+            sentieon_license,
         ]
     )
 
@@ -52,6 +58,8 @@ def test_gens_pon_config(
     fastq_dir_gens_pon: str,
     case_id_gens_pon: str,
     gens_hg19_interval_list: str,
+    sentieon_license: str,
+    sentieon_install_dir: str,
 ):
     """Test balsamic PON config case command for GENS."""
 
@@ -76,6 +84,10 @@ def test_gens_pon_config(
             PONWorkflow.GENS_MALE,
             "--genome-interval",
             gens_hg19_interval_list,
+            "--sentieon-install-dir",
+            sentieon_install_dir,
+            "--sentieon-license",
+            sentieon_license,
         ]
     )
 
@@ -90,6 +102,8 @@ def test_gens_pon_config(
     balsamic_cache: str,
     fastq_dir_gens_pon: str,
     case_id_gens_pon: str,
+    sentieon_license: str,
+    sentieon_install_dir: str,
 ):
     """Test detection of missing genome_interval file which is optional but required for GENS."""
 
@@ -112,6 +126,10 @@ def test_gens_pon_config(
             balsamic_cache,
             "--pon-workflow",
             PONWorkflow.GENS_MALE,
+            "--sentieon-install-dir",
+            sentieon_install_dir,
+            "--sentieon-license",
+            sentieon_license,
         ]
     )
 
@@ -123,7 +141,12 @@ def test_gens_pon_config(
 
 
 def test_cnvkit_pon_config_failed(
-    invoke_cli, tmp_path: str, balsamic_cache: str, panel_bed_file: str
+    invoke_cli,
+    tmp_path: str,
+    balsamic_cache: str,
+    panel_bed_file: str,
+    sentieon_license: str,
+    sentieon_install_dir: str,
 ):
     """Test detection of missing option for a PON config without required arguments.."""
     # GIVEN a case ID, fastq files, and an analysis dir
@@ -144,6 +167,10 @@ def test_cnvkit_pon_config_failed(
             test_analysis_dir,
             "--balsamic-cache",
             balsamic_cache,
+            "--sentieon-install-dir",
+            sentieon_install_dir,
+            "--sentieon-license",
+            sentieon_license,
         ]
     )
 
@@ -153,7 +180,12 @@ def test_cnvkit_pon_config_failed(
 
 
 def test_cnvkit_pon_config_missing_panel(
-    invoke_cli, tmp_path: str, balsamic_cache: str, fastq_dir_pon: str
+    invoke_cli,
+    tmp_path: str,
+    balsamic_cache: str,
+    fastq_dir_pon: str,
+    sentieon_license: str,
+    sentieon_install_dir: str,
 ):
     """Test detection of missing panel which is optional but required for CNVkit."""
 
@@ -179,6 +211,10 @@ def test_cnvkit_pon_config_missing_panel(
             PONWorkflow.CNVKIT,
             "--version",
             "v5",
+            "--sentieon-install-dir",
+            sentieon_install_dir,
+            "--sentieon-license",
+            sentieon_license,
         ]
     )
 
@@ -208,6 +244,8 @@ def test_cnvkit_pon_config_graph_failed(
     analysis_dir: str,
     balsamic_cache: str,
     panel_bed_file: str,
+    sentieon_license: str,
+    sentieon_install_dir: str,
 ):
     """Test DAG graph building failure."""
 
@@ -236,6 +274,10 @@ def test_cnvkit_pon_config_graph_failed(
                 balsamic_cache,
                 "--pon-workflow",
                 PONWorkflow.CNVKIT,
+                "--sentieon-install-dir",
+                sentieon_install_dir,
+                "--sentieon-license",
+                sentieon_license,
             ]
         )
 
