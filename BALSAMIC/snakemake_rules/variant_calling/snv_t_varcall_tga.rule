@@ -93,7 +93,8 @@ rule vardict_tumor_only:
 export PERL5LIB=;
 
 export TMPDIR={params.tmpdir};
-export VAR_DICT_OPTS='\"-Djava.io.tmpdir={params.tmpdir}\" \"-Xmx45G\"'; 
+export _JAVA_OPTIONS="-Djava.io.tmpdir={params.tmpdir}"; 
+export VAR_DICT_OPTS='\"-Xms45G\" \"-Xmx90G\"'; 
 
 vardict-java -I 600 \
 -G {input.fa} \
