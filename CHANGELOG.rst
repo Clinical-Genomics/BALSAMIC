@@ -58,6 +58,7 @@ Fixed:
 * CNVkit incorrect version in the documentation https://github.com/Clinical-Genomics/BALSAMIC/pull/1457
 * MSIsensor-pro container and updated msisensor to version 1.3.0  https://github.com/Clinical-Genomics/BALSAMIC/pull/1486
 * Somalier container and updated somalier to version 0.2.19 https://github.com/Clinical-Genomics/BALSAMIC/pull/1487
+* Vardict memory and tmpdir allocation https://github.com/Clinical-Genomics/BALSAMIC/pull/
 
 [15.0.1]
 --------
