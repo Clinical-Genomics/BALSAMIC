@@ -175,7 +175,8 @@ rule ascat_tumor_normal:
         normal = "NORMAL",
         genome = config["reference"]["genome_version"],
         case_name = config["analysis"]["case_id"],
-        gender = config["analysis"]["gender"]
+        gender = config["analysis"]["gender"],
+        vcf_dir = vcf_dir
     threads:
         get_threads(cluster_config, "ascat_tumor_normal")
     message:
@@ -200,29 +201,33 @@ ascat.pl \
   -tumour {input.bamT} \
   -normal {input.bamN};
 
-cp  {params.tmpdir}/{params.tumor}.copynumber.caveman.vcf.gz {output.final_vcf};
+mv {params.tmpdir} {params.vcf_dir}
 
-cp {params.tmpdir}/{params.tumor}.copynumber.txt.gz {output.ascat_copynumber}
+basetmpname=$(basename {params.tmpdir})
 
-cp {params.tmpdir}/{params.tumor}.samplestatistics.txt {output.sample_statistics};
+cp {params.vcf_dir}/$basetmpname/{params.tumor}.copynumber.caveman.vcf.gz {output.final_vcf};
 
-cp {params.tmpdir}/{params.tumor}.ASCATprofile.png {output.plot_ascat_profile};
+cp {params.vcf_dir}/$basetmpname/{params.tumor}.copynumber.txt.gz {output.ascat_copynumber}
 
-cp {params.tmpdir}/{params.tumor}.rawprofile.png {output.plot_raw_profile};
+cp {params.vcf_dir}/$basetmpname/{params.tumor}.samplestatistics.txt {output.sample_statistics};
 
-cp {params.tmpdir}/{params.tumor}.ASPCF.png {output.plot_aspcf};
+cp {params.vcf_dir}/$basetmpname/{params.tumor}.ASCATprofile.png {output.plot_ascat_profile};
 
-cp {params.tmpdir}/{params.tumor}.tumour.png {output.plot_tumor};
+cp {params.vcf_dir}/$basetmpname/{params.tumor}.rawprofile.png {output.plot_raw_profile};
 
-cp {params.tmpdir}/{params.tumor}.germline.png {output.plot_germline};
+cp {params.vcf_dir}/$basetmpname/{params.tumor}.ASPCF.png {output.plot_aspcf};
 
-cp {params.tmpdir}/{params.tumor}.sunrise.png {output.plot_sunrise};
+cp {params.vcf_dir}/$basetmpname/{params.tumor}.tumour.png {output.plot_tumor};
+
+cp {params.vcf_dir}/$basetmpname/{params.tumor}.germline.png {output.plot_germline};
+
+cp {params.vcf_dir}/$basetmpname/{params.tumor}.sunrise.png {output.plot_sunrise};
 
 tabix -p vcf -f {output.final_vcf};
 
 echo -e \"{params.tumor}\\tTUMOR\\n{params.normal}\\tNORMAL\" > {output.namemap};
 
-rm -rf {params.tmpdir};
+# rm -rf {params.tmpdir};
         """
 
 rule tiddit_sv_tumor_normal:
