@@ -1,0 +1,52 @@
+
+rule bcftools_normalise_vcfs:
+    input:
+        ref = config["reference"]["reference_genome"],
+        vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".{caller}.research.vcf.gz",
+    output:
+        vcf_normalised = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".{caller}.research.normalised.vcf.gz",
+    benchmark:
+        Path(benchmark_dir,'bcftools_norm_{caller}' + config["analysis"]["case_id"] + ".tsv").as_posix()
+    singularity:
+        Path(singularity_image,config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
+    params:
+        case_name = config["analysis"]["case_id"],
+        variant_caller = "{caller}",
+    threads:
+        get_threads(cluster_config,'bcftools_normalise_vcfs')
+    message:
+        "Normalising variants for {params.variant_caller} {params.case_name}"
+    shell:
+        """
+      bcftools norm --output-type u --multiallelics -both --check-ref s --fasta-ref {input.ref} {input.vcf} \
+      | bcftools norm -o {output.vcf_normalised} --output-type z --rm-dup none -
+      
+      tabix -p vcf -f {output.vcf_normalised};
+        """
+
+rule bcftools_concatenate_vcfs:
+    input:
+        vcfs = expand(vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".{caller}.research.normalised.vcf.gz", caller=["vardict", "tnscope"])
+    output:
+        vcf_merged = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".merged.research.vcf.gz"
+    benchmark:
+        Path(benchmark_dir + "bcftools_concatenate_vcfs_" + config["analysis"]["case_id"] + ".tsv").as_posix()
+    singularity:
+        Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
+    params:
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
+    threads:
+        get_threads(cluster_config, "bcftools_concatenate_vcfs")
+    message:
+        "Merging VCFs with bcftools concat"
+    shell:
+        """
+export TMPDIR={params.tmpdir};
+
+vcf_files=$(echo {input.vcfs} | sed 's/ / -I /g') ;
+
+bcftools concat -O z --allow-overlaps --rm-dups all {input.vcfs} > {output.vcf_merged} ;
+tabix -p vcf -f {output.vcf_merged} ;
+
+rm -rf {params.tmpdir}
+      """
