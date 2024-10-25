@@ -221,7 +221,6 @@ elif config["analysis"]["sequencing_type"] == 'targeted' and config["analysis"][
       AF_min=[SNV_FILTER_SETTINGS.AF_min.tag_value, SNV_FILTER_SETTINGS.AF_min.filter_name],
       high_normal_tumor_af_frac_filter_name=SNV_FILTER_SETTINGS.high_normal_tumor_af_frac.filter_name,
       high_normal_tumor_af_frac_value=SNV_FILTER_SETTINGS.high_normal_tumor_af_frac.tag_value,
-      possible_germline="balsamic_possible_germline",
       case_name=config["analysis"]["case_id"],
     threads:
       get_threads(cluster_config,'bcftools_quality_filter_vardict_tumor_normal')
@@ -235,7 +234,6 @@ elif config["analysis"]["sequencing_type"] == 'targeted' and config["analysis"][
     bcftools filter --include 'INFO/DP >= {params.DP[0]}' --soft-filter '{params.DP[1]}' --mode '+' | \
     bcftools filter --include 'INFO/VD >= {params.AD[0]}' --soft-filter '{params.AD[1]}' --mode '+' | \
     bcftools filter --include 'INFO/AF >= {params.AF_min[0]}' --soft-filter '{params.AF_min[1]}' --mode '+' | \
-    bcftools filter --exclude 'INFO/STATUS ~ "germline/i"' --soft-filter '{params.possible_germline}' --mode '+' | \
     bcftools view -f PASS -o {output.vcf_filtered} -O z;
     
     tabix -p vcf -f {output.vcf_filtered};
