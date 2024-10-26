@@ -119,6 +119,8 @@ rule post_process_vardict:
     params:
         tmpdir=tempfile.mkdtemp(prefix=tmp_dir),
         case_name=config["analysis"]["case_id"],
+        edit_vcf_script= get_script_path("edit_vcf_info.py"),
+        variant_caller= "vardict"
     benchmark:
         Path(benchmark_dir,'post_process_vardict_' + config["analysis"]["case_id"] + ".tsv").as_posix()
     singularity:
@@ -132,13 +134,18 @@ rule post_process_vardict:
 mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
 
-bgzip {input.vcf_sorted} ; 
-tabix -f -p vcf {input.vcf_sorted}.gz ;
+python {params.edit_vcf_script} \
+--input_vcf {input.vcf_sorted} \
+--output_vcf {params.tmpdir}/vardict_merged_sorted.temp.vcf \
+--variant_caller {params.variant_caller};
+
+bgzip {params.tmpdir}/vardict_merged_sorted.temp.vcf  ; 
+tabix -f -p vcf {params.tmpdir}/vardict_merged_sorted.temp.vcf.gz ;
 
 echo \"TUMOR\" > {params.tmpdir}/reheader ;
 echo \"NORMAL\" >> {params.tmpdir}/reheader ;
 
-bcftools reheader -s {params.tmpdir}/reheader {input.vcf_sorted}.gz -o {output.vcf_vardict} ;
+bcftools reheader -s {params.tmpdir}/reheader {params.tmpdir}/vardict_merged_sorted.temp.vcf.gz -o {output.vcf_vardict} ;
 tabix -f -p vcf {output.vcf_vardict} ;
 
 echo -e \"tTUMOR\\tTUMOR\\nNORMAL\\tNORMAL\" > {output.namemap} ; 

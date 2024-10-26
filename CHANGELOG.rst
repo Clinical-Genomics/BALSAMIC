@@ -20,6 +20,7 @@ Added:
 * Added family-id to genmod in order to get ranked variants to Scout https://github.com/Clinical-Genomics/BALSAMIC/pull/1475
 * Added Raw TNscope calls and unfiltered research-annotated SNVs to delivery https://github.com/Clinical-Genomics/BALSAMIC/pull/1475
 * Argument for SNV Artefact LoqusDB to all workflows https://github.com/Clinical-Genomics/BALSAMIC/pull/1481
+* TNscope tag to variant info-field for TGA workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1497
 
 Changed:
 ^^^^^^^^
@@ -37,7 +38,7 @@ Changed:
 * Fixed TNscope research VCF filters to either PASS or triallelic site https://github.com/Clinical-Genomics/BALSAMIC/pull/1475
 * Increased maximal amount of redirects for lychee test following links in docs to 10 https://github.com/Clinical-Genomics/BALSAMIC/pull/1488
 * Updated readthedocs tools versions https://github.com/Clinical-Genomics/BALSAMIC/pull/1489
-5* Renamed UMI consensusfiltered bamfile to be picked up by multiqc https://github.com/Clinical-Genomics/BALSAMIC/pull/1490
+* Renamed UMI consensusfiltered bamfile to be picked up by multiqc https://github.com/Clinical-Genomics/BALSAMIC/pull/1490
 
 
 Removed:
@@ -49,6 +50,7 @@ Removed:
 * ML model for TNscope  https://github.com/Clinical-Genomics/BALSAMIC/pull/1475
 * All code associated with TNhaplotyper https://github.com/Clinical-Genomics/BALSAMIC/pull/1475
 * Removed research.filtered.pass files from delivery https://github.com/Clinical-Genomics/BALSAMIC/pull/1475
+* Removed VarDict germline filter, replaced by relative normal af / tumor af filter https://github.com/Clinical-Genomics/BALSAMIC/pull/1497
 
 Fixed:
 ^^^^^^
