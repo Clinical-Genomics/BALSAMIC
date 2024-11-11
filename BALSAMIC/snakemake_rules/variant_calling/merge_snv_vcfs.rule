@@ -41,10 +41,6 @@ rule merge_snv_vcfs:
         "Merging VCFs with custom python script using vcfpy"
     shell:
         """
-export TMPDIR={params.tmpdir};
-
 python {params.modify_tnscope_infofield} {input.vcfs} {output.vcf_merged} ;
 tabix -p vcf -f {output.vcf_merged} ;
-
-rm -rf {params.tmpdir}
       """
