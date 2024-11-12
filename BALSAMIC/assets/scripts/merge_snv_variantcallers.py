@@ -4,7 +4,6 @@ import gzip
 import click
 from typing import Dict, Tuple, Any
 
-
 def merge_headers(reader1: vcfpy.Reader, reader2: vcfpy.Reader) -> vcfpy.Header:
     """
     Combines all header lines from two VCF files, adding unique lines from each.
@@ -85,20 +84,14 @@ def process_vcf_records(
     - reader2 (vcfpy.Reader): Second VCF reader.
     """
 
-    def get_variant_key(record: vcfpy.Record) -> Tuple[str, int, str, Tuple[str, ...]]:
-        """Creates a unique key for each variant based on CHROM, POS, REF, and ALT."""
-        return (
-            record.CHROM,
-            record.POS,
-            record.REF,
-            tuple(str(alt) for alt in record.ALT),
-        )
-
-    variants1 = {get_variant_key(record): record for record in reader1}
-    variants2 = {get_variant_key(record): record for record in reader2}
+    variants1 = {(record.CHROM, record.POS, record.REF, tuple(str(alt) for alt in record.ALT)): record for record in
+                 reader1}
+    variants2 = {(record.CHROM, record.POS, record.REF, tuple(str(alt) for alt in record.ALT)): record for record in
+                 reader2}
 
     processed = set()
 
+    # Merge overlapping records
     for key, record1 in variants1.items():
         if key in variants2:
             record2 = variants2[key]
@@ -113,7 +106,7 @@ def process_vcf_records(
                 FILTER=record1.FILTER,
                 INFO=merged_info,
                 FORMAT=record1.FORMAT,
-                calls=record1.calls,
+                calls=record1.calls
             )
             writer.write_record(merged_record)
             processed.add(key)
@@ -126,6 +119,26 @@ def process_vcf_records(
 
     writer.close()
 
+
+def merge_vcf_files(vcf1: str, vcf2: str, output_file: str) -> None:
+    """
+    Merges two VCF files, combining headers and overlapping records.
+
+    Parameters:
+    - vcf1 (str): Path to the first VCF file.
+    - vcf2 (str): Path to the second VCF file.
+    - output_file (str): Path to the output merged VCF file.
+    """
+    reader1 = vcfpy.Reader.from_path(vcf1)
+    reader2 = vcfpy.Reader.from_path(vcf2)
+    merged_header = merge_headers(reader1, reader2)
+    with (
+        gzip.open(output_file, "wt")
+        if output_file.endswith(".gz")
+        else open(output_file, "w")
+    ) as f:
+        writer = vcfpy.Writer.from_stream(f, merged_header)
+        process_vcf_records(writer, reader1, reader2)
 
 def merge_vcf_files(vcf1: str, vcf2: str, output_file: str) -> None:
     """
