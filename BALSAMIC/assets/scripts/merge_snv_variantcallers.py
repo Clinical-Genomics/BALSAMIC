@@ -19,7 +19,6 @@ def merge_headers(reader1, reader2):
 
     return merged_header
 
-
 def merge_vcf_records(record1, record2):
     """Merges INFO fields of two matching VCF records."""
     merged_info = record1.INFO.copy()
@@ -97,7 +96,6 @@ def process_vcf_records(writer, reader1, reader2):
             writer.write_record(record2)
 
     writer.close()
-    print(f"Merged VCF file created at: {output_file}")
 
 
 @click.command()
@@ -107,6 +105,7 @@ def process_vcf_records(writer, reader1, reader2):
 def main(file1, file2, output_file):
     """Merge two VCF files with overlapping variants and headers, supporting bgzip format."""
     merge_vcf_files(file1, file2, output_file)
+    print(f"Merged VCF file created at: {output_file}")
 
 
 if __name__ == "__main__":
