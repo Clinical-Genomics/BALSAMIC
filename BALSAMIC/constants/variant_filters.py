@@ -55,7 +55,7 @@ SNV_BCFTOOLS_SETTINGS_TGA = {
         "field": "INFO",
     },
     "rpa": {
-        "tag_value": 8,
+        "tag_value": 10,
         "filter_name": "balsamic_high_repeat_unit_number",
         "field": "INFO",
     },
