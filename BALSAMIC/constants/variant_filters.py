@@ -54,6 +54,11 @@ SNV_BCFTOOLS_SETTINGS_TGA = {
         "filter_name": "balsamic_high_strand_oddsratio",
         "field": "INFO",
     },
+    "rpa": {
+        "tag_value": 8,
+        "filter_name": "balsamic_high_repeat_unit_number",
+        "field": "INFO",
+    },
     "AF_min": {"tag_value": 0.005, "filter_name": "balsamic_low_af", "field": "INFO"},
     "AD": {"tag_value": 5, "filter_name": "balsamic_low_tumor_ad", "field": "INFO"},
     "MQ": {"tag_value": 30, "filter_name": "balsamic_low_mq", "field": "INFO"},

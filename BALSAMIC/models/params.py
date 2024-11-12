@@ -305,6 +305,7 @@ class VarCallerFilter(BaseModel):
         pop_freq_umi: VCFAttributes (optional); maximum gnomad_af for UMI workflow
         strand_reads: VCFAttributes (optional); minimum strand specific read counts
         qss: VCFAttributes (optional); minimum sum of base quality scores
+        rpa: VCFAttributes (optional); maximum number of tandem repeat units in either reference or allele
         sor: VCFAttributes (optional); minimum symmetrical log-odds ratio
         artefact_snv_freq: VCFAttributes (optional); maximum artefact-database snv allele frequency
         swegen_snv_freq: VCFAttributes (optional); maximum swegen snv allele frequency
@@ -327,6 +328,7 @@ class VarCallerFilter(BaseModel):
     pop_freq_umi: Optional[VCFAttributes] = None
     strand_reads: Optional[VCFAttributes] = None
     qss: Optional[VCFAttributes] = None
+    rpa: Optional[VCFAttributes] = None
     sor: Optional[VCFAttributes] = None
     artefact_snv_freq: Optional[VCFAttributes] = None
     swegen_snv_freq: Optional[VCFAttributes] = None
