@@ -17,11 +17,23 @@ def merge_headers(reader1: vcfpy.Reader, reader2: vcfpy.Reader) -> vcfpy.Header:
     - vcfpy.Header: Merged header containing unique lines from both readers.
     """
     merged_header = reader1.header.copy()
+
+    # Define the types of header lines we want to merge
     header_line_types = ["INFO", "FILTER", "FORMAT", "ALT"]
 
+    # Loop over each line type and merge lines from reader2 that are not in merged_header
     for line_type in header_line_types:
+        # Check if the appropriate method for each header line type is available
+        method_name = f"{line_type.lower()}_ids"
+        if hasattr(merged_header, method_name):
+            # Get the list of IDs for the header line type
+            line_ids = getattr(merged_header, method_name)()
+        else:
+            # Handle cases where the specific method is not available
+            line_ids = [line.id for line in merged_header.get_lines(line_type)]
+
         for line in reader2.header.get_lines(line_type):
-            if line.id not in getattr(merged_header, f"{line_type.lower()}_ids")():
+            if line.id not in line_ids:
                 merged_header.add_line(line)
 
     return merged_header
