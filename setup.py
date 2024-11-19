@@ -25,7 +25,7 @@ requirements: List[str] = [
     "charset-normalizer==3.2.0",
     "click==8.1.6",
     "colorclass==2.2.2",
-    "coloredlogs==15.0.1",
+    "coloredlogs==16.0.0",
     "ConfigArgParse==1.7",
     "connection-pool==0.0.3",
     "contourpy==1.1.0",
@@ -122,7 +122,7 @@ if not os.getenv("READTHEDOCS"):
 
 setup(
     name=NAME,
-    version="15.0.1",
+    version="16.0.0",
     url=URL,
     author=AUTHOR,
     author_email=EMAIL,
