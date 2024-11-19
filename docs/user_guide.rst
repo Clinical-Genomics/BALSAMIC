@@ -79,7 +79,7 @@ Command above should exit a similar output as below:
   7 vep
   72
   This was a dry-run (flag -n). The order of jobs does not reflect the order of execution.
- 
+
 And now run balsamic through SLURM. Make sure you set your SLURM project account using ``--account`` if your local
 settings require it:
 
@@ -87,15 +87,6 @@ settings require it:
 
   balsamic run analysis --sample-config demo/demo_run_balsamic/demo_run_balsamic.json \
     --profile slurm --qos low --account development --run-analysis
-
-And now run balsamic through QSUB. Make sure you set your QSUB project account using ``--account`` if your local
-settings require it: 
-
-::
-
-  balsamic run analysis --sample-config demo/demo_run_balsamic/demo_run_balsamic.json \
-    --profile qsub --qos low --account development --run-analysis
-
 
 And running workflow without submitting jobs. Set number of cores by passing an argument to snakemake as seen below:
 

@@ -9,20 +9,18 @@ from pathlib import Path
 from typing import Dict, List
 
 from BALSAMIC.constants.constants import FileType
-from BALSAMIC.constants.analysis import FastqName, MutationType, SampleType
-from BALSAMIC.constants.paths import (
-    BALSAMIC_DIR,
-    SENTIEON_DNASCOPE_DIR,
-    SENTIEON_TNSCOPE_DIR,
-)
+from BALSAMIC.constants.analysis import (
+    FastqName,
+    MutationType,
+    SampleType,
+    SequencingType)
+from BALSAMIC.constants.paths import BALSAMIC_DIR
 from BALSAMIC.constants.rules import SNAKEMAKE_RULES
 from BALSAMIC.constants.variant_filters import (
-    COMMON_SETTINGS,
-    SENTIEON_VARCALL_SETTINGS,
+    SNV_BCFTOOLS_SETTINGS_PANEL,
+    SNV_BCFTOOLS_SETTINGS_EXOME,
+    SNV_BCFTOOLS_SETTINGS_WGS,
     SVDB_FILTER_SETTINGS,
-    VARDICT_SETTINGS_PANEL,
-    VARDICT_SETTINGS_EXOME,
-    VARDICT_SETTINGS_COMMON,
     MANTA_FILTER_SETTINGS,
 )
 from BALSAMIC.constants.workflow_params import (
@@ -97,6 +95,7 @@ umi_qc_dir: str = Path(qc_dir, "umi_qc").as_posix() + "/"
 # Annotations
 research_annotations = []
 clinical_annotations = []
+artefact_snv_obs = ""
 clinical_snv_obs = ""
 cancer_germline_snv_obs = ""
 cancer_somatic_snv_obs = ""
@@ -125,16 +124,17 @@ else:
     status_to_sample_id = "TUMOR" + "\\\\t" + tumor_sample
 
 
-# Varcaller filter settings
-COMMON_FILTERS = VarCallerFilter.model_validate(COMMON_SETTINGS)
+# Set SNV filter settings depending on if sample is panel / wes / wgs
+if config_model.panel:
+    if config_model.panel.exome:
+        SNV_FILTER_SETTINGS = VarCallerFilter.model_validate(SNV_BCFTOOLS_SETTINGS_EXOME)
+    else:
+        SNV_FILTER_SETTINGS = VarCallerFilter.model_validate(SNV_BCFTOOLS_SETTINGS_PANEL)
+else:
+    SNV_FILTER_SETTINGS = VarCallerFilter.model_validate(SNV_BCFTOOLS_SETTINGS_WGS)
 
-# Set VarDict settings depending on if panel is exome or not
-VARDICT = VarCallerFilter.model_validate(VARDICT_SETTINGS_PANEL)
-if config_model.panel and config_model.panel.exome:
-    VARDICT = VarCallerFilter.model_validate(VARDICT_SETTINGS_EXOME)
 
 
-SENTIEON_CALLER = VarCallerFilter.model_validate(SENTIEON_VARCALL_SETTINGS)
 SVDB_FILTERS = VarCallerFilter.model_validate(SVDB_FILTER_SETTINGS)
 MANTA_FILTERS = VarCallerFilter.model_validate(MANTA_FILTER_SETTINGS)
 
@@ -222,6 +222,21 @@ if "swegen_snv_frequency" in config["reference"]:
         }
     )
 
+if "artefact_snv_observations" in config["reference"]:
+    clinical_annotations.append(
+        {
+            "annotation": [
+                {
+                    "file": Path(config["reference"]["artefact_snv_observations"]).as_posix(),
+                    "fields": ["Frq", "Obs", "Hom"],
+                    "ops": ["self", "self", "self"],
+                    "names": ["ArtefactFrq", "ArtefactObs", "ArtefactHom"],
+                }
+            ]
+        }
+    )
+    artefact_snv_obs: str = Path(config["reference"]["artefact_snv_observations"]).as_posix()
+
 if "clinical_snv_observations" in config["reference"]:
     clinical_annotations.append(
         {
@@ -293,36 +308,6 @@ if config["analysis"]["sequencing_type"] != "wgs":
 if len(cluster_config.keys()) == 0:
     cluster_config = config
 
-# Find and set Sentieon binary and license server from env variables
-try:
-    config["SENTIEON_LICENSE"] = os.environ["SENTIEON_LICENSE"]
-    config["SENTIEON_INSTALL_DIR"] = os.environ["SENTIEON_INSTALL_DIR"]
-
-    if os.getenv("SENTIEON_EXEC") is not None:
-        config["SENTIEON_EXEC"] = os.environ["SENTIEON_EXEC"]
-    else:
-        config["SENTIEON_EXEC"] = Path(
-            os.environ["SENTIEON_INSTALL_DIR"], "bin", "sentieon"
-        ).as_posix()
-
-    config["SENTIEON_TNSCOPE"] = SENTIEON_TNSCOPE_DIR.as_posix()
-    config["SENTIEON_DNASCOPE"] = SENTIEON_DNASCOPE_DIR.as_posix()
-
-except KeyError as error:
-    LOG.error(
-        "Set environment variables SENTIEON_LICENSE, SENTIEON_INSTALL_DIR, SENTIEON_EXEC "
-        "to run SENTIEON variant callers"
-    )
-    raise BalsamicError
-
-if not Path(config["SENTIEON_EXEC"]).exists():
-    LOG.error(
-        "Sentieon executable not found {}".format(
-            Path(config["SENTIEON_EXEC"]).as_posix()
-        )
-    )
-    raise BalsamicError
-
 if "hg38" in config["reference"]["reference_genome"]:
     config["reference"]["genome_version"] = "hg38"
 elif "canfam3" in config["reference"]["reference_genome"]:
@@ -360,6 +345,9 @@ cnv_report_paths = []
 if config["analysis"]["sequencing_type"] == "wgs":
     if config["analysis"]["analysis_type"] == "paired":
         cnv_report_paths.append(
+            f"{vcf_dir}MSI.somatic.{config['analysis']['case_id']}.msisensorpro.msi.pdf"
+        )
+        cnv_report_paths.append(
             f"{vcf_dir}CNV.somatic.{config['analysis']['case_id']}.ascat.samplestatistics.txt.pdf"
         )
         cnv_report_paths.extend(
@@ -383,6 +371,10 @@ if config["analysis"]["sequencing_type"] == "wgs":
             )
         )
 else:
+    if config["analysis"]["analysis_type"] == "paired":
+        cnv_report_paths.append(
+            f"{vcf_dir}MSI.somatic.{config['analysis']['case_id']}.msisensorpro.msi.pdf"
+        )
     cnv_report_paths.extend(
         expand(f"{cnv_dir}tumor.merged-{{plot}}.pdf", plot=["diagram", "scatter"])
     )
@@ -390,113 +382,8 @@ else:
         f"{cnv_dir}CNV.somatic.{config['analysis']['case_id']}.purecn.purity.csv.pdf"
     )
 
-# Extract variant callers for the workflow
-germline_caller = []
-somatic_caller = []
-somatic_caller_cnv = []
-somatic_caller_sv = []
-for m in set(MutationType):
-    germline_caller_balsamic = get_variant_callers(
-        config=config,
-        analysis_type=config["analysis"]["analysis_type"],
-        workflow_solution="BALSAMIC",
-        mutation_type=m,
-        sequencing_type=config["analysis"]["sequencing_type"],
-        mutation_class="germline",
-    )
 
-    germline_caller_sentieon = get_variant_callers(
-        config=config,
-        analysis_type=config["analysis"]["analysis_type"],
-        workflow_solution="Sentieon",
-        mutation_type=m,
-        sequencing_type=config["analysis"]["sequencing_type"],
-        mutation_class="germline",
-    )
-
-    germline_caller = (
-        germline_caller + germline_caller_balsamic + germline_caller_sentieon
-    )
-
-    somatic_caller_balsamic = get_variant_callers(
-        config=config,
-        analysis_type=config["analysis"]["analysis_type"],
-        workflow_solution="BALSAMIC",
-        mutation_type=m,
-        sequencing_type=config["analysis"]["sequencing_type"],
-        mutation_class="somatic",
-    )
-
-    somatic_caller_sentieon = get_variant_callers(
-        config=config,
-        analysis_type=config["analysis"]["analysis_type"],
-        workflow_solution="Sentieon",
-        mutation_type=m,
-        sequencing_type=config["analysis"]["sequencing_type"],
-        mutation_class="somatic",
-    )
-
-    somatic_caller_sentieon_umi = get_variant_callers(
-        config=config,
-        analysis_type=config["analysis"]["analysis_type"],
-        workflow_solution="Sentieon_umi",
-        mutation_type=m,
-        sequencing_type=config["analysis"]["sequencing_type"],
-        mutation_class="somatic",
-    )
-    somatic_caller = (
-        somatic_caller
-        + somatic_caller_sentieon_umi
-        + somatic_caller_balsamic
-        + somatic_caller_sentieon
-    )
-
-somatic_caller_sv = get_variant_callers(
-    config=config,
-    analysis_type=config["analysis"]["analysis_type"],
-    workflow_solution="BALSAMIC",
-    mutation_type="SV",
-    sequencing_type=config["analysis"]["sequencing_type"],
-    mutation_class="somatic",
-)
-
-somatic_caller_cnv = get_variant_callers(
-    config=config,
-    analysis_type=config["analysis"]["analysis_type"],
-    workflow_solution="BALSAMIC",
-    mutation_type="CNV",
-    sequencing_type=config["analysis"]["sequencing_type"],
-    mutation_class="somatic",
-)
-somatic_caller_sv.remove("svdb")
-svdb_callers_prio = somatic_caller_sv + somatic_caller_cnv
-
-for var_caller in svdb_callers_prio:
-    if var_caller in somatic_caller:
-        somatic_caller.remove(var_caller)
-
-# Collect only snv callers for calculating tmb
-somatic_caller_tmb = []
-for ws in ["BALSAMIC", "Sentieon", "Sentieon_umi"]:
-    somatic_caller_snv = get_variant_callers(
-        config=config,
-        analysis_type=config["analysis"]["analysis_type"],
-        workflow_solution=ws,
-        mutation_type="SNV",
-        sequencing_type=config["analysis"]["sequencing_type"],
-        mutation_class="somatic",
-    )
-    somatic_caller_tmb += somatic_caller_snv
-
-
-# Remove variant callers from list of callers
-if "disable_variant_caller" in config:
-    variant_callers_to_remove = config["disable_variant_caller"].split(",")
-    for var_caller in variant_callers_to_remove:
-        if var_caller in somatic_caller:
-            somatic_caller.remove(var_caller)
-        if var_caller in germline_caller:
-            germline_caller.remove(var_caller)
+# Collect all rules to be run
 
 rules_to_include = []
 analysis_type = config["analysis"]["analysis_type"]
@@ -509,35 +396,113 @@ for sub, value in SNAKEMAKE_RULES.items():
 
 if config["analysis"]["analysis_workflow"] == "balsamic":
     rules_to_include = [rule for rule in rules_to_include if "umi" not in rule]
-    somatic_caller = [
-        var_caller for var_caller in somatic_caller if "umi" not in var_caller
-    ]
-    somatic_caller_tmb = [
-        var_caller for var_caller in somatic_caller_tmb if "umi" not in var_caller
-    ]
 
 # Add rule for DRAGEN
 if "dragen" in config:
     rules_to_include.append("snakemake_rules/concatenation/concatenation.rule")
 
 # Add rule for GENS
-if "gens_coverage_pon" in config["reference"]:
-    rules_to_include.append("snakemake_rules/variant_calling/gatk_read_counts.rule")
+if "gnomad_min_af5" in config["reference"]:
     rules_to_include.append("snakemake_rules/variant_calling/gens_preprocessing.rule")
+if "gnomad_min_af5" in config["reference"] and sequence_type == SequencingType.WGS:
+    rules_to_include.append("snakemake_rules/variant_calling/gatk_read_counts.rule")
 
 LOG.info(f"The following rules will be included in the workflow: {rules_to_include}")
+
+# If workflow includes UMI filtered results, add these results
+wf_solutions = ["BALSAMIC", "Sentieon"]
+if config["analysis"]["analysis_workflow"] == "balsamic-umi":
+    wf_solutions.append("Sentieon_umi")
+
+# Extract variant callers for the workflow
+germline_caller_snv = []
+germline_caller_sv = []
+germline_caller_cnv = []
+somatic_caller_snv = []
+somatic_caller_cnv = []
+somatic_caller_sv = []
+
+# Collect list of variant callers to be run
+for ws in wf_solutions:
+    somatic_caller_snv += get_variant_callers(
+        config=config,
+        analysis_type=config["analysis"]["analysis_type"],
+        workflow_solution=ws,
+        mutation_type="SNV",
+        sequencing_type=config["analysis"]["sequencing_type"],
+        mutation_class="somatic",
+    )
+    somatic_caller_sv += get_variant_callers(
+        config=config,
+        analysis_type=config["analysis"]["analysis_type"],
+        workflow_solution=ws,
+        mutation_type="SV",
+        sequencing_type=config["analysis"]["sequencing_type"],
+        mutation_class="somatic",
+    )
+    somatic_caller_cnv += get_variant_callers(
+        config=config,
+        analysis_type=config["analysis"]["analysis_type"],
+        workflow_solution=ws,
+        mutation_type="CNV",
+        sequencing_type=config["analysis"]["sequencing_type"],
+        mutation_class="somatic",
+    )
+    germline_caller_snv += get_variant_callers(
+        config=config,
+        analysis_type=config["analysis"]["analysis_type"],
+        workflow_solution=ws,
+        mutation_type="SNV",
+        sequencing_type=config["analysis"]["sequencing_type"],
+        mutation_class="germline",
+    )
+    germline_caller_sv += get_variant_callers(
+        config=config,
+        analysis_type=config["analysis"]["analysis_type"],
+        workflow_solution=ws,
+        mutation_type="SV",
+        sequencing_type=config["analysis"]["sequencing_type"],
+        mutation_class="germline",
+    )
+    germline_caller_cnv += get_variant_callers(
+        config=config,
+        analysis_type=config["analysis"]["analysis_type"],
+        workflow_solution=ws,
+        mutation_type="CNV",
+        sequencing_type=config["analysis"]["sequencing_type"],
+        mutation_class="germline",
+    )
+
 LOG.info(
-    f"The following Germline variant callers will be included in the workflow: {germline_caller}"
+    f"The following Somatic SNV variant callers will be included in the workflow: {somatic_caller_snv}"
 )
 LOG.info(
-    f"The following somatic variant callers will be included in the workflow: {somatic_caller}"
+    f"The following Somatic SV variant callers will be included in the workflow: {somatic_caller_sv}"
+)
+LOG.info(
+    f"The following Somatic CNV variant callers will be included in the workflow: {somatic_caller_cnv}"
+)
+LOG.info(
+    f"The following Germline SNV variant callers will be included in the workflow: {germline_caller_snv}"
+)
+LOG.info(
+    f"The following Germline SV variant callers will be included in the workflow: {germline_caller_sv}"
+)
+LOG.info(
+    f"The following Germline CNV variant callers will be included in the workflow: {germline_caller_cnv}"
 )
 
+somatic_caller_sv.remove("svdb")
+svdb_callers_prio = somatic_caller_sv + somatic_caller_cnv
 
-for r in rules_to_include:
-
-    include: Path(BALSAMIC_DIR, r).as_posix()
-
+somatic_caller = somatic_caller_snv + ["svdb"]
+final_somatic_snv_caller = somatic_caller_snv
+if config["analysis"]["sequencing_type"] != "wgs":
+    remove_caller_list = ["tnscope", "vardict"]
+    for remove_caller in remove_caller_list:
+        if remove_caller in somatic_caller:
+            somatic_caller.remove(remove_caller)
+            final_somatic_snv_caller.remove(remove_caller)
 
 # Define common and analysis specific outputs
 quality_control_results = [
@@ -550,6 +515,7 @@ quality_control_results = [
 analysis_specific_results = []
 
 # Germline SNVs/SVs
+germline_caller = germline_caller_cnv + germline_caller_sv + germline_caller_snv
 analysis_specific_results.extend(
     expand(
         vep_dir + "{vcf}.vcf.gz",
@@ -557,9 +523,14 @@ analysis_specific_results.extend(
     )
 )
 
+for r in rules_to_include:
+    include: Path(BALSAMIC_DIR, r).as_posix()
+
+
 # Germline SNVs specifically for genotype
 if config["analysis"]["analysis_type"] == "paired":
     analysis_specific_results.append(vep_dir + "SNV.genotype.normal.dnascope.vcf.gz")
+
 
 # Raw VCFs
 analysis_specific_results.extend(
@@ -577,6 +548,14 @@ analysis_specific_results.extend(
     )
 )
 
+# Scored clinical SNV VCFs
+analysis_specific_results.extend(
+    expand(
+        vep_dir + "{vcf}.clinical.scored.vcf.gz",
+        vcf=get_vcf(config, final_somatic_snv_caller, [case_id]),
+    )
+)
+
 # Filtered and passed post annotation clinical VCFs
 analysis_specific_results.extend(
     expand(
@@ -587,10 +566,11 @@ analysis_specific_results.extend(
 
 
 # TMB
+somatic_caller.remove("svdb")
 analysis_specific_results.extend(
     expand(
         vep_dir + "{vcf}.balsamic_stat",
-        vcf=get_vcf(config, somatic_caller_tmb, [case_id]),
+        vcf=get_vcf(config, somatic_caller, [case_id]),
     )
 )
 
@@ -606,28 +586,16 @@ if config["analysis"]["sequencing_type"] != "wgs":
     )
     analysis_specific_results.append(cnv_dir + case_id + ".gene_metrics")
     # vcf2cytosure
-    analysis_specific_results.extend(
-        expand(
-            vcf_dir + "CNV.somatic.{case_name}.{var_caller}.vcf2cytosure.cgh",
-            case_name=case_id,
-            var_caller=["cnvkit"],
-        )
-    )
-    # VarDict
-    analysis_specific_results.extend(
-        expand(
-            vep_dir + "{vcf}.research.filtered.pass.ranked.vcf.gz",
-            vcf=get_vcf(config, ["vardict"], [case_id]),
-        )
-    )
+    analysis_specific_results.extend(expand(
+        vcf_dir + "CNV.somatic.{case_name}.{var_caller}.vcf2cytosure.cgh",
+        case_name=case_id,
+        var_caller=["cnvkit"]
+    ))
     # UMI
     if config["analysis"]["analysis_workflow"] == "balsamic-umi":
-        analysis_specific_results.extend(
-            expand(
-                umi_qc_dir + "{sample}.umi.mean_family_depth",
-                sample=config_model.get_all_sample_names(),
-            )
-        )
+        analysis_specific_results.extend(expand(umi_qc_dir + "tumor.{sample}.umi.mean_family_depth", sample=tumor_sample))
+        if config['analysis']['analysis_type'] == "paired":
+            analysis_specific_results.extend(expand(umi_qc_dir + "normal.{sample}.umi.mean_family_depth",sample=normal_sample))
         if background_variant_file:
             analysis_specific_results.extend(
                 expand(
@@ -690,10 +658,7 @@ if config["analysis"]["analysis_type"] == "single":
     )
 
 # GENS Outputs
-if (
-    config["analysis"]["sequencing_type"] == "wgs"
-    and "gens_coverage_pon" in config["reference"]
-):
+if "gnomad_min_af5" in config["reference"]:
     analysis_specific_results.extend(
         expand(
             cnv_dir + "{sample}.{gens_input}.bed.gz",
@@ -701,6 +666,7 @@ if (
             gens_input=["cov", "baf"],
         )
     )
+
 
 # Dragen
 if (
