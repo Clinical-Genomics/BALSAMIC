@@ -21,10 +21,11 @@ rule fastqc:
         "Running FastQC on {params.fastq_file_name}"
     shell:
         """
-mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
     
 fastqc --threads {threads} {input.fastq} \
 --dir {params.tmpdir} \
 --outdir {params.fastqc_dir};
+
+rm -rf {params.tmpdir}
         """

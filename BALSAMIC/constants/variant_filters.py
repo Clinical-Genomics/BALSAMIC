@@ -1,28 +1,8 @@
-COMMON_SETTINGS = {
-    "pop_freq": {
-        "tag_value": 0.005,
-        "filter_name": "balsamic_high_pop_freq",
-        "field": "INFO",
-    },
-    "varcaller_name": "None",
-    "filter_type": "general",
-    "analysis_type": "tumor_only,tumor_normal",
-    "description": "General purpose filters used for filtering any variant caller",
-}
-
-# Configuration of VARDICT settings
-VARDICT_SETTINGS = {
-    "AD": {"tag_value": 5, "filter_name": "balsamic_low_tumor_ad", "field": "INFO"},
-    "DP": {
-        "tag_value": 100,
-        "filter_name": "balsamic_low_tumor_dp",
-        "field": "INFO",
-    },
-    "MQ": {"tag_value": 40, "filter_name": "balsamic_low_mq", "field": "INFO"},
-    "AF_min": {"tag_value": 0.007, "filter_name": "balsamic_low_af", "field": "INFO"},
-    "pop_freq": {
-        "tag_value": 0.005,
-        "filter_name": "balsamic_high_pop_freq",
+# Configuration of common SNV filter settings
+SNV_BCFTOOLS_SETTINGS_COMMON = {
+    "artefact_snv_freq": {
+        "tag_value": 0.1,
+        "filter_name": "ArtefactFrq",
         "field": "INFO",
     },
     "swegen_snv_freq": {
@@ -35,14 +15,78 @@ VARDICT_SETTINGS = {
         "filter_name": "Frq",
         "field": "INFO",
     },
-    "varcaller_name": "VarDict",
+    "high_normal_tumor_af_frac": {
+        "tag_value": 0.3,
+        "filter_name": "high_normal_tumor_af_frac",
+        "field": "FORMAT",
+    },
+    "qss": {
+        "tag_value": 20,
+        "filter_name": "balsamic_low_quality_scores",
+        "field": "FORMAT",
+    },
+    "strand_reads": {
+        "tag_value": 0,
+        "filter_name": "balsamic_low_strand_read_counts",
+        "field": "FORMAT",
+    },
+    "varcaller_name": "None",
     "filter_type": "general",
-    "analysis_type": "tumor_only",
-    "description": "General purpose filters used for filtering VarDict",
+    "analysis_type": "tumor_only,tumor_normal",
+    "description": "General purpose filters used for filtering SNVs",
 }
 
-# Configuration for SENTIEON settings:
-SENTIEON_VARCALL_SETTINGS = {
+# Configuration of common TGA SNV filter settings
+SNV_BCFTOOLS_SETTINGS_TGA = {
+    **SNV_BCFTOOLS_SETTINGS_COMMON,
+    "pop_freq": {
+        "tag_value": 0.005,
+        "filter_name": "balsamic_high_pop_freq",
+        "field": "INFO",
+    },
+    "pop_freq_umi": {
+        "tag_value": 0.02,
+        "filter_name": "balsamic_umi_high_pop_freq",
+        "field": "INFO",
+    },
+    "sor": {
+        "tag_value": 2.7,
+        "filter_name": "balsamic_high_strand_oddsratio",
+        "field": "INFO",
+    },
+    "AF_min": {"tag_value": 0.005, "filter_name": "balsamic_low_af", "field": "INFO"},
+    "AD": {"tag_value": 5, "filter_name": "balsamic_low_tumor_ad", "field": "INFO"},
+    "MQ": {"tag_value": 30, "filter_name": "balsamic_low_mq", "field": "INFO"},
+}
+
+# Configuration of unique TGA SNV filter settings for smaller panels
+SNV_BCFTOOLS_SETTINGS_PANEL = {
+    **SNV_BCFTOOLS_SETTINGS_TGA,
+    "DP": {
+        "tag_value": 50,
+        "filter_name": "balsamic_low_tumor_dp",
+        "field": "INFO",
+    },
+}
+
+# Configuration of unique TGA SNV filter settings for smaller exomes
+SNV_BCFTOOLS_SETTINGS_EXOME = {
+    **SNV_BCFTOOLS_SETTINGS_TGA,
+    "DP": {
+        "tag_value": 20,
+        "filter_name": "balsamic_low_tumor_dp",
+        "field": "INFO",
+    },
+}
+
+# Configuration of unique WGS SNV filter settings
+SNV_BCFTOOLS_SETTINGS_WGS = {
+    **SNV_BCFTOOLS_SETTINGS_COMMON,
+    "sor": {
+        "tag_value": 3,
+        "filter_name": "balsamic_high_strand_oddsratio",
+        "field": "INFO",
+    },
     "AD": {"tag_value": 3, "filter_name": "balsamic_low_tumor_ad", "field": "FORMAT"},
     "DP": {
         "tag_value": 10,
@@ -55,40 +99,6 @@ SENTIEON_VARCALL_SETTINGS = {
         "filter_name": "balsamic_high_pop_freq",
         "field": "INFO",
     },
-    "pop_freq_umi": {
-        "tag_value": 0.02,
-        "filter_name": "balsamic_umi_high_pop_freq",
-        "field": "INFO",
-    },
-    "qss": {
-        "tag_value": 20,
-        "filter_name": "balsamic_low_quality_scores",
-        "field": "FORMAT",
-    },
-    "strand_reads": {
-        "tag_value": 0,
-        "filter_name": "balsamic_low_strand_read_counts",
-        "field": "FORMAT",
-    },
-    "sor": {
-        "tag_value": 3,
-        "filter_name": "balsamic_high_strand_oddsratio",
-        "field": "INFO",
-    },
-    "swegen_snv_freq": {
-        "tag_value": 0.01,
-        "filter_name": "SWEGENAF",
-        "field": "INFO",
-    },
-    "loqusdb_clinical_snv_freq": {
-        "tag_value": 0.01,
-        "filter_name": "Frq",
-        "field": "INFO",
-    },
-    "varcaller_name": "sentieon",
-    "filter_type": "general",
-    "analysis_type": "tumor_only",
-    "description": "General purpose filters used for filtering tnscope and tnhaplotyper",
 }
 
 # Manta bcftools filters
