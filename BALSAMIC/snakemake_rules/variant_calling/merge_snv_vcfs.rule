@@ -44,6 +44,6 @@ rule merge_snv_vcfs:
         """
 python {params.modify_tnscope_infofield} {input.vcfs} {params.tmpdir}/merged.vcf ;
 bgzip {params.tmpdir}/merged.vcf ;
-mv {params.tmpdir}/merged.vcf {output.vcf_merged} ;
+mv {params.tmpdir}/merged.vcf.gz {output.vcf_merged} ;
 tabix -p vcf -f {output.vcf_merged} ;
       """
