@@ -4,15 +4,17 @@ import sys
 import re
 import click
 
+
 def collect_header(vcf):
     header = []
-    with gzip.open(vcf, 'rt') as gz_vcf:
+    with gzip.open(vcf, "rt") as gz_vcf:
         for line in gz_vcf:
             if line.startswith("#"):
                 header.append(line)
             else:
                 break
     return header
+
 
 def add_header_categories(header_categories, header):
     for hdr_row in header:
@@ -25,6 +27,7 @@ def add_header_categories(header_categories, header):
             header_categories[cat].append("=".join(hdr_row_split[1:]))
     return header_categories
 
+
 def get_description_field(header_row):
     pattern = r'Description="(.*?)"'
     match = re.search(pattern, header_row)
@@ -32,18 +35,22 @@ def get_description_field(header_row):
         return match.group(1)
     return None
 
+
 def update_description_text(row, new_description):
     return re.sub(r'Description="(.*?)"', f'Description="{new_description}"', row)
 
+
 def get_number_field(header_row):
-    pattern = r'Number=([^,]+)'
+    pattern = r"Number=([^,]+)"
     match = re.search(pattern, header_row)
     if match:
         return match.group(1)
     return None
 
+
 def update_number_text(row, new_number):
-    return re.sub(r'Number=([^,]+)', f'Number="{new_number}"', row)
+    return re.sub(r"Number=([^,]+)", f'Number="{new_number}"', row)
+
 
 def merge_headers(vcf1, vcf2):
     """
@@ -126,7 +133,7 @@ def merge_header_row(line1, line2):
         # Print warning to standard error
         print(
             f"Warning: Number fields differ for header lines. line1: {line1}, line2: {line2}",
-            file=sys.stderr
+            file=sys.stderr,
         )
         updated_line = update_number_text(updated_line, ".")
 
@@ -136,7 +143,7 @@ def merge_header_row(line1, line2):
 def read_variants(vcf):
     variants = {}
 
-    with gzip.open(vcf, 'rt') as gz_vcf:
+    with gzip.open(vcf, "rt") as gz_vcf:
         for line in gz_vcf:
             if line.startswith("#"):
                 continue  # Skip header lines
@@ -144,9 +151,23 @@ def read_variants(vcf):
 
             normal = False
             if len(fields) > 10:  # TUMOR + NORMAL
-                chrom, pos, id, ref, alt, qual, filter, info, format, tumor, normal = fields[:11]
+                (
+                    chrom,
+                    pos,
+                    id,
+                    ref,
+                    alt,
+                    qual,
+                    filter,
+                    info,
+                    format,
+                    tumor,
+                    normal,
+                ) = fields[:11]
             else:  # TUMOR ONLY
-                chrom, pos, id, ref, alt, qual, filter, info, format, tumor = fields[:11]
+                chrom, pos, id, ref, alt, qual, filter, info, format, tumor = fields[
+                    :11
+                ]
 
                 # Use a tuple of (chrom, pos, ref, alt) as the key
             key = (chrom, pos, ref, alt)
@@ -193,7 +214,9 @@ def merge_info_fields(info_fields):
 
     # Recreate INFO field with merged key-value pairs
     merged_info_str = ";".join([f"{key}" for key in merged_info_single_fields])
-    merged_info_str = merged_info_str + ";".join([f"{key}={value}" for key, value in merged_info.items()])
+    merged_info_str = merged_info_str + ";".join(
+        [f"{key}={value}" for key, value in merged_info.items()]
+    )
     return merged_info_str
 
 
@@ -248,6 +271,7 @@ def merge_variants(vcf1, vcf2):
 
     return merged_variants
 
+
 def write_merged_vcf(output_file, header, merged_variants):
     """
     Writes the merged variants along with the header to the output VCF file.
@@ -259,6 +283,7 @@ def write_merged_vcf(output_file, header, merged_variants):
         # Write merged variants
         for variant in merged_variants:
             f.write(variant + "\n")
+
 
 @click.command()
 @click.argument("vcf1", type=click.Path(exists=True))
@@ -282,6 +307,7 @@ def main(vcf1: str, vcf2: str, output_file: str) -> None:
 
     # Write the merged VCF to output file
     write_merged_vcf(output_file, merged_header, merged_variants)
+
 
 if __name__ == "__main__":
     main()
