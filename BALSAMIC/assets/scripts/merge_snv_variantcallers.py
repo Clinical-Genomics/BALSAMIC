@@ -102,7 +102,7 @@ def merge_headers(vcf1, vcf2):
     for cat in merged_header_dict:
         for key, line in merged_header_dict[cat].items():
             merged_header.append(f"##{cat}={line}")
-    merged_header.append(variant_header[0])
+    merged_header.append("#" + variant_header[0])
     merged_header = [line.strip("\n") for line in merged_header]
     return merged_header
 
