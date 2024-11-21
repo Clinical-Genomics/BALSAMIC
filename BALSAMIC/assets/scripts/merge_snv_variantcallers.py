@@ -252,11 +252,7 @@ def write_merged_vcf(output_file, header, merged_variants):
     """
     Writes the merged variants along with the header to the output VCF file.
     """
-    with (
-        gzip.open(output_file, "wt")
-        if output_file.endswith(".gz")
-        else open(output_file, "w")
-    ) as f:
+    with open(output_file, "w") as f:
         # Write the header
         for line in header:
             f.write(line + "\n")

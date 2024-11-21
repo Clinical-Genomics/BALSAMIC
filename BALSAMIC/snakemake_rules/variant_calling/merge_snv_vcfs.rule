@@ -35,12 +35,15 @@ rule merge_snv_vcfs:
         Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
     params:
         modify_tnscope_infofield = get_script_path("merge_snv_variantcallers.py"),
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
     threads:
         get_threads(cluster_config, "bcftools_concatenate_vcfs")
     message:
         "Merging VCFs with custom python script using vcfpy"
     shell:
         """
-python {params.modify_tnscope_infofield} {input.vcfs} {output.vcf_merged} ;
+python {params.modify_tnscope_infofield} {input.vcfs} {params.tmpdir}/merged.vcf ;
+bgzip {params.tmpdir}/merged.vcf ;
+mv {params.tmpdir}/merged.vcf {output.vcf_merged} ;
 tabix -p vcf -f {output.vcf_merged} ;
       """
