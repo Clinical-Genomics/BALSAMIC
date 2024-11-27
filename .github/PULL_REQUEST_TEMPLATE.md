@@ -128,11 +128,9 @@
 
 Validation criteria to be added to validation report PR: [LINK-TO-RELEASE-PR]
 
-`
+> **_Version specific criteria:_**  Add text here / NA.
 
-Text here
 
-`
 > [!IMPORTANT]
 > One of the below checkboxes for validation need to be checked 
 
