@@ -128,9 +128,12 @@
 
 Validation criteria to be added to validation report PR: [LINK-TO-RELEASE-PR]
 
-> **_Version specific criteria:_**  
+---
+**Validation specific criteria**
 
-Add text here / NA.
+Text here or N/A
+
+---
 
 
 > [!IMPORTANT]
