@@ -129,7 +129,7 @@
 Validation criteria to be added to validation report PR: [LINK-TO-RELEASE-PR]
 
 ---
-**Validation specific criteria**
+**Version specific criteria**
 
 Text here or N/A
 
