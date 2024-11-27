@@ -1,3 +1,21 @@
+
+[X.X.X]
+-------
+
+Added:
+^^^^^^
+* SOR filter to WGS TN SNV quality filter
+
+Changed:
+^^^^^^^^
+
+Removed:
+^^^^^^^^
+
+Fixed:
+^^^^^^
+
+
 [16.0.0]
 -------
 
