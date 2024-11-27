@@ -75,9 +75,6 @@
 
 ## Clinical Genomics Stockholm
 
-<details>
-<summary></summary>
-
 <!-- Do not reveal clinical data, and if applicable, place it within the internal Google Drive directory. -->
 
 ### Documentation
@@ -130,6 +127,7 @@
 <!-- Create validation criteria for this PR or mark as unnecessary. -->
 
 Validation criteria to be added to validation report PR: [LINK-TO-RELEASE-PR]
+
 `
 
 Text here
@@ -141,8 +139,6 @@ Text here
 - [ ] Added version specific validation criteria to validation report
 - [ ] Changes validated in standard sections: [validation-section]
 - [ ] Validation criteria not necessary
-
-</details>
 
 ## Checklist
 
