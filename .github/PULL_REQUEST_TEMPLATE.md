@@ -125,6 +125,23 @@
     - [x] N/A
     - [ ] Updated: [Link]
 
+### Validation criteria
+
+<!-- Create validation criteria for this PR or mark as unnecessary. -->
+
+Validation criteria to be added to validation report PR: [LINK-TO-RELEASE-PR]
+`
+
+Text here
+
+`
+> [!IMPORTANT]
+> One of the below checkboxes for validation need to be checked 
+
+- [ ] Added version specific validation criteria to validation report
+- [ ] Changes validated in standard sections: [validation-section]
+- [ ] Validation criteria not necessary
+
 </details>
 
 ## Checklist
@@ -139,6 +156,8 @@
     - [ ] Linked relevant user stories or issues to the PR.
 - **Documentation**
     - [ ] Verified and updated documentation if necessary.
+- **Validation criteria**
+    - [ ] Completed the validation criteria section of the template.
 - **Tests**
     - [ ] Described and tested the functionality addressed in the PR.
     - [ ] Ensured integration of the new code with existing workflows.
@@ -155,6 +174,8 @@
     - [ ] Code follows the project's coding standards and style guide.
 - **Documentation**
     - [ ] Pipeline changes are well-documented in the CHANGELOG and relevant documentation.
+- **Validation criteria**
+    - [ ] The author has completed the validation criteria section of the template
 - **Tests**
     - [ ] The author provided a description of their manual testing, including consideration of edge cases and boundary
       conditions where applicable, with satisfactory results.
