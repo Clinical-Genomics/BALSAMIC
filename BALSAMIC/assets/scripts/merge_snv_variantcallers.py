@@ -255,7 +255,7 @@ def merge_info_fields(info_fields: List[str]) -> str:
             )
         else:  # Key only
             merged_info[key] = None
-    return ";".join(f"{k}={v}" if v is not None else k for k, v in merged_info.items())
+    return ";".join(f"{k}={v}" if v is not None else f"{k};" for k, v in merged_info.items())
 
 
 def merge_variants(vcf1: str, vcf2: str) -> List[str]:
