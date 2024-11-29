@@ -21,6 +21,7 @@ Added:
 * Added Raw TNscope calls and unfiltered research-annotated SNVs to delivery https://github.com/Clinical-Genomics/BALSAMIC/pull/1475
 * Argument for SNV Artefact LoqusDB to all workflows https://github.com/Clinical-Genomics/BALSAMIC/pull/1481
 * TNscope tag to variant info-field for TGA workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1497
+* Python script for merging duplicate SNV calls https://github.com/Clinical-Genomics/BALSAMIC/pull/1499
 
 Changed:
 ^^^^^^^^
