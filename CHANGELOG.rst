@@ -1,3 +1,22 @@
+[X.X.X]
+-------
+
+Added:
+^^^^^^
+- Added option to disable hard filter of variants in matched normal
+
+Changed:
+^^^^^^^^
+- Reworked bcftools filters
+
+Removed:
+^^^^^^^^
+
+
+Fixed:
+^^^^^^
+
+
 [16.0.0]
 -------
 
