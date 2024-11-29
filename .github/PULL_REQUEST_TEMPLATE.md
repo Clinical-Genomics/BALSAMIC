@@ -91,6 +91,13 @@
     - [x] N/A
     - [ ] Updated: [Link]
 
+### Panel of Normal specific criteria
+
+<!-- If the PR includes a new PoN adhere to the criteria below. -->
+
+- [ ] The PR includes the addition of a new Panel of Normals
+- [ ] The samples have been verified to adhere to the sample selection criteria on [Atlas PoN creation instructions for Balsamic](https://atlas.scilifelab.se/infrastructure/BALSAMIC/balsamic_pon/#procedure)
+
 ### User Changes
 
 <!-- Please provide justification if you select N/A and the changes affect the output or results. -->

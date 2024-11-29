@@ -44,10 +44,38 @@ Depending on the sequencing type, BALSAMIC is currently running the following st
      - tumor-only
      - somatic
      - CNV
+   * - igh_dux4 (see note below)
+     - WGS
+     - tumor-normal, tumor-only
+     - somatic
+     - SV
+
+
+**Note:** igh_dux4 is not a variant caller itself. This is a custom script that uses samtools to detect read pairs supporting IGH::DUX4 rearrangements.
+
+It is mandatory to provide the gender of the sample from BALSAMIC version >= 10.0.0 For CNV analysis.
 
 Further details about a specific caller can be found in the links for the repositories containing the documentation for SV and CNV callers along with the links for the articles are listed in `bioinfo softwares <https://balsamic.readthedocs.io/en/latest/bioinfo_softwares.html>`_.
 
-It is mandatory to provide the gender of the sample from BALSAMIC version >= 10.0.0 For CNV analysis.
+**Difficult to detect clinically relevant SVs**
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+**IGH::DUX4 rearrangements**
+
+This is a custom script that uses samtools to detect read pairs supporting IGH::DUX4 rearrangements. In short, the command identifies discordant reads mapping to the IGH region and to either DUX4 or its homologous DUX4-like regions (see references for details). The inclusion of this feature aims to alleviate the failure of callers to detect this rearrangement.
+
+It is important to note, however, that the reported breakpoints are fixed to the IGH and DUX4 coordinates and are, therefore, imprecise and uncertain. Therefore, we advise caution when interpreting this information.
+
+The script used to detect this rearrangements can be found in: BALSAMIC/assets/scripts/igh_dux4_detection.sh (see `references <https://balsamic.readthedocs.io/en/latest/resources.html>`_ Detection of IGH::DUX4 rearrangement, for more information.)
+
+**FLT3-ITDs**
+
+FLT3 Internal Tandem Duplications are quite difficult to detect and can exist in sizes detectable by both small SNV and InDel callers such as VarDit and TNscope as well as Structural Variant callers like Manta, Delly and TIDDIT. In our experience however the variant is more commonly detected by SV callers and we strongly recommend that this variant is looked for in the SV results.
+
+It has also been observed in release 16.0.0 of Balsamic a decline in the ability of SNV callers to detect this variant, possibly as a result of collapsing overlapping mates of read-pairs into singletons as a result of UMI post processing. This adds further reasons to searching for this variant in the SV results!
+
+In the future we will aim to add further callers better able to detect this variant.
+
 
 **Pre-merge Filtrations**
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -82,6 +110,9 @@ Manta calls are filtered using bcftools to only keep variants that have evidence
    * - Manta
      - low_pr_sr_count
      - SUM(FORMAT/PR[0:1]+FORMAT/SR[0:1]) < 4.0
+   * - igh_dux4
+     - samtools_igh_dux4
+     - DV < 1
 
 
 Further information regarding the TIDDIT tumor normal filtration: As translocation variants are represented by 2 BNDs in the VCF which allows for mixed assignment of soft-filters, a requirement for assigning soft-filters to translocations is that neither BND is PASS.
@@ -117,12 +148,13 @@ Further information regarding the TIDDIT tumor normal filtration: As translocati
        | 3. ascat
        | 4. dellycnv
        | 5. tiddit
+       | 6. igh_dux4
      - | 1. manta
        | 2. dellysv
        | 3. dellycnv
        | 4. tiddit
        | 5. cnvpytor
-
+       | 6. igh_dux4
 
 
 The merged `SNV.somatic.<CASE_ID>.svdb.vcf.gz` file retains all the information for the variants from the caller in which the variants are identified, which are then annotated using `ensembl-vep`.

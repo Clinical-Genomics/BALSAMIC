@@ -15,6 +15,7 @@ from BALSAMIC.assets.scripts.collect_qc_metrics import (
     get_variant_metrics,
     get_metric_condition,
     get_relatedness_metrics,
+    get_sample_id,
 )
 
 
@@ -22,10 +23,10 @@ def test_get_qc_supported_capture_kit(qc_requested_metrics):
     """test extraction of the capture kit name available for analysis"""
 
     # GIVEN a capture kit
-    capture_kit = "panel_1_v1.0_hg19_design.bed"
+    capture_kit = "panelA_1.0_hg19_design.bed"
 
     # GIVEN an expected output
-    expected_output = "panel_1"
+    expected_output = "panelA"
 
     # WHEN calling the function
     supported_capture_kit = get_qc_supported_capture_kit(
@@ -41,7 +42,7 @@ def test_get_requested_metrics_targeted(config_dict, qc_requested_metrics):
 
     # GIVEN a config_dict
     config = copy.deepcopy(config_dict)
-    config["panel"]["capture_kit"] = "tests/panel/panel_2_v1.0_hg19_design.bed"
+    config["panel"]["capture_kit"] = "tests/panel/panelB_1.0_hg19_design.bed"
 
     # GIVEN the expected output
     expected_output = {
@@ -282,6 +283,17 @@ def test_collect_qc_metrics_counts(
     # THEN check if the YAML is correctly created and there are no errors
     assert result.exit_code == 0
     assert Path(output_path).exists()
+
+
+def test_get_sample_id(tumor_sample_name):
+    """Tests sample ID extraction from multiqc_key."""
+    multiqc_sampleid_keys = [
+        f"tumor.{tumor_sample_name}",
+        f"tumor.{tumor_sample_name}_R1",
+        f"{tumor_sample_name}_align_sort_HMYLNDSXX_{tumor_sample_name}_S165_L001",
+    ]
+    for multiqc_key in multiqc_sampleid_keys:
+        assert get_sample_id(multiqc_key) == tumor_sample_name
 
 
 def test_get_relatedness_metrics(multiqc_data_dict):
