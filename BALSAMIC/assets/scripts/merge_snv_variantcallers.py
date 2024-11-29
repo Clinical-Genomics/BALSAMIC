@@ -257,48 +257,113 @@ def merge_info_fields(info_fields: List[str]) -> str:
             merged_info[key] = None
     return ";".join(f"{k}={v}" if v is not None else f"{k};" for k, v in merged_info.items())
 
-
 def merge_variants(vcf1: str, vcf2: str) -> List[str]:
     """
-    Merges variants from two VCF files.
+    Merges variants from two VCF files, keeping all unique variants
+    and merging INFO fields for shared variants, sorted in genomic order.
 
     Parameters:
     - vcf1 (str): Path to the first VCF file.
     - vcf2 (str): Path to the second VCF file.
 
     Returns:
-    - List[str]: Merged variant lines.
+    - List[str]: Merged variant lines, sorted in genomic order.
     """
     variants1 = read_variants(vcf1)
     variants2 = read_variants(vcf2)
 
+    # Combine keys and sort by genomic order (chromosome, position)
+    all_keys = sorted(
+        set(variants1.keys()).union(variants2.keys()),
+        key=lambda x: (parse_chromosome(x[0]), int(x[1])),
+    )
+
     merged_variants = []
-    for key, variant1 in variants1.items():
+
+    for key in all_keys:
+        variant1 = variants1.get(key)
         variant2 = variants2.get(key)
-        if variant2:
+
+        if variant1 and variant2:
+            # Variant exists in both VCFs; merge INFO fields
             id_ = variant1["id"] if variant1["id"] != "." else variant2["id"]
             merged_info = merge_info_fields(
                 variant1["info"].split(";") + variant2["info"].split(";")
             )
-        else:
-            id_ = variant1["id"]
-            merged_info = variant1["info"]
-        merged_variants.append(
-            "\t".join(
-                [
-                    variant1["chrom"],
-                    variant1["pos"],
-                    id_,
-                    variant1["ref"],
-                    variant1["alt"],
-                    variant1["qual"],
-                    variant1["filter"],
-                    merged_info,
-                    variant1["format"],
-                ]
-                + variant1["samples"]
+            qual = variant1["qual"] if variant1["qual"] != "." else variant2["qual"]
+            filter_ = variant1["filter"] if variant1["filter"] != "." else variant2["filter"]
+            merged_variants.append(
+                "\t".join(
+                    [
+                        variant1["chrom"],
+                        variant1["pos"],
+                        id_,
+                        variant1["ref"],
+                        variant1["alt"],
+                        qual,
+                        filter_,
+                        merged_info,
+                        variant1["format"],
+                    ]
+                    + variant1["samples"]
+                )
             )
-        )
+        elif variant1:
+            # Unique to VCF1
+            merged_variants.append(
+                "\t".join(
+                    [
+                        variant1["chrom"],
+                        variant1["pos"],
+                        variant1["id"],
+                        variant1["ref"],
+                        variant1["alt"],
+                        variant1["qual"],
+                        variant1["filter"],
+                        variant1["info"],
+                        variant1["format"],
+                    ]
+                    + variant1["samples"]
+                )
+            )
+        elif variant2:
+            # Unique to VCF2
+            merged_variants.append(
+                "\t".join(
+                    [
+                        variant2["chrom"],
+                        variant2["pos"],
+                        variant2["id"],
+                        variant2["ref"],
+                        variant2["alt"],
+                        variant2["qual"],
+                        variant2["filter"],
+                        variant2["info"],
+                        variant2["format"],
+                    ]
+                    + variant2["samples"]
+                )
+            )
+
+    return merged_variants
+
+
+def parse_chromosome(chrom: str) -> Tuple[int, str]:
+    """
+    Parses chromosome names to ensure proper sorting.
+
+    Parameters:
+    - chrom (str): Chromosome name.
+
+    Returns:
+    - Tuple[int, str]: Parsed chromosome for sorting (numeric or special).
+    """
+    # Handle numeric chromosomes as integers for proper sorting
+    if chrom.isdigit():
+        return (int(chrom), "")
+    # Handle special chromosomes like X, Y, M, etc.
+    chrom_order = {"X": 23, "Y": 24, "M": 25}
+    return (chrom_order.get(chrom.upper(), 99), chrom)
 
 
 def write_merged_vcf(output_file: str, header: List[str], variants: List[str]) -> None:
