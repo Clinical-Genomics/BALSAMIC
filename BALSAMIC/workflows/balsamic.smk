@@ -123,7 +123,6 @@ if config_model.analysis.analysis_type == "paired":
 else:
     status_to_sample_id = "TUMOR" + "\\\\t" + tumor_sample
 
-
 # Set SNV filter settings depending on if sample is panel / wes / wgs
 if config_model.panel:
     if config_model.panel.exome:
@@ -133,6 +132,8 @@ if config_model.panel:
 else:
     SNV_FILTER_SETTINGS = VarCallerFilter.model_validate(SNV_BCFTOOLS_SETTINGS_WGS)
 
+# Get hard-filters
+bcftools_hard_filter_names = SNV_FILTER_SETTINGS.get_bcftools_filter_command(soft_filter_normal = config_model.analysis.soft_filter_normal)
 
 
 SVDB_FILTERS = VarCallerFilter.model_validate(SVDB_FILTER_SETTINGS)

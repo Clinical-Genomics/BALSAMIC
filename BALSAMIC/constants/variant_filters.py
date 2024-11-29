@@ -30,6 +30,7 @@ SNV_BCFTOOLS_SETTINGS_COMMON = {
         "filter_name": "balsamic_low_strand_read_counts",
         "field": "FORMAT",
     },
+    "matched_normal_filter_names": ["high_normal_tumor_af_frac", "germline_risk"],
     "varcaller_name": "None",
     "filter_type": "general",
     "analysis_type": "tumor_only,tumor_normal",

@@ -1,5 +1,5 @@
 """Balsamic analysis parameters models."""
-from typing import Optional
+from typing import List, Optional
 
 from pydantic import BaseModel, ConfigDict, field_validator
 from BALSAMIC.constants.analysis import SequencingType
@@ -334,7 +334,35 @@ class VarCallerFilter(BaseModel):
     loqusdb_clinical_snv_freq: Optional[VCFAttributes] = None
     loqusdb_clinical_sv_freq: Optional[VCFAttributes] = None
     low_pr_sr_count: Optional[VCFAttributes] = None
+    matched_normal_filter_names: Optional[List[str]] = None
     varcaller_name: str
     filter_type: str
     analysis_type: str
     description: str
+
+    def get_bcftools_hard_filter_names(self, soft_filter_normal: bool = False):
+        """
+        Extract all filter_name attributes from VCFAttributes fields.
+
+        Args:
+            exclude_matched_normal (bool): If True, removes filter_name attributes
+                                           that exist in `matched_normal_filter_names`.
+
+        Returns:
+            List[str]: A list of filter_name attributes.
+        """
+        filter_names = []
+
+        # Iterate over all attributes in the model
+        for field_name, value in self.__dict__.items():
+            if isinstance(value, VCFAttributes) and hasattr(value, "filter_name"):
+                filter_names.append(value.filter_name)
+
+        # Remove matched normal filter names if the flag is set
+        if soft_filter_normal and self.matched_normal_filter_names:
+            filter_names = [
+                fn for fn in filter_names
+                if fn not in self.matched_normal_filter_names
+            ]
+
+        return ",".join(filter_names)
