@@ -361,8 +361,7 @@ class VarCallerFilter(BaseModel):
         # Remove matched normal filter names if the flag is set
         if soft_filter_normal and self.matched_normal_filter_names:
             filter_names = [
-                fn for fn in filter_names
-                if fn not in self.matched_normal_filter_names
+                fn for fn in filter_names if fn not in self.matched_normal_filter_names
             ]
 
         return ",".join(filter_names)
