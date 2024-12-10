@@ -141,6 +141,13 @@ OPTION_CLUSTER_CONFIG = click.option(
     help="Cluster configuration JSON file path",
 )
 
+OPTION_SOFT_FILTER_NORMAL = click.option(
+    "--soft_filter-normal",
+    is_flag=True,
+    default=False,
+    help="Flag to disable hard-filtering on presence of variants in matched normal sample",
+)
+
 OPTION_CLUSTER_MAIL = click.option(
     "--mail-user",
     type=click.STRING,
