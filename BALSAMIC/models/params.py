@@ -364,4 +364,4 @@ class VarCallerFilter(BaseModel):
                 fn for fn in filter_names if fn not in self.matched_normal_filter_names
             ]
 
-        return ",".join(filter_names)
+        return filter_names
