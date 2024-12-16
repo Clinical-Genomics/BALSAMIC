@@ -9,8 +9,7 @@ TNSCOPE_HARDFILTERS = [
     {"filter_name": "t_lod_fstar", "Description": "Tumor does not meet likelihood threshold"},
     {"filter_name": "low_t_alt_frac", "Description": "Site filtered due to low alt allele fraction"},
 ]
-TNSCOPE_TN_HARDFILTERS = [
-    *TNSCOPE_HARDFILTERS,
+TNSCOPE_TN_HARDFILTERS = TNSCOPE_HARDFILTERS + [
     {"filter_name": "germline_risk", "Description": "Evidence indicates this site is germline, not somatic"},
 ]
 VARDICT_HARDFILTERS = [
@@ -31,9 +30,7 @@ VARDICT_HARDFILTERS = [
     {"filter_name": "v2", "Description": "Var Depth < 2"},
 ]
 
-VARDICT_TN_HARDFILTERS = [
-    *VARDICT_HARDFILTERS
-]
+VARDICT_TN_HARDFILTERS = VARDICT_HARDFILTERS
 
 # RESEARCH AND CLINICAL FILTERS
 #---------------------------------------------------
@@ -50,6 +47,10 @@ SNV_BCFTOOOLS_CLINICAL_COMMON = {
         "filter_name": "ArtefactFrq",
         "field": "INFO",
     },
+    "varcaller_name": "None",
+    "filter_type": "general",
+    "analysis_type": "tumor_only,tumor_normal",
+    "description": "Clinical database filters used for filtering SNVs",
 }
 
 # Configurations for common research filters
@@ -58,7 +59,11 @@ SNV_BCFTOOOLS_RESEARCH_COMMON = {
         "tag_value": 0.01,
         "filter_name": "SWEGENAF",
         "field": "INFO",
-    }
+    },
+    "varcaller_name": "None",
+    "filter_type": "general",
+    "analysis_type": "tumor_only,tumor_normal",
+    "description": "Research database filters used for filtering SNVs",
 }
 
 # Configurations for TGA specific research filters
@@ -74,9 +79,9 @@ SNV_BCFTOOOLS_RESEARCH_TGA = {
 # Configurations for UMI specific research filters
 SNV_BCFTOOOLS_RESEARCH_UMI = {
     **SNV_BCFTOOOLS_RESEARCH_COMMON,
-    "pop_freq_umi": {
+    "pop_freq": {
         "tag_value": 0.02,
-        "filter_name": "balsamic_umi_high_pop_freq",
+        "filter_name": "balsamic_high_pop_freq",
         "field": "INFO",
     }
 }
@@ -250,13 +255,13 @@ SNV_BCFTOOLS_QUALITY_WES_TNSCOPE_TN = {
 
 SNV_BCFTOOLS_QUALITY_TGA_TNSCOPE_UMI_TO = {
     **SNV_BCFTOOLS_QUALITY_TNSCOPE_COMMON,
-    **TNSCOPE_HARDFILTERS,
+    "variantcaller_filters": TNSCOPE_HARDFILTERS,
 }
 
 SNV_BCFTOOLS_QUALITY_TGA_TNSCOPE_UMI_TN = {
     **SNV_BCFTOOLS_QUALITY_TNSCOPE_COMMON,
     **SNV_BCFTOOLS_QUALITY_TUMOR_NORMAL,
-    **TNSCOPE_TN_HARDFILTERS,
+    "variantcaller_filters": TNSCOPE_TN_HARDFILTERS,
 }
 
 # WGS
@@ -264,6 +269,7 @@ SNV_BCFTOOLS_QUALITY_TGA_TNSCOPE_UMI_TN = {
 
 # Configurations for common quality filters for WGS
 SNV_BCFTOOLS_QUALITY_COMMON_WGS = {
+    **SNV_BCFTOOLS_QUALITY_TNSCOPE_COMMON,
     "AD": {"tag_value": 3, "filter_name": "balsamic_low_tumor_ad", "field": "FORMAT"},
     "DP": {
         "tag_value": 10,
@@ -316,12 +322,13 @@ SNV_FILTERS_WGS_TO = {
         **SNV_BCFTOOOLS_RESEARCH_WGS,
     },
     "clinical": {
+        **SNV_BCFTOOOLS_RESEARCH_WGS,
         **SNV_BCFTOOOLS_CLINICAL_COMMON,
     }
 }
 
 SNV_FILTERS_WGS_TN = {
-    "tnscope_filters": {
+    "tnscope": {
         **SNV_BCFTOOLS_QUALITY_WGS_TNSCOPE_TN,
         "variantcaller_filters": TNSCOPE_TN_HARDFILTERS,
     },
@@ -329,6 +336,7 @@ SNV_FILTERS_WGS_TN = {
         **SNV_BCFTOOOLS_RESEARCH_WGS,
     },
     "clinical": {
+        **SNV_BCFTOOOLS_RESEARCH_WGS,
         **SNV_BCFTOOOLS_CLINICAL_COMMON,
     }
 }
@@ -346,6 +354,7 @@ SNV_FILTERS_TGA_WES_TO = {
         **SNV_BCFTOOOLS_RESEARCH_TGA,
     },
     "clinical": {
+        **SNV_BCFTOOOLS_RESEARCH_TGA,
         **SNV_BCFTOOOLS_CLINICAL_COMMON,
     }
 }
@@ -363,6 +372,7 @@ SNV_FILTERS_TGA_WES_TN = {
         **SNV_BCFTOOOLS_RESEARCH_TGA,
     },
     "clinical": {
+        **SNV_BCFTOOOLS_RESEARCH_TGA,
         **SNV_BCFTOOOLS_CLINICAL_COMMON,
     }
 }
@@ -380,6 +390,7 @@ SNV_FILTERS_TGA_TO = {
         **SNV_BCFTOOOLS_RESEARCH_TGA,
     },
     "clinical": {
+        **SNV_BCFTOOOLS_RESEARCH_TGA,
         **SNV_BCFTOOOLS_CLINICAL_COMMON,
     }
 }
@@ -397,6 +408,7 @@ SNV_FILTERS_TGA_TN = {
         **SNV_BCFTOOOLS_RESEARCH_TGA,
     },
     "clinical": {
+        **SNV_BCFTOOOLS_RESEARCH_TGA,
         **SNV_BCFTOOOLS_CLINICAL_COMMON,
     }
 }

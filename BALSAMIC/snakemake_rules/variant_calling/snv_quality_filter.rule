@@ -150,30 +150,6 @@ if config["analysis"]["sequencing_type"] == 'targeted' and config["analysis"]["a
     tabix -p vcf -f {output.vcf_filtered};
       """
 
-  rule bcftools_quality_filter_TNscope_umi_tumor_only:
-    input:
-      vcf= vcf_dir +  "SNV.somatic."+ config["analysis"]["case_id"] + ".tnscope_umi.vcf.gz",
-    output:
-      vcf_filtered = vcf_dir +  "SNV.somatic."+ config["analysis"]["case_id"] + ".tnscope_umi.research.vcf.gz"
-    benchmark:
-      Path(benchmark_dir,'bcftools_quality_filter_TNscope_umi_tumor_only' + config["analysis"]["case_id"] + ".tsv").as_posix()
-    singularity:
-      Path(singularity_image,config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
-    params:
-      hard_filter_list=snv_filters["tnscope_umi"].get_bcftools_hard_filter_command(),
-      case_name = config["analysis"]["case_id"],
-    threads:
-      get_threads(cluster_config,'bcftools_quality_filter_tnscope_umi_tumor_only')
-    message:
-      "Quality filtering tnscope_umi tumor-only variants using bcftools for {params.case_name}"
-    shell:
-      """
-    bcftools view {input.vcf} \
-    | bcftools view --exclude '{params.hard_filter_list}' -o {output.vcf_filtered} -O z;
-    
-    tabix -p vcf -f {output.vcf_filtered};
-      """
-
 
 elif config["analysis"]["sequencing_type"] == 'targeted' and config["analysis"]["analysis_type"] == 'paired':
 
@@ -246,6 +222,8 @@ elif config["analysis"]["sequencing_type"] == 'targeted' and config["analysis"][
     tabix -p vcf -f {output.vcf_filtered};
       """
 
+
+if config_model.analysis.analysis_workflow == AnalysisWorkflow.BALSAMIC_UMI and config["analysis"]["analysis_type"] == 'paired':
   rule bcftools_quality_filter_TNscope_umi_tumor_normal:
     input:
       vcf = vcf_dir +  "SNV.somatic."+ config["analysis"]["case_id"] + ".tnscope_umi.vcf.gz",
@@ -274,3 +252,28 @@ elif config["analysis"]["sequencing_type"] == 'targeted' and config["analysis"][
     tabix -p vcf -f {output.vcf_filtered};
       """
 
+elif config_model.analysis.analysis_workflow == AnalysisWorkflow.BALSAMIC_UMI and config["analysis"]["analysis_type"] == 'single':
+  rule bcftools_quality_filter_TNscope_umi_tumor_only:
+    input:
+      vcf=vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope_umi.vcf.gz",
+    output:
+      vcf_filtered=vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope_umi.research.vcf.gz"
+    benchmark:
+      Path(benchmark_dir,'bcftools_quality_filter_TNscope_umi_tumor_only' + config["analysis"][
+        "case_id"] + ".tsv").as_posix()
+    singularity:
+      Path(singularity_image,config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
+    params:
+      hard_filter_list=snv_filters["tnscope_umi"].get_bcftools_hard_filter_command(),
+      case_name=config["analysis"]["case_id"],
+    threads:
+      get_threads(cluster_config,'bcftools_quality_filter_tnscope_umi_tumor_only')
+    message:
+      "Quality filtering tnscope_umi tumor-only variants using bcftools for {params.case_name}"
+    shell:
+      """
+    bcftools view {input.vcf} \
+    | bcftools view --exclude '{params.hard_filter_list}' -o {output.vcf_filtered} -O z;
+
+    tabix -p vcf -f {output.vcf_filtered};
+      """

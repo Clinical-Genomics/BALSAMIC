@@ -26,6 +26,7 @@ from BALSAMIC.constants.variant_filters import (
     SNV_FILTERS_TGA_TN,
     SNV_BCFTOOLS_QUALITY_TGA_TNSCOPE_UMI_TN,
     SNV_BCFTOOLS_QUALITY_TGA_TNSCOPE_UMI_TO,
+    SNV_BCFTOOOLS_RESEARCH_UMI,
     SVDB_FILTER_SETTINGS,
     MANTA_FILTER_SETTINGS,
     MATCHED_NORMAL_FILTER_NAMES,
@@ -149,8 +150,10 @@ else:
         snv_filters: dict = SNV_FILTERS_WGS_TO
 
 if config_model.analysis.analysis_workflow == AnalysisWorkflow.BALSAMIC_UMI:
+    snv_filters["research_umi"] = SNV_BCFTOOOLS_RESEARCH_UMI
     if config_model.analysis.analysis_type == "paired":
         snv_filters["tnscope_umi"] = SNV_BCFTOOLS_QUALITY_TGA_TNSCOPE_UMI_TN
+
     else:
         snv_filters["tnscope_umi"] = SNV_BCFTOOLS_QUALITY_TGA_TNSCOPE_UMI_TO
 
