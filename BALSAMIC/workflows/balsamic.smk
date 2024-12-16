@@ -10,6 +10,7 @@ from typing import Dict, List
 
 from BALSAMIC.constants.constants import FileType
 from BALSAMIC.constants.analysis import (
+    AnalysisWorkflow,
     FastqName,
     MutationType,
     SampleType,
@@ -17,11 +18,17 @@ from BALSAMIC.constants.analysis import (
 from BALSAMIC.constants.paths import BALSAMIC_DIR
 from BALSAMIC.constants.rules import SNAKEMAKE_RULES
 from BALSAMIC.constants.variant_filters import (
-    SNV_BCFTOOLS_SETTINGS_PANEL,
-    SNV_BCFTOOLS_SETTINGS_EXOME,
-    SNV_BCFTOOLS_SETTINGS_WGS,
+    SNV_FILTERS_WGS_TO,
+    SNV_FILTERS_WGS_TN,
+    SNV_FILTERS_TGA_WES_TO,
+    SNV_FILTERS_TGA_WES_TN,
+    SNV_FILTERS_TGA_TO,
+    SNV_FILTERS_TGA_TN,
+    SNV_BCFTOOLS_QUALITY_TGA_TNSCOPE_UMI_TN,
+    SNV_BCFTOOLS_QUALITY_TGA_TNSCOPE_UMI_TO,
     SVDB_FILTER_SETTINGS,
     MANTA_FILTER_SETTINGS,
+    MATCHED_NORMAL_FILTER_NAMES,
 )
 from BALSAMIC.constants.workflow_params import (
     VARCALL_PARAMS,
@@ -126,14 +133,33 @@ else:
 # Set SNV filter settings depending on if sample is panel / wes / wgs
 if config_model.panel:
     if config_model.panel.exome:
-        SNV_FILTER_SETTINGS = VarCallerFilter.model_validate(SNV_BCFTOOLS_SETTINGS_EXOME)
+        if config_model.analysis.analysis_type == "paired":
+            snv_filters: dict = SNV_FILTERS_TGA_WES_TN
+        else:
+            snv_filters: dict = SNV_FILTERS_TGA_WES_TO
     else:
-        SNV_FILTER_SETTINGS = VarCallerFilter.model_validate(SNV_BCFTOOLS_SETTINGS_PANEL)
+        if config_model.analysis.analysis_type == "paired":
+            snv_filters: dict = SNV_FILTERS_TGA_TN
+        else:
+            snv_filters: dict = SNV_FILTERS_TGA_TO
 else:
-    SNV_FILTER_SETTINGS = VarCallerFilter.model_validate(SNV_BCFTOOLS_SETTINGS_WGS)
+    if config_model.analysis.analysis_type == "paired":
+        snv_filters: dict = SNV_FILTERS_WGS_TN
+    else:
+        snv_filters: dict = SNV_FILTERS_WGS_TO
 
-# Get hard-filters
-bcftools_hard_filter_names = SNV_FILTER_SETTINGS.get_bcftools_hard_filter_names(soft_filter_normal = config_model.analysis.soft_filter_normal)
+if config_model.analysis.analysis_workflow == AnalysisWorkflow.BALSAMIC_UMI:
+    if config_model.analysis.analysis_type == "paired":
+        snv_filters["tnscope_umi"] = SNV_BCFTOOLS_QUALITY_TGA_TNSCOPE_UMI_TN
+    else:
+        snv_filters["tnscope_umi"] = SNV_BCFTOOLS_QUALITY_TGA_TNSCOPE_UMI_TO
+
+for snv_filter, filter_dict in snv_filters.items():
+    # Add optional soft-filter filter names
+    if config_model.analysis.soft_filter_normal:
+        filter_dict.update(MATCHED_NORMAL_FILTER_NAMES)
+
+    snv_filters[snv_filter] = VarCallerFilter.model_validate(filter_dict)
 
 
 SVDB_FILTERS = VarCallerFilter.model_validate(SVDB_FILTER_SETTINGS)

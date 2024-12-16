@@ -289,6 +289,17 @@ class VCFAttributes(BaseModel):
     filter_name: str
     field: str
 
+class VariantCallerFilters(BaseModel):
+    """Internal variant caller filters
+
+    This class handles the internal variant caller filters.
+
+    Attributes:
+        filter_name: str
+        Description: str
+    """
+    filter_name: str
+    Description: str
 
 class VarCallerFilter(BaseModel):
     """General purpose for variant caller filters
@@ -335,33 +346,36 @@ class VarCallerFilter(BaseModel):
     loqusdb_clinical_sv_freq: Optional[VCFAttributes] = None
     low_pr_sr_count: Optional[VCFAttributes] = None
     matched_normal_filter_names: Optional[List[str]] = None
+    variantcaller_filters: Optional[List[VariantCallerFilters]] = None
     varcaller_name: str
     filter_type: str
     analysis_type: str
     description: str
 
-    def get_bcftools_hard_filter_names(self, soft_filter_normal: bool = False):
+    def get_bcftools_hard_filter_command(self):
         """
-        Extract all filter_name attributes from VCFAttributes fields.
-
-        Args:
-            exclude_matched_normal (bool): If True, removes filter_name attributes
-                                           that exist in `matched_normal_filter_names`.
+        Generate a BCFTools-compatible filter string based on all filter names.
 
         Returns:
-            List[str]: A list of filter_name attributes.
+            str: A string formatted as 'FILTER~"name1" || FILTER~"name2" || ...'.
         """
-        filter_names = []
+        filter_names = set()  # Use a set to avoid duplicates
 
-        # Iterate over all attributes in the model
+        # Collect filter_name attributes from VCFAttributes fields
         for field_name, value in self.__dict__.items():
             if isinstance(value, VCFAttributes) and hasattr(value, "filter_name"):
-                filter_names.append(value.filter_name)
+                filter_names.add(value.filter_name)
+
+        # Add filter_name attributes from variantcaller_filters
+        if self.variantcaller_filters:
+            for filter_obj in self.variantcaller_filters:
+                filter_names.add(filter_obj.filter_name)
 
         # Remove matched normal filter names if the flag is set
-        if soft_filter_normal and self.matched_normal_filter_names:
-            filter_names = [
-                fn for fn in filter_names if fn not in self.matched_normal_filter_names
-            ]
+        if self.matched_normal_filter_names:
+            filter_names -= set(self.matched_normal_filter_names)
 
-        return filter_names
+        # Format as BCFTools-compatible filter string
+        bcftools_filter_string = " || ".join([f'FILTER~"{filter_}"' for filter_ in sorted(filter_names)])
+        return bcftools_filter_string
+
