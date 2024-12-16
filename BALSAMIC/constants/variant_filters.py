@@ -343,11 +343,11 @@ SNV_FILTERS_WGS_TN = {
 
 SNV_FILTERS_TGA_WES_TO = {
     "tnscope": {
-        **SNV_BCFTOOLS_QUALITY_TGA_TNSCOPE_TO,
+        **SNV_BCFTOOLS_QUALITY_WES_TNSCOPE_TO,
         "variantcaller_filters": TNSCOPE_HARDFILTERS,
     },
     "vardict": {
-        **SNV_BCFTOOLS_QUALITY_TGA_VARDICT_TO,
+        **SNV_BCFTOOLS_QUALITY_WES_VARDICT_TO,
         "variantcaller_filters": VARDICT_HARDFILTERS,
     },
     "research": {
@@ -359,18 +359,13 @@ SNV_FILTERS_TGA_WES_TO = {
     }
 }
 
-# SNV_BCFTOOLS_QUALITY_WES_TNSCOPE_TO
-# SNV_BCFTOOLS_QUALITY_WES_VARDICT_TO
-# SNV_BCFTOOLS_QUALITY_WES_TNSCOPE_TN
-# SNV_BCFTOOLS_QUALITY_WES_VARDICT_TN
-
 SNV_FILTERS_TGA_WES_TN = {
     "tnscope": {
-        **SNV_BCFTOOLS_QUALITY_TGA_TNSCOPE_TN,
+        **SNV_BCFTOOLS_QUALITY_WES_TNSCOPE_TN,
         "variantcaller_filters": TNSCOPE_TN_HARDFILTERS,
     },
     "vardict": {
-        **SNV_BCFTOOLS_QUALITY_TGA_VARDICT_TN,
+        **SNV_BCFTOOLS_QUALITY_WES_VARDICT_TN,
         "variantcaller_filters": VARDICT_TN_HARDFILTERS,
     },
     "research": {
