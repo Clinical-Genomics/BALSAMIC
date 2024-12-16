@@ -142,7 +142,7 @@ OPTION_CLUSTER_CONFIG = click.option(
 )
 
 OPTION_SOFT_FILTER_NORMAL = click.option(
-    "--soft_filter-normal",
+    "--soft-filter-normal",
     is_flag=True,
     default=False,
     help="Flag to disable hard-filtering on presence of variants in matched normal sample",
