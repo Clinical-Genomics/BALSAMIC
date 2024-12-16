@@ -116,7 +116,7 @@ class AnalysisModel(BaseModel):
     Attributes:
 
         case_id : Field(required); string case identifier
-        softfilter_normal: (bool); optional parameter to disable hard-filtering on presence in mathed normal sample
+        soft_filter_normal: (bool); optional parameter to disable hard-filtering on presence in mathed normal sample
         gender: Field(required); string case gender
         analysis_type : Field(required); string literal [single, paired, pon]
             single : if only tumor samples are provided
