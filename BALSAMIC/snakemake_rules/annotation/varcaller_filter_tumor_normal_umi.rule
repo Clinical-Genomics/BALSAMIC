@@ -14,8 +14,9 @@ rule bcftools_filter_TNscope_umi_research_tumor_normal:
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
   params:
-    pop_freq = [SNV_FILTER_SETTINGS.pop_freq_umi.tag_value, SNV_FILTER_SETTINGS.pop_freq_umi.filter_name],
-    swegen_freq = [SNV_FILTER_SETTINGS.swegen_snv_freq.tag_value, SNV_FILTER_SETTINGS.swegen_snv_freq.filter_name],
+    pop_freq = [snv_filters["research_umi"].pop_freq.tag_value, snv_filters["research_umi"].pop_freq.filter_name],
+    swegen_freq = [snv_filters["research_umi"].swegen_snv_freq.tag_value, snv_filters["research_umi"].swegen_snv_freq.filter_name],
+    hard_filter_list = snv_filters["research_umi"].get_bcftools_hard_filter_command(),
     case_name = '{case_name}',
     edit_vcf_script = get_script_path("edit_vcf_info.py"),
     variant_caller = "tnscope_umi"
@@ -29,7 +30,7 @@ rule bcftools_filter_TNscope_umi_research_tumor_normal:
 bcftools view --threads {threads} -f PASS,triallelic_site {input.vcf_snv_research} | \
 bcftools filter --threads {threads} --include 'INFO/GNOMADAF_popmax <= {params.pop_freq[0]} || INFO/GNOMADAF_popmax == \".\"' --soft-filter '{params.pop_freq[1]}' --mode '+' | \
 bcftools filter --threads {threads} --include 'INFO/SWEGENAF <= {params.swegen_freq[0]} || INFO/SWEGENAF == \".\"' --soft-filter '{params.swegen_freq[1]}' --mode '+' |\
-bcftools view --threads {threads} -i 'FILTER == "PASS" || FILTER == "triallelic_site"' -o {output.vcf_pass_tnscope_umi}.temp1 -O z;
+bcftools view --threads {threads} --exclude "{params.hard_filter_list}" -o {output.vcf_pass_tnscope_umi}.temp1 -O z;
 
 python {params.edit_vcf_script} \
 --input_vcf {output.vcf_pass_tnscope_umi}.temp1 \
@@ -60,12 +61,13 @@ rule bcftools_filter_TNscope_umi_clinical_tumor_normal:
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
   params:
-    artefact_freq = [SNV_FILTER_SETTINGS.artefact_snv_freq.tag_value, SNV_FILTER_SETTINGS.artefact_snv_freq.filter_name],
-    pop_freq = [SNV_FILTER_SETTINGS.pop_freq_umi.tag_value, SNV_FILTER_SETTINGS.pop_freq_umi.filter_name],
-    swegen_freq = [SNV_FILTER_SETTINGS.swegen_snv_freq.tag_value, SNV_FILTER_SETTINGS.swegen_snv_freq.filter_name],
-    loqusdb_clinical_freq = [SNV_FILTER_SETTINGS.loqusdb_clinical_snv_freq.tag_value, SNV_FILTER_SETTINGS.loqusdb_clinical_snv_freq.filter_name],
+    artefact_freq = [snv_filters["clinical"].artefact_snv_freq.tag_value, snv_filters["clinical"].artefact_snv_freq.filter_name],
+    pop_freq = [snv_filters["clinical"].pop_freq.tag_value, snv_filters["clinical"].pop_freq.filter_name],
+    swegen_freq = [snv_filters["clinical"].swegen_snv_freq.tag_value, snv_filters["clinical"].swegen_snv_freq.filter_name],
+    loqusdb_clinical_freq = [snv_filters["clinical"].loqusdb_clinical_snv_freq.tag_value, snv_filters["clinical"].loqusdb_clinical_snv_freq.filter_name],
     housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "clinical"},
     case_name = '{case_name}',
+    hard_filter_list = snv_filters["clinical"].get_bcftools_hard_filter_command(),
     edit_vcf_script = get_script_path("edit_vcf_info.py"),
     variant_caller = "tnscope_umi"
   threads:
@@ -81,7 +83,7 @@ bcftools filter --threads {threads} --include 'INFO/ArtefactFrq <= {params.artef
 bcftools filter --threads {threads} --include 'INFO/GNOMADAF_popmax <= {params.pop_freq[0]} || INFO/GNOMADAF_popmax == \".\"' --soft-filter '{params.pop_freq[1]}' --mode '+' | \
 bcftools filter --threads {threads} --include 'INFO/SWEGENAF <= {params.swegen_freq[0]} || INFO/SWEGENAF == \".\"' --soft-filter '{params.swegen_freq[1]}' --mode '+' |\
 bcftools filter --threads {threads} --include 'INFO/Frq <= {params.loqusdb_clinical_freq[0]} || INFO/Frq == \".\"' --soft-filter '{params.loqusdb_clinical_freq[1]}' --mode '+' |\
-bcftools view --threads {threads} -i 'FILTER == "PASS" || FILTER == "triallelic_site"' -O z -o {output.vcf_pass_tnscope_umi}.temp1;
+bcftools view --threads {threads} --exclude "{params.hard_filter_list}" -O z -o {output.vcf_pass_tnscope_umi}.temp1;
 
 python {params.edit_vcf_script} \
 --input_vcf {output.vcf_pass_tnscope_umi}.temp1 \

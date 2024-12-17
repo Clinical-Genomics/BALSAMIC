@@ -1,5 +1,5 @@
 """Balsamic analysis parameters models."""
-from typing import Optional
+from typing import List, Optional
 
 from pydantic import BaseModel, ConfigDict, field_validator
 from BALSAMIC.constants.analysis import SequencingType
@@ -290,6 +290,20 @@ class VCFAttributes(BaseModel):
     field: str
 
 
+class VariantCallerFilters(BaseModel):
+    """Internal variant caller filters
+
+    This class handles the internal variant caller filters.
+
+    Attributes:
+        filter_name: str
+        Description: str
+    """
+
+    filter_name: str
+    Description: str
+
+
 class VarCallerFilter(BaseModel):
     """General purpose for variant caller filters
 
@@ -302,7 +316,6 @@ class VarCallerFilter(BaseModel):
         MQ: VCFAttributes (optional); minimum mapping quality
         DP: VCFAttributes (optional); minimum read depth
         pop_freq: VCFAttributes (optional); maximum gnomad allele frequency
-        pop_freq_umi: VCFAttributes (optional); maximum gnomad_af for UMI workflow
         strand_reads: VCFAttributes (optional); minimum strand specific read counts
         qss: VCFAttributes (optional); minimum sum of base quality scores
         sor: VCFAttributes (optional); minimum symmetrical log-odds ratio
@@ -324,7 +337,6 @@ class VarCallerFilter(BaseModel):
     MQ: Optional[VCFAttributes] = None
     DP: Optional[VCFAttributes] = None
     pop_freq: Optional[VCFAttributes] = None
-    pop_freq_umi: Optional[VCFAttributes] = None
     strand_reads: Optional[VCFAttributes] = None
     qss: Optional[VCFAttributes] = None
     sor: Optional[VCFAttributes] = None
@@ -334,7 +346,38 @@ class VarCallerFilter(BaseModel):
     loqusdb_clinical_snv_freq: Optional[VCFAttributes] = None
     loqusdb_clinical_sv_freq: Optional[VCFAttributes] = None
     low_pr_sr_count: Optional[VCFAttributes] = None
+    matched_normal_filter_names: Optional[List[str]] = None
+    variantcaller_filters: Optional[List[VariantCallerFilters]] = None
     varcaller_name: str
     filter_type: str
     analysis_type: str
     description: str
+
+    def get_bcftools_hard_filter_command(self):
+        """
+        Generate a BCFTools-compatible filter string based on all filter names.
+
+        Returns:
+            str: A string formatted as 'FILTER~"name1" || FILTER~"name2" || ...'.
+        """
+        filter_names = set()  # Use a set to avoid duplicates
+
+        # Collect filter_name attributes from VCFAttributes fields
+        for field_name, value in self.__dict__.items():
+            if isinstance(value, VCFAttributes) and hasattr(value, "filter_name"):
+                filter_names.add(value.filter_name)
+
+        # Add filter_name attributes from variantcaller_filters
+        if self.variantcaller_filters:
+            for filter_obj in self.variantcaller_filters:
+                filter_names.add(filter_obj.filter_name)
+
+        # Remove matched normal filter names if the flag is set
+        if self.matched_normal_filter_names:
+            filter_names -= set(self.matched_normal_filter_names)
+
+        # Format as BCFTools-compatible filter string
+        bcftools_filter_string = " || ".join(
+            [f'FILTER~"{filter_}"' for filter_ in sorted(filter_names)]
+        )
+        return bcftools_filter_string
