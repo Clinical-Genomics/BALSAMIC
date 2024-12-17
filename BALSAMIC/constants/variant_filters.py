@@ -191,18 +191,18 @@ SNV_BCFTOOLS_QUALITY_TGA_VARDICT_TN = {
     **SNV_BCFTOOLS_QUALITY_TUMOR_NORMAL,
 }
 
-# Configurations for TGA VarDict specific quality filters
+# Configurations for VarDict WES specific quality filters
 SNV_BCFTOOLS_QUALITY_WES_VARDICT = {
     **SNV_BCFTOOLS_QUALITY_TGA_WES,
     **SNV_BCFTOOLS_QUALITY_VARDICT_COMMON,
 }
 
-# Configurations for WES VarDict tumor only specific quality filters
+# Configurations for VarDict WES tumor only specific quality filters
 SNV_BCFTOOLS_QUALITY_WES_VARDICT_TO = {
     **SNV_BCFTOOLS_QUALITY_WES_VARDICT,
 }
 
-# Configurations for WES VarDict tumor normal specific quality filters
+# Configurations for VarDict WES tumor normal specific quality filters
 SNV_BCFTOOLS_QUALITY_WES_VARDICT_TN = {
     **SNV_BCFTOOLS_QUALITY_WES_VARDICT,
     **SNV_BCFTOOLS_QUALITY_TUMOR_NORMAL,
@@ -218,19 +218,19 @@ SNV_BCFTOOLS_QUALITY_TNSCOPE_COMMON = {
     "description": "General purpose filters used for filtering SNVs",
 }
 
-# Configurations for TGA TNscope specific quality filters
+# Configuration of unique TGA SNV filter settings for small panels
 SNV_BCFTOOLS_QUALITY_TGA_TNSCOPE = {
     **SNV_BCFTOOLS_QUALITY_TGA,
     **SNV_BCFTOOLS_QUALITY_TNSCOPE_COMMON,
 }
 
-# Configurations for TGA TNscope specific quality filters
+# Configuration of unique TGA SNV filter settings for exomes
 SNV_BCFTOOLS_QUALITY_WES_TNSCOPE = {
     **SNV_BCFTOOLS_QUALITY_TGA_WES,
     **SNV_BCFTOOLS_QUALITY_TNSCOPE_COMMON,
 }
 
-# Configurations for TGA TNscope specific quality filters
+# Configurations for common TGA TNscope tumor only quality filters
 SNV_BCFTOOLS_QUALITY_TGA_TNSCOPE_TO_COMMON = {
     "qss": {
         "tag_value": 20,
@@ -244,26 +244,30 @@ SNV_BCFTOOLS_QUALITY_TGA_TNSCOPE_TO_COMMON = {
     },
 }
 
-# Configurations for TGA TNscope specific quality filters
+# Configurations for common TGA TNscope tumor normal quality filters
 SNV_BCFTOOLS_QUALITY_TGA_TNSCOPE_TN_COMMON = {}
 
+# Configurations for TGA TNscope tumor only quality filters
 SNV_BCFTOOLS_QUALITY_TGA_TNSCOPE_TO = {
     **SNV_BCFTOOLS_QUALITY_TGA_TNSCOPE,
     **SNV_BCFTOOLS_QUALITY_TGA_TNSCOPE_TO_COMMON,
 }
 
+# Configurations for TGA TNscope tumor normal quality filters
 SNV_BCFTOOLS_QUALITY_TGA_TNSCOPE_TN = {
     **SNV_BCFTOOLS_QUALITY_TGA_TNSCOPE,
     **SNV_BCFTOOLS_QUALITY_TUMOR_NORMAL,
     **SNV_BCFTOOLS_QUALITY_TGA_TNSCOPE_TN_COMMON,
 }
 
+# Configurations for WES TNscope tumor only quality filters
 SNV_BCFTOOLS_QUALITY_WES_TNSCOPE_TO = {
     **SNV_BCFTOOLS_QUALITY_TGA_WES,
     **SNV_BCFTOOLS_QUALITY_WES_TNSCOPE,
     **SNV_BCFTOOLS_QUALITY_TGA_TNSCOPE_TO_COMMON,
 }
 
+# Configurations for WES TNscope tumor normal quality filters
 SNV_BCFTOOLS_QUALITY_WES_TNSCOPE_TN = {
     **SNV_BCFTOOLS_QUALITY_TGA_WES,
     **SNV_BCFTOOLS_QUALITY_WES_TNSCOPE,
@@ -274,11 +278,13 @@ SNV_BCFTOOLS_QUALITY_WES_TNSCOPE_TN = {
 # TNSCOPE UMI
 # --------------------------------------------------
 
+# Configurations for UMI TNscope tumor only quality filters
 SNV_BCFTOOLS_QUALITY_TGA_TNSCOPE_UMI_TO = {
     **SNV_BCFTOOLS_QUALITY_TNSCOPE_COMMON,
     "variantcaller_filters": TNSCOPE_HARDFILTERS,
 }
 
+# Configurations for UMI TNscope tumor normal quality filters
 SNV_BCFTOOLS_QUALITY_TGA_TNSCOPE_UMI_TN = {
     **SNV_BCFTOOLS_QUALITY_TNSCOPE_COMMON,
     **SNV_BCFTOOLS_QUALITY_TUMOR_NORMAL,
@@ -332,7 +338,7 @@ SNV_BCFTOOLS_QUALITY_WGS_TNSCOPE_TN = {
     **SNV_BCFTOOLS_QUALITY_TUMOR_NORMAL,
 }
 
-
+# All filters for WGS tumor only
 SNV_FILTERS_WGS_TO = {
     "tnscope": {
         **SNV_BCFTOOLS_QUALITY_WGS_TNSCOPE_TO,
@@ -347,6 +353,7 @@ SNV_FILTERS_WGS_TO = {
     },
 }
 
+# All filters for WGS tumor normal
 SNV_FILTERS_WGS_TN = {
     "tnscope": {
         **SNV_BCFTOOLS_QUALITY_WGS_TNSCOPE_TN,
@@ -361,6 +368,7 @@ SNV_FILTERS_WGS_TN = {
     },
 }
 
+# All filters for WES tumor only
 SNV_FILTERS_TGA_WES_TO = {
     "tnscope": {
         **SNV_BCFTOOLS_QUALITY_WES_TNSCOPE_TO,
@@ -379,6 +387,7 @@ SNV_FILTERS_TGA_WES_TO = {
     },
 }
 
+# All filters for WES tumor normal
 SNV_FILTERS_TGA_WES_TN = {
     "tnscope": {
         **SNV_BCFTOOLS_QUALITY_WES_TNSCOPE_TN,
@@ -397,6 +406,7 @@ SNV_FILTERS_TGA_WES_TN = {
     },
 }
 
+# All filters for TGA tumor only
 SNV_FILTERS_TGA_TO = {
     "tnscope": {
         **SNV_BCFTOOLS_QUALITY_TGA_TNSCOPE_TO,
@@ -415,6 +425,7 @@ SNV_FILTERS_TGA_TO = {
     },
 }
 
+# All filters for TGA tumor normal
 SNV_FILTERS_TGA_TN = {
     "tnscope": {
         **SNV_BCFTOOLS_QUALITY_TGA_TNSCOPE_TN,
