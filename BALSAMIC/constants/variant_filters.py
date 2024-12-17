@@ -242,6 +242,11 @@ SNV_BCFTOOLS_QUALITY_TGA_TNSCOPE_TO_COMMON = {
         "filter_name": "balsamic_high_strand_oddsratio",
         "field": "INFO",
     },
+    "rpa": {
+        "tag_value": 8,
+        "filter_name": "balsamic_high_repeat_unit_number",
+        "field": "INFO",
+    },
 }
 
 # Configurations for common TGA TNscope tumor normal quality filters
