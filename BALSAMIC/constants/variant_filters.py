@@ -212,11 +212,6 @@ SNV_BCFTOOLS_QUALITY_TGA_TNSCOPE_TO_COMMON = {
         "filter_name": "balsamic_low_quality_scores",
         "field": "FORMAT",
     },
-    "strand_reads": {
-        "tag_value": 0,
-        "filter_name": "balsamic_low_strand_read_counts",
-        "field": "FORMAT",
-    },
     "sor": {
         "tag_value": 2.7,
         "filter_name": "balsamic_high_strand_oddsratio",

@@ -96,7 +96,6 @@ if config["analysis"]["sequencing_type"] == 'targeted' and config["analysis"]["a
       AD=[snv_filters["tnscope"].AD.tag_value, snv_filters["tnscope"].AD.filter_name],
       DP=[snv_filters["tnscope"].DP.tag_value, snv_filters["tnscope"].DP.filter_name],
       AF_min=[snv_filters["tnscope"].AF_min.tag_value, snv_filters["tnscope"].AF_min.filter_name],
-      strand_reads=[snv_filters["tnscope"].strand_reads.tag_value, snv_filters["tnscope"].strand_reads.filter_name],
       qss=[snv_filters["tnscope"].qss.tag_value, snv_filters["tnscope"].qss.filter_name],
       sor=[snv_filters["tnscope"].sor.tag_value, snv_filters["tnscope"].sor.filter_name],
       hard_filter_list=snv_filters["tnscope"].get_bcftools_hard_filter_command(),
