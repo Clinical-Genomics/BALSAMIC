@@ -289,6 +289,7 @@ class VCFAttributes(BaseModel):
     filter_name: str
     field: str
 
+
 class VariantCallerFilters(BaseModel):
     """Internal variant caller filters
 
@@ -298,8 +299,10 @@ class VariantCallerFilters(BaseModel):
         filter_name: str
         Description: str
     """
+
     filter_name: str
     Description: str
+
 
 class VarCallerFilter(BaseModel):
     """General purpose for variant caller filters
@@ -374,6 +377,7 @@ class VarCallerFilter(BaseModel):
             filter_names -= set(self.matched_normal_filter_names)
 
         # Format as BCFTools-compatible filter string
-        bcftools_filter_string = " || ".join([f'FILTER~"{filter_}"' for filter_ in sorted(filter_names)])
+        bcftools_filter_string = " || ".join(
+            [f'FILTER~"{filter_}"' for filter_ in sorted(filter_names)]
+        )
         return bcftools_filter_string
-

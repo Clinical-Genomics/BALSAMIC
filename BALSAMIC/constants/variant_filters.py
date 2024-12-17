@@ -1,25 +1,50 @@
-
 # OPTIONAL SOFT FILTERS
-MATCHED_NORMAL_FILTER_NAMES = {"matched_normal_filter_names": ["germline_risk", "high_normal_tumor_af_frac"]}
+MATCHED_NORMAL_FILTER_NAMES = {
+    "matched_normal_filter_names": ["germline_risk", "high_normal_tumor_af_frac"]
+}
 
 # CALLER SPECIFIC HARD-FILTERS
-#---------------------------------
+# ---------------------------------
 
 TNSCOPE_HARDFILTERS = [
-    {"filter_name": "t_lod_fstar", "Description": "Tumor does not meet likelihood threshold"},
-    {"filter_name": "low_t_alt_frac", "Description": "Site filtered due to low alt allele fraction"},
+    {
+        "filter_name": "t_lod_fstar",
+        "Description": "Tumor does not meet likelihood threshold",
+    },
+    {
+        "filter_name": "low_t_alt_frac",
+        "Description": "Site filtered due to low alt allele fraction",
+    },
 ]
 TNSCOPE_TN_HARDFILTERS = TNSCOPE_HARDFILTERS + [
-    {"filter_name": "germline_risk", "Description": "Evidence indicates this site is germline, not somatic"},
+    {
+        "filter_name": "germline_risk",
+        "Description": "Evidence indicates this site is germline, not somatic",
+    },
 ]
 VARDICT_HARDFILTERS = [
     {"filter_name": "AMPBIAS", "Description": "Indicate the variant has amplicon bias"},
     {"filter_name": "Cluster0bp", "Description": "Two variants are within 0 bp"},
-    {"filter_name": "InGap", "Description": "The variant is in the deletion gap, thus likely false positive"},
-    {"filter_name": "InIns", "Description": "The variant is adjacent to an insertion variant"},
-    {"filter_name": "LongMSI", "Description": "The somatic variant is flanked by long A/T (>=14)"},
-    {"filter_name": "MSI12", "Description": "Variant in MSI region with 12 non-monomer MSI or 13 monomer MSI"},
-    {"filter_name": "NM4.5", "Description": "Mean mismatches in reads >= 4.5, thus likely false positive"},
+    {
+        "filter_name": "InGap",
+        "Description": "The variant is in the deletion gap, thus likely false positive",
+    },
+    {
+        "filter_name": "InIns",
+        "Description": "The variant is adjacent to an insertion variant",
+    },
+    {
+        "filter_name": "LongMSI",
+        "Description": "The somatic variant is flanked by long A/T (>=14)",
+    },
+    {
+        "filter_name": "MSI12",
+        "Description": "Variant in MSI region with 12 non-monomer MSI or 13 monomer MSI",
+    },
+    {
+        "filter_name": "NM4.5",
+        "Description": "Mean mismatches in reads >= 4.5, thus likely false positive",
+    },
     {"filter_name": "Q10", "Description": "Mean Mapping Quality Below 10"},
     {"filter_name": "SN1.5", "Description": "Signal to Noise Less than 1.5"},
     {"filter_name": "d3", "Description": "Total Depth < 3"},
@@ -33,7 +58,7 @@ VARDICT_HARDFILTERS = [
 VARDICT_TN_HARDFILTERS = VARDICT_HARDFILTERS
 
 # RESEARCH AND CLINICAL FILTERS
-#---------------------------------------------------
+# ---------------------------------------------------
 
 # Configurations for common clinical filters
 SNV_BCFTOOOLS_CLINICAL_COMMON = {
@@ -73,7 +98,7 @@ SNV_BCFTOOOLS_RESEARCH_TGA = {
         "tag_value": 0.005,
         "filter_name": "balsamic_high_pop_freq",
         "field": "INFO",
-    }
+    },
 }
 
 # Configurations for UMI specific research filters
@@ -83,7 +108,7 @@ SNV_BCFTOOOLS_RESEARCH_UMI = {
         "tag_value": 0.02,
         "filter_name": "balsamic_high_pop_freq",
         "field": "INFO",
-    }
+    },
 }
 
 # Configurations for WGS specific research filters
@@ -93,12 +118,12 @@ SNV_BCFTOOOLS_RESEARCH_WGS = {
         "tag_value": 0.001,
         "filter_name": "balsamic_high_pop_freq",
         "field": "INFO",
-    }
+    },
 }
 
 
 # SNV QUALITY FILTERS
-#---------------------------------------------------
+# ---------------------------------------------------
 
 # Configurations for common tumor normal SNV filters
 SNV_BCFTOOLS_QUALITY_TUMOR_NORMAL = {
@@ -110,7 +135,7 @@ SNV_BCFTOOLS_QUALITY_TUMOR_NORMAL = {
 }
 
 # TGA AND WES
-#---------------------------------------------------
+# ---------------------------------------------------
 
 # Configurations for common quality filters for TGA
 SNV_BCFTOOLS_QUALITY_COMMON_TGA = {
@@ -220,8 +245,7 @@ SNV_BCFTOOLS_QUALITY_TGA_TNSCOPE_TO_COMMON = {
 }
 
 # Configurations for TGA TNscope specific quality filters
-SNV_BCFTOOLS_QUALITY_TGA_TNSCOPE_TN_COMMON = {
-}
+SNV_BCFTOOLS_QUALITY_TGA_TNSCOPE_TN_COMMON = {}
 
 SNV_BCFTOOLS_QUALITY_TGA_TNSCOPE_TO = {
     **SNV_BCFTOOLS_QUALITY_TGA_TNSCOPE,
@@ -262,7 +286,7 @@ SNV_BCFTOOLS_QUALITY_TGA_TNSCOPE_UMI_TN = {
 }
 
 # WGS
-#---------------------------------------------------
+# ---------------------------------------------------
 
 # Configurations for common quality filters for WGS
 SNV_BCFTOOLS_QUALITY_COMMON_WGS = {
@@ -278,8 +302,7 @@ SNV_BCFTOOLS_QUALITY_COMMON_WGS = {
 
 
 # Configuration for WGS SNV filters
-SNV_BCFTOOLS_QUALITY_WGS_TNSCOPE_COMMON = {
-}
+SNV_BCFTOOLS_QUALITY_WGS_TNSCOPE_COMMON = {}
 
 # Configuration for WGS tumor only SNV filters
 SNV_BCFTOOLS_QUALITY_WGS_TNSCOPE_TO = {
@@ -321,7 +344,7 @@ SNV_FILTERS_WGS_TO = {
     "clinical": {
         **SNV_BCFTOOOLS_RESEARCH_WGS,
         **SNV_BCFTOOOLS_CLINICAL_COMMON,
-    }
+    },
 }
 
 SNV_FILTERS_WGS_TN = {
@@ -335,7 +358,7 @@ SNV_FILTERS_WGS_TN = {
     "clinical": {
         **SNV_BCFTOOOLS_RESEARCH_WGS,
         **SNV_BCFTOOOLS_CLINICAL_COMMON,
-    }
+    },
 }
 
 SNV_FILTERS_TGA_WES_TO = {
@@ -353,7 +376,7 @@ SNV_FILTERS_TGA_WES_TO = {
     "clinical": {
         **SNV_BCFTOOOLS_RESEARCH_TGA,
         **SNV_BCFTOOOLS_CLINICAL_COMMON,
-    }
+    },
 }
 
 SNV_FILTERS_TGA_WES_TN = {
@@ -371,7 +394,7 @@ SNV_FILTERS_TGA_WES_TN = {
     "clinical": {
         **SNV_BCFTOOOLS_RESEARCH_TGA,
         **SNV_BCFTOOOLS_CLINICAL_COMMON,
-    }
+    },
 }
 
 SNV_FILTERS_TGA_TO = {
@@ -389,7 +412,7 @@ SNV_FILTERS_TGA_TO = {
     "clinical": {
         **SNV_BCFTOOOLS_RESEARCH_TGA,
         **SNV_BCFTOOOLS_CLINICAL_COMMON,
-    }
+    },
 }
 
 SNV_FILTERS_TGA_TN = {
@@ -407,7 +430,7 @@ SNV_FILTERS_TGA_TN = {
     "clinical": {
         **SNV_BCFTOOOLS_RESEARCH_TGA,
         **SNV_BCFTOOOLS_CLINICAL_COMMON,
-    }
+    },
 }
 
 
