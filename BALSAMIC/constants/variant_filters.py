@@ -16,6 +16,9 @@ TNSCOPE_HARDFILTERS = [
         "Description": "Site filtered due to low alt allele fraction",
     },
 ]
+
+TNSCOPE_TO_HARDFILTERS = TNSCOPE_HARDFILTERS
+
 TNSCOPE_TN_HARDFILTERS = TNSCOPE_HARDFILTERS + [
     {
         "filter_name": "germline_risk",
@@ -23,7 +26,6 @@ TNSCOPE_TN_HARDFILTERS = TNSCOPE_HARDFILTERS + [
     },
 ]
 VARDICT_HARDFILTERS = [
-    {"filter_name": "AMPBIAS", "Description": "Indicate the variant has amplicon bias"},
     {"filter_name": "Cluster0bp", "Description": "Two variants are within 0 bp"},
     {
         "filter_name": "InGap",
@@ -54,6 +56,8 @@ VARDICT_HARDFILTERS = [
     {"filter_name": "q22.5", "Description": "Mean Base Quality Below 22.5"},
     {"filter_name": "v2", "Description": "Var Depth < 2"},
 ]
+
+VARDICT_TO_HARDFILTERS = VARDICT_HARDFILTERS + [{"filter_name": "AMPBIAS", "Description": "Indicate the variant has amplicon bias"}]
 
 VARDICT_TN_HARDFILTERS = VARDICT_HARDFILTERS
 
@@ -342,7 +346,7 @@ SNV_BCFTOOLS_QUALITY_WGS_TNSCOPE_TN = {
 SNV_FILTERS_WGS_TO = {
     "tnscope": {
         **SNV_BCFTOOLS_QUALITY_WGS_TNSCOPE_TO,
-        "variantcaller_filters": TNSCOPE_HARDFILTERS,
+        "variantcaller_filters": TNSCOPE_TO_HARDFILTERS,
     },
     "research": {
         **SNV_BCFTOOOLS_RESEARCH_WGS,
@@ -372,11 +376,11 @@ SNV_FILTERS_WGS_TN = {
 SNV_FILTERS_TGA_WES_TO = {
     "tnscope": {
         **SNV_BCFTOOLS_QUALITY_WES_TNSCOPE_TO,
-        "variantcaller_filters": TNSCOPE_HARDFILTERS,
+        "variantcaller_filters": TNSCOPE_TO_HARDFILTERS,
     },
     "vardict": {
         **SNV_BCFTOOLS_QUALITY_WES_VARDICT_TO,
-        "variantcaller_filters": VARDICT_HARDFILTERS,
+        "variantcaller_filters": VARDICT_TO_HARDFILTERS,
     },
     "research": {
         **SNV_BCFTOOOLS_RESEARCH_TGA,
@@ -410,11 +414,11 @@ SNV_FILTERS_TGA_WES_TN = {
 SNV_FILTERS_TGA_TO = {
     "tnscope": {
         **SNV_BCFTOOLS_QUALITY_TGA_TNSCOPE_TO,
-        "variantcaller_filters": TNSCOPE_HARDFILTERS,
+        "variantcaller_filters": TNSCOPE_TO_HARDFILTERS,
     },
     "vardict": {
         **SNV_BCFTOOLS_QUALITY_TGA_VARDICT_TO,
-        "variantcaller_filters": VARDICT_HARDFILTERS,
+        "variantcaller_filters": VARDICT_TO_HARDFILTERS,
     },
     "research": {
         **SNV_BCFTOOOLS_RESEARCH_TGA,
