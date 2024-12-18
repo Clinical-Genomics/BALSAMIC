@@ -1,6 +1,10 @@
 # OPTIONAL SOFT FILTERS
 MATCHED_NORMAL_FILTER_NAMES = {
-    "matched_normal_filter_names": ["germline_risk", "high_normal_tumor_af_frac"]
+    "matched_normal_filter_names": [
+        "germline_risk",
+        "high_normal_tumor_af_frac",
+        "MAF0.05",
+    ]
 }
 
 # CALLER SPECIFIC HARD-FILTERS
@@ -36,10 +40,6 @@ VARDICT_HARDFILTERS = [
         "Description": "The variant is adjacent to an insertion variant",
     },
     {
-        "filter_name": "LongMSI",
-        "Description": "The somatic variant is flanked by long A/T (>=14)",
-    },
-    {
         "filter_name": "MSI12",
         "Description": "Variant in MSI region with 12 non-monomer MSI or 13 monomer MSI",
     },
@@ -47,19 +47,42 @@ VARDICT_HARDFILTERS = [
         "filter_name": "NM4.5",
         "Description": "Mean mismatches in reads >= 4.5, thus likely false positive",
     },
-    {"filter_name": "Q10", "Description": "Mean Mapping Quality Below 10"},
     {"filter_name": "SN1.5", "Description": "Signal to Noise Less than 1.5"},
-    {"filter_name": "d3", "Description": "Total Depth < 3"},
     {"filter_name": "f0.001", "Description": "Allele frequency < 0.001"},
     {"filter_name": "p8", "Description": "Mean Position in Reads Less than 8"},
     {"filter_name": "pSTD", "Description": "Position in Reads has STD of 0"},
     {"filter_name": "q22.5", "Description": "Mean Base Quality Below 22.5"},
+]
+
+VARDICT_TO_HARDFILTERS = VARDICT_HARDFILTERS + [
+    {"filter_name": "AMPBIAS", "Description": "Indicate the variant has amplicon bias"},
+    {
+        "filter_name": "LongMSI",
+        "Description": "The somatic variant is flanked by long A/T (>=14)",
+    },
+    {"filter_name": "Q10", "Description": "Mean Mapping Quality Below 10"},
+    {"filter_name": "d3", "Description": "Total Depth < 3"},
     {"filter_name": "v2", "Description": "Var Depth < 2"},
 ]
 
-VARDICT_TO_HARDFILTERS = VARDICT_HARDFILTERS + [{"filter_name": "AMPBIAS", "Description": "Indicate the variant has amplicon bias"}]
-
-VARDICT_TN_HARDFILTERS = VARDICT_HARDFILTERS
+VARDICT_TN_HARDFILTERS = VARDICT_HARDFILTERS + [
+    {"filter_name": "Bias", "Description": "Strand Bias"},
+    {
+        "filter_name": "DIFF0.2",
+        "Description": "Non-somatic or LOH and allele frequency difference < 0.2",
+    },
+    {
+        "filter_name": "LongAT",
+        "Description": "The somatic variant is flanked by long A/T (>=14)",
+    },
+    {
+        "filter_name": "MAF0.05",
+        "Description": "Matched sample has AF > 0.05, thus not somatic",
+    },
+    {"filter_name": "P0.9", "Description": "Not significant with p-value > 0.9"},
+    {"filter_name": "d5", "Description": "Total Depth < 5"},
+    {"filter_name": "v3", "Description": "Var Depth < 3"},
+]
 
 # RESEARCH AND CLINICAL FILTERS
 # ---------------------------------------------------
