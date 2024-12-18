@@ -30,7 +30,7 @@ rule bcftools_filter_TNscope_umi_research_tumor_normal:
 bcftools view --threads {threads} {input.vcf_snv_research} | \
 bcftools filter --threads {threads} --include 'INFO/GNOMADAF_popmax <= {params.pop_freq[0]} || INFO/GNOMADAF_popmax == \".\"' --soft-filter '{params.pop_freq[1]}' --mode '+' | \
 bcftools filter --threads {threads} --include 'INFO/SWEGENAF <= {params.swegen_freq[0]} || INFO/SWEGENAF == \".\"' --soft-filter '{params.swegen_freq[1]}' --mode '+' |\
-bcftools view --threads {threads} --exclude "{params.hard_filter_list}" -o {output.vcf_pass_tnscope_umi}.temp1 -O z;
+bcftools view --threads {threads} --exclude '{params.hard_filter_list}' -o {output.vcf_pass_tnscope_umi}.temp1 -O z;
 
 python {params.edit_vcf_script} \
 --input_vcf {output.vcf_pass_tnscope_umi}.temp1 \
@@ -82,7 +82,7 @@ bcftools filter --threads {threads} --include 'INFO/ArtefactFrq <= {params.artef
 bcftools filter --threads {threads} --include 'INFO/GNOMADAF_popmax <= {params.pop_freq[0]} || INFO/GNOMADAF_popmax == \".\"' --soft-filter '{params.pop_freq[1]}' --mode '+' | \
 bcftools filter --threads {threads} --include 'INFO/SWEGENAF <= {params.swegen_freq[0]} || INFO/SWEGENAF == \".\"' --soft-filter '{params.swegen_freq[1]}' --mode '+' |\
 bcftools filter --threads {threads} --include 'INFO/Frq <= {params.loqusdb_clinical_freq[0]} || INFO/Frq == \".\"' --soft-filter '{params.loqusdb_clinical_freq[1]}' --mode '+' |\
-bcftools view --threads {threads} --exclude "{params.hard_filter_list}" -O z -o {output.vcf_pass_tnscope_umi}.temp1;
+bcftools view --threads {threads} --exclude '{params.hard_filter_list}' -O z -o {output.vcf_pass_tnscope_umi}.temp1;
 
 python {params.edit_vcf_script} \
 --input_vcf {output.vcf_pass_tnscope_umi}.temp1 \

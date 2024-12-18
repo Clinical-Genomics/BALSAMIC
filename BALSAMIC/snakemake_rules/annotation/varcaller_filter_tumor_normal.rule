@@ -27,7 +27,7 @@ rule bcftools_filter_merged_research_tumor_normal:
 bcftools view --threads {threads} {input.vcf_snv_research} |\
 bcftools filter --threads {threads} --include 'INFO/GNOMADAF_popmax <= {params.pop_freq[0]} || INFO/GNOMADAF_popmax == \".\"' --soft-filter '{params.pop_freq[1]}' --mode '+' |\
 bcftools filter --threads {threads} --include 'INFO/SWEGENAF <= {params.swegen_freq[0]} || INFO/SWEGENAF == \".\"' --soft-filter '{params.swegen_freq[1]}' --mode '+' |\
-bcftools view --threads {threads} --exclude "{params.hard_filter_list}" -o {output.vcf_pass_merged} -O z;
+bcftools view --threads {threads} --exclude '{params.hard_filter_list}' -o {output.vcf_pass_merged} -O z;
 
 tabix -p vcf -f {output.vcf_pass_merged};
 
@@ -65,7 +65,7 @@ bcftools filter --threads {threads} --include 'INFO/ArtefactFrq <= {params.artef
 bcftools filter --threads {threads} --include 'INFO/GNOMADAF_popmax <= {params.pop_freq[0]} || INFO/GNOMADAF_popmax == \".\"' --soft-filter '{params.pop_freq[1]}' --mode '+' | \
 bcftools filter --threads {threads} --include 'INFO/SWEGENAF <= {params.swegen_freq[0]} || INFO/SWEGENAF == \".\"' --soft-filter '{params.swegen_freq[1]}' --mode '+' |\
 bcftools filter --threads {threads} --include 'INFO/Frq <= {params.loqusdb_clinical_freq[0]} || INFO/Frq == \".\"' --soft-filter '{params.loqusdb_clinical_freq[1]}' --mode '+' |\
-bcftools view --threads {threads} --exclude "{params.hard_filter_list}" -O z -o {output.vcf_pass_merged};
+bcftools view --threads {threads} --exclude '{params.hard_filter_list}' -O z -o {output.vcf_pass_merged};
 
 tabix -p vcf -f {output.vcf_pass_merged};
 
