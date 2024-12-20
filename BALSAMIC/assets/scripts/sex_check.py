@@ -5,6 +5,7 @@ import os
 
 
 
+
 def read_cov(filepath):
     with open(filepath, "r") as rf:
         rows = rf.readlines()
@@ -67,29 +68,112 @@ def retrieve_file_info(cnn_file):
         cnn_type = "target"
     return sample_name, cnn_type
 
+def get_predicted_sex(y_x_frac):
+    sex_prediction = {}
+
+    if y_x_frac > 0.2:
+        # Above 0.2
+        sex_prediction["predicted_sex"] = "male"
+        if y_x_frac >= 0.5:
+            # above 0.5
+            sex_prediction["predicted_sex_confidence"] = "high"
+        elif y_x_frac >= 0.3 and y_x_frac < 0.5:
+            # between 0.3 and 0.5
+            sex_prediction["predicted_sex_confidence"] = "medium"
+        else:
+            # between 0.2 and 0.3
+            sex_prediction["predicted_sex_confidence"] = "low"
+    elif y_x_frac > 0.1 and y_x_frac < 0.2:
+        # Between 0.1 and 0.2
+        sex_prediction["predicted_sex"] = "unknown"
+        sex_prediction["predicted_sex_confidence"] = "low"
+    else:
+        # Below 0.1
+        sex_prediction["predicted_sex"] = "female"
+        if y_x_frac >= 0.08:
+            # Between 0.08 and 0.1
+            sex_prediction["predicted_sex_confidence"] = "low"
+        elif y_x_frac >= 0.05:
+            # Between 0.05 and 0.08
+            sex_prediction["predicted_sex_confidence"] = "medium"
+        else:
+            # Between 0 and 0.05
+            sex_prediction["predicted_sex_confidence"] = "high"
+
+    return sex_prediction
+
 def predict_sex(cnn_file):
-    data_rows = read_cov(cnn_file)
-    data_df = process_data(data_rows)
-    stats = get_stats(data_df)
-    sample_dict = extract_stats(stats)
     sample_name, cnn_type = retrieve_file_info(cnn_file)
 
     predicted_sex = {}
     predicted_sex["sample_name"] = sample_name
     predicted_sex["cnn_type"] = cnn_type
 
-    if sample_dict["X_count"] < 10 or sample_dict["Y_count"] < 10:
-        predicted_sex["data_amount"] = "low"
-    elif sample_dict["X_count"] < 50 or sample_dict["Y_count"] < 50:
-        predicted_sex["data_amount"] = "medium"
+    data_rows = read_cov(cnn_file)
+    data_df = process_data(data_rows)
+    if not isinstance(data_df, pd.DataFrame):
+        predicted_sex["sex_prediction"] = "Failed"
+        predicted_sex["data_dict"] = "NA"
+        return predicted_sex
+
+    stats = get_stats(data_df)
+    data_dict = extract_stats(stats)
+
+
+    if data_dict["X_count"] < 10 or data_dict["Y_count"] < 10:
+        data_dict["data_amount"] = "low"
+    elif data_dict["X_count"] < 50 or data_dict["Y_count"] < 50:
+        data_dict["data_amount"] = "medium"
     else:
-        predicted_sex["data_amount"] = "high"
+        data_dict["data_amount"] = "high"
 
-    predicted_sex["Y_mean/X_mean"] = round(sample_dict["Y_mean"] / sample_dict["X_mean"], 5)
+    data_dict["Y_mean/X_mean"] = round(data_dict["Y_mean"] / data_dict["X_mean"], 5)
+    data_dict["Y_median/X_median"] = round(data_dict["Y_median"] / data_dict["X_median"], 5)
+
+    predicted_sex["sex_prediction"] = {}
+    predicted_sex["sex_prediction"]["by_mean"] = get_predicted_sex(data_dict["Y_mean/X_mean"])
+    predicted_sex["sex_prediction"]["by_median"] = get_predicted_sex(data_dict["Y_median/X_median"])
+
+    predicted_sex["data_dict"] = data_dict
+
+    return predicted_sex
+
+def get_prediction(prediction):
+    if "Failed" in prediction["sex_prediction"]:
+        return "Failed", "NA", "Failed", "NA"
+    else:
+        return prediction["sex_prediction"]["by_mean"]["predicted_sex"], prediction["sex_prediction"]["by_mean"]["predicted_sex_confidence"], prediction["sex_prediction"]["by_median"]["predicted_sex"], prediction["sex_prediction"]["by_median"]["predicted_sex_confidence"]
 
 
+def summarise_sample_sex_prediction(target_predicted_sex, antitarget_predicted_sex):
+    sample_predicted_sex = {}
 
-    sex_prediction = {}
+
+    # target_data_amount = target_predicted_sex["data_dict"]["data_amount"]
+    mean_target_predicted_sex, mean_target_predicted_sex_conf, median_target_predicted_sex,  median_target_predicted_sex_conf = get_prediction(target_predicted_sex)
+
+    # antitarget_data_amount = antitarget_predicted_sex["data_dict"]["data_amount"]
+    mean_antitarget_predicted_sex, mean_antitarget_predicted_sex_conf, median_antitarget_predicted_sex, median_antitarget_predicted_sex_conf = get_prediction(antitarget_predicted_sex)
+
+
+    sample_predicted_sex["predicted_sex"] = [mean_target_predicted_sex, median_target_predicted_sex, mean_antitarget_predicted_sex, median_antitarget_predicted_sex]
+    sample_predicted_sex["predicted_sex_conf"] = [mean_target_predicted_sex_conf, median_target_predicted_sex_conf, mean_antitarget_predicted_sex_conf, median_antitarget_predicted_sex_conf]
+
+
+    sample_predicted_sex["target_predicted_sex"] = target_predicted_sex
+    sample_predicted_sex["antitarget_predicted_sex"] = antitarget_predicted_sex
+
+    return sample_predicted_sex
+def compare_tumor_normal_sex_prediction():
+    pass
+
+def write_json(json_obj: dict, path: str) -> None:
+    """Write JSON format data to an output file."""
+    try:
+        with open(path, "w") as fn:
+            json.dump(json_obj, fn, indent=4)
+    except OSError as error:
+        raise OSError(f"Error while writing JSON file: {path}, error: {error}")
 
 @click.command()
 @click.option('--target-cnn-tumor', type=click.Path(exists=True), required=True,
@@ -104,8 +188,12 @@ def predict_sex(cnn_file):
 def process_files(target_cnn_tumor, antitarget_cnn_tumor, output, target_cnn_normal, antitarget_cnn_normal):
 
     tumor_target_predicted_sex = predict_sex(target_cnn_tumor)
+    tumor_antitarget_predicted_sex = predict_sex(antitarget_cnn_tumor)
+    sample_predicted_sex = summarise_sample_sex_prediction(tumor_target_predicted_sex, tumor_antitarget_predicted_sex)
 
-    antitarget_cnn_tumor
+    write_json(sample_predicted_sex, output)
+
+    #antitarget_cnn_tumor
 
 
 
