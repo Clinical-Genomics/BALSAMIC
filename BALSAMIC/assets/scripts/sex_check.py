@@ -2,37 +2,36 @@ import click
 import pandas as pd
 import json
 import os
+from typing import List, Optional, Dict, Union
 
 
 
-
-def read_cov(filepath):
+def read_cov(filepath: str) -> List[List[str]]:
+    """Read coverage file and return rows as a list of lists."""
     with open(filepath, "r") as rf:
         rows = rf.readlines()
-        data_rows = [r.strip("\n").split("\t") for r in rows]
-    return data_rows
+        return [r.strip("\n").split("\t") for r in rows]
 
-def process_data(data_rows):
-    filtered_data = [sublist for sublist in data_rows if sublist[0] in {"Y", "X"}]
+def process_data(data_rows: List[List[str]]) -> Optional[pd.DataFrame]:
+    """Process data rows to filter and structure into a DataFrame."""
+    filtered_data = [row for row in data_rows if row[0] in {"Y", "X"}]
     if len(filtered_data) < 10:
         print("Cannot compute sex, ignoring")
         return None
-    dicty = {}
-    for l in filtered_data:
-        c = l[0]
-        p = l[1]
-        s = l[2]
-        d = l[4]
-        n = f"{c}_{p}_{s}"
-        dicty[n] = {}
-        dicty[n]["chrom"] = c
-        dicty[n]["depth"] = d
-    df = pd.DataFrame.from_dict(dicty).T
+
+    records = {
+        f"{row[0]}_{row[1]}_{row[2]}": {"chrom": row[0], "depth": row[4]}
+        for row in filtered_data
+    }
+
+    df = pd.DataFrame.from_dict(records, orient="index")
     df["depth"] = pd.to_numeric(df["depth"], errors="coerce")
     return df
 
-def get_stats(df):
-    stats = df.groupby("chrom")["depth"].agg(
+
+def get_stats(df: pd.DataFrame) -> pd.DataFrame:
+    """Compute statistics on depth grouped by chromosome."""
+    return df.groupby("chrom")["depth"].agg(
         mean="mean",
         median="median",
         min="min",
@@ -40,9 +39,9 @@ def get_stats(df):
         std="std",
         count="count"
     ).reset_index()
-    return stats
 
 def extract_stats(stats):
+    """Extract statistics into a dictionary."""
     stats = stats.T.to_dict()
     sample_dict = {}
     sample_dict["X_mean"] = stats[0]["mean"]
@@ -59,48 +58,42 @@ def extract_stats(stats):
     sample_dict["Y_count"] = stats[1]["count"]
     return sample_dict
 
-def retrieve_file_info(cnn_file):
-    filename = os.path.basename(cnn_file)
+def retrieve_file_info(filepath: str) -> (str, str):
+    """Extract sample name and CNN type from file name."""
+    filename = os.path.basename(filepath)
     sample_name = filename.split(".")[0]
-    if "antitarget" in filename:
-        cnn_type = "antitarget"
-    else:
-        cnn_type = "target"
+    cnn_type = "antitarget" if "antitarget" in filename else "target"
     return sample_name, cnn_type
 
-def get_predicted_sex(y_x_frac):
-    sex_prediction = {}
+def get_predicted_sex(y_x_frac: float) -> Dict[str, str]:
+    """Predict sex and confidence based on Y/X fraction."""
+    thresholds = {
+        "male_high": 1.0,
+        "male_medium": 0.7,
+        "male_low": 0.2,
+        "female_high": 0.00001,
+        "female_medium": 0.05,
+        "female_low": 0.15,
+    }
 
-    if y_x_frac > 0.2:
-        # Above 0.2
-        sex_prediction["predicted_sex"] = "male"
-        if y_x_frac >= 0.5:
-            # above 0.5
-            sex_prediction["predicted_sex_confidence"] = "high"
-        elif y_x_frac >= 0.3 and y_x_frac < 0.5:
-            # between 0.3 and 0.5
-            sex_prediction["predicted_sex_confidence"] = "medium"
+    if y_x_frac > thresholds["male_low"]:
+        if y_x_frac >= thresholds["male_high"]:
+            return {"predicted_sex": "male", "confidence": "high"}
+        elif y_x_frac >= thresholds["male_medium"]:
+            return {"predicted_sex": "male", "confidence": "medium"}
         else:
-            # between 0.2 and 0.3
-            sex_prediction["predicted_sex_confidence"] = "low"
-    elif y_x_frac > 0.1 and y_x_frac < 0.2:
-        # Between 0.1 and 0.2
-        sex_prediction["predicted_sex"] = "unknown"
-        sex_prediction["predicted_sex_confidence"] = "low"
+            return {"predicted_sex": "male", "confidence": "low"}
+    elif y_x_frac <= thresholds["female_low"]:
+        if y_x_frac >= thresholds["female_medium"]:
+            return {"predicted_sex": "female", "confidence": "medium"}
+        elif y_x_frac >= thresholds["female_high"]:
+            return {"predicted_sex": "female", "confidence": "high"}
+        else:
+            return {"predicted_sex": "female", "confidence": "low"}
     else:
-        # Below 0.1
-        sex_prediction["predicted_sex"] = "female"
-        if y_x_frac >= 0.08:
-            # Between 0.08 and 0.1
-            sex_prediction["predicted_sex_confidence"] = "low"
-        elif y_x_frac >= 0.05:
-            # Between 0.05 and 0.08
-            sex_prediction["predicted_sex_confidence"] = "medium"
-        else:
-            # Between 0 and 0.05
-            sex_prediction["predicted_sex_confidence"] = "high"
-
+        return {"predicted_sex": "unknown", "confidence": "low"}
     return sex_prediction
+
 
 def predict_sex(cnn_file):
     sample_name, cnn_type = retrieve_file_info(cnn_file)
@@ -142,19 +135,19 @@ def get_prediction(prediction):
     if "failed" in prediction["sex_prediction"]:
         return "NA", "NA", "NA", "NA"
     else:
-        return prediction["sex_prediction"]["by_mean"]["predicted_sex"], prediction["sex_prediction"]["by_mean"]["predicted_sex_confidence"], prediction["sex_prediction"]["by_median"]["predicted_sex"], prediction["sex_prediction"]["by_median"]["predicted_sex_confidence"]
+        return prediction["sex_prediction"]["by_mean"]["predicted_sex"], prediction["sex_prediction"]["by_mean"]["confidence"], prediction["sex_prediction"]["by_median"]["predicted_sex"], prediction["sex_prediction"]["by_median"]["confidence"]
 
 
 def calculate_prediction_score(sex_prediction):
     frac_conf_score = {
-        "high": 3,
-        "medium": 2,
+        "high": 4,
+        "medium": 3,
         "low": 1,
         "NA": 0,
     }
     data_conf_score = {
-        "high": 5,
-        "medium": 4,
+        "high": 6,
+        "medium": 5,
         "low": 1,
         "NA": 0,
     }
@@ -188,9 +181,9 @@ def consolidate_sex_predictions(sex_predictions):
                 final_sex = sex
 
     score_confidence_levels = {
-        "high": 6,
-        "medium": 5,
-        "low": 3,
+        "high": 9,
+        "medium": 8,
+        "low": 4,
     }
     final_confidence = "uncertain"
     if final_score > score_confidence_levels["low"]:
@@ -200,7 +193,7 @@ def consolidate_sex_predictions(sex_predictions):
     if final_score > score_confidence_levels["high"]:
         final_confidence = "high"
 
-    return {"sex": final_sex, "sex_score": score, "prediction_confidence": final_confidence}
+    return {"sex": final_sex, "sex_score": final_score, "prediction_confidence": final_confidence}
 
 def summarise_sample_sex_prediction(target_predicted_sex, antitarget_predicted_sex, sample_type):
     sample_predicted_sex = {sample_type: {}}
