@@ -2,44 +2,53 @@
 # coding: utf-8
 
 
-rule sex_check_tumor_only:
-    input:
-        target_cnn_tumor = expand(cnv_dir + "{sample}.targetcoverage.cnn", sample=tumor_sample),
-        antitarget_cnn_tumor = expand(cnv_dir + "{sample}.antitargetcoverage.cnn", sample=tumor_sample),
-    output:
-        sex_prediction_json = qc_dir + "sex_prediction.json"
-    benchmark:
-        Path(benchmark_dir,'sex_check.tsv').as_posix()
-    params:
-        sex_check_script = get_script_path("sex_check.py"),
-        case_name = config["analysis"]["case_id"],
-    threads:
-        get_threads(cluster_config, "sex_check")
-    message:
-        "Running sex_check tumor sample of {params.case_name}"
-    shell:
-        """
-    python {params.sex_check_script} --target-cnn-tumor {input.target_cnn_tumor} --antitarget-cnn-tumor {input.antitarget_cnn_tumor} --output {output.sex_prediction_json} ;
-        """
-
-rule sex_check_tumor_normal:
-    input:
-        target_cnn_tumor = expand(cnv_dir + "{sample}.targetcoverage.cnn", sample=tumor_sample),
-        antitarget_cnn_tumor = expand(cnv_dir + "{sample}.antitargetcoverage.cnn", sample=tumor_sample),
-        target_cnn_normal = expand(cnv_dir + "{sample}.targetcoverage.cnn",sample=normal_sample),
-        antitarget_cnn_normal = expand(cnv_dir + "{sample}.antitargetcoverage.cnn",sample=normal_sample)
-    output:
-        sex_prediction_json = qc_dir + "sex_prediction.json"
-    benchmark:
-        Path(benchmark_dir,'sex_check.tsv').as_posix()
-    params:
-        sex_check_script = get_script_path("sex_check.py"),
-        case_name = config["analysis"]["case_id"],
-    threads:
-        get_threads(cluster_config, "sex_check")
-    message:
-        "Running sex_check tumor sample of {params.case_name}"
-    shell:
-        """
-    python {params.sex_check_script} --target-cnn-tumor {input.target_cnn_tumor} --antitarget-cnn-tumor {input.antitarget_cnn_tumor} --target-cnn-normal {input.target_cnn_normal} --antitarget-cnn-normal {input.antitarget_cnn_normal} --output {output.sex_prediction_json} ;
-        """
+if config['analysis']['analysis_type'] == "paired":
+    rule sex_prediction_tumor_normal:
+        input:
+            target_cnn_tumor = expand(cnv_dir + "{sample}.targetcoverage.cnn", sample = tumor_sample),
+            antitarget_cnn_tumor = expand(cnv_dir + "{sample}.antitargetcoverage.cnn", sample = tumor_sample),
+            target_cnn_normal = expand(cnv_dir + "{sample}.targetcoverage.cnn",sample = normal_sample),
+            antitarget_cnn_normal = expand(cnv_dir + "{sample}.antitargetcoverage.cnn",sample = normal_sample)
+        output:
+            sex_prediction_json = qc_dir + "sex_prediction.json"
+        benchmark:
+            Path(benchmark_dir,'sex_prediction.tsv').as_posix()
+        params:
+            sex_check_script = get_script_path("sex_prediction.py"),
+            case_name = config["analysis"]["case_id"],
+        threads:
+            get_threads(cluster_config, "sex_prediction")
+        message:
+            "Running sex_prediction on tumor sample of {params.case_name}"
+        shell:
+            """
+        python {params.sex_check_script} \
+        --target-cnn-tumor {input.target_cnn_tumor} \
+        --antitarget-cnn-tumor {input.antitarget_cnn_tumor} \
+        --target-cnn-normal {input.target_cnn_normal} \
+        --antitarget-cnn-normal {input.antitarget_cnn_normal} \
+        --output {output.sex_prediction_json} ;
+            """
+else:
+    rule sex_prediction_tumor_only:
+        input:
+            target_cnn_tumor = expand(cnv_dir + "{sample}.targetcoverage.cnn", sample = tumor_sample),
+            antitarget_cnn_tumor = expand(cnv_dir + "{sample}.antitargetcoverage.cnn", sample = tumor_sample),
+        output:
+            sex_prediction_json = qc_dir + "sex_prediction.json"
+        benchmark:
+            Path(benchmark_dir,'sex_prediction.tsv').as_posix()
+        params:
+            sex_check_script = get_script_path("sex_prediction.py"),
+            case_name = config["analysis"]["case_id"],
+        threads:
+            get_threads(cluster_config, "sex_prediction")
+        message:
+            "Running sex_prediction on tumor and normal sample of {params.case_name}"
+        shell:
+            """
+        python {params.sex_check_script} \
+        --target-cnn-tumor {input.target_cnn_tumor} \
+        --antitarget-cnn-tumor {input.antitarget_cnn_tumor} \
+        --output {output.sex_prediction_json} ;
+            """

@@ -141,7 +141,7 @@ def predict_sex(cnn_file):
 
 def get_prediction(prediction):
     if "failed" in prediction["sex_prediction"]:
-        return "NA", "NA", "NA", "NA"
+        return "unknown", "NA", "unknown", "NA"
     else:
         return (
             prediction["sex_prediction"]["by_mean"]["predicted_sex"],
@@ -180,7 +180,7 @@ def calculate_prediction_score(sex_prediction):
 
 
 def consolidate_sex_predictions(sex_predictions):
-    final_sex = "NA"
+    final_sex = "unknown"
     final_score = 0
 
     for sex_prediction in sex_predictions:
