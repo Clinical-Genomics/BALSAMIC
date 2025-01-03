@@ -70,6 +70,7 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
             "snakemake_rules/umi/qc_umi.rule",
             "snakemake_rules/umi/generate_AF_tables.rule",
             "snakemake_rules/quality_control/samtools_qc_tga.rule",
+            "snakemake_rules/quality_control/sex_check.rule",
         ],
         "align": [
             "snakemake_rules/align/tga_sentieon_alignment.rule",
@@ -106,6 +107,7 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
             "snakemake_rules/concatenation/concatenation.rule",
             "snakemake_rules/umi/generate_AF_tables.rule",
             "snakemake_rules/quality_control/samtools_qc_tga.rule",
+            "snakemake_rules/quality_control/sex_check.rule",
         ],
         "align": [
             "snakemake_rules/align/tga_sentieon_alignment.rule",

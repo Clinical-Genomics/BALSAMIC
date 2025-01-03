@@ -17,6 +17,7 @@ if config["analysis"]["analysis_workflow"] == "balsamic-umi":
 rule collect_custom_qc_metrics:
     input:
         bcftools_counts = bcftools_counts_input,
+        sex_prediction_json = qc_dir + "sex_prediction.json",
         json = qc_dir + "multiqc_data/multiqc_data.json"
     output:
         yaml = qc_dir + config["analysis"]["case_id"] + "_metrics_deliverables.yaml"
@@ -30,5 +31,5 @@ rule collect_custom_qc_metrics:
         "Extract the manually specified QC metric for validation and delivery"
     shell:
         """
-python {params.collect_qc_metrics_script} {params.config_path} {output.yaml} {input.json} {input.bcftools_counts}
+python {params.collect_qc_metrics_script} {params.config_path} {output.yaml} {input.json} {input.sex_prediction_json} {input.bcftools_counts}
         """
