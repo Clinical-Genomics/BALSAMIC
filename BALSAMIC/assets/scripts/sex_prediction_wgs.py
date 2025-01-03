@@ -8,7 +8,7 @@ def read_txt_file(filepath: str) -> List[List[str]]:
         rows = rf.readlines()
         return [r.strip("\n").split(" ") for r in rows]
 
-def get_ascat_sex_prediction(ascat_sample_statistics_path, sample_type):
+def get_ascat_sex_prediction(ascat_sample_statistics_path):
 
     sample_stats = read_txt_file(ascat_sample_statistics_path)
     for line in sample_stats:
@@ -20,23 +20,7 @@ def get_ascat_sex_prediction(ascat_sample_statistics_path, sample_type):
     else:
         predicted_sex = "female"
 
-    return {sample_type: {"predicted_sex": predicted_sex}}
-
-
-def case_sex_prediction(predicted_sex):
-    predicted_sex["case_sex"] = {}
-    tumor_sex = predicted_sex["tumor"]["predicted_sex"]
-    if "normal" in predicted_sex:
-        normal_sex = predicted_sex["normal"]["predicted_sex"]
-        if tumor_sex != normal_sex:
-            case_sex = "conflicting"
-        else:
-            case_sex = tumor_sex
-    else:
-        case_sex = tumor_sex
-
-    predicted_sex["case_sex"] = case_sex
-    return predicted_sex
+    return {"case_sex": predicted_sex}
 
 
 def write_json(json_obj: dict, path: str) -> None:
@@ -50,16 +34,10 @@ def write_json(json_obj: dict, path: str) -> None:
 
 @click.command()
 @click.option(
-    "--tumor-ascat-statistics",
+    "--case-ascat-statistics",
     type=click.Path(exists=True),
     required=True,
-    help="Path to the ascat statistics tumor file.",
-)
-@click.option(
-    "--normal-ascat-statistics",
-    type=click.Path(exists=True),
-    default=None,
-    help="Optional path to the ascat statistics normal file.",
+    help="Path to the ascat statistics file.",
 )
 @click.option(
     "--output",
@@ -68,19 +46,10 @@ def write_json(json_obj: dict, path: str) -> None:
     help="Path to the output file to be created.",
 )
 def sex_check(
-    tumor_ascat_statistics,
-    normal_ascat_statistics,
+    case_ascat_statistics,
     output,
 ):
-
-    predicted_sex = get_ascat_sex_prediction(tumor_ascat_statistics, "tumor")
-
-    if normal_ascat_statistics:
-        normal_sex_prediction = get_ascat_sex_prediction(normal_ascat_statistics, "normal")
-        predicted_sex.update(normal_sex_prediction)
-
-    # Create case-level prediction (compare tumor and normal sex)
-    predicted_sex = case_sex_prediction(predicted_sex)
+    predicted_sex = get_ascat_sex_prediction(case_ascat_statistics)
 
     # Write json report
     write_json(predicted_sex, output)

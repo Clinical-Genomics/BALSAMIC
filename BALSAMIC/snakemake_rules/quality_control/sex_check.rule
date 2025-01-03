@@ -2,7 +2,28 @@
 # coding: utf-8
 
 
-if config['analysis']['analysis_type'] == "paired":
+if config["analysis"]["sequencing_type"] == 'wgs':
+    rule sex_prediction_wgs:
+        input:
+            sample_statistics = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.samplestatistics.txt",
+        output:
+            sex_prediction_json = qc_dir + "sex_prediction.json"
+        benchmark:
+            Path(benchmark_dir, 'sex_prediction.tsv').as_posix()
+        params:
+            sex_check_script = get_script_path("sex_prediction_wgs.py"),
+            case_name = config["analysis"]["case_id"],
+        threads:
+            get_threads(cluster_config, "sex_prediction")
+        message:
+            "Running sex_prediction on case {params.case_name}"
+        shell:
+            """
+        python {params.sex_check_script} \
+        --case-ascat-statistics {input.sample_statistics} \
+        --output {output.sex_prediction_json} ;
+            """
+elif config["analysis"]["sequencing_type"] == 'targeted' and config["analysis"]["analysis_type"] == 'paired':
     rule sex_prediction_tumor_normal:
         input:
             target_cnn_tumor = expand(cnv_dir + "{sample}.targetcoverage.cnn", sample = tumor_sample),
@@ -14,7 +35,7 @@ if config['analysis']['analysis_type'] == "paired":
         benchmark:
             Path(benchmark_dir, 'sex_prediction.tsv').as_posix()
         params:
-            sex_check_script = get_script_path("sex_prediction.py"),
+            sex_check_script = get_script_path("sex_prediction_tga.py"),
             case_name = config["analysis"]["case_id"],
         threads:
             get_threads(cluster_config, "sex_prediction")
@@ -29,7 +50,7 @@ if config['analysis']['analysis_type'] == "paired":
         --antitarget-cnn-normal {input.antitarget_cnn_normal} \
         --output {output.sex_prediction_json} ;
             """
-else:
+elif config["analysis"]["sequencing_type"] == 'targeted' and config["analysis"]["analysis_type"] == 'single':
     rule sex_prediction_tumor_only:
         input:
             target_cnn_tumor = expand(cnv_dir + "{sample}.targetcoverage.cnn", sample = tumor_sample),
@@ -39,7 +60,7 @@ else:
         benchmark:
             Path(benchmark_dir, 'sex_prediction.tsv').as_posix()
         params:
-            sex_check_script = get_script_path("sex_prediction.py"),
+            sex_check_script = get_script_path("sex_prediction_tga.py"),
             case_name = config["analysis"]["case_id"],
         threads:
             get_threads(cluster_config, "sex_prediction")
