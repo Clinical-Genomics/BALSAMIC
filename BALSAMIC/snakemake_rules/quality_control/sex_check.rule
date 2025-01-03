@@ -12,14 +12,14 @@ if config['analysis']['analysis_type'] == "paired":
         output:
             sex_prediction_json = qc_dir + "sex_prediction.json"
         benchmark:
-            Path(benchmark_dir,'sex_prediction.tsv').as_posix()
+            Path(benchmark_dir, 'sex_prediction.tsv').as_posix()
         params:
             sex_check_script = get_script_path("sex_prediction.py"),
             case_name = config["analysis"]["case_id"],
         threads:
             get_threads(cluster_config, "sex_prediction")
         message:
-            "Running sex_prediction on tumor sample of {params.case_name}"
+            "Running sex_prediction on tumor and normal sample of {params.case_name}"
         shell:
             """
         python {params.sex_check_script} \
@@ -37,14 +37,14 @@ else:
         output:
             sex_prediction_json = qc_dir + "sex_prediction.json"
         benchmark:
-            Path(benchmark_dir,'sex_prediction.tsv').as_posix()
+            Path(benchmark_dir, 'sex_prediction.tsv').as_posix()
         params:
             sex_check_script = get_script_path("sex_prediction.py"),
             case_name = config["analysis"]["case_id"],
         threads:
             get_threads(cluster_config, "sex_prediction")
         message:
-            "Running sex_prediction on tumor and normal sample of {params.case_name}"
+            "Running sex_prediction on tumor sample of {params.case_name}"
         shell:
             """
         python {params.sex_check_script} \

@@ -2,7 +2,7 @@ import click
 import pandas as pd
 import json
 import os
-from typing import List, Optional, Dict, Union
+from typing import List, Optional, Dict
 
 
 def read_cov(filepath: str) -> List[List[str]]:
