@@ -116,10 +116,7 @@ def get_multiqc_data_source(multiqc_data: dict, sample: str, tool: str) -> str:
 
 def get_sex_check_metrics(sex_prediction_path: Path, config: dict) -> list:
     """Retrieves the sex check metrics and returns them as a Metric list."""
-    data_source = "sex_prediction_script"
-    metric = "sex_check"
-    step = "compare_predicted_and_given_sex"
-
+    metric = "compare_predicted_sex_to_given_sex"
     case_id = config["analysis"]["case_id"]
 
     sex_prediction: dict = read_json(sex_prediction_path)
@@ -132,7 +129,18 @@ def get_sex_check_metrics(sex_prediction_path: Path, config: dict) -> list:
             f"QC metric {metric}: {supplied_sex} validation has failed. "
             f"(Condition: supplied sex ({supplied_sex}) == predicted sex ({predicted_sex}) , ID: {case_id})."
         )
-        
+    return [{
+        "id": {case_id},
+        "input": sex_prediction_path.basename(),
+        "name": metric.upper(),
+        "step": "sex_check",
+        "value": predicted_sex,
+        "condition": {
+            "norm": "eq",
+            "threshold": supplied_sex,
+        },
+    }]
+
 
 def get_relatedness_metrics(multiqc_data: dict) -> list:
     """Retrieves the relatedness metrics and returns them as a Metric list."""
