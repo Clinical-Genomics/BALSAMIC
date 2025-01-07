@@ -3,6 +3,7 @@ import json
 from typing import List, Dict
 import numpy as np
 
+
 def read_txt_file(filepath: str) -> List[List[str]]:
     """
     Reads a text file containing space-separated values and returns the data as a list of lists.
@@ -16,6 +17,7 @@ def read_txt_file(filepath: str) -> List[List[str]]:
     with open(filepath, "r") as rf:
         rows = rf.readlines()
     return [r.strip("\n").split(" ") for r in rows]
+
 
 def get_ascat_sex_prediction(ascat_sample_statistics_path: str) -> Dict[str, str]:
     """
@@ -36,6 +38,7 @@ def get_ascat_sex_prediction(ascat_sample_statistics_path: str) -> Dict[str, str
 
     predicted_sex = "male" if male_y_or_n == "Y" else "female"
     return {"case_sex": predicted_sex}
+
 
 def predict_sex_from_y_and_x_cov(
     tumor_y_coverage_path: str, tumor_x_coverage_path: str
@@ -71,6 +74,7 @@ def predict_sex_from_y_and_x_cov(
         "tumor_y_x_median_frac": tumor_y_x_median_frac,
     }
 
+
 def write_json(json_obj: Dict, path: str) -> None:
     """
     Writes a dictionary to a JSON file.
@@ -87,6 +91,7 @@ def write_json(json_obj: Dict, path: str) -> None:
             json.dump(json_obj, fn, indent=4)
     except OSError as error:
         raise OSError(f"Error while writing JSON file: {path}, error: {error}")
+
 
 @click.command()
 @click.option(
@@ -139,6 +144,7 @@ def sex_check(
         return
 
     write_json(predicted_sex, output)
+
 
 if __name__ == "__main__":
     sex_check()

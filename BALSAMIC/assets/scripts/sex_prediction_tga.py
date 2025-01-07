@@ -6,6 +6,7 @@ from typing import List, Optional, Dict, Any, Tuple
 
 from BALSAMIC.utils.io import write_json
 
+
 def read_cov(filepath: str) -> List[List[str]]:
     """Read a coverage file and return its rows as a list of lists.
 
@@ -19,6 +20,7 @@ def read_cov(filepath: str) -> List[List[str]]:
         rows = rf.readlines()
         return [r.strip("\n").split("\t") for r in rows]
 
+
 def process_data(data_rows: List[List[str]]) -> Optional[pd.DataFrame]:
     """Process coverage data rows to filter and structure into a DataFrame.
 
@@ -30,7 +32,9 @@ def process_data(data_rows: List[List[str]]) -> Optional[pd.DataFrame]:
     """
     filtered_data = [row for row in data_rows if row[0] in {"Y", "X"}]
     if len(filtered_data) < 10:
-        warnings.warn("Cannot compute sex due to insufficient data, ignoring", UserWarning)
+        warnings.warn(
+            "Cannot compute sex due to insufficient data, ignoring", UserWarning
+        )
         return None
 
     records: dict = {
@@ -41,6 +45,7 @@ def process_data(data_rows: List[List[str]]) -> Optional[pd.DataFrame]:
     df = pd.DataFrame.from_dict(records, orient="index")
     df["depth"] = pd.to_numeric(df["depth"], errors="coerce")
     return df
+
 
 def get_stats(df: pd.DataFrame) -> pd.DataFrame:
     """Compute statistical summaries of depth grouped by chromosome.
@@ -218,6 +223,7 @@ def calculate_prediction_score(sex_prediction: dict) -> int:
     )
     return score
 
+
 def get_prediction(prediction: Dict[str, Any]) -> Tuple[str, str, str, str]:
     """Extract sex predictions and confidence levels from a prediction dictionary.
 
@@ -241,7 +247,10 @@ def get_prediction(prediction: Dict[str, Any]) -> Tuple[str, str, str, str]:
         prediction["sex_prediction"]["by_median"]["confidence"],
     )
 
-def consolidate_sex_predictions(sex_predictions: List[Dict[str, Any]]) -> Dict[str, Any]:
+
+def consolidate_sex_predictions(
+    sex_predictions: List[Dict[str, Any]]
+) -> Dict[str, Any]:
     """Consolidate multiple sex predictions into a final prediction.
 
     Args:
@@ -298,7 +307,7 @@ def consolidate_sex_predictions(sex_predictions: List[Dict[str, Any]]) -> Dict[s
 def summarise_sample_sex_prediction(
     target_predicted_sex: Dict[str, Any],
     antitarget_predicted_sex: Dict[str, Any],
-    sample_type: str
+    sample_type: str,
 ) -> Dict[str, Any]:
     """Summarize sex predictions for a sample based on target and antitarget data.
 
@@ -377,7 +386,9 @@ def summarise_sample_sex_prediction(
 
     # Add raw data
     sample_predicted_sex[sample_type]["target_predicted_sex"] = target_predicted_sex
-    sample_predicted_sex[sample_type]["antitarget_predicted_sex"] = antitarget_predicted_sex
+    sample_predicted_sex[sample_type][
+        "antitarget_predicted_sex"
+    ] = antitarget_predicted_sex
 
     return sample_predicted_sex
 
@@ -390,7 +401,10 @@ def case_sex_prediction(predicted_sex: Dict) -> Dict:
         normal_sex: str = predicted_sex["normal"]["final_sex"]["sex"]
         if tumor_sex != normal_sex:
             case_sex = "conflicting"
-            warnings.warn(f"Conflicting sex prediction found, tumor sex: {tumor_sex}, is not the same as normal sex: {normal_sex}", UserWarning)
+            warnings.warn(
+                f"Conflicting sex prediction found, tumor sex: {tumor_sex}, is not the same as normal sex: {normal_sex}",
+                UserWarning,
+            )
         else:
             case_sex: str = tumor_sex
     else:
