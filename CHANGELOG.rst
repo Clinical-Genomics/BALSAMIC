@@ -1,3 +1,20 @@
+[X.X.X]
+-------
+
+Added:
+^^^^^^
+* check to verify sample sex for all workflows https://github.com/Clinical-Genomics/BALSAMIC/pull/1516
+
+Changed:
+^^^^^^^^
+
+Removed:
+^^^^^^^^
+
+
+Fixed:
+^^^^^^
+
 [16.0.0]
 -------
 
