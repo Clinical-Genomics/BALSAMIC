@@ -500,6 +500,7 @@ def female_200k_y_coverage(test_data_dir: str) -> str:
         test_data_dir, "qc_files", "sex_check", "female_200k_y_bases.txt"
     ).as_posix()
 
+
 @pytest.fixture(scope="session")
 def tga_female_sex_prediction(test_data_dir: str) -> str:
     """Return path sex prediction json for female."""
@@ -507,12 +508,14 @@ def tga_female_sex_prediction(test_data_dir: str) -> str:
         test_data_dir, "qc_files", "sex_check", "female_sex_prediction.json"
     ).as_posix()
 
+
 @pytest.fixture(scope="session")
 def tga_male_sex_prediction(test_data_dir: str) -> str:
     """Return path sex prediction json for male."""
     return Path(
         test_data_dir, "qc_files", "sex_check", "male_sex_prediction.json"
     ).as_posix()
+
 
 @pytest.fixture(scope="session")
 def pon_config_dict(pon_config_path: str) -> str:
@@ -2585,6 +2588,7 @@ def job_properties() -> Dict[str, Any]:
             "mail_type": ClusterMailType.ALL.value,
         }
     }
+
 
 @pytest.fixture(scope="session")
 def scheduler_data(

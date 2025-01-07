@@ -309,10 +309,13 @@ def test_correct_sex_get_sex_check_metrics(tga_male_sex_prediction, config_dict)
     # GIVEN male sex prediction JSON and male config dictionary
 
     # WHEN comparing predicted male sex and supplied male gender
-    sex_metrics: list = get_sex_check_metrics(Path(tga_male_sex_prediction), config_dict)
+    sex_metrics: list = get_sex_check_metrics(
+        Path(tga_male_sex_prediction), config_dict
+    )
 
     # THEN
     assert "male" in sex_metrics[0]["value"]
+
 
 def test_wrong_sex_get_sex_check_metrics(tga_female_sex_prediction, config_dict):
     """ """
