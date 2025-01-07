@@ -94,8 +94,6 @@ def get_predicted_sex(y_x_frac: float) -> Dict[str, str]:
             return {"predicted_sex": "female", "confidence": "low"}
     else:
         return {"predicted_sex": "unknown", "confidence": "low"}
-    return sex_prediction
-
 
 def predict_sex(cnn_file):
     sample_name, cnn_type = retrieve_file_info(cnn_file)
