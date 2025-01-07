@@ -110,7 +110,7 @@ def get_predicted_sex(y_x_frac: float) -> Dict[str, str]:
         Dict[str, str]: Predicted sex and confidence level.
     """
     thresholds = {
-        "male_high": 1.0,
+        "male_high": 0.9,
         "male_medium": 0.7,
         "male_low": 0.2,
         "female_high": 0.00001,
@@ -445,7 +445,7 @@ def case_sex_prediction(predicted_sex: Dict) -> Dict:
     default=None,
     help="Optional path to the antitarget CNN normal file.",
 )
-def process_files(
+def predict_sex_main(
     target_cnn_tumor: str,
     antitarget_cnn_tumor: str,
     output: str,
@@ -485,4 +485,4 @@ def process_files(
 
 
 if __name__ == "__main__":
-    process_files()
+    predict_sex_main()

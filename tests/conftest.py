@@ -421,9 +421,83 @@ def config_dict_w_singularity(
 
 
 @pytest.fixture(scope="session")
-def pon_config_path(test_data_dir: str) -> str:
-    """Created path for PON config json file."""
-    return Path(test_data_dir, f"config_pon.{FileType.JSON}").as_posix()
+def male_target_cnn_file(test_data_dir: str) -> str:
+    """Return path to test cnvkit target cnn file from male sample."""
+    return Path(
+        test_data_dir, "qc_files", "sex_check", "male.targetcoverage.cnn"
+    ).as_posix()
+
+
+@pytest.fixture(scope="session")
+def male_antitarget_cnn_file(test_data_dir: str) -> str:
+    """Return path to test cnvkit antitarget cnn file from male sample."""
+    return Path(
+        test_data_dir, "qc_files", "sex_check", "male.antitargetcoverage.cnn"
+    ).as_posix()
+
+
+@pytest.fixture(scope="session")
+def female_target_cnn_file(test_data_dir: str) -> str:
+    """Return path to test cnvkit target cnn file from mfeale sample."""
+    return Path(
+        test_data_dir, "qc_files", "sex_check", "female.targetcoverage.cnn"
+    ).as_posix()
+
+
+@pytest.fixture(scope="session")
+def female_antitarget_cnn_file(test_data_dir: str) -> str:
+    """Return path to test cnvkit antitarget cnn file from female sample."""
+    return Path(
+        test_data_dir, "qc_files", "sex_check", "female.antitargetcoverage.cnn"
+    ).as_posix()
+
+
+@pytest.fixture(scope="session")
+def male_sample_ascat_statistics(test_data_dir: str) -> str:
+    """Return path to test ascat sample statistics from male sample."""
+    return Path(
+        test_data_dir, "qc_files", "sex_check", "male.ascat.samplestatistics.txt"
+    ).as_posix()
+
+
+@pytest.fixture(scope="session")
+def female_sample_ascat_statistics(test_data_dir: str) -> str:
+    """Return path to test ascat sample statistics from female sample."""
+    return Path(
+        test_data_dir, "qc_files", "sex_check", "female.ascat.samplestatistics.txt"
+    ).as_posix()
+
+
+@pytest.fixture(scope="session")
+def male_200k_x_coverage(test_data_dir: str) -> str:
+    """Return path to 200k lines of x coverage from male sample."""
+    return Path(
+        test_data_dir, "qc_files", "sex_check", "male_200k_x_bases.txt"
+    ).as_posix()
+
+
+@pytest.fixture(scope="session")
+def male_200k_y_coverage(test_data_dir: str) -> str:
+    """Return path to 200k lines of y coverage from male sample."""
+    return Path(
+        test_data_dir, "qc_files", "sex_check", "male_200k_y_bases.txt"
+    ).as_posix()
+
+
+@pytest.fixture(scope="session")
+def female_200k_x_coverage(test_data_dir: str) -> str:
+    """Return path to 200k lines of x coverage from female sample."""
+    return Path(
+        test_data_dir, "qc_files", "sex_check", "female_200k_x_bases.txt"
+    ).as_posix()
+
+
+@pytest.fixture(scope="session")
+def female_200k_y_coverage(test_data_dir: str) -> str:
+    """Return path to 200k lines of y coverage from female sample."""
+    return Path(
+        test_data_dir, "qc_files", "sex_check", "female_200k_y_bases.txt"
+    ).as_posix()
 
 
 @pytest.fixture(scope="session")

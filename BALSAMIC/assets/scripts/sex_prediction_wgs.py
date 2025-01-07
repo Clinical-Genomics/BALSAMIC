@@ -118,7 +118,7 @@ def write_json(json_obj: Dict, path: str) -> None:
     required=True,
     help="Path to the output file to be created.",
 )
-def sex_check(
+def predict_sex_wgs(
     case_ascat_statistics: str,
     sample_y_coverage: str,
     sample_x_coverage: str,
@@ -147,4 +147,4 @@ def sex_check(
 
 
 if __name__ == "__main__":
-    sex_check()
+    predict_sex_wgs()
