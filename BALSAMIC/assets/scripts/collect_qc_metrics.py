@@ -120,7 +120,7 @@ def get_multiqc_data_source(multiqc_data: dict, sample: str, tool: str) -> str:
                     )
 
 
-def get_sex_check_metrics(sex_prediction_path: Path, config: dict) -> list:
+def get_sex_check_metrics(sex_prediction_path: str, config: dict) -> list:
     """Retrieves the sex check metrics and returns them as a Metric list."""
     metric = "compare_predicted_sex_to_given_sex"
     case_id = config["analysis"]["case_id"]
@@ -138,7 +138,7 @@ def get_sex_check_metrics(sex_prediction_path: Path, config: dict) -> list:
     return [
         {
             "id": {case_id},
-            "input": sex_prediction_path.basename(),
+            "input": os.path.basename(sex_prediction_path),
             "name": metric.upper(),
             "step": "sex_check",
             "value": predicted_sex,
