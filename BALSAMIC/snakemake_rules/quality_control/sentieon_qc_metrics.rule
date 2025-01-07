@@ -8,7 +8,8 @@ if config["analysis"]["sequencing_type"] == 'wgs':
             reference = config["reference"]["reference_genome"]
         output:
             wgs_metrics = qc_dir + "{sample_type}.{sample}_sentieon_wgs_metrics.txt",
-            coverage_metrics = qc_dir + "{sample_type}.{sample}_coverage.gz"
+            coverage_metrics_y = qc_dir + "{sample_type}.{sample}_Y_cov_per_base.txt",
+            coverage_metrics_x = qc_dir + "{sample_type}.{sample}_X_cov_per_base.txt"
         benchmark:
             Path(benchmark_dir,'sentieon_wgs_metrics_' + "{sample_type}_{sample}.tsv").as_posix()
         params:
@@ -43,7 +44,9 @@ if config["analysis"]["sequencing_type"] == 'wgs':
     --gene_list {params.gene_list} {params.cov_threshold} \
     {output.coverage_metrics}_tmp;
     
-    gzip -c {output.coverage_metrics}_tmp > {output.coverage_metrics} ;
+    grep ^Y {output.coverage_metrics}_tmp | cut -f2 > {output.coverage_metrics_y} ;
+    grep ^X {output.coverage_metrics}_tmp | cut -f2 > {output.coverage_metrics_x} ;
+
     rm {output.coverage_metrics}_tmp ;
     rm -rf {params.tmpdir} ;
             """

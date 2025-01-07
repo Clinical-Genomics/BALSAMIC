@@ -2,8 +2,8 @@
 # coding: utf-8
 
 
-if config["analysis"]["sequencing_type"] == 'wgs':
-    rule sex_prediction_wgs:
+if config["analysis"]["sequencing_type"] == 'wgs' and config["analysis"]["analysis_type"] == 'paired':
+    rule sex_prediction_wgs_tumor_normal:
         input:
             sample_statistics = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.samplestatistics.txt",
         output:
@@ -23,8 +23,31 @@ if config["analysis"]["sequencing_type"] == 'wgs':
         --case-ascat-statistics {input.sample_statistics} \
         --output {output.sex_prediction_json} ;
             """
+elif config["analysis"]["sequencing_type"] == 'wgs' and config["analysis"]["analysis_type"] == 'single':
+    rule sex_prediction_wgs_tumor_only:
+        input:
+            coverage_metrics_y = qc_dir + "{sample_type}.{sample}_Y_cov_per_base.txt",
+            coverage_metrics_x = qc_dir + "{sample_type}.{sample}_X_cov_per_base.txt"
+        output:
+            sex_prediction_json = qc_dir + "sex_prediction.json"
+        benchmark:
+            Path(benchmark_dir, 'sex_prediction.tsv').as_posix()
+        params:
+            sex_check_script = get_script_path("sex_prediction_wgs.py"),
+            case_name = config["analysis"]["case_id"],
+        threads:
+            get_threads(cluster_config, "sex_prediction")
+        message:
+            "Running sex_prediction on case {params.case_name}"
+        shell:
+            """
+        python {params.sex_check_script} \
+        --sample-x-coverage {input.sample_statistics} \
+        --sample-y-coverage {input.sample_statistics} \
+        --output {output.sex_prediction_json} ;
+            """
 elif config["analysis"]["sequencing_type"] == 'targeted' and config["analysis"]["analysis_type"] == 'paired':
-    rule sex_prediction_tumor_normal:
+    rule sex_prediction_tga_tumor_normal:
         input:
             target_cnn_tumor = expand(cnv_dir + "{sample}.targetcoverage.cnn", sample = tumor_sample),
             antitarget_cnn_tumor = expand(cnv_dir + "{sample}.antitargetcoverage.cnn", sample = tumor_sample),
@@ -51,7 +74,7 @@ elif config["analysis"]["sequencing_type"] == 'targeted' and config["analysis"][
         --output {output.sex_prediction_json} ;
             """
 elif config["analysis"]["sequencing_type"] == 'targeted' and config["analysis"]["analysis_type"] == 'single':
-    rule sex_prediction_tumor_only:
+    rule sex_prediction_tga_tumor_only:
         input:
             target_cnn_tumor = expand(cnv_dir + "{sample}.targetcoverage.cnn", sample = tumor_sample),
             antitarget_cnn_tumor = expand(cnv_dir + "{sample}.antitargetcoverage.cnn", sample = tumor_sample),
