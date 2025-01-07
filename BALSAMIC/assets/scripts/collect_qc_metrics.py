@@ -24,8 +24,13 @@ from BALSAMIC.utils.rule import (
 @click.argument("config_path", type=click.Path(exists=True), required=True)
 @click.argument("output_path", type=click.Path(exists=False), required=True)
 @click.argument("multiqc_data_path", type=click.Path(exists=True), required=True)
-@click.argument("sex_prediction_path", type=click.Path(exists=True), required=True)
 @click.argument("counts_path", nargs=-1, type=click.Path(exists=True), required=False)
+@click.option(
+    "--sex-prediction-path",
+    type=click.Path(exists=True),
+    required=False,
+    help="Optional path to sex prediction json (optional only in balsamic-qc)",
+)
 def collect_qc_metrics(
     config_path: Path,
     output_path: Path,
@@ -54,7 +59,8 @@ def collect_qc_metrics(
         metrics += get_variant_metrics(count)
 
     # Sex check
-    metrics += get_sex_check_metrics(sex_prediction_path, config)
+    if sex_prediction_path:
+        metrics += get_sex_check_metrics(sex_prediction_path, config)
 
     # Relatedness
     analysis_type = get_analysis_type(config)

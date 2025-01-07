@@ -42,12 +42,11 @@ if config["analysis"]["sequencing_type"] == 'wgs':
     -r {input.reference} \
     --algo CoverageMetrics \
     --gene_list {params.gene_list} {params.cov_threshold} \
-    {output.coverage_metrics}_tmp;
+    {params.tmpdir}/coverage_per_base_wgs.txt ;
     
-    grep ^Y {output.coverage_metrics}_tmp | cut -f2 > {output.coverage_metrics_y} ;
-    grep ^X {output.coverage_metrics}_tmp | cut -f2 > {output.coverage_metrics_x} ;
+    grep ^Y {params.tmpdir}/coverage_per_base_wgs.txt | cut -f2 > {output.coverage_metrics_y} ;
+    grep ^X {params.tmpdir}/coverage_per_base_wgs.txt | cut -f2 > {output.coverage_metrics_x} ;
 
-    rm {output.coverage_metrics}_tmp ;
     rm -rf {params.tmpdir} ;
             """
 

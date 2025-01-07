@@ -26,8 +26,8 @@ if config["analysis"]["sequencing_type"] == 'wgs' and config["analysis"]["analys
 elif config["analysis"]["sequencing_type"] == 'wgs' and config["analysis"]["analysis_type"] == 'single':
     rule sex_prediction_wgs_tumor_only:
         input:
-            coverage_metrics_y = qc_dir + "{sample_type}.{sample}_Y_cov_per_base.txt",
-            coverage_metrics_x = qc_dir + "{sample_type}.{sample}_X_cov_per_base.txt"
+            coverage_metrics_y = expand(qc_dir + "tumor.{sample}_Y_cov_per_base.txt", sample = tumor_sample),
+            coverage_metrics_x = expand(qc_dir + "tumor.{sample}_X_cov_per_base.txt", sample = tumor_sample)
         output:
             sex_prediction_json = qc_dir + "sex_prediction.json"
         benchmark:
@@ -42,8 +42,8 @@ elif config["analysis"]["sequencing_type"] == 'wgs' and config["analysis"]["anal
         shell:
             """
         python {params.sex_check_script} \
-        --sample-x-coverage {input.sample_statistics} \
-        --sample-y-coverage {input.sample_statistics} \
+        --sample-x-coverage {input.coverage_metrics_x} \
+        --sample-y-coverage {input.coverage_metrics_y} \
         --output {output.sex_prediction_json} ;
             """
 elif config["analysis"]["sequencing_type"] == 'targeted' and config["analysis"]["analysis_type"] == 'paired':

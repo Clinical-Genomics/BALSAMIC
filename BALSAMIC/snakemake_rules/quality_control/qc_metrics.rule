@@ -14,22 +14,43 @@ if config["analysis"]["analysis_workflow"] == "balsamic":
 if config["analysis"]["analysis_workflow"] == "balsamic-umi":
     bcftools_counts_input.append(vep_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope_umi.clinical.filtered.pass.stats")
 
-rule collect_custom_qc_metrics:
-    input:
-        bcftools_counts = bcftools_counts_input,
-        sex_prediction_json = qc_dir + "sex_prediction.json",
-        json = qc_dir + "multiqc_data/multiqc_data.json"
-    output:
-        yaml = qc_dir + config["analysis"]["case_id"] + "_metrics_deliverables.yaml"
-    params:
-        config_path = f"{analysis_dir_home}/{case_id}/{case_id}.json",
-        collect_qc_metrics_script = get_script_path("collect_qc_metrics.py"),
-        housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "qc-metrics"}
-    threads:
-        get_threads(cluster_config, "collect_custom_qc_metrics")
-    message:
-        "Extract the manually specified QC metric for validation and delivery"
-    shell:
-        """
-python {params.collect_qc_metrics_script} {params.config_path} {output.yaml} {input.json} {input.sex_prediction_json} {input.bcftools_counts}
-        """
+
+if config["analysis"]["analysis_workflow"] != "balsamic-qc":
+    rule collect_custom_qc_metrics:
+        input:
+            bcftools_counts = bcftools_counts_input,
+            sex_prediction_json = qc_dir + "sex_prediction.json",
+            json = qc_dir + "multiqc_data/multiqc_data.json"
+        output:
+            yaml = qc_dir + config["analysis"]["case_id"] + "_metrics_deliverables.yaml"
+        params:
+            config_path = f"{analysis_dir_home}/{case_id}/{case_id}.json",
+            collect_qc_metrics_script = get_script_path("collect_qc_metrics.py"),
+            housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "qc-metrics"}
+        threads:
+            get_threads(cluster_config, "collect_custom_qc_metrics")
+        message:
+            "Extract the manually specified QC metric for validation and delivery"
+        shell:
+            """
+    python {params.collect_qc_metrics_script} --sex-prediction-path {input.sex_prediction_json} {params.config_path} {output.yaml} {input.json} {input.bcftools_counts}
+            """
+else:
+    rule collect_custom_qc_metrics:
+        input:
+            bcftools_counts = bcftools_counts_input,
+            json = qc_dir + "multiqc_data/multiqc_data.json"
+        output:
+            yaml = qc_dir + config["analysis"]["case_id"] + "_metrics_deliverables.yaml"
+        params:
+            config_path = f"{analysis_dir_home}/{case_id}/{case_id}.json",
+            collect_qc_metrics_script = get_script_path("collect_qc_metrics.py"),
+            housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "qc-metrics"}
+        threads:
+            get_threads(cluster_config, "collect_custom_qc_metrics")
+        message:
+            "Extract the manually specified QC metric for validation and delivery"
+        shell:
+            """
+    python {params.collect_qc_metrics_script} {params.config_path} {output.yaml} {input.json} {input.bcftools_counts}
+            """
