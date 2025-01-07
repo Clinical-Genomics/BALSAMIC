@@ -518,6 +518,12 @@ def tga_male_sex_prediction(test_data_dir: str) -> str:
 
 
 @pytest.fixture(scope="session")
+def pon_config_path(test_data_dir: str) -> str:
+    """Created path for PON config json file."""
+    return Path(test_data_dir, f"config_pon.{FileType.JSON}").as_posix()
+
+
+@pytest.fixture(scope="session")
 def pon_config_dict(pon_config_path: str) -> str:
     """Read and return PON config from json."""
     return read_json(pon_config_path)
