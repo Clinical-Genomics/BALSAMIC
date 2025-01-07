@@ -3,14 +3,15 @@ import json
 from typing import List
 import numpy as np
 
+
 def read_txt_file(filepath: str) -> List[List[str]]:
     """Read ascat statistics file and return rows as a list of lists."""
     with open(filepath, "r") as rf:
         rows = rf.readlines()
         return [r.strip("\n").split(" ") for r in rows]
 
-def get_ascat_sex_prediction(ascat_sample_statistics_path):
 
+def get_ascat_sex_prediction(ascat_sample_statistics_path):
     sample_stats = read_txt_file(ascat_sample_statistics_path)
     for line in sample_stats:
         if line[0] == "GenderChrFound":
@@ -23,7 +24,10 @@ def get_ascat_sex_prediction(ascat_sample_statistics_path):
 
     return {"case_sex": predicted_sex}
 
-def predict_sex_from_y_and_x_cov(tumor_y_coverage_path: str, tumor_x_coverage_path: str) -> dict:
+
+def predict_sex_from_y_and_x_cov(
+    tumor_y_coverage_path: str, tumor_x_coverage_path: str
+) -> dict:
     """Compute statistics on a column of numbers in a file.
 
     Args:
@@ -55,11 +59,13 @@ def predict_sex_from_y_and_x_cov(tumor_y_coverage_path: str, tumor_x_coverage_pa
     else:
         predicted_sex = "unknown"
 
-    return {"case_sex": predicted_sex,
-            "tumor_median_x_coverage": tumor_median_x_cov,
-            "tumor_median_y_coverage": tumor_median_y_cov,
-            "tumor_y_x_median_frac": tumor_y_x_median_frac
-            }
+    return {
+        "case_sex": predicted_sex,
+        "tumor_median_x_coverage": tumor_median_x_cov,
+        "tumor_median_y_coverage": tumor_median_y_cov,
+        "tumor_y_x_median_frac": tumor_y_x_median_frac,
+    }
+
 
 def write_json(json_obj: dict, path: str) -> None:
     """Write JSON format data to an output file."""
@@ -104,7 +110,9 @@ def sex_check(
     if case_ascat_statistics:
         predicted_sex = get_ascat_sex_prediction(case_ascat_statistics)
     elif sample_y_coverage and sample_x_coverage:
-        predicted_sex = predict_sex_from_y_and_x_cov(sample_y_coverage, sample_x_coverage)
+        predicted_sex = predict_sex_from_y_and_x_cov(
+            sample_y_coverage, sample_x_coverage
+        )
     else:
         print("Missing input files to predict sample sex, exiting")
         return
