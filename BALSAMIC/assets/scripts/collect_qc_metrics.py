@@ -137,7 +137,7 @@ def get_sex_check_metrics(sex_prediction_path: str, config: dict) -> list:
         )
     return [
         {
-            "id": {case_id},
+            "id": case_id,
             "input": os.path.basename(sex_prediction_path),
             "name": metric.upper(),
             "step": "sex_check",
