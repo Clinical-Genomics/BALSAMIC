@@ -130,24 +130,16 @@ def get_sex_check_metrics(sex_prediction_path: str, config: dict) -> list:
     supplied_sex = config["analysis"]["gender"]
     predicted_sex = sex_prediction["case_sex"]
 
-    if supplied_sex != predicted_sex:
-        raise ValueError(
-            f"QC metric {metric}: {supplied_sex} validation has failed. "
-            f"(Condition: supplied sex ({supplied_sex}) == predicted sex ({predicted_sex}) , ID: {case_id})."
-        )
-    return [
-        {
-            "id": case_id,
-            "input": os.path.basename(sex_prediction_path),
-            "name": metric.upper(),
-            "step": "sex_check",
-            "value": predicted_sex,
-            "condition": {
-                "norm": "eq",
-                "threshold": supplied_sex,
-            },
-        }
-    ]
+    output_metrics = Metric(
+        id=case_id,
+        input=os.path.basename(sex_prediction_path),
+        name=metric.upper(),
+        step="sex_check",
+        value=predicted_sex,
+        condition={"norm": "eq", "threshold": supplied_sex},
+    ).model_dump()
+
+    return [output_metrics]
 
 
 def get_relatedness_metrics(multiqc_data: dict) -> list:
