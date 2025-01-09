@@ -40,21 +40,6 @@ class Metric(BaseModel):
     value: Any
     condition: Optional[MetricCondition]
 
-
-
-def validate_metric(metric: Metric):
-    """Checks if a metric meets its filtering condition."""
-    if metric.condition and not VALID_OPS[metric.condition.norm](
-        metric.value, metric.condition.threshold
-    ):
-        raise ValueError(
-            f"QC metric {metric.name}: {metric.value} validation has failed. "
-            f"(Condition: {metric.condition.norm} {metric.condition.threshold}, ID: {metric.id})."
-        )
-    LOG.info(f"QC metric {metric.name}: {metric.value} meets its condition.")
-    return metric
-
-
 def validate_metric(metric: Metric):
     """Checks if a metric meets its filtering condition."""
     if metric.condition:

@@ -304,29 +304,30 @@ def test_get_sample_id(tumor_sample_name):
         assert get_sample_id(multiqc_key) == tumor_sample_name
 
 
-def test_correct_sex_get_sex_check_metrics(tga_male_sex_prediction, config_dict):
+def test_get_sex_check_metrics(tga_male_sex_prediction, config_dict):
     """ """
     # GIVEN male sex prediction JSON and male config dictionary
+
+    # GIVEN an expected MetricsModel dictionary
+    expected_sex_check_metric = [
+        {
+            "header": None,
+            "id": "id1",
+            "input": "male_sex_prediction.json",
+            "name": "COMPARE_PREDICTED_SEX_TO_GIVEN_SEX",
+            "step": "sex_check",
+            "value": "male",
+            "condition": {"norm": "eq", "threshold": "male"},
+        }
+    ]
 
     # WHEN comparing predicted male sex and supplied male gender
     sex_metrics: list = get_sex_check_metrics(
         Path(tga_male_sex_prediction), config_dict
     )
 
-    # THEN
-    assert "male" in sex_metrics[0]["value"]
-
-
-def test_wrong_sex_get_sex_check_metrics(tga_female_sex_prediction, config_dict):
-    """ """
-    # GIVEN female sex prediction JSON and male config dictionary
-
-    # WHEN comparing predicted female sex and supplied male gender
-    with pytest.raises(ValueError) as exc:
-        get_sex_check_metrics(Path(tga_female_sex_prediction), config_dict)
-
-    # THEN a ValueError should be triggered containing this text
-    assert "Condition: supplied sex (male) == predicted sex (female)" in str(exc.value)
+    # THEN check that the relatedness metrics has been correctly shaped
+    assert sex_metrics == expected_sex_check_metric
 
 
 def test_get_relatedness_metrics(multiqc_data_dict):
