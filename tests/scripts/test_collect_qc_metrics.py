@@ -323,7 +323,7 @@ def test_get_sex_check_metrics(tga_male_sex_prediction, config_dict):
 
     # WHEN comparing predicted male sex and supplied male gender
     sex_metrics: list = get_sex_check_metrics(
-        Path(tga_male_sex_prediction), config_dict
+        tga_male_sex_prediction, config_dict
     )
 
     # THEN check that the relatedness metrics has been correctly shaped
