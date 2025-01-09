@@ -115,6 +115,26 @@ def test_wrong_sex_check_metrics(tga_female_sex_prediction, config_dict):
     )
 
 
+def test_validate_metric_type_error():
+    """Test MetricValidation TypeError for incompatible variable-type comparisons."""
+
+    # Create a Metric object where value and threshold are incompatible types
+    metrics = [
+        {
+            "name": "Test Metric",
+            "input": "fake_input_file",
+            "step": "fake_step",
+            "value": "string-value",  # Incompatible with numerical comparisons
+            "condition": {"norm": "lt", "threshold": 10},
+            "id": "caseid",
+        }
+    ]
+
+    # Validate that the TypeError handling raises the correct ValueError
+    with pytest.raises(ValueError, match=r"Type mismatch in QC metric Test Metric: .*"):
+        MetricValidation(metrics=metrics)
+
+
 def test_metric_validation_norm_fail(qc_extracted_metrics: dict):
     """Test MetricValidation ValueError raising for an operator that it is not accepted."""
 
