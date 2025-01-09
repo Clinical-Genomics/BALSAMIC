@@ -101,9 +101,7 @@ def test_wrong_sex_check_metrics(tga_female_sex_prediction, config_dict):
     """Test MetricValidation for capturing conflicting predicted to given sex."""
 
     # GIVEN female sex prediction JSON and male config dictionary
-    sex_metrics: list = get_sex_check_metrics(
-        Path(tga_female_sex_prediction), config_dict
-    )
+    sex_metrics: list = get_sex_check_metrics(tga_female_sex_prediction, config_dict)
 
     # WHEN comparing predicted female sex and supplied male gender
     # THEN check that the model filters the metrics according to its norm
