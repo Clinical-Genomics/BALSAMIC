@@ -16,6 +16,7 @@ class MetricCondition(BaseModel):
         norm (str, optional)       : Validation condition (e.g., "eq", "lt").
         threshold (Any, optional)  : Validation cutoff or expected value.
     """
+
     norm: Optional[str] = None
     threshold: Optional[Any] = None
 
@@ -32,6 +33,7 @@ class Metric(BaseModel):
         value (Any, required)                 : Metric value (can be float or str).
         condition (MetricCondition, required) : Metric validation condition.
     """
+
     header: Optional[str] = None
     id: str
     input: str
@@ -39,6 +41,7 @@ class Metric(BaseModel):
     step: str
     value: Any
     condition: Optional[MetricCondition]
+
 
 def validate_metric(metric: Metric):
     """Checks if a metric meets its filtering condition."""
@@ -67,10 +70,12 @@ def validate_metric(metric: Metric):
     LOG.info(f"QC metric {metric.name}: {metric.value} meets its condition.")
     return metric
 
+
 class MetricValidation(BaseModel):
     """Defines the metric validation model.
 
     Attributes:
         metrics (List[Metric], required) : Metric model to validate.
     """
+
     metrics: List[Annotated[Metric, AfterValidator(validate_metric)]]
