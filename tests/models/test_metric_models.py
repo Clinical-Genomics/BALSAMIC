@@ -112,8 +112,8 @@ def test_wrong_sex_check_metrics(tga_female_sex_prediction, config_dict):
 
     # THEN a ValueError should be triggered containing this text
     assert (
-        f"QC metric COMPARE_PREDICTED_SEX_TO_GIVEN_SEX: female validation has failed. "
-        f"(Condition: eq male, ID: id1)." in str(val_exc.value)
+        "QC metric COMPARE_PREDICTED_SEX_TO_GIVEN_SEX: female validation has failed. "
+        "(Condition: eq male, ID: id1)." in str(val_exc.value)
     )
 
 
