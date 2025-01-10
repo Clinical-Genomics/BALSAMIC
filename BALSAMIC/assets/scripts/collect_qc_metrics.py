@@ -124,20 +124,38 @@ def get_sex_check_metrics(sex_prediction_path: str, config: dict) -> list:
     """Retrieves the sex check metrics and returns them as a Metric list."""
     metric = "compare_predicted_to_given_sex"
     case_id: str = config["analysis"]["case_id"]
+    sex_prediction = read_json(sex_prediction_path)
 
     given_sex: str = config["analysis"]["gender"]
-    predicted_sex: str = read_json(sex_prediction_path)["case_sex"]
+    tumor_predicted_sex: str = sex_prediction["tumor"]["predicted_sex"]
 
-    output_metrics = Metric(
-        id=case_id,
+
+    tumor_sex_prediction_metrics = Metric(
+        id=f"{case_id}_tumor",
         input=os.path.basename(sex_prediction_path),
         name=metric.upper(),
         step="sex_check",
-        value=predicted_sex,
+        value=tumor_predicted_sex,
         condition={"norm": "eq", "threshold": given_sex},
     ).model_dump()
 
-    return [output_metrics]
+    sex_check_metrics = [tumor_sex_prediction_metrics]
+
+    if "normal" in sex_prediction:
+        normal_predicted_sex = sex_prediction["normal"]["predicted_sex"]
+
+        normal_sex_prediction_metrics = Metric(
+            id=f"{case_id}_normal",
+            input=os.path.basename(sex_prediction_path),
+            name=metric.upper(),
+            step="sex_check",
+            value=normal_predicted_sex,
+            condition={"norm": "eq", "threshold": given_sex},
+        ).model_dump()
+
+        sex_check_metrics.append(normal_sex_prediction_metrics)
+
+    return [sex_check_metrics]
 
 
 def get_relatedness_metrics(multiqc_data: dict) -> list:

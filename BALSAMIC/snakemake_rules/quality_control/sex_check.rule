@@ -5,7 +5,10 @@
 if config["analysis"]["sequencing_type"] == 'wgs' and config["analysis"]["analysis_type"] == 'paired':
     rule sex_prediction_wgs_tumor_normal:
         input:
-            sample_statistics = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.samplestatistics.txt",
+            tumor_coverage_metrics_y = expand(qc_dir + "tumor.{sample}_Y_cov_per_base.txt", sample = tumor_sample),
+            tumor_coverage_metrics_x = expand(qc_dir + "tumor.{sample}_X_cov_per_base.txt", sample = tumor_sample),
+            normal_coverage_metrics_y = expand(qc_dir + "normal.{sample}_Y_cov_per_base.txt",sample = normal_sample),
+            normal_coverage_metrics_x = expand(qc_dir + "normal.{sample}_X_cov_per_base.txt", sample = normal_sample)
         output:
             sex_prediction_json = qc_dir + "sex_prediction.json"
         benchmark:
@@ -20,7 +23,10 @@ if config["analysis"]["sequencing_type"] == 'wgs' and config["analysis"]["analys
         shell:
             """
         python {params.sex_check_script} \
-        --case-ascat-statistics {input.sample_statistics} \
+        --tumor-x-coverage {input.tumor_coverage_metrics_x} \
+        --tumor-y-coverage {input.tumor_coverage_metrics_y} \
+        --normal-x-coverage {input.normal_coverage_metrics_x} \
+        --normal-y-coverage {input.normal_coverage_metrics_y} \
         --output {output.sex_prediction_json} ;
             """
 elif config["analysis"]["sequencing_type"] == 'wgs' and config["analysis"]["analysis_type"] == 'single':
@@ -42,8 +48,8 @@ elif config["analysis"]["sequencing_type"] == 'wgs' and config["analysis"]["anal
         shell:
             """
         python {params.sex_check_script} \
-        --sample-x-coverage {input.coverage_metrics_x} \
-        --sample-y-coverage {input.coverage_metrics_y} \
+        --tumor-x-coverage {input.coverage_metrics_x} \
+        --tumor-y-coverage {input.coverage_metrics_y} \
         --output {output.sex_prediction_json} ;
             """
 elif config["analysis"]["sequencing_type"] == 'targeted' and config["analysis"]["analysis_type"] == 'paired':

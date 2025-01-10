@@ -298,8 +298,8 @@ def consolidate_sex_predictions(
         final_confidence = "high"
 
     return {
-        "sex": final_sex,
-        "sex_score": final_score,
+        "predicted_sex": final_sex,
+        "predicted_sex_score": final_score,
         "prediction_confidence": final_confidence,
     }
 
@@ -380,7 +380,7 @@ def summarise_sample_sex_prediction(
         score = calculate_prediction_score(sex_prediction)
         sample_predicted_sex[sample_type]["predicted_sex"][idx].update({"score": score})
 
-    sample_predicted_sex[sample_type]["final_sex"] = consolidate_sex_predictions(
+    sample_predicted_sex[sample_type] = consolidate_sex_predictions(
         sample_predicted_sex[sample_type]["predicted_sex"]
     )
 
@@ -396,9 +396,9 @@ def summarise_sample_sex_prediction(
 def case_sex_prediction(predicted_sex: Dict) -> Dict:
     """Add case level sex prediction, setting sex to conflicting if tumor and normal doesn't match."""
     predicted_sex["case_sex"] = {}
-    tumor_sex: str = predicted_sex["tumor"]["final_sex"]["sex"]
+    tumor_sex: str = predicted_sex["tumor"]["predicted_sex"]
     if "normal" in predicted_sex:
-        normal_sex: str = predicted_sex["normal"]["final_sex"]["sex"]
+        normal_sex: str = predicted_sex["normal"]["predicted_sex"]
         if tumor_sex != normal_sex:
             case_sex = "conflicting"
             warnings.warn(
