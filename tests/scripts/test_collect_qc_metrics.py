@@ -305,7 +305,7 @@ def test_get_sample_id(tumor_sample_name):
 
 
 def test_get_sex_check_metrics(tga_male_sex_prediction, config_dict):
-    """ """
+    """Tests sex check metric retrieval."""
     # GIVEN male sex prediction JSON and male config dictionary
 
     # GIVEN an expected MetricsModel dictionary
