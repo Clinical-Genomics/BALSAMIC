@@ -452,23 +452,6 @@ def female_antitarget_cnn_file(test_data_dir: str) -> str:
         test_data_dir, "qc_files", "sex_check", "female.antitargetcoverage.cnn"
     ).as_posix()
 
-
-@pytest.fixture(scope="session")
-def male_sample_ascat_statistics(test_data_dir: str) -> str:
-    """Return path to test ascat sample statistics from male sample."""
-    return Path(
-        test_data_dir, "qc_files", "sex_check", "male.ascat.samplestatistics.txt"
-    ).as_posix()
-
-
-@pytest.fixture(scope="session")
-def female_sample_ascat_statistics(test_data_dir: str) -> str:
-    """Return path to test ascat sample statistics from female sample."""
-    return Path(
-        test_data_dir, "qc_files", "sex_check", "female.ascat.samplestatistics.txt"
-    ).as_posix()
-
-
 @pytest.fixture(scope="session")
 def male_200k_x_coverage(test_data_dir: str) -> str:
     """Return path to 200k lines of x coverage from male sample."""

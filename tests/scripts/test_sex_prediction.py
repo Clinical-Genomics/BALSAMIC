@@ -100,60 +100,6 @@ def test_tga_conflicting_sex_prediction(
     assert conflicting_sex_prediction["case_sex"] == "conflicting"
 
 
-def test_wgs_tumor_normal_male_sex_prediction(
-    male_sample_ascat_statistics: str, tmp_path, cli_runner
-):
-    """Ensure that WGS sex prediction is working using ascat sample statistics from male sample."""
-    # GIVEN the output path, and input cnn files
-    output_path = str(tmp_path / "male_wgs_sex_prediction.json")
-
-    # WHEN invoking the python script
-    result = cli_runner.invoke(
-        predict_sex_wgs,
-        [
-            "--case-ascat-statistics",
-            male_sample_ascat_statistics,
-            "--output",
-            output_path,
-        ],
-    )
-
-    # THEN check if the JSON is correctly created and there are no errors
-    assert result.exit_code == 0
-    assert Path(output_path).exists()
-
-    # THEN check that male sex has been correctly predicted
-    sex_prediction: dict = read_json(output_path)
-    assert sex_prediction["case_sex"] == "male"
-
-
-def test_wgs_tumor_normal_female_sex_prediction(
-    female_sample_ascat_statistics: str, tmp_path, cli_runner
-):
-    """Ensure that WGS sex prediction is working using ascat sample statistics from female sample."""
-    # GIVEN the output path, and input cnn files
-    output_path = str(tmp_path / "female_wgs_sex_prediction.json")
-
-    # WHEN invoking the python script
-    result = cli_runner.invoke(
-        predict_sex_wgs,
-        [
-            "--case-ascat-statistics",
-            female_sample_ascat_statistics,
-            "--output",
-            output_path,
-        ],
-    )
-
-    # THEN check if the JSON is correctly created and there are no errors
-    assert result.exit_code == 0
-    assert Path(output_path).exists()
-
-    # THEN check that female sex has been correctly predicted
-    sex_prediction: dict = read_json(output_path)
-    assert sex_prediction["case_sex"] == "female"
-
-
 def test_wgs_tumor_only_male_sex_prediction(
     male_200k_x_coverage: str, male_200k_y_coverage: str, tmp_path, cli_runner
 ):

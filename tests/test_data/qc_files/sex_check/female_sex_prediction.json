@@ -1,47 +1,15 @@
 {
     "tumor": {
-        "predicted_sex": [
-            {
-                "sex": "female",
-                "frac_conf": "low",
-                "data_conf": "low",
-                "data_type": "target",
-                "score": 3
-            },
-            {
-                "sex": "female",
-                "frac_conf": "low",
-                "data_conf": "low",
-                "data_type": "target",
-                "score": 3
-            },
-            {
-                "sex": "unknown",
-                "frac_conf": "low",
-                "data_conf": "high",
-                "data_type": "antitarget",
-                "score": 7
-            },
-            {
-                "sex": "female",
-                "frac_conf": "high",
-                "data_conf": "high",
-                "data_type": "antitarget",
-                "score": 10
-            }
-        ],
-        "final_sex": {
-            "sex": "female",
-            "sex_score": 10,
-            "prediction_confidence": "high"
-        },
+        "predicted_sex": "female",
+        "predicted_sex_score": 10,
+        "prediction_confidence": "high",
         "target_predicted_sex": {
-            "sample_name": "female",
+            "sample_name": "ACC16341A10",
             "cnn_type": "target",
             "sex_prediction": {
                 "by_mean": {
                     "predicted_sex": "female",
-                    "confidence": "low"
+                    "confidence": "high"
                 },
                 "by_median": {
                     "predicted_sex": "female",
@@ -49,30 +17,30 @@
                 }
             },
             "data_dict": {
-                "X_mean": 554.2100626666667,
-                "X_median": 598.9304999999999,
-                "X_min": 0.0,
-                "X_max": 0.0,
-                "X_std": 276.73166454971954,
-                "X_count": 900,
-                "Y_mean": 0.0,
+                "X_mean": 1400.015567032967,
+                "X_median": 1409.72,
+                "X_min": 461.21,
+                "X_max": 461.21,
+                "X_std": 230.34499208238816,
+                "X_count": 455,
+                "Y_mean": 2.33,
                 "Y_median": 0.0,
                 "Y_min": 0.0,
-                "Y_max": 0.0,
-                "Y_std": 0.0,
-                "Y_count": 3,
-                "data_amount": "low",
-                "Y_mean/X_mean": 0.0,
+                "Y_max": 22.19,
+                "Y_std": 6.160151513288181,
+                "Y_count": 13,
+                "data_amount": "medium",
+                "Y_mean/X_mean": 0.00166,
                 "Y_median/X_median": 0.0
             }
         },
         "antitarget_predicted_sex": {
-            "sample_name": "female",
+            "sample_name": "ACC16341A10",
             "cnn_type": "antitarget",
             "sex_prediction": {
                 "by_mean": {
-                    "predicted_sex": "unknown",
-                    "confidence": "low"
+                    "predicted_sex": "female",
+                    "confidence": "high"
                 },
                 "by_median": {
                     "predicted_sex": "female",
@@ -80,21 +48,21 @@
                 }
             },
             "data_dict": {
-                "X_mean": 0.3558156648148148,
-                "X_median": 0.185333,
-                "X_min": 0.0185778,
-                "X_max": 0.0185778,
-                "X_std": 0.7203100708934838,
-                "X_count": 1080,
-                "Y_mean": 0.06824497908791209,
-                "Y_median": 0.001407045,
+                "X_mean": 0.3203248221032132,
+                "X_median": 0.1521,
+                "X_min": 0.0213941,
+                "X_max": 0.0213941,
+                "X_std": 1.0084246212258186,
+                "X_count": 1027,
+                "Y_mean": 0.011575826752747253,
+                "Y_median": 0.0028512850000000003,
                 "Y_min": 0.0,
-                "Y_max": 7.09915,
-                "Y_std": 0.573341902575057,
+                "Y_max": 0.57264,
+                "Y_std": 0.04931412603907364,
                 "Y_count": 182,
                 "data_amount": "high",
-                "Y_mean/X_mean": 0.1918,
-                "Y_median/X_median": 0.00759
+                "Y_mean/X_mean": 0.03614,
+                "Y_median/X_median": 0.01875
             }
         }
     },
