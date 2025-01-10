@@ -5,7 +5,7 @@ from BALSAMIC.utils.io import read_json
 
 
 def test_tga_male_sex_prediction(
-    male_target_cnn_file, male_antitarget_cnn_file, tmp_path, cli_runner
+    male_target_cnn_file: str, male_antitarget_cnn_file: str, tmp_path, cli_runner
 ):
     """Ensure that TGA sex prediction is working using cnvkit cnn files for male sample."""
     # GIVEN the output path, and input cnn files
@@ -34,7 +34,7 @@ def test_tga_male_sex_prediction(
 
 
 def test_tga_female_sex_prediction(
-    female_target_cnn_file, female_antitarget_cnn_file, tmp_path, cli_runner
+    female_target_cnn_file: str, female_antitarget_cnn_file: str, tmp_path, cli_runner
 ):
     """Ensure that TGA sex prediction is working using cnvkit cnn files for female sample."""
     # GIVEN the output path, and input cnn files
@@ -63,10 +63,10 @@ def test_tga_female_sex_prediction(
 
 
 def test_tga_conflicting_sex_prediction(
-    male_target_cnn_file,
-    male_antitarget_cnn_file,
-    female_target_cnn_file,
-    female_antitarget_cnn_file,
+    male_target_cnn_file: str,
+    male_antitarget_cnn_file: str,
+    female_target_cnn_file: str,
+    female_antitarget_cnn_file: str,
     tmp_path,
     cli_runner,
 ):
@@ -101,7 +101,7 @@ def test_tga_conflicting_sex_prediction(
 
 
 def test_wgs_tumor_normal_male_sex_prediction(
-    male_sample_ascat_statistics, tmp_path, cli_runner
+    male_sample_ascat_statistics: str, tmp_path, cli_runner
 ):
     """Ensure that WGS sex prediction is working using ascat sample statistics from male sample."""
     # GIVEN the output path, and input cnn files
@@ -128,7 +128,7 @@ def test_wgs_tumor_normal_male_sex_prediction(
 
 
 def test_wgs_tumor_normal_female_sex_prediction(
-    female_sample_ascat_statistics, tmp_path, cli_runner
+    female_sample_ascat_statistics: str, tmp_path, cli_runner
 ):
     """Ensure that WGS sex prediction is working using ascat sample statistics from female sample."""
     # GIVEN the output path, and input cnn files
@@ -155,7 +155,7 @@ def test_wgs_tumor_normal_female_sex_prediction(
 
 
 def test_wgs_tumor_only_male_sex_prediction(
-    male_200k_x_coverage, male_200k_y_coverage, tmp_path, cli_runner
+    male_200k_x_coverage: str, male_200k_y_coverage: str, tmp_path, cli_runner
 ):
     """Ensure that WGS sex prediction is working for tumor only using per base X and Y coverages for male sample."""
     # GIVEN the output path, and input cnn files
@@ -184,7 +184,7 @@ def test_wgs_tumor_only_male_sex_prediction(
 
 
 def test_wgs_tumor_only_female_sex_prediction(
-    female_200k_x_coverage, female_200k_y_coverage, tmp_path, cli_runner
+    female_200k_x_coverage: str, female_200k_y_coverage: str, tmp_path, cli_runner
 ):
     """Ensure that WGS sex prediction is working for tumor only using per base X and Y coverages for female sample."""
     # GIVEN the output path, and input cnn files

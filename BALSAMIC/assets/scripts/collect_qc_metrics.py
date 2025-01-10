@@ -29,7 +29,7 @@ from BALSAMIC.utils.rule import (
     "--sex-prediction-path",
     type=click.Path(exists=True),
     required=False,
-    help="Optional path to sex prediction json (optional only in balsamic-qc)",
+    help="Path to sex prediction json (optional for balsamic-qc)",
 )
 def collect_qc_metrics(
     config_path: Path,
@@ -122,13 +122,11 @@ def get_multiqc_data_source(multiqc_data: dict, sample: str, tool: str) -> str:
 
 def get_sex_check_metrics(sex_prediction_path: str, config: dict) -> list:
     """Retrieves the sex check metrics and returns them as a Metric list."""
-    metric = "compare_predicted_sex_to_given_sex"
-    case_id = config["analysis"]["case_id"]
+    metric = "compare_predicted_to_given_sex"
+    case_id: str = config["analysis"]["case_id"]
 
-    sex_prediction: dict = read_json(sex_prediction_path)
-
-    supplied_sex = config["analysis"]["gender"]
-    predicted_sex = sex_prediction["case_sex"]
+    given_sex: str = config["analysis"]["gender"]
+    predicted_sex: str = read_json(sex_prediction_path)["case_sex"]
 
     output_metrics = Metric(
         id=case_id,
@@ -136,7 +134,7 @@ def get_sex_check_metrics(sex_prediction_path: str, config: dict) -> list:
         name=metric.upper(),
         step="sex_check",
         value=predicted_sex,
-        condition={"norm": "eq", "threshold": supplied_sex},
+        condition={"norm": "eq", "threshold": given_sex},
     ).model_dump()
 
     return [output_metrics]

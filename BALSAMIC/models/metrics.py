@@ -46,9 +46,9 @@ class Metric(BaseModel):
 def validate_metric(metric: Metric):
     """Checks if a metric meets its filtering condition."""
     if metric.condition:
-        norm = metric.condition.norm
-        threshold = metric.condition.threshold
-        value = metric.value
+        norm: Optional[str] = metric.condition.norm
+        threshold: Optional[Any] = metric.condition.threshold
+        value: Any = metric.value
 
         # Validate the norm operator
         if norm not in VALID_OPS:

@@ -15,8 +15,7 @@ def read_txt_file(filepath: str) -> List[List[str]]:
         List[List[str]]: A list of lists where each inner list represents a row of the file.
     """
     with open(filepath, "r") as rf:
-        rows = rf.readlines()
-    return [r.strip("\n").split(" ") for r in rows]
+        return [line.split() for line in rf]
 
 
 def get_ascat_sex_prediction(ascat_sample_statistics_path: str) -> Dict[str, str]:

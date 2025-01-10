@@ -314,7 +314,7 @@ def test_get_sex_check_metrics(tga_male_sex_prediction, config_dict):
             "header": None,
             "id": "id1",
             "input": "male_sex_prediction.json",
-            "name": "COMPARE_PREDICTED_SEX_TO_GIVEN_SEX",
+            "name": "COMPARE_PREDICTED_TO_GIVEN_SEX",
             "step": "sex_check",
             "value": "male",
             "condition": {"norm": "eq", "threshold": "male"},

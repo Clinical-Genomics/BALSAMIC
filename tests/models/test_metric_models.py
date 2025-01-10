@@ -97,7 +97,7 @@ def test_multiple_metric_validation_fail(qc_extracted_metrics: dict):
     assert metrics[8]["name"] in str(val_exc.value)
 
 
-def test_wrong_sex_check_metrics(tga_female_sex_prediction, config_dict):
+def test_wrong_sex_check_metrics(tga_female_sex_prediction: str, config_dict: dict):
     """Test MetricValidation for capturing conflicting predicted to given sex."""
 
     # GIVEN female sex prediction JSON and male config dictionary
@@ -110,7 +110,7 @@ def test_wrong_sex_check_metrics(tga_female_sex_prediction, config_dict):
 
     # THEN a ValueError should be triggered containing this text
     assert (
-        "QC metric COMPARE_PREDICTED_SEX_TO_GIVEN_SEX: female validation has failed. "
+        "QC metric COMPARE_PREDICTED_TO_GIVEN_SEX: female validation has failed. "
         "(Condition: eq male, ID: id1)." in str(val_exc.value)
     )
 
