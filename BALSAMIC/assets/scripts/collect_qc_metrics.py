@@ -141,7 +141,7 @@ def get_sex_check_metrics(sex_prediction_path: str, config: dict) -> list:
     sex_check_metrics = [tumor_sex_prediction_metrics]
 
     if "normal" in sex_prediction:
-        normal_predicted_sex = sex_prediction["normal"]["predicted_sex"]
+        normal_predicted_sex: str = sex_prediction["normal"]["predicted_sex"]
 
         normal_sex_prediction_metrics = Metric(
             id=f"{case_id}_normal",
@@ -154,7 +154,7 @@ def get_sex_check_metrics(sex_prediction_path: str, config: dict) -> list:
 
         sex_check_metrics.append(normal_sex_prediction_metrics)
 
-    return [sex_check_metrics]
+    return sex_check_metrics
 
 
 def get_relatedness_metrics(multiqc_data: dict) -> list:
