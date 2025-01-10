@@ -66,5 +66,72 @@
             }
         }
     },
+    "normal": {
+        "predicted_sex": "female",
+        "predicted_sex_score": 10,
+        "prediction_confidence": "high",
+        "target_predicted_sex": {
+            "sample_name": "ACC16341A3",
+            "cnn_type": "target",
+            "sex_prediction": {
+                "by_mean": {
+                    "predicted_sex": "female",
+                    "confidence": "high"
+                },
+                "by_median": {
+                    "predicted_sex": "female",
+                    "confidence": "low"
+                }
+            },
+            "data_dict": {
+                "X_mean": 1264.0270967032968,
+                "X_median": 1271.93,
+                "X_min": 418.87,
+                "X_max": 418.87,
+                "X_std": 222.35903101084796,
+                "X_count": 455,
+                "Y_mean": 0.5584615384615385,
+                "Y_median": 0.0,
+                "Y_min": 0.0,
+                "Y_max": 4.42,
+                "Y_std": 1.3506470434193516,
+                "Y_count": 13,
+                "data_amount": "medium",
+                "Y_mean/X_mean": 0.00044,
+                "Y_median/X_median": 0.0
+            }
+        },
+        "antitarget_predicted_sex": {
+            "sample_name": "ACC16341A3",
+            "cnn_type": "antitarget",
+            "sex_prediction": {
+                "by_mean": {
+                    "predicted_sex": "female",
+                    "confidence": "high"
+                },
+                "by_median": {
+                    "predicted_sex": "female",
+                    "confidence": "high"
+                }
+            },
+            "data_dict": {
+                "X_mean": 0.28692208789678675,
+                "X_median": 0.137604,
+                "X_min": 0.00780087,
+                "X_max": 0.00780087,
+                "X_std": 0.8903586833375136,
+                "X_count": 1027,
+                "Y_mean": 0.011141120615384617,
+                "Y_median": 0.00262233,
+                "Y_min": 0.0,
+                "Y_max": 0.558996,
+                "Y_std": 0.05205104731642913,
+                "Y_count": 182,
+                "data_amount": "high",
+                "Y_mean/X_mean": 0.03883,
+                "Y_median/X_median": 0.01906
+            }
+        }
+    },
     "case_sex": "female"
 }
