@@ -111,9 +111,9 @@ def test_wgs_tumor_only_male_sex_prediction(
     result = cli_runner.invoke(
         predict_sex_wgs,
         [
-            "--sample-x-coverage",
+            "--tumor-x-coverage",
             male_200k_x_coverage,
-            "--sample-y-coverage",
+            "--tumor-y-coverage",
             male_200k_y_coverage,
             "--output",
             output_path,
@@ -126,7 +126,7 @@ def test_wgs_tumor_only_male_sex_prediction(
 
     # THEN check that male sex has been correctly predicted
     sex_prediction: dict = read_json(output_path)
-    assert sex_prediction["case_sex"] == "male"
+    assert sex_prediction["tumor"]["predicted_sex"] == "male"
 
 
 def test_wgs_tumor_only_female_sex_prediction(
@@ -140,9 +140,9 @@ def test_wgs_tumor_only_female_sex_prediction(
     result = cli_runner.invoke(
         predict_sex_wgs,
         [
-            "--sample-x-coverage",
+            "--tumor-x-coverage",
             female_200k_x_coverage,
-            "--sample-y-coverage",
+            "--tumor-y-coverage",
             female_200k_y_coverage,
             "--output",
             output_path,
@@ -155,4 +155,4 @@ def test_wgs_tumor_only_female_sex_prediction(
 
     # THEN check that female sex has been correctly predicted
     sex_prediction: dict = read_json(output_path)
-    assert sex_prediction["case_sex"] == "female"
+    assert sex_prediction["tumor"]["predicted_sex"] == "female"
