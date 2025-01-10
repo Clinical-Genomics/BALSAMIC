@@ -129,7 +129,6 @@ def get_sex_check_metrics(sex_prediction_path: str, config: dict) -> list:
     given_sex: str = config["analysis"]["gender"]
     tumor_predicted_sex: str = sex_prediction["tumor"]["predicted_sex"]
 
-
     tumor_sex_prediction_metrics = Metric(
         id=f"{case_id}_tumor",
         input=os.path.basename(sex_prediction_path),

@@ -31,12 +31,14 @@ def predict_sex_from_y_and_x_cov(
     else:
         predicted_sex = "unknown"
 
-    return {sample_type: {
-        "predicted_sex": predicted_sex,
-        "tumor_median_x_coverage": tumor_median_x_cov,
-        "tumor_median_y_coverage": tumor_median_y_cov,
-        "tumor_y_x_median_frac": tumor_y_x_median_frac,
-    }}
+    return {
+        sample_type: {
+            "predicted_sex": predicted_sex,
+            "tumor_median_x_coverage": tumor_median_x_cov,
+            "tumor_median_y_coverage": tumor_median_y_cov,
+            "tumor_y_x_median_frac": tumor_y_x_median_frac,
+        }
+    }
 
 
 def write_json(json_obj: Dict, path: str) -> None:
@@ -104,10 +106,14 @@ def predict_sex_wgs(
         sample_x_coverage (str): Path to the X chromosome coverage file.
         output (str): Path to the output file for the results.
     """
-    predicted_sex = predict_sex_from_y_and_x_cov(tumor_y_coverage, tumor_x_coverage, "tumor")
+    predicted_sex = predict_sex_from_y_and_x_cov(
+        tumor_y_coverage, tumor_x_coverage, "tumor"
+    )
 
     if normal_y_coverage and normal_x_coverage:
-        predicted_normal_sex = predict_sex_from_y_and_x_cov(normal_y_coverage, normal_x_coverage, "normal")
+        predicted_normal_sex = predict_sex_from_y_and_x_cov(
+            normal_y_coverage, normal_x_coverage, "normal"
+        )
         predicted_sex.update(predicted_normal_sex)
 
     write_json(predicted_sex, output)
