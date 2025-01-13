@@ -126,7 +126,7 @@
 
 <!-- Create validation criteria for this PR or mark as unnecessary. -->
 
-Validation criteria to be added to validation report PR: [LINK-TO-RELEASE-PR]
+Validation criteria to be added to validation report PR: [LINK-TO-VALIDATION-REPORT-PR from the [validations repository](https://github.com/Clinical-Genomics/validations/)]
 
 ---
 **Version specific criteria**
