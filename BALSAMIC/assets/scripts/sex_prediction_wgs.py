@@ -5,28 +5,28 @@ import numpy as np
 
 
 def predict_sex_from_y_and_x_cov(
-    tumor_y_coverage_path: str, tumor_x_coverage_path: str, sample_type: str
+    y_coverage_path: str, x_coverage_path: str, sample_type: str
 ) -> Dict[str, float]:
     """
     Predicts the sex of a sample based on the median coverage of Y and X chromosomes.
 
     Args:
-        tumor_y_coverage_path (str): Path to the file containing Y chromosome coverage values.
-        tumor_x_coverage_path (str): Path to the file containing X chromosome coverage values.
+        y_coverage_path (str): Path to the file containing Y chromosome coverage values.
+        x_coverage_path (str): Path to the file containing X chromosome coverage values.
 
     Returns:
         Dict[str, float]: A dictionary containing predicted sex, median coverages, and their ratio.
     """
-    tumor_y_cov = np.loadtxt(tumor_y_coverage_path)
-    tumor_x_cov = np.loadtxt(tumor_x_coverage_path)
+    y_cov = np.loadtxt(y_coverage_path)
+    x_cov = np.loadtxt(x_coverage_path)
 
-    tumor_median_y_cov = np.median(tumor_y_cov)
-    tumor_median_x_cov = np.median(tumor_x_cov)
-    tumor_y_x_median_frac = round(tumor_median_y_cov / tumor_median_x_cov, 5)
+    median_y_cov = np.median(y_cov)
+    median_x_cov = np.median(x_cov)
+    y_x_median_frac = round(median_y_cov / median_x_cov, 5)
 
-    if tumor_y_x_median_frac > 0.1:
+    if y_x_median_frac > 0.1:
         predicted_sex = "male"
-    elif tumor_y_x_median_frac < 0.08:
+    elif y_x_median_frac < 0.08:
         predicted_sex = "female"
     else:
         predicted_sex = "unknown"
@@ -34,9 +34,9 @@ def predict_sex_from_y_and_x_cov(
     return {
         sample_type: {
             "predicted_sex": predicted_sex,
-            "tumor_median_x_coverage": tumor_median_x_cov,
-            "tumor_median_y_coverage": tumor_median_y_cov,
-            "tumor_y_x_median_frac": tumor_y_x_median_frac,
+            "median_x_coverage": median_x_cov,
+            "median_y_coverage": median_y_cov,
+            "y_x_median_frac": y_x_median_frac,
         }
     }
 
