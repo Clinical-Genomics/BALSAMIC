@@ -128,12 +128,10 @@
 
 Validation criteria to be added to validation report PR: [LINK-TO-VALIDATION-REPORT-PR from the [validations repository](https://github.com/Clinical-Genomics/validations/)]
 
----
 **Version specific criteria**
 
-Text here or N/A
+- Text here or N/A
 
----
 
 
 > [!IMPORTANT]
