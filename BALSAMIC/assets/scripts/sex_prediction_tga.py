@@ -17,8 +17,7 @@ def read_cov(filepath: str) -> List[List[str]]:
         List[List[str]]: Parsed rows of the coverage file.
     """
     with open(filepath, "r") as rf:
-        rows = rf.readlines()
-        return [r.strip("\n").split("\t") for r in rows]
+        return [line.split("\t") for line in rf]
 
 
 def process_data(data_rows: List[List[str]]) -> Optional[pd.DataFrame]:

@@ -101,9 +101,10 @@ def predict_sex_wgs(
     Determines the sex of a sample based on ASCAT statistics or chromosome coverage.
 
     Args:
-        case_ascat_statistics (str): Path to the ASCAT statistics file.
-        sample_y_coverage (str): Path to the Y chromosome coverage file.
-        sample_x_coverage (str): Path to the X chromosome coverage file.
+        tumor_y_coverage (str): Path to the Y chromosome coverage file for the tumor sample.
+        tumor_x_coverage (str): Path to the X chromosome coverage file for the tumor sample.
+        normal_y_coverage (str): Path to the Y chromosome coverage file for the normal sample.
+        normal_x_coverage (str): Path to the X chromosome coverage file for the normal sample.
         output (str): Path to the output file for the results.
     """
     predicted_sex = predict_sex_from_y_and_x_cov(
