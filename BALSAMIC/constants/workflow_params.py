@@ -208,7 +208,7 @@ WORKFLOW_PARAMS = {
     "tnscope_tga": {
         "algo": "TNscope",
         "filter_tumor_af": 0.0005,
-        "pcr_model": "NONE",
+        "pcr_model": "hostile",
         "min_tumorLOD": 4,
         "init_tumorLOD": 0.5,
         "error_rate": 5,
