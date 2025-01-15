@@ -26,7 +26,9 @@ def collect_header(vcf: str) -> List[str]:
     return header
 
 
-def add_header_categories(header_categories, header):
+def add_header_categories(
+    header_categories: Dict[str, List[str]], header: List[str]
+) -> Dict[str, List[str]]:
     """
     Categorizes VCF headers by type (e.g., FILTER, INFO).
 
@@ -38,13 +40,19 @@ def add_header_categories(header_categories, header):
     - Dict[str, List[str]]: Updated header categories.
     """
     for hdr_row in header:
-        hdr_row_split = hdr_row.split("=")
-        cat = hdr_row_split[0].strip("#")
-        if cat not in header_categories:
-            header_categories[cat] = []
-            header_categories[cat].append("=".join(hdr_row_split[1:]))
+        # Example hdr_row:
+        # ##FORMAT=<ID=AD,Number=R,Type=Integer,Description="Allelic depths for the ref and alt alleles in the order listed">
+        hdr_row_split: List[str] = hdr_row.split("=")
+        # Example hdr_row_split
+        # ["##FORMAT", "<ID", "AD,Number", "R,Type", "Integer,Description", "Allelic depths for the ref and alt alleles in the order listed">
+        category: str = hdr_row_split[0].strip("#")
+        # Example category:
+        # FORMAT
+        if category not in header_categories:
+            header_categories[category] = []
+            header_categories[category].append("=".join(hdr_row_split[1:]))
         else:
-            header_categories[cat].append("=".join(hdr_row_split[1:]))
+            header_categories[category].append("=".join(hdr_row_split[1:]))
     return header_categories
 
 
@@ -104,7 +112,7 @@ def update_number_text(row: str, new_number: str) -> str:
     return re.sub(r"Number=([^,]+)", f"Number={new_number}", row)
 
 
-def merge_headers(vcf1, vcf2):
+def merge_headers(vcf1: str, vcf2: str) -> List[str]:
     """
     Merges headers from two VCF files, ensuring no duplicate or conflicting entries.
 
@@ -115,38 +123,48 @@ def merge_headers(vcf1, vcf2):
     Returns:
     - List[str]: Merged header lines.
     """
-    header1 = collect_header(vcf1)
-    header2 = collect_header(vcf2)
+    header1: List[str] = collect_header(vcf1)
+    header2: List[str] = collect_header(vcf2)
 
+    # Merge header categories
     header_categories = {}
-    header_categories = add_header_categories(header_categories, header1)
-    header_categories = add_header_categories(header_categories, header2)
+    header_categories: Dict[str, List[str]] = add_header_categories(
+        header_categories, header1
+    )
+    header_categories: Dict[str, List[str]] = add_header_categories(
+        header_categories, header2
+    )
 
     # Handle variant header
-    variant_header_string = "CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO"
-    variant_header = [key for key in header_categories if variant_header_string in key]
+    variant_header = [
+        key
+        for key in header_categories
+        if "CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO" in key
+    ]
 
-    count_unique_variant_headers = len(variant_header)
-
-    if count_unique_variant_headers > 1:
+    if len(variant_header) > 1:
         print("Error, variant headers in vcf1 and vcf2 do not match. Cannot merge.")
         sys.exit(1)
 
     for key in variant_header:
         header_categories.pop(key)
 
-    # Merge identical rows
+    # Merge identical header rows
     merged_header_dict = {}
-    for cat in header_categories:
+    for category in header_categories:
         cat_lines = {}
-        merged_header_dict[cat] = {}
-        for line in header_categories[cat]:
+        merged_header_dict[category] = {}
+        for line in header_categories[category]:
             if line in cat_lines:
                 # Line has already been added in this category, skip it
                 continue
             else:
                 try:
+                    # Example split line
+                    # ["<ID", "AD,Number", "R,Type", "Integer,Description", "Allelic depths for the ref and alt alleles in the order listed">
                     line_id = line.split("=")[1].split(",")[0]
+                    # Example line_id
+                    # AD
                 except:
                     # Line does not match standard VCF header format, just add it
                     cat_lines[line] = line
@@ -158,16 +176,18 @@ def merge_headers(vcf1, vcf2):
                 cat_lines[line_id] = line
             else:
                 # Merge lines with the same category and ID
-                line1 = cat_lines[line_id]
-                line2 = line
-                cat_lines[line_id] = merge_header_row(line1, line2)
-        merged_header_dict[cat] = cat_lines
+                line1: str = cat_lines[line_id]
+                line2: str = line
+                cat_lines[line_id]: str = merge_header_row(line1, line2)
+
+        merged_header_dict[category]: Dict[str:str] = cat_lines
 
     # Consolidate merged header into list to be written
     merged_header = []
-    for cat in merged_header_dict:
-        for key, line in merged_header_dict[cat].items():
-            merged_header.append(f"##{cat}={line}")
+    for category in merged_header_dict:
+        # Such as FILTER, FORMAT, INFO
+        for key, line in merged_header_dict[category].items():
+            merged_header.append(f"##{category}={line}")
     merged_header.append("#" + variant_header[0])
     merged_header = [line.strip("\n") for line in merged_header]
     return merged_header
@@ -184,16 +204,19 @@ def merge_header_row(line1: str, line2: str) -> str:
     Returns:
     - str: Merged header row.
     """
-    updated_line = line1
-    desc1 = get_description_field(line1)
-    desc2 = get_description_field(line2)
-    if desc1 and desc2 and desc1 != desc2:
-        merged_desc = f"vcf1: {desc1} | vcf2: {desc2}"
-        updated_line = update_description_text(updated_line, merged_desc)
+    updated_line: str = line1
 
-    num1 = get_number_field(line1)
-    num2 = get_number_field(line2)
-    if num1 and num2 and num1 != num2:
+    # Merge Description field for two header_rows with the same category and ID
+    desc1: str = get_description_field(line1)
+    desc2: str = get_description_field(line2)
+    if desc1 and desc2 and desc1 != desc2:
+        merged_desc: str = f"vcf1: {desc1} | vcf2: {desc2}"
+        updated_line: str = update_description_text(updated_line, merged_desc)
+
+    num_field1: str = get_number_field(line1)
+    num_field2: str = get_number_field(line2)
+    if num_field1 and num_field2 and num_field1 != num_field2:
+        # If the number field is different for the same ID, set the num_field to "."
         updated_line = update_number_text(updated_line, ".")
         print(
             f"Warning: Number fields differ. line1: {line1}, line2: {line2}",
@@ -218,7 +241,7 @@ def read_variants(vcf: str) -> Dict[Tuple[str, str, str, str], Dict[str, str]]:
         for line in gz_vcf:
             if line.startswith("#"):
                 continue
-            fields = line.strip().split("\t")
+            fields: List[str] = line.strip().split("\t")
             chrom, pos, id, ref, alt, qual, filter_, info, format_, *samples = fields
             key = (chrom, pos, ref, alt)
             variants[key] = {
@@ -241,21 +264,73 @@ def merge_info_fields(info_fields: List[str]) -> str:
     Merges multiple INFO fields into a single field, preserving all unique key-value pairs.
 
     Parameters:
-    - info_fields (List[str]): List of INFO fields.
+    - info_fields (List[str]): List of INFO fields, where each field is a string.
 
     Returns:
-    - str: Merged INFO field.
+    - str: Merged INFO field as a semicolon-separated string.
     """
+
+    def parse_info_field(field: str) -> Tuple[str, Optional[str]]:
+        """
+        Parses an individual INFO field into a key-value pair.
+
+        Parameters:
+        - field (str): The INFO field (e.g., "DP=10" or "SVTYPE").
+
+        Returns:
+        - Tuple[str, Optional[str]]: A tuple of the key and value (or None if no value exists).
+        """
+        key, sep, value = field.partition("=")
+        return (key, value if sep else None)
+
+    # Parse all fields and store in a dictionary
     merged_info = {}
     for field in info_fields:
-        key, sep, value = field.partition("=")
-        if sep:  # Key-value pair
-            merged_info[key] = (
-                merged_info.get(key, "") + ("," if key in merged_info else "") + value
-            )
+        key, value = parse_info_field(field)
+        if value is not None:  # Key-value pair
+            # Append the value if the key already exists, using a comma as a separator
+            if key in merged_info:
+                merged_info[key] += f",{value}"
+            else:
+                merged_info[key] = value
         else:  # Key only
             merged_info[key] = None
-    return ";".join(f"{k}={v}" if v is not None else f"{k};" for k, v in merged_info.items())
+
+    # Construct the merged INFO field string
+    return ";".join(
+        f"{key}={value}" if value is not None else key
+        for key, value in merged_info.items()
+    )
+
+
+def merge_filters(filter1: str, filter2: str) -> str:
+    """
+    Merges FILTER fields from two variants according to the following rules:
+    - If both filters are "PASS", the result is "PASS".
+    - If one or both filters contain non-"PASS" values, merge those values into a semicolon-separated string.
+    - Remove "PASS" if it is present in either filter when merging non-"PASS" values.
+
+    Parameters:
+    - filter1 (str): The FILTER field of the first variant.
+    - filter2 (str): The FILTER field of the second variant.
+
+    Returns:
+    - str: Merged FILTER field.
+    """
+    # Handle missing or placeholder values (".")
+    filters1 = set(filter1.split(";")) if filter1 != "." else set()
+    filters2 = set(filter2.split(";")) if filter2 != "." else set()
+
+    # Combine filters
+    merged_filters = filters1.union(filters2)
+
+    # Remove "PASS" if there are any other filters
+    if "PASS" in merged_filters and len(merged_filters) > 1:
+        merged_filters.discard("PASS")
+
+    # If the result is empty, default to "."
+    return ";".join(sorted(merged_filters)) if merged_filters else "."
+
 
 def merge_variants(vcf1: str, vcf2: str) -> List[str]:
     """
@@ -269,11 +344,11 @@ def merge_variants(vcf1: str, vcf2: str) -> List[str]:
     Returns:
     - List[str]: Merged variant lines, sorted in genomic order.
     """
-    variants1 = read_variants(vcf1)
-    variants2 = read_variants(vcf2)
+    variants1: Dict[Tuple[str, str, str, str], Dict[str, str]] = read_variants(vcf1)
+    variants2: Dict[Tuple[str, str, str, str], Dict[str, str]] = read_variants(vcf2)
 
     # Combine keys and sort by genomic order (chromosome, position)
-    all_keys = sorted(
+    all_keys: List[Tuple[str, str, str, str]] = sorted(
         set(variants1.keys()).union(variants2.keys()),
         key=lambda x: (parse_chromosome(x[0]), int(x[1])),
     )
@@ -281,17 +356,23 @@ def merge_variants(vcf1: str, vcf2: str) -> List[str]:
     merged_variants = []
 
     for key in all_keys:
-        variant1 = variants1.get(key)
-        variant2 = variants2.get(key)
+        variant1: Dict[str, str] = variants1.get(key)
+        variant2: Dict[str, str] = variants2.get(key)
 
         if variant1 and variant2:
             # Variant exists in both VCFs; merge INFO fields
+
             id_ = variant1["id"] if variant1["id"] != "." else variant2["id"]
-            merged_info = merge_info_fields(
+
+            # Merge info fields, creating a list of values for shared IDs (AD=123,124)
+            merged_info: str = merge_info_fields(
                 variant1["info"].split(";") + variant2["info"].split(";")
             )
             qual = variant1["qual"] if variant1["qual"] != "." else variant2["qual"]
-            filter_ = variant1["filter"] if variant1["filter"] != "." else variant2["filter"]
+
+            # Merge filter columns
+            filter_ = merge_filters(variant1["filter"], variant2["filter"])
+
             merged_variants.append(
                 "\t".join(
                     [
@@ -395,10 +476,10 @@ def main(vcf1: str, vcf2: str, output_file: str) -> None:
     - output_file (str): Path to the output merged VCF file.
     """
     # Merge header
-    merged_header = merge_headers(vcf1, vcf2)
+    merged_header: List[str] = merge_headers(vcf1, vcf2)
 
     # Merge variants based on the same chrom, pos, ref, alt, and merge INFO fields
-    merged_variants = merge_variants(vcf1, vcf2)
+    merged_variants: List[str] = merge_variants(vcf1, vcf2)
 
     # Write the merged VCF to output file
     write_merged_vcf(output_file, merged_header, merged_variants)
