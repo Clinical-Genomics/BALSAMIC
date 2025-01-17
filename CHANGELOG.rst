@@ -1,3 +1,22 @@
+[X.X.X]
+-------
+
+Added:
+^^^^^^
+
+
+Changed:
+^^^^^^^^
+* merge SNVs into MNVs in TNscope TGA
+
+Removed:
+^^^^^^^^
+
+
+Fixed:
+^^^^^^
+
+
 [16.0.0]
 -------
 
