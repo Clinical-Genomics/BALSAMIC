@@ -243,6 +243,8 @@ class BalsamicWorkflowConfig(BaseModel):
         umiextract : params defined in the rule sentieon_umiextract
         umiconsensuscall: params defined in the rule sentieon_consensuscall
         tnscope_umi: params defined in the rule sentieon_tnscope_umi
+        tnscope_tga_tumor_only: params defined in the rule sentieon_tnscope_tga_tumor_only
+        tnscope_tga_tumor_normal: params defined in the rule sentieon_tnscope_tga_tumor_normal
 
     Functions:
         - get_manta_settings: Return setting for manta rule
@@ -261,7 +263,8 @@ class BalsamicWorkflowConfig(BaseModel):
     umiextract: UMIParamsUMIextract
     umiconsensuscall: UMIParamsConsensuscall
     tnscope_umi: UMIParamsTNscope
-    tnscope_tga: TGAParamsTNscope
+    tnscope_tga_tumor_only: TGAParamsTNscope
+    tnscope_tga_tumor_normal: TGAParamsTNscope
 
     def get_manta_settings(self, sequencing_type) -> str:
         """Return correct setting for manta rules depending on sequencing type."""
