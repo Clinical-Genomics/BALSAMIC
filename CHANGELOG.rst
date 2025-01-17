@@ -1,3 +1,21 @@
+[X.X.X]
+-------
+
+Added:
+^^^^^^
+
+Changed:
+^^^^^^^^
+* --pcr_indel_model changed to hostile for TGA tumor only https://github.com/Clinical-Genomics/BALSAMIC/pull/1523
+
+Removed:
+^^^^^^^^
+
+
+Fixed:
+^^^^^^
+
+
 [16.0.0]
 -------
 
