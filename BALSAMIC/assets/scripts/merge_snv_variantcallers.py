@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 from typing import Dict, List, Tuple, Optional
+from datetime import datetime
 import click
 import gzip
 import sys
+import os
 import re
 
 
@@ -123,6 +125,16 @@ def merge_headers(vcf1: str, vcf2: str) -> List[str]:
     Returns:
     - List[str]: Merged header lines.
     """
+
+    vcf1_name = os.path.basename(vcf1)
+    vcf2_name = os.path.basename(vcf2)
+
+    # Get the current date and time
+    current_datetime = datetime.now()
+
+    # Format the date and time in ISO 8601 format
+    formatted_date = current_datetime.strftime('%Y-%m-%dT%H:%M:%S')
+
     header1: List[str] = collect_header(vcf1)
     header2: List[str] = collect_header(vcf2)
 
@@ -188,6 +200,11 @@ def merge_headers(vcf1: str, vcf2: str) -> List[str]:
         # Such as FILTER, FORMAT, INFO
         for key, line in merged_header_dict[category].items():
             merged_header.append(f"##{category}={line}")
+    merged_header.extend([
+        f"##merge_snv_variantcallers=merge_snv_variantcallers.py {vcf1_name} {vcf2_name} --output output_merged.vcf",
+        f"##merge_snv_variantcallers_processing_time={formatted_date}",
+        f"##INFO_MERGE_SNV_VARIANTCALLERS=Values in merged INFO fields are listed in the order of the input files: first from {vcf1_name}, then from {vcf2_name}."
+    ])
     merged_header.append("#" + variant_header[0])
     merged_header = [line.strip("\n") for line in merged_header]
     return merged_header
