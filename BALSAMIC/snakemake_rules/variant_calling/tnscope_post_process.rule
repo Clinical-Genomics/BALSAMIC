@@ -5,7 +5,6 @@
 
 rule bcftools_split_tnscope_variants:
     input:
-        ref = config["reference"]["reference_genome"],
         vcf = vcf_dir + "sentieon_tnscope/ALL.somatic." + config["analysis"]["case_id"] + ".tnscope.vcf.gz",
     output:
         vcf_tnscope = vcf_dir + "sentieon_tnscope/SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.preprocess.vcf",
@@ -31,9 +30,35 @@ bcftools view --include 'INFO/SVTYPE!="."' -O z -o {output.vcf_tnscope_sv} {inpu
 tabix -p vcf -f {output.vcf_tnscope_sv};
         """
 
-rule modify_tnscope_infofield:
+rule merge_tnscope_snvs_to_mnvs:
     input:
         vcf_tnscope = vcf_dir + "sentieon_tnscope/SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.preprocess.vcf",
+        ref = config["reference"]["reference_genome"],
+    output:
+        vcf_tnscope = vcf_dir + "sentieon_tnscope/SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.mnvs.vcf",
+    benchmark:
+        Path(benchmark_dir,'merge_tnscope_snvs_to_mnvs' + config[ "analysis" ][ "case_id" ] + ".tsv").as_posix()
+    singularity:
+        Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
+    params:
+        merge_mnvs = get_script_path("merge_mnp.py"),
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
+        case_name = config["analysis"]["case_id"],
+    threads:
+        get_threads(cluster_config, 'modify_tnscope_infofield')
+    message:
+        "Merge TNscope SNVs with same phaseID to MNVs for {params.case_name}"
+    shell:
+        """
+export SENTIEON_TMPDIR={params.tmpdir};
+export SENTIEON_LICENSE={params.sentieon_lic};
+
+{params.sentieon_exec} pyexec {params.merge_mnvs} {input.vcf_tnscope} {input.ref} > {output.vcf_tnscope}
+        """
+
+rule modify_tnscope_infofield:
+    input:
+        vcf_tnscope = vcf_dir + "sentieon_tnscope/SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.mnvs.vcf",
     output:
         vcf_tnscope = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.vcf.gz",
     benchmark:
