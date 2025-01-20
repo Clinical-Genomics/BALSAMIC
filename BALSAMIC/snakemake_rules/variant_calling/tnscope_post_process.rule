@@ -44,6 +44,8 @@ rule merge_tnscope_snvs_to_mnvs:
         merge_mnvs = get_script_path("merge_mnp.py"),
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         case_name = config["analysis"]["case_id"],
+        sentieon_exec = config_model.sentieon.sentieon_exec,
+        sentieon_lic = config_model.sentieon.sentieon_license,
     threads:
         get_threads(cluster_config, 'modify_tnscope_infofield')
     message:
