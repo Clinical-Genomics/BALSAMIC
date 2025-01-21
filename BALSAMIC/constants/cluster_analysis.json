@@ -388,6 +388,10 @@
 		"time": "01:00:00",
 		"n": 4
 	},
+	"merge_tnscope_snvs_to_mnvs": {
+		"time": "01:00:00",
+		"n": 4
+	},
 	"vcf2cytosure_convert": {
 		"time": "02:00:00",
 		"n": 8

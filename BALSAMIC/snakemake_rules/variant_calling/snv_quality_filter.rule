@@ -83,7 +83,7 @@ if config["analysis"]["sequencing_type"] == 'targeted' and config["analysis"]["a
 
   rule bcftools_quality_filter_tnscope_tumor_only_tga:
     input:
-      vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.vcf.gz",
+      vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.mnvs.vcf.gz",
     output:
       vcf_filtered = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.research.vcf.gz",
     benchmark:
@@ -148,7 +148,7 @@ if config["analysis"]["sequencing_type"] == 'targeted' and config["analysis"]["a
 
   rule bcftools_quality_filter_TNscope_umi_tumor_only:
     input:
-      vcf= vcf_dir +  "SNV.somatic."+ config["analysis"]["case_id"] + ".tnscope_umi.vcf.gz",
+      vcf = vcf_dir + "sentieon_tnscope/SNV.somatic." + config["analysis"]["case_id"] + ".tnscope_umi.post_process.vcf.gz",
     output:
       vcf_filtered = vcf_dir +  "SNV.somatic."+ config["analysis"]["case_id"] + ".tnscope_umi.research.vcf.gz"
     benchmark:
@@ -174,7 +174,7 @@ elif config["analysis"]["sequencing_type"] == 'targeted' and config["analysis"][
 
   rule bcftools_quality_filter_tnscope_tumor_normal_tga:
     input:
-      vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.vcf.gz",
+      vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.mnvs.vcf.gz",
     output:
       vcf_filtered = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.research.vcf.gz",
     benchmark:
@@ -241,7 +241,7 @@ elif config["analysis"]["sequencing_type"] == 'targeted' and config["analysis"][
 
   rule bcftools_quality_filter_TNscope_umi_tumor_normal:
     input:
-      vcf = vcf_dir +  "SNV.somatic."+ config["analysis"]["case_id"] + ".tnscope_umi.vcf.gz",
+      vcf = vcf_dir + "sentieon_tnscope/SNV.somatic." + config["analysis"]["case_id"] + ".tnscope_umi.post_process.vcf.gz",
     output:
       vcf_filtered = vcf_dir +  "SNV.somatic."+ config["analysis"]["case_id"] + ".tnscope_umi.research.vcf.gz",
     benchmark:
