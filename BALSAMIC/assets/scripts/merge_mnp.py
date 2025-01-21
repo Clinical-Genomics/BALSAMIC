@@ -150,6 +150,10 @@ def merge_variants(variants, max_distance):
             all_filters.discard("PASS")
         merged_variant.filter = list(all_filters)
 
+        # Set merged variants to filter MERGED
+        for v in variant_group:
+            v.filter = ["MERGED"]
+
         # Update sample fields
         for i, sample in enumerate(vcf.samples):
             sample_data = merged_variant.samples[i]
