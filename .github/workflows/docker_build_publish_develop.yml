@@ -3,7 +3,6 @@ on:
   push:
     branches:
       - "develop"
-      - "create_tnscope_mnvs"
   pull_request:
     branches-ignore:
       - "master"

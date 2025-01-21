@@ -49,8 +49,8 @@ import pyfaidx
 
 global vcf, reference
 
-def ifmerge(v1, v2, max_distance):
 
+def ifmerge(v1, v2, max_distance):
     if "SVTYPE" in v1.info or "SVTYPE" in v2.info:
         return False
     # coordinate off by 1
@@ -65,7 +65,7 @@ def ifmerge(v1, v2, max_distance):
     ps1 = v1.samples[0].get("PS", "")
     ps2 = v2.samples[0].get("PS", "")
     if (pid1 == pid2 and pgt1 == pgt2 and pid1 != "" and pgt1 != "") or (
-            ps1 == ps2 and ps1 != ""
+        ps1 == ps2 and ps1 != ""
     ):
         return True
     return False
@@ -90,7 +90,9 @@ def merge_variants(variants, max_distance):
 
         # Ensure no overlapping variants within the group
         for i in range(group_length - 1):
-            if variant_group[i + 1].pos - variant_group[i].pos < len(variant_group[i].ref):
+            if variant_group[i + 1].pos - variant_group[i].pos < len(
+                variant_group[i].ref
+            ):
                 return None
 
         # Initialize the merged variant
@@ -105,8 +107,8 @@ def merge_variants(variants, max_distance):
             ref_gap = ""
             if current_variant.pos > merged_variant.pos + len(ref_seq):
                 ref_gap = reference[merged_variant.chrom][
-                          merged_variant.pos + len(ref_seq):current_variant.pos
-                          ].seq.upper()
+                    merged_variant.pos + len(ref_seq) : current_variant.pos
+                ].seq.upper()
 
             ref_seq += ref_gap + current_variant.ref
             alt_seqs = [
@@ -134,8 +136,9 @@ def merge_variants(variants, max_distance):
         prefix_index = 0
         while prefix_index < len(ref_seq) - 1:
             if all(
-                    ref_seq[prefix_index] == alt_seq[prefix_index]
-                    for alt_seq in alt_seqs if prefix_index < len(alt_seq)
+                ref_seq[prefix_index] == alt_seq[prefix_index]
+                for alt_seq in alt_seqs
+                if prefix_index < len(alt_seq)
             ):
                 prefix_index += 1
             else:
@@ -210,6 +213,7 @@ def merge_variants(variants, max_distance):
         merged_variants.append(pending_variants.pop(0))
 
     return merged_variants
+
 
 def process(vcf_file, ref_file, out_file, max_distance):
     global vcf, reference

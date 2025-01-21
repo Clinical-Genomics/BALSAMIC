@@ -73,7 +73,7 @@ def ifmerge(v1, v2):
     ps1 = v1.samples[0].get("PS", "")
     ps2 = v2.samples[0].get("PS", "")
     if (pid1 == pid2 and pgt1 == pgt2 and pid1 != "" and pgt1 != "") or (
-            ps1 == ps2 and ps1 != ""
+        ps1 == ps2 and ps1 != ""
     ):
         if custom_merge is not None:
             return custom_merge.is_merge(v1, v2)
@@ -106,7 +106,7 @@ def merge(vs):
             vi = vv[i]
             ref_gap = ""
             if vi.pos - (v.pos + len(ref)) > 0:
-                ref_gap = reference[v.chrom][v.pos + len(ref): vi.pos].seq.upper()
+                ref_gap = reference[v.chrom][v.pos + len(ref) : vi.pos].seq.upper()
             ref = ref + ref_gap + vi.ref
             alt = [alt[j] + ref_gap + vi.alt[j] for j in range(len(alt))]
             vi.filter = ["MERGED"]

@@ -46,8 +46,10 @@ import copy
 import click
 import sys
 import pyfaidx
-from typing import List, Union, Optional, Any
+from typing import List, Union, Optional
+
 global vcf, reference
+
 
 def ifmerge(
     variant1: vcflib.vcf.Variant, variant2: vcflib.vcf.Variant, max_distance: int
@@ -84,17 +86,14 @@ def ifmerge(
     ps2 = variant2.samples[0].get("PS", "")
 
     # Check if variants share the same PID and PGT, or the same PS
-    if (
-        (pid1 == pid2 and pgt1 == pgt2 and pid1 and pgt1)
-        or (ps1 == ps2 and ps1)
-    ):
+    if (pid1 == pid2 and pgt1 == pgt2 and pid1 and pgt1) or (ps1 == ps2 and ps1):
         return True
 
     return False
 
+
 def distance(
-    v1: Union[List[vcflib.vcf.Variant], vcflib.vcf.Variant],
-    v2: vcflib.vcf.Variant
+    v1: Union[List[vcflib.vcf.Variant], vcflib.vcf.Variant], v2: vcflib.vcf.Variant
 ) -> int:
     """
     Calculate the distance between two VCF variants. If `v1` is a list of variants,
@@ -136,7 +135,7 @@ def merge(vs, max_distance):
             vi = vv[i]
             ref_gap = ""
             if vi.pos - (v.pos + len(ref)) > 0:
-                ref_gap = reference[v.chrom][v.pos + len(ref): vi.pos].seq.upper()
+                ref_gap = reference[v.chrom][v.pos + len(ref) : vi.pos].seq.upper()
             ref = ref + ref_gap + vi.ref
             alt = [alt[j] + ref_gap + vi.alt[j] for j in range(len(alt))]
 
@@ -224,11 +223,9 @@ def merge(vs, max_distance):
         vlist.append(to_push.pop(0))
     return vlist
 
+
 def process(
-    vcf_file: str,
-    ref_file: str,
-    out_file: Optional[str],
-    max_distance: int
+    vcf_file: str, ref_file: str, out_file: Optional[str], max_distance: int
 ) -> None:
     """
     Processes a VCF file, merges neighboring variants into MNVs, and writes the result to an output file or stdout.
@@ -319,10 +316,7 @@ def process(
     help="Maximum distance between two variants to be merged.",
 )
 def main(
-    vcf_file: str,
-    reference: str,
-    out_file: Optional[str],
-    max_distance: int
+    vcf_file: str, reference: str, out_file: Optional[str], max_distance: int
 ) -> None:
     """
     Merge phased SNVs into MNVs and output the result to a VCF file or stdout.
