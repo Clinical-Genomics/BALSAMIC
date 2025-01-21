@@ -46,7 +46,6 @@ import copy
 import click
 import sys
 import pyfaidx
-import importlib
 
 global vcf, reference
 
@@ -276,7 +275,7 @@ def process(vcf_file, ref_file, out_file, max_distance):
     show_default=True,
     help="Maximum distance between two variants to be merged.",
 )
-def merge_variants(vcf_file, reference, out_file, max_distance):
+def main(vcf_file, reference, out_file, max_distance):
     """
     Merge phased SNVs into MNVs.
 
@@ -288,4 +287,4 @@ def merge_variants(vcf_file, reference, out_file, max_distance):
 
 
 if __name__ == "__main__":
-    merge_variants()
+    main()
