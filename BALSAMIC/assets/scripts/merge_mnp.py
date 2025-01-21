@@ -38,149 +38,256 @@ Requirements:
 This script requires access to the vcflib library contained in the Sentieon
 software package located in $SENTIEON_INSTALL_DIR/lib/python/sentieon.
 """
+
 from __future__ import print_function
 
-import argparse
+import vcflib
 import copy
+import argparse
 import sys
-from pyfaidx import Fasta
-from vcflib import VCF
+import pyfaidx
+import importlib
 
-# Global variables
-global vcf, reference
-MAX_DISTANCE = 20  # Default value
+global vcf, reference, custom_merge
+# defines the maximum distance of two variants of the same phase to be merged
+max_distance = 5
+custom_merge = None
 
-def should_merge(variant1, variant2):
-    """Determine whether two variants should be merged."""
 
-    # Do not merge structural variants (SVs)
-    if "SVTYPE" in variant1.info or "SVTYPE" in variant2.info:
+# decide whether two variants should be merged or not
+def ifmerge(v1, v2):
+
+    if "SVTYPE" in v1.info or "SVTYPE" in v2.info:
         return False
-
-    # Variants must be close enough and on the same chromosome
-    if variant1.chrom != variant2.chrom or variant2.pos - variant1.pos > MAX_DISTANCE + len(variant1.ref) - 1:
+    # coordinate off by 1
+    if v1.chrom != v2.chrom or v2.pos - v1.pos > max_distance + len(v1.ref) - 1:
         return False
-
-    # Must share the same PID/PGT or PS (phasing information)
-    pid1, pid2 = variant1.samples[0].get("PID", ""), variant2.samples[0].get("PID", "")
-    pgt1, pgt2 = variant1.samples[0].get("PGT", ""), variant2.samples[0].get("PGT", "")
-    ps1, ps2 = variant1.samples[0].get("PS", ""), variant2.samples[0].get("PS", "")
-
-    if ((pid1 == pid2 and pgt1 == pgt2 and pid1 and pgt1) or (ps1 == ps2 and ps1)):
+    # share the same PID and PGT
+    pid1 = v1.samples[0].get("PID", "")
+    pid2 = v2.samples[0].get("PID", "")
+    pgt1 = v1.samples[0].get("PGT", "")
+    pgt2 = v2.samples[0].get("PGT", "")
+    # or the same PS to support use case of VCF coming from whatshap
+    ps1 = v1.samples[0].get("PS", "")
+    ps2 = v2.samples[0].get("PS", "")
+    if (pid1 == pid2 and pgt1 == pgt2 and pid1 != "" and pgt1 != "") or (
+            ps1 == ps2 and ps1 != ""
+    ):
+        if custom_merge is not None:
+            return custom_merge.is_merge(v1, v2)
         return True
-
     return False
 
-def calculate_distance(variant1, variant2):
-    """Calculate the distance between two variants."""
-    return variant2.pos - variant1.pos - len(variant1.ref) + 1
+
+def distance(v1, v2):
+    if type(v1) == list:
+        for v in v1[::-1]:
+            return v2.pos - v.pos - len(v.ref) + 1
+        return 1000
+    if v1.chrom != v2.chrom:
+        return 1000
+    return v2.pos - v1.pos - len(v1.ref) + 1
+
 
 def merge_variants(variants):
-    """Merge a list of variants into a single variant."""
+    def _merge_variant_group(variant_group):
+        """
+        Merge a group of overlapping variants into a single variant.
+        """
+        group_length = len(variant_group)
 
-    def merge_individuals(v_list):
-        if len(v_list) < 2:
-            return None
+        # Ensure no overlapping variants within the group
+        for i in range(group_length - 1):
+            if variant_group[i + 1].pos - variant_group[i].pos < len(variant_group[i].ref):
+                return None
 
-        merged_variant = copy.deepcopy(v_list[0])
+        # Initialize the merged variant
+        merged_variant = copy.deepcopy(variant_group[0])
         merged_variant.id = "."
-        ref = v_list[0].ref
-        alt = v_list[0].alt
+        ref_seq = variant_group[0].ref
+        alt_seqs = variant_group[0].alt
 
-        # Combine the filters from all variants
-        combined_filters = set()
-        for variant in v_list:
-            combined_filters.update(variant.filter)
-        if "PASS" in combined_filters and len(combined_filters) > 1:
-            combined_filters.remove("PASS")
-        merged_variant.filter = list(combined_filters)
-
-        for next_variant in v_list[1:]:
+        # Combine REF and ALT sequences
+        for i in range(1, group_length):
+            current_variant = variant_group[i]
             ref_gap = ""
-            gap_length = next_variant.pos - (merged_variant.pos + len(ref))
-            if gap_length > 0:
-                ref_gap = reference[merged_variant.chrom][merged_variant.pos + len(ref):next_variant.pos].seq.upper()
+            if current_variant.pos > merged_variant.pos + len(ref_seq):
+                ref_gap = reference[merged_variant.chrom][
+                          merged_variant.pos + len(ref_seq):current_variant.pos
+                          ].seq.upper()
 
-            ref += ref_gap + next_variant.ref
-            alt = [alt[i] + ref_gap + next_variant.alt[i] for i in range(len(alt))]
-            next_variant.filter = ["MERGED"]
+            ref_seq += ref_gap + current_variant.ref
+            alt_seqs = [
+                alt_seq + ref_gap + current_variant.alt[j]
+                for j, alt_seq in enumerate(alt_seqs)
+            ]
 
-        merged_variant.qual = (sum(v.qual for v in v_list if v.qual) / len(v_list)) if all(
-            v.qual for v in v_list) else None
+        # Update QUAL and INFO fields
+        qualities = [v.qual for v in variant_group]
+        merged_variant.qual = (
+            sum(qualities) / group_length if None not in qualities else None
+        )
 
-        merged_variant.ref = ref
-        merged_variant.alt = alt
+        for key in merged_variant.info.keys():
+            values = [v.info.get(key) for v in variant_group]
+            merged_variant.info[key] = (
+                sum(values) / group_length if None not in values else None
+            )
+
+        # Adjust REF and ALT to remove common prefixes
+        prefix_index = 0
+        while prefix_index < len(ref_seq) - 1:
+            if all(
+                    ref_seq[prefix_index] == alt_seq[prefix_index]
+                    for alt_seq in alt_seqs if prefix_index < len(alt_seq)
+            ):
+                prefix_index += 1
+            else:
+                break
+        merged_variant.ref = ref_seq[prefix_index:]
+        merged_variant.alt = [alt_seq[prefix_index:] for alt_seq in alt_seqs]
+        merged_variant.pos += prefix_index
+
+        # Combine filters and ensure uniqueness
+        all_filters = {flt for v in variant_group for flt in v.filter}
+        if "PASS" in all_filters and len(all_filters) > 1:
+            all_filters.discard("PASS")
+        merged_variant.filter = list(all_filters)
+
+        # Update sample fields
+        for i, sample in enumerate(vcf.samples):
+            sample_data = merged_variant.samples[i]
+            group_samples = [v.samples[i] for v in variant_group]
+
+            # Handle allele frequency (AF)
+            af_values = [samp.get("AF") for samp in group_samples]
+            if None not in af_values:
+                if isinstance(af_values[0], list):
+                    sample_data["AF"] = [
+                        sum(af[j] for af in af_values) / group_length
+                        for j in range(len(alt_seqs))
+                    ]
+                else:
+                    sample_data["AF"] = sum(af_values) / group_length
+
+            # Handle allele depth (AD)
+            ad_values = [samp["AD"] for samp in group_samples]
+            sample_data["AD"] = (
+                int(sum(ad[0] for ad in ad_values) / group_length),
+                int(sum(ad[1] for ad in ad_values) / group_length),
+            )
+
+            # Handle AFDP (allele frequency depth)
+            afdp_values = [samp.get("AFDP") for samp in group_samples]
+            if None not in afdp_values:
+                sample_data["AFDP"] = int(sum(afdp_values) / group_length)
 
         return merged_variant
 
-    merged_list = []
-    to_merge = []
+    merged_variants = []
+    pending_variants = []
 
-    for variant in variants:
-        if not to_merge or should_merge(to_merge[-1], variant):
-            to_merge.append(variant)
-        else:
-            if to_merge:
-                merged_variant = merge_individuals(to_merge)
-                if merged_variant:
-                    merged_list.append(merged_variant)
-            to_merge = [variant]
+    for i, variant in enumerate(variants):
+        to_merge = [variant]
 
-    if to_merge:
-        merged_variant = merge_individuals(to_merge)
-        if merged_variant:
-            merged_list.append(merged_variant)
+        for j in range(i + 1, len(variants)):
+            if ifmerge(to_merge[-1], variants[j]):
+                to_merge.append(variants[j])
+            else:
+                break
 
-    return merged_list
+        if len(to_merge) > 1:
+            merged = _merge_variant_group(to_merge)
+            if merged:
+                pending_variants.append(merged)
 
-def process_vcf(vcf_file, ref_file, out_file):
-    """Main processing function for merging VCF variants."""
-    global vcf, reference, MAX_DISTANCE
+        while pending_variants and pending_variants[0].pos <= variant.pos:
+            merged_variants.append(pending_variants.pop(0))
 
-    vcf = VCF(vcf_file)
-    reference = Fasta(ref_file)
+        merged_variants.append(variant)
 
+    while pending_variants:
+        merged_variants.append(pending_variants.pop(0))
+
+    return merged_variants
+
+def process(vcf_file, ref_file, out_file, merge_options):
+    global vcf, reference, custom_merge
+    vcf = vcflib.VCF(vcf_file)
     if out_file:
-        output_handle = open(out_file, "w")
+        out_fh = open(out_file, "w")
     else:
-        output_handle = sys.stdout
+        out_fh = sys.stdout
+    reference = pyfaidx.Fasta(ref_file)
 
-    vcf.filters["MERGED"] = {"Description": "Merged with neighboring variants", "ID": "MERGED"}
+    if merge_options:
+        merge_lib = merge_options[0]
+        m = importlib.import_module(merge_lib)
+        custom_merge = getattr(m, merge_lib)(*merge_options[1:])
 
-    # Write headers
-    for header in vcf.headers:
-        if header.startswith("##FILTER"):
-            print('##FILTER=<ID=MERGED,Description="Merged with neighboring variants">', file=output_handle)
-        print(header, file=output_handle)
-
-    buffer = []
+    # define header
+    vcf.filters["MERGED"] = {
+        "Description": '"Merged with neightboring variants"',
+        "ID": "MERGED",
+    }
+    filter = False
+    for header_line in vcf.headers:
+        if header_line.startswith("##FILTER") and not filter:
+            print(
+                '##FILTER=<ID=MERGED,Description="Merged with neightboring variants">',
+                file=out_fh,
+            )
+            filter = True
+        print(header_line, file=out_fh)
+    last = []
     for variant in vcf:
-        if not buffer or should_merge(buffer[-1], variant):
-            buffer.append(variant)
+        if len(last) == 0:  # empty stack
+            if "PASS" not in variant.filter or "SVTYPE" in variant.info:
+                # ignore SVs
+                print(variant, file=out_fh)
+            else:
+                last.append(variant)
         else:
-            merged = merge_variants(buffer)
-            for merged_variant in merged:
-                print(merged_variant, file=output_handle)
-            buffer = [variant]
-
-    # Process remaining variants
-    merged = merge_variants(buffer)
-    for merged_variant in merged:
-        print(merged_variant, file=output_handle)
+            if distance(last, variant) <= max_distance:
+                last.append(variant)
+            else:
+                # perform merge on existing stack and reset it
+                last = merge_variants(last)
+                for v in last:
+                    print(v, file=out_fh)
+                last = []
+                if "SVTYPE" in variant.info:
+                    print(variant, file=out_fh)
+                else:
+                    last.append(variant)
+    last = merge_variants(last)
+    for v in last:
+        print(v, file=out_fh)
 
     if out_file:
-        output_handle.close()
+        out_fh.close()
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Merge phased SNVs into MNVs.")
     parser.add_argument("vcf_file", help="Input VCF file")
-    parser.add_argument("reference", help="Reference genome file")
-    parser.add_argument("--out_file", help="Output VCF file", default=None)
-    parser.add_argument("--max_distance", type=int, help="Max distance between variants for merging", default=20)
-
+    parser.add_argument("reference", help="The reference genome")
+    parser.add_argument(
+        "--out_file",
+        help="Ouptut VCF file. If not specified, it will be output to stdout.",
+    )
+    parser.add_argument(
+        "--max_distance",
+        help="Maximum distance between two variants to be merged.",
+        default=5,
+    )
+    parser.add_argument(
+        "merge",
+        nargs="*",
+        help="Optional merge options. First argument is the merge file/class name. \
+        The rest are the arguments to initialize the merge object.",
+    )
     args = parser.parse_args()
-
     if args.max_distance:
-        MAX_DISTANCE = args.max_distance
-
-    process_vcf(args.vcf_file, args.reference, args.out_file)
+        max_distance = int(args.max_distance)
+    process(args.vcf_file, args.reference, args.out_file, args.merge)
