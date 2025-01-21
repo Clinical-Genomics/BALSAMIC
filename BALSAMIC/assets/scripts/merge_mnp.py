@@ -43,19 +43,14 @@ from __future__ import print_function
 
 import vcflib
 import copy
-import argparse
+import click
 import sys
 import pyfaidx
 import importlib
 
-global vcf, reference, custom_merge
-# defines the maximum distance of two variants of the same phase to be merged
-max_distance = 5
-custom_merge = None
+global vcf, reference
 
-
-# decide whether two variants should be merged or not
-def ifmerge(v1, v2):
+def ifmerge(v1, v2, max_distance):
 
     if "SVTYPE" in v1.info or "SVTYPE" in v2.info:
         return False
@@ -73,8 +68,6 @@ def ifmerge(v1, v2):
     if (pid1 == pid2 and pgt1 == pgt2 and pid1 != "" and pgt1 != "") or (
             ps1 == ps2 and ps1 != ""
     ):
-        if custom_merge is not None:
-            return custom_merge.is_merge(v1, v2)
         return True
     return False
 
@@ -89,7 +82,7 @@ def distance(v1, v2):
     return v2.pos - v1.pos - len(v1.ref) + 1
 
 
-def merge_variants(variants):
+def merge_variants(variants, max_distance):
     def _merge_variant_group(variant_group):
         """
         Merge a group of overlapping variants into a single variant.
@@ -130,9 +123,13 @@ def merge_variants(variants):
 
         for key in merged_variant.info.keys():
             values = [v.info.get(key) for v in variant_group]
-            merged_variant.info[key] = (
-                sum(values) / group_length if None not in values else None
-            )
+            if None in values:
+                merged_variant.info[key] = None
+            else:
+                try:
+                    merged_variant.info[key] = sum(values) / group_length
+                except:
+                    merged_variant.info[key] = None
 
         # Adjust REF and ALT to remove common prefixes
         prefix_index = 0
@@ -191,7 +188,7 @@ def merge_variants(variants):
         to_merge = [variant]
 
         for j in range(i + 1, len(variants)):
-            if ifmerge(to_merge[-1], variants[j]):
+            if ifmerge(to_merge[-1], variants[j], max_distance):
                 to_merge.append(variants[j])
             else:
                 break
@@ -211,19 +208,14 @@ def merge_variants(variants):
 
     return merged_variants
 
-def process(vcf_file, ref_file, out_file, merge_options):
-    global vcf, reference, custom_merge
+def process(vcf_file, ref_file, out_file, max_distance):
+    global vcf, reference
     vcf = vcflib.VCF(vcf_file)
     if out_file:
         out_fh = open(out_file, "w")
     else:
         out_fh = sys.stdout
     reference = pyfaidx.Fasta(ref_file)
-
-    if merge_options:
-        merge_lib = merge_options[0]
-        m = importlib.import_module(merge_lib)
-        custom_merge = getattr(m, merge_lib)(*merge_options[1:])
 
     # define header
     vcf.filters["MERGED"] = {
@@ -252,7 +244,7 @@ def process(vcf_file, ref_file, out_file, merge_options):
                 last.append(variant)
             else:
                 # perform merge on existing stack and reset it
-                last = merge_variants(last)
+                last = merge_variants(last, max_distance)
                 for v in last:
                     print(v, file=out_fh)
                 last = []
@@ -260,7 +252,7 @@ def process(vcf_file, ref_file, out_file, merge_options):
                     print(variant, file=out_fh)
                 else:
                     last.append(variant)
-    last = merge_variants(last)
+    last = merge_variants(last, max_distance)
     for v in last:
         print(v, file=out_fh)
 
@@ -268,26 +260,32 @@ def process(vcf_file, ref_file, out_file, merge_options):
         out_fh.close()
 
 
+@click.command()
+@click.argument("vcf_file", type=click.Path(exists=True))
+@click.argument("reference", type=click.Path(exists=True))
+@click.option(
+    "--out_file",
+    type=click.Path(),
+    default=None,
+    help="Output VCF file. If not specified, output will be written to stdout.",
+)
+@click.option(
+    "--max_distance",
+    type=int,
+    default=5,
+    show_default=True,
+    help="Maximum distance between two variants to be merged.",
+)
+def merge_variants(vcf_file, reference, out_file, max_distance):
+    """
+    Merge phased SNVs into MNVs.
+
+    VCF_FILE: Input VCF file to process.
+    REFERENCE: The reference genome file.
+    """
+    # You can replace 'process' with your actual function implementation
+    process(vcf_file, reference, out_file, max_distance)
+
+
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Merge phased SNVs into MNVs.")
-    parser.add_argument("vcf_file", help="Input VCF file")
-    parser.add_argument("reference", help="The reference genome")
-    parser.add_argument(
-        "--out_file",
-        help="Ouptut VCF file. If not specified, it will be output to stdout.",
-    )
-    parser.add_argument(
-        "--max_distance",
-        help="Maximum distance between two variants to be merged.",
-        default=5,
-    )
-    parser.add_argument(
-        "merge",
-        nargs="*",
-        help="Optional merge options. First argument is the merge file/class name. \
-        The rest are the arguments to initialize the merge object.",
-    )
-    args = parser.parse_args()
-    if args.max_distance:
-        max_distance = int(args.max_distance)
-    process(args.vcf_file, args.reference, args.out_file, args.merge)
+    merge_variants()
