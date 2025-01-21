@@ -131,8 +131,7 @@ def merge(vs, max_distance):
         v.filter = list(all_filters)
 
         # Set constituent merged variants to filter MERGED
-        for i in range(1, len_vv):
-            vi = vv[i]
+        for vi in vv:
             vi.filter = ["MERGED"]
 
         # variants grouped by samples
