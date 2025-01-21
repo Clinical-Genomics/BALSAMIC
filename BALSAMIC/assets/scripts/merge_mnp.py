@@ -215,7 +215,7 @@ def process(vcf_file, ref_file, out_file, max_distance):
                 last.append(variant)
             else:
                 # perform merge on existing stack and reset it
-                last = merge_variants(last, max_distance)
+                last = merge(last, max_distance)
                 for v in last:
                     print(v, file=out_fh)
                 last = []
@@ -223,7 +223,7 @@ def process(vcf_file, ref_file, out_file, max_distance):
                     print(variant, file=out_fh)
                 else:
                     last.append(variant)
-    last = merge_variants(last, max_distance)
+    last = merge(last, max_distance)
     for v in last:
         print(v, file=out_fh)
 
