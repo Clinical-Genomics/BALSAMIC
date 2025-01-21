@@ -42,7 +42,7 @@ rule merge_tnscope_snvs_to_mnvs:
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
     params:
-        merge_mnvs = get_script_path("merge_mnp_backup.py"),
+        merge_mnvs = get_script_path("merge_mnp.py"),
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         case_name = config["analysis"]["case_id"],
         sentieon_exec = config_model.sentieon.sentieon_exec,
