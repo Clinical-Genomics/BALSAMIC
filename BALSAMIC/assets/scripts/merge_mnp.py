@@ -50,14 +50,14 @@ from typing import List, Union, Optional, Any
 global vcf, reference
 
 def ifmerge(
-    variant1: Any, variant2: Any, max_distance: int
+    variant1: vcflib.vcf.Variant, variant2: vcflib.vcf.Variant, max_distance: int
 ) -> bool:
     """
     Determine whether two variants should be merged based on specific conditions.
 
     Parameters:
-        variant1 (vcflib.VCF.Variant): The first variant object.
-        variant2 (vcflib.VCF.Variant): The second variant object.
+        variant1 (vcflib.vcf.Variant): The first variant object.
+        variant2 (vcflib.vcf.Variant): The second variant object.
         max_distance (int): The maximum allowable distance between two variants
                             for them to be considered for merging.
 
@@ -93,16 +93,16 @@ def ifmerge(
     return False
 
 def distance(
-    v1: Union[List[Any], Any],
-    v2: Any
+    v1: Union[List[vcflib.vcf.Variant], vcflib.vcf.Variant],
+    v2: vcflib.vcf.Variant
 ) -> int:
     """
     Calculate the distance between two VCF variants. If `v1` is a list of variants,
     the function will calculate the distance to the last variant in the list.
 
     Parameters:
-        v1 (Union[List[vcflib.VCF.Variant], vcflib.VCF.Variant]): The first variant(s).
-        v2 (vcflib.VCF.Variant): The second variant.
+        v1 (Union[List[vcflib.vcf.Variant], vcflib.VCF.Variant]): The first variant(s).
+        v2 (vcflib.vcf.Variant): The second variant.
 
     Returns:
         int: The calculated distance between the two variants. Returns 1000 if variants
