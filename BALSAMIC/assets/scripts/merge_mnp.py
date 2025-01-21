@@ -46,11 +46,11 @@ import copy
 import click
 import sys
 import pyfaidx
-from typing import List, Union, Optional
+from typing import List, Union, Optional, Any
 global vcf, reference
 
 def ifmerge(
-    variant1: vcflib.VCF.Variant, variant2: vcflib.VCF.Variant, max_distance: int
+    variant1: Any, variant2: Any, max_distance: int
 ) -> bool:
     """
     Determine whether two variants should be merged based on specific conditions.
@@ -93,7 +93,7 @@ def ifmerge(
     return False
 
 def distance(
-    v1: Union[List[vcflib.VCF.Variant], vcflib.VCF.Variant],
+    v1: Union[List[Any], Any],
     v2: vcflib.VCF.Variant
 ) -> int:
     """
@@ -269,6 +269,7 @@ def process(
     # Process variants and merge them if they are within max_distance
     variant_stack = []
     for variant in vcf:
+        print(type(variant))
         if not variant_stack:
             # If the stack is empty, add the variant or print if it's an SV
             if "SVTYPE" in variant.info:
