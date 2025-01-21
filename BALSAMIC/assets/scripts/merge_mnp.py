@@ -121,26 +121,62 @@ def distance(
     return v2.pos - v1.pos - len(v1.ref) + 1
 
 
-def merge(vs, max_distance):
-    def _merge(vv):
+def merge(variant_stack: List[vcflib.vcf.Variant], max_distance: int) -> List[vcflib.vcf.Variant]:
+    """
+    Merges a stack of overlapping variants into a single variant.
+
+    This function takes a stack of variants that are close enough (within a specified max_distance)
+    and merges them into one variant, combining their reference and alternate alleles, quality scores,
+    and sample information.
+
+    Parameters:
+        variant_stack (List[vcflib.vcf.Variant]): A list of variants to be merged.
+        max_distance (int): The maximum distance between variants for them to be considered for merging.
+
+    Returns:
+        List[vcflib.vcf.Variant]: A list of merged variants.
+    """
+
+    def _merge(vv: List[vcflib.vcf.Variant]) -> vcflib.vcf.Variant:
+        """
+        Merges a list of variants into a single variant by combining their properties.
+
+        This function merges reference, alternate alleles, quality, INFO fields, and sample information
+        of overlapping variants in the list.
+
+        Parameters:
+            vv (List[vcflib.vcf.Variant]): The list of variants to be merged.
+
+        Returns:
+            vcflib.vcf.Variant: The merged variant.
+        """
         len_vv = len(vv)
+
+        # Check if variants overlap in positions, return None if not
         for i in range(len_vv - 1):
             if vv[i + 1].pos - vv[i].pos < len(vv[i].ref):
                 return None
+
+        # Initialize the merged variant with the first variant in the list
         v = copy.deepcopy(vv[0])
-        v.id = "."
+        v.id = "."  # Clear the ID for merged variant
         ref = vv[0].ref
         alt = vv[0].alt
+
+        # Combine REF and ALT sequences for all variants
         for i in range(1, len_vv):
             vi = vv[i]
             ref_gap = ""
             if vi.pos - (v.pos + len(ref)) > 0:
-                ref_gap = reference[v.chrom][v.pos + len(ref) : vi.pos].seq.upper()
+                ref_gap = reference[v.chrom][v.pos + len(ref): vi.pos].seq.upper()
             ref = ref + ref_gap + vi.ref
             alt = [alt[j] + ref_gap + vi.alt[j] for j in range(len(alt))]
 
+        # Calculate the merged quality score
         qual_list = [vi.qual for vi in vv]
         v.qual = sum(qual_list) / len_vv if None not in qual_list else None
+
+        # Merge INFO fields by averaging the values
         for k in v.info.keys():
             vk = [vi.info.get(k) for vi in vv]
             if None in vk:
@@ -150,7 +186,8 @@ def merge(vs, max_distance):
                     v.info[k] = sum(vk) / len_vv
                 except:
                     v.info[k] = None
-        # remove common heading letters
+
+        # Remove common leading bases between REF and ALT alleles
         i = 0
         while i < len(ref) - 1:
             common = False not in [
@@ -161,7 +198,6 @@ def merge(vs, max_distance):
             i += 1
         v.ref = ref[i:]
         v.alt = [alti[i:] for alti in alt]
-        #        print(v.alt)
         v.pos += i
 
         # Combine filters and ensure uniqueness
@@ -170,17 +206,17 @@ def merge(vs, max_distance):
             all_filters.discard("PASS")
         v.filter = list(all_filters)
 
-        # Set constituent merged variants to filter MERGED
+        # Mark all constituent variants as "MERGED"
         for vi in vv:
             vi.filter = ["MERGED"]
 
-        # variants grouped by samples
+        # Merge sample information (AF, AD, AFDP)
         for i in range(len(vcf.samples)):
             t = v.samples[i]
             vv_samples = [vs.samples[i] for vs in vv]
             if None in [vi.get("AF") for vi in vv_samples]:
                 pass
-            elif type(vv_samples[0]["AF"]) == list:
+            elif isinstance(vv_samples[0]["AF"], list):
                 t["AF"] = [
                     sum([vsi["AF"][j] for vsi in vv_samples]) / len_vv
                     for j in range(len(alt))
@@ -195,32 +231,44 @@ def merge(vs, max_distance):
             afdp = [vi.get("AFDP") for vi in vv_samples]
             if None not in afdp:
                 t["AFDP"] = int(sum(afdp) / len_vv)
+
+        # Format the final variant
         _ = vcf.format(v)
         for vi in vv:
             _ = vcf.format(vi)
+
         return v
 
-    vlist = []
-    to_push = []
-    for i in range(len(vs)):
-        vi = vs[i]
+    vlist = []  # List to store the final merged variants
+    to_push = []  # Temporary list to store variants being merged
+
+    # Iterate over the variant stack and merge overlapping variants
+    for i in range(len(variant_stack)):
+        vi: vcflib.vcf.Variant = variant_stack[i]
         to_merge = [vi]
-        for j in range(i + 1, len(vs)):
-            vj = vs[j]
+        for j in range(i + 1, len(variant_stack)):
+            vj: vcflib.vcf.Variant = variant_stack[j]
             if ifmerge(to_merge[-1], vj, max_distance):
                 to_merge.append(vj)
+
+        # If there are variants to merge, merge them
         if len(to_merge) > 1:
             merged = _merge(to_merge)
             if merged:
                 to_push.append(merged)
+
+        # Add merged variants to the final list if they are in order
         while len(to_push):
             if to_push[0].pos <= vi.pos:
                 vlist.append(to_push.pop(0))
             else:
                 break
         vlist.append(vi)
+
+    # Append any remaining merged variants
     while len(to_push):
         vlist.append(to_push.pop(0))
+
     return vlist
 
 
@@ -266,7 +314,6 @@ def process(
     # Process variants and merge them if they are within max_distance
     variant_stack = []
     for variant in vcf:
-        print(type(variant))
         if not variant_stack:
             # If the stack is empty, add the variant or print if it's an SV
             if "SVTYPE" in variant.info:
