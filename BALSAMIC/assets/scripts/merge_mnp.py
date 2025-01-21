@@ -121,7 +121,9 @@ def distance(
     return v2.pos - v1.pos - len(v1.ref) + 1
 
 
-def merge(variant_stack: List[vcflib.vcf.Variant], max_distance: int) -> List[vcflib.vcf.Variant]:
+def merge(
+    variant_stack: List[vcflib.vcf.Variant], max_distance: int
+) -> List[vcflib.vcf.Variant]:
     """
     Merges a stack of overlapping variants into a single variant.
 
@@ -168,7 +170,7 @@ def merge(variant_stack: List[vcflib.vcf.Variant], max_distance: int) -> List[vc
             vi = vv[i]
             ref_gap = ""
             if vi.pos - (v.pos + len(ref)) > 0:
-                ref_gap = reference[v.chrom][v.pos + len(ref): vi.pos].seq.upper()
+                ref_gap = reference[v.chrom][v.pos + len(ref) : vi.pos].seq.upper()
             ref = ref + ref_gap + vi.ref
             alt = [alt[j] + ref_gap + vi.alt[j] for j in range(len(alt))]
 
