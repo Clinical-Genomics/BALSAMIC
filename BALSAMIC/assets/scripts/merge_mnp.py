@@ -105,8 +105,8 @@ def merge_variants(variants, max_distance):
             ref_gap = ""
             if current_variant.pos > merged_variant.pos + len(ref_seq):
                 ref_gap = reference[merged_variant.chrom][
-                          merged_variant.pos + len(ref_seq):current_variant.pos
-                          ].seq.upper()
+                    merged_variant.pos + len(ref_seq):current_variant.pos
+                ].seq.upper()
 
             ref_seq += ref_gap + current_variant.ref
             alt_seqs = [
@@ -134,8 +134,8 @@ def merge_variants(variants, max_distance):
         prefix_index = 0
         while prefix_index < len(ref_seq) - 1:
             if all(
-                    ref_seq[prefix_index] == alt_seq[prefix_index]
-                    for alt_seq in alt_seqs if prefix_index < len(alt_seq)
+                ref_seq[prefix_index] == alt_seq[prefix_index]
+                for alt_seq in alt_seqs if prefix_index < len(alt_seq)
             ):
                 prefix_index += 1
             else:
@@ -150,7 +150,7 @@ def merge_variants(variants, max_distance):
             all_filters.discard("PASS")
         merged_variant.filter = list(all_filters)
 
-        # Set merged variants to filter MERGED
+        # Update constituent variants to "MERGED"
         for v in variant_group:
             v.filter = ["MERGED"]
 
