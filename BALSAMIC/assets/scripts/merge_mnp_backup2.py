@@ -81,103 +81,135 @@ def distance(v1, v2):
     return v2.pos - v1.pos - len(v1.ref) + 1
 
 
-def merge(vs):
-    def _merge(vv):
-        len_vv = len(vv)
-        for i in range(len_vv - 1):
-            if vv[i + 1].pos - vv[i].pos < len(vv[i].ref):
-                return None
-        v = copy.deepcopy(vv[0])
-        v.id = "."
-        ref = vv[0].ref
-        alt = vv[0].alt
-        for i in range(1, len_vv):
-            vi = vv[i]
-            ref_gap = ""
-            if vi.pos - (v.pos + len(ref)) > 0:
-                ref_gap = reference[v.chrom][v.pos + len(ref): vi.pos].seq.upper()
-            ref = ref + ref_gap + vi.ref
-            alt = [alt[j] + ref_gap + vi.alt[j] for j in range(len(alt))]
+def merge_variants(variants, max_distance):
+    def _merge_variant_group(variant_group):
+        """
+        Merge a group of overlapping variants into a single variant.
+        """
+        group_length = len(variant_group)
 
-        qual_list = [vi.qual for vi in vv]
-        v.qual = sum(qual_list) / len_vv if None not in qual_list else None
-        for k in v.info.keys():
-            vk = [vi.info.get(k) for vi in vv]
-            if None in vk:
-                v.info[k] = None
+        # Ensure no overlapping variants within the group
+        for i in range(group_length - 1):
+            if variant_group[i + 1].pos - variant_group[i].pos < len(variant_group[i].ref):
+                return None
+
+        # Initialize the merged variant
+        merged_variant = copy.deepcopy(variant_group[0])
+        merged_variant.id = "."
+        ref_seq = variant_group[0].ref
+        alt_seqs = variant_group[0].alt
+
+        # Combine REF and ALT sequences
+        for i in range(1, group_length):
+            current_variant = variant_group[i]
+            ref_gap = ""
+            if current_variant.pos > merged_variant.pos + len(ref_seq):
+                ref_gap = reference[merged_variant.chrom][
+                          merged_variant.pos + len(ref_seq):current_variant.pos
+                          ].seq.upper()
+
+            ref_seq += ref_gap + current_variant.ref
+            alt_seqs = [
+                alt_seq + ref_gap + current_variant.alt[j]
+                for j, alt_seq in enumerate(alt_seqs)
+            ]
+
+        # Update QUAL and INFO fields
+        qualities = [v.qual for v in variant_group]
+        merged_variant.qual = (
+            sum(qualities) / group_length if None not in qualities else None
+        )
+
+        for key in merged_variant.info.keys():
+            values = [v.info.get(key) for v in variant_group]
+            if None in values:
+                merged_variant.info[key] = None
             else:
                 try:
-                    v.info[k] = sum(vk) / len_vv
+                    merged_variant.info[key] = sum(values) / group_length
                 except:
-                    v.info[k] = None
-        # remove common heading letters
-        i = 0
-        while i < len(ref) - 1:
-            common = False not in [
-                ref[i] == alti[i] if i < len(alti) - 1 else False for alti in alt
-            ]
-            if not common:
+                    merged_variant.info[key] = None
+
+        # Adjust REF and ALT to remove common prefixes
+        prefix_index = 0
+        while prefix_index < len(ref_seq) - 1:
+            if all(
+                    ref_seq[prefix_index] == alt_seq[prefix_index]
+                    for alt_seq in alt_seqs if prefix_index < len(alt_seq)
+            ):
+                prefix_index += 1
+            else:
                 break
-            i += 1
-        v.ref = ref[i:]
-        v.alt = [alti[i:] for alti in alt]
-        #        print(v.alt)
-        v.pos += i
+        merged_variant.ref = ref_seq[prefix_index:]
+        merged_variant.alt = [alt_seq[prefix_index:] for alt_seq in alt_seqs]
+        merged_variant.pos += prefix_index
 
         # Combine filters and ensure uniqueness
-        all_filters = {flt for vi in vv for flt in vi.filter}
+        all_filters = {flt for v in variant_group for flt in v.filter}
         if "PASS" in all_filters and len(all_filters) > 1:
             all_filters.discard("PASS")
-        v.filter = list(all_filters)
+        merged_variant.filter = list(all_filters)
 
-        # variants grouped by samples
-        for i in range(len(vcf.samples)):
-            t = v.samples[i]
-            vv_samples = [vs.samples[i] for vs in vv]
-            if None in [vi.get("AF") for vi in vv_samples]:
-                pass
-            elif type(vv_samples[0]["AF"]) == list:
-                t["AF"] = [
-                    sum([vsi["AF"][j] for vsi in vv_samples]) / len_vv
-                    for j in range(len(alt))
-                ]
-            else:
-                t["AF"] = sum([vsi["AF"] for vsi in vv_samples]) / len_vv
-            ads = [(vi["AD"][0], vi["AD"][1]) for vi in vv_samples]
-            t["AD"] = (
-                int(sum([vi["AD"][0] for vi in vv_samples]) / len_vv),
-                int(sum([vi["AD"][1] for vi in vv_samples]) / len_vv),
+        # Explicitly update the filter of the original variants
+        for original_variant in variant_group:
+            original_variant.filter = ["MERGED"]
+
+        # Update sample fields
+        for i, sample in enumerate(vcf.samples):
+            sample_data = merged_variant.samples[i]
+            group_samples = [v.samples[i] for v in variant_group]
+
+            # Handle allele frequency (AF)
+            af_values = [samp.get("AF") for samp in group_samples]
+            if None not in af_values:
+                if isinstance(af_values[0], list):
+                    sample_data["AF"] = [
+                        sum(af[j] for af in af_values) / group_length
+                        for j in range(len(alt_seqs))
+                    ]
+                else:
+                    sample_data["AF"] = sum(af_values) / group_length
+
+            # Handle allele depth (AD)
+            ad_values = [samp["AD"] for samp in group_samples]
+            sample_data["AD"] = (
+                int(sum(ad[0] for ad in ad_values) / group_length),
+                int(sum(ad[1] for ad in ad_values) / group_length),
             )
-            afdp = [vi.get("AFDP") for vi in vv_samples]
-            if None not in afdp:
-                t["AFDP"] = int(sum(afdp) / len_vv)
-        _ = vcf.format(v)
-        for vi in vv:
-            _ = vcf.format(vi)
-        return v
 
-    vlist = []
-    to_push = []
-    for i in range(len(vs)):
-        vi = vs[i]
-        to_merge = [vi]
-        for j in range(i + 1, len(vs)):
-            vj = vs[j]
-            if ifmerge(to_merge[-1], vj):
-                to_merge.append(vj)
-        if len(to_merge) > 1:
-            merged = _merge(to_merge)
-            if merged:
-                to_push.append(merged)
-        while len(to_push):
-            if to_push[0].pos <= vi.pos:
-                vlist.append(to_push.pop(0))
+            # Handle AFDP (allele frequency depth)
+            afdp_values = [samp.get("AFDP") for samp in group_samples]
+            if None not in afdp_values:
+                sample_data["AFDP"] = int(sum(afdp_values) / group_length)
+
+        return merged_variant
+
+    merged_variants = []
+    pending_variants = []
+
+    for i, variant in enumerate(variants):
+        to_merge = [variant]
+
+        for j in range(i + 1, len(variants)):
+            if ifmerge(to_merge[-1], variants[j], max_distance):
+                to_merge.append(variants[j])
             else:
                 break
-        vlist.append(vi)
-    while len(to_push):
-        vlist.append(to_push.pop(0))
-    return vlist
+
+        if len(to_merge) > 1:
+            merged = _merge_variant_group(to_merge)
+            if merged:
+                pending_variants.append(merged)
+
+        while pending_variants and pending_variants[0].pos <= variant.pos:
+            merged_variants.append(pending_variants.pop(0))
+
+        merged_variants.append(variant)
+
+    while pending_variants:
+        merged_variants.append(pending_variants.pop(0))
+
+    return merged_variants
 
 def process(vcf_file, ref_file, out_file, max_distance):
     global vcf, reference
