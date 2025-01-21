@@ -46,38 +46,79 @@ import copy
 import click
 import sys
 import pyfaidx
-
+from typing import List, Union, Optional
 global vcf, reference
 
-def ifmerge(v1, v2, max_distance):
+def ifmerge(
+    variant1: vcflib.VCF.Variant, variant2: vcflib.VCF.Variant, max_distance: int
+) -> bool:
+    """
+    Determine whether two variants should be merged based on specific conditions.
 
-    if "SVTYPE" in v1.info or "SVTYPE" in v2.info:
+    Parameters:
+        variant1 (vcflib.VCF.Variant): The first variant object.
+        variant2 (vcflib.VCF.Variant): The second variant object.
+        max_distance (int): The maximum allowable distance between two variants
+                            for them to be considered for merging.
+
+    Returns:
+        bool: True if the variants should be merged, False otherwise.
+    """
+    # Check if either variant contains structural variation information
+    if "SVTYPE" in variant1.info or "SVTYPE" in variant2.info:
         return False
-    # coordinate off by 1
-    if v1.chrom != v2.chrom or v2.pos - v1.pos > max_distance + len(v1.ref) - 1:
+
+    # Ensure variants are on the same chromosome and within the maximum distance
+    if (
+        variant1.chrom != variant2.chrom
+        or variant2.pos - variant1.pos > max_distance + len(variant1.ref) - 1
+    ):
         return False
-    # share the same PID and PGT
-    pid1 = v1.samples[0].get("PID", "")
-    pid2 = v2.samples[0].get("PID", "")
-    pgt1 = v1.samples[0].get("PGT", "")
-    pgt2 = v2.samples[0].get("PGT", "")
-    # or the same PS to support use case of VCF coming from whatshap
-    ps1 = v1.samples[0].get("PS", "")
-    ps2 = v2.samples[0].get("PS", "")
-    if (pid1 == pid2 and pgt1 == pgt2 and pid1 != "" and pgt1 != "") or (
-            ps1 == ps2 and ps1 != ""
+
+    # Extract phasing-related information from samples
+    pid1 = variant1.samples[0].get("PID", "")
+    pid2 = variant2.samples[0].get("PID", "")
+    pgt1 = variant1.samples[0].get("PGT", "")
+    pgt2 = variant2.samples[0].get("PGT", "")
+    ps1 = variant1.samples[0].get("PS", "")
+    ps2 = variant2.samples[0].get("PS", "")
+
+    # Check if variants share the same PID and PGT, or the same PS
+    if (
+        (pid1 == pid2 and pgt1 == pgt2 and pid1 and pgt1)
+        or (ps1 == ps2 and ps1)
     ):
         return True
+
     return False
 
+def distance(
+    v1: Union[List[vcflib.VCF.Variant], vcflib.VCF.Variant],
+    v2: vcflib.VCF.Variant
+) -> int:
+    """
+    Calculate the distance between two VCF variants. If `v1` is a list of variants,
+    the function will calculate the distance to the last variant in the list.
 
-def distance(v1, v2):
-    if type(v1) == list:
-        for v in v1[::-1]:
+    Parameters:
+        v1 (Union[List[vcflib.VCF.Variant], vcflib.VCF.Variant]): The first variant(s).
+        v2 (vcflib.VCF.Variant): The second variant.
+
+    Returns:
+        int: The calculated distance between the two variants. Returns 1000 if variants
+             are on different chromosomes or if the distance cannot be determined.
+    """
+    if isinstance(v1, list):
+        # If v1 is a list of variants, return the distance to the last variant in the list
+        for v in v1[::-1]:  # Reverse list iteration
             return v2.pos - v.pos - len(v.ref) + 1
         return 1000
+
     if v1.chrom != v2.chrom:
+        # If variants are on different chromosomes, return a large distance
         return 1000
+
+    # Calculate distance between two variants on the same chromosome
     return v2.pos - v1.pos - len(v1.ref) + 1
 
 
@@ -183,54 +224,79 @@ def merge(vs, max_distance):
         vlist.append(to_push.pop(0))
     return vlist
 
-def process(vcf_file, ref_file, out_file, max_distance):
+def process(
+    vcf_file: str,
+    ref_file: str,
+    out_file: Optional[str],
+    max_distance: int
+) -> None:
+    """
+    Processes a VCF file, merges neighboring variants into MNVs, and writes the result to an output file or stdout.
+
+    Parameters:
+        vcf_file (str): Path to the input VCF file to process.
+        ref_file (str): Path to the reference genome file.
+        out_file (Optional[str]): Path to the output VCF file. If not specified, the result is printed to stdout.
+        max_distance (int): Maximum distance between two variants to be merged.
+
+    This function reads the input VCF file, processes each variant, and merges variants that are close
+    enough to each other based on the `max_distance` parameter. The result is written to the specified
+    output file or to stdout if no output file is provided.
+    """
     global vcf, reference
     vcf = vcflib.VCF(vcf_file)
-    if out_file:
-        out_fh = open(out_file, "w")
-    else:
-        out_fh = sys.stdout
     reference = pyfaidx.Fasta(ref_file)
 
-    # define header
+    # Open output file (or use stdout if no file is specified)
+    out_fh = open(out_file, "w") if out_file else sys.stdout
+
+    # Define and add the MERGED filter to the VCF header if not already present
     vcf.filters["MERGED"] = {
         "Description": '"Merged with neighboring variants"',
         "ID": "MERGED",
     }
-    filter = False
+
+    filter_added = False
     for header_line in vcf.headers:
-        if header_line.startswith("##FILTER") and not filter:
+        if header_line.startswith("##FILTER") and not filter_added:
             print(
                 '##FILTER=<ID=MERGED,Description="Merged with neighboring variants">',
                 file=out_fh,
             )
-            filter = True
+            filter_added = True
         print(header_line, file=out_fh)
-    last = []
+
+    # Process variants and merge them if they are within max_distance
+    variant_stack = []
     for variant in vcf:
-        if len(last) == 0:  # empty stack
+        if not variant_stack:
+            # If the stack is empty, add the variant or print if it's an SV
             if "SVTYPE" in variant.info:
-                # ignore SVs
                 print(variant, file=out_fh)
             else:
-                last.append(variant)
+                variant_stack.append(variant)
         else:
-            if distance(last, variant) <= max_distance:
-                last.append(variant)
+            # Check if the current variant is close enough to merge
+            if distance(variant_stack, variant) <= max_distance:
+                variant_stack.append(variant)
             else:
-                # perform merge on existing stack and reset it
-                last = merge(last, max_distance)
-                for v in last:
-                    print(v, file=out_fh)
-                last = []
+                # Merge variants in the stack and reset it
+                merged_variants = merge(variant_stack, max_distance)
+                for merged_variant in merged_variants:
+                    print(merged_variant, file=out_fh)
+                variant_stack = []
+                # Print the current variant or add it to the stack
                 if "SVTYPE" in variant.info:
                     print(variant, file=out_fh)
                 else:
-                    last.append(variant)
-    last = merge(last, max_distance)
-    for v in last:
-        print(v, file=out_fh)
+                    variant_stack.append(variant)
 
+    # Process any remaining variants in the stack after the loop
+    merged_variants = merge(variant_stack, max_distance)
+    for merged_variant in merged_variants:
+        print(merged_variant, file=out_fh)
+
+    # Close the output file if it was specified
     if out_file:
         out_fh.close()
 
@@ -251,14 +317,25 @@ def process(vcf_file, ref_file, out_file, max_distance):
     show_default=True,
     help="Maximum distance between two variants to be merged.",
 )
-def main(vcf_file, reference, out_file, max_distance):
+def main(
+    vcf_file: str,
+    reference: str,
+    out_file: Optional[str],
+    max_distance: int
+) -> None:
     """
-    Merge phased SNVs into MNVs.
+    Merge phased SNVs into MNVs and output the result to a VCF file or stdout.
 
-    VCF_FILE: Input VCF file to process.
-    REFERENCE: The reference genome file.
+    Parameters:
+        vcf_file (str): Path to the input VCF file to process.
+        reference (str): Path to the reference genome file.
+        out_file (Optional[str]): Path to the output VCF file. If not specified, the result will be printed to stdout.
+        max_distance (int): Maximum allowed distance between two variants to be merged.
+
+    This command processes the input VCF file and merges phased single nucleotide variants (SNVs)
+    into multi-nucleotide variants (MNVs) if they meet the criteria based on `max_distance`.
     """
-    # You can replace 'process' with your actual function implementation
+    # Call the process function to perform the actual merging
     process(vcf_file, reference, out_file, max_distance)
 
 
