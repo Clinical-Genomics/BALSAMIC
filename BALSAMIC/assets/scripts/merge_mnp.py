@@ -94,7 +94,7 @@ def ifmerge(
 
 def distance(
     v1: Union[List[Any], Any],
-    v2: vcflib.VCF.Variant
+    v2: Any
 ) -> int:
     """
     Calculate the distance between two VCF variants. If `v1` is a list of variants,
