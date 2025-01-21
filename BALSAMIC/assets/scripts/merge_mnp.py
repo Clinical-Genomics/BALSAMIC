@@ -82,7 +82,7 @@ def distance(v1, v2):
 
 
 def merge(vs, max_distance):
-    def _merge(vv, max_distance):
+    def _merge(vv):
         len_vv = len(vv)
         for i in range(len_vv - 1):
             if vv[i + 1].pos - vv[i].pos < len(vv[i].ref):
