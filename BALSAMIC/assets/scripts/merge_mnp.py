@@ -163,7 +163,7 @@ def merge(vs):
         to_merge = [vi]
         for j in range(i + 1, len(vs)):
             vj = vs[j]
-            if ifmerge(to_merge[-1], vj):
+            if ifmerge(to_merge[-1], vj, max_distance):
                 to_merge.append(vj)
         if len(to_merge) > 1:
             merged = _merge(to_merge)
@@ -215,7 +215,7 @@ def process(vcf_file, ref_file, out_file, max_distance):
                 last.append(variant)
             else:
                 # perform merge on existing stack and reset it
-                last = merge(last)
+                last = merge(last, max_distance)
                 for v in last:
                     print(v, file=out_fh)
                 last = []
@@ -223,7 +223,7 @@ def process(vcf_file, ref_file, out_file, max_distance):
                     print(variant, file=out_fh)
                 else:
                     last.append(variant)
-    last = merge(last)
+    last = merge(last, max_distance)
     for v in last:
         print(v, file=out_fh)
 
