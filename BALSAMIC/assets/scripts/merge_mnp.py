@@ -186,7 +186,7 @@ def merge(
             else:
                 try:
                     v.info[k] = sum(vk) / len_vv
-                except:
+                except (TypeError, ZeroDivisionError):
                     v.info[k] = None
 
         # Remove common leading bases between REF and ALT alleles
@@ -216,23 +216,28 @@ def merge(
         for i in range(len(vcf.samples)):
             t = v.samples[i]
             vv_samples = [vs.samples[i] for vs in vv]
-            if None in [vi.get("AF") for vi in vv_samples]:
-                pass
-            elif isinstance(vv_samples[0]["AF"], list):
-                t["AF"] = [
-                    sum([vsi["AF"][j] for vsi in vv_samples]) / len_vv
-                    for j in range(len(alt))
-                ]
-            else:
-                t["AF"] = sum([vsi["AF"] for vsi in vv_samples]) / len_vv
-            ads = [(vi["AD"][0], vi["AD"][1]) for vi in vv_samples]
+            af_values = [vi.get("AF") for vi in vv_samples]
+
+            # Handle AF (allele frequency)
+            if None not in af_values:
+                if isinstance(vv_samples[0]["AF"], list):
+                    t["AF"] = [
+                        sum([vsi["AF"][j] for vsi in vv_samples]) / len_vv
+                        for j in range(len(alt))
+                    ]
+                else:
+                    t["AF"] = sum(af_values) / len_vv
+
+            # Handle AD (allele depths)
             t["AD"] = (
                 int(sum([vi["AD"][0] for vi in vv_samples]) / len_vv),
                 int(sum([vi["AD"][1] for vi in vv_samples]) / len_vv),
             )
-            afdp = [vi.get("AFDP") for vi in vv_samples]
-            if None not in afdp:
-                t["AFDP"] = int(sum(afdp) / len_vv)
+
+            # Handle AFDP (allele frequency depth)
+            afdp_values = [vi.get("AFDP") for vi in vv_samples]
+            if None not in afdp_values:
+                t["AFDP"] = int(sum(afdp_values) / len_vv)
 
         # Format the final variant
         _ = vcf.format(v)
