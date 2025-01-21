@@ -152,7 +152,8 @@ def merge_variants(variants, max_distance):
 
         # Update constituent variants to "MERGED"
         for v in variant_group:
-            v.filter = ["MERGED"]
+            idx = variants.index(v)
+            variants[idx].filter = ["MERGED"]
 
         # Update sample fields
         for i, sample in enumerate(vcf.samples):
@@ -222,14 +223,14 @@ def process(vcf_file, ref_file, out_file, max_distance):
 
     # define header
     vcf.filters["MERGED"] = {
-        "Description": '"Merged with neightboring variants"',
+        "Description": '"Merged with neighboring variants"',
         "ID": "MERGED",
     }
     filter = False
     for header_line in vcf.headers:
         if header_line.startswith("##FILTER") and not filter:
             print(
-                '##FILTER=<ID=MERGED,Description="Merged with neightboring variants">',
+                '##FILTER=<ID=MERGED,Description="Merged with neighboring variants">',
                 file=out_fh,
             )
             filter = True
@@ -237,7 +238,7 @@ def process(vcf_file, ref_file, out_file, max_distance):
     last = []
     for variant in vcf:
         if len(last) == 0:  # empty stack
-            if "PASS" not in variant.filter or "SVTYPE" in variant.info:
+            if "SVTYPE" in variant.info:
                 # ignore SVs
                 print(variant, file=out_fh)
             else:
