@@ -7,7 +7,8 @@ Added:
 
 Changed:
 ^^^^^^^^
-* merge SNVs into MNVs in TNscope TGA
+* merge SNVs into MNVs in TNscope TGA https://github.com/Clinical-Genomics/BALSAMIC/pull/1524
+* change raw delivery SNV file for TGA to before any post-processing https://github.com/Clinical-Genomics/BALSAMIC/pull/1524
 
 Removed:
 ^^^^^^^^
