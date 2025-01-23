@@ -7,88 +7,63 @@ from typing import List, Optional, Dict, Any, Tuple
 from BALSAMIC.utils.io import write_json
 
 
-def read_cov(filepath: str) -> List[List[str]]:
-    """Read a coverage file and return its rows as a list of lists.
+def process_coverage_data(filepath: str) -> Optional[pd.DataFrame]:
+    """
+    Process coverage data to keep only information about sex chromosomes and returns a DataFrame.
 
     Args:
-        filepath (str): Path to the coverage file.
+        filepath (str): Path to tsv coverage file
 
     Returns:
-        List[List[str]]: Parsed rows of the coverage file.
+        Optional[pd.DataFrame]: Processed DataFrame or None if insufficient data.
     """
-    with open(filepath, "r") as rf:
-        return [line.split("\t") for line in rf]
 
+    colnames: List[str] = ["chromosome", "start", "end", "gene", "depth", "log2"]
+    data: pd.DataFrame = pd.read_csv(filepath, sep="\t", header=None, names=colnames)
+    filtered_data = data[data["chromosome"].isin(["X", "Y"])].copy()
 
-def process_data(data_rows: List[List[str]]) -> Optional[pd.DataFrame]:
-    """Process coverage data rows to filter and structure into a DataFrame.
-
-    Args:
-        data_rows (List[List[str]]): Rows of coverage data.
-
-    Returns:
-        Optional[pd.DataFrame]: DataFrame with processed data or None if insufficient data.
-    """
-    filtered_data = [row for row in data_rows if row[0] in {"Y", "X"}]
-    if len(filtered_data) < 10:
+    if filtered_data.shape[0] < 10:
         warnings.warn(
             "Cannot compute sex due to insufficient data, ignoring", UserWarning
         )
         return None
 
-    records: dict = {
-        f"{row[0]}_{row[1]}_{row[2]}": {"chrom": row[0], "depth": row[4]}
-        for row in filtered_data
-    }
+    filtered_data["key"] = (
+        filtered_data["chromosome"]
+        + "_"
+        + filtered_data["start"].astype(str)
+        + "_"
+        + filtered_data["end"].astype(str)
+    )
 
-    df = pd.DataFrame.from_dict(records, orient="index")
-    df["depth"] = pd.to_numeric(df["depth"], errors="coerce")
-    return df
+    filtered_data = filtered_data[["key", "chromosome", "depth"]].set_index("key")
+    filtered_data["depth"] = pd.to_numeric(filtered_data["depth"], errors="coerce")
+    return filtered_data
 
 
-def get_stats(df: pd.DataFrame) -> pd.DataFrame:
+def get_stats(df: pd.DataFrame) -> dict[str, float]:
     """Compute statistical summaries of depth grouped by chromosome.
 
     Args:
         df (pd.DataFrame): DataFrame containing coverage data.
 
     Returns:
-        pd.DataFrame: DataFrame with statistics such as mean, median, min, max, etc.
+        Dict[str, float]: Dictionary containing extracted statistics such as mean, median, min, max, etc.
     """
-    return (
-        df.groupby("chrom")["depth"]
+    stats = (
+        df.groupby("chromosome")["depth"]
         .agg(
             mean="mean", median="median", min="min", max="max", std="std", count="count"
         )
         .reset_index()
     )
-
-
-def extract_stats(stats: pd.DataFrame) -> Dict[str, float]:
-    """Extract statistics from a DataFrame into a dictionary.
-
-    Args:
-        stats (pd.DataFrame): DataFrame with statistical summaries.
-
-    Returns:
-        Dict[str, float]: Dictionary containing extracted statistics.
-    """
-
-    stats: dict = stats.T.to_dict()
-    sample_dict = {}
-    sample_dict["X_mean"] = stats[0]["mean"]
-    sample_dict["X_median"] = stats[0]["median"]
-    sample_dict["X_min"] = stats[0]["min"]
-    sample_dict["X_max"] = stats[0]["min"]
-    sample_dict["X_std"] = stats[0]["std"]
-    sample_dict["X_count"] = stats[0]["count"]
-    sample_dict["Y_mean"] = stats[1]["mean"]
-    sample_dict["Y_median"] = stats[1]["median"]
-    sample_dict["Y_min"] = stats[1]["min"]
-    sample_dict["Y_max"] = stats[1]["max"]
-    sample_dict["Y_std"] = stats[1]["std"]
-    sample_dict["Y_count"] = stats[1]["count"]
-    return sample_dict
+    # Create the stats dictionary
+    stats_dict = {}
+    for index, row in stats.iterrows():
+        chromosome = row["chromosome"]
+        for metric in ["mean", "median", "min", "max", "std", "count"]:
+            stats_dict[f"{chromosome}_{metric}"] = row[metric]
+    return stats_dict
 
 
 def retrieve_file_info(filepath: str) -> (str, str):
@@ -108,26 +83,17 @@ def get_predicted_sex(y_x_frac: float) -> Dict[str, str]:
     Returns:
         Dict[str, str]: Predicted sex and confidence level.
     """
-    thresholds = {
-        "male_high": 0.9,
-        "male_medium": 0.7,
-        "male_low": 0.2,
-        "female_high": 0.00001,
-        "female_medium": 0.05,
-        "female_low": 0.15,
-    }
-
-    if y_x_frac > thresholds["male_low"]:
-        if y_x_frac >= thresholds["male_high"]:
+    if y_x_frac > 0.2:
+        if y_x_frac >= 0.9:
             return {"predicted_sex": "male", "confidence": "high"}
-        elif y_x_frac >= thresholds["male_medium"]:
+        elif y_x_frac >= 0.7:
             return {"predicted_sex": "male", "confidence": "medium"}
         else:
             return {"predicted_sex": "male", "confidence": "low"}
-    elif y_x_frac <= thresholds["female_low"]:
-        if y_x_frac >= thresholds["female_medium"]:
+    elif y_x_frac <= 0.15:
+        if y_x_frac >= 0.05:
             return {"predicted_sex": "female", "confidence": "medium"}
-        elif y_x_frac >= thresholds["female_high"]:
+        elif y_x_frac >= 0.00001:
             return {"predicted_sex": "female", "confidence": "high"}
         else:
             return {"predicted_sex": "female", "confidence": "low"}
@@ -152,16 +118,14 @@ def predict_sex(cnn_file: str) -> Dict[str, Any]:
         "cnn_type": cnn_type,
     }
 
-    data_rows: list = read_cov(cnn_file)
-    data_df: pd.DataFrame = process_data(data_rows)
+    data_df: pd.DataFrame = process_coverage_data(cnn_file)
 
     if not isinstance(data_df, pd.DataFrame):
         predicted_sex["sex_prediction"] = "failed"
         predicted_sex["data_dict"] = "NA"
         return predicted_sex
 
-    stats: pd.DataFrame = get_stats(data_df)
-    data_dict: dict = extract_stats(stats)
+    data_dict: dict = get_stats(data_df)
 
     # Categorize data amount based on X and Y chromosome counts
     if data_dict["X_count"] < 10 or data_dict["Y_count"] < 10:
