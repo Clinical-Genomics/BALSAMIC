@@ -18,18 +18,8 @@ from BALSAMIC.constants.analysis import (
 from BALSAMIC.constants.paths import BALSAMIC_DIR
 from BALSAMIC.constants.rules import SNAKEMAKE_RULES
 from BALSAMIC.constants.variant_filters import (
-    SNV_FILTERS_WGS_TO,
-    SNV_FILTERS_WGS_TN,
-    SNV_FILTERS_TGA_WES_TO,
-    SNV_FILTERS_TGA_WES_TN,
-    SNV_FILTERS_TGA_TO,
-    SNV_FILTERS_TGA_TN,
-    SNV_BCFTOOLS_QUALITY_TGA_TNSCOPE_UMI_TN,
-    SNV_BCFTOOLS_QUALITY_TGA_TNSCOPE_UMI_TO,
-    SNV_BCFTOOOLS_RESEARCH_UMI,
     SVDB_FILTER_SETTINGS,
     MANTA_FILTER_SETTINGS,
-    MATCHED_NORMAL_FILTER_NAMES,
 )
 from BALSAMIC.constants.workflow_params import (
     VARCALL_PARAMS,

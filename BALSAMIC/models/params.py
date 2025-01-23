@@ -22,7 +22,6 @@ class ParamsCommon(BaseModel):
     picard_RG_normal: str
     picard_RG_tumor: str
 
-
 class ParamsInsertSizeMetrics(BaseModel):
     """This class defines the common params settings used for the InsertSizeMetricsAlgo
 
@@ -270,11 +269,11 @@ class BalsamicWorkflowConfig(BaseModel):
         return self.manta.tga_settings
 
 
-class VCFAttributes(BaseModel):
+class VCFFilter(BaseModel):
     """General purpose filter to manage various VCF attributes
 
     This class handles three parameters for the purpose filtering variants
-    based on a tag_values, filter_name, and which field in VCF.
+    based on a tag_values, filter_name, and which field in the VCF.
 
     E.g. AD=VCFAttributes(tag_value=5, filter_name="balsamic_low_tumor_ad", field="INFO")
     A value of 5 from INFO field and filter_name will be balsamic_low_tumor_ad
@@ -283,25 +282,21 @@ class VCFAttributes(BaseModel):
         tag_value: float
         filter_name: str
         field: str
+        description: str (optional); filter description
+        sequencing_type: str (optional); specific sequencing type such WES or TGA for which to apply the filter
+        analysis_type: str (optiona); specific sequencing type such paired or single for which to apply the filter
+        analysis_workflow: str (optional); specific workflow such as UMI for which to apply the filter
+        variant_caller: str (optional); the specific variant caller for which to apply the filter
     """
 
     tag_value: float
     filter_name: str
     field: str
-
-
-class VariantCallerFilters(BaseModel):
-    """Internal variant caller filters
-
-    This class handles the internal variant caller filters.
-
-    Attributes:
-        filter_name: str
-        Description: str
-    """
-
-    filter_name: str
-    Description: str
+    description: Optional[str]
+    sequencing_type: Optional[str]
+    analysis_type: Optional[str]
+    analysis_workflow: Optional[str]
+    variant_caller: Optional[str]
 
 
 class VarCallerFilter(BaseModel):
@@ -310,19 +305,7 @@ class VarCallerFilter(BaseModel):
     This class handles attributes and filter for variant callers
 
     Attributes:
-        AD: VCFAttributes (required); minimum allelic depth
-        AF_min: VCFAttributes (optional); minimum allelic fraction
-        high_normal_tumor_af_frac: VCFAttributes (optional); maximum normal allele frequency / tumor allele frequency
-        MQ: VCFAttributes (optional); minimum mapping quality
-        DP: VCFAttributes (optional); minimum read depth
-        pop_freq: VCFAttributes (optional); maximum gnomad allele frequency
-        strand_reads: VCFAttributes (optional); minimum strand specific read counts
-        qss: VCFAttributes (optional); minimum sum of base quality scores
-        sor: VCFAttributes (optional); minimum symmetrical log-odds ratio
-        artefact_snv_freq: VCFAttributes (optional); maximum artefact-database snv allele frequency
-        swegen_snv_freq: VCFAttributes (optional); maximum swegen snv allele frequency
         swegen_sv_freq: VCFAttributes (optional); maximum swegen sv allele frequency
-        loqusdb_clinical_snv_freq: VCFAttributes (optional); maximum loqusdb clinical snv allele frequency
         loqusdb_clinical_sv_freq: VCFAttributes (optional); maximum loqusdb clinical sv allele frequency
         low_pr_sr_count: VCFAttributes (optional); minumum Manta variant read support
         varcaller_name: str (required); variant caller name
@@ -331,23 +314,9 @@ class VarCallerFilter(BaseModel):
         description: str (required); comment section for description
     """
 
-    AD: Optional[VCFAttributes] = None
-    AF_min: Optional[VCFAttributes] = None
-    high_normal_tumor_af_frac: Optional[VCFAttributes] = None
-    MQ: Optional[VCFAttributes] = None
-    DP: Optional[VCFAttributes] = None
-    pop_freq: Optional[VCFAttributes] = None
-    strand_reads: Optional[VCFAttributes] = None
-    qss: Optional[VCFAttributes] = None
-    sor: Optional[VCFAttributes] = None
-    artefact_snv_freq: Optional[VCFAttributes] = None
-    swegen_snv_freq: Optional[VCFAttributes] = None
-    swegen_sv_freq: Optional[VCFAttributes] = None
-    loqusdb_clinical_snv_freq: Optional[VCFAttributes] = None
-    loqusdb_clinical_sv_freq: Optional[VCFAttributes] = None
-    low_pr_sr_count: Optional[VCFAttributes] = None
-    matched_normal_filter_names: Optional[List[str]] = None
-    variantcaller_filters: Optional[List[VariantCallerFilters]] = None
+    swegen_sv_freq: Optional[VCFFilter] = None
+    loqusdb_clinical_sv_freq: Optional[VCFFilter] = None
+    low_pr_sr_count: Optional[VCFFilter] = None
     varcaller_name: str
     filter_type: str
     analysis_type: str
