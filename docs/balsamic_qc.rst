@@ -62,7 +62,7 @@ This JSON file is structured as follows, with one sub-dictionary per sample ("tu
 Sex prediction of TGA cases
 -----------------------------
 
-For all TGA cases regardless of panel, the intermediate CNN files from CNVkit is used:
+For all TGA and exome cases regardless of panel, the intermediate CNN files from CNVkit is used:
 
 -   [sample-id].targetcoverage.cnn
 -   [sample-id].antitargetcoverage.cnn
