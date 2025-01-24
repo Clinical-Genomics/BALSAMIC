@@ -396,7 +396,7 @@ else:
 rules_to_include = []
 
 for sub, value in SNAKEMAKE_RULES.items():
-    if sub in ["common", analysis_type + "_" + sequence_type]:
+    if sub in ["common", analysis_type + "_" + sequencing_type]:
         for module_name, module_rules in value.items():
             rules_to_include.extend(module_rules)
 
@@ -410,7 +410,7 @@ if "dragen" in config:
 # Add rule for GENS
 if "gnomad_min_af5" in config["reference"]:
     rules_to_include.append("snakemake_rules/variant_calling/gens_preprocessing.rule")
-if "gnomad_min_af5" in config["reference"] and sequence_type == SequencingType.WGS:
+if "gnomad_min_af5" in config["reference"] and sequencing_type == SequencingType.WGS:
     rules_to_include.append("snakemake_rules/variant_calling/gatk_read_counts.rule")
 
 LOG.info(f"The following rules will be included in the workflow: {rules_to_include}")
