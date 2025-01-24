@@ -156,7 +156,6 @@ class BaseSNVFilters:
     def filter_criteria(
         cls,
         category: Literal["clinical", "research", "quality"],
-        analysis_workflow: Optional[Enum] = None,
         analysis_type: Optional[Enum] = None,
         sequencing_type: Optional[Enum] = None,
         variant_caller: Optional[Enum] = None,
@@ -168,7 +167,6 @@ class BaseSNVFilters:
 
         Args:
             category (Literal["clinical", "research", "quality"]): The filter category to use.
-            analysis_workflow (Optional[Enum]): Filter based on analysis workflow (default: None).
             analysis_type (Optional[Enum]): Filter based on analysis type (default: None).
             sequencing_type (Optional[Enum]): Filter based on sequencing type (default: None).
             variant_caller (Optional[Enum]): Filter based on variant caller (default: None).
@@ -185,11 +183,6 @@ class BaseSNVFilters:
         def filter_matches(f: VCFFilter) -> bool:
             return (
                 (
-                    analysis_workflow is None
-                    or getattr(f, "analysis_workflow", None)
-                    in {None, analysis_workflow}
-                )
-                and (
                     analysis_type is None
                     or getattr(f, "analysis_type", None) in {None, analysis_type}
                 )
@@ -226,7 +219,6 @@ class BaseSNVFilters:
     def get_filter_command(
             cls,
             category: Literal["clinical", "research", "quality"],
-            analysis_workflow: Optional[Enum] = None,
             analysis_type: Optional[Enum] = None,
             sequencing_type: Optional[Enum] = None,
             variant_caller: Optional[Enum] = None,
@@ -237,7 +229,6 @@ class BaseSNVFilters:
 
         Args:
             category (Literal["clinical", "research", "quality"]): The filter category to use.
-            analysis_workflow (Optional[Enum]): Filter based on analysis workflow (default: None).
             analysis_type (Optional[Enum]): Filter based on analysis type (default: None).
             sequencing_type (Optional[Enum]): Filter based on sequencing type (default: None).
             variant_caller (Optional[Enum]): Filter based on variant caller (default: None).
@@ -249,7 +240,6 @@ class BaseSNVFilters:
         # Use the shared filtering logic and extract filter names
         filters = cls.filter_criteria(
             category,
-            analysis_workflow,
             analysis_type,
             sequencing_type,
             variant_caller,
@@ -267,7 +257,6 @@ class BaseSNVFilters:
     def get_filters(
         cls,
         category: Literal["clinical", "research", "quality"],
-        analysis_workflow: Optional[Enum] = None,
         analysis_type: Optional[Enum] = None,
         sequencing_type: Optional[Enum] = None,
         variant_caller: Optional[Enum] = None,
@@ -278,7 +267,6 @@ class BaseSNVFilters:
 
         Args:
             category (Literal["clinical", "research", "quality"]): The filter category to use.
-            analysis_workflow (Optional[Enum]): Filter based on analysis workflow (default: None).
             analysis_type (Optional[Enum]): Filter based on analysis type (default: None).
             sequencing_type (Optional[Enum]): Filter based on sequencing type (default: None).
             variant_caller (Optional[Enum]): Filter based on variant caller (default: None).
@@ -290,7 +278,6 @@ class BaseSNVFilters:
         # Use the shared filtering logic and return filter objects
         return cls.filter_criteria(
             category,
-            analysis_workflow,
             analysis_type,
             sequencing_type,
             variant_caller,

@@ -286,7 +286,6 @@ class VCFFilter(BaseModel):
         Description: str (optional); filter description
         sequencing_type: str (optional); specific sequencing type such WES or TGA for which to apply the filter
         analysis_type: str (optiona); specific sequencing type such paired or single for which to apply the filter
-        analysis_workflow: str (optional); specific workflow such as UMI for which to apply the filter
         variant_caller: str (optional); the specific variant caller for which to apply the filter
     """
 
@@ -296,7 +295,6 @@ class VCFFilter(BaseModel):
     Description: Optional[str] = None
     sequencing_type: Optional[str] = None
     analysis_type: Optional[str] = None
-    analysis_workflow: Optional[str] = None
     variant_caller: Optional[str] = None
 
 
