@@ -143,40 +143,6 @@ snv_research_filters = SNV_FILTERS.get_filters(category="research", sequencing_t
 snv_clinical_filters = SNV_FILTERS.get_filters(category="clinical", sequencing_type=sequencing_type, analysis_type=analysis_type)
 
 
-# Set SNV filter settings depending on if sample is panel / wes / wgs
-if config_model.panel:
-    if config_model.panel.exome:
-        if config_model.analysis.analysis_type == "paired":
-            snv_filters: dict = SNV_FILTERS_TGA_WES_TN
-        else:
-            snv_filters: dict = SNV_FILTERS_TGA_WES_TO
-    else:
-        if config_model.analysis.analysis_type == "paired":
-            snv_filters: dict = SNV_FILTERS_TGA_TN
-        else:
-            snv_filters: dict = SNV_FILTERS_TGA_TO
-else:
-    if config_model.analysis.analysis_type == "paired":
-        snv_filters: dict = SNV_FILTERS_WGS_TN
-    else:
-        snv_filters: dict = SNV_FILTERS_WGS_TO
-
-if config_model.analysis.analysis_workflow == AnalysisWorkflow.BALSAMIC_UMI:
-    snv_filters["research_umi"] = SNV_BCFTOOOLS_RESEARCH_UMI
-    if config_model.analysis.analysis_type == "paired":
-        snv_filters["tnscope_umi"] = SNV_BCFTOOLS_QUALITY_TGA_TNSCOPE_UMI_TN
-
-    else:
-        snv_filters["tnscope_umi"] = SNV_BCFTOOLS_QUALITY_TGA_TNSCOPE_UMI_TO
-
-for snv_filter, filter_dict in snv_filters.items():
-    # Add optional soft-filter filter names
-    if config_model.analysis.soft_filter_normal:
-        filter_dict.update(MATCHED_NORMAL_FILTER_NAMES)
-
-    snv_filters[snv_filter] = VarCallerFilter.model_validate(filter_dict)
-
-
 SVDB_FILTERS = VarCallerFilter.model_validate(SVDB_FILTER_SETTINGS)
 MANTA_FILTERS = VarCallerFilter.model_validate(MANTA_FILTER_SETTINGS)
 
