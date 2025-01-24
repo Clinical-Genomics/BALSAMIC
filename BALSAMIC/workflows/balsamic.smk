@@ -22,9 +22,9 @@ from BALSAMIC.constants.rules import SNAKEMAKE_RULES
 from BALSAMIC.constants.variant_filters import (
     SVDB_FILTER_SETTINGS,
     MANTA_FILTER_SETTINGS,
-    WGS_SNV_Filters,
-    TGA_SNV_Filters,
-    TGA_UMI_SNV_Filters,
+    WgsSNVFilters,
+    TgaSNVFilters,
+    TgaUmiSNVFilters,
     get_tag_and_filtername,
 )
 from BALSAMIC.constants.workflow_params import (
@@ -132,12 +132,12 @@ else:
 
 
 if config_model.panel:
-    SNV_FILTERS = TGA_SNV_Filters
+    SNV_FILTERS = TgaSNVFilters
 else:
-    SNV_FILTERS = WGS_SNV_Filters
+    SNV_FILTERS = WgsSNVFilters
 
 if config_model.analysis.analysis_workflow == AnalysisWorkflow.BALSAMIC_UMI:
-    SNV_FILTERS = TGA_UMI_SNV_Filters
+    SNV_FILTERS = TgaUmiSNVFilters
 
 snv_quality_filters = SNV_FILTERS.get_filters(category="quality", sequencing_type=sequencing_type, analysis_type=analysis_type)
 snv_research_filters = SNV_FILTERS.get_filters(category="research", sequencing_type=sequencing_type, analysis_type=analysis_type)

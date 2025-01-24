@@ -1,7 +1,6 @@
 from BALSAMIC.models.params import VCFFilter
 from BALSAMIC.constants.analysis import (
     SequencingType,
-    AnalysisWorkflow,
     AnalysisType,
     BioinfoTools,
 )
@@ -285,7 +284,7 @@ class BaseSNVFilters:
         )
 
 
-class WGS_SNV_Filters(BaseSNVFilters):
+class WgsSNVFilters(BaseSNVFilters):
     clinical = [
         VCFFilter(tag_value=0.01, filter_name="Frq", field="INFO"),
         VCFFilter(tag_value=0.1, filter_name="ArtefactFrq", field="INFO"),
@@ -325,7 +324,7 @@ class WGS_SNV_Filters(BaseSNVFilters):
     ]
 
 
-class TGA_SNV_Filters(BaseSNVFilters):
+class TgaSNVFilters(BaseSNVFilters):
     clinical = [
         VCFFilter(tag_value=0.01, filter_name="Frq", field="INFO"),
         VCFFilter(tag_value=0.1, filter_name="ArtefactFrq", field="INFO"),
@@ -378,7 +377,7 @@ class TGA_SNV_Filters(BaseSNVFilters):
     ]
 
 
-class TGA_UMI_SNV_Filters(BaseSNVFilters):
+class TgaUmiSNVFilters(BaseSNVFilters):
     clinical = [
         VCFFilter(tag_value=0.01, filter_name="Frq", field="INFO"),
         VCFFilter(tag_value=0.1, filter_name="ArtefactFrq", field="INFO"),
