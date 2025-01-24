@@ -14,9 +14,9 @@ rule bcftools_filter_TNscope_umi_research_tumor_normal:
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
   params:
-    pop_freq = get_tag_and_filtername(snv_research_filters, "balsamic_high_pop_freq"),
-    swegen_freq = get_tag_and_filtername(snv_research_filters, "SWEGENAF"),
-    hard_filter_list = SNV_FILTERS.get_filter_command(category="research", sequencing_type=sequencing_type, analysis_type=analysis_type),
+    pop_freq = get_tag_and_filtername(umi_snv_research_filters, "balsamic_high_pop_freq"),
+    swegen_freq = get_tag_and_filtername(umi_snv_research_filters, "SWEGENAF"),
+    hard_filter_list = TgaUmiSNVFilters.get_filter_command(category="research", sequencing_type=sequencing_type, analysis_type=analysis_type),
     case_name = '{case_name}',
     edit_vcf_script = get_script_path("edit_vcf_info.py"),
     variant_caller = "tnscope_umi"
@@ -61,13 +61,13 @@ rule bcftools_filter_TNscope_umi_clinical_tumor_normal:
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
   params:
-    artefact_freq = get_tag_and_filtername(snv_clinical_filters, "ArtefactFrq"),
-    pop_freq = get_tag_and_filtername(snv_research_filters, "balsamic_high_pop_freq"),
-    swegen_freq = get_tag_and_filtername(snv_research_filters, "SWEGENAF"),
-    loqusdb_clinical_freq = get_tag_and_filtername(snv_clinical_filters, "Frq"),
+    artefact_freq = get_tag_and_filtername(umi_snv_clinical_filters, "ArtefactFrq"),
+    pop_freq = get_tag_and_filtername(umi_snv_research_filters, "balsamic_high_pop_freq"),
+    swegen_freq = get_tag_and_filtername(umi_snv_research_filters, "SWEGENAF"),
+    loqusdb_clinical_freq = get_tag_and_filtername(umi_snv_clinical_filters, "Frq"),
     housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "clinical"},
     case_name = '{case_name}',
-    hard_filter_list = SNV_FILTERS.get_filter_command(category="clinical", sequencing_type=sequencing_type, analysis_type=analysis_type),
+    hard_filter_list = TgaUmiSNVFilters.get_filter_command(category="clinical", sequencing_type=sequencing_type, analysis_type=analysis_type),
     edit_vcf_script = get_script_path("edit_vcf_info.py"),
     variant_caller = "tnscope_umi"
   threads:

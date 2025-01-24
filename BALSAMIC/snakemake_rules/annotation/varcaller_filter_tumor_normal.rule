@@ -16,7 +16,7 @@ rule bcftools_filter_merged_research_tumor_normal:
   params:
     pop_freq = get_tag_and_filtername(snv_research_filters, "balsamic_high_pop_freq"),
     swegen_freq = get_tag_and_filtername(snv_research_filters, "SWEGENAF"),
-    hard_filter_list = SNV_FILTERS.get_filter_command(category="research", sequencing_type=sequencing_type, analysis_type=analysis_type),
+    hard_filter_list = TgaSNVFilters.get_filter_command(category="research", sequencing_type=sequencing_type, analysis_type=analysis_type),
     case_name = '{case_name}'
   threads:
     get_threads(cluster_config, 'bcftools_filter_tnscope_research_tumor_normal')
@@ -51,7 +51,7 @@ rule bcftools_filter_merged_clinical_tumor_normal:
     pop_freq = get_tag_and_filtername(snv_research_filters, "balsamic_high_pop_freq"),
     swegen_freq = get_tag_and_filtername(snv_research_filters, "SWEGENAF"),
     loqusdb_clinical_freq = get_tag_and_filtername(snv_clinical_filters, "Frq"),
-    hard_filter_list = SNV_FILTERS.get_filter_command(category="clinical", sequencing_type=sequencing_type, analysis_type=analysis_type),
+    hard_filter_list = TgaSNVFilters.get_filter_command(category="clinical", sequencing_type=sequencing_type, analysis_type=analysis_type),
     housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "clinical"},
     case_name = '{case_name}',
   threads:
