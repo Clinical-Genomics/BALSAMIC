@@ -140,7 +140,7 @@ if config_model.analysis.analysis_workflow == AnalysisWorkflow.BALSAMIC_UMI:
 
 snv_quality_filters = SNV_FILTERS.get_filters(category="quality", sequencing_type=sequencing_type, analysis_type=analysis_type)
 snv_research_filters = SNV_FILTERS.get_filters(category="research", sequencing_type=sequencing_type, analysis_type=analysis_type)
-snv_clinical_filters = SNV_FILTERS.get_filters(category="clincial", sequencing_type=sequencing_type, analysis_type=analysis_type)
+snv_clinical_filters = SNV_FILTERS.get_filters(category="clinical", sequencing_type=sequencing_type, analysis_type=analysis_type)
 
 
 # Set SNV filter settings depending on if sample is panel / wes / wgs
