@@ -15,7 +15,8 @@ from BALSAMIC.constants.analysis import (
     MutationType,
     SampleType,
     SequencingType,
-    AnalysisType)
+    AnalysisType,
+    BioinfoTools)
 from BALSAMIC.constants.paths import BALSAMIC_DIR
 from BALSAMIC.constants.rules import SNAKEMAKE_RULES
 from BALSAMIC.constants.variant_filters import (
