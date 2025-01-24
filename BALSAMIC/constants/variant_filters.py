@@ -346,12 +346,6 @@ class TGA_SNV_Filters(BaseSNVFilters):
     research = [
         VCFFilter(tag_value=0.01, filter_name="SWEGENAF", field="INFO"),
         VCFFilter(tag_value=0.005, filter_name="balsamic_high_pop_freq", field="INFO"),
-        VCFFilter(
-            tag_value=0.02,
-            filter_name="balsamic_high_pop_freq",
-            field="INFO",
-            analysis_workflow=AnalysisWorkflow.BALSAMIC_UMI,
-        ),
     ]
     quality = [
         VCFFilter(
