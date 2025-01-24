@@ -1,4 +1,3 @@
-
 from BALSAMIC.models.config import Filter
 
 # OPTIONAL SOFT FILTERS
@@ -32,13 +31,27 @@ TNSCOPE_TN_HARDFILTERS = TNSCOPE_HARDFILTERS + [
         "Description": "Evidence indicates this site is germline, not somatic",
     },
 ]
+
+
 class VarDictFilters:
     common_hard_filters = [
         Filter(filter_name="Cluster0bp", Description="Two variants are within 0 bp"),
-        Filter(filter_name="InGap", Description="The variant is in the deletion gap, thus likely false positive"),
-        Filter(filter_name="InIns", Description="The variant is adjacent to an insertion variant"),
-        Filter(filter_name="MSI12", Description="Variant in MSI region with 12 non-monomer MSI or 13 monomer MSI"),
-        Filter(filter_name="NM4.5", Description="Mean mismatches in reads >= 4.5, thus likely false positive"),
+        Filter(
+            filter_name="InGap",
+            Description="The variant is in the deletion gap, thus likely false positive",
+        ),
+        Filter(
+            filter_name="InIns",
+            Description="The variant is adjacent to an insertion variant",
+        ),
+        Filter(
+            filter_name="MSI12",
+            Description="Variant in MSI region with 12 non-monomer MSI or 13 monomer MSI",
+        ),
+        Filter(
+            filter_name="NM4.5",
+            Description="Mean mismatches in reads >= 4.5, thus likely false positive",
+        ),
         Filter(filter_name="SN1.5", Description="Signal to Noise Less than 1.5"),
         Filter(filter_name="f0.001", Description="Allele frequency < 0.001"),
         Filter(filter_name="p8", Description="Mean Position in Reads Less than 8"),
@@ -46,8 +59,13 @@ class VarDictFilters:
         Filter(filter_name="q22.5", Description="Mean Base Quality Below 22.5"),
     ]
     TO_hard_filters = common_hard_filters + [
-        Filter(filter_name="AMPBIAS", Description="Indicate the variant has amplicon bias"),
-        Filter(filter_name="LongMSI", Description="The somatic variant is flanked by long A/T (>=14)"),
+        Filter(
+            filter_name="AMPBIAS", Description="Indicate the variant has amplicon bias"
+        ),
+        Filter(
+            filter_name="LongMSI",
+            Description="The somatic variant is flanked by long A/T (>=14)",
+        ),
         Filter(filter_name="Q10", Description="Mean Mapping Quality Below 10"),
         Filter(filter_name="d3", Description="Allele frequency < 0.001"),
         Filter(filter_name="v2", Description="Var Depth < 2"),

@@ -14,12 +14,17 @@ from BALSAMIC.constants.analysis import (
     FastqName,
     MutationType,
     SampleType,
-    SequencingType)
+    SequencingType,
+    AnalysisType)
 from BALSAMIC.constants.paths import BALSAMIC_DIR
 from BALSAMIC.constants.rules import SNAKEMAKE_RULES
 from BALSAMIC.constants.variant_filters import (
     SVDB_FILTER_SETTINGS,
     MANTA_FILTER_SETTINGS,
+    WGS_SNV_Filters,
+    TGA_SNV_Filters,
+    TGA_UMI_SNV_Filters,
+    get_tag_and_filtername,
 )
 from BALSAMIC.constants.workflow_params import (
     VARCALL_PARAMS,
@@ -109,17 +114,34 @@ if config["analysis"]["sequencing_type"] != "wgs":
 singularity_image: str = config_model.singularity["image"]
 sample_names: List[str] = config_model.get_all_sample_names()
 tumor_sample: str = config_model.get_sample_name_by_type(SampleType.TUMOR)
+
+analysis_type = config_model.analysis.analysis_type
 sequencing_type = config_model.analysis.sequencing_type
-if config_model.analysis.analysis_type == "paired":
+
+if analysis_type == AnalysisType.PAIRED:
     normal_sample: str = config_model.get_sample_name_by_type(SampleType.NORMAL)
 
 # Sample status to sampleID namemap
-if config_model.analysis.analysis_type == "paired":
+if analysis_type == AnalysisType.PAIRED:
     status_to_sample_id = (
         "TUMOR" + "\\\\t" + tumor_sample + "\\\\n" + "NORMAL" + "\\\\t" + normal_sample
     )
 else:
     status_to_sample_id = "TUMOR" + "\\\\t" + tumor_sample
+
+
+if config_model.panel:
+    SNV_FILTERS = TGA_SNV_Filters
+else:
+    SNV_FILTERS = WGS_SNV_Filters
+
+if config_model.analysis.analysis_workflow == AnalysisWorkflow.BALSAMIC_UMI:
+    SNV_FILTERS = TGA_UMI_SNV_Filters
+
+snv_quality_filters = SNV_FILTERS.get_filters(category="quality", sequencing_type=sequencing_type, analysis_type=analysis_type)
+snv_research_filters = SNV_FILTERS.get_filters(category="research", sequencing_type=sequencing_type, analysis_type=analysis_type)
+snv_clinical_filters = SNV_FILTERS.get_filters(category="clincial", sequencing_type=sequencing_type, analysis_type=analysis_type)
+
 
 # Set SNV filter settings depending on if sample is panel / wes / wgs
 if config_model.panel:
@@ -406,8 +428,6 @@ else:
 # Collect all rules to be run
 
 rules_to_include = []
-analysis_type = config["analysis"]["analysis_type"]
-sequence_type = config["analysis"]["sequencing_type"]
 
 for sub, value in SNAKEMAKE_RULES.items():
     if sub in ["common", analysis_type + "_" + sequence_type]:
