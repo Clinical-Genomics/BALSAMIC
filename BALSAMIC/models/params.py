@@ -283,21 +283,21 @@ class VCFFilter(BaseModel):
         tag_value: float
         filter_name: str
         field: str
-        description: str (optional); filter description
+        Description: str (optional); filter description
         sequencing_type: str (optional); specific sequencing type such WES or TGA for which to apply the filter
         analysis_type: str (optiona); specific sequencing type such paired or single for which to apply the filter
         analysis_workflow: str (optional); specific workflow such as UMI for which to apply the filter
         variant_caller: str (optional); the specific variant caller for which to apply the filter
     """
 
-    tag_value: float
+    tag_value: Optional[float] = None
     filter_name: str
-    field: str
-    description: Optional[str]
-    sequencing_type: Optional[str]
-    analysis_type: Optional[str]
-    analysis_workflow: Optional[str]
-    variant_caller: Optional[str]
+    field: Optional[str] = None
+    Description: Optional[str] = None
+    sequencing_type: Optional[str] = None
+    analysis_type: Optional[str] = None
+    analysis_workflow: Optional[str] = None
+    variant_caller: Optional[str] = None
 
 
 class VarCallerFilter(BaseModel):
