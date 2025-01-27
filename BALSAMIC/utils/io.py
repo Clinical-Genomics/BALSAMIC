@@ -57,6 +57,7 @@ def read_json(json_path: str) -> dict:
     else:
         raise FileNotFoundError(f"The JSON file {json_path} was not found")
 
+
 def write_json(json_obj: dict, path: str) -> None:
     """Write JSON format data to an output file."""
     try:
