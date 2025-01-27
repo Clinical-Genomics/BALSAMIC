@@ -320,4 +320,3 @@ class VarCallerFilter(BaseModel):
     filter_type: str
     analysis_type: str
     description: str
-

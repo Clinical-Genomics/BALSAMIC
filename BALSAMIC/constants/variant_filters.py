@@ -4,7 +4,7 @@ from BALSAMIC.constants.analysis import (
     AnalysisType,
     BioinfoTools,
 )
-from typing import List, Optional, Literal, Dict, Set, Union
+from typing import List, Optional, Literal, Set
 from enum import Enum
 
 
@@ -216,12 +216,12 @@ class BaseSNVFilters:
 
     @classmethod
     def get_filter_command(
-            cls,
-            category: Literal["clinical", "research", "quality"],
-            analysis_type: Optional[Enum] = None,
-            sequencing_type: Optional[Enum] = None,
-            variant_caller: Optional[Enum] = None,
-            soft_filter_normals: Optional[bool] = None,
+        cls,
+        category: Literal["clinical", "research", "quality"],
+        analysis_type: Optional[Enum] = None,
+        sequencing_type: Optional[Enum] = None,
+        variant_caller: Optional[Enum] = None,
+        soft_filter_normals: Optional[bool] = None,
     ) -> Set[str]:
         """
         Get a set of filter names based on various attributes.
@@ -285,13 +285,13 @@ class BaseSNVFilters:
 
 
 class WgsSNVFilters(BaseSNVFilters):
-    clinical = [
-        VCFFilter(tag_value=0.01, filter_name="Frq", field="INFO"),
-        VCFFilter(tag_value=0.1, filter_name="ArtefactFrq", field="INFO"),
-    ]
     research = [
         VCFFilter(tag_value=0.01, filter_name="SWEGENAF", field="INFO"),
         VCFFilter(tag_value=0.001, filter_name="balsamic_high_pop_freq", field="INFO"),
+    ]
+    clinical = research + [
+        VCFFilter(tag_value=0.01, filter_name="Frq", field="INFO"),
+        VCFFilter(tag_value=0.1, filter_name="ArtefactFrq", field="INFO"),
     ]
     quality = [
         VCFFilter(
@@ -325,13 +325,13 @@ class WgsSNVFilters(BaseSNVFilters):
 
 
 class TgaSNVFilters(BaseSNVFilters):
-    clinical = [
-        VCFFilter(tag_value=0.01, filter_name="Frq", field="INFO"),
-        VCFFilter(tag_value=0.1, filter_name="ArtefactFrq", field="INFO"),
-    ]
     research = [
         VCFFilter(tag_value=0.01, filter_name="SWEGENAF", field="INFO"),
         VCFFilter(tag_value=0.005, filter_name="balsamic_high_pop_freq", field="INFO"),
+    ]
+    clinical = research + [
+        VCFFilter(tag_value=0.01, filter_name="Frq", field="INFO"),
+        VCFFilter(tag_value=0.1, filter_name="ArtefactFrq", field="INFO"),
     ]
     quality = [
         VCFFilter(
@@ -378,13 +378,13 @@ class TgaSNVFilters(BaseSNVFilters):
 
 
 class TgaUmiSNVFilters(BaseSNVFilters):
-    clinical = [
-        VCFFilter(tag_value=0.01, filter_name="Frq", field="INFO"),
-        VCFFilter(tag_value=0.1, filter_name="ArtefactFrq", field="INFO"),
-    ]
     research = [
         VCFFilter(tag_value=0.01, filter_name="SWEGENAF", field="INFO"),
         VCFFilter(tag_value=0.02, filter_name="balsamic_high_pop_freq", field="INFO"),
+    ]
+    clinical = research + [
+        VCFFilter(tag_value=0.01, filter_name="Frq", field="INFO"),
+        VCFFilter(tag_value=0.1, filter_name="ArtefactFrq", field="INFO"),
     ]
     quality = [
         VCFFilter(
@@ -394,6 +394,7 @@ class TgaUmiSNVFilters(BaseSNVFilters):
             analysis_type=AnalysisType.PAIRED,
         ),
     ]
+
 
 def get_tag_and_filtername(filters: List[VCFFilter], filter_name: str) -> List[str]:
     """
