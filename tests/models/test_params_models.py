@@ -132,7 +132,11 @@ def test_structuralvariantfilters():
 
     # GIVEN a SV VarCallerFilter
     dummy_varcaller = {
-        "low_pr_sr_count": {"tag_value": 4, "filter_name": "low_pr_sr_count", "field": "INFO"},
+        "low_pr_sr_count": {
+            "tag_value": 4,
+            "filter_name": "low_pr_sr_count",
+            "field": "INFO",
+        },
         "loqusdb_clinical_sv_freq": {
             "tag_value": 0.02,
             "filter_name": "dummy_pop_freq",

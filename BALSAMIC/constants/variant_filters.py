@@ -56,6 +56,11 @@ class BaseSNVFilters:
             variant_caller=BioinfoTools.VARDICT,
         ),
         VCFFilter(
+            filter_name="q22.5",
+            Description="Mean Base Quality Below 22.5",
+            variant_caller=BioinfoTools.VARDICT,
+        ),
+        VCFFilter(
             filter_name="AMPBIAS",
             Description="Indicate the variant has amplicon bias",
             variant_caller=BioinfoTools.VARDICT,
