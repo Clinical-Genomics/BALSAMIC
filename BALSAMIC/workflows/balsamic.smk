@@ -130,6 +130,7 @@ if analysis_type == AnalysisType.PAIRED:
 else:
     status_to_sample_id = "TUMOR" + "\\\\t" + tumor_sample
 
+soft_filter_normal = config_model.analysis.soft_filter_normal
 
 if config_model.panel:
     SNV_FILTERS = TgaSNVFilters
