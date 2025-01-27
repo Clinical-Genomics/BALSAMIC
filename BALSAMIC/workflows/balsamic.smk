@@ -33,7 +33,7 @@ from BALSAMIC.constants.workflow_params import (
     SLEEP_BEFORE_START,
 )
 from BALSAMIC.models.config import ConfigModel
-from BALSAMIC.models.params import BalsamicWorkflowConfig, VarCallerFilter
+from BALSAMIC.models.params import BalsamicWorkflowConfig, StructuralVariantFilters
 from BALSAMIC.utils.cli import check_executable, generate_h5
 from BALSAMIC.utils.exc import BalsamicError
 from BALSAMIC.utils.io import read_yaml, write_finish_file, write_json
@@ -150,8 +150,8 @@ if config_model.analysis.analysis_workflow == AnalysisWorkflow.BALSAMIC_UMI:
 
 
 
-SVDB_FILTERS = VarCallerFilter.model_validate(SVDB_FILTER_SETTINGS)
-MANTA_FILTERS = VarCallerFilter.model_validate(MANTA_FILTER_SETTINGS)
+SVDB_FILTERS = StructuralVariantFilters.model_validate(SVDB_FILTER_SETTINGS)
+MANTA_FILTERS = StructuralVariantFilters.model_validate(MANTA_FILTER_SETTINGS)
 
 # Fastp parameters
 fastp_parameters: Dict = get_fastp_parameters(config_model)

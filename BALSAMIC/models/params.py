@@ -285,7 +285,7 @@ class VCFFilter(BaseModel):
         field: str
         Description: str (optional); filter description
         sequencing_type: str (optional); specific sequencing type such WES or TGA for which to apply the filter
-        analysis_type: str (optiona); specific sequencing type such paired or single for which to apply the filter
+        analysis_type: str (optional); specific sequencing type such paired or single for which to apply the filter
         variant_caller: str (optional); the specific variant caller for which to apply the filter
     """
 
@@ -298,10 +298,10 @@ class VCFFilter(BaseModel):
     variant_caller: Optional[str] = None
 
 
-class VarCallerFilter(BaseModel):
-    """General purpose for variant caller filters
+class StructuralVariantFilters(BaseModel):
+    """Variant filters for Structural Variants
 
-    This class handles attributes and filter for variant callers
+    This class handles attributes and filter for structural variants
 
     Attributes:
         swegen_sv_freq: VCFAttributes (optional); maximum swegen sv allele frequency
