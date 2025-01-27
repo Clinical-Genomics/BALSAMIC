@@ -97,7 +97,7 @@ def test_wgs_quality_single_filters():
     assert "balsamic_low_strand_read_counts" in retrieved_filter_names
 
 
-def test_tga_umi_SNV_filters():
+def test_tga_umi_snv_filters():
     """Test correct filter retrieval in TGA UMI SNV filters class."""
 
     # GIVEN TGA UMI tumor normal matched filters
@@ -120,7 +120,7 @@ def test_tga_umi_SNV_filters():
     assert ["SWEGENAF", "balsamic_high_pop_freq"] == retrieved_filter_names
 
 
-def test_WES_TGA_read_depth_snv_filter():
+def test_wes_tga_read_depth_snv_filter():
     """Test correct retrieval of WES specific DP value"""
 
     # GIVEN WES and TGA filters
