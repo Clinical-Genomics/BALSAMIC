@@ -19,7 +19,7 @@ if config["analysis"]["sequencing_type"] == 'wgs' and config["analysis"]["analys
         strand_reads = get_tag_and_filtername(snv_quality_filters, "balsamic_low_strand_read_counts"),
         qss = get_tag_and_filtername(snv_quality_filters, "balsamic_low_quality_scores"),
         sor = get_tag_and_filtername(snv_quality_filters, "balsamic_high_strand_oddsratio"),
-        hard_filter_list = WgsSNVFilters.get_filter_command(category="quality", sequencing_type=sequencing_type, analysis_type=analysis_type, variant_caller=BioinfoTools.TNSCOPE, soft_filter_normals=soft_filter_normal),
+        hard_filters = WgsSNVFilters.get_bcftools_filter_string(category="quality", sequencing_type=sequencing_type, analysis_type=analysis_type, variant_caller=BioinfoTools.TNSCOPE, soft_filter_normals=soft_filter_normal),
         case_name = config["analysis"]["case_id"],
       threads:
         get_threads(cluster_config, 'bcftools_quality_filter_tnscope_tumor_only')
@@ -38,7 +38,7 @@ bcftools view --threads {threads} --regions-file {input.wgs_calling_file}.bed {i
 | bcftools filter --threads {threads} --include 'SUM(FORMAT/QSS)/SUM(FORMAT/AD) >= {params.qss[0]}' --soft-filter '{params.qss[1]}' --mode '+' \
 | bcftools filter --threads {threads} --include 'FORMAT/ALT_F1R2 > {params.strand_reads[0]} && (FORMAT/ALT_F1R2 > 0  && FORMAT/ALT_F2R1 > {params.strand_reads[0]} &&  FORMAT/REF_F1R2 > {params.strand_reads[0]} && FORMAT/REF_F2R1 > {params.strand_reads[0]})' --soft-filter '{params.strand_reads[1]}' --mode '+' \
 | bcftools filter --threads {threads} --include "INFO/SOR < {params.sor[0]}" --soft-filter '{params.sor[1]}' --mode '+' \
-| bcftools view --exclude '{params.hard_filter_list}' -O z -o {output.vcf_snv_research};
+| bcftools view --exclude '{params.hard_filters}' -O z -o {output.vcf_snv_research};
 
 tabix -p vcf -f {output.vcf_snv_research};
 
@@ -61,7 +61,7 @@ elif config["analysis"]["sequencing_type"] == 'wgs' and config["analysis"]["anal
         DP = get_tag_and_filtername(snv_quality_filters, "balsamic_low_tumor_dp"),
         AF_min = get_tag_and_filtername(snv_quality_filters, "balsamic_low_af"),
         high_normal_tumor_af_frac = get_tag_and_filtername(snv_quality_filters, "high_normal_tumor_af_frac"),
-        hard_filter_list = WgsSNVFilters.get_filter_command(category="quality", sequencing_type=sequencing_type, analysis_type=analysis_type, variant_caller=BioinfoTools.TNSCOPE, soft_filter_normals=soft_filter_normal),
+        hard_filters = WgsSNVFilters.get_bcftools_filter_string(category="quality", sequencing_type=sequencing_type, analysis_type=analysis_type, variant_caller=BioinfoTools.TNSCOPE, soft_filter_normals=soft_filter_normal),
         case_name = config["analysis"]["case_id"],
       threads:
         get_threads(cluster_config, 'bcftools_quality_filter_tnscope_tumor_normal')
@@ -75,7 +75,7 @@ bcftools view {input.vcf_snv} \
 | bcftools filter --threads {threads} --include 'FORMAT/AF[0] >= {params.AF_min[0]}' --soft-filter '{params.AF_min[1]}' --mode '+' \
 | bcftools annotate -x FILTER/alt_allele_in_normal \
 | bcftools filter --threads {threads} --exclude 'sum(FORMAT/AF[1])/sum(FORMAT/AF[0])>{params.high_normal_tumor_af_frac[0]}' --soft-filter '{params.high_normal_tumor_af_frac[1]}' --mode '+' \
-| bcftools view --exclude '{params.hard_filter_list}' -O z -o {output.vcf_snv_research}; 
+| bcftools view --exclude '{params.hard_filters}' -O z -o {output.vcf_snv_research}; 
 
 tabix -p vcf -f {output.vcf_snv_research};
           """
@@ -97,7 +97,7 @@ if config["analysis"]["sequencing_type"] == 'targeted' and config["analysis"]["a
       AF_min=get_tag_and_filtername(snv_quality_filters, "balsamic_low_af"),
       qss=get_tag_and_filtername(snv_quality_filters, "balsamic_low_quality_scores"),
       sor=get_tag_and_filtername(snv_quality_filters, "balsamic_high_strand_oddsratio"),
-      hard_filter_list=TgaSNVFilters.get_filter_command(category="quality", sequencing_type=sequencing_type, analysis_type=analysis_type, variant_caller=BioinfoTools.TNSCOPE, soft_filter_normals=soft_filter_normal),
+      hard_filters=TgaSNVFilters.get_bcftools_filter_string(category="quality", sequencing_type=sequencing_type, analysis_type=analysis_type, variant_caller=BioinfoTools.TNSCOPE, soft_filter_normals=soft_filter_normal),
       case_name = config["analysis"]["case_id"],
     threads:
       get_threads(cluster_config,'bcftools_quality_filter_vardict_tumor_only')
@@ -111,7 +111,7 @@ if config["analysis"]["sequencing_type"] == 'targeted' and config["analysis"]["a
     | bcftools filter --threads {threads} --include 'SUM(FORMAT/QSS)/SUM(FORMAT/AD) >= {params.qss[0]}' --soft-filter '{params.qss[1]}' --mode '+' \
     | bcftools filter --threads {threads} --include "INFO/SOR < {params.sor[0]}" --soft-filter '{params.sor[1]}' --mode '+' \
     | bcftools filter --include 'FORMAT/AF[0] >= {params.AF_min[0]}' --soft-filter '{params.AF_min[1]}' --mode '+' \
-    | bcftools view --exclude '{params.hard_filter_list}' -o {output.vcf_filtered} -O z;
+    | bcftools view --exclude '{params.hard_filters}' -o {output.vcf_filtered} -O z;
     
     tabix -p vcf -f {output.vcf_filtered};
       """
@@ -130,7 +130,7 @@ if config["analysis"]["sequencing_type"] == 'targeted' and config["analysis"]["a
       AD=get_tag_and_filtername(snv_quality_filters, "balsamic_low_tumor_ad"),
       DP=get_tag_and_filtername(snv_quality_filters, "balsamic_low_tumor_dp"),
       AF_min=get_tag_and_filtername(snv_quality_filters, "balsamic_low_af"),
-      hard_filter_list=TgaSNVFilters.get_filter_command(category="quality", sequencing_type=sequencing_type, analysis_type=analysis_type, variant_caller=BioinfoTools.VARDICT, soft_filter_normals=soft_filter_normal),
+      hard_filters=TgaSNVFilters.get_bcftools_filter_string(category="quality", sequencing_type=sequencing_type, analysis_type=analysis_type, variant_caller=BioinfoTools.VARDICT, soft_filter_normals=soft_filter_normal),
       case_name=config["analysis"]["case_id"],
     threads:
       get_threads(cluster_config,'bcftools_quality_filter_vardict_tumor_only')
@@ -143,7 +143,7 @@ if config["analysis"]["sequencing_type"] == 'targeted' and config["analysis"]["a
     bcftools filter --include 'INFO/DP >= {params.DP[0]}' --soft-filter '{params.DP[1]}' --mode '+' | \
     bcftools filter --include 'INFO/VD >= {params.AD[0]}' --soft-filter '{params.AD[1]}' --mode '+' | \
     bcftools filter --include 'INFO/AF >= {params.AF_min[0]}' --soft-filter '{params.AF_min[1]}' --mode '+' | \
-    bcftools view --exclude '{params.hard_filter_list}' -o {output.vcf_filtered} -O z;
+    bcftools view --exclude '{params.hard_filters}' -o {output.vcf_filtered} -O z;
       
     tabix -p vcf -f {output.vcf_filtered};
       """
@@ -165,7 +165,7 @@ elif config["analysis"]["sequencing_type"] == 'targeted' and config["analysis"][
       DP = get_tag_and_filtername(snv_quality_filters, "balsamic_low_tumor_dp"),
       AF_min = get_tag_and_filtername(snv_quality_filters, "balsamic_low_af"),
       high_normal_tumor_af_frac = get_tag_and_filtername(snv_quality_filters, "high_normal_tumor_af_frac"),
-      hard_filter_list = TgaSNVFilters.get_filter_command(category="quality", sequencing_type=sequencing_type, analysis_type=analysis_type, variant_caller=BioinfoTools.TNSCOPE, soft_filter_normals=soft_filter_normal),
+      hard_filters = TgaSNVFilters.get_bcftools_filter_string(category="quality", sequencing_type=sequencing_type, analysis_type=analysis_type, variant_caller=BioinfoTools.TNSCOPE, soft_filter_normals=soft_filter_normal),
       case_name = config["analysis"]["case_id"],
     threads:
       get_threads(cluster_config,'bcftools_quality_filter_vardict_tumor_normal')
@@ -179,7 +179,7 @@ elif config["analysis"]["sequencing_type"] == 'targeted' and config["analysis"][
     | bcftools filter --include 'SUM(FORMAT/AD[0:0]+FORMAT/AD[0:1]) >= {params.DP[0]} || SUM(FORMAT/AD[1:0]+FORMAT/AD[1:1]) >= {params.DP[0]}' --soft-filter '{params.DP[1]}' --mode '+' \
     | bcftools filter --include 'FORMAT/AD[0:1] >= {params.AD[0]}' --soft-filter '{params.AD[1]}' --mode '+' \
     | bcftools filter --include 'FORMAT/AF[0] >= {params.AF_min[0]}' --soft-filter '{params.AF_min[1]}' --mode '+' \
-    | bcftools view --exclude '{params.hard_filter_list}' -o {output.vcf_filtered} -O z;
+    | bcftools view --exclude '{params.hard_filters}' -o {output.vcf_filtered} -O z;
     
     tabix -p vcf -f {output.vcf_filtered};
       """
@@ -199,7 +199,7 @@ elif config["analysis"]["sequencing_type"] == 'targeted' and config["analysis"][
       DP=get_tag_and_filtername(snv_quality_filters, "balsamic_low_tumor_dp"),
       AF_min=get_tag_and_filtername(snv_quality_filters, "balsamic_low_af"),
       high_normal_tumor_af_frac=get_tag_and_filtername(snv_quality_filters,"high_normal_tumor_af_frac"),
-      hard_filter_list=TgaSNVFilters.get_filter_command(category="quality", sequencing_type=sequencing_type, analysis_type=analysis_type, variant_caller=BioinfoTools.VARDICT, soft_filter_normals=soft_filter_normal),
+      hard_filters=TgaSNVFilters.get_bcftools_filter_string(category="quality", sequencing_type=sequencing_type, analysis_type=analysis_type, variant_caller=BioinfoTools.VARDICT, soft_filter_normals=soft_filter_normal),
       case_name=config["analysis"]["case_id"],
     threads:
       get_threads(cluster_config,'bcftools_quality_filter_vardict_tumor_normal')
@@ -213,7 +213,7 @@ elif config["analysis"]["sequencing_type"] == 'targeted' and config["analysis"][
     bcftools filter --include 'INFO/DP >= {params.DP[0]}' --soft-filter '{params.DP[1]}' --mode '+' | \
     bcftools filter --include 'INFO/VD >= {params.AD[0]}' --soft-filter '{params.AD[1]}' --mode '+' | \
     bcftools filter --include 'INFO/AF >= {params.AF_min[0]}' --soft-filter '{params.AF_min[1]}' --mode '+' | \
-    bcftools view --exclude '{params.hard_filter_list}' -o {output.vcf_filtered} -O z;
+    bcftools view --exclude '{params.hard_filters}' -o {output.vcf_filtered} -O z;
     
     tabix -p vcf -f {output.vcf_filtered};
       """
@@ -232,7 +232,7 @@ if config_model.analysis.analysis_workflow == AnalysisWorkflow.BALSAMIC_UMI and 
     params:
       case_name = config["analysis"]["case_id"],
       high_normal_tumor_af_frac=get_tag_and_filtername(umi_snv_quality_filters,"high_normal_tumor_af_frac"),
-      hard_filter_list=TgaUmiSNVFilters.get_filter_command(category="quality", sequencing_type=sequencing_type, analysis_type=analysis_type, variant_caller=BioinfoTools.TNSCOPE, soft_filter_normals=soft_filter_normal),
+      hard_filters=TgaUmiSNVFilters.get_bcftools_filter_string(category="quality", sequencing_type=sequencing_type, analysis_type=analysis_type, variant_caller=BioinfoTools.TNSCOPE, soft_filter_normals=soft_filter_normal),
     threads:
       get_threads(cluster_config,'bcftools_quality_filter_TNscope_umi_tumor_normal')
     message:
@@ -242,7 +242,7 @@ if config_model.analysis.analysis_workflow == AnalysisWorkflow.BALSAMIC_UMI and 
     bcftools view {input.vcf} \
     | bcftools annotate -x FILTER/alt_allele_in_normal \
     | bcftools filter --threads {threads} --exclude 'sum(FORMAT/AF[1])/sum(FORMAT/AF[0])>{params.high_normal_tumor_af_frac[0]}' --soft-filter '{params.high_normal_tumor_af_frac[1]}' --mode '+' \
-    | bcftools view --exclude '{params.hard_filter_list}' -o {output.vcf_filtered} -O z;
+    | bcftools view --exclude '{params.hard_filters}' -o {output.vcf_filtered} -O z;
     
     tabix -p vcf -f {output.vcf_filtered};
       """
@@ -259,7 +259,7 @@ elif config_model.analysis.analysis_workflow == AnalysisWorkflow.BALSAMIC_UMI an
     singularity:
       Path(singularity_image,config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
     params:
-      hard_filter_list=TgaUmiSNVFilters.get_filter_command(category="quality", sequencing_type=sequencing_type, analysis_type=analysis_type, variant_caller=BioinfoTools.TNSCOPE, soft_filter_normals=soft_filter_normal),
+      hard_filters=TgaUmiSNVFilters.get_bcftools_filter_string(category="quality", sequencing_type=sequencing_type, analysis_type=analysis_type, variant_caller=BioinfoTools.TNSCOPE, soft_filter_normals=soft_filter_normal),
       case_name=config["analysis"]["case_id"],
     threads:
       get_threads(cluster_config,'bcftools_quality_filter_tnscope_umi_tumor_only')
@@ -268,7 +268,7 @@ elif config_model.analysis.analysis_workflow == AnalysisWorkflow.BALSAMIC_UMI an
     shell:
       """
     bcftools view {input.vcf} \
-    | bcftools view --exclude '{params.hard_filter_list}' -o {output.vcf_filtered} -O z;
+    | bcftools view --exclude '{params.hard_filters}' -o {output.vcf_filtered} -O z;
 
     tabix -p vcf -f {output.vcf_filtered};
       """

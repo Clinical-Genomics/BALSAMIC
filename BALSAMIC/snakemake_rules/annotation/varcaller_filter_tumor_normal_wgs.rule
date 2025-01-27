@@ -16,7 +16,7 @@ rule bcftools_filter_tnscope_research_tumor_normal:
   params:
     pop_freq = get_tag_and_filtername(snv_research_filters, "balsamic_high_pop_freq"),
     swegen_freq = get_tag_and_filtername(snv_research_filters, "SWEGENAF"),
-    hard_filter_list = WgsSNVFilters.get_filter_command(category="research", sequencing_type=sequencing_type, analysis_type=analysis_type, soft_filter_normals=soft_filter_normal),
+    hard_filters = WgsSNVFilters.get_bcftools_filter_string(category="research", sequencing_type=sequencing_type, analysis_type=analysis_type, soft_filter_normals=soft_filter_normal),
     case_name = '{case_name}'
   threads:
     get_threads(cluster_config, 'bcftools_filter_tnscope_research_tumor_normal')
@@ -27,7 +27,7 @@ rule bcftools_filter_tnscope_research_tumor_normal:
 bcftools view --threads {threads} {input.vcf_snv_research} |\
 bcftools filter --threads {threads} --include 'INFO/GNOMADAF_popmax <= {params.pop_freq[0]} || INFO/GNOMADAF_popmax == \".\"' --soft-filter '{params.pop_freq[1]}' --mode '+' |\
 bcftools filter --threads {threads} --include 'INFO/SWEGENAF <= {params.swegen_freq[0]} || INFO/SWEGENAF == \".\"' --soft-filter '{params.swegen_freq[1]}' --mode '+' |\
-bcftools view --threads {threads} --exclude '{params.hard_filter_list}' -o {output.vcf_pass_tnscope} -O z;
+bcftools view --threads {threads} --exclude '{params.hard_filters}' -o {output.vcf_pass_tnscope} -O z;
 
 tabix -p vcf -f {output.vcf_pass_tnscope};
 
@@ -51,7 +51,7 @@ rule bcftools_filter_tnscope_clinical_tumor_normal:
     pop_freq = get_tag_and_filtername(snv_research_filters, "balsamic_high_pop_freq"),
     swegen_freq = get_tag_and_filtername(snv_research_filters, "SWEGENAF"),
     loqusdb_clinical_freq = get_tag_and_filtername(snv_clinical_filters, "Frq"),
-    hard_filter_list = WgsSNVFilters.get_filter_command(category="clinical", sequencing_type=sequencing_type, analysis_type=analysis_type, soft_filter_normals=soft_filter_normal),
+    hard_filters = WgsSNVFilters.get_bcftools_filter_string(category="clinical", sequencing_type=sequencing_type, analysis_type=analysis_type, soft_filter_normals=soft_filter_normal),
     housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "clinical"},
     case_name = '{case_name}',
   threads:
@@ -65,7 +65,7 @@ bcftools filter --threads {threads} --include 'INFO/ArtefactFrq <= {params.artef
 bcftools filter --threads {threads} --include 'INFO/GNOMADAF_popmax <= {params.pop_freq[0]} || INFO/GNOMADAF_popmax == \".\"' --soft-filter '{params.pop_freq[1]}' --mode '+' | \
 bcftools filter --threads {threads} --include 'INFO/SWEGENAF <= {params.swegen_freq[0]} || INFO/SWEGENAF == \".\"' --soft-filter '{params.swegen_freq[1]}' --mode '+' |\
 bcftools filter --threads {threads} --include 'INFO/Frq <= {params.loqusdb_clinical_freq[0]} || INFO/Frq == \".\"' --soft-filter '{params.loqusdb_clinical_freq[1]}' --mode '+' |\
-bcftools view --threads {threads} --exclude '{params.hard_filter_list}' -O z -o {output.vcf_pass_tnscope};
+bcftools view --threads {threads} --exclude '{params.hard_filters}' -O z -o {output.vcf_pass_tnscope};
 
 tabix -p vcf -f {output.vcf_pass_tnscope};
 

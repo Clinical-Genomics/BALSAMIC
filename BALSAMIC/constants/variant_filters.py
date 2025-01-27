@@ -215,14 +215,14 @@ class BaseSNVFilters:
         return matching_filters
 
     @classmethod
-    def get_filter_command(
+    def get_bcftools_filter_string(
         cls,
         category: Literal["clinical", "research", "quality"],
         analysis_type: Optional[Enum] = None,
         sequencing_type: Optional[Enum] = None,
         variant_caller: Optional[Enum] = None,
         soft_filter_normals: Optional[bool] = None,
-    ) -> Set[str]:
+    ) -> str:
         """
         Get a set of filter names based on various attributes.
 
@@ -234,7 +234,7 @@ class BaseSNVFilters:
             soft_filter_normals (Optional[bool]): If True, removes filters in MATCHED_NORMAL_FILTER_NAMES.
 
         Returns:
-            Set[str]: A set of filter names.
+            str: bcftools filter string
         """
         # Use the shared filtering logic and extract filter names
         filters = cls.filter_criteria(
