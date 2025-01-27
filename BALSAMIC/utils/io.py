@@ -57,20 +57,6 @@ def read_json(json_path: str) -> dict:
     else:
         raise FileNotFoundError(f"The JSON file {json_path} was not found")
 
-
-def read_tsv(filepath: str) -> List[List[str]]:
-    """Read a tsv file and return its rows as a list of lists.
-
-    Args:
-        filepath (str): Path to the tsv file.
-
-    Returns:
-        List[List[str]]: Parsed rows of the tsv file.
-    """
-    with open(filepath, "r") as rf:
-        return [line.split("\t") for line in rf]
-
-
 def write_json(json_obj: dict, path: str) -> None:
     """Write JSON format data to an output file."""
     try:

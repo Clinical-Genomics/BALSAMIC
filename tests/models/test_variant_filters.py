@@ -132,15 +132,15 @@ def test_wes_tga_read_depth_snv_filter():
     )
 
     # WHEN extracting DP specific filter
-    wes_DP_filter = get_tag_and_filtername(wes_filters, "balsamic_low_tumor_dp")
-    tga_DP_filter = get_tag_and_filtername(tga_filters, "balsamic_low_tumor_dp")
+    wes_dp_filter = get_tag_and_filtername(wes_filters, "balsamic_low_tumor_dp")
+    tga_dp_filter = get_tag_and_filtername(tga_filters, "balsamic_low_tumor_dp")
 
     # THEN DP filter name should be correct
-    assert wes_DP_filter[1] == "balsamic_low_tumor_dp"
+    assert wes_dp_filter[1] == "balsamic_low_tumor_dp"
     # THEN DP threshold for WES should be 20
-    assert isclose(wes_DP_filter[0], 20)
+    assert isclose(wes_dp_filter[0], 20)
     # THEN DP threshold for TGA should be 50
-    assert isclose(tga_DP_filter[0], 50)
+    assert isclose(tga_dp_filter[0], 50)
 
 
 def test_filter_criteria_soft_normals_exclusion():
