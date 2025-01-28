@@ -78,7 +78,7 @@ def test_wgs_quality_paired_filters():
     retrieved_filter_names = {f.filter_name for f in filters}
 
     # THEN matched normal filter is retrieved
-    assert "high_normal_tumor_af_frac" in retrieved_filter_names
+    assert "in_normal" in retrieved_filter_names
 
 
 def test_wgs_quality_single_filters():
