@@ -108,12 +108,6 @@ class BaseSNVFilters:
             analysis_type=AnalysisType.PAIRED,
         ),
         VCFFilter(
-            filter_name="MAF0.05",
-            Description="Matched sample has AF > 0.05, thus not somatic (this filter is removed downstream)",
-            variant_caller=BioinfoTools.VARDICT,
-            analysis_type=AnalysisType.PAIRED,
-        ),
-        VCFFilter(
             filter_name="P0.9",
             Description="Not significant with p-value > 0.9",
             variant_caller=BioinfoTools.VARDICT,
@@ -150,12 +144,6 @@ class BaseSNVFilters:
         VCFFilter(
             filter_name="germline_risk",
             Description="Evidence indicates this site is germline, not somatic",
-            variant_caller=BioinfoTools.TNSCOPE,
-            analysis_type=AnalysisType.PAIRED,
-        ),
-        VCFFilter(
-            filter_name="alt_allele_in_normal",
-            Description="Evidence seen in the normal sample (this filter is removed downstream)",
             variant_caller=BioinfoTools.TNSCOPE,
             analysis_type=AnalysisType.PAIRED,
         ),
