@@ -60,7 +60,7 @@ elif config["analysis"]["sequencing_type"] == 'wgs' and config["analysis"]["anal
         AD = get_tag_and_filtername(snv_quality_filters, "balsamic_low_tumor_ad"),
         DP = get_tag_and_filtername(snv_quality_filters, "balsamic_low_tumor_dp"),
         AF_min = get_tag_and_filtername(snv_quality_filters, "balsamic_low_af"),
-        high_normal_tumor_af_frac = get_tag_and_filtername(snv_quality_filters, "high_normal_tumor_af_frac"),
+        in_normal = get_tag_and_filtername(snv_quality_filters, "in_normal"),
         hard_filters = WgsSNVFilters.get_bcftools_filter_string(category="quality", sequencing_type=sequencing_type, analysis_type=analysis_type, variant_caller=BioinfoTools.TNSCOPE, soft_filter_normals=soft_filter_normal),
         case_name = config["analysis"]["case_id"],
       threads:
@@ -74,7 +74,7 @@ bcftools view {input.vcf_snv} \
 | bcftools filter --threads {threads} --include 'FORMAT/AD[0:1] >= {params.AD[0]}' --soft-filter '{params.AD[1]}' --mode '+' \
 | bcftools filter --threads {threads} --include 'FORMAT/AF[0] >= {params.AF_min[0]}' --soft-filter '{params.AF_min[1]}' --mode '+' \
 | bcftools annotate -x FILTER/alt_allele_in_normal \
-| bcftools filter --threads {threads} --exclude 'sum(FORMAT/AF[1])/sum(FORMAT/AF[0])>{params.high_normal_tumor_af_frac[0]}' --soft-filter '{params.high_normal_tumor_af_frac[1]}' --mode '+' \
+| bcftools filter --threads {threads} --exclude 'sum(FORMAT/AF[1])/sum(FORMAT/AF[0])>{params.in_normal[0]}' --soft-filter '{params.in_normal[1]}' --mode '+' \
 | bcftools view --exclude '{params.hard_filters}' -O z -o {output.vcf_snv_research}; 
 
 tabix -p vcf -f {output.vcf_snv_research};
@@ -164,7 +164,7 @@ elif config["analysis"]["sequencing_type"] == 'targeted' and config["analysis"][
       AD = get_tag_and_filtername(snv_quality_filters, "balsamic_low_tumor_ad"),
       DP = get_tag_and_filtername(snv_quality_filters, "balsamic_low_tumor_dp"),
       AF_min = get_tag_and_filtername(snv_quality_filters, "balsamic_low_af"),
-      high_normal_tumor_af_frac = get_tag_and_filtername(snv_quality_filters, "high_normal_tumor_af_frac"),
+      in_normal = get_tag_and_filtername(snv_quality_filters, "in_normal"),
       hard_filters = TgaSNVFilters.get_bcftools_filter_string(category="quality", sequencing_type=sequencing_type, analysis_type=analysis_type, variant_caller=BioinfoTools.TNSCOPE, soft_filter_normals=soft_filter_normal),
       case_name = config["analysis"]["case_id"],
     threads:
@@ -175,7 +175,7 @@ elif config["analysis"]["sequencing_type"] == 'targeted' and config["analysis"][
       """
     bcftools view {input.vcf} \
     | bcftools annotate -x FILTER/alt_allele_in_normal \
-    | bcftools filter --threads {threads} --exclude 'sum(FORMAT/AF[1])/sum(FORMAT/AF[0])>{params.high_normal_tumor_af_frac[0]}' --soft-filter '{params.high_normal_tumor_af_frac[1]}' --mode '+' \
+    | bcftools filter --threads {threads} --exclude 'sum(FORMAT/AF[1])/sum(FORMAT/AF[0])>{params.in_normal[0]}' --soft-filter '{params.in_normal[1]}' --mode '+' \
     | bcftools filter --include 'SUM(FORMAT/AD[0:0]+FORMAT/AD[0:1]) >= {params.DP[0]} || SUM(FORMAT/AD[1:0]+FORMAT/AD[1:1]) >= {params.DP[0]}' --soft-filter '{params.DP[1]}' --mode '+' \
     | bcftools filter --include 'FORMAT/AD[0:1] >= {params.AD[0]}' --soft-filter '{params.AD[1]}' --mode '+' \
     | bcftools filter --include 'FORMAT/AF[0] >= {params.AF_min[0]}' --soft-filter '{params.AF_min[1]}' --mode '+' \
@@ -198,7 +198,7 @@ elif config["analysis"]["sequencing_type"] == 'targeted' and config["analysis"][
       AD=get_tag_and_filtername(snv_quality_filters, "balsamic_low_tumor_ad"),
       DP=get_tag_and_filtername(snv_quality_filters, "balsamic_low_tumor_dp"),
       AF_min=get_tag_and_filtername(snv_quality_filters, "balsamic_low_af"),
-      high_normal_tumor_af_frac=get_tag_and_filtername(snv_quality_filters,"high_normal_tumor_af_frac"),
+      in_normal=get_tag_and_filtername(snv_quality_filters,"in_normal"),
       hard_filters=TgaSNVFilters.get_bcftools_filter_string(category="quality", sequencing_type=sequencing_type, analysis_type=analysis_type, variant_caller=BioinfoTools.VARDICT, soft_filter_normals=soft_filter_normal),
       case_name=config["analysis"]["case_id"],
     threads:
@@ -210,7 +210,7 @@ elif config["analysis"]["sequencing_type"] == 'targeted' and config["analysis"][
     bcftools view {input.vcf} | \
     bcftools annotate -x FILTER/MAF0.05 | \
     bcftools filter --include 'SMPL_MIN(FMT/MQ) >= {params.MQ[0]}' --soft-filter '{params.MQ[1]}' --mode + | \
-    bcftools filter --threads {threads} --exclude 'sum(FORMAT/AF[1:0])/sum(FORMAT/AF[0:0])>{params.high_normal_tumor_af_frac[0]}' --soft-filter '{params.high_normal_tumor_af_frac[1]}' --mode '+' | \
+    bcftools filter --threads {threads} --exclude 'sum(FORMAT/AF[1:0])/sum(FORMAT/AF[0:0])>{params.in_normal[0]}' --soft-filter '{params.in_normal[1]}' --mode '+' | \
     bcftools filter --include 'INFO/DP >= {params.DP[0]}' --soft-filter '{params.DP[1]}' --mode '+' | \
     bcftools filter --include 'INFO/VD >= {params.AD[0]}' --soft-filter '{params.AD[1]}' --mode '+' | \
     bcftools filter --include 'INFO/AF >= {params.AF_min[0]}' --soft-filter '{params.AF_min[1]}' --mode '+' | \
@@ -232,7 +232,7 @@ if config_model.analysis.analysis_workflow == AnalysisWorkflow.BALSAMIC_UMI and 
       Path(singularity_image,config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
     params:
       case_name = config["analysis"]["case_id"],
-      high_normal_tumor_af_frac=get_tag_and_filtername(umi_snv_quality_filters,"high_normal_tumor_af_frac"),
+      in_normal=get_tag_and_filtername(umi_snv_quality_filters,"in_normal"),
       hard_filters=TgaUmiSNVFilters.get_bcftools_filter_string(category="quality", sequencing_type=sequencing_type, analysis_type=analysis_type, variant_caller=BioinfoTools.TNSCOPE, soft_filter_normals=soft_filter_normal),
     threads:
       get_threads(cluster_config,'bcftools_quality_filter_TNscope_umi_tumor_normal')
@@ -242,7 +242,7 @@ if config_model.analysis.analysis_workflow == AnalysisWorkflow.BALSAMIC_UMI and 
       """
     bcftools view {input.vcf} \
     | bcftools annotate -x FILTER/alt_allele_in_normal \
-    | bcftools filter --threads {threads} --exclude 'sum(FORMAT/AF[1])/sum(FORMAT/AF[0])>{params.high_normal_tumor_af_frac[0]}' --soft-filter '{params.high_normal_tumor_af_frac[1]}' --mode '+' \
+    | bcftools filter --threads {threads} --exclude 'sum(FORMAT/AF[1])/sum(FORMAT/AF[0])>{params.in_normal[0]}' --soft-filter '{params.in_normal[1]}' --mode '+' \
     | bcftools view --exclude '{params.hard_filters}' -o {output.vcf_filtered} -O z;
     
     tabix -p vcf -f {output.vcf_filtered};

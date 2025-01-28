@@ -46,7 +46,7 @@ def test_tga_quality_paired_filters():
     retrieved_filter_names = {f.filter_name for f in filters}
 
     # THEN matched normal filter is retrieved
-    assert "high_normal_tumor_af_frac" in retrieved_filter_names
+    assert "in_normal" in retrieved_filter_names
 
 
 def test_tga_quality_single_filters():
@@ -61,7 +61,7 @@ def test_tga_quality_single_filters():
     retrieved_filter_names = {f.filter_name for f in filters}
 
     # THEN matched normal filter is not retrieved
-    assert "high_normal_tumor_af_frac" not in retrieved_filter_names
+    assert "in_normal" not in retrieved_filter_names
     # THEN single specific filter is retrieved
     assert "balsamic_high_strand_oddsratio" in retrieved_filter_names
 
@@ -92,7 +92,7 @@ def test_wgs_quality_single_filters():
     retrieved_filter_names = {f.filter_name for f in filters}
 
     # THEN matched normal filter is not retrieved
-    assert "high_normal_tumor_af_frac" not in retrieved_filter_names
+    assert "in_normal" not in retrieved_filter_names
     # THEN single specific filter is retrieved
     assert "balsamic_low_strand_read_counts" in retrieved_filter_names
 
@@ -108,7 +108,7 @@ def test_tga_umi_snv_filters():
     retrieved_filter_names = {f.filter_name for f in filters}
 
     # THEN matched normal filter is retrieved
-    assert "high_normal_tumor_af_frac" in retrieved_filter_names
+    assert "in_normal" in retrieved_filter_names
 
     # GIVEN TGA UMI research filters
     filters = TgaUmiSNVFilters.filter_criteria(category="research")

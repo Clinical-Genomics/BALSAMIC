@@ -151,7 +151,7 @@ class BaseSNVFilters:
 
     MATCHED_NORMAL_FILTER_NAMES: List[str] = [
         "germline_risk",
-        "high_normal_tumor_af_frac",
+        "in_normal",
     ]
 
     @classmethod
@@ -299,7 +299,7 @@ class WgsSNVFilters(BaseSNVFilters):
     quality = [
         VCFFilter(
             tag_value=0.3,
-            filter_name="high_normal_tumor_af_frac",
+            filter_name="in_normal",
             field="FORMAT",
             analysis_type=AnalysisType.PAIRED,
         ),
@@ -339,7 +339,7 @@ class TgaSNVFilters(BaseSNVFilters):
     quality = [
         VCFFilter(
             tag_value=0.3,
-            filter_name="high_normal_tumor_af_frac",
+            filter_name="in_normal",
             field="FORMAT",
             analysis_type=AnalysisType.PAIRED,
         ),
@@ -392,7 +392,7 @@ class TgaUmiSNVFilters(BaseSNVFilters):
     quality = [
         VCFFilter(
             tag_value=0.3,
-            filter_name="high_normal_tumor_af_frac",
+            filter_name="in_normal",
             field="FORMAT",
             analysis_type=AnalysisType.PAIRED,
         ),
