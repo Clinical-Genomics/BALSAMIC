@@ -133,6 +133,12 @@ class BaseSNVFilters:
             analysis_type=AnalysisType.PAIRED,
         ),
         VCFFilter(
+            filter_name="Q0",
+            Description="Mean Mapping Quality Below 0",
+            variant_caller=BioinfoTools.VARDICT,
+            analysis_type=AnalysisType.PAIRED,
+        ),
+        VCFFilter(
             filter_name="t_lod_fstar",
             Description="Tumor does not meet likelihood threshold",
             variant_caller=BioinfoTools.TNSCOPE,
