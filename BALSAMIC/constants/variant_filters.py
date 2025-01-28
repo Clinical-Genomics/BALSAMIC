@@ -109,7 +109,7 @@ class BaseSNVFilters:
         ),
         VCFFilter(
             filter_name="MAF0.05",
-            Description="Matched sample has AF > 0.05, thus not somatic",
+            Description="Matched sample has AF > 0.05, thus not somatic (this filter is removed downstream)",
             variant_caller=BioinfoTools.VARDICT,
             analysis_type=AnalysisType.PAIRED,
         ),
@@ -153,12 +153,17 @@ class BaseSNVFilters:
             variant_caller=BioinfoTools.TNSCOPE,
             analysis_type=AnalysisType.PAIRED,
         ),
+        VCFFilter(
+            filter_name="alt_allele_in_normal",
+            Description="Evidence seen in the normal sample (this filter is removed downstream)",
+            variant_caller=BioinfoTools.TNSCOPE,
+            analysis_type=AnalysisType.PAIRED,
+        ),
     ]
 
     MATCHED_NORMAL_FILTER_NAMES: List[str] = [
         "germline_risk",
         "high_normal_tumor_af_frac",
-        "MAF0.05",
     ]
 
     @classmethod

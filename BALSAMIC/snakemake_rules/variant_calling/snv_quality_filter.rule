@@ -208,6 +208,7 @@ elif config["analysis"]["sequencing_type"] == 'targeted' and config["analysis"][
     shell:
       """
     bcftools view {input.vcf} | \
+    bcftools annotate -x FILTER/MAF0.05 | \
     bcftools filter --include 'SMPL_MIN(FMT/MQ) >= {params.MQ[0]}' --soft-filter '{params.MQ[1]}' --mode + | \
     bcftools filter --threads {threads} --exclude 'sum(FORMAT/AF[1:0])/sum(FORMAT/AF[0:0])>{params.high_normal_tumor_af_frac[0]}' --soft-filter '{params.high_normal_tumor_af_frac[1]}' --mode '+' | \
     bcftools filter --include 'INFO/DP >= {params.DP[0]}' --soft-filter '{params.DP[1]}' --mode '+' | \
