@@ -61,6 +61,11 @@ class BaseSNVFilters:
             variant_caller=BioinfoTools.VARDICT,
         ),
         VCFFilter(
+            filter_name="Bias",
+            Description="Strand Bias",
+            variant_caller=BioinfoTools.VARDICT,
+        ),
+        VCFFilter(
             filter_name="AMPBIAS",
             Description="Indicate the variant has amplicon bias",
             variant_caller=BioinfoTools.VARDICT,
@@ -89,12 +94,6 @@ class BaseSNVFilters:
             Description="Var Depth < 2",
             variant_caller=BioinfoTools.VARDICT,
             analysis_type=AnalysisType.SINGLE,
-        ),
-        VCFFilter(
-            filter_name="Bias",
-            Description="Strand Bias",
-            variant_caller=BioinfoTools.VARDICT,
-            analysis_type=AnalysisType.PAIRED,
         ),
         VCFFilter(
             filter_name="DIFF0.2",
