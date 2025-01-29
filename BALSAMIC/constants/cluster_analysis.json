@@ -388,11 +388,7 @@
 		"time": "01:00:00",
 		"n": 4
 	},
-	"modify_tnscope_infofield": {
-		"time": "01:00:00",
-		"n": 4
-	},
-	"merge_tnscope_snvs_to_mnvs": {
+	"post_process_tnscope": {
 		"time": "01:00:00",
 		"n": 4
 	},
