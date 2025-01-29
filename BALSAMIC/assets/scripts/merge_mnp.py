@@ -207,11 +207,12 @@ def merge(
         if len(all_filters) > 1:
             v.filter = ["MERGED_MNV_CONFLICTING_FILTERS"]
         else:
-            v.filter = ["MERGED_MNV"]
+            v.filter = ["MERGED_MNV", f"{all_filters}"]
 
         # Mark all constituent variants as "MERGED"
         for vi in vv:
-            vi.filter.append("MERGED")
+            if "MERGED" not in vi.filter:
+                vi.filter.append("MERGED")
 
         # Merge sample information (AF, AD, AFDP)
         for i in range(len(vcf.samples)):
@@ -381,7 +382,7 @@ def process(
 @click.option(
     "--max_distance",
     type=int,
-    default=4,
+    default=5,
     show_default=True,
     help="Maximum distance between two variants to be merged.",
 )

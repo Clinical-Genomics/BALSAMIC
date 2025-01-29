@@ -57,7 +57,7 @@ rule merge_tnscope_snvs_to_mnvs:
 export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
 
-{params.sentieon_exec} pyexec {params.merge_mnvs} {input.vcf_tnscope} {input.ref} > {output.vcf_tnscope}
+{params.sentieon_exec} pyexec {params.merge_mnvs} --max_distance 5 {input.vcf_tnscope} {input.ref} > {output.vcf_tnscope}
         """
 
 rule modify_tnscope_infofield:
