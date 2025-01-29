@@ -65,9 +65,9 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 
 python {params.modify_tnscope_infofield} {params.tmpdir}/tnscope.research.mnv.vcf {params.tmpdir}/tnscope.research.mnv.add_info_fields.vcf ;
 
-python {params.edit_vcf_script} -i {params.tmpdir}/tnscope.research.mnv.add_info_fields.vcf -o {params.tmpdir}/tnscope.research.mnv.add_info_fields.added_found_in.vcf.vcf -c {params.variant_caller};
+python {params.edit_vcf_script} -i {params.tmpdir}/tnscope.research.mnv.add_info_fields.vcf -o {params.tmpdir}/tnscope.research.mnv.add_info_fields.added_found_in.vcf -c {params.variant_caller};
 
-bgzip {params.tmpdir}/tnscope.research.mnv.modified.added_found_in.vcf.vcf ;
+bgzip {params.tmpdir}/tnscope.research.mnv.modified.added_found_in.vcf ;
 
 mv {params.tmpdir}/tnscope.research.mnv.modified.added_found_in.vcf.gz {output.vcf_tnscope} ;
 tabix -p vcf -f {output.vcf_tnscope} ;
