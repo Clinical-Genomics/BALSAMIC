@@ -202,15 +202,16 @@ def merge(
         v.alt = [alti[i:] for alti in alt]
         v.pos += i
 
-        # Combine filters and ensure uniqueness
+        # Set MNV filter
         all_filters = {flt for vi in vv for flt in vi.filter}
-        if "PASS" in all_filters and len(all_filters) > 1:
-            all_filters.discard("PASS")
-        v.filter = list(all_filters)
+        if len(all_filters) > 1:
+            v.filter = ["MERGED_MNV_CONFLICTING_FILTERS"]
+        else:
+            v.filter = ["MERGED_MNV"]
 
         # Mark all constituent variants as "MERGED"
         for vi in vv:
-            vi.filter = ["MERGED"]
+            vi.filter.append("MERGED")
 
         # Merge sample information (AF, AD, AFDP)
         for i in range(len(vcf.samples)):
@@ -303,18 +304,33 @@ def process(
     out_fh = open(out_file, "w") if out_file else sys.stdout
 
     # Define and add the MERGED filter to the VCF header if not already present
-    vcf.filters["MERGED"] = {
-        "Description": '"Merged with neighboring variants"',
-        "ID": "MERGED",
+    new_filters = {
+        "MERGED": {
+            "Description": '"SNV Merged with neighboring variants"',
+            "ID": "MERGED",
+        },
+        "MERGED_MNV": {
+            "Description": '"Created from merged SNVs with same phase-id"',
+            "ID": "MERGED_MNV",
+        },
+        "MERGED_MNV_CONFLICTING_FILTERS": {
+            "Description": '"Merged MNV contains SNVs with conflicting filters, such as triallelic_site and in_normal"',
+            "ID": "MNV_CONFLICTING_FILTERS",
+        }
     }
+    for new_filter_id, description_dict in new_filters.items():
+        vcf.filters[new_filter_id] = description_dict
 
     filter_added = False
     for header_line in vcf.headers:
         if header_line.startswith("##FILTER") and not filter_added:
-            print(
-                '##FILTER=<ID=MERGED,Description="Merged with neighboring variants">',
-                file=out_fh,
-            )
+            for new_filter_id, description_dict in new_filters.items():
+                id = description_dict["ID"]
+                description = description_dict["Description"]
+                print(
+                    f"##FILTER=<ID={id},Description={description}>",
+                    file=out_fh,
+                )
             filter_added = True
         print(header_line, file=out_fh)
 
@@ -365,7 +381,7 @@ def process(
 @click.option(
     "--max_distance",
     type=int,
-    default=5,
+    default=4,
     show_default=True,
     help="Maximum distance between two variants to be merged.",
 )
