@@ -58,6 +58,7 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
             "snakemake_rules/annotation/vcf2cytosure_convert.rule",
             "snakemake_rules/annotation/final_vcf_reheader.rule",
             "snakemake_rules/annotation/rankscore.rule",
+            "snakemake_rules/quality_control/sex_check.rule",
         ],
     },
     "single_targeted": {
@@ -160,6 +161,7 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
             "snakemake_rules/quality_control/picard_wgs.rule",
             "snakemake_rules/quality_control/somalier.rule",
             "snakemake_rules/quality_control/samtools_qc_wgs.rule",
+            "snakemake_rules/quality_control/sex_check.rule",
         ],
         "align": [
             "snakemake_rules/align/wgs_bam_postprocess.rule",

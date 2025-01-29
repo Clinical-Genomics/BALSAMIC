@@ -22,6 +22,7 @@ from BALSAMIC.commands.options import (
     OPTION_CASE_ID,
     OPTION_CLINICAL_SNV_OBSERVATIONS,
     OPTION_CLINICAL_SV_OBSERVATIONS,
+    OPTION_SOFT_FILTER_NORMAL,
     OPTION_EXOME,
     OPTION_FASTQ_PATH,
     OPTION_GENDER,
@@ -77,6 +78,7 @@ LOG = logging.getLogger(__name__)
 @OPTION_CASE_ID
 @OPTION_CLINICAL_SNV_OBSERVATIONS
 @OPTION_CLINICAL_SV_OBSERVATIONS
+@OPTION_SOFT_FILTER_NORMAL
 @OPTION_EXOME
 @OPTION_FASTQ_PATH
 @OPTION_GENDER
@@ -121,6 +123,7 @@ def case_config(
     pon_cnn: Path,
     sentieon_install_dir: Path,
     sentieon_license: str,
+    soft_filter_normal: bool,
     swegen_snv: Path,
     swegen_sv: Path,
     tumor_sample_name: str,
@@ -193,6 +196,7 @@ def case_config(
         },
         analysis={
             "case_id": case_id,
+            "soft_filter_normal": soft_filter_normal,
             "gender": gender,
             "analysis_dir": analysis_dir,
             "fastq_path": analysis_fastq_dir,
