@@ -205,7 +205,7 @@ def merge(
         # Set MNV filter
         all_filters = {flt for vi in vv for flt in vi.filter}
         if len(all_filters) > 1:
-            v.filter = ["MERGED_MNV_CONFLICTING_FILTERS"]
+            v.filter = ["MNV_CONFLICTING_FILTERS"]
         else:
             v.filter = ["MERGED_MNV", f"{all_filters.pop()}"]
 
@@ -314,7 +314,7 @@ def process(
             "Description": '"Created from merged SNVs with same phase-id"',
             "ID": "MERGED_MNV",
         },
-        "MERGED_MNV_CONFLICTING_FILTERS": {
+        "MNV_CONFLICTING_FILTERS": {
             "Description": '"Merged MNV contains SNVs with conflicting filters, such as triallelic_site and in_normal"',
             "ID": "MNV_CONFLICTING_FILTERS",
         }
