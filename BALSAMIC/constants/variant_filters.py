@@ -1,475 +1,430 @@
-# OPTIONAL SOFT FILTERS
-MATCHED_NORMAL_FILTER_NAMES = {
-    "matched_normal_filter_names": [
-        "germline_risk",
-        "high_normal_tumor_af_frac",
-        "MAF0.05",
+from BALSAMIC.models.params import VCFFilter
+from BALSAMIC.constants.analysis import (
+    SequencingType,
+    AnalysisType,
+    BioinfoTools,
+)
+from typing import List, Optional, Literal, Set
+from enum import Enum
+
+
+class BaseSNVFilters:
+    INTERNAL_VARIANT_CALLER_FILTERS = [
+        VCFFilter(
+            filter_name="Cluster0bp",
+            Description="Two variants are within 0 bp",
+            variant_caller=BioinfoTools.VARDICT,
+        ),
+        VCFFilter(
+            filter_name="InGap",
+            Description="The variant is in the deletion gap, thus likely false positive",
+            variant_caller=BioinfoTools.VARDICT,
+        ),
+        VCFFilter(
+            filter_name="InIns",
+            Description="The variant is adjacent to an insertion variant",
+            variant_caller=BioinfoTools.VARDICT,
+        ),
+        VCFFilter(
+            filter_name="MSI12",
+            Description="Variant in MSI region with 12 non-monomer MSI or 13 monomer MSI",
+            variant_caller=BioinfoTools.VARDICT,
+        ),
+        VCFFilter(
+            filter_name="NM4.5",
+            Description="Mean mismatches in reads >= 4.5, thus likely false positive",
+            variant_caller=BioinfoTools.VARDICT,
+        ),
+        VCFFilter(
+            filter_name="SN1.5",
+            Description="Signal to Noise Less than 1.5",
+            variant_caller=BioinfoTools.VARDICT,
+        ),
+        VCFFilter(
+            filter_name="f0.001",
+            Description="Allele frequency < 0.001",
+            variant_caller=BioinfoTools.VARDICT,
+        ),
+        VCFFilter(
+            filter_name="p8",
+            Description="Mean Position in Reads Less than 8",
+            variant_caller=BioinfoTools.VARDICT,
+        ),
+        VCFFilter(
+            filter_name="pSTD",
+            Description="Position in Reads has STD of 0",
+            variant_caller=BioinfoTools.VARDICT,
+        ),
+        VCFFilter(
+            filter_name="q22.5",
+            Description="Mean Base Quality Below 22.5",
+            variant_caller=BioinfoTools.VARDICT,
+        ),
+        VCFFilter(
+            filter_name="Bias",
+            Description="Strand Bias",
+            variant_caller=BioinfoTools.VARDICT,
+        ),
+        VCFFilter(
+            filter_name="AMPBIAS",
+            Description="Indicate the variant has amplicon bias",
+            variant_caller=BioinfoTools.VARDICT,
+            analysis_type=AnalysisType.SINGLE,
+        ),
+        VCFFilter(
+            filter_name="LongMSI",
+            Description="The somatic variant is flanked by long A/T (>=14)",
+            variant_caller=BioinfoTools.VARDICT,
+            analysis_type=AnalysisType.SINGLE,
+        ),
+        VCFFilter(
+            filter_name="Q10",
+            Description="Mean Mapping Quality Below 10",
+            variant_caller=BioinfoTools.VARDICT,
+            analysis_type=AnalysisType.SINGLE,
+        ),
+        VCFFilter(
+            filter_name="d3",
+            Description="Allele frequency < 0.001",
+            variant_caller=BioinfoTools.VARDICT,
+            analysis_type=AnalysisType.SINGLE,
+        ),
+        VCFFilter(
+            filter_name="v2",
+            Description="Var Depth < 2",
+            variant_caller=BioinfoTools.VARDICT,
+            analysis_type=AnalysisType.SINGLE,
+        ),
+        VCFFilter(
+            filter_name="DIFF0.2",
+            Description="Non-somatic or LOH and allele frequency difference < 0.2",
+            variant_caller=BioinfoTools.VARDICT,
+            analysis_type=AnalysisType.PAIRED,
+        ),
+        VCFFilter(
+            filter_name="LongAT",
+            Description="The somatic variant is flanked by long A/T (>=14)",
+            variant_caller=BioinfoTools.VARDICT,
+            analysis_type=AnalysisType.PAIRED,
+        ),
+        VCFFilter(
+            filter_name="P0.9",
+            Description="Not significant with p-value > 0.9",
+            variant_caller=BioinfoTools.VARDICT,
+            analysis_type=AnalysisType.PAIRED,
+        ),
+        VCFFilter(
+            filter_name="d5",
+            Description="Total Depth < 5",
+            variant_caller=BioinfoTools.VARDICT,
+            analysis_type=AnalysisType.PAIRED,
+        ),
+        VCFFilter(
+            filter_name="v3",
+            Description="Var Depth < 3",
+            variant_caller=BioinfoTools.VARDICT,
+            analysis_type=AnalysisType.PAIRED,
+        ),
+        VCFFilter(
+            filter_name="Q0",
+            Description="Mean Mapping Quality Below 0",
+            variant_caller=BioinfoTools.VARDICT,
+            analysis_type=AnalysisType.PAIRED,
+        ),
+        VCFFilter(
+            filter_name="t_lod_fstar",
+            Description="Tumor does not meet likelihood threshold",
+            variant_caller=BioinfoTools.TNSCOPE,
+        ),
+        VCFFilter(
+            filter_name="low_t_alt_frac",
+            Description="Site filtered due to low alt allele fraction",
+            variant_caller=BioinfoTools.TNSCOPE,
+        ),
+        VCFFilter(
+            filter_name="germline_risk",
+            Description="Evidence indicates this site is germline, not somatic",
+            variant_caller=BioinfoTools.TNSCOPE,
+            analysis_type=AnalysisType.PAIRED,
+        ),
     ]
-}
 
-# CALLER SPECIFIC HARD-FILTERS
-# ---------------------------------
+    MATCHED_NORMAL_FILTER_NAMES: List[str] = [
+        "germline_risk",
+        "in_normal",
+    ]
 
-TNSCOPE_HARDFILTERS = [
-    {
-        "filter_name": "t_lod_fstar",
-        "Description": "Tumor does not meet likelihood threshold",
-    },
-    {
-        "filter_name": "low_t_alt_frac",
-        "Description": "Site filtered due to low alt allele fraction",
-    },
-]
+    @classmethod
+    def filter_criteria(
+        cls,
+        category: Literal["clinical", "research", "quality"],
+        analysis_type: Optional[Enum] = None,
+        sequencing_type: Optional[Enum] = None,
+        variant_caller: Optional[Enum] = None,
+        soft_filter_normals: Optional[bool] = None,
+        exclude_variantcaller_filters: Optional[bool] = False,
+    ) -> List[VCFFilter]:
+        """
+        Shared filtering logic to get filters based on criteria.
 
-TNSCOPE_TO_HARDFILTERS = TNSCOPE_HARDFILTERS
+        Args:
+            category (Literal["clinical", "research", "quality"]): The filter category to use.
+            analysis_type (Optional[Enum]): Filter based on analysis type (default: None).
+            sequencing_type (Optional[Enum]): Filter based on sequencing type (default: None).
+            variant_caller (Optional[Enum]): Filter based on variant caller (default: None).
+            soft_filter_normals (Optional[bool]): If True, excludes filters in MATCHED_NORMAL_FILTER_NAMES.
+            exclude_variantcaller_filters (Optional[bool]): If True, excludes the variantcaller filters.
 
-TNSCOPE_TN_HARDFILTERS = TNSCOPE_HARDFILTERS + [
-    {
-        "filter_name": "germline_risk",
-        "Description": "Evidence indicates this site is germline, not somatic",
-    },
-]
-VARDICT_HARDFILTERS = [
-    {"filter_name": "Cluster0bp", "Description": "Two variants are within 0 bp"},
-    {
-        "filter_name": "InGap",
-        "Description": "The variant is in the deletion gap, thus likely false positive",
-    },
-    {
-        "filter_name": "InIns",
-        "Description": "The variant is adjacent to an insertion variant",
-    },
-    {
-        "filter_name": "MSI12",
-        "Description": "Variant in MSI region with 12 non-monomer MSI or 13 monomer MSI",
-    },
-    {
-        "filter_name": "NM4.5",
-        "Description": "Mean mismatches in reads >= 4.5, thus likely false positive",
-    },
-    {"filter_name": "SN1.5", "Description": "Signal to Noise Less than 1.5"},
-    {"filter_name": "f0.001", "Description": "Allele frequency < 0.001"},
-    {"filter_name": "p8", "Description": "Mean Position in Reads Less than 8"},
-    {"filter_name": "pSTD", "Description": "Position in Reads has STD of 0"},
-    {"filter_name": "q22.5", "Description": "Mean Base Quality Below 22.5"},
-]
+        Returns:
+            List[VCFFilter]: A list of matching filter objects.
+        """
+        # Get the filters for the category
+        filters = getattr(cls, category)
 
-VARDICT_TO_HARDFILTERS = VARDICT_HARDFILTERS + [
-    {"filter_name": "AMPBIAS", "Description": "Indicate the variant has amplicon bias"},
-    {
-        "filter_name": "LongMSI",
-        "Description": "The somatic variant is flanked by long A/T (>=14)",
-    },
-    {"filter_name": "Q10", "Description": "Mean Mapping Quality Below 10"},
-    {"filter_name": "d3", "Description": "Total Depth < 3"},
-    {"filter_name": "v2", "Description": "Var Depth < 2"},
-]
+        # Helper function to check if a filter matches the criteria
+        def filter_matches(f: VCFFilter) -> bool:
+            return (
+                (
+                    analysis_type is None
+                    or getattr(f, "analysis_type", None) in {None, analysis_type}
+                )
+                and (
+                    sequencing_type is None
+                    or getattr(f, "sequencing_type", None) in {None, sequencing_type}
+                )
+                and (
+                    variant_caller is None
+                    or getattr(f, "variant_caller", None) in {None, variant_caller}
+                )
+            )
 
-VARDICT_TN_HARDFILTERS = VARDICT_HARDFILTERS + [
-    {"filter_name": "Bias", "Description": "Strand Bias"},
-    {
-        "filter_name": "DIFF0.2",
-        "Description": "Non-somatic or LOH and allele frequency difference < 0.2",
-    },
-    {
-        "filter_name": "LongAT",
-        "Description": "The somatic variant is flanked by long A/T (>=14)",
-    },
-    {
-        "filter_name": "MAF0.05",
-        "Description": "Matched sample has AF > 0.05, thus not somatic",
-    },
-    {"filter_name": "P0.9", "Description": "Not significant with p-value > 0.9"},
-    {"filter_name": "d5", "Description": "Total Depth < 5"},
-    {"filter_name": "v3", "Description": "Var Depth < 3"},
-]
+        # Filter the filters based on the matching function
+        matching_filters = [f for f in filters if filter_matches(f)]
 
-# RESEARCH AND CLINICAL FILTERS
-# ---------------------------------------------------
+        # If category is "quality", include VARIANT_CALLER_HARDFILTERS
+        if category == "quality" and not exclude_variantcaller_filters:
+            matching_filters += [
+                f for f in cls.INTERNAL_VARIANT_CALLER_FILTERS if filter_matches(f)
+            ]
 
-# Configurations for common clinical filters
-SNV_BCFTOOOLS_CLINICAL_COMMON = {
-    "loqusdb_clinical_snv_freq": {
-        "tag_value": 0.01,
-        "filter_name": "Frq",
-        "field": "INFO",
-    },
-    "artefact_snv_freq": {
-        "tag_value": 0.1,
-        "filter_name": "ArtefactFrq",
-        "field": "INFO",
-    },
-    "varcaller_name": "None",
-    "filter_type": "general",
-    "analysis_type": "tumor_only,tumor_normal",
-    "description": "Clinical database filters used for filtering SNVs",
-}
+        # Exclude filters if soft_filter_normals is set
+        if soft_filter_normals:
+            matching_filters = [
+                f
+                for f in matching_filters
+                if f.filter_name not in cls.MATCHED_NORMAL_FILTER_NAMES
+            ]
 
-# Configurations for common research filters
-SNV_BCFTOOOLS_RESEARCH_COMMON = {
-    "swegen_snv_freq": {
-        "tag_value": 0.01,
-        "filter_name": "SWEGENAF",
-        "field": "INFO",
-    },
-    "varcaller_name": "None",
-    "filter_type": "general",
-    "analysis_type": "tumor_only,tumor_normal",
-    "description": "Research database filters used for filtering SNVs",
-}
+        return matching_filters
 
-# Configurations for TGA specific research filters
-SNV_BCFTOOOLS_RESEARCH_TGA = {
-    **SNV_BCFTOOOLS_RESEARCH_COMMON,
-    "pop_freq": {
-        "tag_value": 0.005,
-        "filter_name": "balsamic_high_pop_freq",
-        "field": "INFO",
-    },
-}
+    @classmethod
+    def get_bcftools_filter_string(
+        cls,
+        category: Literal["clinical", "research", "quality"],
+        analysis_type: Optional[Enum] = None,
+        sequencing_type: Optional[Enum] = None,
+        variant_caller: Optional[Enum] = None,
+        soft_filter_normals: Optional[bool] = None,
+    ) -> str:
+        """
+        Get a set of filter names based on various attributes.
 
-# Configurations for UMI specific research filters
-SNV_BCFTOOOLS_RESEARCH_UMI = {
-    **SNV_BCFTOOOLS_RESEARCH_COMMON,
-    "pop_freq": {
-        "tag_value": 0.02,
-        "filter_name": "balsamic_high_pop_freq",
-        "field": "INFO",
-    },
-}
+        Args:
+            category (Literal["clinical", "research", "quality"]): The filter category to use.
+            analysis_type (Optional[Enum]): Filter based on analysis type (default: None).
+            sequencing_type (Optional[Enum]): Filter based on sequencing type (default: None).
+            variant_caller (Optional[Enum]): Filter based on variant caller (default: None).
+            soft_filter_normals (Optional[bool]): If True, removes filters in MATCHED_NORMAL_FILTER_NAMES.
 
-# Configurations for WGS specific research filters
-SNV_BCFTOOOLS_RESEARCH_WGS = {
-    **SNV_BCFTOOOLS_RESEARCH_COMMON,
-    "pop_freq": {
-        "tag_value": 0.001,
-        "filter_name": "balsamic_high_pop_freq",
-        "field": "INFO",
-    },
-}
+        Returns:
+            str: bcftools filter string
+        """
+        # Use the shared filtering logic and extract filter names
+        filters = cls.filter_criteria(
+            category,
+            analysis_type,
+            sequencing_type,
+            variant_caller,
+            soft_filter_normals,
+        )
+        # Extract filter_names
+        filter_names = [f.filter_name for f in filters]
+
+        # Format as BCFTools-compatible filter string
+        return " || ".join(
+            [f'FILTER~"{filter_name}"' for filter_name in sorted(filter_names)]
+        )
+
+    @classmethod
+    def get_filters(
+        cls,
+        category: Literal["clinical", "research", "quality"],
+        analysis_type: Optional[Enum] = None,
+        sequencing_type: Optional[Enum] = None,
+        variant_caller: Optional[Enum] = None,
+        exclude_variantcaller_filters: Optional[bool] = True,
+    ) -> List[VCFFilter]:
+        """
+        Get a list of filters matching the specified attributes.
+
+        Args:
+            category (Literal["clinical", "research", "quality"]): The filter category to use.
+            analysis_type (Optional[Enum]): Filter based on analysis type (default: None).
+            sequencing_type (Optional[Enum]): Filter based on sequencing type (default: None).
+            variant_caller (Optional[Enum]): Filter based on variant caller (default: None).
+            exclude_variantcaller_filters (Optional[bool]): If True, excludes the variantcaller filters.
+
+        Returns:
+            List[VCFFilter]: A list of matching filter objects.
+        """
+        # Use the shared filtering logic and return filter objects
+        return cls.filter_criteria(
+            category,
+            analysis_type,
+            sequencing_type,
+            variant_caller,
+            exclude_variantcaller_filters=exclude_variantcaller_filters,
+        )
 
 
-# SNV QUALITY FILTERS
-# ---------------------------------------------------
-
-# Configurations for common tumor normal SNV filters
-SNV_BCFTOOLS_QUALITY_TUMOR_NORMAL = {
-    "high_normal_tumor_af_frac": {
-        "tag_value": 0.3,
-        "filter_name": "high_normal_tumor_af_frac",
-        "field": "FORMAT",
-    },
-}
-
-# TGA AND WES
-# ---------------------------------------------------
-
-# Configurations for common quality filters for TGA
-SNV_BCFTOOLS_QUALITY_COMMON_TGA = {
-    "AF_min": {"tag_value": 0.005, "filter_name": "balsamic_low_af", "field": "INFO"},
-    "AD": {"tag_value": 5, "filter_name": "balsamic_low_tumor_ad", "field": "INFO"},
-}
-# Configuration of unique TGA SNV filter settings for smaller panels
-SNV_BCFTOOLS_QUALITY_TGA = {
-    **SNV_BCFTOOLS_QUALITY_COMMON_TGA,
-    "DP": {
-        "tag_value": 50,
-        "filter_name": "balsamic_low_tumor_dp",
-        "field": "INFO",
-    },
-}
-
-# Configuration of unique TGA SNV filter settings for exomes
-SNV_BCFTOOLS_QUALITY_TGA_WES = {
-    **SNV_BCFTOOLS_QUALITY_COMMON_TGA,
-    "DP": {
-        "tag_value": 20,
-        "filter_name": "balsamic_low_tumor_dp",
-        "field": "INFO",
-    },
-}
-
-
-# VARDICT
-# --------------------------------------------------
-# Configurations for TGA VarDict specific quality filters
-SNV_BCFTOOLS_QUALITY_VARDICT_COMMON = {
-    "varcaller_name": "vardict",
-    "filter_type": "general",
-    "analysis_type": "tumor_only,tumor_normal",
-    "description": "General purpose filters used for filtering SNVs",
-    "MQ": {"tag_value": 30, "filter_name": "balsamic_low_mq", "field": "INFO"},
-}
-
-# Configurations for TGA VarDict specific quality filters
-SNV_BCFTOOLS_QUALITY_TGA_VARDICT = {
-    **SNV_BCFTOOLS_QUALITY_TGA,
-    **SNV_BCFTOOLS_QUALITY_VARDICT_COMMON,
-}
-
-# Configurations for TGA VarDict tumor only specific quality filters
-SNV_BCFTOOLS_QUALITY_TGA_VARDICT_TO = {
-    **SNV_BCFTOOLS_QUALITY_TGA_VARDICT,
-}
-
-# Configurations for TGA VarDict tumor normal specific quality filters
-SNV_BCFTOOLS_QUALITY_TGA_VARDICT_TN = {
-    **SNV_BCFTOOLS_QUALITY_TGA_VARDICT,
-    **SNV_BCFTOOLS_QUALITY_TUMOR_NORMAL,
-}
-
-# Configurations for VarDict WES specific quality filters
-SNV_BCFTOOLS_QUALITY_WES_VARDICT = {
-    **SNV_BCFTOOLS_QUALITY_TGA_WES,
-    **SNV_BCFTOOLS_QUALITY_VARDICT_COMMON,
-}
-
-# Configurations for VarDict WES tumor only specific quality filters
-SNV_BCFTOOLS_QUALITY_WES_VARDICT_TO = {
-    **SNV_BCFTOOLS_QUALITY_WES_VARDICT,
-}
-
-# Configurations for VarDict WES tumor normal specific quality filters
-SNV_BCFTOOLS_QUALITY_WES_VARDICT_TN = {
-    **SNV_BCFTOOLS_QUALITY_WES_VARDICT,
-    **SNV_BCFTOOLS_QUALITY_TUMOR_NORMAL,
-}
-
-# TNSCOPE
-# --------------------------------------------------
-# Configurations for TGA TNscope specific quality filters
-SNV_BCFTOOLS_QUALITY_TNSCOPE_COMMON = {
-    "varcaller_name": "tnscope",
-    "filter_type": "general",
-    "analysis_type": "tumor_only,tumor_normal",
-    "description": "General purpose filters used for filtering SNVs",
-}
-
-# Configuration of unique TGA SNV filter settings for small panels
-SNV_BCFTOOLS_QUALITY_TGA_TNSCOPE = {
-    **SNV_BCFTOOLS_QUALITY_TGA,
-    **SNV_BCFTOOLS_QUALITY_TNSCOPE_COMMON,
-}
-
-# Configuration of unique TGA SNV filter settings for exomes
-SNV_BCFTOOLS_QUALITY_WES_TNSCOPE = {
-    **SNV_BCFTOOLS_QUALITY_TGA_WES,
-    **SNV_BCFTOOLS_QUALITY_TNSCOPE_COMMON,
-}
-
-# Configurations for common TGA TNscope tumor only quality filters
-SNV_BCFTOOLS_QUALITY_TGA_TNSCOPE_TO_COMMON = {
-    "qss": {
-        "tag_value": 20,
-        "filter_name": "balsamic_low_quality_scores",
-        "field": "FORMAT",
-    },
-    "sor": {
-        "tag_value": 2.7,
-        "filter_name": "balsamic_high_strand_oddsratio",
-        "field": "INFO",
-    },
-}
-
-# Configurations for common TGA TNscope tumor normal quality filters
-SNV_BCFTOOLS_QUALITY_TGA_TNSCOPE_TN_COMMON = {}
-
-# Configurations for TGA TNscope tumor only quality filters
-SNV_BCFTOOLS_QUALITY_TGA_TNSCOPE_TO = {
-    **SNV_BCFTOOLS_QUALITY_TGA_TNSCOPE,
-    **SNV_BCFTOOLS_QUALITY_TGA_TNSCOPE_TO_COMMON,
-}
-
-# Configurations for TGA TNscope tumor normal quality filters
-SNV_BCFTOOLS_QUALITY_TGA_TNSCOPE_TN = {
-    **SNV_BCFTOOLS_QUALITY_TGA_TNSCOPE,
-    **SNV_BCFTOOLS_QUALITY_TUMOR_NORMAL,
-    **SNV_BCFTOOLS_QUALITY_TGA_TNSCOPE_TN_COMMON,
-}
-
-# Configurations for WES TNscope tumor only quality filters
-SNV_BCFTOOLS_QUALITY_WES_TNSCOPE_TO = {
-    **SNV_BCFTOOLS_QUALITY_TGA_WES,
-    **SNV_BCFTOOLS_QUALITY_WES_TNSCOPE,
-    **SNV_BCFTOOLS_QUALITY_TGA_TNSCOPE_TO_COMMON,
-}
-
-# Configurations for WES TNscope tumor normal quality filters
-SNV_BCFTOOLS_QUALITY_WES_TNSCOPE_TN = {
-    **SNV_BCFTOOLS_QUALITY_TGA_WES,
-    **SNV_BCFTOOLS_QUALITY_WES_TNSCOPE,
-    **SNV_BCFTOOLS_QUALITY_TUMOR_NORMAL,
-    **SNV_BCFTOOLS_QUALITY_TGA_TNSCOPE_TN_COMMON,
-}
-
-# TNSCOPE UMI
-# --------------------------------------------------
-
-# Configurations for UMI TNscope tumor only quality filters
-SNV_BCFTOOLS_QUALITY_TGA_TNSCOPE_UMI_TO = {
-    **SNV_BCFTOOLS_QUALITY_TNSCOPE_COMMON,
-    "variantcaller_filters": TNSCOPE_HARDFILTERS,
-}
-
-# Configurations for UMI TNscope tumor normal quality filters
-SNV_BCFTOOLS_QUALITY_TGA_TNSCOPE_UMI_TN = {
-    **SNV_BCFTOOLS_QUALITY_TNSCOPE_COMMON,
-    **SNV_BCFTOOLS_QUALITY_TUMOR_NORMAL,
-    "variantcaller_filters": TNSCOPE_TN_HARDFILTERS,
-}
-
-# WGS
-# ---------------------------------------------------
-
-# Configurations for common quality filters for WGS
-SNV_BCFTOOLS_QUALITY_COMMON_WGS = {
-    **SNV_BCFTOOLS_QUALITY_TNSCOPE_COMMON,
-    "AD": {"tag_value": 3, "filter_name": "balsamic_low_tumor_ad", "field": "FORMAT"},
-    "DP": {
-        "tag_value": 10,
-        "filter_name": "balsamic_low_tumor_dp",
-        "field": "FORMAT",
-    },
-    "AF_min": {"tag_value": 0.05, "filter_name": "balsamic_low_af", "field": "FORMAT"},
-}
+class WgsSNVFilters(BaseSNVFilters):
+    research = [
+        VCFFilter(tag_value=0.01, filter_name="SWEGENAF", field="INFO"),
+        VCFFilter(tag_value=0.001, filter_name="balsamic_high_pop_freq", field="INFO"),
+    ]
+    clinical = research + [
+        VCFFilter(tag_value=0.01, filter_name="Frq", field="INFO"),
+        VCFFilter(tag_value=0.1, filter_name="ArtefactFrq", field="INFO"),
+    ]
+    quality = [
+        VCFFilter(
+            tag_value=0.3,
+            filter_name="in_normal",
+            field="FORMAT",
+            analysis_type=AnalysisType.PAIRED,
+        ),
+        VCFFilter(tag_value=3, filter_name="balsamic_low_tumor_ad", field="FORMAT"),
+        VCFFilter(tag_value=10, filter_name="balsamic_low_tumor_dp", field="FORMAT"),
+        VCFFilter(tag_value=0.05, filter_name="balsamic_low_af", field="FORMAT"),
+        VCFFilter(
+            tag_value=20,
+            filter_name="balsamic_low_quality_scores",
+            field="FORMAT",
+            analysis_type=AnalysisType.SINGLE,
+        ),
+        VCFFilter(
+            tag_value=0,
+            filter_name="balsamic_low_strand_read_counts",
+            field="FORMAT",
+            analysis_type=AnalysisType.SINGLE,
+        ),
+        VCFFilter(
+            tag_value=3,
+            filter_name="balsamic_high_strand_oddsratio",
+            field="INFO",
+            analysis_type=AnalysisType.SINGLE,
+        ),
+    ]
 
 
-# Configuration for WGS SNV filters
-SNV_BCFTOOLS_QUALITY_WGS_TNSCOPE_COMMON = {}
+class TgaSNVFilters(BaseSNVFilters):
+    research = [
+        VCFFilter(tag_value=0.01, filter_name="SWEGENAF", field="INFO"),
+        VCFFilter(tag_value=0.005, filter_name="balsamic_high_pop_freq", field="INFO"),
+    ]
+    clinical = research + [
+        VCFFilter(tag_value=0.01, filter_name="Frq", field="INFO"),
+        VCFFilter(tag_value=0.1, filter_name="ArtefactFrq", field="INFO"),
+    ]
+    quality = [
+        VCFFilter(
+            tag_value=0.3,
+            filter_name="in_normal",
+            field="FORMAT",
+            analysis_type=AnalysisType.PAIRED,
+        ),
+        VCFFilter(tag_value=0.005, filter_name="balsamic_low_af", field="INFO"),
+        VCFFilter(tag_value=5, filter_name="balsamic_low_tumor_ad", field="INFO"),
+        VCFFilter(
+            tag_value=50,
+            filter_name="balsamic_low_tumor_dp",
+            field="INFO",
+            sequencing_type=SequencingType.TARGETED,
+        ),
+        VCFFilter(
+            tag_value=20,
+            filter_name="balsamic_low_tumor_dp",
+            field="INFO",
+            sequencing_type=SequencingType.WES,
+        ),
+        VCFFilter(
+            tag_value=30,
+            filter_name="balsamic_low_mq",
+            field="INFO",
+            variant_caller=BioinfoTools.VARDICT,
+        ),
+        VCFFilter(
+            tag_value=20,
+            filter_name="balsamic_low_quality_scores",
+            field="INFO",
+            variant_caller=BioinfoTools.TNSCOPE,
+            analysis_type=AnalysisType.SINGLE,
+        ),
+        VCFFilter(
+            tag_value=2.7,
+            filter_name="balsamic_high_strand_oddsratio",
+            field="INFO",
+            variant_caller=BioinfoTools.TNSCOPE,
+            analysis_type=AnalysisType.SINGLE,
+        ),
+    ]
 
-# Configuration for WGS tumor only SNV filters
-SNV_BCFTOOLS_QUALITY_WGS_TNSCOPE_TO = {
-    **SNV_BCFTOOLS_QUALITY_COMMON_WGS,
-    **SNV_BCFTOOLS_QUALITY_WGS_TNSCOPE_COMMON,
-    "qss": {
-        "tag_value": 20,
-        "filter_name": "balsamic_low_quality_scores",
-        "field": "FORMAT",
-    },
-    "strand_reads": {
-        "tag_value": 0,
-        "filter_name": "balsamic_low_strand_read_counts",
-        "field": "FORMAT",
-    },
-    "sor": {
-        "tag_value": 3,
-        "filter_name": "balsamic_high_strand_oddsratio",
-        "field": "INFO",
-    },
-}
 
-# Configuration for WGS tumor normal SNV filters
-SNV_BCFTOOLS_QUALITY_WGS_TNSCOPE_TN = {
-    **SNV_BCFTOOLS_QUALITY_COMMON_WGS,
-    **SNV_BCFTOOLS_QUALITY_WGS_TNSCOPE_COMMON,
-    **SNV_BCFTOOLS_QUALITY_TUMOR_NORMAL,
-}
+class TgaUmiSNVFilters(BaseSNVFilters):
+    research = [
+        VCFFilter(tag_value=0.01, filter_name="SWEGENAF", field="INFO"),
+        VCFFilter(tag_value=0.02, filter_name="balsamic_high_pop_freq", field="INFO"),
+    ]
+    clinical = research + [
+        VCFFilter(tag_value=0.01, filter_name="Frq", field="INFO"),
+        VCFFilter(tag_value=0.1, filter_name="ArtefactFrq", field="INFO"),
+    ]
+    quality = [
+        VCFFilter(
+            tag_value=0.3,
+            filter_name="in_normal",
+            field="FORMAT",
+            analysis_type=AnalysisType.PAIRED,
+        ),
+    ]
 
-# All filters for WGS tumor only
-SNV_FILTERS_WGS_TO = {
-    "tnscope": {
-        **SNV_BCFTOOLS_QUALITY_WGS_TNSCOPE_TO,
-        "variantcaller_filters": TNSCOPE_TO_HARDFILTERS,
-    },
-    "research": {
-        **SNV_BCFTOOOLS_RESEARCH_WGS,
-    },
-    "clinical": {
-        **SNV_BCFTOOOLS_RESEARCH_WGS,
-        **SNV_BCFTOOOLS_CLINICAL_COMMON,
-    },
-}
 
-# All filters for WGS tumor normal
-SNV_FILTERS_WGS_TN = {
-    "tnscope": {
-        **SNV_BCFTOOLS_QUALITY_WGS_TNSCOPE_TN,
-        "variantcaller_filters": TNSCOPE_TN_HARDFILTERS,
-    },
-    "research": {
-        **SNV_BCFTOOOLS_RESEARCH_WGS,
-    },
-    "clinical": {
-        **SNV_BCFTOOOLS_RESEARCH_WGS,
-        **SNV_BCFTOOOLS_CLINICAL_COMMON,
-    },
-}
+def get_tag_and_filtername(filters: List[VCFFilter], filter_name: str) -> List[str]:
+    """
+    Retrieve the filter name and tag value for a specific filter.
 
-# All filters for WES tumor only
-SNV_FILTERS_TGA_WES_TO = {
-    "tnscope": {
-        **SNV_BCFTOOLS_QUALITY_WES_TNSCOPE_TO,
-        "variantcaller_filters": TNSCOPE_TO_HARDFILTERS,
-    },
-    "vardict": {
-        **SNV_BCFTOOLS_QUALITY_WES_VARDICT_TO,
-        "variantcaller_filters": VARDICT_TO_HARDFILTERS,
-    },
-    "research": {
-        **SNV_BCFTOOOLS_RESEARCH_TGA,
-    },
-    "clinical": {
-        **SNV_BCFTOOOLS_RESEARCH_TGA,
-        **SNV_BCFTOOOLS_CLINICAL_COMMON,
-    },
-}
+    Args:
+        filters (List[VCFFilter]): A list of filter objects to search within.
+        filter_name (str): The name of the filter to match.
 
-# All filters for WES tumor normal
-SNV_FILTERS_TGA_WES_TN = {
-    "tnscope": {
-        **SNV_BCFTOOLS_QUALITY_WES_TNSCOPE_TN,
-        "variantcaller_filters": TNSCOPE_TN_HARDFILTERS,
-    },
-    "vardict": {
-        **SNV_BCFTOOLS_QUALITY_WES_VARDICT_TN,
-        "variantcaller_filters": VARDICT_TN_HARDFILTERS,
-    },
-    "research": {
-        **SNV_BCFTOOOLS_RESEARCH_TGA,
-    },
-    "clinical": {
-        **SNV_BCFTOOOLS_RESEARCH_TGA,
-        **SNV_BCFTOOOLS_CLINICAL_COMMON,
-    },
-}
+    Returns:
+        List[str]: A list containing the tag value and the filter name.
 
-# All filters for TGA tumor only
-SNV_FILTERS_TGA_TO = {
-    "tnscope": {
-        **SNV_BCFTOOLS_QUALITY_TGA_TNSCOPE_TO,
-        "variantcaller_filters": TNSCOPE_TO_HARDFILTERS,
-    },
-    "vardict": {
-        **SNV_BCFTOOLS_QUALITY_TGA_VARDICT_TO,
-        "variantcaller_filters": VARDICT_TO_HARDFILTERS,
-    },
-    "research": {
-        **SNV_BCFTOOOLS_RESEARCH_TGA,
-    },
-    "clinical": {
-        **SNV_BCFTOOOLS_RESEARCH_TGA,
-        **SNV_BCFTOOOLS_CLINICAL_COMMON,
-    },
-}
+    Raises:
+        ValueError: If more than one filter matches the filter name.
+        KeyError: If no filter matches the filter name.
+    """
+    matched_filters = [f for f in filters if f.filter_name == filter_name]
 
-# All filters for TGA tumor normal
-SNV_FILTERS_TGA_TN = {
-    "tnscope": {
-        **SNV_BCFTOOLS_QUALITY_TGA_TNSCOPE_TN,
-        "variantcaller_filters": TNSCOPE_TN_HARDFILTERS,
-    },
-    "vardict": {
-        **SNV_BCFTOOLS_QUALITY_TGA_VARDICT_TN,
-        "variantcaller_filters": VARDICT_TN_HARDFILTERS,
-    },
-    "research": {
-        **SNV_BCFTOOOLS_RESEARCH_TGA,
-    },
-    "clinical": {
-        **SNV_BCFTOOOLS_RESEARCH_TGA,
-        **SNV_BCFTOOOLS_CLINICAL_COMMON,
-    },
-}
+    if len(matched_filters) > 1:
+        raise ValueError(
+            f"Multiple filters found with the filter name '{filter_name}'. "
+        )
+    elif not matched_filters:
+        raise KeyError(f"No filter found with the filter name '{filter_name}'.")
+
+    # Return the filter name and tag value for the matched filter
+    return [matched_filters[0].tag_value, matched_filters[0].filter_name]
 
 
 # Manta bcftools filters

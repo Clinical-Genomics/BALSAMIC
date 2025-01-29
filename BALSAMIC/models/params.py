@@ -270,11 +270,11 @@ class BalsamicWorkflowConfig(BaseModel):
         return self.manta.tga_settings
 
 
-class VCFAttributes(BaseModel):
+class VCFFilter(BaseModel):
     """General purpose filter to manage various VCF attributes
 
     This class handles three parameters for the purpose filtering variants
-    based on a tag_values, filter_name, and which field in VCF.
+    based on a tag_values, filter_name, and which field in the VCF.
 
     E.g. AD=VCFAttributes(tag_value=5, filter_name="balsamic_low_tumor_ad", field="INFO")
     A value of 5 from INFO field and filter_name will be balsamic_low_tumor_ad
@@ -283,46 +283,28 @@ class VCFAttributes(BaseModel):
         tag_value: float
         filter_name: str
         field: str
+        Description: str (optional); filter description
+        sequencing_type: str (optional); specific sequencing type such WES or TGA for which to apply the filter
+        analysis_type: str (optional); specific sequencing type such paired or single for which to apply the filter
+        variant_caller: str (optional); the specific variant caller for which to apply the filter
     """
 
-    tag_value: float
+    tag_value: Optional[float] = None
     filter_name: str
-    field: str
+    field: Optional[str] = None
+    Description: Optional[str] = None
+    sequencing_type: Optional[str] = None
+    analysis_type: Optional[str] = None
+    variant_caller: Optional[str] = None
 
 
-class VariantCallerFilters(BaseModel):
-    """Internal variant caller filters
+class StructuralVariantFilters(BaseModel):
+    """Variant filters for Structural Variants
 
-    This class handles the internal variant caller filters.
+    This class handles attributes and filter for structural variants
 
     Attributes:
-        filter_name: str
-        Description: str
-    """
-
-    filter_name: str
-    Description: str
-
-
-class VarCallerFilter(BaseModel):
-    """General purpose for variant caller filters
-
-    This class handles attributes and filter for variant callers
-
-    Attributes:
-        AD: VCFAttributes (required); minimum allelic depth
-        AF_min: VCFAttributes (optional); minimum allelic fraction
-        high_normal_tumor_af_frac: VCFAttributes (optional); maximum normal allele frequency / tumor allele frequency
-        MQ: VCFAttributes (optional); minimum mapping quality
-        DP: VCFAttributes (optional); minimum read depth
-        pop_freq: VCFAttributes (optional); maximum gnomad allele frequency
-        strand_reads: VCFAttributes (optional); minimum strand specific read counts
-        qss: VCFAttributes (optional); minimum sum of base quality scores
-        sor: VCFAttributes (optional); minimum symmetrical log-odds ratio
-        artefact_snv_freq: VCFAttributes (optional); maximum artefact-database snv allele frequency
-        swegen_snv_freq: VCFAttributes (optional); maximum swegen snv allele frequency
         swegen_sv_freq: VCFAttributes (optional); maximum swegen sv allele frequency
-        loqusdb_clinical_snv_freq: VCFAttributes (optional); maximum loqusdb clinical snv allele frequency
         loqusdb_clinical_sv_freq: VCFAttributes (optional); maximum loqusdb clinical sv allele frequency
         low_pr_sr_count: VCFAttributes (optional); minumum Manta variant read support
         varcaller_name: str (required); variant caller name
@@ -331,53 +313,10 @@ class VarCallerFilter(BaseModel):
         description: str (required); comment section for description
     """
 
-    AD: Optional[VCFAttributes] = None
-    AF_min: Optional[VCFAttributes] = None
-    high_normal_tumor_af_frac: Optional[VCFAttributes] = None
-    MQ: Optional[VCFAttributes] = None
-    DP: Optional[VCFAttributes] = None
-    pop_freq: Optional[VCFAttributes] = None
-    strand_reads: Optional[VCFAttributes] = None
-    qss: Optional[VCFAttributes] = None
-    sor: Optional[VCFAttributes] = None
-    artefact_snv_freq: Optional[VCFAttributes] = None
-    swegen_snv_freq: Optional[VCFAttributes] = None
-    swegen_sv_freq: Optional[VCFAttributes] = None
-    loqusdb_clinical_snv_freq: Optional[VCFAttributes] = None
-    loqusdb_clinical_sv_freq: Optional[VCFAttributes] = None
-    low_pr_sr_count: Optional[VCFAttributes] = None
-    matched_normal_filter_names: Optional[List[str]] = None
-    variantcaller_filters: Optional[List[VariantCallerFilters]] = None
+    swegen_sv_freq: Optional[VCFFilter] = None
+    loqusdb_clinical_sv_freq: Optional[VCFFilter] = None
+    low_pr_sr_count: Optional[VCFFilter] = None
     varcaller_name: str
     filter_type: str
     analysis_type: str
     description: str
-
-    def get_bcftools_hard_filter_command(self):
-        """
-        Generate a BCFTools-compatible filter string based on all filter names.
-
-        Returns:
-            str: A string formatted as 'FILTER~"name1" || FILTER~"name2" || ...'.
-        """
-        filter_names = set()  # Use a set to avoid duplicates
-
-        # Collect filter_name attributes from VCFAttributes fields
-        for field_name, value in self.__dict__.items():
-            if isinstance(value, VCFAttributes) and hasattr(value, "filter_name"):
-                filter_names.add(value.filter_name)
-
-        # Add filter_name attributes from variantcaller_filters
-        if self.variantcaller_filters:
-            for filter_obj in self.variantcaller_filters:
-                filter_names.add(filter_obj.filter_name)
-
-        # Remove matched normal filter names if the flag is set
-        if self.matched_normal_filter_names:
-            filter_names -= set(self.matched_normal_filter_names)
-
-        # Format as BCFTools-compatible filter string
-        bcftools_filter_string = " || ".join(
-            [f'FILTER~"{filter_}"' for filter_ in sorted(filter_names)]
-        )
-        return bcftools_filter_string
