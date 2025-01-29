@@ -207,7 +207,7 @@ def merge(
         if len(all_filters) > 1:
             v.filter = ["MERGED_MNV_CONFLICTING_FILTERS"]
         else:
-            v.filter = ["MERGED_MNV", f"{all_filters}"]
+            v.filter = ["MERGED_MNV", f"{all_filters.pop()}"]
 
         # Mark all constituent variants as "MERGED"
         for vi in vv:
