@@ -67,9 +67,9 @@ python {params.modify_tnscope_infofield} {params.tmpdir}/tnscope.research.mnv.vc
 
 python {params.edit_vcf_script} -i {params.tmpdir}/tnscope.research.mnv.add_info_fields.vcf -o {params.tmpdir}/tnscope.research.mnv.add_info_fields.added_found_in.vcf -c {params.variant_caller};
 
-bgzip {params.tmpdir}/tnscope.research.mnv.modified.added_found_in.vcf ;
+bgzip {params.tmpdir}/tnscope.research.mnv.add_info_fields.added_found_in.vcf ;
 
-mv {params.tmpdir}/tnscope.research.mnv.modified.added_found_in.vcf.gz {output.vcf_tnscope} ;
+mv {params.tmpdir}/tnscope.research.mnv.add_info_fields.added_found_in.vcf.gz {output.vcf_tnscope} ;
 tabix -p vcf -f {output.vcf_tnscope} ;
         """
 
