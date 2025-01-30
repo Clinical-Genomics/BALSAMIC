@@ -1,5 +1,5 @@
 [X.X.X]
--------
+--------
 
 Added:
 ^^^^^^
@@ -24,7 +24,7 @@ Fixed:
 * Merged VarDict and TNscope variants now correctly show both callers in FOUND_IN info field https://github.com/Clinical-Genomics/BALSAMIC/pull/1499
 
 [16.0.0]
--------
+--------
 
 Added:
 ^^^^^^

@@ -317,7 +317,7 @@ def process(
         "MNV_CONFLICTING_FILTERS": {
             "Description": '"Merged MNV contains SNVs with conflicting filters, such as triallelic_site and in_normal"',
             "ID": "MNV_CONFLICTING_FILTERS",
-        }
+        },
     }
     for new_filter_id, description_dict in new_filters.items():
         vcf.filters[new_filter_id] = description_dict

@@ -245,6 +245,7 @@ The `TNscope <https://www.biorxiv.org/content/10.1101/250647v1.abstract>`_ algor
 *min_base_qual*: Minimal base quality to consider in calling
 
 ::
+
     min_base_qual = 15
 
 *min_tumor_allele_frac*: Set the minimum tumor AF to be considered as potential variant site.
@@ -311,6 +312,21 @@ The `TNscope <https://www.biorxiv.org/content/10.1101/250647v1.abstract>`_ algor
 ::
 
     marks variant with soft-filter `in_normal` variant if: AF(normal) / AF(tumor) > 0.3
+
+
+**Post-processing of TNscope variants**
+
+After quality-filtering TNscope variants and before merging with VarDict variants the phased SNVs and InDels from TNscope are merged together to MNVs using a slightly modified script from `Sentieon-scripts <https://github.com/Sentieon/sentieon-scripts/blob/master/merge_mnp/merge_mnp.py>`_ which can be found in ``BALSAMIC/assets/scripts/merge_mnp.py``
+
+This was done to avoid multiple representations of the same variant as VarDict already outputs these types of variants as MNVs, and because VEP isn't coded to handle phased SNVs in the interpretation of protein effect.
+
+In the merging of phased SNVs to MNV we need to handle how to consolidate information from multiple variants into a single metric, and importantly also for the FILTER column.
+
+An example is a MNV created by merging a phased germline SNV with a somatic SNV. This has been solved as follows:
+
+- `MNV_CONFLICTING_FILTERS`: Is a filter given to MNVs with constituent variants with different filters (such as `in_normal` and `PASS`)
+
+- `MERGED_MNV`: Is a filter set to all merged MNVs, and the common filter for all constituent variants is appended after, such as `MERGED_MNV;PASS` or `MERGED_MNV;in_normal`
 
 
 **Post-call Observation database Filters**
