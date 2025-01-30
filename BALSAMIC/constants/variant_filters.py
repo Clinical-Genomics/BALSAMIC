@@ -289,9 +289,6 @@ class BaseSNVFilters:
 
 class WgsSNVFilters(BaseSNVFilters):
     research = [
-        VCFFilter(
-            filter_name="MERGED", Description="SNV Merged with neighboring variants"
-        ),
         VCFFilter(tag_value=0.01, filter_name="SWEGENAF", field="INFO"),
         VCFFilter(tag_value=0.001, filter_name="balsamic_high_pop_freq", field="INFO"),
     ]
@@ -332,6 +329,9 @@ class WgsSNVFilters(BaseSNVFilters):
 
 class TgaSNVFilters(BaseSNVFilters):
     research = [
+        VCFFilter(
+            filter_name="MERGED", Description="SNV Merged with neighboring variants"
+        ),
         VCFFilter(tag_value=0.01, filter_name="SWEGENAF", field="INFO"),
         VCFFilter(tag_value=0.005, filter_name="balsamic_high_pop_freq", field="INFO"),
     ]
