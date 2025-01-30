@@ -5,7 +5,7 @@ Short tutorial
 Here a short tutorial is provided for BALSAMIC (**version** = 16.0.0).
 
 Regarding fastq-inputs
----------------------
+---------------------------
 
 Previous versions of BALSAMIC only accepted one fastq-pair per sample, which required concatenation of fastq-pairs if multiple existed.
 
