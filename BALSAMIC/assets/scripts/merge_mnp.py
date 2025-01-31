@@ -203,7 +203,7 @@ def merge(
         v.pos += i
 
         # Set MNV filter
-        all_filters = {flt for vi in vv for flt in vi.filter}.discard("MERGED")
+        all_filters = {flt for vi in vv for flt in vi.filter}
         if len(all_filters) > 1:
             v.filter = ["MNV_CONFLICTING_FILTERS"]
             v.info["TNSCOPE_MNV_FILTERS"] = ",".join(all_filters)
