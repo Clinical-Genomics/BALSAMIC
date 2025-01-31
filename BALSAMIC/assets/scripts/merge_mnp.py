@@ -329,7 +329,7 @@ def process(
     for new_filter_id, description_dict in new_filters.items():
         vcf.filters[new_filter_id] = description_dict
 
-    filter_added, info_added = False
+    filter_added, info_added = False, False
     for header_line in vcf.headers:
         if header_line.startswith("##FILTER") and not filter_added:
             for new_filter_id, description_dict in new_filters.items():
