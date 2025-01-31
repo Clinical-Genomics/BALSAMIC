@@ -308,7 +308,7 @@ def process(
     reference = pyfaidx.Fasta(ref_file)
 
     # Open output file (or use stdout if no file is specified)
-    out_fh = open(out_file, "w", encoding="utf-8") if out_file else sys.stdout
+    out_fh = open(out_file, "w") if out_file else sys.stdout
 
     # Define and add the MERGED filter to the VCF header if not already present
     new_filters = {
@@ -325,7 +325,7 @@ def process(
         "TNSCOPE_MNV_FILTERS": {
             "Description": '"Unique set of filters from constituent SNVs and InDels merged to MNV"',
             "ID": "TNSCOPE_MNV_FILTERS",
-            "Number": "1",
+            "Number": ".",
             "Type": "String",
         },
     }
