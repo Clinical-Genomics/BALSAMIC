@@ -1,10 +1,11 @@
 """Tests for the QC metrics related methods."""
 import copy
 from typing import Any, Dict
-
+from pathlib import Path
 import pytest
 
 from BALSAMIC.models.metrics import MetricValidation, Metric, MetricCondition
+from BALSAMIC.assets.scripts.collect_qc_metrics import get_sex_check_metrics
 
 
 def test_metric_condition():
@@ -96,6 +97,44 @@ def test_multiple_metric_validation_fail(qc_extracted_metrics: dict):
     assert metrics[8]["name"] in str(val_exc.value)
 
 
+def test_wrong_sex_check_metrics(tga_female_sex_prediction: str, config_dict: dict):
+    """Test MetricValidation for capturing conflicting predicted to given sex."""
+
+    # GIVEN female sex prediction JSON and male config dictionary
+    sex_metrics: list = get_sex_check_metrics(tga_female_sex_prediction, config_dict)
+
+    # WHEN comparing predicted female sex and supplied male gender
+    # THEN check that the model filters the metrics according to its norm
+    with pytest.raises(ValueError) as val_exc:
+        MetricValidation(metrics=sex_metrics)
+
+    # THEN a ValueError should be triggered containing this text
+    assert (
+        "QC metric COMPARE_PREDICTED_TO_GIVEN_SEX: female validation has failed. "
+        "(Condition: eq male, ID: id1_tumor)." in str(val_exc.value)
+    )
+
+
+def test_validate_metric_type_error():
+    """Test MetricValidation TypeError for incompatible variable-type comparisons."""
+
+    # Create a Metric object where value and threshold are incompatible types
+    metrics = [
+        {
+            "name": "Test Metric",
+            "input": "fake_input_file",
+            "step": "fake_step",
+            "value": "string-value",  # Incompatible with numerical comparisons
+            "condition": {"norm": "lt", "threshold": 10},
+            "id": "caseid",
+        }
+    ]
+
+    # Validate that the TypeError handling raises the correct ValueError
+    with pytest.raises(ValueError, match=r"Type mismatch in QC metric Test Metric: .*"):
+        MetricValidation(metrics=metrics)
+
+
 def test_metric_validation_norm_fail(qc_extracted_metrics: dict):
     """Test MetricValidation ValueError raising for an operator that it is not accepted."""
 
@@ -106,5 +145,5 @@ def test_metric_validation_norm_fail(qc_extracted_metrics: dict):
     # THEN model raises an error due to a non accepted norm
     try:
         MetricValidation(metrics=metrics)
-    except KeyError as key_exc:
+    except ValueError as key_exc:
         assert metrics[4]["condition"]["norm"] in str(key_exc)
