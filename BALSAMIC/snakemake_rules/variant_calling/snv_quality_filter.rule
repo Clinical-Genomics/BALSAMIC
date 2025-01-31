@@ -148,6 +148,7 @@ if config["analysis"]["sequencing_type"] == 'targeted' and config["analysis"]["a
     tabix -p vcf -f {output.vcf_filtered};
       """
 
+
 elif config["analysis"]["sequencing_type"] == 'targeted' and config["analysis"]["analysis_type"] == 'paired':
 
   rule bcftools_quality_filter_tnscope_tumor_normal_tga:
