@@ -203,7 +203,7 @@ def merge(
         v.pos += i
 
         # Set MNV filter
-        all_filters = {flt for vi in vv for flt in vi.filter}
+        all_filters = {flt for vi in vv for flt in vi.filter}.discard("MERGED")
         if len(all_filters) > 1:
             v.filter = ["MNV_CONFLICTING_FILTERS"]
             v.info["TNSCOPE_MNV_FILTERS"] = ",".join(all_filters)
@@ -305,7 +305,7 @@ def process(
     reference = pyfaidx.Fasta(ref_file)
 
     # Open output file (or use stdout if no file is specified)
-    out_fh = open(out_file, "w") if out_file else sys.stdout
+    out_fh = open(out_file, "w", encoding="utf-8") if out_file else sys.stdout
 
     # Define and add the MERGED filter to the VCF header if not already present
     new_filters = {
