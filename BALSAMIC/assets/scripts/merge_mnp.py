@@ -260,6 +260,9 @@ def merge(
         to_merge = [vi]
         for j in range(i + 1, len(variant_stack)):
             vj: vcflib.vcf.Variant = variant_stack[j]
+            # If variant has already been merged, ignore it
+            if "MERGED" in vj.filter:
+                continue
             if ifmerge(to_merge[-1], vj, max_distance):
                 to_merge.append(vj)
 
