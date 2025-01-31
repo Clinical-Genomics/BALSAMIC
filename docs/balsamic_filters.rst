@@ -97,6 +97,16 @@ At each step only variants with filters `PASS` and `triallelic_site` are kept an
 **Targeted Genome Analysis**
 #############################
 
+Regarding matched normal analyses
+******************************************
+
+Since Balsamic v17.0.0 the option `--soft-filter-normal` was added and automatically applied for all Targeted Genome Analyses with a matched normal.
+
+This option disables hard-filtering on the matched normal specific filters; `germline_risk` from TNscope and the `in_normal` custom bcftools filter mentioned below under *Relative tumor AF in normal*.
+
+These matched normal soft-filters can optionally be applied out in Scout to revert to the original hard-filter behaviour.
+
+
 Somatic Callers for reporting SNVs/INDELS
 ******************************************
 
@@ -179,10 +189,8 @@ Following is the set of criteria applied for filtering vardict results. It is us
 
 ::
 
-    excludes variant if: AF(normal) / AF(tumor) > 0.3
+    marks variant with soft-filter `in_normal` variant if: AF(normal) / AF(tumor) > 0.3
 
-**Note:**
-**Additionally, the variant is excluded for tumor-normal cases if marked as 'germline' in the `STATUS` column of the VCF file.**
 
 
 **Sentieon's TNscope**
@@ -302,7 +310,7 @@ The `TNscope <https://www.biorxiv.org/content/10.1101/250647v1.abstract>`_ algor
 
 ::
 
-    excludes variant if: AF(normal) / AF(tumor) > 0.3
+    marks variant with soft-filter `in_normal` variant if: AF(normal) / AF(tumor) > 0.3
 
 
 **Post-call Observation database Filters**
