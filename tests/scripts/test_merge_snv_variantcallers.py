@@ -123,7 +123,7 @@ def test_merge_conflicting_filters():
     merged_filters = merge_filters(filter1, filter2)
 
     # THEN PASS filter should be removed
-    merged_filters == "in_normal;germline_risk"
+    assert merged_filters == "in_normal;germline_risk"
 
 
 def test_merge_filters():
@@ -137,7 +137,7 @@ def test_merge_filters():
     merged_filters = merge_filters(filter1, filter2)
 
     # THEN only one PASS should remain
-    merged_filters == "PASS"
+    assert merged_filters == "PASS"
 
 
 def test_merge_info_fields():
