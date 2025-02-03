@@ -396,6 +396,24 @@ def config_dict(config_path: str) -> str:
 
 
 @pytest.fixture(scope="session")
+def test_vardict_vcf(test_data_dir: str) -> str:
+    """Return path to dummy VarDict vcf with 2 variants, one that matches with TNscope dummy vcf"""
+    return Path(test_data_dir, "vcfs", "vardict_variants.vcf.gz")
+
+
+@pytest.fixture(scope="session")
+def test_tnscope_vcf(test_data_dir: str) -> str:
+    """Return path to dummy TNscope vcf with 2 variants, one that matches with VarDict dummy vcf"""
+    return Path(test_data_dir, "vcfs", "tnscope_variants.vcf.gz")
+
+
+@pytest.fixture(scope="session")
+def test_vardict_vcf_non_matching_header(test_data_dir: str) -> str:
+    """Return path to dummy VarDict vcf with missing normal sample column"""
+    return Path(test_data_dir, "vcfs", "vardict_non_matching_mergeheader.vcf.gz")
+
+
+@pytest.fixture(scope="session")
 def config_dict_w_singularity(
     config_dict: str,
     balsamic_cache: str,

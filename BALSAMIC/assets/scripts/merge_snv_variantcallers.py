@@ -114,6 +114,12 @@ def update_number_text(row: str, new_number: str) -> str:
     return re.sub(r"Number=([^,]+)", f"Number={new_number}", row)
 
 
+class VCFHeaderMergeError(Exception):
+    """Exception raised for errors in merging VCF headers."""
+
+    pass
+
+
 def merge_headers(vcf1: str, vcf2: str) -> List[str]:
     """
     Merges headers from two VCF files, ensuring no duplicate or conflicting entries.
@@ -133,7 +139,7 @@ def merge_headers(vcf1: str, vcf2: str) -> List[str]:
     current_datetime = datetime.now()
 
     # Format the date and time in ISO 8601 format
-    formatted_date = current_datetime.strftime('%Y-%m-%dT%H:%M:%S')
+    formatted_date = current_datetime.strftime("%Y-%m-%dT%H:%M:%S")
 
     header1: List[str] = collect_header(vcf1)
     header2: List[str] = collect_header(vcf2)
@@ -155,8 +161,9 @@ def merge_headers(vcf1: str, vcf2: str) -> List[str]:
     ]
 
     if len(variant_header) > 1:
-        print("Error, variant headers in vcf1 and vcf2 do not match. Cannot merge.")
-        sys.exit(1)
+        raise VCFHeaderMergeError(
+            f"Error: Variant headers in {vcf1_name} and {vcf2_name} do not match. Cannot merge."
+        )
 
     for key in variant_header:
         header_categories.pop(key)
@@ -200,11 +207,13 @@ def merge_headers(vcf1: str, vcf2: str) -> List[str]:
         # Such as FILTER, FORMAT, INFO
         for key, line in merged_header_dict[category].items():
             merged_header.append(f"##{category}={line}")
-    merged_header.extend([
-        f"##merge_snv_variantcallers=merge_snv_variantcallers.py {vcf1_name} {vcf2_name} --output output_merged.vcf",
-        f"##merge_snv_variantcallers_processing_time={formatted_date}",
-        f"##INFO_MERGE_SNV_VARIANTCALLERS=Values in merged INFO fields are listed in the order of the input files: first from {vcf1_name}, then from {vcf2_name}"
-    ])
+    merged_header.extend(
+        [
+            f"##merge_snv_variantcallers=merge_snv_variantcallers.py {vcf1_name} {vcf2_name} --output output_merged.vcf",
+            f"##merge_snv_variantcallers_processing_time={formatted_date}",
+            f"##INFO_MERGE_SNV_VARIANTCALLERS=Values in merged INFO fields are listed in the order of the input files: first from {vcf1_name}, then from {vcf2_name}",
+        ]
+    )
     merged_header.append("#" + variant_header[0])
     merged_header = [line.strip("\n") for line in merged_header]
     return merged_header
