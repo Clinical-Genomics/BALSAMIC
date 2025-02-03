@@ -8,7 +8,7 @@ from BALSAMIC.assets.scripts.merge_snv_variantcallers import (
     merge_variants,
 )
 from typing import Tuple, List
-
+import os
 
 def test_merge_variants(test_vardict_vcf: str, test_tnscope_vcf: str):
     """Tests correct merging of variants from VCF files which share 1 variant and have 1 unique each."""
@@ -55,6 +55,11 @@ def test_merge_variantheaders(test_vardict_vcf: str, test_tnscope_vcf: str):
         '##INFO=<ID=NLOD,Number=1,Type=Float,Description="Normal LOD score">'
         in merged_header
     )
+
+    # THEN new header row should exist in the merged VCF
+    vcf1_name = os.path.basename(test_vardict_vcf)
+    vcf2_name = os.path.basename(test_tnscope_vcf)
+    assert f"##INFO_MERGE_SNV_VARIANTCALLERS=Values in merged INFO fields are listed in the order of the input files: first from {vcf1_name}, then from {vcf2_name}" in merged_header
 
 
 def test_merge_headers_mismatch(
@@ -123,7 +128,7 @@ def test_merge_conflicting_filters():
     merged_filters = merge_filters(filter1, filter2)
 
     # THEN PASS filter should be removed
-    assert merged_filters == "in_normal;germline_risk"
+    assert merged_filters == "germline_risk;in_normal"
 
 
 def test_merge_filters():
