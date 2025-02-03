@@ -10,6 +10,7 @@ from BALSAMIC.assets.scripts.merge_snv_variantcallers import (
 from typing import Tuple, List
 import os
 
+
 def test_merge_variants(test_vardict_vcf: str, test_tnscope_vcf: str):
     """Tests correct merging of variants from VCF files which share 1 variant and have 1 unique each."""
 
@@ -59,7 +60,10 @@ def test_merge_variantheaders(test_vardict_vcf: str, test_tnscope_vcf: str):
     # THEN new header row should exist in the merged VCF
     vcf1_name = os.path.basename(test_vardict_vcf)
     vcf2_name = os.path.basename(test_tnscope_vcf)
-    assert f"##INFO_MERGE_SNV_VARIANTCALLERS=Values in merged INFO fields are listed in the order of the input files: first from {vcf1_name}, then from {vcf2_name}" in merged_header
+    assert (
+        f"##INFO_MERGE_SNV_VARIANTCALLERS=Values in merged INFO fields are listed in the order of the input files: first from {vcf1_name}, then from {vcf2_name}"
+        in merged_header
+    )
 
 
 def test_merge_headers_mismatch(
