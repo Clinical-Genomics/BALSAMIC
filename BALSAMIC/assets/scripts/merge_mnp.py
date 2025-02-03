@@ -336,7 +336,7 @@ def process(
     for header_line in vcf.headers:
         if header_line.startswith("##FILTER") and not filter_added:
             for new_filter_id, description_dict in new_filters.items():
-                id = description_dict["ID"]
+                filter_id = description_dict["ID"]
                 description = description_dict["Description"]
                 print(
                     f"##FILTER=<ID={id},Description={description}>",
@@ -345,12 +345,12 @@ def process(
             filter_added = True
         if header_line.startswith("##INFO") and not info_added:
             for new_info_id, description_dict in new_info_fieds.items():
-                id = description_dict["ID"]
+                info_id = description_dict["ID"]
                 description = description_dict["Description"]
                 number = description_dict["Number"]
-                type = description_dict["Type"]
+                info_type = description_dict["Type"]
                 print(
-                    f"##INFO=<ID={id},Number={number},Type={type},Description={description}>",
+                    f"##INFO=<ID={info_id},Number={number},Type={info_type},Description={description}>",
                     file=out_fh,
                 )
             info_added = True
