@@ -206,8 +206,11 @@ def merge(
         all_filters = {flt for vi in vv for flt in vi.filter}
         if len(all_filters) > 1:
             v.filter = ["MNV_CONFLICTING_FILTERS"]
+            v.info["TNSCOPE_MNV_FILTERS"] = ",".join(all_filters)
         else:
-            v.filter = ["MERGED_MNV", f"{all_filters.pop()}"]
+            mnv_filter = all_filters.pop()
+            v.filter = [mnv_filter]
+            v.info["TNSCOPE_MNV_FILTERS"] = mnv_filter
 
         # Mark all constituent variants as "MERGED"
         for vi in vv:
@@ -257,6 +260,9 @@ def merge(
         to_merge = [vi]
         for j in range(i + 1, len(variant_stack)):
             vj: vcflib.vcf.Variant = variant_stack[j]
+            # If variant has already been merged, ignore it
+            if "MERGED" in vj.filter:
+                continue
             if ifmerge(to_merge[-1], vj, max_distance):
                 to_merge.append(vj)
 
@@ -310,29 +316,44 @@ def process(
             "Description": '"SNV Merged with neighboring variants"',
             "ID": "MERGED",
         },
-        "MERGED_MNV": {
-            "Description": '"Created from merged SNVs with same phase-id"',
-            "ID": "MERGED_MNV",
-        },
         "MNV_CONFLICTING_FILTERS": {
             "Description": '"Merged MNV contains SNVs with conflicting filters, such as triallelic_site and in_normal"',
             "ID": "MNV_CONFLICTING_FILTERS",
         },
     }
+    new_info_fieds = {
+        "TNSCOPE_MNV_FILTERS": {
+            "Description": '"Unique set of filters from constituent SNVs and InDels merged to MNV"',
+            "ID": "TNSCOPE_MNV_FILTERS",
+            "Number": ".",
+            "Type": "String",
+        },
+    }
     for new_filter_id, description_dict in new_filters.items():
         vcf.filters[new_filter_id] = description_dict
 
-    filter_added = False
+    filter_added, info_added = False, False
     for header_line in vcf.headers:
         if header_line.startswith("##FILTER") and not filter_added:
             for new_filter_id, description_dict in new_filters.items():
-                id = description_dict["ID"]
+                filter_id = description_dict["ID"]
                 description = description_dict["Description"]
                 print(
                     f"##FILTER=<ID={id},Description={description}>",
                     file=out_fh,
                 )
             filter_added = True
+        if header_line.startswith("##INFO") and not info_added:
+            for new_info_id, description_dict in new_info_fieds.items():
+                info_id = description_dict["ID"]
+                description = description_dict["Description"]
+                number = description_dict["Number"]
+                info_type = description_dict["Type"]
+                print(
+                    f"##INFO=<ID={info_id},Number={number},Type={info_type},Description={description}>",
+                    file=out_fh,
+                )
+            info_added = True
         print(header_line, file=out_fh)
 
     # Process variants and merge them if they are within max_distance
