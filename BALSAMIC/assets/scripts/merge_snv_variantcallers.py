@@ -239,12 +239,12 @@ def read_variants(vcf: str) -> Dict[Tuple[str, str, str, str], Dict[str, str]]:
             if line.startswith("#"):
                 continue
             fields: List[str] = line.strip().split("\t")
-            chrom, pos, id, ref, alt, qual, filter_, info, format_, *samples = fields
+            chrom, pos, v_id, ref, alt, qual, filter_, info, format_, *samples = fields
             key = (chrom, pos, ref, alt)
             variants[key] = {
                 "chrom": chrom,
                 "pos": pos,
-                "id": id,
+                "id": v_id,
                 "ref": ref,
                 "alt": alt,
                 "qual": qual,
