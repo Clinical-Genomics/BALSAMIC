@@ -121,102 +121,58 @@ class VCFHeaderMergeError(Exception):
 
 
 def merge_headers(vcf1: str, vcf2: str) -> List[str]:
-    """
-    Merges headers from two VCF files, ensuring no duplicate or conflicting entries.
+    """Merges headers from two VCF files, ensuring no duplicate or conflicting entries."""
 
-    Parameters:
-    - vcf1 (str): Path to the first VCF file.
-    - vcf2 (str): Path to the second VCF file.
+    def extract_line_id(line: str) -> str:
+        """Extracts the ID from a VCF header line."""
+        try:
+            return line.split("=")[1].split(",")[0]
+        except IndexError:
+            return ""
 
-    Returns:
-    - List[str]: Merged header lines.
-    """
-
-    vcf1_name = os.path.basename(vcf1)
-    vcf2_name = os.path.basename(vcf2)
-
-    # Get the current date and time
-    current_datetime = datetime.now()
-
-    # Format the date and time in ISO 8601 format
-    formatted_date = current_datetime.strftime("%Y-%m-%dT%H:%M:%S")
-
-    header1: List[str] = collect_header(vcf1)
-    header2: List[str] = collect_header(vcf2)
-
-    # Merge header categories
-    header_categories = {}
-    header_categories: Dict[str, List[str]] = add_header_categories(
-        header_categories, header1
-    )
-    header_categories: Dict[str, List[str]] = add_header_categories(
-        header_categories, header2
-    )
-
-    # Handle variant header
-    variant_header = [
-        key
-        for key in header_categories
-        if "CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO" in key
-    ]
-
-    if len(variant_header) > 1:
-        raise VCFHeaderMergeError(
-            f"Error: Variant headers in {vcf1_name} and {vcf2_name} do not match. Cannot merge."
-        )
-
-    for key in variant_header:
-        header_categories.pop(key)
-
-    # Merge identical header rows
-    merged_header_dict = {}
-    for category in header_categories:
+    def process_category_lines(lines: List[str]) -> Dict[str, str]:
+        """Processes header lines within a category, merging duplicate IDs."""
         cat_lines = {}
-        merged_header_dict[category] = {}
-        for line in header_categories[category]:
-            if line in cat_lines:
-                # Line has already been added in this category, skip it
-                continue
+        for line in lines:
+            line_id = extract_line_id(line)
+            if not line_id:  # Add malformed lines directly
+                cat_lines[line] = line
             else:
-                try:
-                    # Example split line
-                    # ["<ID", "AD,Number", "R,Type", "Integer,Description", "Allelic depths for the ref and alt alleles in the order listed">
-                    line_id = line.split("=")[1].split(",")[0]
-                    # Example line_id
-                    # AD
-                except:
-                    # Line does not match standard VCF header format, just add it
-                    cat_lines[line] = line
-                    continue
-            # Handle merging standard VCF header lines such as:
-            # ##FILTER=<ID=balsamic_low_tumor_ad,Description="Set if not true: FORMAT/AD[0:1] >= 5.0">
-            # ##FORMAT=<ID=AF,Number=A,Type=Float,Description="Allele Frequency">
-            if line_id not in cat_lines:
-                cat_lines[line_id] = line
-            else:
-                # Merge lines with the same category and ID
-                line1: str = cat_lines[line_id]
-                line2: str = line
-                cat_lines[line_id]: str = merge_header_row(line1, line2)
+                cat_lines[line_id] = merge_header_row(cat_lines.get(line_id, line), line)
+        return cat_lines
 
-        merged_header_dict[category]: Dict[str:str] = cat_lines
+    vcf1_name, vcf2_name = map(os.path.basename, [vcf1, vcf2])
+    formatted_date = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
 
-    # Consolidate merged header into list to be written
-    merged_header = []
-    for category in merged_header_dict:
-        # Such as FILTER, FORMAT, INFO
-        for key, line in merged_header_dict[category].items():
-            merged_header.append(f"##{category}={line}")
-    merged_header.extend(
-        [
-            f"##merge_snv_variantcallers=merge_snv_variantcallers.py {vcf1_name} {vcf2_name} --output output_merged.vcf",
-            f"##merge_snv_variantcallers_processing_time={formatted_date}",
-            f"##INFO_MERGE_SNV_VARIANTCALLERS=Values in merged INFO fields are listed in the order of the input files: first from {vcf1_name}, then from {vcf2_name}",
-        ]
-    )
-    merged_header.append("#" + variant_header[0])
-    merged_header = [line.strip("\n") for line in merged_header]
-    return merged_header
+    header1, header2 = collect_header(vcf1), collect_header(vcf2)
+
+    header_categories = add_header_categories({}, header1)
+    header_categories = add_header_categories(header_categories, header2)
+
+    # Validate variant headers
+    variant_header = [key for key in header_categories if "CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO" in key]
+    if len(variant_header) > 1:
+        raise VCFHeaderMergeError(f"Error: Variant headers in {vcf1_name} and {vcf2_name} do not match. Cannot merge.")
+
+    if variant_header:
+        header_categories.pop(variant_header[0], None)
+
+    # Process and merge headers
+    merged_header_dict = {category: process_category_lines(lines) for category, lines in header_categories.items()}
+
+    # Assemble merged header
+    merged_header = [
+        f"##{category}={line}" for category, cat_lines in merged_header_dict.items() for line in cat_lines.values()
+    ]
+    merged_header.extend([
+        f"##merge_snv_variantcallers=merge_snv_variantcallers.py {vcf1_name} {vcf2_name} --output output_merged.vcf",
+        f"##merge_snv_variantcallers_processing_time={formatted_date}",
+        f"##INFO_MERGE_SNV_VARIANTCALLERS=Values in merged INFO fields are listed in the order of the input files: first from {vcf1_name}, then from {vcf2_name}",
+    ])
+    if variant_header:
+        merged_header.append("#" + variant_header[0])
+
+    return [line.strip("\n") for line in merged_header]
 
 
 def merge_header_row(line1: str, line2: str) -> str:
