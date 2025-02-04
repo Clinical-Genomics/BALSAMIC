@@ -181,7 +181,7 @@ def merge_headers(vcf1: str, vcf2: str) -> List[str]:
         [
             f"##merge_snv_variantcallers=merge_snv_variantcallers.py {vcf1_name} {vcf2_name} --output output_merged.vcf",
             f"##merge_snv_variantcallers_processing_time={formatted_date}",
-            f"##INFO_MERGE_SNV_VARIANTCALLERS=Values in merged INFO fields are listed in the order of the input files: first from {vcf1_name}, then from {vcf2_name}",
+            f"##merge_snv_variantcallers=values in merged INFO fields are listed in the order of the input files: first from {vcf1_name}, then from {vcf2_name}",
         ]
     )
     if variant_header:
