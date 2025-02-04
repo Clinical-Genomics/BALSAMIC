@@ -138,7 +138,9 @@ def merge_headers(vcf1: str, vcf2: str) -> List[str]:
             if not line_id:  # Add malformed lines directly
                 cat_lines[line] = line
             else:
-                cat_lines[line_id] = merge_header_row(cat_lines.get(line_id, line), line)
+                cat_lines[line_id] = merge_header_row(
+                    cat_lines.get(line_id, line), line
+                )
         return cat_lines
 
     vcf1_name, vcf2_name = map(os.path.basename, [vcf1, vcf2])
@@ -150,25 +152,38 @@ def merge_headers(vcf1: str, vcf2: str) -> List[str]:
     header_categories = add_header_categories(header_categories, header2)
 
     # Validate variant headers
-    variant_header = [key for key in header_categories if "CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO" in key]
+    variant_header = [
+        key
+        for key in header_categories
+        if "CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO" in key
+    ]
     if len(variant_header) > 1:
-        raise VCFHeaderMergeError(f"Error: Variant headers in {vcf1_name} and {vcf2_name} do not match. Cannot merge.")
+        raise VCFHeaderMergeError(
+            f"Error: Variant headers in {vcf1_name} and {vcf2_name} do not match. Cannot merge."
+        )
 
     if variant_header:
         header_categories.pop(variant_header[0], None)
 
     # Process and merge headers
-    merged_header_dict = {category: process_category_lines(lines) for category, lines in header_categories.items()}
+    merged_header_dict = {
+        category: process_category_lines(lines)
+        for category, lines in header_categories.items()
+    }
 
     # Assemble merged header
     merged_header = [
-        f"##{category}={line}" for category, cat_lines in merged_header_dict.items() for line in cat_lines.values()
+        f"##{category}={line}"
+        for category, cat_lines in merged_header_dict.items()
+        for line in cat_lines.values()
     ]
-    merged_header.extend([
-        f"##merge_snv_variantcallers=merge_snv_variantcallers.py {vcf1_name} {vcf2_name} --output output_merged.vcf",
-        f"##merge_snv_variantcallers_processing_time={formatted_date}",
-        f"##INFO_MERGE_SNV_VARIANTCALLERS=Values in merged INFO fields are listed in the order of the input files: first from {vcf1_name}, then from {vcf2_name}",
-    ])
+    merged_header.extend(
+        [
+            f"##merge_snv_variantcallers=merge_snv_variantcallers.py {vcf1_name} {vcf2_name} --output output_merged.vcf",
+            f"##merge_snv_variantcallers_processing_time={formatted_date}",
+            f"##INFO_MERGE_SNV_VARIANTCALLERS=Values in merged INFO fields are listed in the order of the input files: first from {vcf1_name}, then from {vcf2_name}",
+        ]
+    )
     if variant_header:
         merged_header.append("#" + variant_header[0])
 
