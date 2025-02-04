@@ -7,17 +7,18 @@ Added:
 
 Changed:
 ^^^^^^^^
-* Reworked bcftools filters https://github.com/Clinical-Genomics/BALSAMIC/pull/1509
-* Renamed high_normal_tumor_af_frac to in_normal https://github.com/Clinical-Genomics/BALSAMIC/pull/1509
-* check to verify sample sex for all workflows https://github.com/Clinical-Genomics/BALSAMIC/pull/1516
 
 
 Removed:
 ^^^^^^^^
+* Remove WGS-level GC-bias metric from TGA workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1521
 
 
-Fixed:
-^^^^^^
+Changed:
+^^^^^^^^
+* Reworked bcftools filters https://github.com/Clinical-Genomics/BALSAMIC/pull/1509
+* Renamed high_normal_tumor_af_frac to in_normal https://github.com/Clinical-Genomics/BALSAMIC/pull/1509
+* check to verify sample sex for all workflows https://github.com/Clinical-Genomics/BALSAMIC/pull/1516
 
 
 [16.0.0]
