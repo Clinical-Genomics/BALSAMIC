@@ -63,11 +63,9 @@ if config["analysis"]["sequencing_type"] == 'wgs':
 
     # Sentieon metrics
     multiqc_input.extend(expand(qc_dir + "tumor.{sample}_sentieon_wgs_metrics.txt", sample=tumor_sample))
-    multiqc_input.extend(expand(qc_dir + "tumor.{sample}_coverage.gz", sample=tumor_sample))
 
     if config['analysis']['analysis_type'] == "paired":
         multiqc_input.extend(expand(qc_dir + "normal.{sample}_sentieon_wgs_metrics.txt", sample=normal_sample))
-        multiqc_input.extend(expand(qc_dir + "normal.{sample}_coverage.gz", sample=normal_sample))
 
 
     if config["analysis"]["analysis_workflow"] != "balsamic-qc":
