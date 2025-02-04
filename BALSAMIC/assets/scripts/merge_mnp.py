@@ -339,7 +339,7 @@ def process(
                 filter_id = description_dict["ID"]
                 description = description_dict["Description"]
                 print(
-                    f"##FILTER=<ID={id},Description={description}>",
+                    f"##FILTER=<ID={filter_id},Description={description}>",
                     file=out_fh,
                 )
             filter_added = True
