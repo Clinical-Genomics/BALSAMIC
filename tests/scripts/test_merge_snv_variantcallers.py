@@ -61,7 +61,7 @@ def test_merge_variantheaders(test_vardict_vcf: str, test_tnscope_vcf: str):
     vcf1_name = os.path.basename(test_vardict_vcf)
     vcf2_name = os.path.basename(test_tnscope_vcf)
     assert (
-        f"##INFO_MERGE_SNV_VARIANTCALLERS=Values in merged INFO fields are listed in the order of the input files: first from {vcf1_name}, then from {vcf2_name}"
+        f"##merge_snv_variantcallers=values in merged INFO fields are listed in the order of the input files: first from {vcf1_name}, then from {vcf2_name}"
         in merged_header
     )
 
