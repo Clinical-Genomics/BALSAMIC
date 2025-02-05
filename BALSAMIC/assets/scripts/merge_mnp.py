@@ -279,9 +279,9 @@ def merge(
             v.info["TNSCOPE_MNV_NORMAL_AFs"] = ",".join(
                 str(af) for af in TNSCOPE_MNV_AFs[1]
             )
-        v.info["TNSCOPE_MNV_TUMOR_ADs"] = ",".join(TNSCOPE_MNV_AFs[0])
+        v.info["TNSCOPE_MNV_TUMOR_ADs"] = ",".join(TNSCOPE_MNV_ADs[0])
         if 1 in TNSCOPE_MNV_ADs:
-            v.info["TNSCOPE_MNV_TUMOR_ADs"] = ",".join(TNSCOPE_MNV_AFs[1])
+            v.info["TNSCOPE_MNV_NORMAL_ADs"] = ",".join(TNSCOPE_MNV_ADs[1])
         v.info["TNSCOPE_MNV_VARS"] = ",".join(TNSCOPE_MNV_VARS)
 
         # Format the final variant
