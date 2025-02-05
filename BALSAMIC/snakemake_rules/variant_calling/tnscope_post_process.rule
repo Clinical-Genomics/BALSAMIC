@@ -50,6 +50,7 @@ rule post_process_tnscope:
         case_name = config["analysis"]["case_id"],
         sentieon_exec = config_model.sentieon.sentieon_exec,
         sentieon_lic = config_model.sentieon.sentieon_license,
+        matched_normal_filternames = ",".join(BaseSNVFilters.MATCHED_NORMAL_FILTER_NAMES),
         variant_caller= "tnscope"
     threads:
         get_threads(cluster_config, 'post_process_tnscope')
@@ -61,7 +62,7 @@ rule post_process_tnscope:
 export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
 
-{params.sentieon_exec} pyexec {params.merge_mnvs} --max_distance 5 {input.vcf_tnscope} {input.ref} > {params.tmpdir}/tnscope.research.mnv.vcf ;
+{params.sentieon_exec} pyexec {params.merge_mnvs} --preserve_filters {params.matched_normal_filternames} --max_distance 5 {input.vcf_tnscope} {input.ref} > {params.tmpdir}/tnscope.research.mnv.vcf ;
 
 python {params.modify_tnscope_infofield} {params.tmpdir}/tnscope.research.mnv.vcf {params.tmpdir}/tnscope.research.mnv.add_info_fields.vcf ;
 
