@@ -122,7 +122,7 @@ def distance(
 
 
 def merge(
-    variant_stack: List[vcflib.vcf.Variant], max_distance: int, preserve_filters: str
+    variant_stack: List[vcflib.vcf.Variant], max_distance: int, preserve_filters: List[str]
 ) -> List[vcflib.vcf.Variant]:
     """
     Merges a stack of overlapping variants into a single variant.
@@ -314,7 +314,7 @@ def merge(
 
 
 def process(
-    vcf_file: str, ref_file: str, out_file: Optional[str], max_distance: int, preserve_filters: str
+    vcf_file: str, ref_file: str, out_file: Optional[str], max_distance: int, preserve_filters: List[str]
 ) -> None:
     """
     Processes a VCF file, merges neighboring variants into MNVs, and writes the result to an output file or stdout.
@@ -416,7 +416,7 @@ def process(
                 variant_stack.append(variant)
             else:
                 # Merge variants in the stack and reset it
-                merged_variants = merge(variant_stack, max_distance)
+                merged_variants = merge(variant_stack, max_distance, preserve_filters)
                 for merged_variant in merged_variants:
                     print(merged_variant, file=out_fh)
                 variant_stack = []
@@ -427,7 +427,7 @@ def process(
                     variant_stack.append(variant)
 
     # Process any remaining variants in the stack after the loop
-    merged_variants = merge(variant_stack, max_distance)
+    merged_variants = merge(variant_stack, max_distance, preserve_filters)
     for merged_variant in merged_variants:
         print(merged_variant, file=out_fh)
 
@@ -470,13 +470,13 @@ def main(
         reference (str): Path to the reference genome file.
         out_file (Optional[str]): Path to the output VCF file. If not specified, the result will be printed to stdout.
         max_distance (int): Maximum allowed distance between two variants to be merged.
-        preserve_filters (str): Filters which when uniquely present (does not also contain PASS) in the same merged MNV is not set to conflicting, but is preserved as is.
+        preserve_filters (str): Comma separated list of filters to not automatically include in MNV_CONFLICTING_FILTERS
 
     This command processes the input VCF file and merges phased single nucleotide variants (SNVs)
     into multi-nucleotide variants (MNVs) if they meet the criteria based on `max_distance`.
     """
     # Call the process function to perform the actual merging
-    process(vcf_file, reference, out_file, max_distance, preserve_filters)
+    process(vcf_file, reference, out_file, max_distance, preserve_filters.split(","))
 
 
 if __name__ == "__main__":
