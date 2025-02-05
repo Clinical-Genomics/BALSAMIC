@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 """
 
 Copyright (c) Sentieon Inc. All rights reserved.
@@ -38,24 +37,6 @@ Requirements:
 This script requires access to the vcflib library contained in the Sentieon
 software package located in $SENTIEON_INSTALL_DIR/lib/python/sentieon.
 """
-
-"""
-Modifications by Clinical Genomics Stockholm, in the context of: https://github.com/Clinical-Genomics/BALSAMIC
-
-- Filter PASS is no longer a requirement for MNVs to be merged
-
-This was added because we have additional filters, like triallelic_site, and also variants with normal/germline filters set that we want to merge into MNVs.
-
-- Additional INFO fields which saves AD, AF, FILTER and CHROM_POS_REF_ALT of the constituent SNVs/InDels
-
-This was added mainly for the ability of tracing back the filters of the constituent SNVs/InDels
-
-- New argument for preserve_filters
-
-This was added as an extra logic in the merging of filters in the creation of the MNV.
-The filters listed in the preserve_filters argument are kept as filters as long as there are no other other filters in the same MNV (such as PASS / triallelic_site), at which point the filter will be set to MNV_CONFLICTING_FILTERS
-"""
-
 from __future__ import print_function
 
 import vcflib
@@ -534,3 +515,23 @@ def main(
 
 if __name__ == "__main__":
     main()
+
+
+"""
+NOTE: 
+
+Modifications by Clinical Genomics Stockholm, in the context of: https://github.com/Clinical-Genomics/BALSAMIC
+
+- Filter PASS is no longer a requirement for MNVs to be merged
+
+This was added because we have additional filters, like triallelic_site, and also variants with normal/germline filters set that we want to merge into MNVs.
+
+- Additional INFO fields which saves AD, AF, FILTER and CHROM_POS_REF_ALT of the constituent SNVs/InDels
+
+This was added mainly for the ability of tracing back the filters of the constituent SNVs/InDels
+
+- New argument for preserve_filters
+
+This was added as an extra logic in the merging of filters in the creation of the MNV.
+The filters listed in the preserve_filters argument are kept as filters as long as there are no other other filters in the same MNV (such as PASS / triallelic_site), at which point the filter will be set to MNV_CONFLICTING_FILTERS
+"""
