@@ -220,7 +220,7 @@ def merge(
 
         # Set the merged variant's filter based on the preserve logic.
         if all(preserve_variants):
-            v.filter = ",".join(all_filters)
+            v.filter = all_filters
         else:
             v.filter = ["MNV_CONFLICTING_FILTERS"] if len(all_filters) > 1 else [all_filters.pop()]
 
@@ -230,8 +230,8 @@ def merge(
         for vi in vv:
             if "MERGED" not in vi.filter:
                 vi.filter.append("MERGED")
-
-            TNSCOPE_MNV_VARS.append(f"{vi.chrom}_{vi.pos}_{vi.ref}_{vi.alt}")
+            vi_alt = vi.alt[0]
+            TNSCOPE_MNV_VARS.append(f"{vi.chrom}_{vi.pos}_{vi.ref}_{vi_alt}")
 
         # Merge sample information (AF, AD, AFDP)
         for i in range(len(vcf.samples)):
