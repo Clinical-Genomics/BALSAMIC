@@ -39,6 +39,23 @@ This script requires access to the vcflib library contained in the Sentieon
 software package located in $SENTIEON_INSTALL_DIR/lib/python/sentieon.
 """
 
+"""
+Modifications by Clinical Genomics Stockholm, in the context of: https://github.com/Clinical-Genomics/BALSAMIC
+
+- Filter PASS is no longer a requirement for MNVs to be merged
+
+This was added because we have additional filters, like triallelic_site, and also variants with normal/germline filters set that we want to merge into MNVs.
+
+- Additional INFO fields which saves AD, AF, FILTER and CHROM_POS_REF_ALT of the constituent SNVs/InDels
+
+This was added mainly for the ability of tracing back the filters of the constituent SNVs/InDels
+
+- New argument for preserve_filters
+
+This was added as an extra logic in the merging of filters in the creation of the MNV.
+The filters listed in the preserve_filters argument are kept as filters as long as there are no other other filters in the same MNV (such as PASS / triallelic_site), at which point the filter will be set to MNV_CONFLICTING_FILTERS
+"""
+
 from __future__ import print_function
 
 import vcflib
@@ -122,7 +139,9 @@ def distance(
 
 
 def merge(
-    variant_stack: List[vcflib.vcf.Variant], max_distance: int, preserve_filters: List[str]
+    variant_stack: List[vcflib.vcf.Variant],
+    max_distance: int,
+    preserve_filters: List[str],
 ) -> List[vcflib.vcf.Variant]:
     """
     Merges a stack of overlapping variants into a single variant.
@@ -222,7 +241,11 @@ def merge(
         if all(preserve_variants):
             v.filter = all_filters
         else:
-            v.filter = ["MNV_CONFLICTING_FILTERS"] if len(all_filters) > 1 else [all_filters.pop()]
+            v.filter = (
+                ["MNV_CONFLICTING_FILTERS"]
+                if len(all_filters) > 1
+                else [all_filters.pop()]
+            )
 
         # Mark all constituent variants as "MERGED"
         # Create list of all constituent SNV chrom,pos,ref,alts
@@ -234,26 +257,30 @@ def merge(
             TNSCOPE_MNV_VARS.append(f"{vi.chrom}_{vi.pos}_{vi.ref}_{vi_alt}")
 
         # Merge sample information (AF, AD, AFDP)
+        TNSCOPE_MNV_AFs = {}
+        TNSCOPE_MNV_ADs = {}
         for i in range(len(vcf.samples)):
             t = v.samples[i]
             vv_samples = [vs.samples[i] for vs in vv]
-            TNSCOPE_MNV_AFs = [vi.get("AF") for vi in vv_samples]
-
+            sample_af = [vi.get("AF") for vi in vv_samples]
+            TNSCOPE_MNV_AFs[i] = sample_af
 
             # Handle AF (allele frequency)
-            if None not in TNSCOPE_MNV_AFs:
+            if None not in sample_af:
                 if isinstance(vv_samples[0]["AF"], list):
                     t["AF"] = [
                         sum([vsi["AF"][j] for vsi in vv_samples]) / len_vv
                         for j in range(len(alt))
                     ]
                 else:
-                    t["AF"] = sum(TNSCOPE_MNV_AFs) / len_vv
+                    t["AF"] = sum(sample_af) / len_vv
 
             # Handle AD (allele depths)
             ref_ads: list = [vi["AD"][0] for vi in vv_samples]
             alt_ads: list = [vi["AD"][1] for vi in vv_samples]
-            TNSCOPE_MNV_ADs: list = (f"{ref}|{alt}" for ref, alt in zip(ref_ads, alt_ads))
+            TNSCOPE_MNV_ADs[i]: list = (
+                f"{ref}|{alt}" for ref, alt in zip(ref_ads, alt_ads)
+            )
 
             t["AD"] = (
                 int(sum(ref_ads) / len_vv),
@@ -266,8 +293,14 @@ def merge(
                 t["AFDP"] = int(sum(afdp_values) / len_vv)
 
         v.info["TNSCOPE_MNV_FILTERS"] = ",".join(TNSCOPE_MNV_FILTERS)
-        v.info["TNSCOPE_MNV_AFs"] = ",".join(str(af) for af in TNSCOPE_MNV_AFs)
-        v.info["TNSCOPE_MNV_ADs"] = ",".join(TNSCOPE_MNV_ADs)
+        v.info["TNSCOPE_MNV_TUMOR_AFs"] = ",".join(str(af) for af in TNSCOPE_MNV_AFs[0])
+        if 1 in TNSCOPE_MNV_AFs:
+            v.info["TNSCOPE_MNV_NORMAL_AFs"] = ",".join(
+                str(af) for af in TNSCOPE_MNV_AFs[1]
+            )
+        v.info["TNSCOPE_MNV_TUMOR_ADs"] = ",".join(TNSCOPE_MNV_AFs[0])
+        if 1 in TNSCOPE_MNV_ADs:
+            v.info["TNSCOPE_MNV_TUMOR_ADs"] = ",".join(TNSCOPE_MNV_AFs[1])
         v.info["TNSCOPE_MNV_VARS"] = ",".join(TNSCOPE_MNV_VARS)
 
         # Format the final variant
@@ -314,7 +347,11 @@ def merge(
 
 
 def process(
-    vcf_file: str, ref_file: str, out_file: Optional[str], max_distance: int, preserve_filters: List[str]
+    vcf_file: str,
+    ref_file: str,
+    out_file: Optional[str],
+    max_distance: int,
+    preserve_filters: List[str],
 ) -> None:
     """
     Processes a VCF file, merges neighboring variants into MNVs, and writes the result to an output file or stdout.
@@ -355,14 +392,26 @@ def process(
             "Number": ".",
             "Type": "String",
         },
-        "TNSCOPE_MNV_AFs": {
-            "Description": '"A list of AFs from each respective constituent SNV"',
+        "TNSCOPE_MNV_TUMOR_AFs": {
+            "Description": '"A list of AFs from each respective constituent SNV in tumor sample"',
             "ID": "TNSCOPE_MNV_AFs",
             "Number": ".",
             "Type": "String",
         },
-        "TNSCOPE_MNV_ADs": {
-            "Description": '"A list of ADs from each respective constituent SNV (ref, alt separated by |)"',
+        "TNSCOPE_MNV_TUMOR_ADs": {
+            "Description": '"A list of ADs from each respective constituent SNV (ref, alt separated by |) in tumor sample"',
+            "ID": "TNSCOPE_MNV_ADs",
+            "Number": ".",
+            "Type": "String",
+        },
+        "TNSCOPE_MNV_NORMAL_AFs": {
+            "Description": '"A list of AFs from each respective constituent SNV in normal sample"',
+            "ID": "TNSCOPE_MNV_AFs",
+            "Number": ".",
+            "Type": "String",
+        },
+        "TNSCOPE_MNV_NORMAL_ADs": {
+            "Description": '"A list of ADs from each respective constituent SNV (ref, alt separated by |) in normal sample"',
             "ID": "TNSCOPE_MNV_ADs",
             "Number": ".",
             "Type": "String",
@@ -460,7 +509,11 @@ def process(
     help="Filters which when uniquely present (does not also contain PASS) in the same merged MNV is not set to conflicting, but is preserved as is.",
 )
 def main(
-    vcf_file: str, reference: str, out_file: Optional[str], max_distance: int, preserve_filters: str
+    vcf_file: str,
+    reference: str,
+    out_file: Optional[str],
+    max_distance: int,
+    preserve_filters: str,
 ) -> None:
     """
     Merge phased SNVs into MNVs and output the result to a VCF file or stdout.
