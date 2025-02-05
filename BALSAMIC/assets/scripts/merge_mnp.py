@@ -266,7 +266,7 @@ def merge(
                 t["AFDP"] = int(sum(afdp_values) / len_vv)
 
         v.info["TNSCOPE_MNV_FILTERS"] = ",".join(TNSCOPE_MNV_FILTERS)
-        v.info["TNSCOPE_MNV_AFs"] = ",".join(TNSCOPE_MNV_AFs)
+        v.info["TNSCOPE_MNV_AFs"] = ",".join(str(af) for af in TNSCOPE_MNV_AFs)
         v.info["TNSCOPE_MNV_ADs"] = ",".join(TNSCOPE_MNV_ADs)
         v.info["TNSCOPE_MNV_VARS"] = ",".join(TNSCOPE_MNV_VARS)
 
