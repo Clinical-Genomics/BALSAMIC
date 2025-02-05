@@ -204,7 +204,7 @@ def merge(
         v.pos += i
 
         # Build TNSCOPE_MNV_FILTERS by joining filters for each variant in vv.
-        TNSCOPE_MNV_FILTERS = ["|".join(vi.filter) for vi in vv]
+        tnscope_mnv_filters = ["|".join(vi.filter) for vi in vv]
 
         # Map each variant's index to its filter list.
         vi_filters = {i: vi.filter for i, vi in enumerate(vv)}
@@ -230,21 +230,21 @@ def merge(
 
         # Mark all constituent variants as "MERGED"
         # Create list of all constituent SNV chrom,pos,ref,alts
-        TNSCOPE_MNV_VARS: list = []
+        tnscope_mnv_vars: list = []
         for vi in vv:
             if "MERGED" not in vi.filter:
                 vi.filter.append("MERGED")
             vi_alt = vi.alt[0]
-            TNSCOPE_MNV_VARS.append(f"{vi.chrom}_{vi.pos}_{vi.ref}_{vi_alt}")
+            tnscope_mnv_vars.append(f"{vi.chrom}_{vi.pos}_{vi.ref}_{vi_alt}")
 
         # Merge sample information (AF, AD, AFDP)
-        TNSCOPE_MNV_AFs = {}
-        TNSCOPE_MNV_ADs = {}
+        tnscope_mnv_afs = {}
+        tnscope_mnv_ads = {}
         for i in range(len(vcf.samples)):
             t = v.samples[i]
             vv_samples = [vs.samples[i] for vs in vv]
             sample_af = [vi.get("AF") for vi in vv_samples]
-            TNSCOPE_MNV_AFs[i] = sample_af
+            tnscope_mnv_afs[i] = sample_af
 
             # Handle AF (allele frequency)
             if None not in sample_af:
@@ -259,7 +259,7 @@ def merge(
             # Handle AD (allele depths)
             ref_ads: list = [vi["AD"][0] for vi in vv_samples]
             alt_ads: list = [vi["AD"][1] for vi in vv_samples]
-            TNSCOPE_MNV_ADs[i]: list = (
+            tnscope_mnv_ads[i]: list = (
                 f"{ref}|{alt}" for ref, alt in zip(ref_ads, alt_ads)
             )
 
@@ -273,16 +273,16 @@ def merge(
             if None not in afdp_values:
                 t["AFDP"] = int(sum(afdp_values) / len_vv)
 
-        v.info["TNSCOPE_MNV_FILTERS"] = ",".join(TNSCOPE_MNV_FILTERS)
-        v.info["TNSCOPE_MNV_TUMOR_AFs"] = ",".join(str(af) for af in TNSCOPE_MNV_AFs[0])
-        if 1 in TNSCOPE_MNV_AFs:
+        v.info["TNSCOPE_MNV_FILTERS"] = ",".join(tnscope_mnv_filters)
+        v.info["TNSCOPE_MNV_TUMOR_AFs"] = ",".join(str(af) for af in tnscope_mnv_afs[0])
+        if 1 in tnscope_mnv_afs:
             v.info["TNSCOPE_MNV_NORMAL_AFs"] = ",".join(
-                str(af) for af in TNSCOPE_MNV_AFs[1]
+                str(af) for af in tnscope_mnv_afs[1]
             )
-        v.info["TNSCOPE_MNV_TUMOR_ADs"] = ",".join(TNSCOPE_MNV_ADs[0])
-        if 1 in TNSCOPE_MNV_ADs:
-            v.info["TNSCOPE_MNV_NORMAL_ADs"] = ",".join(TNSCOPE_MNV_ADs[1])
-        v.info["TNSCOPE_MNV_VARS"] = ",".join(TNSCOPE_MNV_VARS)
+        v.info["TNSCOPE_MNV_TUMOR_ADs"] = ",".join(tnscope_mnv_ads[0])
+        if 1 in tnscope_mnv_ads:
+            v.info["TNSCOPE_MNV_NORMAL_ADs"] = ",".join(tnscope_mnv_ads[1])
+        v.info["TNSCOPE_MNV_VARS"] = ",".join(tnscope_mnv_vars)
 
         # Format the final variant
         _ = vcf.format(v)
