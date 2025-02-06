@@ -187,6 +187,10 @@ research_annotations.append(
                     "CLNREVSTAT",
                     "CLNSIG",
                     "ORIGIN",
+                    "ONC",
+                    "ONCDN"
+                    "ONCREVSTAT",
+                    "ONCDISDB",
                     "CLNVC",
                     "CLNVCSO",
                 ],
@@ -196,6 +200,10 @@ research_annotations.append(
                     "CLNREVSTAT",
                     "CLNSIG",
                     "ORIGIN",
+                    "ONC",
+                    "ONCDN"
+                    "ONCREVSTAT",
+                    "ONCDISDB",
                     "CLNVC",
                     "CLNVCSO",
                 ],
