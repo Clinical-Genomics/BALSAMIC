@@ -177,7 +177,7 @@ def merge(
 
         # Calculate the merged quality score
         qual_list = [vi.qual for vi in vv]
-        v.qual = sum(qual_list) / len_vv if None not in qual_list else None
+        v.qual = round(sum(qual_list) / len_vv, 4) if None not in qual_list else None
 
         # Merge INFO fields by averaging the values
         for k in v.info.keys():
@@ -186,7 +186,7 @@ def merge(
                 v.info[k] = None
             else:
                 try:
-                    v.info[k] = sum(vk) / len_vv
+                    v.info[k] = round(sum(vk) / len_vv, 4)
                 except (TypeError, ZeroDivisionError):
                     v.info[k] = None
 
