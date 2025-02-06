@@ -19,6 +19,7 @@ Changed:
 
 Removed:
 ^^^^^^^^
+* Remove WGS-level GC-bias metric from TGA workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1521
 
 
 Fixed:
