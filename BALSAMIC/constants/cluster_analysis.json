@@ -188,6 +188,10 @@
 		"time": "24:00:00",
 		"n": 12
 	},
+	"sex_prediction": {
+		"time": "01:00:00",
+		"n": 2
+	},
 	"vardict_merge": {
 		"time": "01:30:00",
 		"n": 5
@@ -384,7 +388,7 @@
 		"time": "01:00:00",
 		"n": 4
 	},
-	"modify_tnscope_infofield": {
+	"post_process_tnscope": {
 		"time": "01:00:00",
 		"n": 4
 	},

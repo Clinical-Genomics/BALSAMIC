@@ -3,21 +3,30 @@
 
 Added:
 ^^^^^^
+* Added option to disable hard filter of variants in matched normal https://github.com/Clinical-Genomics/BALSAMIC/pull/1509
+* Added check to verify sample sex for all workflows https://github.com/Clinical-Genomics/BALSAMIC/pull/1516
+
 
 Changed:
 ^^^^^^^^
+* Reworked bcftools filters https://github.com/Clinical-Genomics/BALSAMIC/pull/1509
+* Renamed high_normal_tumor_af_frac to in_normal https://github.com/Clinical-Genomics/BALSAMIC/pull/1509
+* check to verify sample sex for all workflows https://github.com/Clinical-Genomics/BALSAMIC/pull/1516
+* Merging SNVs into MNVs in TNscope TGA https://github.com/Clinical-Genomics/BALSAMIC/pull/1524
+* Change raw delivery SNV file for TGA to before any post-processing https://github.com/Clinical-Genomics/BALSAMIC/pull/1524
+* Changed VarDict and TNscope VCF merged method to custom script https://github.com/Clinical-Genomics/BALSAMIC/pull/1499
 * --pcr_indel_model changed to hostile for TGA tumor only https://github.com/Clinical-Genomics/BALSAMIC/pull/1523
 
 Removed:
 ^^^^^^^^
-
+* Remove WGS-level GC-bias metric from TGA workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1521
 
 Fixed:
 ^^^^^^
-
+* Merged VarDict and TNscope variants now correctly show both callers in FOUND_IN info field https://github.com/Clinical-Genomics/BALSAMIC/pull/1499
 
 [16.0.0]
--------
+--------
 
 Added:
 ^^^^^^
@@ -39,6 +48,7 @@ Added:
 * Added Raw TNscope calls and unfiltered research-annotated SNVs to delivery https://github.com/Clinical-Genomics/BALSAMIC/pull/1475
 * Argument for SNV Artefact LoqusDB to all workflows https://github.com/Clinical-Genomics/BALSAMIC/pull/1481
 * TNscope tag to variant info-field for TGA workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1497
+* Python script for merging duplicate SNV calls https://github.com/Clinical-Genomics/BALSAMIC/pull/1499
 
 Changed:
 ^^^^^^^^
