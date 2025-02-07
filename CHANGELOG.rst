@@ -1,17 +1,10 @@
 [X.X.X]
--------
+--------
 
 Added:
 ^^^^^^
 * Added option to disable hard filter of variants in matched normal https://github.com/Clinical-Genomics/BALSAMIC/pull/1509
-
-Changed:
-^^^^^^^^
-
-
-Removed:
-^^^^^^^^
-* Remove WGS-level GC-bias metric from TGA workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1521
+* Added check to verify sample sex for all workflows https://github.com/Clinical-Genomics/BALSAMIC/pull/1516
 
 
 Changed:
@@ -19,10 +12,21 @@ Changed:
 * Reworked bcftools filters https://github.com/Clinical-Genomics/BALSAMIC/pull/1509
 * Renamed high_normal_tumor_af_frac to in_normal https://github.com/Clinical-Genomics/BALSAMIC/pull/1509
 * check to verify sample sex for all workflows https://github.com/Clinical-Genomics/BALSAMIC/pull/1516
+* Merging SNVs into MNVs in TNscope TGA https://github.com/Clinical-Genomics/BALSAMIC/pull/1524
+* Change raw delivery SNV file for TGA to before any post-processing https://github.com/Clinical-Genomics/BALSAMIC/pull/1524
+
+
+Removed:
+^^^^^^^^
+* Remove WGS-level GC-bias metric from TGA workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1521
+
+
+Fixed:
+^^^^^^
 
 
 [16.0.0]
--------
+--------
 
 Added:
 ^^^^^^

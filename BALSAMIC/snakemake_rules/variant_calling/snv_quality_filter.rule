@@ -86,7 +86,7 @@ if config["analysis"]["sequencing_type"] == 'targeted' and config["analysis"]["a
     input:
       vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.vcf.gz",
     output:
-      vcf_filtered = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.research.vcf.gz",
+      vcf_filtered = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.research.pre_process.vcf.gz",
     benchmark:
       Path(benchmark_dir,'bcftools_quality_filter_vardict_tumor_only_' + config["analysis"]["case_id"] + ".tsv").as_posix()
     singularity:
@@ -155,7 +155,7 @@ elif config["analysis"]["sequencing_type"] == 'targeted' and config["analysis"][
     input:
       vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.vcf.gz",
     output:
-      vcf_filtered = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.research.vcf.gz",
+      vcf_filtered = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.research.pre_process.vcf.gz",
     benchmark:
       Path(benchmark_dir,'bcftools_quality_filter_vardict_tumor_normal_' + config["analysis"]["case_id"] + ".tsv").as_posix()
     singularity:
@@ -223,7 +223,7 @@ elif config["analysis"]["sequencing_type"] == 'targeted' and config["analysis"][
 if config_model.analysis.analysis_workflow == AnalysisWorkflow.BALSAMIC_UMI and config["analysis"]["analysis_type"] == 'paired':
   rule bcftools_quality_filter_TNscope_umi_tumor_normal:
     input:
-      vcf = vcf_dir +  "SNV.somatic."+ config["analysis"]["case_id"] + ".tnscope_umi.vcf.gz",
+      vcf = vcf_dir + "sentieon_tnscope/SNV.somatic." + config["analysis"]["case_id"] + ".tnscope_umi.post_process.vcf.gz",
     output:
       vcf_filtered = vcf_dir +  "SNV.somatic."+ config["analysis"]["case_id"] + ".tnscope_umi.research.vcf.gz",
     benchmark:
@@ -251,9 +251,9 @@ if config_model.analysis.analysis_workflow == AnalysisWorkflow.BALSAMIC_UMI and 
 elif config_model.analysis.analysis_workflow == AnalysisWorkflow.BALSAMIC_UMI and config["analysis"]["analysis_type"] == 'single':
   rule bcftools_quality_filter_TNscope_umi_tumor_only:
     input:
-      vcf=vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope_umi.vcf.gz",
+      vcf = vcf_dir + "sentieon_tnscope/SNV.somatic." + config["analysis"]["case_id"] + ".tnscope_umi.post_process.vcf.gz",
     output:
-      vcf_filtered=vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope_umi.research.vcf.gz"
+      vcf_filtered = vcf_dir +  "SNV.somatic."+ config["analysis"]["case_id"] + ".tnscope_umi.research.vcf.gz"
     benchmark:
       Path(benchmark_dir,'bcftools_quality_filter_TNscope_umi_tumor_only' + config["analysis"][
         "case_id"] + ".tsv").as_posix()
