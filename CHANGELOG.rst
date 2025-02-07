@@ -5,9 +5,6 @@ Added:
 ^^^^^^
 * Added option to disable hard filter of variants in matched normal https://github.com/Clinical-Genomics/BALSAMIC/pull/1509
 
-Changed:
-^^^^^^^^
-
 
 Removed:
 ^^^^^^^^
@@ -19,6 +16,12 @@ Changed:
 * Reworked bcftools filters https://github.com/Clinical-Genomics/BALSAMIC/pull/1509
 * Renamed high_normal_tumor_af_frac to in_normal https://github.com/Clinical-Genomics/BALSAMIC/pull/1509
 * check to verify sample sex for all workflows https://github.com/Clinical-Genomics/BALSAMIC/pull/1516
+* lowered threads for bcftools and CADD rules https://github.com/Clinical-Genomics/BALSAMIC/pull/1528
+
+Fixed:
+^^^^^^^^
+
+* changed name of benchmark files for annotation rules to avoid name conflicts https://github.com/Clinical-Genomics/BALSAMIC/pull/1528
 
 
 [16.0.0]
