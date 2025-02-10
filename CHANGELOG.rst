@@ -23,6 +23,15 @@ Removed:
 
 Fixed:
 ^^^^^^
+=======
+
+[16.0.1]
+-------
+
+Removed:
+^^^^^^^^
+* remove snakemake case_report.html report creation https://github.com/Clinical-Genomics/BALSAMIC/pull/1530
+>>>>>>> master
 
 
 [16.0.0]
