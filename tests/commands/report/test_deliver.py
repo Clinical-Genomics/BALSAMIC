@@ -35,8 +35,6 @@ def test_deliver_tumor_only_panel(
                 "deliver",
                 "--sample-config",
                 tumor_only_config,
-                "--disable-variant-caller",
-                "cnvkit",
             ]
         )
 
