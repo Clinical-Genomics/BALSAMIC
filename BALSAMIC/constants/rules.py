@@ -200,8 +200,9 @@ DELIVERY_RULES: List[str] = [
     "vep_annotate_germlineVAR_tumor",
     "vep_annotate_germlineVAR_normal",
     # SNVs
-    "modify_tnscope_infofield",
-    "modify_tnscope_infofield_umi",
+    "bcftools_split_tnscope_variants",
+    "sentieon_tnscope_umi",
+    "sentieon_tnscope_umi_tn",
     "gatk_update_vcf_sequence_dictionary",
     "bcftools_filter_tnscope_clinical_tumor_only",
     "bcftools_filter_tnscope_clinical_tumor_normal",

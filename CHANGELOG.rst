@@ -1,14 +1,10 @@
 [X.X.X]
--------
+--------
 
 Added:
 ^^^^^^
 * Added option to disable hard filter of variants in matched normal https://github.com/Clinical-Genomics/BALSAMIC/pull/1509
-
-
-Removed:
-^^^^^^^^
-* Remove WGS-level GC-bias metric from TGA workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1521
+* Added check to verify sample sex for all workflows https://github.com/Clinical-Genomics/BALSAMIC/pull/1516
 
 
 Changed:
@@ -16,16 +12,30 @@ Changed:
 * Reworked bcftools filters https://github.com/Clinical-Genomics/BALSAMIC/pull/1509
 * Renamed high_normal_tumor_af_frac to in_normal https://github.com/Clinical-Genomics/BALSAMIC/pull/1509
 * check to verify sample sex for all workflows https://github.com/Clinical-Genomics/BALSAMIC/pull/1516
-* lowered threads for bcftools and CADD rules https://github.com/Clinical-Genomics/BALSAMIC/pull/1528
+* Merging SNVs into MNVs in TNscope TGA https://github.com/Clinical-Genomics/BALSAMIC/pull/1524
+* Change raw delivery SNV file for TGA to before any post-processing https://github.com/Clinical-Genomics/BALSAMIC/pull/1524
+
+
+Removed:
+^^^^^^^^
+* Remove WGS-level GC-bias metric from TGA workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1521
+
 
 Fixed:
-^^^^^^^^
+^^^^^^
+=======
 
-* changed name of benchmark files for annotation rules to avoid name conflicts https://github.com/Clinical-Genomics/BALSAMIC/pull/1528
+
+[16.0.1]
+-------
+
+Removed:
+^^^^^^^^
+* remove snakemake case_report.html report creation https://github.com/Clinical-Genomics/BALSAMIC/pull/1530
 
 
 [16.0.0]
--------
+--------
 
 Added:
 ^^^^^^
