@@ -5,6 +5,9 @@ Removed:
 ^^^^^^^^
 * remove snakemake case_report.html report creation https://github.com/Clinical-Genomics/BALSAMIC/pull/1530
 
+Fixed:
+^^^^^^
+* fix somalier container 
 
 [16.0.0]
 -------
