@@ -41,7 +41,6 @@ class SnakemakeExecutable(BaseModel):
         profile (Optional[ClusterProfile])                           : Cluster profile to submit jobs.
         qos (Optional[QOS])                                          : QOS for sbatch jobs.
         quiet (Optional[bool])                                       : Quiet mode for snakemake.
-        report_path (Optional[Path])                                 : Snakemake generated report path.
         run_analysis (bool)                                          : Flag to run the actual analysis.
         run_mode (RunMode)                                           : Cluster run mode to execute analysis.
         script_dir (Optional[DirectoryPath])                         : Cluster profile scripts directory.
@@ -66,7 +65,6 @@ class SnakemakeExecutable(BaseModel):
     profile: Optional[ClusterProfile] = None
     qos: Optional[QOS] = None
     quiet: bool = False
-    report_path: Optional[Path] = None
     run_analysis: bool = False
     run_mode: RunMode
     script_dir: Optional[DirectoryPath] = None
@@ -113,12 +111,6 @@ class SnakemakeExecutable(BaseModel):
             return "--quiet"
         return ""
 
-    def get_report_path_option(self) -> str:
-        """Return string representation of the report_path option."""
-        if self.report_path:
-            return f"--report {self.report_path.as_posix()}"
-        return ""
-
     def get_run_analysis_flag(self) -> str:
         """Return string representation of the run_analysis flag."""
         if not self.run_analysis:
@@ -154,7 +146,6 @@ class SnakemakeExecutable(BaseModel):
             f"{self.get_force_flag()} "
             f"{self.get_run_analysis_flag()} "
             f"{self.get_snakemake_cluster_options()} "
-            f"{self.get_report_path_option()} "
             f"{self.get_config_options()} "
             f"{self.get_snakemake_options_command()}"
         )

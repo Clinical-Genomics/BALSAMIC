@@ -2570,7 +2570,6 @@ def fixture_snakemake_executable_validated_data(
         "profile": ClusterProfile.SLURM,
         "qos": QOS.HIGH,
         "quiet": True,
-        "report_path": None,
         "run_analysis": True,
         "run_mode": RunMode.CLUSTER,
         "script_dir": session_tmp_path,
