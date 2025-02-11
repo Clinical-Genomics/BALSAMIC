@@ -154,7 +154,8 @@
 	},
 	"sentieon_TNscope": {
 		"time": "24:00:00",
-		"n": 36
+		"n": 36,
+		"mem": 80000
 	},
 	"sentieon_TNscope_tumor_only": {
 		"time": "24:00:00",
