@@ -5,7 +5,8 @@ Added:
 ^^^^^^
 * Added option to disable hard filter of variants in matched normal https://github.com/Clinical-Genomics/BALSAMIC/pull/1509
 * Added check to verify sample sex for all workflows https://github.com/Clinical-Genomics/BALSAMIC/pull/1516
-
+* GT field to IGH-DUX4 variant https://github.com/Clinical-Genomics/BALSAMIC/pull/1527
+* ONC field annotations from Clinvar https://github.com/Clinical-Genomics/BALSAMIC/pull/1527
 
 Changed:
 ^^^^^^^^
@@ -31,7 +32,6 @@ Fixed:
 Removed:
 ^^^^^^^^
 * remove snakemake case_report.html report creation https://github.com/Clinical-Genomics/BALSAMIC/pull/1530
->>>>>>> master
 
 
 [16.0.0]
