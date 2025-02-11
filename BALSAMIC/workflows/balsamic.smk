@@ -192,6 +192,7 @@ research_annotations.append(
                     "ONCDN"
                     "ONCREVSTAT",
                     "ONCDISDB",
+                    "ONCCONF",
                     "CLNVC",
                     "CLNVCSO",
                 ],
@@ -205,6 +206,7 @@ research_annotations.append(
                     "ONCDN"
                     "ONCREVSTAT",
                     "ONCDISDB",
+                    "ONCCONF",
                     "CLNVC",
                     "CLNVCSO",
                 ],
