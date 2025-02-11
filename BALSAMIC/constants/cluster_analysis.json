@@ -214,6 +214,10 @@
 	},
 	"sentieon_TNscope": {
 		"time": "24:00:00",
+		"n": 36
+	},
+	"sentieon_tnscope_wgs_tumor_normal": {
+		"time": "24:00:00",
 		"n": 36,
 		"mem": 80000
 	},
