@@ -20,6 +20,7 @@ from BALSAMIC.constants.analysis import (
 from BALSAMIC.constants.paths import BALSAMIC_DIR
 from BALSAMIC.constants.rules import SNAKEMAKE_RULES
 from BALSAMIC.constants.variant_filters import (
+    BaseSNVFilters,
     SVDB_FILTER_SETTINGS,
     MANTA_FILTER_SETTINGS,
     WgsSNVFilters,
