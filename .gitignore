@@ -35,3 +35,4 @@ BALSAMIC_reference/
 BALSAMIC/workflows/umi_workflow
 BALSAMIC/workflows/umi_workflow/.*
 .idea/
+.vscode/

@@ -75,9 +75,6 @@
 
 ## Clinical Genomics Stockholm
 
-<details>
-<summary></summary>
-
 <!-- Do not reveal clinical data, and if applicable, place it within the internal Google Drive directory. -->
 
 ### Documentation
@@ -90,6 +87,13 @@
 - **Web portal for Clinical Genomics**
     - [x] N/A
     - [ ] Updated: [Link]
+
+### Panel of Normal specific criteria
+
+<!-- If the PR includes a new PoN adhere to the criteria below. -->
+
+- [ ] The PR includes the addition of a new Panel of Normals
+- [ ] The samples have been verified to adhere to the sample selection criteria on [Atlas PoN creation instructions for Balsamic](https://atlas.scilifelab.se/infrastructure/BALSAMIC/balsamic_pon/#procedure)
 
 ### User Changes
 
@@ -118,7 +122,24 @@
     - [x] N/A
     - [ ] Updated: [Link]
 
-</details>
+### Validation criteria
+
+<!-- Create validation criteria for this PR or mark as unnecessary. -->
+
+Validation criteria to be added to validation report PR: [LINK-TO-VALIDATION-REPORT-PR from the [validations repository](https://github.com/Clinical-Genomics/validations/)]
+
+**Version specific criteria**
+
+- Text here or N/A
+
+
+
+> [!IMPORTANT]
+> One of the below checkboxes for validation need to be checked 
+
+- [ ] Added version specific validation criteria to validation report
+- [ ] Changes validated in standard sections: [validation-section]
+- [ ] Validation criteria not necessary
 
 ## Checklist
 
@@ -132,6 +153,8 @@
     - [ ] Linked relevant user stories or issues to the PR.
 - **Documentation**
     - [ ] Verified and updated documentation if necessary.
+- **Validation criteria**
+    - [ ] Completed the validation criteria section of the template.
 - **Tests**
     - [ ] Described and tested the functionality addressed in the PR.
     - [ ] Ensured integration of the new code with existing workflows.
@@ -148,6 +171,8 @@
     - [ ] Code follows the project's coding standards and style guide.
 - **Documentation**
     - [ ] Pipeline changes are well-documented in the CHANGELOG and relevant documentation.
+- **Validation criteria**
+    - [ ] The author has completed the validation criteria section of the template
 - **Tests**
     - [ ] The author provided a description of their manual testing, including consideration of edge cases and boundary
       conditions where applicable, with satisfactory results.

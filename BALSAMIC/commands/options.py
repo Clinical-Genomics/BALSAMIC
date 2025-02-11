@@ -1,4 +1,5 @@
 """Balsamic command options."""
+
 import click
 
 from BALSAMIC import __version__ as balsamic_version
@@ -22,14 +23,10 @@ from BALSAMIC.constants.cluster import (
 from BALSAMIC.constants.constants import LOG_LEVELS, LogLevel
 from BALSAMIC.constants.rules import DELIVERY_RULES
 from BALSAMIC.constants.workflow_params import VCF_DICT
-from BALSAMIC.utils.cli import validate_cache_version
-
-OPTION_ADAPTER_TRIM = click.option(
-    "--adapter-trim/--no-adapter-trim",
-    default=True,
-    show_default=True,
-    is_flag=True,
-    help="Trim adapters from reads in FASTQ file",
+from BALSAMIC.utils.cli import (
+    validate_cache_version,
+    validate_exome_option,
+    validate_umi_min_reads,
 )
 
 OPTION_ANALYSIS_DIR = click.option(
@@ -47,7 +44,12 @@ OPTION_ANALYSIS_WORKFLOW = click.option(
     type=click.Choice(ANALYSIS_WORKFLOWS),
     help="Balsamic analysis workflow to be executed",
 )
-
+OPTION_ARTEFACT_SNV_OBSERVATIONS = click.option(
+    "--artefact-snv-observations",
+    type=click.Path(exists=True, resolve_path=True),
+    required=False,
+    help="VCF path of somatic SNVs called in high coverage normal samples (used in all workflows)",
+)
 OPTION_BACKGROUND_VARIANTS = click.option(
     "-b",
     "--background-variants",
@@ -139,6 +141,13 @@ OPTION_CLUSTER_CONFIG = click.option(
     help="Cluster configuration JSON file path",
 )
 
+OPTION_SOFT_FILTER_NORMAL = click.option(
+    "--soft-filter-normal",
+    is_flag=True,
+    default=False,
+    help="Flag to disable hard-filtering on presence of variants in matched normal sample",
+)
+
 OPTION_CLUSTER_MAIL = click.option(
     "--mail-user",
     type=click.STRING,
@@ -187,6 +196,14 @@ OPTION_DRAGEN = click.option(
     is_flag=True,
     default=False,
     help="Enable dragen variant caller",
+)
+
+OPTION_EXOME = click.option(
+    "--exome",
+    is_flag=True,
+    default=False,
+    help="Assign exome parameters to TGA workflow",
+    callback=validate_exome_option,
 )
 
 OPTION_FASTQ_PATH = click.option(
@@ -306,14 +323,6 @@ OPTION_PRINT_FILES = click.option(
     help="Print list of analysis files. Otherwise only final count will be printed.",
 )
 
-OPTION_QUALITY_TRIM = click.option(
-    "--quality-trim/--no-quality-trim",
-    default=True,
-    show_default=True,
-    is_flag=True,
-    help="Trim low quality reads in FASTQ file",
-)
-
 OPTION_QUIET = click.option(
     "-q",
     "--quiet",
@@ -355,6 +364,20 @@ OPTION_SAMPLE_CONFIG = click.option(
     required=True,
     type=click.Path(),
     help="Sample configuration file",
+)
+
+OPTION_SENTIEON_INSTALL_DIR = click.option(
+    "--sentieon-install-dir",
+    type=click.Path(exists=True, resolve_path=True),
+    required=True,
+    help="Path to Sentieon install directory",
+)
+
+OPTION_SENTIEON_LICENSE = click.option(
+    "--sentieon-license",
+    required=True,
+    type=click.STRING,
+    help="Sentieon license in format IP:Port",
 )
 
 OPTION_SHOW_ONLY_MISSING_FILES = click.option(
@@ -400,18 +423,9 @@ OPTION_TUMOR_SAMPLE_NAME = click.option(
     help="Tumor sample name",
 )
 
-OPTION_UMI = click.option(
-    "--umi/--no-umi",
-    default=True,
-    show_default=True,
-    is_flag=True,
-    help="UMI processing steps for samples with UMI tags. For WGS cases, UMI is always disabled.",
-)
-
-OPTION_UMI_TRIM_LENGTH = click.option(
-    "--umi-trim-length",
-    default=5,
-    show_default=True,
-    type=click.INT,
-    help="Trim N bases from reads in FASTQ file",
+OPTION_UMI_MIN_READS = click.option(
+    "--umi-min-reads",
+    type=click.STRING,
+    callback=validate_umi_min_reads,
+    help="Minimum raw reads supporting each UMI group. Format: 'x,y,z'.",
 )

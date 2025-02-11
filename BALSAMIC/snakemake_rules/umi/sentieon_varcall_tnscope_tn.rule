@@ -6,8 +6,8 @@
 
 rule sentieon_tnscope_umi_tn:
     input:
-        bamT = umi_dir + "tumor_umi_consensusfiltered.merged.bam",
-        bamN = umi_dir + "normal_umi_consensusfiltered.merged.bam",
+        bamT = expand(umi_dir + "tumor.{sample}_consensusfiltered_umi.bam", sample=tumor_sample),
+        bamN = expand(umi_dir + "normal.{sample}_consensusfiltered_umi.bam", sample=normal_sample),
         ref_fa = config["reference"]["reference_genome"],
         bed = config["panel"]["capture_kit"],
         dbsnp = config["reference"]["dbsnp"]
@@ -17,18 +17,18 @@ rule sentieon_tnscope_umi_tn:
     benchmark:
         Path(benchmark_dir, "sentieon_tnscope_umi_" + config["analysis"]["case_id"] + ".tsv").as_posix()
     params:
-        housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "research"},
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-        sentieon_exec = config["SENTIEON_EXEC"],
-        sentieon_lic = config["SENTIEON_LICENSE"],
-        tumor_af = params.umicommon.filter_tumor_af,
+        housekeeper_id = {"id": config["analysis"]["case_id"],"tags": "research"},
+        sentieon_exec = config_model.sentieon.sentieon_exec,
+        sentieon_lic = config_model.sentieon.sentieon_license,
+        tumor_af = params.tnscope_umi.filter_tumor_af,
         algo = params.tnscope_umi.algo,
         disable_detect = params.tnscope_umi.disable_detect,
         tumor_lod = params.tnscope_umi.min_tumorLOD,
         init_tumor_lod = params.tnscope_umi.init_tumorLOD,
         error_rate = params.tnscope_umi.error_rate,
         prune_factor = params.tnscope_umi.prunefactor,
-        pcr_model = params.common.pcr_model,
+        pcr_model = params.tnscope_umi.pcr_model,
         padding = params.tnscope_umi.padding,
         tumor = "TUMOR",
         normal = "NORMAL",
@@ -39,7 +39,6 @@ rule sentieon_tnscope_umi_tn:
         "Calling single nucleotide variants using TNscope for {params.case_name}"
     shell:
         """
-mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
 export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
@@ -66,4 +65,6 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 {output.vcf_tnscope_umi};
 
 echo -e \"{params.tumor}\\tTUMOR\\n{params.normal}\\tNORMAL\" > {output.namemap};
+
+rm -rf {params.tmpdir}
         """

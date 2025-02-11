@@ -4,13 +4,16 @@ from pathlib import Path
 from typing import Dict, List
 
 import pytest
+from _pytest.logging import LogCaptureFixture
 from pydantic import ValidationError
 
 from BALSAMIC.constants.analysis import FastqName, SampleType, SequencingType
 from BALSAMIC.models.config import AnalysisModel, ConfigModel, SampleInstanceModel
 
 
-def test_analysis_model(test_data_dir: Path, timestamp_now: datetime):
+def test_analysis_model(
+    test_data_dir: Path, timestamp_now: datetime, caplog: LogCaptureFixture
+):
     """Test analysis model instantiation."""
 
     # GIVEN valid input arguments
@@ -31,21 +34,18 @@ def test_analysis_model(test_data_dir: Path, timestamp_now: datetime):
     }
 
     # THEN we can successfully create a config dict
-    assert AnalysisModel.model_validate(valid_args)
+    analysis_model: AnalysisModel = AnalysisModel.model_validate(valid_args)
+    assert analysis_model
+    assert analysis_model.script == test_data_dir.as_posix()
 
-    # GIVEN invalid input arguments
-    invalid_args = {
-        "case_id": "case_id",
-        "gender": "unknown",
-        "analysis_type": "odd",
-        "sequencing_type": "wrong",
-        "analysis_dir": "tests/test_data",
-        "analysis_workflow": "umi",
-    }
+    # GIVEN invalid input arguments for the log directory
+    valid_args["log"] = "/not/a/directory"
 
     # THEN should trigger ValueError
     with pytest.raises(ValueError):
-        AnalysisModel.model_validate(invalid_args)
+        AnalysisModel.model_validate(valid_args)
+
+    assert "The supplied directory path /not/a/directory does not exist" in caplog.text
 
 
 def test_sample_instance_model(config_dict_w_fastqs: Dict):
@@ -335,10 +335,10 @@ def test_get_bam_name_per_lane(balsamic_model: ConfigModel):
 
     # Then the bam names for all fastq patterns should be retrieved and match the expected format
     expected_bam_name_lane1 = (
-        f"{bam_dir}{normal_name}_align_sort_{normal_lane1_fastq_pattern}.bam"
+        f"{bam_dir}normal.{normal_name}.{normal_lane1_fastq_pattern}.align_sort.bam"
     )
     expected_bam_name_lane2 = (
-        f"{bam_dir}{normal_name}_align_sort_{normal_lane2_fastq_pattern}.bam"
+        f"{bam_dir}normal.{normal_name}.{normal_lane2_fastq_pattern}.align_sort.bam"
     )
     expected_bam_names = [expected_bam_name_lane1, expected_bam_name_lane2]
     compare_bam_file_lists(expected_bam_names, bam_names)
@@ -362,7 +362,7 @@ def test_get_final_bam_name(balsamic_model: ConfigModel):
     )
 
     # Then retrieved final bam names should match the expected format and be identical regardless of request parameter
-    expected_final_bam_name = f"{bam_dir}{sample_type}.{sample_name}.dedup_sorted.bam"
+    expected_final_bam_name = f"{bam_dir}{sample_type}.{sample_name}.dedup.fixmate.bam"
     assert expected_final_bam_name == bam_name_sample_name
     assert bam_name_sample_name == bam_name_sample_type
 
@@ -372,6 +372,16 @@ def test_get_final_bam_name(balsamic_model: ConfigModel):
     expected_final_bam_name = f"{bam_dir}{sample_type}.{sample_name}.dedup.realign.bam"
     bam_name_sample_type = balsamic_model.get_final_bam_name(
         bam_dir, sample_type=sample_type
+    )
+    assert expected_final_bam_name == bam_name_sample_type
+
+    # WHEN submitting custom bam suffix
+    bam_name_sample_type = balsamic_model.get_final_bam_name(
+        bam_dir, sample_type=sample_type, specified_suffix="dedup.fixmate.qualcapped"
+    )
+    # Then the bam name should end with the specified suffix
+    expected_final_bam_name = (
+        f"{bam_dir}{sample_type}.{sample_name}.dedup.fixmate.qualcapped.bam"
     )
     assert expected_final_bam_name == bam_name_sample_type
 
@@ -408,5 +418,5 @@ def test_get_final_bam_name_pon(balsamic_pon_model: ConfigModel):
     )
 
     # Then retrieved final bam names should match the expected format and be identical regardless of request parameter
-    expected_final_bam_name = f"{bam_dir}{sample_type}.{sample_name}.dedup.bam"
+    expected_final_bam_name = f"{bam_dir}{sample_type}.{sample_name}.dedup.fixmate.bam"
     assert expected_final_bam_name == bam_name_sample_name

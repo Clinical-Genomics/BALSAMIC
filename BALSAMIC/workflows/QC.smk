@@ -70,27 +70,16 @@ params = BalsamicWorkflowConfig.model_validate(WORKFLOW_PARAMS)
 # Fastp parameters
 fastp_parameters: Dict = get_fastp_parameters(config_model)
 
+analysis_type = config_model.analysis.analysis_type
+sequencing_type = config_model.analysis.sequencing_type
+
 # Capture kit name
-if config["analysis"]["sequencing_type"] != "wgs":
+if sequencing_type != "wgs":
     capture_kit = os.path.split(config["panel"]["capture_kit"])[1]
 
 # explicitly check if cluster_config dict has zero keys.
 if len(cluster_config.keys()) == 0:
     cluster_config = config
-
-# Find and set Sentieon binary and license server from env variables
-try:
-    config["SENTIEON_LICENSE"] = os.environ["SENTIEON_LICENSE"]
-    config["SENTIEON_INSTALL_DIR"] = os.environ["SENTIEON_INSTALL_DIR"]
-
-    if os.getenv("SENTIEON_EXEC") is not None:
-        config["SENTIEON_EXEC"] = os.environ["SENTIEON_EXEC"]
-    else:
-        config["SENTIEON_EXEC"] = Path(os.environ["SENTIEON_INSTALL_DIR"], "bin", "sentieon").as_posix()
-except KeyError as error:
-    LOG.error("Set environment variables SENTIEON_LICENSE, SENTIEON_INSTALL_DIR, SENTIEON_EXEC "
-              "to run SENTIEON variant callers")
-    raise BalsamicError
 
 if "hg38" in config["reference"]["reference_genome"]:
     config["reference"]["genome_version"] = "hg38"
@@ -106,12 +95,10 @@ LOG.info('Genome version set to %s', config["reference"]["genome_version"])
 os.environ['TMPDIR'] = get_result_dir(config)
 
 # Include rules
-analysis_type = config['analysis']["analysis_type"]
-sequence_type = config['analysis']["sequencing_type"]
 
 rules_to_include = []
 for workflow_type, value in SNAKEMAKE_RULES.items():
-    if workflow_type in ["common", analysis_type + "_" + sequence_type]:
+    if workflow_type in ["common", analysis_type + "_" + sequencing_type]:
         rules_to_include.extend(value.get("qc", []) + value.get("align", []) + value.get("misc", []))
 rules_to_include = [rule for rule in rules_to_include if "umi" not in rule and "report" not in rule]
 
@@ -129,11 +116,12 @@ LOG.info(f"The following rules will be included in the workflow: {rules_to_inclu
 quality_control_results = [
     Path(qc_dir, case_id + "_metrics_deliverables.yaml").as_posix(),
     Path(qc_dir, "multiqc_report.html").as_posix(),
+    Path(qc_dir, "multiqc_data/multiqc_data.json").as_posix(),
 ]
 
 if 'delivery' in config:
     wildcard_dict = {
-        "sample": config_model.get_all_sample_names() + ["tumor", "normal"],
+        "sample": sample_names + ["tumor", "normal"],
         "case_name": case_id,
         "allow_missing": True
     }
@@ -161,6 +149,10 @@ if 'delivery' in config:
     delivery_ready = Path(get_result_dir(config), "delivery_report", case_id + "_delivery_ready.hk").as_posix()
     write_json(output_files_ready, delivery_ready)
     FormatFile(delivery_ready)
+
+wildcard_constraints:
+    sample="|".join(sample_names),
+
 
 rule all:
     input:
