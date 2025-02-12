@@ -113,8 +113,9 @@ Somatic Callers for reporting SNVs/INDELS
 
 For SNV/InDel calling in the TGA analyses of balsamic both VarDict and TNscope are used. Lists of variants are produced from both tools, which are then normalised and quality filtered before being merged with a custom made python script which can be found in `BALSAMIC/assets/scripts/merge_snv_variantcallers.py`.
 
-This script merges the variants with the same chrom, pos, ref and alt
+The requirement for merging variants with this script is a perfect match of; CHROM, POS, REF and ALT fields.
 
+The INFO fields from both VCFs are merged entirely, and when the same field exists in both variants it is converted to a comma-separated list. An exception to this behaviour is the AF and DP fields for which the single values are maintained (from the first VCF in the positional argument), and new fields called AF_LIST and DP_LIST are created which contains a list of values from both callers.
 
 **Vardict**
 ===========

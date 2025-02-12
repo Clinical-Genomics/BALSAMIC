@@ -142,8 +142,12 @@ def merge_headers(vcf1: str, vcf2: str) -> List[str]:
                     cat_lines.get(line_id, line), line
                 )
         if category == "INFO":
-            cat_lines["AF_LIST"] = '<ID=AF_LIST,Number=.,Type=Float,Description="Allele Frequency list from both variant callers of a merged variant, in positional argument order">'
-            cat_lines["DP_LIST"] = '<ID=DP_LIST,Number=.,Type=Integer,Description="Total Depth list from both variant callers of a merged variant, in positional argument order">'
+            cat_lines[
+                "AF_LIST"
+            ] = '<ID=AF_LIST,Number=.,Type=Float,Description="Allele Frequency list from both variant callers of a merged variant, in positional argument order">'
+            cat_lines[
+                "DP_LIST"
+            ] = '<ID=DP_LIST,Number=.,Type=Integer,Description="Total Depth list from both variant callers of a merged variant, in positional argument order">'
         return cat_lines
 
     vcf1_name, vcf2_name = map(os.path.basename, [vcf1, vcf2])
@@ -300,13 +304,14 @@ def merge_info_fields(info_fields: List[str]) -> str:
             merged_info[key] = None
 
     # Extract single values and create a separate list for fields such as AF and DP
-    for key, value in list(merged_info.items()):  # Iterate over a copy to avoid modification issues
+    for key, value in list(
+        merged_info.items()
+    ):  # Iterate over a copy to avoid modification issues
         if key in unique_fields and isinstance(value, str):  # Ensure value is a string
             values = value.split(",")
             if len(values) > 1:
                 merged_info[f"{key}_LIST"] = value  # Store the full list as a string
                 merged_info[key] = values[0]  # Keep only the first value
-
 
     # Construct the merged INFO field string
     return ";".join(

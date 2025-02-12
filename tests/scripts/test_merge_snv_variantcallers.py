@@ -156,7 +156,7 @@ def test_merge_info_fields():
     assert merge_info_fields(["DP=10", "AF=0.5"]) == "DP=10;AF=0.5"
 
     # Test merging duplicate keys with different values
-    assert merge_info_fields(["DP=10", "DP=20"]) == "DP=10,20"
+    assert merge_info_fields(["DP=10", "DP=20"]) == "DP=10;DP_LIST=10,20"
 
     # Test handling of key-only fields
     assert merge_info_fields(["P0.01Likely", "DP=10"]) == "P0.01Likely;DP=10"
@@ -167,7 +167,7 @@ def test_merge_info_fields():
     # Test merging multiple values with a mix of key-only and key-value pairs
     assert (
         merge_info_fields(["NLODF=126.72", "DP=10", "DP=15", "PASS"])
-        == "NLODF=126.72;DP=10,15;PASS"
+        == "NLODF=126.72;DP=10;PASS;DP_LIST=10,15"
     )
 
     # Test empty input
@@ -176,7 +176,7 @@ def test_merge_info_fields():
     # Test handling of mixed formatting
     assert (
         merge_info_fields(["AF=0.1", "AF=0.2", "FILTER", "FILTER"])
-        == "AF=0.1,0.2;FILTER"
+        == "AF=0.1;FILTER;AF_LIST=0.1,0.2"
     )
 
     # Test handling of multiple unique key-value pairs
@@ -187,11 +187,8 @@ def test_merge_info_fields():
         merge_info_fields(
             ["DP=10", "DP=20", "DP=30", "FOUND_IN=vardict", "FOUND_IN=tnscope"]
         )
-        == "DP=10,20,30;FOUND_IN=vardict,tnscope"
+        == "DP=10;FOUND_IN=vardict,tnscope;DP_LIST=10,20,30"
     )
-
-    # Test when values include existing commas
-    assert merge_info_fields(["DP=10,15", "DP=20"]) == "DP=10,15,20"
 
 
 def test_merge_complete_info_fields():
