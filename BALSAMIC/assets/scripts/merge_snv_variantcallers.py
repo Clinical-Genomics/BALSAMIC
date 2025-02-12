@@ -130,7 +130,7 @@ def merge_headers(vcf1: str, vcf2: str) -> List[str]:
         except IndexError:
             return ""
 
-    def process_category_lines(lines: List[str]) -> Dict[str, str]:
+    def process_category_lines(lines: List[str], category: str) -> Dict[str, str]:
         """Processes header lines within a category, merging duplicate IDs."""
         cat_lines = {}
         for line in lines:
@@ -141,6 +141,9 @@ def merge_headers(vcf1: str, vcf2: str) -> List[str]:
                 cat_lines[line_id] = merge_header_row(
                     cat_lines.get(line_id, line), line
                 )
+        if category == "INFO":
+            cat_lines["AF_LIST"] = '<ID=AF_LIST,Number=.,Type=Float,Description="Allele Frequency list from both variant callers of a merged variant, in positional argument order">'
+            cat_lines["DP_LIST"] = '<ID=DP_LIST,Number=.,Type=Integer,Description="Total Depth list from both variant callers of a merged variant, in positional argument order">'
         return cat_lines
 
     vcf1_name, vcf2_name = map(os.path.basename, [vcf1, vcf2])
@@ -148,8 +151,8 @@ def merge_headers(vcf1: str, vcf2: str) -> List[str]:
 
     header1, header2 = collect_header(vcf1), collect_header(vcf2)
 
-    header_categories = add_header_categories({}, header1)
-    header_categories = add_header_categories(header_categories, header2)
+    header_categories: List[str] = add_header_categories({}, header1)
+    header_categories: List[str] = add_header_categories(header_categories, header2)
 
     # Validate variant headers
     variant_header = [
@@ -167,7 +170,7 @@ def merge_headers(vcf1: str, vcf2: str) -> List[str]:
 
     # Process and merge headers
     merged_header_dict = {
-        category: process_category_lines(lines)
+        category: process_category_lines(lines, category)
         for category, lines in header_categories.items()
     }
 
@@ -280,6 +283,9 @@ def merge_info_fields(info_fields: List[str]) -> str:
         key, sep, value = field.partition("=")
         return (key, value if sep else None)
 
+    # List of FIELDS to preserve as single values, with first VCF prio
+    unique_fields = ["AF", "DP"]
+
     # Parse all fields and store in a dictionary
     merged_info = {}
     for field in info_fields:
@@ -292,6 +298,15 @@ def merge_info_fields(info_fields: List[str]) -> str:
                 merged_info[key] = value
         else:  # Key only
             merged_info[key] = None
+
+    # Extract single values and create a separate list for fields such as AF and DP
+    for key, value in list(merged_info.items()):  # Iterate over a copy to avoid modification issues
+        if key in unique_fields and isinstance(value, str):  # Ensure value is a string
+            values = value.split(",")
+            if len(values) > 1:
+                merged_info[f"{key}_LIST"] = value  # Store the full list as a string
+                merged_info[key] = values[0]  # Keep only the first value
+
 
     # Construct the merged INFO field string
     return ";".join(

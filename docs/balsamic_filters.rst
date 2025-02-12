@@ -111,7 +111,9 @@ Somatic Callers for reporting SNVs/INDELS
 ******************************************
 
 
-For SNV/InDel calling in the TGA analyses of balsamic both VarDict and TNscope are used. Lists of variants are produced from both tools, which are then normalised and quality filtered before being merged.
+For SNV/InDel calling in the TGA analyses of balsamic both VarDict and TNscope are used. Lists of variants are produced from both tools, which are then normalised and quality filtered before being merged with a custom made python script which can be found in `BALSAMIC/assets/scripts/merge_snv_variantcallers.py`.
+
+This script merges the variants with the same chrom, pos, ref and alt
 
 
 **Vardict**
