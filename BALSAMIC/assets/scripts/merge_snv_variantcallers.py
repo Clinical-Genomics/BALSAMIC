@@ -155,8 +155,10 @@ def merge_headers(vcf1: str, vcf2: str) -> List[str]:
 
     header1, header2 = collect_header(vcf1), collect_header(vcf2)
 
-    header_categories: List[str] = add_header_categories({}, header1)
-    header_categories: List[str] = add_header_categories(header_categories, header2)
+    header_categories: Dict[str, List[str]] = add_header_categories({}, header1)
+    header_categories: Dict[str, List[str]] = add_header_categories(
+        header_categories, header2
+    )
 
     # Validate variant headers
     variant_header = [
@@ -273,47 +275,39 @@ def merge_info_fields(info_fields: List[str]) -> str:
     Returns:
     - str: Merged INFO field as a semicolon-separated string.
     """
+    unique_fields = {"AF", "DP"}  # Set for faster lookups
+    merged_info = {}
 
     def parse_info_field(field: str) -> Tuple[str, Optional[str]]:
-        """
-        Parses an individual INFO field into a key-value pair.
-
-        Parameters:
-        - field (str): The INFO field (e.g., "DP=10" or "SVTYPE").
-
-        Returns:
-        - Tuple[str, Optional[str]]: A tuple of the key and value (or None if no value exists).
-        """
+        """Parses an individual INFO field into a key-value pair."""
         key, sep, value = field.partition("=")
-        return (key, value if sep else None)
+        return key, value if sep else None
 
-    # List of FIELDS to preserve as single values, with first VCF prio
-    unique_fields = ["AF", "DP"]
+    def add_to_merged_info(key: str, value: Optional[str]) -> None:
+        """Handles merging logic for INFO fields."""
+        if value is None:
+            merged_info[key] = None
+        elif key in merged_info:
+            merged_info[key] += f",{value}"
+        else:
+            merged_info[key] = value
 
-    # Parse all fields and store in a dictionary
-    merged_info = {}
+    # Parse and merge INFO fields
     for field in info_fields:
         key, value = parse_info_field(field)
-        if value is not None:  # Key-value pair
-            # Append the value if the key already exists, using a comma as a separator
-            if key in merged_info:
-                merged_info[key] += f",{value}"
-            else:
-                merged_info[key] = value
-        else:  # Key only
-            merged_info[key] = None
+        add_to_merged_info(key, value)
 
-    # Extract single values and create a separate list for fields such as AF and DP
-    for key, value in list(
-        merged_info.items()
-    ):  # Iterate over a copy to avoid modification issues
-        if key in unique_fields and isinstance(value, str):  # Ensure value is a string
-            values = value.split(",")
+    def process_unique_fields() -> None:
+        """Ensures single-value fields retain only the first occurrence."""
+        for key in unique_fields & merged_info.keys():
+            values = merged_info[key].split(",")
             if len(values) > 1:
-                merged_info[f"{key}_LIST"] = value  # Store the full list as a string
-                merged_info[key] = values[0]  # Keep only the first value
+                merged_info[f"{key}_LIST"] = merged_info[key]
+                merged_info[key] = values[0]
 
-    # Construct the merged INFO field string
+    process_unique_fields()
+
+    # Construct the final INFO string
     return ";".join(
         f"{key}={value}" if value is not None else key
         for key, value in merged_info.items()
