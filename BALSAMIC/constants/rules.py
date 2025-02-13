@@ -58,6 +58,7 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
             "snakemake_rules/annotation/vcf2cytosure_convert.rule",
             "snakemake_rules/annotation/final_vcf_reheader.rule",
             "snakemake_rules/annotation/rankscore.rule",
+            "snakemake_rules/quality_control/sex_check.rule",
         ],
     },
     "single_targeted": {
@@ -160,6 +161,7 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
             "snakemake_rules/quality_control/picard_wgs.rule",
             "snakemake_rules/quality_control/somalier.rule",
             "snakemake_rules/quality_control/samtools_qc_wgs.rule",
+            "snakemake_rules/quality_control/sex_check.rule",
         ],
         "align": [
             "snakemake_rules/align/wgs_bam_postprocess.rule",
@@ -198,8 +200,9 @@ DELIVERY_RULES: List[str] = [
     "vep_annotate_germlineVAR_tumor",
     "vep_annotate_germlineVAR_normal",
     # SNVs
-    "modify_tnscope_infofield",
-    "modify_tnscope_infofield_umi",
+    "bcftools_split_tnscope_variants",
+    "sentieon_tnscope_umi",
+    "sentieon_tnscope_umi_tn",
     "gatk_update_vcf_sequence_dictionary",
     "bcftools_filter_tnscope_clinical_tumor_only",
     "bcftools_filter_tnscope_clinical_tumor_normal",
