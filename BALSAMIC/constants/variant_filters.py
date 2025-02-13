@@ -380,12 +380,6 @@ class TgaSNVFilters(BaseSNVFilters):
             variant_caller=BioinfoTools.TNSCOPE,
             analysis_type=AnalysisType.SINGLE,
         ),
-        VCFFilter(
-            tag_value=13,
-            filter_name="balsamic_high_repeat_unit",
-            field="INFO",
-            variant_caller=BioinfoTools.TNSCOPE,
-        ),
     ]
 
 
