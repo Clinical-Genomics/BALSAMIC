@@ -97,6 +97,16 @@ At each step only variants with filters `PASS` and `triallelic_site` are kept an
 **Targeted Genome Analysis**
 #############################
 
+Regarding matched normal analyses
+******************************************
+
+Since Balsamic v17.0.0 the option `--soft-filter-normal` was added and automatically applied for all Targeted Genome Analyses with a matched normal.
+
+This option disables hard-filtering on the matched normal specific filters; `germline_risk` from TNscope and the `in_normal` custom bcftools filter mentioned below under *Relative tumor AF in normal*.
+
+These matched normal soft-filters can optionally be applied out in Scout to revert to the original hard-filter behaviour.
+
+
 Somatic Callers for reporting SNVs/INDELS
 ******************************************
 
@@ -179,10 +189,8 @@ Following is the set of criteria applied for filtering vardict results. It is us
 
 ::
 
-    excludes variant if: AF(normal) / AF(tumor) > 0.3
+    marks variant with soft-filter `in_normal` variant if: AF(normal) / AF(tumor) > 0.3
 
-**Note:**
-**Additionally, the variant is excluded for tumor-normal cases if marked as 'germline' in the `STATUS` column of the VCF file.**
 
 
 **Sentieon's TNscope**
@@ -237,6 +245,7 @@ The `TNscope <https://www.biorxiv.org/content/10.1101/250647v1.abstract>`_ algor
 *min_base_qual*: Minimal base quality to consider in calling
 
 ::
+
     min_base_qual = 15
 
 *min_tumor_allele_frac*: Set the minimum tumor AF to be considered as potential variant site.
@@ -302,7 +311,34 @@ The `TNscope <https://www.biorxiv.org/content/10.1101/250647v1.abstract>`_ algor
 
 ::
 
-    excludes variant if: AF(normal) / AF(tumor) > 0.3
+    marks variant with soft-filter `in_normal` variant if: AF(normal) / AF(tumor) > 0.3
+
+
+**Post-processing of TNscope variants**
+
+After quality-filtering TNscope variants and before merging with VarDict variants the phased SNVs and InDels from TNscope are merged together to MNVs using a slightly modified script from `Sentieon-scripts <https://github.com/Sentieon/sentieon-scripts/blob/master/merge_mnp/merge_mnp.py>`_ which can be found in ``BALSAMIC/assets/scripts/merge_mnp.py``
+
+This was done to avoid multiple representations of the same variant as VarDict already outputs these types of variants as MNVs, and because VEP isn't coded to handle phased SNVs in the interpretation of protein effect.
+
+In the merging of phased SNVs to MNV we need to handle how to consolidate information from multiple variants into a single metric, and importantly also for the FILTER column.
+
+An example is a MNV created by merging a phased germline SNV with a somatic SNV. This has been solved as follows:
+
+- `MNV_CONFLICTING_FILTERS`: Is a filter given to MNVs with constituent variants with different filters (such as `in_normal` and `PASS`)
+
+.. note::
+
+    However, as we may have multiple filters which means similar things, such as germline_risk and in_normal, MNVs constituted by variants with only these filters set aren't exactly "conflicting".
+
+Therefore the logic for setting `MNV_CONFLICTING_FILTERS` has been made a bit more complex, and in summary there are 3 possible outcomes for filters when merging SNVs/InDels into MNVs:
+
+1. Single filter such as PASS, when all constituting variants all have the same filter and no other.
+2. Multiple filters, such as in_normal,germline_risk, when all constituting variants have at least 1 of the matched normal filters.
+3. `MNV_CONFLICTING_FILTERS` when the merged variants have conflicting filters, and they don't all contain matched normal filters.
+
+.. note::
+
+    In addition to this a few more fields are added to the INFO field of the created MNVs containing comma-separated lists of AD, AF, and FILTER from its constituting variants.
 
 
 **Post-call Observation database Filters**

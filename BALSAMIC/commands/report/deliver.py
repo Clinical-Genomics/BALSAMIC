@@ -1,22 +1,17 @@
 """Report deliver CLI command."""
 import logging
-import subprocess
-import sys
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 import click
 import snakemake
 from BALSAMIC.constants.constants import FileType
 
 from BALSAMIC.commands.options import (
-    OPTION_DISABLE_VARIANT_CALLER,
     OPTION_RULES_TO_DELIVER,
     OPTION_SAMPLE_CONFIG,
 )
-from BALSAMIC.constants.analysis import RunMode
 from BALSAMIC.models.config import ConfigModel
-from BALSAMIC.models.snakemake import SnakemakeExecutable
 from BALSAMIC.utils.cli import (
     get_snakefile,
     convert_deliverables_tags,
@@ -31,13 +26,11 @@ LOG = logging.getLogger(__name__)
 @click.command(
     "deliver", short_help="Create a <case_id>.hk file with output analysis files"
 )
-@OPTION_DISABLE_VARIANT_CALLER
 @OPTION_RULES_TO_DELIVER
 @OPTION_SAMPLE_CONFIG
 @click.pass_context
 def deliver(
     context: click.Context,
-    disable_variant_caller: Optional[str],
     rules_to_deliver: List[str],
     sample_config: str,
 ):
@@ -48,31 +41,10 @@ def deliver(
     config_model: ConfigModel = ConfigModel(**config)
     output_dir: Path = Path(config_model.analysis.result, "delivery_report")
     output_dir.mkdir(exist_ok=True)
-    working_dir: Path = Path(
-        config_model.analysis.analysis_dir,
-        config_model.analysis.case_id,
-        "BALSAMIC_run",
-    )
-    html_report: Path = Path(output_dir, f"{config_model.analysis.case_id}_report.html")
+
     snakefile: Path = get_snakefile(
         analysis_type=config_model.analysis.analysis_type,
         analysis_workflow=config_model.analysis.analysis_workflow,
-    )
-
-    LOG.info(f"Creating HTML report file: {html_report.as_posix()}")
-    snakemake_executable: SnakemakeExecutable = SnakemakeExecutable(
-        case_id=config_model.analysis.case_id,
-        config_path=sample_config,
-        disable_variant_caller=disable_variant_caller,
-        report_path=html_report,
-        run_analysis=True,
-        run_mode=RunMode.LOCAL,
-        snakefile=snakefile,
-        snakemake_options=["--quiet"],
-        working_dir=working_dir,
-    )
-    subprocess.check_output(
-        f"{sys.executable} -m {snakemake_executable.get_command()}".split(), shell=False
     )
 
     LOG.info(f"Delivering analysis workflow: {config_model.analysis.analysis_workflow}")
@@ -90,17 +62,6 @@ def deliver(
     hk_deliverables: List[Dict[str, Any]] = read_json(delivery_ready_file.as_posix())
     hk_deliverables: List[Dict[str, Any]] = convert_deliverables_tags(
         delivery_json=hk_deliverables, sample_config_dict=config
-    )
-
-    # HTML analysis report
-    hk_deliverables.append(
-        {
-            "path": html_report.as_posix(),
-            "step": "balsamic_delivery",
-            "format": get_file_extension(html_report.as_posix()),
-            "tag": ["balsamic-report"],
-            "id": config_model.analysis.case_id,
-        }
     )
 
     # Sample configuration file

@@ -13,6 +13,7 @@ from click.testing import CliRunner
 from pydantic_core import Url
 
 from BALSAMIC import __version__ as balsamic_version
+from BALSAMIC.assets.scripts.sex_prediction_tga import predict_sex_main
 from BALSAMIC.assets.scripts.preprocess_gens import cli as gens_preprocessing_cli
 from BALSAMIC.commands.base import cli
 from BALSAMIC.constants.analysis import (
@@ -418,6 +419,86 @@ def config_dict_w_singularity(
         },
     )
     return modify_dict
+
+
+@pytest.fixture(scope="session")
+def male_target_cnn_file(test_data_dir: str) -> str:
+    """Return path to test cnvkit target cnn file from male sample."""
+    return Path(
+        test_data_dir, "qc_files", "sex_check", "male.targetcoverage.cnn"
+    ).as_posix()
+
+
+@pytest.fixture(scope="session")
+def male_antitarget_cnn_file(test_data_dir: str) -> str:
+    """Return path to test cnvkit antitarget cnn file from male sample."""
+    return Path(
+        test_data_dir, "qc_files", "sex_check", "male.antitargetcoverage.cnn"
+    ).as_posix()
+
+
+@pytest.fixture(scope="session")
+def female_target_cnn_file(test_data_dir: str) -> str:
+    """Return path to test cnvkit target cnn file from mfeale sample."""
+    return Path(
+        test_data_dir, "qc_files", "sex_check", "female.targetcoverage.cnn"
+    ).as_posix()
+
+
+@pytest.fixture(scope="session")
+def female_antitarget_cnn_file(test_data_dir: str) -> str:
+    """Return path to test cnvkit antitarget cnn file from female sample."""
+    return Path(
+        test_data_dir, "qc_files", "sex_check", "female.antitargetcoverage.cnn"
+    ).as_posix()
+
+
+@pytest.fixture(scope="session")
+def male_200k_x_coverage(test_data_dir: str) -> str:
+    """Return path to 200k lines of x coverage from male sample."""
+    return Path(
+        test_data_dir, "qc_files", "sex_check", "male_200k_x_bases.txt"
+    ).as_posix()
+
+
+@pytest.fixture(scope="session")
+def male_200k_y_coverage(test_data_dir: str) -> str:
+    """Return path to 200k lines of y coverage from male sample."""
+    return Path(
+        test_data_dir, "qc_files", "sex_check", "male_200k_y_bases.txt"
+    ).as_posix()
+
+
+@pytest.fixture(scope="session")
+def female_200k_x_coverage(test_data_dir: str) -> str:
+    """Return path to 200k lines of x coverage from female sample."""
+    return Path(
+        test_data_dir, "qc_files", "sex_check", "female_200k_x_bases.txt"
+    ).as_posix()
+
+
+@pytest.fixture(scope="session")
+def female_200k_y_coverage(test_data_dir: str) -> str:
+    """Return path to 200k lines of y coverage from female sample."""
+    return Path(
+        test_data_dir, "qc_files", "sex_check", "female_200k_y_bases.txt"
+    ).as_posix()
+
+
+@pytest.fixture(scope="session")
+def tga_female_sex_prediction(test_data_dir: str) -> str:
+    """Return path sex prediction json for female."""
+    return Path(
+        test_data_dir, "qc_files", "sex_check", "female_sex_prediction.json"
+    ).as_posix()
+
+
+@pytest.fixture(scope="session")
+def tga_male_sex_prediction(test_data_dir: str) -> str:
+    """Return path sex prediction json for male."""
+    return Path(
+        test_data_dir, "qc_files", "sex_check", "male_sex_prediction.json"
+    ).as_posix()
 
 
 @pytest.fixture(scope="session")
@@ -2469,7 +2550,6 @@ def fixture_snakemake_executable_validated_data(
         "profile": ClusterProfile.SLURM,
         "qos": QOS.HIGH,
         "quiet": True,
-        "report_path": None,
         "run_analysis": True,
         "run_mode": RunMode.CLUSTER,
         "script_dir": session_tmp_path,

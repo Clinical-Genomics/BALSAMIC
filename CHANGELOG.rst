@@ -1,23 +1,41 @@
 
 [X.X.X]
--------
+--------
 
 Added:
 ^^^^^^
-* SOR filter to WGS TN SNV quality filter
+* Added option to disable hard filter of variants in matched normal https://github.com/Clinical-Genomics/BALSAMIC/pull/1509
+* Added check to verify sample sex for all workflows https://github.com/Clinical-Genomics/BALSAMIC/pull/1516
+* SOR filter to WGS TN SNV quality filter https://github.com/Clinical-Genomics/BALSAMIC/pull/1506
 
 Changed:
 ^^^^^^^^
+* Reworked bcftools filters https://github.com/Clinical-Genomics/BALSAMIC/pull/1509
+* Renamed high_normal_tumor_af_frac to in_normal https://github.com/Clinical-Genomics/BALSAMIC/pull/1509
+* check to verify sample sex for all workflows https://github.com/Clinical-Genomics/BALSAMIC/pull/1516
+* Merging SNVs into MNVs in TNscope TGA https://github.com/Clinical-Genomics/BALSAMIC/pull/1524
+* Change raw delivery SNV file for TGA to before any post-processing https://github.com/Clinical-Genomics/BALSAMIC/pull/1524
+
 
 Removed:
 ^^^^^^^^
+* Remove WGS-level GC-bias metric from TGA workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1521
+
 
 Fixed:
 ^^^^^^
 
 
-[16.0.0]
+[16.0.1]
 -------
+
+Removed:
+^^^^^^^^
+* remove snakemake case_report.html report creation https://github.com/Clinical-Genomics/BALSAMIC/pull/1530
+
+
+[16.0.0]
+--------
 
 Added:
 ^^^^^^
