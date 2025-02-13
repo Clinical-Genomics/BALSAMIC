@@ -94,7 +94,7 @@ export PERL5LIB=;
 
 export TMPDIR={params.tmpdir};
 export _JAVA_OPTIONS="-Djava.io.tmpdir={params.tmpdir}"; 
-export VAR_DICT_OPTS='\"-Xms45G\" \"-Xmx90G\"'; 
+export VAR_DICT_OPTS='\"-Xms20G\" \"-Xmx40G\"'; 
 
 vardict-java -I 600 \
 -G {input.fa} \
