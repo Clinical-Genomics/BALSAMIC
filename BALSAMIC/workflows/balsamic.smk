@@ -10,18 +10,23 @@ from typing import Dict, List
 
 from BALSAMIC.constants.constants import FileType
 from BALSAMIC.constants.analysis import (
+    AnalysisWorkflow,
     FastqName,
     MutationType,
     SampleType,
-    SequencingType)
+    SequencingType,
+    AnalysisType,
+    BioinfoTools)
 from BALSAMIC.constants.paths import BALSAMIC_DIR
 from BALSAMIC.constants.rules import SNAKEMAKE_RULES
 from BALSAMIC.constants.variant_filters import (
-    SNV_BCFTOOLS_SETTINGS_PANEL,
-    SNV_BCFTOOLS_SETTINGS_EXOME,
-    SNV_BCFTOOLS_SETTINGS_WGS,
+    BaseSNVFilters,
     SVDB_FILTER_SETTINGS,
     MANTA_FILTER_SETTINGS,
+    WgsSNVFilters,
+    TgaSNVFilters,
+    TgaUmiSNVFilters,
+    get_tag_and_filtername,
 )
 from BALSAMIC.constants.workflow_params import (
     VARCALL_PARAMS,
@@ -29,7 +34,7 @@ from BALSAMIC.constants.workflow_params import (
     SLEEP_BEFORE_START,
 )
 from BALSAMIC.models.config import ConfigModel
-from BALSAMIC.models.params import BalsamicWorkflowConfig, VarCallerFilter
+from BALSAMIC.models.params import BalsamicWorkflowConfig, StructuralVariantFilters
 from BALSAMIC.utils.cli import check_executable, generate_h5
 from BALSAMIC.utils.exc import BalsamicError
 from BALSAMIC.utils.io import read_yaml, write_finish_file, write_json
@@ -111,32 +116,43 @@ if config["analysis"]["sequencing_type"] != "wgs":
 singularity_image: str = config_model.singularity["image"]
 sample_names: List[str] = config_model.get_all_sample_names()
 tumor_sample: str = config_model.get_sample_name_by_type(SampleType.TUMOR)
+
+analysis_type = config_model.analysis.analysis_type
 sequencing_type = config_model.analysis.sequencing_type
-if config_model.analysis.analysis_type == "paired":
+
+if analysis_type == AnalysisType.PAIRED:
     normal_sample: str = config_model.get_sample_name_by_type(SampleType.NORMAL)
 
 # Sample status to sampleID namemap
-if config_model.analysis.analysis_type == "paired":
+if analysis_type == AnalysisType.PAIRED:
     status_to_sample_id = (
         "TUMOR" + "\\\\t" + tumor_sample + "\\\\n" + "NORMAL" + "\\\\t" + normal_sample
     )
 else:
     status_to_sample_id = "TUMOR" + "\\\\t" + tumor_sample
 
+soft_filter_normal = config_model.analysis.soft_filter_normal
 
-# Set SNV filter settings depending on if sample is panel / wes / wgs
 if config_model.panel:
-    if config_model.panel.exome:
-        SNV_FILTER_SETTINGS = VarCallerFilter.model_validate(SNV_BCFTOOLS_SETTINGS_EXOME)
-    else:
-        SNV_FILTER_SETTINGS = VarCallerFilter.model_validate(SNV_BCFTOOLS_SETTINGS_PANEL)
+    SNV_FILTERS = TgaSNVFilters
 else:
-    SNV_FILTER_SETTINGS = VarCallerFilter.model_validate(SNV_BCFTOOLS_SETTINGS_WGS)
+    SNV_FILTERS = WgsSNVFilters
+
+snv_quality_filters = SNV_FILTERS.get_filters(category="quality", sequencing_type=sequencing_type, analysis_type=analysis_type)
+snv_research_filters = SNV_FILTERS.get_filters(category="research", sequencing_type=sequencing_type, analysis_type=analysis_type)
+snv_clinical_filters = SNV_FILTERS.get_filters(category="clinical", sequencing_type=sequencing_type, analysis_type=analysis_type)
+
+
+if config_model.analysis.analysis_workflow == AnalysisWorkflow.BALSAMIC_UMI:
+    SNV_FILTERS = TgaUmiSNVFilters
+    umi_snv_quality_filters = SNV_FILTERS.get_filters(category="quality", sequencing_type=sequencing_type, analysis_type=analysis_type)
+    umi_snv_research_filters = SNV_FILTERS.get_filters(category="research", sequencing_type=sequencing_type, analysis_type=analysis_type)
+    umi_snv_clinical_filters = SNV_FILTERS.get_filters(category="clinical", sequencing_type=sequencing_type, analysis_type=analysis_type)
 
 
 
-SVDB_FILTERS = VarCallerFilter.model_validate(SVDB_FILTER_SETTINGS)
-MANTA_FILTERS = VarCallerFilter.model_validate(MANTA_FILTER_SETTINGS)
+SVDB_FILTERS = StructuralVariantFilters.model_validate(SVDB_FILTER_SETTINGS)
+MANTA_FILTERS = StructuralVariantFilters.model_validate(MANTA_FILTER_SETTINGS)
 
 # Fastp parameters
 fastp_parameters: Dict = get_fastp_parameters(config_model)
@@ -386,11 +402,9 @@ else:
 # Collect all rules to be run
 
 rules_to_include = []
-analysis_type = config["analysis"]["analysis_type"]
-sequence_type = config["analysis"]["sequencing_type"]
 
 for sub, value in SNAKEMAKE_RULES.items():
-    if sub in ["common", analysis_type + "_" + sequence_type]:
+    if sub in ["common", analysis_type + "_" + sequencing_type]:
         for module_name, module_rules in value.items():
             rules_to_include.extend(module_rules)
 
@@ -404,7 +418,7 @@ if "dragen" in config:
 # Add rule for GENS
 if "gnomad_min_af5" in config["reference"]:
     rules_to_include.append("snakemake_rules/variant_calling/gens_preprocessing.rule")
-if "gnomad_min_af5" in config["reference"] and sequence_type == SequencingType.WGS:
+if "gnomad_min_af5" in config["reference"] and sequencing_type == SequencingType.WGS:
     rules_to_include.append("snakemake_rules/variant_calling/gatk_read_counts.rule")
 
 LOG.info(f"The following rules will be included in the workflow: {rules_to_include}")
