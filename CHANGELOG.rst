@@ -23,7 +23,8 @@ Removed:
 
 Fixed:
 ^^^^^^
-=======
+* VarDict
+
 
 [16.0.1]
 -------
@@ -31,7 +32,6 @@ Fixed:
 Removed:
 ^^^^^^^^
 * remove snakemake case_report.html report creation https://github.com/Clinical-Genomics/BALSAMIC/pull/1530
->>>>>>> master
 
 
 [16.0.0]
