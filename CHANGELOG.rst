@@ -5,7 +5,6 @@ Added:
 ^^^^^^
 * Added option to disable hard filter of variants in matched normal https://github.com/Clinical-Genomics/BALSAMIC/pull/1509
 * Added check to verify sample sex for all workflows https://github.com/Clinical-Genomics/BALSAMIC/pull/1516
-* Added max RPA 13 to TNscope quality filter in TGA workflows https://github.com/Clinical-Genomics/BALSAMIC/pull/1523
 
 
 Changed:
@@ -16,7 +15,8 @@ Changed:
 * Merging SNVs into MNVs in TNscope TGA https://github.com/Clinical-Genomics/BALSAMIC/pull/1524
 * Change raw delivery SNV file for TGA to before any post-processing https://github.com/Clinical-Genomics/BALSAMIC/pull/1524
 * Changed VarDict and TNscope VCF merged method to custom script https://github.com/Clinical-Genomics/BALSAMIC/pull/1499
-* changed --pcr_indel_model to conservative for TGA workflows https://github.com/Clinical-Genomics/BALSAMIC/pull/1523
+* changed --pcr_indel_model to conservative for TNscope in all TGA workflows https://github.com/Clinical-Genomics/BALSAMIC/pull/1523
+* changed prune_factor to 4 for TNscope in all TGA workflows https://github.com/Clinical-Genomics/BALSAMIC/pull/1523
 
 Removed:
 ^^^^^^^^
