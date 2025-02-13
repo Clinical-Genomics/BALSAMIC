@@ -196,7 +196,7 @@ research_annotations.append(
                     "CLNVC",
                     "CLNVCSO",
                 ],
-                "ops": ["self", "self", "self", "self", "self", "self"],
+                "ops": ["self", "self", "self", "self", "self", "self", "self", "self", "self", "self", "self"],
                 "names": [
                     "CLNACC",
                     "CLNREVSTAT",
