@@ -189,7 +189,7 @@ research_annotations.append(
                     "CLNSIG",
                     "ORIGIN",
                     "ONC",
-                    "ONCDN"
+                    "ONCDN",
                     "ONCREVSTAT",
                     "ONCDISDB",
                     "ONCCONF",
@@ -203,7 +203,7 @@ research_annotations.append(
                     "CLNSIG",
                     "ORIGIN",
                     "ONC",
-                    "ONCDN"
+                    "ONCDN",
                     "ONCREVSTAT",
                     "ONCDISDB",
                     "ONCCONF",
