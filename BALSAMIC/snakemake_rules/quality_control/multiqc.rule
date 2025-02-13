@@ -18,8 +18,13 @@ qc_metrics_wildcards = ["alignment_summary_metrics.txt", "base_distribution_by_c
                         "insert_size_metrics.pdf", "insert_size_metrics.txt",
                         "quality_by_cycle_metrics.txt", "quality_by_cycle_metrics.pdf",
                         "quality_distribution_metrics.txt", "quality_distribution_metrics.pdf",
-                        "gc_bias.txt", "gc_bias_summary.txt", "gc_bias.pdf", "hsmetric.txt",
-                        "samtools.flagstats.txt", "samtools.idxstats.txt", "samtools.stats.txt"]
+                        "hsmetric.txt", "samtools.flagstats.txt", "samtools.idxstats.txt", "samtools.stats.txt"]
+
+if config["analysis"]["sequencing_type"] == 'wgs':
+    # for WGS workflow
+    qc_metrics_wildcards.extend(["gc_bias.txt",
+                                 "gc_bias_summary.txt",
+                                 "gc_bias.pdf"])
 
 if config["analysis"]["sequencing_type"] == 'targeted':
     # for post UMI collapse
@@ -58,11 +63,9 @@ if config["analysis"]["sequencing_type"] == 'wgs':
 
     # Sentieon metrics
     multiqc_input.extend(expand(qc_dir + "tumor.{sample}_sentieon_wgs_metrics.txt", sample=tumor_sample))
-    multiqc_input.extend(expand(qc_dir + "tumor.{sample}_coverage.gz", sample=tumor_sample))
 
     if config['analysis']['analysis_type'] == "paired":
         multiqc_input.extend(expand(qc_dir + "normal.{sample}_sentieon_wgs_metrics.txt", sample=normal_sample))
-        multiqc_input.extend(expand(qc_dir + "normal.{sample}_coverage.gz", sample=normal_sample))
 
 
     if config["analysis"]["analysis_workflow"] != "balsamic-qc":
