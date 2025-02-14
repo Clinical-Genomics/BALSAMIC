@@ -1,12 +1,7 @@
 {
   "QC": {
-    "picard_rmdup": false,
     "adapter": "AATGATACGGCGACCACCGAGATCTACACTCTTTCCCTACACGACGCTCTTCCGATCT",
-    "quality_trim": true,
-    "adapter_trim": true,
-    "umi_trim": true,
     "min_seq_length": "25",
-    "umi_trim_length": "5",
     "n_base_limit": "50"
   },
   "samples": "Placeholder",

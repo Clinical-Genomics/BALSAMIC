@@ -8,7 +8,7 @@ rule bcftools_get_somaticINDEL_research:
   output:
     vcf_indel_research = vcf_dir + "SNV.somatic.{case_name}.{var_caller}.indel.research.vcf.gz",
   benchmark:
-    Path(benchmark_dir, "vep_somatic_research_snv.{case_name}.{var_caller}.tsv").as_posix()
+    Path(benchmark_dir, "bcftools_get_somaticINDEL_research.{case_name}.{var_caller}.tsv").as_posix()
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
   params:
@@ -29,7 +29,7 @@ rule cadd_annotate_somaticINDEL_research:
   output:
     cadd_indel_research = vep_dir + "SNV.somatic.{case_name}.{var_caller}.cadd_indel.research.tsv.gz",
   benchmark:
-    Path(benchmark_dir, "vep_somatic_research_snv.{case_name}.{var_caller}.tsv").as_posix()
+    Path(benchmark_dir, "cadd_annotate_somaticINDEL_research.{case_name}.{var_caller}.tsv").as_posix()
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("cadd") + ".sif").as_posix()
   params:
@@ -52,7 +52,7 @@ rule bcftools_annotate_somaticINDEL_research:
   output:
     vcf_indel_research = vep_dir + "SNV.somatic.{case_name}.{var_caller}.cadd_indel.research.vcf.gz",
   benchmark:
-    Path(benchmark_dir, "vep_somatic_research_snv.{case_name}.{var_caller}.tsv").as_posix()
+    Path(benchmark_dir, "bcftools_annotate_somaticINDEL_research.{case_name}.{var_caller}.tsv").as_posix()
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
   params:
@@ -83,16 +83,16 @@ tabix -p vcf -f  {output.vcf_indel_research}
 rule vep_annotate_somaticSNV_research:
   input:
     vcf_snv_research = vep_dir + "SNV.somatic.{case_name}.{var_caller}.cadd_indel.research.vcf.gz",
-    header = vcf_dir + "SNV.somatic.{case_name}.{var_caller}.sample_name_map",
     cosmic = config["reference"]["cosmic"]
   output:
-    vcf_snv_research = temp(vep_dir + "SNV.somatic.{case_name}.{var_caller}.research.vcf.gz"),
+    vcf_snv_unfiltered = vep_dir + "SNV.somatic.{case_name}.{var_caller}.research.vcf.gz",
     vcfanno_research_toml = vep_dir + "SNV.somatic.{case_name}.{var_caller}_vcfanno_research.toml"
   benchmark:
-    Path(benchmark_dir, "vep_somatic_research_snv.{case_name}.{var_caller}.tsv").as_posix()
+    Path(benchmark_dir, "vep_annotate_somaticSNV_research.{case_name}.{var_caller}.tsv").as_posix()
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix()
   params:
+    housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "research"},
     message_text = "SNV.somatic.{case_name}.{var_caller}.research.vcf.gz",
     tmp_vcf_research = temp(vep_dir + "SNV.somatic.{case_name}.{var_caller}.tmp.research.vcf.gz"),
     vcfanno_research_annotations = dump_toml(research_annotations),
@@ -110,7 +110,6 @@ export PERL5LIB=;
 echo \'{params.vcfanno_research_annotations}\' > {output.vcfanno_research_toml};
 
 vcfanno -p {threads} {output.vcfanno_research_toml} {input.vcf_snv_research} \
-| bcftools reheader --threads {threads} -s {input.header} \
 | bcftools view --threads {threads} -O z -o {params.tmp_vcf_research} ;
 
 vep \
@@ -118,12 +117,12 @@ vep \
 --dir_cache {params.vep_cache} \
 --dir_plugins $vep_path \
 --input_file {params.tmp_vcf_research} \
---output_file {output.vcf_snv_research} \
+--output_file {output.vcf_snv_unfiltered} \
 --fork {threads} \
 {params.vep_defaults} \
 --custom {input.cosmic},COSMIC,vcf,exact,0,CDS,GENE,STRAND,CNT,AA ;
 
-tabix -p vcf -f {output.vcf_snv_research};
+tabix -p vcf -f {output.vcf_snv_unfiltered};
 
 rm {params.tmp_vcf_research};
         """
@@ -131,15 +130,15 @@ rm {params.tmp_vcf_research};
 rule vcfanno_annotate_somaticSNV_clinical:
   input:
     vcf_snv_research = vep_dir + "SNV.somatic.{case_name}.{var_caller}.research.vcf.gz",
-    header = vcf_dir + "SNV.somatic.{case_name}.{var_caller}.sample_name_map",
   output:
-    vcf_snv_clinical = temp(vep_dir + "SNV.somatic.{case_name}.{var_caller}.clinical.vcf.gz"),
+    vcf_snv_clinical = vep_dir + "SNV.somatic.{case_name}.{var_caller}.clinical.vcf.gz",
   benchmark:
-    Path(benchmark_dir, "vcfanno_somatic_clinical_snv.{case_name}.{var_caller}.tsv").as_posix()
+    Path(benchmark_dir, "vcfanno_annotate_somaticSNV_clinical.{case_name}.{var_caller}.tsv").as_posix()
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix()
   params:
     message_text = "SNV.somatic.{case_name}.{var_caller}.clinical.vcf.gz",
+    artefact_snv = artefact_snv_obs,
     clinical_snv = clinical_snv_obs,
     cancer_germline_snv = cancer_germline_snv_obs,
     cancer_somatic_snv = cancer_somatic_snv_obs,
@@ -151,10 +150,9 @@ rule vcfanno_annotate_somaticSNV_clinical:
     "Running vcfanno annotation for single nuceotide variants on {params.message_text}"
   shell:
         """
-if [[ -f "{params.clinical_snv}" || -f "{params.cancer_germline_snv}" || -f "{params.cancer_somatic_snv}" ]]; then
+if [[ -f "{params.clinical_snv}" || -f "{params.cancer_germline_snv}" || -f "{params.cancer_somatic_snv}" || -f "{params.artefact_snv}" ]]; then
     echo \'{params.vcfanno_clinical_annotations}\' > {params.vcfanno_clinical_toml};
     vcfanno -p {threads} {params.vcfanno_clinical_toml} {input.vcf_snv_research} | \
-    bcftools reheader --threads {threads} -s {input.header} | \
     bcftools view --threads {threads} -O z -o {output.vcf_snv_clinical};
 else
     cp {input.vcf_snv_research} {output.vcf_snv_clinical};

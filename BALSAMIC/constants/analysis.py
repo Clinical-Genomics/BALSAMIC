@@ -46,6 +46,7 @@ class SequencingType(StrEnum):
 
     TARGETED: str = "targeted"
     WGS: str = "wgs"
+    WES: str = "wes"
 
 
 class SampleType(StrEnum):
@@ -119,11 +120,13 @@ class BioinfoTools(StrEnum):
     SVDB: str = "svdb"
     TABIX: str = "tabix"
     TIDDIT: str = "tiddit"
+    TNSCOPE: str = "tnscope"
     VARDICT: str = "vardict"
     VCF2CYTOSURE: str = "vcf2cytosure"
     VCFANNO: str = "vcfanno"
     CADD: str = "cadd"
     PURECN: str = "purecn"
+    PYSAM: str = "pysam"
 
 
 class FastqName(StrEnum):
@@ -177,4 +180,5 @@ BIOINFO_TOOL_ENV: Dict[str, str] = {
     BioinfoTools.CADD: DockerContainers.CADD,
     BioinfoTools.PURECN: DockerContainers.PURECN,
     BioinfoTools.GATK: DockerContainers.GATK,
+    BioinfoTools.PYSAM: DockerContainers.PYTHON_3,
 }

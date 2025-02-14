@@ -1,16 +1,19 @@
 {
   "QC": {
-    "picard_rmdup": false,
     "adapter": "AATGATACGGCGACCACCGAGATCTACACTCTTTCCCTACACGACGCTCTTCCGATCT",
-    "quality_trim": true,
-    "adapter_trim": true,
-    "umi_trim": true,
     "min_seq_length": "25",
-    "umi_trim_length": "5",
     "n_base_limit": "50"
   },
   "vcf": {
+
     "vardict": {
+      "mutation": "somatic",
+      "mutation_type": "SNV",
+      "analysis_type": ["paired", "single"],
+      "sequencing_type": ["targeted"],
+      "workflow_solution": ["BALSAMIC"]
+    },
+    "merged": {
       "mutation": "somatic",
       "mutation_type": "SNV",
       "analysis_type": ["paired", "single"],
@@ -207,7 +210,7 @@
     "svdb": ["2.8.1"],
     "tiddit": ["3.3.2"],
     "vardict": ["2019.06.04"],
-    "somalier": ["0.2.16"],
+    "somalier": ["0.2.19"],
     "delly": ["1.0.3"],
     "manta": ["1.6.0"],
     "bedtools": ["2.30.0"],
@@ -224,7 +227,7 @@
     "ascatNgs": ["4.5.0"],
     "vcf2cytosure": ["0.9.1"],
     "cnvpytor": ["1.2.1"],
-    "msisensorpro": ["1.2.0"]
+    "msisensorpro": ["1.3.0"]
   },
   "panel": {
     "capture_kit": "tests/test_data/references/panel/panel.bed",

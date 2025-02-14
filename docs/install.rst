@@ -2,7 +2,7 @@
 Installation
 ============
 
-This section describes steps to install BALSAMIC (**version** = 15.0.1)
+This section describes steps to install BALSAMIC (**version** = 16.0.1)
 
 
 
@@ -52,7 +52,7 @@ Or if you have repository cloned and want it in editable mode:
 Step 2. generate BALSAMIC cache and pull containers
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-First generate your own COSMIC database key via: https://cancer.sanger.ac.uk/cosmic/help/file_download
+First generate your own COSMIC database key via: https://cancer.sanger.ac.uk/cosmic/register
 The following commands will create and download reference directory at ``~/balsamic_cache`` (change this path if you
 want it to be created in another location):
 

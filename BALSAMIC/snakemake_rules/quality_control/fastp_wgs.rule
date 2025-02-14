@@ -1,23 +1,23 @@
 """Rules for WGS fastq pre-processing: quality and adapter-trimming."""
 
 
-rule fastp_quality_trim_wgs:
+rule fastp_quality_and_adapter_trim_wgs:
     """Fastq data pre-processing for WGS."""
     input:
         wake_up = result_dir + "start_analysis",
         fastq_r1 = lambda wildcards: config_model.get_fastq_by_fastq_pattern(wildcards.fastq_pattern, FastqName.FWD),
         fastq_r2 = lambda wildcards: config_model.get_fastq_by_fastq_pattern(wildcards.fastq_pattern, FastqName.REV)
     output:
-        fastq_r1 = temp(fastq_dir + "{fastq_pattern}_1.fp.fastq.gz"),
-        fastq_r2 = temp(fastq_dir + "{fastq_pattern}_2.fp.fastq.gz"),
-        json = qc_dir + "fastp/{fastq_pattern}_fastp.json",
-        html = qc_dir + "fastp/{fastq_pattern}_fastp.html"
+        fastq_r1 = temp(fastq_dir + "{sample_type}.{sample}.{fastq_pattern}_1.fp.fastq.gz"),
+        fastq_r2 = temp(fastq_dir + "{sample_type}.{sample}.{fastq_pattern}_2.fp.fastq.gz"),
+        json = qc_dir + "fastp/{sample_type}.{sample}.{fastq_pattern}_fastp.json",
+        html = qc_dir + "fastp/{sample_type}.{sample}.{fastq_pattern}_fastp.html"
     benchmark:
-        Path(benchmark_dir, "fastp_quality_trim" + "{fastq_pattern}.tsv").as_posix()
+        Path(benchmark_dir, "fastp_quality_trim.{sample_type}.{sample}.{fastq_pattern}.tsv").as_posix()
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("fastp") + ".sif").as_posix()
     params:
-        tmpdir = tmp_dir,
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         quality_trim = " ".join(fastp_parameters["fastp_trim_qual"]),
         adapter_trim = " ".join(fastp_parameters["fastp_trim_adapter"]),
         fastq_pattern = "{fastq_pattern}"
@@ -40,4 +40,6 @@ fastp \
 --overrepresentation_analysis \
 {params.quality_trim} \
 {params.adapter_trim};
+
+rm -rf {params.tmpdir}
         """
