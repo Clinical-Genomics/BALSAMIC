@@ -130,7 +130,7 @@ def merge_headers(vcf1: str, vcf2: str) -> List[str]:
         except IndexError:
             return ""
 
-    def process_category_lines(lines: List[str]) -> Dict[str, str]:
+    def process_category_lines(lines: List[str], category: str) -> Dict[str, str]:
         """Processes header lines within a category, merging duplicate IDs."""
         cat_lines = {}
         for line in lines:
@@ -141,6 +141,14 @@ def merge_headers(vcf1: str, vcf2: str) -> List[str]:
                 cat_lines[line_id] = merge_header_row(
                     cat_lines.get(line_id, line), line
                 )
+        if category == "INFO":
+            cat_lines[
+                "AF_LIST"
+            ] = '<ID=AF_LIST,Number=.,Type=Float,Description="Allele Frequency list from both variant callers of a merged variant, in positional argument order">'
+            cat_lines[
+                "DP_LIST"
+            ] = '<ID=DP_LIST,Number=.,Type=Integer,Description="Total Depth list from both variant callers of a merged variant, in positional argument order">'
+
         return cat_lines
 
     vcf1_name, vcf2_name = map(os.path.basename, [vcf1, vcf2])
@@ -148,8 +156,10 @@ def merge_headers(vcf1: str, vcf2: str) -> List[str]:
 
     header1, header2 = collect_header(vcf1), collect_header(vcf2)
 
-    header_categories = add_header_categories({}, header1)
-    header_categories = add_header_categories(header_categories, header2)
+    header_categories: Dict[str, List[str]] = add_header_categories({}, header1)
+    header_categories: Dict[str, List[str]] = add_header_categories(
+        header_categories, header2
+    )
 
     # Validate variant headers
     variant_header = [
@@ -167,7 +177,7 @@ def merge_headers(vcf1: str, vcf2: str) -> List[str]:
 
     # Process and merge headers
     merged_header_dict = {
-        category: process_category_lines(lines)
+        category: process_category_lines(lines, category)
         for category, lines in header_categories.items()
     }
 
@@ -266,34 +276,39 @@ def merge_info_fields(info_fields: List[str]) -> str:
     Returns:
     - str: Merged INFO field as a semicolon-separated string.
     """
+    unique_fields = {"AF", "DP"}  # Set for faster lookups
+    merged_info = {}
 
     def parse_info_field(field: str) -> Tuple[str, Optional[str]]:
-        """
-        Parses an individual INFO field into a key-value pair.
-
-        Parameters:
-        - field (str): The INFO field (e.g., "DP=10" or "SVTYPE").
-
-        Returns:
-        - Tuple[str, Optional[str]]: A tuple of the key and value (or None if no value exists).
-        """
+        """Parses an individual INFO field into a key-value pair."""
         key, sep, value = field.partition("=")
-        return (key, value if sep else None)
+        return key, value if sep else None
 
-    # Parse all fields and store in a dictionary
-    merged_info = {}
+    def add_to_merged_info(key: str, value: Optional[str]) -> None:
+        """Handles merging logic for INFO fields."""
+        if value is None:
+            merged_info[key] = None
+        elif key in merged_info:
+            merged_info[key] += f",{value}"
+        else:
+            merged_info[key] = value
+
+    # Parse and merge INFO fields
     for field in info_fields:
         key, value = parse_info_field(field)
-        if value is not None:  # Key-value pair
-            # Append the value if the key already exists, using a comma as a separator
-            if key in merged_info:
-                merged_info[key] += f",{value}"
-            else:
-                merged_info[key] = value
-        else:  # Key only
-            merged_info[key] = None
+        add_to_merged_info(key, value)
 
-    # Construct the merged INFO field string
+    def process_unique_fields() -> None:
+        """Ensures single-value fields retain only the first occurrence."""
+        for key in unique_fields & merged_info.keys():
+            values = merged_info[key].split(",")
+            if len(values) > 1:
+                merged_info[f"{key}_LIST"] = merged_info[key]
+                merged_info[key] = values[0]
+
+    process_unique_fields()
+
+    # Construct the final INFO string
     return ";".join(
         f"{key}={value}" if value is not None else key
         for key, value in merged_info.items()

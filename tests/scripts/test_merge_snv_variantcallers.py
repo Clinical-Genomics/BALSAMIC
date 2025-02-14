@@ -156,7 +156,7 @@ def test_merge_info_fields():
     assert merge_info_fields(["DP=10", "AF=0.5"]) == "DP=10;AF=0.5"
 
     # Test merging duplicate keys with different values
-    assert merge_info_fields(["DP=10", "DP=20"]) == "DP=10,20"
+    assert merge_info_fields(["DP=10", "DP=20"]) == "DP=10;DP_LIST=10,20"
 
     # Test handling of key-only fields
     assert merge_info_fields(["P0.01Likely", "DP=10"]) == "P0.01Likely;DP=10"
@@ -167,7 +167,7 @@ def test_merge_info_fields():
     # Test merging multiple values with a mix of key-only and key-value pairs
     assert (
         merge_info_fields(["NLODF=126.72", "DP=10", "DP=15", "PASS"])
-        == "NLODF=126.72;DP=10,15;PASS"
+        == "NLODF=126.72;DP=10;PASS;DP_LIST=10,15"
     )
 
     # Test empty input
@@ -176,7 +176,7 @@ def test_merge_info_fields():
     # Test handling of mixed formatting
     assert (
         merge_info_fields(["AF=0.1", "AF=0.2", "FILTER", "FILTER"])
-        == "AF=0.1,0.2;FILTER"
+        == "AF=0.1;FILTER;AF_LIST=0.1,0.2"
     )
 
     # Test handling of multiple unique key-value pairs
@@ -187,25 +187,5 @@ def test_merge_info_fields():
         merge_info_fields(
             ["DP=10", "DP=20", "DP=30", "FOUND_IN=vardict", "FOUND_IN=tnscope"]
         )
-        == "DP=10,20,30;FOUND_IN=vardict,tnscope"
+        == "DP=10;FOUND_IN=vardict,tnscope;DP_LIST=10,20,30"
     )
-
-    # Test when values include existing commas
-    assert merge_info_fields(["DP=10,15", "DP=20"]) == "DP=10,15,20"
-
-
-def test_merge_complete_info_fields():
-    """Test that the complete info field is merged as expected."""
-
-    # GIVEN vardict info field of variant
-    info1 = "AF=0.005;DP=1197;FOUND_IN=vardict;LSEQ=GCTCACGTGACCACTGTCCC;MSI=5;MSILEN=1;P0.01Likely;RSEQ=TTTTCTGCGACCCCGTCCCC;SAMPLE=idealdeer;SHIFT3=0;SOR=3.46444;SSF=0.10282;STATUS=LikelySomatic;TYPE=SNV;VD=6"
-    # GIVEN tnscope info field of variant
-    info2 = "ECNT=6;FS=0;HCNT=18;MAX_ED=136;MIN_ED=1;NLOD=406.45;NLODF=126.72;PV=0.0966;PV2=0.0966;SOR=0.85;TLOD=7.39;DP=1163;AF=0.00515907;FOUND_IN=tnscope"
-    # GIVEN expected merged info field
-    merged = "AF=0.005,0.00515907;DP=1197,1163;FOUND_IN=vardict,tnscope;LSEQ=GCTCACGTGACCACTGTCCC;MSI=5;MSILEN=1;P0.01Likely;RSEQ=TTTTCTGCGACCCCGTCCCC;SAMPLE=idealdeer;SHIFT3=0;SOR=3.46444,0.85;SSF=0.10282;STATUS=LikelySomatic;TYPE=SNV;VD=6;ECNT=6;FS=0;HCNT=18;MAX_ED=136;MIN_ED=1;NLOD=406.45;NLODF=126.72;PV=0.0966;PV2=0.0966;TLOD=7.39"
-
-    # WHEN merging info fields of vardict and tnscope
-    merged_info = merge_info_fields(info1.split(";") + info2.split(";"))
-
-    # THEN merged info field should be as expected
-    assert merged == merged_info

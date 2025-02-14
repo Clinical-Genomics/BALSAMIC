@@ -25,6 +25,7 @@ Removed:
 Fixed:
 ^^^^^^
 
+* Merged VarDict and TNscope variants now correctly show both callers in FOUND_IN info field https://github.com/Clinical-Genomics/BALSAMIC/pull/1499
 
 [16.0.1]
 -------
@@ -34,14 +35,6 @@ Removed:
 * remove snakemake case_report.html report creation https://github.com/Clinical-Genomics/BALSAMIC/pull/1530
 
 
-Removed:
-^^^^^^^^
-* Remove WGS-level GC-bias metric from TGA workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1521
-
-
-Fixed:
-^^^^^^
-* Merged VarDict and TNscope variants now correctly show both callers in FOUND_IN info field https://github.com/Clinical-Genomics/BALSAMIC/pull/1499
 
 [16.0.0]
 --------
