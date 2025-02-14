@@ -34,22 +34,18 @@ METRICS: Dict[str, dict] = {
             "PCT_TARGET_BASES_1000X": {"condition": {"norm": "gt", "threshold": 0.95}}
         },
         "gmcksolid": {
-            "GC_DROPOUT": {"condition": {"norm": "lt", "threshold": 1}},
             "PCT_TARGET_BASES_250X": {"condition": {"norm": "gt", "threshold": 0.95}},
         },
         "gmslymphoid": {
-            "GC_DROPOUT": {"condition": {"norm": "lt", "threshold": 1}},
             "PCT_TARGET_BASES_500X": {"condition": {"norm": "gt", "threshold": 0.95}},
         },
         "gmsmyeloid": {
-            "GC_DROPOUT": {"condition": {"norm": "lt", "threshold": 1}},
             "PCT_TARGET_BASES_500X": {"condition": {"norm": "gt", "threshold": 0.95}},
         },
         "hdcfdna": {
             "PCT_TARGET_BASES_1000X": {"condition": {"norm": "gt", "threshold": 0.95}},
         },
         "gmssolid": {
-            "GC_DROPOUT": {"condition": {"norm": "lt", "threshold": 1}},
             "PCT_TARGET_BASES_250X": {"condition": {"norm": "gt", "threshold": 0.95}},
         },
         "lymphoma": {
@@ -74,7 +70,7 @@ METRICS: Dict[str, dict] = {
             "PCT_TARGET_BASES_20X": {"condition": {"norm": "gt", "threshold": 0.95}},
         },
         "twistexomecomprehensive": {
-            "GC_DROPOUT": {"condition": {"norm": "lt", "threshold": 1}},
+            "GC_DROPOUT": {"condition": {"norm": "lt", "threshold": 6.00}},
             "PCT_TARGET_BASES_20X": {"condition": {"norm": "gt", "threshold": 0.95}},
         },
     },
