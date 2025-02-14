@@ -79,7 +79,7 @@ def test_get_config_options(snakemake_executable: SnakemakeExecutable):
     snakemake_config_options: str = snakemake_executable.get_config_options()
 
     # THEN the expected format should be returned
-    assert snakemake_config_options == "--config disable_variant_caller=tnscope,vardict"
+    assert snakemake_config_options == "--config disable_variant_caller=tnscope"
 
 
 def test_get_dragen_flag(snakemake_executable: SnakemakeExecutable):
@@ -120,22 +120,6 @@ def test_quiet_flag(snakemake_executable: SnakemakeExecutable):
 
     # THEN the expected format should be returned
     assert quiet_flag == "--quiet"
-
-
-def test_get_report_path_option(
-    session_tmp_path: Path, snakemake_executable: SnakemakeExecutable
-):
-    """Test formatting of the report path option."""
-
-    # GIVEN a snakemake executable model with a report path option
-    snakemake_model: SnakemakeExecutable = copy.deepcopy(snakemake_executable)
-    snakemake_model.report_path = session_tmp_path
-
-    # WHEN calling the method
-    report_path_option: str = snakemake_model.get_report_path_option()
-
-    # THEN the expected format should be returned
-    assert report_path_option == f"--report {session_tmp_path.as_posix()}"
 
 
 def test_get_run_analysis_flag(snakemake_executable: SnakemakeExecutable):
@@ -267,5 +251,5 @@ def test_get_snakemake_command(
         f"--cluster-config {reference_file.as_posix()} --cluster '{sys.executable} {IMMEDIATE_SUBMIT_PATH.as_posix()} "
         f"--account {ClusterAccount.DEVELOPMENT} --log-dir {session_tmp_path} --mail-user {mail_user_option} "
         f"--profile {ClusterProfile.SLURM} --qos {QOS.HIGH} --script-dir {session_tmp_path} {case_id_tumor_only} "
-        "{dependencies}' --config disable_variant_caller=tnscope,vardict --cores 36"
+        "{dependencies}' --config disable_variant_caller=tnscope --cores 36"
     )

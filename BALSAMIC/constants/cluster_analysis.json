@@ -11,13 +11,29 @@
 		"time": "00:15:00",
 		"n": 1
 	},
-	"gens_preprocessing": {
+	"gens_preprocess": {
 		"time": "01:00:00",
 		"n": 4
 	},
 	"postprocess_bam": {
 		"time": "03:00:00",
 		"n": 12
+	},
+	"cap_base_quality": {
+		"time": "05:00:00",
+		"n": 10
+	},
+	"extend_short_bedregions": {
+		"time": "01:00:00",
+		"n": 1
+	},
+	"cnvkit_create_coverage": {
+		"time": "6:00:00",
+		"n": 18
+	},
+	"cnvkit_create_targets": {
+		"time": "6:00:00",
+		"n": 2
 	},
 	"finalize_gens_outputfiles": {
 		"time": "01:00:00",
@@ -43,6 +59,10 @@
 		"time": "06:00:00",
 		"n": 8
 	},
+	"picard_qc": {
+		"time": "06:00:00",
+		"n": 8
+	},
 	"bwa_mem": {
 		"time": "08:00:00",
 		"n": 6
@@ -54,6 +74,14 @@
 	"bcftools_merge_germlineSNV_research": {
 		"time": "4:00:00",
 		"n": 18
+	},
+	"bcftools_normalise_vcfs": {
+		"time": "2:00:00",
+		"n": 2
+	},
+	"bcftools_concatenate_vcfs": {
+		"time": "2:00:00",
+		"n": 2
 	},
 	"cnvkit_segment_CNV_research": {
 		"time": "6:00:00",
@@ -92,13 +120,17 @@
 		"time": "10:00:00",
 		"n": 5
 	},
-	"gatk_denoisereadcounts":{
+	"gatk_denoise_read_counts":{
 		"time": "10:00:00",
 		"n": 10
 	},
 	"gatk_create_readcount_pon":{
 		"time": "60:00:00",
 		"n": 86
+	},
+	"genmod_score_snvs":{
+		"time": "05:00:00",
+		"n": 8
 	},
 	"manta_germline": {
 		"time": "05:00:00",
@@ -132,9 +164,17 @@
 		"time": "02:30:00",
 		"n": 8
 	},
-	"samtools_sort_index": {
-		"time": "02:30:00",
+	"samtools_fixmate": {
+		"time": "04:30:00",
 		"n": 16
+	},
+	"sentieon_qc_metrics": {
+		"time": "06:00:00",
+		"n": 8
+	},
+	"sentieon_plot_qc_metrics": {
+		"time": "03:00:00",
+		"n": 2
 	},
 	"sentieon_DNAscope": {
 		"time": "24:00:00",
@@ -144,13 +184,33 @@
 		"time": "24:00:00",
 		"n": 36
 	},
-	"sentieon_TNhaplotyper": {
+	"sentieon_DNAscope_gnomad_tga": {
 		"time": "24:00:00",
-		"n": 36
+		"n": 12
 	},
-	"sentieon_TNhaplotyper_tumor_only": {
-		"time": "24:00:00",
-		"n": 36
+	"sex_prediction": {
+		"time": "01:00:00",
+		"n": 2
+	},
+	"vardict_merge": {
+		"time": "01:30:00",
+		"n": 5
+	},
+	"vardict_sort": {
+		"time": "01:30:00",
+		"n": 1
+	},
+	"post_process_vardict": {
+		"time": "01:30:00",
+		"n": 2
+	},
+	"vardict_tumor_normal": {
+		"time": "12:00:00",
+		"n": 18
+	},
+	"vardict_tumor_only": {
+		"time": "10:00:00",
+		"n": 18
 	},
 	"sentieon_TNscope": {
 		"time": "24:00:00",
@@ -184,18 +244,6 @@
 		"time": "06:00:00",
 		"n": 10
 	},
-	"vardict_merge": {
-		"time": "01:30:00",
-		"n": 5
-	},
-	"vardict_tumor_normal": {
-		"time": "12:00:00",
-		"n": 18
-	},
-	"vardict_tumor_only": {
-		"time": "10:00:00",
-		"n": 9
-	},
 	"sentieon_bwa_umiextract": {
 		"time": "8:00:00",
 		"n": 36
@@ -216,21 +264,33 @@
 		"time": "4:00:00",
 		"n": 12
 	},
+	"sentieon_tnscope_tga_t_only": {
+		"time": "4:00:00",
+		"n": 16
+	},
+	"sentieon_tnscope_tga_tumor_normal": {
+		"time": "5:00:00",
+		"n": 32
+	},
 	"bcftools_get_somaticINDEL_research": {
 		"time": "1:00:00",
-		"n": 36
+		"n": 4
+	},
+	"bcftools_annotate_somaticINDEL_research": {
+		"time": "1:00:00",
+		"n": 4
 	},
 	"cadd_annotate_somaticINDEL_research": {
 		"time": "18:00:00",
-		"n": 36
+		"n": 4
 	},
 	"vep_annotate_somaticSNV_research": {
 		"time": "18:00:00",
-		"n": 36
+		"n": 12
 	},
 	"vcfanno_annotate_somaticSNV_clinical": {
 		"time": "18:00:00",
-		"n" : 36
+		"n" : 12
 	},
 	"vep_somatic_research_sv": {
 		"time": "12:00:00",
@@ -328,6 +388,14 @@
 		"time": "01:00:00",
 		"n": 8
 	},
+	"bcftools_split_tnscope_variants": {
+		"time": "01:00:00",
+		"n": 4
+	},
+	"post_process_tnscope": {
+		"time": "01:00:00",
+		"n": 4
+	},
 	"vcf2cytosure_convert": {
 		"time": "02:00:00",
 		"n": 8
@@ -360,28 +428,12 @@
 		"time": "03:00:00",
 		"n": 8
 	},
-	"bcftools_filter_vardict_research_tumor_only": {
-		"time": "04:00:00",
-		"n": 8
-	},
-	"bcftools_filter_vardict_clinical_tumor_only": {
-		"time": "03:00:00",
-		"n": 8
-	},
 	"bcftools_filter_tnscope_umi_research_tumor_only": {
 		"time": "04:00:00",
 		"n": 8
 	},
 	"bcftools_filter_tnscope_umi_tumor_only": {
 		"time": ":03:00:00",
-		"n": 8
-	},
-	"bcftools_filter_vardict_research_tumor_normal": {
-		"time": "04:00:00",
-		"n": 8
-	},
-	"bcftools_filter_vardict_clinical_tumor_normal": {
-		"time": "03:00:00",
 		"n": 8
 	},
 	"bcftools_filter_TNscope_umi_research_tumor_normal": {
@@ -401,6 +453,10 @@
 		"n": 1
 	},
 	"somalier_relate": {
+		"time": "01:00:00",
+		"n": 1
+	},
+	"bedtools_merge": {
 		"time": "01:00:00",
 		"n": 1
 	},

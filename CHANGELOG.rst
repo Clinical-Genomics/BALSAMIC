@@ -1,12 +1,73 @@
 [X.X.X]
+--------
+
+Added:
+^^^^^^
+* Added option to disable hard filter of variants in matched normal https://github.com/Clinical-Genomics/BALSAMIC/pull/1509
+* Added check to verify sample sex for all workflows https://github.com/Clinical-Genomics/BALSAMIC/pull/1516
+
+
+Changed:
+^^^^^^^^
+* Reworked bcftools filters https://github.com/Clinical-Genomics/BALSAMIC/pull/1509
+* Renamed high_normal_tumor_af_frac to in_normal https://github.com/Clinical-Genomics/BALSAMIC/pull/1509
+* check to verify sample sex for all workflows https://github.com/Clinical-Genomics/BALSAMIC/pull/1516
+* Merging SNVs into MNVs in TNscope TGA https://github.com/Clinical-Genomics/BALSAMIC/pull/1524
+* Change raw delivery SNV file for TGA to before any post-processing https://github.com/Clinical-Genomics/BALSAMIC/pull/1524
+* Changed VarDict and TNscope VCF merged method to custom script https://github.com/Clinical-Genomics/BALSAMIC/pull/1499
+
+
+Removed:
+^^^^^^^^
+* Remove WGS-level GC-bias metric from TGA workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1521
+
+
+Fixed:
+^^^^^^
+
+
+
+[16.0.1]
 -------
+
+Removed:
+^^^^^^^^
+* remove snakemake case_report.html report creation https://github.com/Clinical-Genomics/BALSAMIC/pull/1530
+
+
+Removed:
+^^^^^^^^
+* Remove WGS-level GC-bias metric from TGA workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1521
+
+
+Fixed:
+^^^^^^
+* Merged VarDict and TNscope variants now correctly show both callers in FOUND_IN info field https://github.com/Clinical-Genomics/BALSAMIC/pull/1499
+
+[16.0.0]
+--------
 
 Added:
 ^^^^^^
 * MSIsensor-pro container https://github.com/Clinical-Genomics/BALSAMIC/pull/1444
 * MSI analysis to the tumor-normal workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1454
-* Sentieon install directory path to case config arguments https://giithub.com/Clinical-Genomics/BALSAMIC/pull/1461
+* Sentieon install directory path to case config arguments https://github.com/Clinical-Genomics/BALSAMIC/pull/1461
+* QC threshold for lymphoma_MRD panel https://github.com/Clinical-Genomics/BALSAMIC/pull/1479
 * MSI tumor-normal analysis to housekeeper storage https://github.com/Clinical-Genomics/BALSAMIC/pull/1483
+* UMI extraction and deduplication to TGA workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1358
+* GENS input files for TGA https://github.com/Clinical-Genomics/BALSAMIC/pull/1448
+* Padding of bed-regions for CNVkit to minimum 100 bases https://github.com/Clinical-Genomics/BALSAMIC/pull/1469
+* Added min mapq 20 to CNVkit PON workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1465
+* CNVkit PONs for Exome comprehensive 10.2, GMSsolid 15.2, GMCKsolid 4.2 https://github.com/Clinical-Genomics/BALSAMIC/pull/1465
+* Merged VarDict with TNscope in all TGA workflows https://github.com/Clinical-Genomics/BALSAMIC/pull/1475
+* New filter for VarDict for tumor in normal contamination https://github.com/Clinical-Genomics/BALSAMIC/pull/1475
+* Export TMP environment variables to rules that lack them https://github.com/Clinical-Genomics/BALSAMIC/pull/1475
+* Added genmod ranked VCFs to be delivered https://github.com/Clinical-Genomics/BALSAMIC/pull/1475
+* Added family-id to genmod in order to get ranked variants to Scout https://github.com/Clinical-Genomics/BALSAMIC/pull/1475
+* Added Raw TNscope calls and unfiltered research-annotated SNVs to delivery https://github.com/Clinical-Genomics/BALSAMIC/pull/1475
+* Argument for SNV Artefact LoqusDB to all workflows https://github.com/Clinical-Genomics/BALSAMIC/pull/1481
+* TNscope tag to variant info-field for TGA workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1497
+* Python script for merging duplicate SNV calls https://github.com/Clinical-Genomics/BALSAMIC/pull/1499
 
 Changed:
 ^^^^^^^^
@@ -14,12 +75,29 @@ Changed:
 * `SLEEP_BEFORE_START` to 600s https://github.com/Clinical-Genomics/BALSAMIC/pull/1372
 * Updated Multiqc to version 1.22.3 https://github.com/Clinical-Genomics/BALSAMIC/pull/1441
 * Upgrade `vcf2cytosure` version to 0.9.1 and remove hardcoded versions https://github.com/Clinical-Genomics/BALSAMIC/pull/1456
+* Create new PONs for GMCKSolid v4.1, GMSMyeloid v5.3, and GMSlymphoid v7.3 https://github.com/Clinical-Genomics/BALSAMIC/pull/1465
+* Refactored CNVkit rules https://github.com/Clinical-Genomics/BALSAMIC/pull/1465
+* Refactored BCFtools filter rules https://github.com/Clinical-Genomics/BALSAMIC/pull/1475
+* Renamed final UMI bamfile to ensure hsmetrics is picked up by multiqc https://github.com/Clinical-Genomics/BALSAMIC/pull/1475
+* Changed ranking model VCF from research to clinical https://github.com/Clinical-Genomics/BALSAMIC/pull/1475
+* Lowered minimum AF for TGA from 0.007 to 0.005 https://github.com/Clinical-Genomics/BALSAMIC/pull/1475
+* Lowered maximal SOR for TNscope in TGA tumor only cases from 3 to 2.7 https://github.com/Clinical-Genomics/BALSAMIC/pull/1475
+* Fixed TNscope research VCF filters to either PASS or triallelic site https://github.com/Clinical-Genomics/BALSAMIC/pull/1475
+* Increased maximal amount of redirects for lychee test following links in docs to 10 https://github.com/Clinical-Genomics/BALSAMIC/pull/1488
+* Updated readthedocs tools versions https://github.com/Clinical-Genomics/BALSAMIC/pull/1489
+* Renamed UMI consensusfiltered bamfile to be picked up by multiqc https://github.com/Clinical-Genomics/BALSAMIC/pull/1490
+
 
 Removed:
 ^^^^^^^^
 * GATK3 https://github.com/Clinical-Genomics/BALSAMIC/pull/1432
 * `gatk_contest` rule https://github.com/Clinical-Genomics/BALSAMIC/pull/1432
 * SGE (qsub) support https://github.com/Clinical-Genomics/BALSAMIC/pull/1372
+* Fastq quality and UMI trimming command-line options https://github.com/Clinical-Genomics/BALSAMIC/pull/1358
+* ML model for TNscope  https://github.com/Clinical-Genomics/BALSAMIC/pull/1475
+* All code associated with TNhaplotyper https://github.com/Clinical-Genomics/BALSAMIC/pull/1475
+* Removed research.filtered.pass files from delivery https://github.com/Clinical-Genomics/BALSAMIC/pull/1475
+* Removed VarDict germline filter, replaced by relative normal af / tumor af filter https://github.com/Clinical-Genomics/BALSAMIC/pull/1497
 
 Fixed:
 ^^^^^^
@@ -27,6 +105,10 @@ Fixed:
 * MSI table https://github.com/Clinical-Genomics/BALSAMIC/pull/1459
 * Pin numpy version in CNVkit container https://github.com/Clinical-Genomics/BALSAMIC/pull/1457
 * CNVkit incorrect version in the documentation https://github.com/Clinical-Genomics/BALSAMIC/pull/1457
+* MSIsensor-pro container and updated msisensor to version 1.3.0  https://github.com/Clinical-Genomics/BALSAMIC/pull/1486
+* Somalier container and updated somalier to version 0.2.19 https://github.com/Clinical-Genomics/BALSAMIC/pull/1487
+* Vardict memory and tmpdir allocation https://github.com/Clinical-Genomics/BALSAMIC/pull/1492
+* Vardict tumor only allocates dynamic number of cores https://github.com/Clinical-Genomics/BALSAMIC/pull/1495
 
 [15.0.1]
 --------

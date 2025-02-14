@@ -15,7 +15,7 @@ from BALSAMIC.models.config import ConfigModel
 from BALSAMIC.models.params import BalsamicWorkflowConfig
 from BALSAMIC.utils.exc import BalsamicError
 from BALSAMIC.utils.io import write_finish_file
-from BALSAMIC.utils.rule import get_fastp_parameters, get_result_dir, get_threads
+from BALSAMIC.utils.rule import get_fastp_parameters, get_result_dir, get_threads, get_script_path
 
 
 # Initialize ConfigModel
@@ -60,15 +60,23 @@ sample_names: List[str] = config_model.get_all_sample_names()
 # Fastp parameters
 fastp_parameters: Dict = get_fastp_parameters(config_model)
 
-sequence_type = config['analysis']["sequencing_type"]
+analysis_type = config_model.analysis.analysis_type
+sequencing_type = config_model.analysis.sequencing_type
+
+
 rules_to_include = []
 rules_to_include.append("snakemake_rules/misc/sleep.rule")
-if sequence_type == SequencingType.TARGETED:
+if sequencing_type == SequencingType.TARGETED:
+    rules_to_include.append("snakemake_rules/concatenation/concatenation.rule")
     rules_to_include.append("snakemake_rules/quality_control/fastp_tga.rule")
+    rules_to_include.append("snakemake_rules/align/tga_sentieon_alignment.rule")
+    rules_to_include.append("snakemake_rules/align/tga_bam_postprocess.rule")
+    rules_to_include.append("snakemake_rules/variant_calling/extend_bed.rule")
+    rules_to_include.append("snakemake_rules/variant_calling/cnvkit_preprocess.rule")
 else:
     rules_to_include.append("snakemake_rules/quality_control/fastp_wgs.rule")
-
-rules_to_include.append("snakemake_rules/align/sentieon_alignment.rule")
+    rules_to_include.append("snakemake_rules/align/wgs_sentieon_alignment.rule")
+    rules_to_include.append("snakemake_rules/align/wgs_bam_postprocess.rule")
 
 if pon_workflow == PONWorkflow.CNVKIT:
     reffasta: str = config_model.reference["reference_genome"]
@@ -87,7 +95,7 @@ if pon_workflow in [PONWorkflow.GENS_MALE, PONWorkflow.GENS_FEMALE]:
     rules_to_include.append("snakemake_rules/variant_calling/gatk_read_counts.rule")
     rules_to_include.append("snakemake_rules/pon/gens_create_pon.rule")
 
-pon_finish = expand(analysis_dir + "analysis_PON_finish")
+pon_finish = Path(analysis_dir + "analysis_PON_finish").as_posix()
 
 for r in rules_to_include:
     include: Path(BALSAMIC_DIR, r).as_posix()

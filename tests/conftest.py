@@ -13,6 +13,7 @@ from click.testing import CliRunner
 from pydantic_core import Url
 
 from BALSAMIC import __version__ as balsamic_version
+from BALSAMIC.assets.scripts.sex_prediction_tga import predict_sex_main
 from BALSAMIC.assets.scripts.preprocess_gens import cli as gens_preprocessing_cli
 from BALSAMIC.commands.base import cli
 from BALSAMIC.constants.analysis import (
@@ -395,6 +396,26 @@ def config_dict(config_path: str) -> str:
 
 
 @pytest.fixture(scope="session")
+def test_vardict_vcf(test_data_dir: str) -> str:
+    """Return path to dummy VarDict vcf with 2 variants, one that matches with TNscope dummy vcf"""
+    return Path(test_data_dir, "vcfs", "vardict_variants.vcf.gz").as_posix()
+
+
+@pytest.fixture(scope="session")
+def test_tnscope_vcf(test_data_dir: str) -> str:
+    """Return path to dummy TNscope vcf with 2 variants, one that matches with VarDict dummy vcf"""
+    return Path(test_data_dir, "vcfs", "tnscope_variants.vcf.gz").as_posix()
+
+
+@pytest.fixture(scope="session")
+def test_vardict_vcf_non_matching_header(test_data_dir: str) -> str:
+    """Return path to dummy VarDict vcf with missing normal sample column"""
+    return Path(
+        test_data_dir, "vcfs", "vardict_non_matching_mergeheader.vcf.gz"
+    ).as_posix()
+
+
+@pytest.fixture(scope="session")
 def config_dict_w_singularity(
     config_dict: str,
     balsamic_cache: str,
@@ -418,6 +439,86 @@ def config_dict_w_singularity(
         },
     )
     return modify_dict
+
+
+@pytest.fixture(scope="session")
+def male_target_cnn_file(test_data_dir: str) -> str:
+    """Return path to test cnvkit target cnn file from male sample."""
+    return Path(
+        test_data_dir, "qc_files", "sex_check", "male.targetcoverage.cnn"
+    ).as_posix()
+
+
+@pytest.fixture(scope="session")
+def male_antitarget_cnn_file(test_data_dir: str) -> str:
+    """Return path to test cnvkit antitarget cnn file from male sample."""
+    return Path(
+        test_data_dir, "qc_files", "sex_check", "male.antitargetcoverage.cnn"
+    ).as_posix()
+
+
+@pytest.fixture(scope="session")
+def female_target_cnn_file(test_data_dir: str) -> str:
+    """Return path to test cnvkit target cnn file from mfeale sample."""
+    return Path(
+        test_data_dir, "qc_files", "sex_check", "female.targetcoverage.cnn"
+    ).as_posix()
+
+
+@pytest.fixture(scope="session")
+def female_antitarget_cnn_file(test_data_dir: str) -> str:
+    """Return path to test cnvkit antitarget cnn file from female sample."""
+    return Path(
+        test_data_dir, "qc_files", "sex_check", "female.antitargetcoverage.cnn"
+    ).as_posix()
+
+
+@pytest.fixture(scope="session")
+def male_200k_x_coverage(test_data_dir: str) -> str:
+    """Return path to 200k lines of x coverage from male sample."""
+    return Path(
+        test_data_dir, "qc_files", "sex_check", "male_200k_x_bases.txt"
+    ).as_posix()
+
+
+@pytest.fixture(scope="session")
+def male_200k_y_coverage(test_data_dir: str) -> str:
+    """Return path to 200k lines of y coverage from male sample."""
+    return Path(
+        test_data_dir, "qc_files", "sex_check", "male_200k_y_bases.txt"
+    ).as_posix()
+
+
+@pytest.fixture(scope="session")
+def female_200k_x_coverage(test_data_dir: str) -> str:
+    """Return path to 200k lines of x coverage from female sample."""
+    return Path(
+        test_data_dir, "qc_files", "sex_check", "female_200k_x_bases.txt"
+    ).as_posix()
+
+
+@pytest.fixture(scope="session")
+def female_200k_y_coverage(test_data_dir: str) -> str:
+    """Return path to 200k lines of y coverage from female sample."""
+    return Path(
+        test_data_dir, "qc_files", "sex_check", "female_200k_y_bases.txt"
+    ).as_posix()
+
+
+@pytest.fixture(scope="session")
+def tga_female_sex_prediction(test_data_dir: str) -> str:
+    """Return path sex prediction json for female."""
+    return Path(
+        test_data_dir, "qc_files", "sex_check", "female_sex_prediction.json"
+    ).as_posix()
+
+
+@pytest.fixture(scope="session")
+def tga_male_sex_prediction(test_data_dir: str) -> str:
+    """Return path sex prediction json for male."""
+    return Path(
+        test_data_dir, "qc_files", "sex_check", "male_sex_prediction.json"
+    ).as_posix()
 
 
 @pytest.fixture(scope="session")
@@ -531,6 +632,26 @@ def gens_dummy_cov_bed(test_data_dir: str) -> str:
         test_data_dir,
         "gens_files",
         "dummy.cov.bed",
+    ).as_posix()
+
+
+@pytest.fixture(scope="session")
+def gens_dummy_cnvkit_cnr(test_data_dir: str) -> str:
+    """Return path CNVkit cnr path for GENS TGA pre-processing script test."""
+    return Path(
+        test_data_dir,
+        "gens_files",
+        "tumor.merged.cnr",
+    ).as_posix()
+
+
+@pytest.fixture(scope="session")
+def gens_dummy_cov_bed_expected(test_data_dir: str) -> str:
+    """Return path expected dummy result-file created from GENS pre-processing TGA test."""
+    return Path(
+        test_data_dir,
+        "gens_files",
+        "dummy_gens_tga.cov.bed",
     ).as_posix()
 
 
@@ -665,6 +786,12 @@ def no_write_perm_path(tmp_path_factory) -> str:
 def references_dir(test_data_dir) -> Path:
     """Return a references directory path."""
     return Path(test_data_dir, "references")
+
+
+@pytest.fixture(scope="session")
+def bedfile_path(test_data_dir) -> Path:
+    """Return bedfile path."""
+    return Path(test_data_dir, "bedfiles", "test_bedfile.bed")
 
 
 @pytest.fixture(scope="session")
@@ -906,7 +1033,7 @@ def fastq_dir_tumor_only_dummy_vep(
     vep_dir: Path = Path(analysis_dir, case_id_tumor_only_dummy_vep, "analysis", "vep")
     vep_dir.mkdir(parents=True, exist_ok=True)
     vep_test_file = (
-        "SNV.somatic.sample_tumor_only.vardict.research.filtered.pass.vcf.gz"
+        "SNV.somatic.sample_tumor_only.tnscope.research.filtered.pass.vcf.gz"
     )
     Path(vep_dir, vep_test_file).touch()
 
@@ -1226,7 +1353,7 @@ def balsamic_pon_model(
 
 
 @pytest.fixture(scope="session")
-def config_case_cli(
+def config_case_cli_wgs(
     balsamic_cache: str,
     background_variant_file: str,
     cadd_annotations: str,
@@ -1239,6 +1366,9 @@ def config_case_cli(
     cancer_somatic_snv_observations_path: str,
     sentieon_license: str,
     sentieon_install_dir: str,
+    gens_hg19_interval_list: str,
+    gens_min_5_af_gnomad_file: str,
+    gens_cov_pon_file: str,
 ) -> List[str]:
     """Return common config case CLI."""
     return [
@@ -1266,6 +1396,59 @@ def config_case_cli(
         sentieon_install_dir,
         "--sentieon-license",
         sentieon_license,
+        "--genome-interval",
+        gens_hg19_interval_list,
+        "--gnomad-min-af5",
+        gens_min_5_af_gnomad_file,
+        "--gens-coverage-pon",
+        gens_cov_pon_file,
+    ]
+
+
+@pytest.fixture(scope="session")
+def config_case_cli_tga(
+    balsamic_cache: str,
+    background_variant_file: str,
+    cadd_annotations: str,
+    swegen_snv_frequency_path: str,
+    swegen_sv_frequency_path: str,
+    clinical_snv_observations_path: str,
+    clinical_sv_observations_path: str,
+    somatic_sv_observations_path: str,
+    cancer_germline_snv_observations_path: str,
+    cancer_somatic_snv_observations_path: str,
+    sentieon_license: str,
+    sentieon_install_dir: str,
+    gens_min_5_af_gnomad_file: str,
+) -> List[str]:
+    """Return common config case CLI."""
+    return [
+        "--balsamic-cache",
+        balsamic_cache,
+        "--background-variants",
+        background_variant_file,
+        "--cadd-annotations",
+        cadd_annotations,
+        "--swegen-snv",
+        swegen_snv_frequency_path,
+        "--swegen-sv",
+        swegen_sv_frequency_path,
+        "--clinical-snv-observations",
+        clinical_snv_observations_path,
+        "--clinical-sv-observations",
+        clinical_sv_observations_path,
+        "--cancer-somatic-sv-observations",
+        somatic_sv_observations_path,
+        "--cancer-germline-snv-observations",
+        cancer_germline_snv_observations_path,
+        "--cancer-somatic-snv-observations",
+        cancer_somatic_snv_observations_path,
+        "--sentieon-install-dir",
+        sentieon_install_dir,
+        "--sentieon-license",
+        sentieon_license,
+        "--gnomad-min-af5",
+        gens_min_5_af_gnomad_file,
     ]
 
 
@@ -1276,7 +1459,7 @@ def tumor_only_config_qc(
     fastq_dir_tumor_only_qc: str,
     tumor_sample_name: str,
     panel_bed_file: str,
-    config_case_cli: list[str],
+    config_case_cli_tga: list[str],
 ) -> str:
     """Invoke balsamic config sample to create sample configuration file for tumor-only TGA."""
 
@@ -1299,7 +1482,7 @@ def tumor_only_config_qc(
             "-p",
             panel_bed_file,
         ]
-        + config_case_cli,
+        + config_case_cli_tga,
     )
 
     return Path(
@@ -1313,8 +1496,9 @@ def tumor_normal_config_qc(
     tumor_sample_name: str,
     normal_sample_name: str,
     analysis_dir: str,
+    panel_bed_file: str,
     fastq_dir_tumor_normal_qc: str,
-    config_case_cli: list[str],
+    config_case_cli_tga: list[str],
 ) -> str:
     """Invoke balsamic config sample to create sample configuration file for tumor-normal TGA QC workflow."""
 
@@ -1336,8 +1520,10 @@ def tumor_normal_config_qc(
             tumor_sample_name,
             "--normal-sample-name",
             normal_sample_name,
+            "-p",
+            panel_bed_file,
         ]
-        + config_case_cli,
+        + config_case_cli_tga,
     )
 
     return Path(
@@ -1354,7 +1540,7 @@ def tumor_normal_config_qc_wgs(
     fastq_dir_tumor_normal_qc_wgs: str,
     tumor_sample_name: str,
     normal_sample_name: str,
-    config_case_cli: List[str],
+    config_case_cli_wgs: List[str],
 ) -> str:
     """Invoke balsamic config sample to create sample configuration file for tumor-normal WGS QC workflow."""
 
@@ -1377,7 +1563,7 @@ def tumor_normal_config_qc_wgs(
             "--normal-sample-name",
             normal_sample_name,
         ]
-        + config_case_cli,
+        + config_case_cli_wgs,
     )
 
     return Path(
@@ -1394,7 +1580,7 @@ def tumor_only_config(
     analysis_dir: str,
     fastq_dir_tumor_only: str,
     panel_bed_file: str,
-    config_case_cli: list[str],
+    config_case_cli_tga: list[str],
 ) -> str:
     """Invoke balsamic config sample to create sample configuration file for tumor-only TGA."""
 
@@ -1415,7 +1601,7 @@ def tumor_only_config(
             "-p",
             panel_bed_file,
         ]
-        + config_case_cli,
+        + config_case_cli_tga,
     )
     return Path(
         analysis_dir,
@@ -1432,7 +1618,7 @@ def tumor_normal_config(
     analysis_dir: str,
     fastq_dir_tumor_normal: str,
     panel_bed_file: str,
-    config_case_cli: list[str],
+    config_case_cli_tga: list[str],
 ) -> str:
     """Invoke balsamic config sample to create sample configuration file for tumor-normal TGA."""
 
@@ -1455,7 +1641,7 @@ def tumor_normal_config(
             "-p",
             panel_bed_file,
         ]
-        + config_case_cli,
+        + config_case_cli_tga,
     )
 
     return Path(
@@ -1472,7 +1658,7 @@ def tumor_only_umi_config(
     analysis_dir: str,
     fastq_dir_tumor_only: str,
     panel_bed_file: str,
-    config_case_cli: list[str],
+    config_case_cli_tga: list[str],
 ) -> str:
     """Invoke balsamic config sample to create sample configuration file for tumor-only TGA."""
 
@@ -1495,7 +1681,7 @@ def tumor_only_umi_config(
             "-p",
             panel_bed_file,
         ]
-        + config_case_cli,
+        + config_case_cli_tga,
     )
 
     return Path(
@@ -1513,7 +1699,7 @@ def tumor_normal_umi_config(
     analysis_dir: str,
     fastq_dir_tumor_normal: str,
     panel_bed_file: str,
-    config_case_cli: list[str],
+    config_case_cli_tga: list[str],
 ) -> str:
     """Invoke balsamic config sample to create sample configuration file for tumor-normal TGA."""
 
@@ -1540,7 +1726,7 @@ def tumor_normal_umi_config(
             "-p",
             panel_bed_file,
         ]
-        + config_case_cli,
+        + config_case_cli_tga,
     )
 
     return Path(
@@ -1556,7 +1742,7 @@ def tumor_only_wgs_config(
     analysis_dir: str,
     fastq_dir_tumor_only_wgs: str,
     tumor_sample_name: str,
-    config_case_cli: List[str],
+    config_case_cli_wgs: List[str],
 ) -> str:
     """Invoke balsamic config sample to create sample configuration file for tumor-only WGS."""
 
@@ -1575,7 +1761,7 @@ def tumor_only_wgs_config(
             "--tumor-sample-name",
             tumor_sample_name,
         ]
-        + config_case_cli,
+        + config_case_cli_wgs,
     )
 
     return Path(
@@ -1592,7 +1778,7 @@ def tumor_normal_wgs_config(
     fastq_dir_tumor_normal_wgs: str,
     tumor_sample_name: str,
     normal_sample_name: str,
-    config_case_cli: str,
+    config_case_cli_wgs: List[str],
 ) -> str:
     """Invoke balsamic config sample to create sample configuration file for tumor-normal WGS."""
 
@@ -1613,7 +1799,7 @@ def tumor_normal_wgs_config(
             "--normal-sample-name",
             normal_sample_name,
         ]
-        + config_case_cli,
+        + config_case_cli_wgs,
     )
 
     return Path(
@@ -1632,8 +1818,7 @@ def tumor_only_config_dummy_vep(
     fastq_dir_tumor_only_dummy_vep: str,
     panel_bed_file: str,
     background_variant_file: str,
-    sentieon_license: str,
-    sentieon_install_dir: str,
+    config_case_cli_tga: list[str],
 ) -> str:
     """Invoke balsamic config sample to create sample configuration file for tumor-only TGA with dummy VEP file."""
 
@@ -1657,11 +1842,8 @@ def tumor_only_config_dummy_vep(
             background_variant_file,
             "--tumor-sample-name",
             tumor_sample_name,
-            "--sentieon-install-dir",
-            sentieon_install_dir,
-            "--sentieon-license",
-            sentieon_license,
-        ],
+        ]
+        + config_case_cli_tga,
     )
     return Path(
         analysis_dir,
@@ -1679,8 +1861,7 @@ def tumor_only_pon_config(
     panel_bed_file: str,
     pon_cnn_path: str,
     balsamic_cache: str,
-    sentieon_license: str,
-    sentieon_install_dir: str,
+    config_case_cli_tga: List[str],
 ) -> str:
     """Invoke balsamic PON config sample to create sample configuration file for tumor-only TGA."""
 
@@ -1700,15 +1881,10 @@ def tumor_only_pon_config(
             panel_bed_file,
             "--pon-cnn",
             pon_cnn_path,
-            "--balsamic-cache",
-            balsamic_cache,
             "--tumor-sample-name",
             tumor_sample_name,
-            "--sentieon-install-dir",
-            sentieon_install_dir,
-            "--sentieon-license",
-            sentieon_license,
-        ],
+        ]
+        + config_case_cli_tga,
     )
 
     return Path(
@@ -1909,10 +2085,10 @@ def qc_requested_metrics():
                 "METRIC_1": {"condition": None},
                 "METRIC_2": {"condition": {"norm": "gt", "threshold": 2}},
             },
-            "panel_1": {
+            "panelA": {
                 "METRIC_3": {"condition": {"norm": "gt", "threshold": 3}},
             },
-            "panel_2": {
+            "panelB": {
                 "METRIC_1": {"condition": {"norm": "gt", "threshold": 1}},
                 "METRIC_2": {"condition": {"norm": "gt", "threshold": 22}},
                 "METRIC_4": {"condition": {"norm": "gt", "threshold": 4}},
@@ -1931,10 +2107,10 @@ def qc_extracted_metrics(metrics_yaml_path: str) -> dict:
 
 
 @pytest.fixture(scope="function")
-def snakemake_bcftools_filter_vardict_research_tumor_only(
+def snakemake_bcftools_filter_tnscope_research_tumor_only(
     tumor_only_config_dummy_vep, helpers
 ):
-    """bcftools_filter_vardict_research_tumor_only snakemake mock rule"""
+    """bcftools_filter_tnscope_research_tumor_only snakemake mock rule"""
 
     helpers.read_config(tumor_only_config_dummy_vep)
     vep_path = os.path.join(
@@ -1942,11 +2118,11 @@ def snakemake_bcftools_filter_vardict_research_tumor_only(
         helpers.case_id,
         "analysis",
         "vep",
-        "{var_type}.somatic.{case_name}.vardict.research.filtered.pass.vcf.gz",
+        "{var_type}.somatic.{case_name}.tnscope.research.filtered.pass.vcf.gz",
     )
     return Map(
         {
-            "bcftools_filter_vardict_research_tumor_only": Map(
+            "bcftools_filter_tnscope_research_tumor_only": Map(
                 {
                     "params": Map(
                         {
@@ -1958,13 +2134,13 @@ def snakemake_bcftools_filter_vardict_research_tumor_only(
                     ),
                     "output": Map(
                         {
-                            "_names": Map({"vcf_pass_vardict": vep_path}),
-                            "vcf_pass_vardict": vep_path,
+                            "_names": Map({"vcf_pass_tnscope": vep_path}),
+                            "vcf_pass_tnscope": vep_path,
                         }
                     ),
                     "rule": Map(
                         {
-                            "name": "bcftools_filter_vardict_research_tumor_only",
+                            "name": "bcftools_filter_tnscope_research_tumor_only",
                             "output": [
                                 vep_path,
                             ],
@@ -2345,7 +2521,7 @@ def fixture_snakemake_executable_data(
         "case_id": case_id_tumor_only,
         "cluster_config_path": reference_file,
         "config_path": reference_file,
-        "disable_variant_caller": "tnscope,vardict",
+        "disable_variant_caller": "tnscope",
         "log_dir": session_tmp_path,
         "mail_user": mail_user_option,
         "profile": ClusterProfile.SLURM,
@@ -2385,7 +2561,7 @@ def fixture_snakemake_executable_validated_data(
         "case_id": case_id_tumor_only,
         "cluster_config_path": reference_file,
         "config_path": reference_file,
-        "disable_variant_caller": "disable_variant_caller=tnscope,vardict",
+        "disable_variant_caller": "disable_variant_caller=tnscope",
         "dragen": False,
         "force": False,
         "log_dir": session_tmp_path,
@@ -2394,7 +2570,6 @@ def fixture_snakemake_executable_validated_data(
         "profile": ClusterProfile.SLURM,
         "qos": QOS.HIGH,
         "quiet": True,
-        "report_path": None,
         "run_analysis": True,
         "run_mode": RunMode.CLUSTER,
         "script_dir": session_tmp_path,
