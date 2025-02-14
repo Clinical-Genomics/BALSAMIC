@@ -329,9 +329,8 @@ An example is a MNV created by merging a phased germline SNV with a somatic SNV.
 
 - `MNV_CONFLICTING_FILTERS`: Is a filter given to MNVs with constituent variants with different filters (such as `in_normal` and `PASS`)
 
-.. note::
 
-    However, as we may have multiple filters which means similar things, such as germline_risk and in_normal, MNVs constituted by variants with only these filters set aren't exactly "conflicting".
+However, as we may have multiple filters which means essentially the same thing, such as germline_risk and in_normal, MNVs created from the merging of variants with only those filters aren't actually conflicting.
 
 Therefore the logic for setting `MNV_CONFLICTING_FILTERS` has been made a bit more complex, and in summary there are 3 possible outcomes for filters when merging SNVs/InDels into MNVs:
 
