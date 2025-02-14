@@ -5,7 +5,7 @@ Added:
 ^^^^^^
 * Added option to disable hard filter of variants in matched normal https://github.com/Clinical-Genomics/BALSAMIC/pull/1509
 * Added check to verify sample sex for all workflows https://github.com/Clinical-Genomics/BALSAMIC/pull/1516
-
+* Added memory option https://github.com/Clinical-Genomics/BALSAMIC/pull/1535
 
 Changed:
 ^^^^^^^^
@@ -14,6 +14,7 @@ Changed:
 * check to verify sample sex for all workflows https://github.com/Clinical-Genomics/BALSAMIC/pull/1516
 * Merging SNVs into MNVs in TNscope TGA https://github.com/Clinical-Genomics/BALSAMIC/pull/1524
 * Change raw delivery SNV file for TGA to before any post-processing https://github.com/Clinical-Genomics/BALSAMIC/pull/1524
+* Updated cluster resources for tnscope WGS TN https://github.com/Clinical-Genomics/BALSAMIC/pull/1535
 
 
 Removed:
