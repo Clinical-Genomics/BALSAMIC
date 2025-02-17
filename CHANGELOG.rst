@@ -25,7 +25,7 @@ Removed:
 Fixed:
 ^^^^^^
 * Merged VarDict and TNscope variants now correctly show both callers in FOUND_IN info field https://github.com/Clinical-Genomics/BALSAMIC/pull/149
-* Fixed somalier container
+* Fixed somalier container https://github.com/Clinical-Genomics/BALSAMIC/pull/1538
 
 
 [16.0.1]
