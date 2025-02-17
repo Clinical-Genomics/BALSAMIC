@@ -14,6 +14,7 @@ Changed:
 * check to verify sample sex for all workflows https://github.com/Clinical-Genomics/BALSAMIC/pull/1516
 * Merging SNVs into MNVs in TNscope TGA https://github.com/Clinical-Genomics/BALSAMIC/pull/1524
 * Change raw delivery SNV file for TGA to before any post-processing https://github.com/Clinical-Genomics/BALSAMIC/pull/1524
+* Changed VarDict and TNscope VCF merged method to custom script https://github.com/Clinical-Genomics/BALSAMIC/pull/1499
 
 
 Removed:
@@ -24,6 +25,24 @@ Removed:
 Fixed:
 ^^^^^^
 
+
+
+[16.0.1]
+-------
+
+Removed:
+^^^^^^^^
+* remove snakemake case_report.html report creation https://github.com/Clinical-Genomics/BALSAMIC/pull/1530
+
+
+Removed:
+^^^^^^^^
+* Remove WGS-level GC-bias metric from TGA workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1521
+
+
+Fixed:
+^^^^^^
+* Merged VarDict and TNscope variants now correctly show both callers in FOUND_IN info field https://github.com/Clinical-Genomics/BALSAMIC/pull/1499
 
 [16.0.0]
 --------
@@ -48,6 +67,7 @@ Added:
 * Added Raw TNscope calls and unfiltered research-annotated SNVs to delivery https://github.com/Clinical-Genomics/BALSAMIC/pull/1475
 * Argument for SNV Artefact LoqusDB to all workflows https://github.com/Clinical-Genomics/BALSAMIC/pull/1481
 * TNscope tag to variant info-field for TGA workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1497
+* Python script for merging duplicate SNV calls https://github.com/Clinical-Genomics/BALSAMIC/pull/1499
 
 Changed:
 ^^^^^^^^
