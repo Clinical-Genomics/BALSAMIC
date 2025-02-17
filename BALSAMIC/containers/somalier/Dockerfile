@@ -1,4 +1,4 @@
-FROM alpine:3.11.5
+FROM alpine:3.18
 
 LABEL base.image="alpine:3.11.5" \
       maintainer="Clinical Genomics" \
