@@ -57,7 +57,9 @@ RUN git clone --depth 1 -b 1.18 --recursive https://github.com/samtools/htslib &
 
 RUN cd / && git clone -b v0.2.19 --depth 5 https://github.com/brentp/somalier.git && \
     nimble install -y nimble@0.14.2 && \
-    cd somalier && nimble install -d -y arraymancer@<=0.7.32
+    cd somalier && \
+    sed -i 's/"arraymancer"/"arraymancer <= 0.7.32"/' somalier.nimble && \
+    nimble install -d -y
 
 RUN apk add --no-cache openblas && \
     cd /somalier && \
