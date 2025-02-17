@@ -87,8 +87,8 @@ METRICS: Dict[str, dict] = {
         "PCT_100X": {"condition": None},
         "FOLD_80_BASE_PENALTY": {"condition": None},
         "PCT_PF_READS_IMPROPER_PAIRS": {"condition": {"norm": "le", "threshold": 0.05}},
-        "GC_DROPOUT": {"condition": {"norm": "lt", "threshold": 10.00}},
-        "AT_DROPOUT": {"condition": {"norm": "lt", "threshold": 10.00}},
+        "GC_DROPOUT": {"condition": {"norm": "lt", "threshold": 5.00}},
+        "AT_DROPOUT": {"condition": {"norm": "lt", "threshold": 5.00}},
     },
     "variants": {
         "NUMBER_OF_SITES": {"condition": {"norm": "lt", "threshold": 50000}},
