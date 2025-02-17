@@ -21,6 +21,7 @@
    balsamic_sv_cnv
    balsamic_annotation
    balsamic_pon
+   balsamic_qc
    balsamic_methods
    history
    bioinfo_softwares

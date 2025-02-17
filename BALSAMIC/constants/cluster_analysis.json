@@ -188,6 +188,10 @@
 		"time": "24:00:00",
 		"n": 12
 	},
+	"sex_prediction": {
+		"time": "01:00:00",
+		"n": 2
+	},
 	"vardict_merge": {
 		"time": "01:30:00",
 		"n": 5
@@ -270,19 +274,23 @@
 	},
 	"bcftools_get_somaticINDEL_research": {
 		"time": "1:00:00",
-		"n": 36
+		"n": 4
+	},
+	"bcftools_annotate_somaticINDEL_research": {
+		"time": "1:00:00",
+		"n": 4
 	},
 	"cadd_annotate_somaticINDEL_research": {
 		"time": "18:00:00",
-		"n": 36
+		"n": 4
 	},
 	"vep_annotate_somaticSNV_research": {
 		"time": "18:00:00",
-		"n": 36
+		"n": 12
 	},
 	"vcfanno_annotate_somaticSNV_clinical": {
 		"time": "18:00:00",
-		"n" : 36
+		"n" : 12
 	},
 	"vep_somatic_research_sv": {
 		"time": "12:00:00",
@@ -384,7 +392,7 @@
 		"time": "01:00:00",
 		"n": 4
 	},
-	"modify_tnscope_infofield": {
+	"post_process_tnscope": {
 		"time": "01:00:00",
 		"n": 4
 	},

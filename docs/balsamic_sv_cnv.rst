@@ -58,7 +58,7 @@ It is mandatory to provide the gender of the sample from BALSAMIC version >= 10.
 Further details about a specific caller can be found in the links for the repositories containing the documentation for SV and CNV callers along with the links for the articles are listed in `bioinfo softwares <https://balsamic.readthedocs.io/en/latest/bioinfo_softwares.html>`_.
 
 **Difficult to detect clinically relevant SVs**
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 **IGH::DUX4 rearrangements**
 
