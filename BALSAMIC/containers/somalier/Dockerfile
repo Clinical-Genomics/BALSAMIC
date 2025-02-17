@@ -59,7 +59,7 @@ RUN cd / && git clone -b v0.2.19 --depth 5 https://github.com/brentp/somalier.gi
     nimble install -y nimble@0.14.2 && \
     cd somalier && nimble install -d -y
 
-RUN apk add  --no-cache openblas && \
+RUN apk add --no-cache openblas && \
     cd /somalier && \
     nim c -d:danger -d:nsb_static -d:release -d:openmp -d:blas=openblas -d:lapack=openblas -o:/usr/bin/somalier src/somalier && \
     cp scripts/ancestry-labels-1kg.tsv / && \
