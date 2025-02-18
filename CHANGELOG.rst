@@ -17,6 +17,7 @@ Changed:
 * Changed VarDict and TNscope VCF merged method to custom script https://github.com/Clinical-Genomics/BALSAMIC/pull/1499
 * Change VarDict memory usage to fix crashes in production https://github.com/Clinical-Genomics/BALSAMIC/pull/1537
 
+
 Removed:
 ^^^^^^^^
 * Remove WGS-level GC-bias metric from TGA workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1521
@@ -24,7 +25,8 @@ Removed:
 
 Fixed:
 ^^^^^^
-* Merged VarDict and TNscope variants now correctly show both callers in FOUND_IN info field https://github.com/Clinical-Genomics/BALSAMIC/pull/1499
+* Merged VarDict and TNscope variants now correctly show both callers in FOUND_IN info field https://github.com/Clinical-Genomics/BALSAMIC/pull/149
+* Fixed somalier container https://github.com/Clinical-Genomics/BALSAMIC/pull/1538
 
 
 [16.0.1]
@@ -33,6 +35,7 @@ Fixed:
 Removed:
 ^^^^^^^^
 * remove snakemake case_report.html report creation https://github.com/Clinical-Genomics/BALSAMIC/pull/1530
+
 
 
 [16.0.0]
