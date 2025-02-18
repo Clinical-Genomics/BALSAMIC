@@ -1,6 +1,6 @@
 
 [X.X.X]
---------
+-------
 
 Added:
 ^^^^^^
@@ -20,16 +20,18 @@ Changed:
 * Changed VarDict and TNscope VCF merged method to custom script https://github.com/Clinical-Genomics/BALSAMIC/pull/1499
 * Changed QC thresholds for WGS normal and WES https://github.com/Clinical-Genomics/BALSAMIC/pull/1477
 * Change VarDict memory usage to fix crashes in production https://github.com/Clinical-Genomics/BALSAMIC/pull/1537
+* changed --pcr_indel_model to conservative for TNscope in all TGA workflows https://github.com/Clinical-Genomics/BALSAMIC/pull/1523
+* changed prune_factor to 4 for TNscope in all TGA workflows https://github.com/Clinical-Genomics/BALSAMIC/pull/1523
 
 
 Removed:
 ^^^^^^^^
 * Remove WGS-level GC-bias metric from TGA workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1521
 
-
 Fixed:
 ^^^^^^
-* Merged VarDict and TNscope variants now correctly show both callers in FOUND_IN info field https://github.com/Clinical-Genomics/BALSAMIC/pull/149
+
+* Merged VarDict and TNscope variants now correctly show both callers in FOUND_IN info field https://github.com/Clinical-Genomics/BALSAMIC/pull/1499
 * Fixed somalier container https://github.com/Clinical-Genomics/BALSAMIC/pull/1538
 
 [16.0.1]
