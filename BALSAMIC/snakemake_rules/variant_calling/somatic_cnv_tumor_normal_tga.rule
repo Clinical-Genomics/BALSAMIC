@@ -358,7 +358,7 @@ rule bcftools_sort_cnvkitCNV_research:
         "Sorting CNVs using bcftools for {params.case_name}"
     shell:
       """
-bgzip -l 9 {input.vcf};
+bgzip -k -l 9 {input.vcf};
 
 tabix -p vcf -f {input.vcf}.gz;
 
