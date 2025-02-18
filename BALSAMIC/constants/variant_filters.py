@@ -324,6 +324,12 @@ class WgsSNVFilters(BaseSNVFilters):
             field="INFO",
             analysis_type=AnalysisType.SINGLE,
         ),
+        VCFFilter(
+            tag_value=4,
+            filter_name="balsamic_high_strand_oddsratio",
+            field="INFO",
+            analysis_type=AnalysisType.PAIRED,
+        ),
     ]
 
 
