@@ -57,9 +57,11 @@ RUN git clone --depth 1 -b 1.18 --recursive https://github.com/samtools/htslib &
 
 RUN cd / && git clone -b v0.2.19 --depth 5 https://github.com/brentp/somalier.git && \
     nimble install -y nimble@0.14.2 && \
-    cd somalier && nimble install -d -y
+    cd somalier && \
+    sed -i 's/"arraymancer#head"/"arraymancer <= 0.7.32"/' somalier.nimble && \
+    nimble install -d -y
 
-RUN apk add  --no-cache openblas && \
+RUN apk add --no-cache openblas && \
     cd /somalier && \
     nim c -d:danger -d:nsb_static -d:release -d:openmp -d:blas=openblas -d:lapack=openblas -o:/usr/bin/somalier src/somalier && \
     cp scripts/ancestry-labels-1kg.tsv / && \
@@ -72,4 +74,3 @@ RUN rm -rf /var/cache/apk/*
 RUN adduser -D defaultuser
 
 USER defaultuser
-
