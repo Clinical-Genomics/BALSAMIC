@@ -43,6 +43,19 @@ ClinVar
      - Variant type
    * - ORIGIN
      - Allele origin
+   * - ONC
+     - Aggregate oncogenicity classification for this single variant
+   * - ONCDN
+     - ClinVar's preferred disease name for the concept specified by disease identifiers in ONCDISDB
+   * - ONCREVSTAT
+     - ClinVar review status of oncogenicity classification for the Variation ID
+   * - ONCDISDB
+     - Tag-value pairs of disease database name and identifier submitted for oncogenicity classifications
+   * - ONCCONF
+     - Conflicting oncogenicity classification for this single variant
+
+
+
 
 The values for `ORIGIN` are described below:
 
