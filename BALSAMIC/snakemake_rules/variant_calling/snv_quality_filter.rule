@@ -6,7 +6,7 @@ if config["analysis"]["sequencing_type"] == 'wgs' and config["analysis"]["analys
         vcf_snv = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.vcf.gz",
         wgs_calling_file = config["reference"]["wgs_calling_regions"],
       output:
-        vcf_snv_research = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.research.vcf.gz",
+        vcf_filtered = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.research.pre_process.vcf",
       benchmark:
         Path(benchmark_dir, 'bcftools_quality_filter_tnscope_tumor_only_' + config["analysis"]["case_id"] + ".tsv").as_posix()
       singularity:
@@ -38,9 +38,7 @@ bcftools view --threads {threads} --regions-file {input.wgs_calling_file}.bed {i
 | bcftools filter --threads {threads} --include 'SUM(FORMAT/QSS)/SUM(FORMAT/AD) >= {params.qss[0]}' --soft-filter '{params.qss[1]}' --mode '+' \
 | bcftools filter --threads {threads} --include 'FORMAT/ALT_F1R2 > {params.strand_reads[0]} && (FORMAT/ALT_F1R2 > 0  && FORMAT/ALT_F2R1 > {params.strand_reads[0]} &&  FORMAT/REF_F1R2 > {params.strand_reads[0]} && FORMAT/REF_F2R1 > {params.strand_reads[0]})' --soft-filter '{params.strand_reads[1]}' --mode '+' \
 | bcftools filter --threads {threads} --include "INFO/SOR < {params.sor[0]}" --soft-filter '{params.sor[1]}' --mode '+' \
-| bcftools view --exclude '{params.hard_filters}' -O z -o {output.vcf_snv_research};
-
-tabix -p vcf -f {output.vcf_snv_research};
+| bcftools view --exclude '{params.hard_filters}' -o {output.vcf_filtered};
 
 rm -rf {params.tmpdir};
           """
@@ -51,7 +49,7 @@ elif config["analysis"]["sequencing_type"] == 'wgs' and config["analysis"]["anal
         vcf_snv = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.vcf.gz",
         wgs_calling_file = config["reference"]["wgs_calling_regions"],
       output:
-        vcf_snv_research = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.research.vcf.gz",
+        vcf_filtered = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.research.pre_process.vcf",
       benchmark:
         Path(benchmark_dir, 'bcftools_quality_filter_tnscope_tumor_normal_' + config["analysis"]["case_id"] + ".tsv").as_posix()
       singularity:
@@ -60,6 +58,7 @@ elif config["analysis"]["sequencing_type"] == 'wgs' and config["analysis"]["anal
         AD = get_tag_and_filtername(snv_quality_filters, "balsamic_low_tumor_ad"),
         DP = get_tag_and_filtername(snv_quality_filters, "balsamic_low_tumor_dp"),
         AF_min = get_tag_and_filtername(snv_quality_filters, "balsamic_low_af"),
+        sor = get_tag_and_filtername(snv_quality_filters,"balsamic_high_strand_oddsratio"),
         in_normal = get_tag_and_filtername(snv_quality_filters, "in_normal"),
         hard_filters = WgsSNVFilters.get_bcftools_filter_string(category="quality", sequencing_type=sequencing_type, analysis_type=analysis_type, variant_caller=BioinfoTools.TNSCOPE, soft_filter_normals=soft_filter_normal),
         case_name = config["analysis"]["case_id"],
@@ -73,11 +72,11 @@ bcftools view {input.vcf_snv} \
 | bcftools filter --threads {threads} --include 'SUM(FORMAT/AD[0:0]+FORMAT/AD[0:1]) >= {params.DP[0]} || SUM(FORMAT/AD[1:0]+FORMAT/AD[1:1]) >= {params.DP[0]}' --soft-filter '{params.DP[1]}' --mode '+' \
 | bcftools filter --threads {threads} --include 'FORMAT/AD[0:1] >= {params.AD[0]}' --soft-filter '{params.AD[1]}' --mode '+' \
 | bcftools filter --threads {threads} --include 'FORMAT/AF[0] >= {params.AF_min[0]}' --soft-filter '{params.AF_min[1]}' --mode '+' \
+| bcftools filter --threads {threads} --include "INFO/SOR < {params.sor[0]}" --soft-filter '{params.sor[1]}' --mode '+' \
 | bcftools annotate -x FILTER/alt_allele_in_normal \
 | bcftools filter --threads {threads} --exclude 'sum(FORMAT/AF[1])/sum(FORMAT/AF[0])>{params.in_normal[0]}' --soft-filter '{params.in_normal[1]}' --mode '+' \
-| bcftools view --exclude '{params.hard_filters}' -O z -o {output.vcf_snv_research}; 
+| bcftools view --exclude '{params.hard_filters}' -o {output.vcf_filtered}; 
 
-tabix -p vcf -f {output.vcf_snv_research};
           """
 
 if config["analysis"]["sequencing_type"] == 'targeted' and config["analysis"]["analysis_type"] == 'single':

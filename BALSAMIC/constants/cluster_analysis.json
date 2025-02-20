@@ -206,11 +206,11 @@
 	},
 	"vardict_tumor_normal": {
 		"time": "12:00:00",
-		"n": 18
+		"n": 6
 	},
 	"vardict_tumor_only": {
 		"time": "10:00:00",
-		"n": 18
+		"n": 6
 	},
 	"sentieon_TNscope": {
 		"time": "24:00:00",
