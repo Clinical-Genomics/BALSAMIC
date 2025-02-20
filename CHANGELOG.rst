@@ -9,6 +9,7 @@ Added:
 * SOR filter to WGS TN SNV quality filter https://github.com/Clinical-Genomics/BALSAMIC/pull/1506
 * GT field to IGH-DUX4 variant https://github.com/Clinical-Genomics/BALSAMIC/pull/1527
 * ONC field annotations from Clinvar https://github.com/Clinical-Genomics/BALSAMIC/pull/1527
+* Added memory option https://github.com/Clinical-Genomics/BALSAMIC/pull/1535
 
 Changed:
 ^^^^^^^^
@@ -20,7 +21,7 @@ Changed:
 * Changed VarDict and TNscope VCF merged method to custom script https://github.com/Clinical-Genomics/BALSAMIC/pull/1499
 * Changed QC thresholds for WGS normal and WES https://github.com/Clinical-Genomics/BALSAMIC/pull/1477
 * Change VarDict memory usage to fix crashes in production https://github.com/Clinical-Genomics/BALSAMIC/pull/1537
-
+* Updated cluster resources for tnscope WGS TN https://github.com/Clinical-Genomics/BALSAMIC/pull/1535
 
 Removed:
 ^^^^^^^^
