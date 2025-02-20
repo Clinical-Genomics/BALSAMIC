@@ -51,6 +51,7 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 --interval {input.bed} \
 --interval_padding {params.padding} \
 --algo {params.algo} \
+--disable_detector sv \
 --tumor_sample {params.tumor} \
 --normal_sample {params.normal} \
 --dbsnp {input.dbsnp} \

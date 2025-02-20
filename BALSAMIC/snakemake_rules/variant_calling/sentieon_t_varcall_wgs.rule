@@ -40,6 +40,7 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 -q {input.recal} \
 -t {threads} \
 --algo TNscope \
+--disable_detector sv \
 --tumor_sample {params.tumor} \
 --dbsnp {input.dbsnp} \
 --cosmic {input.cosmic} \
