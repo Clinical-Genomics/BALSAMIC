@@ -193,6 +193,18 @@ class TGAParamsTNscope(BaseModel):
     disable_detect: str
 
 
+class WGSParamsTNscope(BaseModel):
+    """This class defines the params settings used as constants in WGS workflow-rule tnscope."""
+
+    algo: str
+    init_tumorLOD: float
+    min_tumorLOD: float
+    init_normalLOD: float
+    min_normalLOD: float
+    pcr_model: str
+    disable_detect: str
+
+
 class BAMPostProcessingParams(BaseModel):
     """This class defines the params settings used as constants bam post-processing rules.
 
@@ -263,6 +275,7 @@ class BalsamicWorkflowConfig(BaseModel):
     umiconsensuscall: UMIParamsConsensuscall
     tnscope_umi: UMIParamsTNscope
     tnscope_tga: TGAParamsTNscope
+    tnscope_wgs: WGSParamsTNscope
 
     def get_manta_settings(self, sequencing_type) -> str:
         """Return correct setting for manta rules depending on sequencing type."""
