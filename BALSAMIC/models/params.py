@@ -190,6 +190,7 @@ class TGAParamsTNscope(BaseModel):
     prunefactor: int
     padding: int
     pcr_model: str
+    disable_detect: str
 
 
 class BAMPostProcessingParams(BaseModel):
