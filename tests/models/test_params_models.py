@@ -15,7 +15,7 @@ from BALSAMIC.models.params import (
     QCModel,
     UMIParamsCommon,
     UMIParamsConsensuscall,
-    UMIParamsTNscope,
+    ParamsTNscope,
     UMIParamsUMIextract,
     VCFFilter,
     StructuralVariantFilters,
@@ -215,7 +215,7 @@ def test_umiparams_consensuscall():
 
 
 def test_umiparams_tnscope():
-    """test UMIParamsTNscope model for correct validation"""
+    """test ParamsTNscope model for correct validation"""
 
     # GIVEN tnscope params
     test_tnscope_params = {
@@ -231,7 +231,7 @@ def test_umiparams_tnscope():
     }
 
     # WHEN building the model
-    test_tnscope_params_built = UMIParamsTNscope(**test_tnscope_params)
+    test_tnscope_params_built = ParamsTNscope(**test_tnscope_params)
 
     # THEN assert values
     assert test_tnscope_params_built.algo == "algoname"

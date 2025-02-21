@@ -142,54 +142,20 @@ class UMIParamsConsensuscall(BaseModel):
     tag: str = "XR"
 
 
-class UMIParamsTNscope(BaseModel):
-    """This class defines the params settings used as constants in UMI workflow-rule tnscope.
-
-    Attributes:
-        algo: str; choice of sentieon varcall algorithm. eg. 'TNscope'
-        disable_detect: str; disable variant detector. eg 'sv' or 'snv_indel'
-        filter_tumor_af: float (required); minimum allelic frequency to detect
-        min_tumorLOD: int (required); minimum tumor log odds in the final call of variants
-        init_tumorLOD: float (required); minimum tumor log odds in the initial pass calling variants
-        error_rate: int (required); allow error-rate to consider in calling
-        prunefactor: int (required); pruning factor in the kmer graph
-        padding: int(required); amount to pad bed interval regions
-        pcr_model: str (required). PCR indel model used to weed out false positive indels. Eg: none- PCR free samples.
-    """
+class ParamsTNscope(BaseModel):
+    """This class defines the TNscope params."""
 
     algo: str
-    filter_tumor_af: float
-    init_tumorLOD: float
-    min_tumorLOD: int
-    error_rate: int
-    prunefactor: int
-    padding: int
-    disable_detect: str
-    pcr_model: str
-
-
-class TGAParamsTNscope(BaseModel):
-    """This class defines the params settings used as constants in TGA workflow-rule tnscope.
-
-    Attributes:
-        algo: str; choice of sentieon varcall algorithm. eg. 'TNscope'
-        filter_tumor_af: float (required); minimum allelic frequency to detect
-        min_tumorLOD: int (required); minimum tumor log odds in the final call of variants
-        init_tumorLOD: float (required); minimum tumor log odds in the initial pass calling variants
-        error_rate: int (required); allow error-rate to consider in calling
-        prunefactor: int (required); pruning factor in the kmer graph
-        padding: int(required); amount to pad bed interval regions
-        pcr_model: str (required). PCR indel model used to weed out false positive indels. Eg: none- PCR free samples.
-    """
-
-    algo: str
-    filter_tumor_af: float
-    init_tumorLOD: float
-    min_tumorLOD: int
-    error_rate: int
-    prunefactor: int
-    padding: int
-    pcr_model: str
+    filter_tumor_af: Optional[float] = None
+    init_tumorLOD: Optional[float] = None
+    min_tumorLOD: Optional[float] = None
+    init_normalLOD: Optional[float] = None
+    min_normalLOD: Optional[float] = None
+    error_rate: Optional[int] = None
+    prunefactor: Optional[int] = None
+    padding: Optional[int] = None
+    disable_detect: Optional[str] = None
+    pcr_model: Optional[str] = None
 
 
 class BAMPostProcessingParams(BaseModel):
@@ -260,8 +226,9 @@ class BalsamicWorkflowConfig(BaseModel):
     umicommon: UMIParamsCommon
     umiextract: UMIParamsUMIextract
     umiconsensuscall: UMIParamsConsensuscall
-    tnscope_umi: UMIParamsTNscope
-    tnscope_tga: TGAParamsTNscope
+    tnscope_umi: ParamsTNscope
+    tnscope_tga: ParamsTNscope
+    tnscope_wgs: ParamsTNscope
 
     def get_manta_settings(self, sequencing_type) -> str:
         """Return correct setting for manta rules depending on sequencing type."""
