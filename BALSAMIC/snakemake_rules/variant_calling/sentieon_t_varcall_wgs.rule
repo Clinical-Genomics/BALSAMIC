@@ -10,19 +10,22 @@ rule sentieon_tnscope_wgs_tumor_only:
         bam = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
         recal = expand(bam_dir + "tumor.recal_data.table")
     output:
-        vcf_tnscope = vcf_dir + "sentieon_tnscope" + "/" + "ALL.somatic." + config["analysis"]["case_id"] + ".tnscope.vcf.gz",
+        vcf_tnscope = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.vcf.gz",
         namemap_snv = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.sample_name_map",
-        namemap_sv = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".tnscope.sample_name_map",
     benchmark:
         Path(benchmark_dir, "sentieon_TNscope_tumor_only_" + config["analysis"]["case_id"] + ".tsv").as_posix()
     params:
-        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         tumor = "TUMOR",
-        tumor_options = VARCALL_PARAMS["tnscope"]["tumor"],
-        pcr_model = params.common.pcr_model,
-        sentieon_exec=config_model.sentieon.sentieon_exec,
-        sentieon_lic=config_model.sentieon.sentieon_license,
-        case_name = config["analysis"]["case_id"]
+        sentieon_exec = config_model.sentieon.sentieon_exec,
+        sentieon_lic = config_model.sentieon.sentieon_license,
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
+        algo = params.tnscope_wgs.algo,
+        init_tumor_lod = params.tnscope_wgs.init_tumorLOD,
+        min_tumor_lod = params.tnscope_wgs.min_tumorLOD,
+        pcr_model = params.tnscope_wgs.pcr_model,
+        disable_detect = params.tnscope_wgs.disable_detect,
+        case_name = config["analysis"]["case_id"],
+        housekeeper_id= {"id": config["analysis"]["case_id"],"tags": "research"}
     threads:
         get_threads(cluster_config, 'sentieon_TNscope_tumor_only')
     message:
@@ -35,20 +38,20 @@ export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
 
 {params.sentieon_exec} driver \
+-t {threads} \
 -r {input.ref} \
 -i {input.bam} \
 -q {input.recal} \
--t {threads} \
---algo TNscope \
---disable_detector sv \
+--algo {params.algo} \
+--disable_detector {params.disable_detect} \
 --tumor_sample {params.tumor} \
 --dbsnp {input.dbsnp} \
 --cosmic {input.cosmic} \
 --pcr_indel_mode {params.pcr_model} \
-{params.tumor_options} {output.vcf_tnscope};
+--min_init_tumor_lod {params.init_tumor_lod} \
+--min_tumor_lod {params.min_tumor_lod} \
+{output.vcf_tnscope};
 
 echo -e \"{params.tumor}\\tTUMOR\" > {output.namemap_snv};
-
-cp {output.namemap_snv} {output.namemap_sv};
 rm -rf {params.tmpdir};
         """
