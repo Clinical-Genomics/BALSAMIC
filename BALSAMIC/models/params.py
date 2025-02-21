@@ -145,17 +145,17 @@ class UMIParamsConsensuscall(BaseModel):
 class ParamsTNscope(BaseModel):
     """This class defines the TNscope params."""
 
-    algo: str = None
-    filter_tumor_af: float = None
-    init_tumorLOD: float = None
-    min_tumorLOD: float = None
-    init_normalLOD: float = None
-    min_normalLOD: float = None
-    error_rate: int = None
-    prunefactor: int = None
-    padding: int = None
-    disable_detect: str = None
-    pcr_model: str = None
+    algo: str
+    filter_tumor_af: Optional[float] = None
+    init_tumorLOD: Optional[float] = None
+    min_tumorLOD: Optional[float] = None
+    init_normalLOD: Optional[float] = None
+    min_normalLOD: Optional[float] = None
+    error_rate: Optional[int] = None
+    prunefactor: Optional[int] = None
+    padding: Optional[int] = None
+    disable_detect: Optional[str] = None
+    pcr_model: Optional[str] = None
 
 
 class BAMPostProcessingParams(BaseModel):
