@@ -32,29 +32,27 @@ tabix -p vcf -f {output.vcf_tnscope_sv};
 tabix -p vcf -f {output.vcf_tnscope};
         """
 
+
+
 if config["analysis"]["sequencing_type"] == 'targeted':
-    rule post_process_tnscope_tga:
+    rule merge_tnscope_to_mnvs:
         input:
-            vcf_tnscope = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.research.pre_process.vcf.gz",
-            ref = config["reference"]["reference_genome"],
+            vcf_tnscope=vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.research.pre_process.vcf.gz",
+            ref=config["reference"]["reference_genome"],
         output:
-            vcf_tnscope = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.research.vcf.gz",
+            vcf_tnscope=vcf_dir + "sentieon_tnscope/SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.research.mnvs.vcf",
         benchmark:
-            Path(benchmark_dir,'post_process_tnscope_tga_' + config[ "analysis" ][ "case_id" ] + ".tsv").as_posix()
+            Path(benchmark_dir,'post_process_tnscope_' + config["analysis"]["case_id"] + ".tsv").as_posix()
         singularity:
-            Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
+            Path(singularity_image,config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
         params:
-            merge_mnvs = get_script_path("merge_mnp.py"),
-            modify_tnscope_infofield = get_script_path("modify_tnscope_infofield.py"),
-            edit_vcf_script= get_script_path("edit_vcf_info.py"),
-            tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-            case_name = config["analysis"]["case_id"],
-            sentieon_exec = config_model.sentieon.sentieon_exec,
-            sentieon_lic = config_model.sentieon.sentieon_license,
-            matched_normal_filternames = ",".join(BaseSNVFilters.MATCHED_NORMAL_FILTER_NAMES),
-            variant_caller= "tnscope"
+            merge_mnvs=get_script_path("merge_mnp.py"),
+            tmpdir=tempfile.mkdtemp(prefix=tmp_dir),
+            case_name=config["analysis"]["case_id"],
+            sentieon_exec=config_model.sentieon.sentieon_exec,
+            sentieon_lic=config_model.sentieon.sentieon_license,
         threads:
-            get_threads(cluster_config, 'post_process_tnscope')
+            get_threads(cluster_config,'post_process_tnscope')
         message:
             "Merge TNscope SNVs with same phaseID to MNVs."
             "Add DP and AF tumor sample info and FOUND_IN to INFO field: {params.case_name}"
@@ -62,27 +60,75 @@ if config["analysis"]["sequencing_type"] == 'targeted':
             """
     export SENTIEON_TMPDIR={params.tmpdir};
     export SENTIEON_LICENSE={params.sentieon_lic};
-    
-    {params.sentieon_exec} pyexec {params.merge_mnvs} --preserve_filters {params.matched_normal_filternames} --max_distance 5 {input.vcf_tnscope} {input.ref} > {params.tmpdir}/tnscope.research.mnv.vcf ;
-    
-    python {params.modify_tnscope_infofield} {params.tmpdir}/tnscope.research.mnv.vcf {params.tmpdir}/tnscope.research.mnv.add_info_fields.vcf ;
-    
-    python {params.edit_vcf_script} -i {params.tmpdir}/tnscope.research.mnv.add_info_fields.vcf -o {params.tmpdir}/tnscope.research.mnv.add_info_fields.added_found_in.vcf -c {params.variant_caller};
-    
-    bgzip {params.tmpdir}/tnscope.research.mnv.add_info_fields.added_found_in.vcf ;
-    
-    mv {params.tmpdir}/tnscope.research.mnv.add_info_fields.added_found_in.vcf.gz {output.vcf_tnscope} ;
+
+    {params.sentieon_exec} pyexec {params.merge_mnvs} --preserve_filters {params.matched_normal_filternames} --max_distance 5 {input.vcf_tnscope} {input.ref} > {output.vcf_tnscope} ;
+
+            """
+
+    rule tnscope_sort:
+        input:
+            vcf_tnscope=vcf_dir + "sentieon_tnscope/SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.research.mnvs.vcf",
+        output:
+            vcf_tnscope_sorted=vcf_dir + "sentieon_tnscope/SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.research.mnvs_sorted.vcf",
+        params:
+            tmpdir=tempfile.mkdtemp(prefix=tmp_dir),
+            sort_vcf=get_script_path("sort_vcf.awk"),
+            case_name=config["analysis"]["case_id"],
+        benchmark:
+            Path(benchmark_dir,'tnscope_sort_' + config["analysis"]["case_id"] + ".tsv").as_posix()
+        threads:
+            get_threads(cluster_config,"tnscope_sort")
+        message:
+            ("Sorting TNscope MNV post-processed files with awk {params.case_name}")
+        shell:
+            """
+    mkdir -p {params.tmpdir};
+    export TMPDIR={params.tmpdir};
+
+    awk -f {params.sort_vcf} {input.vcf} > {output.vcf_sorted}
+
+    rm -rf {params.tmpdir} ;
+            """
+
+    rule post_process_tnscope_info_fields_tga:
+        input:
+            vcf_tnscope=vcf_dir + "sentieon_tnscope/SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.research.mnvs_sorted.vcf",
+        output:
+            vcf_tnscope=vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.research.vcf.gz",
+        benchmark:
+            Path(benchmark_dir,'post_process_tnscope_info_fields_' + config["analysis"]["case_id"] + ".tsv").as_posix()
+        singularity:
+            Path(singularity_image,config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
+        params:
+            modify_tnscope_infofield=get_script_path("modify_tnscope_infofield.py"),
+            edit_vcf_script=get_script_path("edit_vcf_info.py"),
+            tmpdir=tempfile.mkdtemp(prefix=tmp_dir),
+            case_name=config["analysis"]["case_id"],
+            matched_normal_filternames=",".join(BaseSNVFilters.MATCHED_NORMAL_FILTER_NAMES),
+            variant_caller="tnscope"
+        threads:
+            get_threads(cluster_config,'post_process_tnscope')
+        message:
+            "Add DP and AF tumor sample info and FOUND_IN to INFO field: {params.case_name}"
+        shell:
+            """
+    python {params.modify_tnscope_infofield} {input.vcf_tnscope} {params.tmpdir}/tnscope.research.add_info_fields.vcf ;
+
+    python {params.edit_vcf_script} -i {params.tmpdir}/tnscope.research.add_info_fields.vcf -o {params.tmpdir}/tnscope.research.add_info_fields.added_found_in.vcf -c {params.variant_caller} ;
+
+    bcftools view --exclude --exclude 'FILTER~"MERGED"' -O z -o {output.vcf_tnscope} {params.tmpdir}/tnscope.research.add_info_fields.added_found_in.vcf ;
+
     tabix -p vcf -f {output.vcf_tnscope} ;
             """
 else:
-    rule post_process_tnscope_wgs:
+    rule post_process_tnscope_info_fields_wgs:
         input:
             vcf_tnscope = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.research.pre_process.vcf",
             ref = config["reference"]["reference_genome"],
         output:
             vcf_tnscope = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.research.vcf.gz",
         benchmark:
-            Path(benchmark_dir,'post_process_tnscope_wgs_' + config[ "analysis" ][ "case_id" ] + ".tsv").as_posix()
+            Path(benchmark_dir,'post_process_tnscope_info_fields_wgs_' + config[ "analysis" ][ "case_id" ] + ".tsv").as_posix()
         singularity:
             Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
         params:
@@ -108,4 +154,6 @@ else:
     mv {params.tmpdir}/tnscope.add_info_fields.added_found_in.vcf.gz {output.vcf_tnscope} ;
     tabix -p vcf -f {output.vcf_tnscope} ;
             """
+
+
 
