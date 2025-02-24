@@ -28,7 +28,7 @@ rule sentieon_tnscope_wgs_tumor_normal:
         sentieon_lic=config_model.sentieon.sentieon_license,
         case_name = config["analysis"]["case_id"]
     threads:
-        get_threads(cluster_config, 'sentieon_TNscope')
+        get_threads(cluster_config, 'sentieon_tnscope_wgs_tumor_normal')
     message:
         ("Calling SNVs and SVs using Sentieon TNscope for sample {params.case_name}")
     shell:

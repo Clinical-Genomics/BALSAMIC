@@ -1,3 +1,4 @@
+
 [X.X.X]
 -------
 
@@ -5,8 +6,10 @@ Added:
 ^^^^^^
 * Added option to disable hard filter of variants in matched normal https://github.com/Clinical-Genomics/BALSAMIC/pull/1509
 * Added check to verify sample sex for all workflows https://github.com/Clinical-Genomics/BALSAMIC/pull/1516
+* SOR filter to WGS TN SNV quality filter https://github.com/Clinical-Genomics/BALSAMIC/pull/1506
 * GT field to IGH-DUX4 variant https://github.com/Clinical-Genomics/BALSAMIC/pull/1527
 * ONC field annotations from Clinvar https://github.com/Clinical-Genomics/BALSAMIC/pull/1527
+* Added memory option https://github.com/Clinical-Genomics/BALSAMIC/pull/1535
 
 Changed:
 ^^^^^^^^
@@ -20,7 +23,7 @@ Changed:
 * Change VarDict memory usage to fix crashes in production https://github.com/Clinical-Genomics/BALSAMIC/pull/1537
 * changed --pcr_indel_model to conservative for TNscope in all TGA workflows https://github.com/Clinical-Genomics/BALSAMIC/pull/1523
 * changed prune_factor to 4 for TNscope in all TGA workflows https://github.com/Clinical-Genomics/BALSAMIC/pull/1523
-
+* Updated cluster resources for tnscope WGS TN https://github.com/Clinical-Genomics/BALSAMIC/pull/1535
 
 Removed:
 ^^^^^^^^
@@ -31,7 +34,6 @@ Fixed:
 
 * Merged VarDict and TNscope variants now correctly show both callers in FOUND_IN info field https://github.com/Clinical-Genomics/BALSAMIC/pull/1499
 * Fixed somalier container https://github.com/Clinical-Genomics/BALSAMIC/pull/1538
-
 
 [16.0.1]
 -------
