@@ -545,6 +545,12 @@ The `TNscope <https://www.biorxiv.org/content/10.1101/250647v1.abstract>`_ algor
 
     AD(tumor) >= 3
 
+*SOR*: Symmetric Odds Ratio of 2x2 contingency table to detect strand bias
+
+::
+
+    SOR < 4
+
 *Allelic Frequency (AF)*: Fraction of the reads supporting the alternate allele
 
 ::

@@ -124,6 +124,18 @@ def test_get_time_option(scheduler_model: Scheduler):
     assert "--time" in time_option
 
 
+def test_get_memory_option(scheduler_model: Scheduler):
+    """Test get memory resource from job properties."""
+
+    # GIVEN a scheduler model
+
+    # WHEN getting the memory cluster resource option
+    mem_option: str = scheduler_model.get_memory_option()
+
+    # THEN the mem be returned
+    assert "--mem" in mem_option
+
+
 def test_get_partition_option(scheduler_model: Scheduler):
     """Test get partition from cluster properties."""
 
