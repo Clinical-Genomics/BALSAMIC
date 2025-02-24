@@ -49,6 +49,7 @@ if config["analysis"]["sequencing_type"] == 'targeted':
             merge_mnvs=get_script_path("merge_mnp.py"),
             tmpdir=tempfile.mkdtemp(prefix=tmp_dir),
             case_name=config["analysis"]["case_id"],
+            matched_normal_filternames=",".join(BaseSNVFilters.MATCHED_NORMAL_FILTER_NAMES),
             sentieon_exec=config_model.sentieon.sentieon_exec,
             sentieon_lic=config_model.sentieon.sentieon_license,
         threads:
@@ -104,7 +105,6 @@ if config["analysis"]["sequencing_type"] == 'targeted':
             edit_vcf_script=get_script_path("edit_vcf_info.py"),
             tmpdir=tempfile.mkdtemp(prefix=tmp_dir),
             case_name=config["analysis"]["case_id"],
-            matched_normal_filternames=",".join(BaseSNVFilters.MATCHED_NORMAL_FILTER_NAMES),
             variant_caller="tnscope"
         threads:
             get_threads(cluster_config,'post_process_tnscope')
