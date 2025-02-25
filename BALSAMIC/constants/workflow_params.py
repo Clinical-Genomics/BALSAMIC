@@ -212,7 +212,7 @@ WORKFLOW_PARAMS = {
         "min_tumorLOD": 4,
         "init_tumorLOD": 0.5,
         "error_rate": 5,
-        "prunefactor": 4,
+        "prunefactor": 3,
         "padding": 100,
     },
     "tnscope_tga_tumor_normal": {
@@ -222,7 +222,7 @@ WORKFLOW_PARAMS = {
         "min_tumorLOD": 4,
         "init_tumorLOD": 0.5,
         "error_rate": 5,
-        "prunefactor": 4,
+        "prunefactor": 3,
         "padding": 100,
     },
 }

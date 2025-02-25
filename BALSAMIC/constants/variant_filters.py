@@ -386,6 +386,19 @@ class TgaSNVFilters(BaseSNVFilters):
             variant_caller=BioinfoTools.TNSCOPE,
             analysis_type=AnalysisType.SINGLE,
         ),
+        VCFFilter(
+            tag_value=3,
+            filter_name="balsamic_high_strand_oddsratio",
+            field="INFO",
+            variant_caller=BioinfoTools.TNSCOPE,
+            analysis_type=AnalysisType.PAIRED,
+        ),
+        VCFFilter(
+            tag_value=12,
+            filter_name="balsamic_high_tnscope_rpa",
+            field="INFO",
+            variant_caller=BioinfoTools.TNSCOPE,
+        ),
     ]
 
 
