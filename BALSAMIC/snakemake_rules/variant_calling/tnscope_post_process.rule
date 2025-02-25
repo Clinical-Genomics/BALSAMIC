@@ -68,7 +68,7 @@ if config["analysis"]["sequencing_type"] == 'targeted':
 
     rule tnscope_sort:
         input:
-            vcf_tnscope=vcf_dir + "sentieon_tnscope/SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.research.mnvs.vcf",
+            vcf_tnscope = vcf_dir + "sentieon_tnscope/SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.research.mnvs.vcf",
         output:
             vcf_tnscope_sorted=vcf_dir + "sentieon_tnscope/SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.research.mnvs_sorted.vcf",
         params:
@@ -86,7 +86,7 @@ if config["analysis"]["sequencing_type"] == 'targeted':
     mkdir -p {params.tmpdir};
     export TMPDIR={params.tmpdir};
 
-    awk -f {params.sort_vcf} {input.vcf} > {output.vcf_sorted}
+    awk -f {params.sort_vcf} {input.vcf_tnscope} > {output.vcf_tnscope_sorted}
 
     rm -rf {params.tmpdir} ;
             """
