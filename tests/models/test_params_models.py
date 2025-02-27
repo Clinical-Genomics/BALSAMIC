@@ -214,7 +214,7 @@ def test_umiparams_consensuscall():
     assert test_consensuscall_built.tag == "XZ"
 
 
-def test_umiparams_tnscope():
+def test_params_tnscope():
     """test ParamsTNscope model for correct validation"""
 
     # GIVEN tnscope params
