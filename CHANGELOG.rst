@@ -22,6 +22,7 @@ Changed:
 * Changed QC thresholds for WGS normal and WES https://github.com/Clinical-Genomics/BALSAMIC/pull/1477
 * Change VarDict memory usage to fix crashes in production https://github.com/Clinical-Genomics/BALSAMIC/pull/1537
 * Updated cluster resources for tnscope WGS TN https://github.com/Clinical-Genomics/BALSAMIC/pull/1535
+* Disable SV calling in TNscope https://github.com/Clinical-Genomics/BALSAMIC/pull/1541
 
 Removed:
 ^^^^^^^^
