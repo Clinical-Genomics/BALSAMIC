@@ -208,7 +208,7 @@ WORKFLOW_PARAMS = {
     "tnscope_tga_tumor_only": {
         "algo": "TNscope",
         "filter_tumor_af": 0.0005,
-        "pcr_model": "conservative",
+        "pcr_model": "NONE",
         "min_tumorLOD": 4,
         "init_tumorLOD": 0.5,
         "error_rate": 5,
@@ -218,7 +218,7 @@ WORKFLOW_PARAMS = {
     "tnscope_tga_tumor_normal": {
         "algo": "TNscope",
         "filter_tumor_af": 0.0005,
-        "pcr_model": "conservative",
+        "pcr_model": "NONE",
         "min_tumorLOD": 4,
         "init_tumorLOD": 0.5,
         "error_rate": 5,
