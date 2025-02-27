@@ -263,6 +263,12 @@ The `TNscope <https://www.biorxiv.org/content/10.1101/250647v1.abstract>`_ algor
 
     interval_padding = 100
 
+*pcr_indel_model*:  PCR indel model used to weed out false positive indels more or less aggressively.
+
+::
+
+    pcr_indel_model = conservative
+
 **Post-call Filters**
 
 *Total Depth (DP)*: Refers to the overall read depth supporting the called variant.
@@ -283,6 +289,12 @@ The `TNscope <https://www.biorxiv.org/content/10.1101/250647v1.abstract>`_ algor
 
     Minimum AF >= 0.005
 
+*RPA*: Number of times tandem repeat unit is repeated, for each allele (including reference)
+
+::
+
+    RPA < 12
+
 
 **For tumor only analyses**
 
@@ -302,6 +314,12 @@ The `TNscope <https://www.biorxiv.org/content/10.1101/250647v1.abstract>`_ algor
 **Additionally, variants labeled with triallelic site filter are not filtered out**
 
 **For normal matched analyses**
+
+*SOR*: Symmetric Odds Ratio of 2x2 contingency table to detect strand bias
+
+::
+
+    SOR < 3
 
 *alt_allele_in_normal*: Default filter set by TNscope was considered too stringent in filtering tumor in normal and is removed.
 

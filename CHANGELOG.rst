@@ -1,6 +1,6 @@
 
 [X.X.X]
---------
+-------
 
 Added:
 ^^^^^^
@@ -10,6 +10,8 @@ Added:
 * GT field to IGH-DUX4 variant https://github.com/Clinical-Genomics/BALSAMIC/pull/1527
 * ONC field annotations from Clinvar https://github.com/Clinical-Genomics/BALSAMIC/pull/1527
 * Added memory option https://github.com/Clinical-Genomics/BALSAMIC/pull/1535
+* Added max SOR 3 to TNscope TGA TN workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1526
+* Added max RPA 12 to TNscope TGA workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1526
 
 Changed:
 ^^^^^^^^
@@ -22,15 +24,16 @@ Changed:
 * Changed QC thresholds for WGS normal and WES https://github.com/Clinical-Genomics/BALSAMIC/pull/1477
 * Change VarDict memory usage to fix crashes in production https://github.com/Clinical-Genomics/BALSAMIC/pull/1537
 * Updated cluster resources for tnscope WGS TN https://github.com/Clinical-Genomics/BALSAMIC/pull/1535
+* changed --pcr_indel_model to conservative for TNscope in all TGA workflows https://github.com/Clinical-Genomics/BALSAMIC/pull/1526
 
 Removed:
 ^^^^^^^^
 * Remove WGS-level GC-bias metric from TGA workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1521
 
-
 Fixed:
 ^^^^^^
-* Merged VarDict and TNscope variants now correctly show both callers in FOUND_IN info field https://github.com/Clinical-Genomics/BALSAMIC/pull/149
+
+* Merged VarDict and TNscope variants now correctly show both callers in FOUND_IN info field https://github.com/Clinical-Genomics/BALSAMIC/pull/1499
 * Fixed somalier container https://github.com/Clinical-Genomics/BALSAMIC/pull/1538
 
 [16.0.1]

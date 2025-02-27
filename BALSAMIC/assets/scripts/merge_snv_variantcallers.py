@@ -148,6 +148,7 @@ def merge_headers(vcf1: str, vcf2: str) -> List[str]:
             cat_lines[
                 "DP_LIST"
             ] = '<ID=DP_LIST,Number=.,Type=Integer,Description="Total Depth list from both variant callers of a merged variant, in positional argument order">'
+
         return cat_lines
 
     vcf1_name, vcf2_name = map(os.path.basename, [vcf1, vcf2])
