@@ -190,10 +190,7 @@ class BaseSNVFilters:
                     variant_caller is None
                     or getattr(f, "variant_caller", None) in {None, variant_caller}
                 )
-                and (
-                    exome is None
-                    or getattr(f, "exome", None) in {None, exome}
-                )
+                and (exome is None or getattr(f, "exome", None) in {None, exome})
             )
 
         # Filter the filters based on the matching function
