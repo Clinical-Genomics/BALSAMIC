@@ -117,6 +117,11 @@ The requirement for merging variants with this script is a perfect match of; CHR
 
 The INFO fields from both VCFs are merged entirely, and when the same field exists in both variants it is converted to a comma-separated list. An exception to this behaviour is the AF and DP fields for which the single values are maintained (from the first VCF in the positional argument), and new fields called AF_LIST and DP_LIST are created which contains a list of values from both callers.
 
+**Calling and quality filtration**
+========================================
+
+This section focuses on the calling and quality filtration done on VarDict and TNscope variant calls.
+
 **Vardict**
 ===========
 
@@ -129,7 +134,7 @@ There are two slightly different post-processing filters activated depending on 
 
 Following is the set of criteria applied for filtering vardict results. It is used for both tumor-normal and tumor-only samples.
 
-**Post-call Quality Filters for panels**
+**Post-call Quality Filters**
 
 *Mean Mapping Quality (MQ)*: Refers to the root mean square (RMS) mapping quality of all the reads spanning the given variant site.
 
@@ -155,14 +160,8 @@ Following is the set of criteria applied for filtering vardict results. It is us
 
     Minimum AF >= 0.005
 
-**Post-call Quality Filters for exomes**
+**Post-call Quality Filters for specific for exomes**
 
-
-*Mean Mapping Quality (MQ)*: Refers to the root mean square (RMS) mapping quality of all the reads spanning the given variant site.
-
-::
-
-    MQ >= 30
 
 *Total Depth (DP)*: Refers to the overall read depth supporting the called variant.
 
@@ -170,23 +169,12 @@ Following is the set of criteria applied for filtering vardict results. It is us
 
     DP >= 20
 
-*Variant depth (VD)*: Total reads supporting the ALT allele
-
-::
-
-    VD >= 5
-
-*Allelic Frequency (AF)*: Fraction of the reads supporting the alternate allele
-
-::
-
-    Minimum AF >= 0.005
 
 
 **Attention:**
 **BALSAMIC <= v8.2.7 uses minimum AF 1% (0.01). From Balsamic v8.2.8, minimum VAF is changed to 0.7% (0.007). From v16.0.0 minimum VAF is changed to 0.5% (0.005).**
 
-**For normal matched analyses**
+**Specific for VarDict normal matched analyses**
 
 *Relative tumor AF in normal*: Allows for maximum Tumor-In-Normal-Contamination of 30%.
 
@@ -264,7 +252,7 @@ The `TNscope <https://www.biorxiv.org/content/10.1101/250647v1.abstract>`_ algor
     interval_padding = 100
 
 
-**Post-call Filters**
+**Post-call Quality Filters**
 
 *Total Depth (DP)*: Refers to the overall read depth supporting the called variant.
 
@@ -290,8 +278,17 @@ The `TNscope <https://www.biorxiv.org/content/10.1101/250647v1.abstract>`_ algor
 
     RPA < 12
 
+**Post-call Quality Filters for specific for exomes**
 
-**For tumor only analyses**
+
+*Total Depth (DP)*: Refers to the overall read depth supporting the called variant.
+
+::
+
+    DP >= 20
+
+
+**Specific for TNscope tumor only analyses**
 
 *Average base quality score*
 
@@ -308,7 +305,7 @@ The `TNscope <https://www.biorxiv.org/content/10.1101/250647v1.abstract>`_ algor
 **Note:**
 **Additionally, variants labeled with triallelic site filter are not filtered out**
 
-**For normal matched analyses**
+**Specific for TNscope normal matched analyses**
 
 *SOR*: Symmetric Odds Ratio of 2x2 contingency table to detect strand bias
 
@@ -355,8 +352,10 @@ Therefore the logic for setting `MNV_CONFLICTING_FILTERS` has been made a bit mo
 
     In addition to this a few more fields are added to the INFO field of the created MNVs containing comma-separated lists of AD, AF, and FILTER from its constituting variants.
 
-
 **Post-call Observation database Filters**
+========================================
+
+This section contains post call and quality filtrations, on the TNscope and VarDict merged VCF.
 
 
 *GNOMADAF_POPMAX*: Maximum Allele Frequency across populations
