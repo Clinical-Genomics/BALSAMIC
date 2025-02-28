@@ -117,8 +117,8 @@ The requirement for merging variants with this script is a perfect match of; CHR
 
 The INFO fields from both VCFs are merged entirely, and when the same field exists in both variants it is converted to a comma-separated list. An exception to this behaviour is the AF and DP fields for which the single values are maintained (from the first VCF in the positional argument), and new fields called AF_LIST and DP_LIST are created which contains a list of values from both callers.
 
-**Calling and quality filtration**
-========================================
+Calling and quality filtration
+******************************************
 
 This section focuses on the calling and quality filtration done on VarDict and TNscope variant calls.
 
@@ -352,8 +352,8 @@ Therefore the logic for setting `MNV_CONFLICTING_FILTERS` has been made a bit mo
 
     In addition to this a few more fields are added to the INFO field of the created MNVs containing comma-separated lists of AD, AF, and FILTER from its constituting variants.
 
-**Post-call Observation database Filters**
-========================================
+Post-call Observation database Filters
+********************************************
 
 This section contains post call and quality filtrations, on the TNscope and VarDict merged VCF.
 
@@ -386,6 +386,13 @@ This above corresponds to at least 4 observations in a database of 29 cases of m
 
 **Target Genome Analysis with UMI's into account**
 **************************************************
+
+This section contains specific filters and settings for the balsamic-umi workflow, which filters on UMI group size (default 3,1,1) before variant-calling.
+
+Calling and quality filtration
+******************************************
+
+This section focuses on calling and quality filters.
 
 **Sentieon's TNscope**
 =======================
@@ -475,7 +482,10 @@ It means that at least `3` read-pairs need to support the UMI-group (based on th
 
     excludes variant if: AF(normal) / AF(tumor) > 0.3
 
-**Post-call Observation database Filters**
+Post-call Observation database Filters
+********************************************
+
+This section contains population database frequency filters.
 
 *GNOMADAF_POPMAX*: Maximum Allele Frequency across populations
 
@@ -499,6 +509,11 @@ The variants scored as `PASS` or `triallelic_sites` are included in the final vc
 
 **Whole Genome Sequencing (WGS)**
 **********************************
+
+Calling and quality filtration
+******************************************
+
+This section focuses on calling and quality filters.
 
 **Sentieon's TNscope**
 =======================
@@ -582,25 +597,10 @@ The `TNscope <https://www.biorxiv.org/content/10.1101/250647v1.abstract>`_ algor
 
     excludes variant if: AF(normal) / AF(tumor) > 0.3
 
-**Post-call Observation database Filters**
 
-*GNOMADAF_POPMAX*: Maximum Allele Frequency across populations
-
-::
-
-    GNOMADAF_popmax <= 0.001 (or) GNOMADAF_popmax == "."
-
-::
-
-    SWEGENAF <= 0.01  (or) SWEGENAF == "."
-
-*Frq*: Frequency of observation of the variants from normal `Clinical` samples
-
-::
-
-    Frq <= 0.01  (or) Frq == "."
 
 The variants scored as `PASS` or `triallelic_sites` are included in the final vcf file (`SNV.somatic.<CASE_ID>.tnscope.<research/clinical>.filtered.pass.vcf.gz`).
+
 
 **TNscope filtering (tumor_only)**
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -660,7 +660,10 @@ The somatic variants in TNscope raw VCF file (`SNV.somatic.<CASE_ID>.tnscope.all
 
     SOR < 3
 
-**Post-call Observation database Filters**
+Post-call Observation database Filters
+********************************************
+
+This section contains population database frequency filters.
 
 *GNOMADAF_POPMAX*: Maximum Allele Frequency across populations
 
