@@ -12,6 +12,8 @@ if config["analysis"]["sequencing_type"] == 'targeted':
             vcf_tnscope=vcf_dir + "sentieon_tnscope/SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.research.mnvs.vcf",
         benchmark:
             Path(benchmark_dir,'post_process_tnscope_' + config["analysis"]["case_id"] + ".tsv").as_posix()
+        singularity:
+            Path(singularity_image,config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
         params:
             merge_mnvs=get_script_path("merge_mnp.py"),
             tmpdir=tempfile.mkdtemp(prefix=tmp_dir),
