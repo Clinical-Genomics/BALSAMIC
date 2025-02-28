@@ -253,18 +253,18 @@ class VCFFilter(BaseModel):
         filter_name: str
         field: str
         Description: str (optional); filter description
-        sequencing_type: str (optional); specific sequencing type such WES or TGA for which to apply the filter
         analysis_type: str (optional); specific sequencing type such paired or single for which to apply the filter
         variant_caller: str (optional); the specific variant caller for which to apply the filter
+        exome: bool (optional); if the filter should only be applied for exome
     """
 
     tag_value: Optional[float] = None
     filter_name: str
     field: Optional[str] = None
     Description: Optional[str] = None
-    sequencing_type: Optional[str] = None
     analysis_type: Optional[str] = None
     variant_caller: Optional[str] = None
+    exome: Optional[bool] = None
 
 
 class StructuralVariantFilters(BaseModel):

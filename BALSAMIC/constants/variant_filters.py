@@ -1,6 +1,5 @@
 from BALSAMIC.models.params import VCFFilter
 from BALSAMIC.constants.analysis import (
-    SequencingType,
     AnalysisType,
     BioinfoTools,
 )
@@ -159,10 +158,10 @@ class BaseSNVFilters:
         cls,
         category: Literal["clinical", "research", "quality"],
         analysis_type: Optional[Enum] = None,
-        sequencing_type: Optional[Enum] = None,
         variant_caller: Optional[Enum] = None,
         soft_filter_normals: Optional[bool] = None,
         exclude_variantcaller_filters: Optional[bool] = False,
+        exome: Optional[bool] = False,
     ) -> List[VCFFilter]:
         """
         Shared filtering logic to get filters based on criteria.
@@ -170,7 +169,6 @@ class BaseSNVFilters:
         Args:
             category (Literal["clinical", "research", "quality"]): The filter category to use.
             analysis_type (Optional[Enum]): Filter based on analysis type (default: None).
-            sequencing_type (Optional[Enum]): Filter based on sequencing type (default: None).
             variant_caller (Optional[Enum]): Filter based on variant caller (default: None).
             soft_filter_normals (Optional[bool]): If True, excludes filters in MATCHED_NORMAL_FILTER_NAMES.
             exclude_variantcaller_filters (Optional[bool]): If True, excludes the variantcaller filters.
@@ -189,12 +187,12 @@ class BaseSNVFilters:
                     or getattr(f, "analysis_type", None) in {None, analysis_type}
                 )
                 and (
-                    sequencing_type is None
-                    or getattr(f, "sequencing_type", None) in {None, sequencing_type}
-                )
-                and (
                     variant_caller is None
                     or getattr(f, "variant_caller", None) in {None, variant_caller}
+                )
+                and (
+                    exome is None
+                    or getattr(f, "exome", None) in {None, exome}
                 )
             )
 
@@ -222,7 +220,6 @@ class BaseSNVFilters:
         cls,
         category: Literal["clinical", "research", "quality"],
         analysis_type: Optional[Enum] = None,
-        sequencing_type: Optional[Enum] = None,
         variant_caller: Optional[Enum] = None,
         soft_filter_normals: Optional[bool] = None,
     ) -> str:
@@ -232,7 +229,6 @@ class BaseSNVFilters:
         Args:
             category (Literal["clinical", "research", "quality"]): The filter category to use.
             analysis_type (Optional[Enum]): Filter based on analysis type (default: None).
-            sequencing_type (Optional[Enum]): Filter based on sequencing type (default: None).
             variant_caller (Optional[Enum]): Filter based on variant caller (default: None).
             soft_filter_normals (Optional[bool]): If True, removes filters in MATCHED_NORMAL_FILTER_NAMES.
 
@@ -243,7 +239,6 @@ class BaseSNVFilters:
         filters = cls.filter_criteria(
             category,
             analysis_type,
-            sequencing_type,
             variant_caller,
             soft_filter_normals,
         )
@@ -260,9 +255,9 @@ class BaseSNVFilters:
         cls,
         category: Literal["clinical", "research", "quality"],
         analysis_type: Optional[Enum] = None,
-        sequencing_type: Optional[Enum] = None,
         variant_caller: Optional[Enum] = None,
         exclude_variantcaller_filters: Optional[bool] = True,
+        exome: Optional[bool] = False,
     ) -> List[VCFFilter]:
         """
         Get a list of filters matching the specified attributes.
@@ -270,7 +265,6 @@ class BaseSNVFilters:
         Args:
             category (Literal["clinical", "research", "quality"]): The filter category to use.
             analysis_type (Optional[Enum]): Filter based on analysis type (default: None).
-            sequencing_type (Optional[Enum]): Filter based on sequencing type (default: None).
             variant_caller (Optional[Enum]): Filter based on variant caller (default: None).
             exclude_variantcaller_filters (Optional[bool]): If True, excludes the variantcaller filters.
 
@@ -281,9 +275,9 @@ class BaseSNVFilters:
         return cls.filter_criteria(
             category,
             analysis_type,
-            sequencing_type,
             variant_caller,
             exclude_variantcaller_filters=exclude_variantcaller_filters,
+            exome=exome,
         )
 
 
@@ -358,13 +352,13 @@ class TgaSNVFilters(BaseSNVFilters):
             tag_value=50,
             filter_name="balsamic_low_tumor_dp",
             field="INFO",
-            sequencing_type=SequencingType.TARGETED,
+            exome=False,
         ),
         VCFFilter(
             tag_value=20,
             filter_name="balsamic_low_tumor_dp",
             field="INFO",
-            sequencing_type=SequencingType.WES,
+            exome=True,
         ),
         VCFFilter(
             tag_value=30,
