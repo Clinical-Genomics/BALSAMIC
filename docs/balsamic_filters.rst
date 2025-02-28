@@ -263,11 +263,6 @@ The `TNscope <https://www.biorxiv.org/content/10.1101/250647v1.abstract>`_ algor
 
     interval_padding = 100
 
-*pcr_indel_model*:  PCR indel model used to weed out false positive indels more or less aggressively.
-
-::
-
-    pcr_indel_model = conservative
 
 **Post-call Filters**
 
