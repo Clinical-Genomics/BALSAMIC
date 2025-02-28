@@ -1,11 +1,3 @@
-# Variantcaller parameters
-VARCALL_PARAMS = {
-    "tnscope": {
-        "tumor": "--min_init_tumor_lod 1.0 --min_tumor_lod 8",
-        "normal": "--min_init_normal_lod 0.5 --min_normal_lod 1.0",
-    }
-}
-
 # Configuration of VCF settings
 VCF_DICT = {
     "tnscope_umi": {
@@ -115,7 +107,7 @@ VCF_DICT = {
     },
 }
 
-SLEEP_BEFORE_START = 800
+SLEEP_BEFORE_START = 1500
 
 WORKFLOW_PARAMS = {
     "bam_post_processing": {
@@ -205,7 +197,7 @@ WORKFLOW_PARAMS = {
         "padding": 100,
         "disable_detect": "sv",
     },
-    "tnscope_tga_tumor_only": {
+    "tnscope_tga": {
         "algo": "TNscope",
         "filter_tumor_af": 0.0005,
         "pcr_model": "NONE",
@@ -214,15 +206,15 @@ WORKFLOW_PARAMS = {
         "error_rate": 5,
         "prunefactor": 3,
         "padding": 100,
+        "disable_detect": "sv",
     },
-    "tnscope_tga_tumor_normal": {
+    "tnscope_wgs": {
         "algo": "TNscope",
-        "filter_tumor_af": 0.0005,
+        "init_tumorLOD": 1.0,
+        "min_tumorLOD": 8,
+        "init_normalLOD": 0.5,
+        "min_normalLOD": 1.0,
+        "disable_detect": "sv",
         "pcr_model": "NONE",
-        "min_tumorLOD": 4,
-        "init_tumorLOD": 0.5,
-        "error_rate": 5,
-        "prunefactor": 3,
-        "padding": 100,
     },
 }

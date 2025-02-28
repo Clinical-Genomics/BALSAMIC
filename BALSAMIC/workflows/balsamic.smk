@@ -29,7 +29,6 @@ from BALSAMIC.constants.variant_filters import (
     get_tag_and_filtername,
 )
 from BALSAMIC.constants.workflow_params import (
-    VARCALL_PARAMS,
     WORKFLOW_PARAMS,
     SLEEP_BEFORE_START,
 )

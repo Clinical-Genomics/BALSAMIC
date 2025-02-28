@@ -12,26 +12,25 @@ rule sentieon_tnscope_tga_tumor_normal:
         bed = config["panel"]["capture_kit"],
         dbsnp = config["reference"]["dbsnp"]
     output:
-        vcf_tnscope = vcf_dir + "sentieon_tnscope" + "/" + "ALL.somatic." + config["analysis"]["case_id"] + ".tnscope.vcf.gz",
+        vcf_tnscope = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.vcf.gz",
         namemap_snv = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.sample_name_map",
-        namemap_sv = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".tnscope.sample_name_map",
     benchmark:
         Path(benchmark_dir, "sentieon_tnscope_umi_" + config["analysis"]["case_id"] + ".tsv").as_posix()
     params:
-        algo = params.tnscope_tga_tumor_normal.algo,
-        error_rate = params.tnscope_tga_tumor_normal.error_rate,
-        init_tumor_lod = params.tnscope_tga_tumor_normal.init_tumorLOD,
-        padding = params.tnscope_tga_tumor_normal.padding,
-        pcr_model = params.tnscope_tga_tumor_normal.pcr_model,
-        prune_factor = params.tnscope_tga_tumor_normal.prunefactor,
-        tumor_af = params.tnscope_tga_tumor_normal.filter_tumor_af,
-        tumor_lod = params.tnscope_tga_tumor_normal.min_tumorLOD,
+        algo = params.tnscope_tga.algo,
+        error_rate = params.tnscope_tga.error_rate,
+        init_tumor_lod = params.tnscope_tga.init_tumorLOD,
+        padding = params.tnscope_tga.padding,
+        pcr_model = params.tnscope_tga.pcr_model,
+        prune_factor = params.tnscope_tga.prunefactor,
+        tumor_af = params.tnscope_tga.filter_tumor_af,
+        tumor_lod = params.tnscope_tga.min_tumorLOD,
         case_name= config["analysis"]["case_id"],
         tumor= "TUMOR",
         normal= "NORMAL",
         sentieon_exec=config_model.sentieon.sentieon_exec,
         sentieon_lic=config_model.sentieon.sentieon_license,
-        tmpdir= tempfile.mkdtemp(prefix=tmp_dir),
+        housekeeper_id= {"id": config["analysis"]["case_id"],"tags": "research"}
     threads:
         get_threads(cluster_config, "sentieon_tnscope_tga_tumor_normal")
     message:
@@ -51,6 +50,7 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 --interval {input.bed} \
 --interval_padding {params.padding} \
 --algo {params.algo} \
+--disable_detector sv \
 --tumor_sample {params.tumor} \
 --normal_sample {params.normal} \
 --dbsnp {input.dbsnp} \
@@ -65,7 +65,6 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 {output.vcf_tnscope};
 
 echo -e \"{params.tumor}\\tTUMOR\\n{params.normal}\\tNORMAL\" > {output.namemap_snv};
-cp {output.namemap_snv} {output.namemap_sv}
         """
 
 rule vardict_tumor_normal:

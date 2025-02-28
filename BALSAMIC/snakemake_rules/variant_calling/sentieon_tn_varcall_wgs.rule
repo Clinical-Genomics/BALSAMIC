@@ -12,27 +12,32 @@ rule sentieon_tnscope_wgs_tumor_normal:
         recalT = expand(bam_dir + "tumor.recal_data.table"),
         recalN = expand(bam_dir + "normal.recal_data.table"),
     output:
-        vcf_tnscope = vcf_dir + "sentieon_tnscope/ALL.somatic." + config["analysis"]["case_id"] + ".tnscope.vcf.gz",
+        vcf_tnscope = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.vcf.gz",
         namemap_snv = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.sample_name_map",
-        namemap_sv = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".tnscope.sample_name_map",
     benchmark:
         Path(benchmark_dir, 'sentieon_TNscope_' + config[ "analysis" ][ "case_id" ] + ".tsv").as_posix()
     params:
-        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         tumor = "TUMOR",
         normal = "NORMAL",
-        pcr_model = params.common.pcr_model,
-        tumor_options = VARCALL_PARAMS["tnscope"]["tumor"],
-        normal_options = VARCALL_PARAMS["tnscope"]["normal"],
-        sentieon_exec=config_model.sentieon.sentieon_exec,
-        sentieon_lic=config_model.sentieon.sentieon_license,
-        case_name = config["analysis"]["case_id"]
+        sentieon_exec = config_model.sentieon.sentieon_exec,
+        sentieon_lic = config_model.sentieon.sentieon_license,
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
+        algo = params.tnscope_wgs.algo,
+        init_tumor_lod = params.tnscope_wgs.init_tumorLOD,
+        min_tumor_lod = params.tnscope_wgs.min_tumorLOD,
+        init_normal_lod = params.tnscope_wgs.init_normalLOD,
+        min_normal_lod = params.tnscope_wgs.min_normalLOD,
+        pcr_model = params.tnscope_wgs.pcr_model,
+        disable_detect = params.tnscope_wgs.disable_detect,
+        case_name = config["analysis"]["case_id"],
+        housekeeper_id= {"id": config["analysis"]["case_id"],"tags": "research"}
     threads:
         get_threads(cluster_config, 'sentieon_tnscope_wgs_tumor_normal')
     message:
-        ("Calling SNVs and SVs using Sentieon TNscope for sample {params.case_name}")
+        ("Calling SNVs using Sentieon TNscope for sample {params.case_name}")
     shell:
         """
+mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
 export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
@@ -44,16 +49,19 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 -q {input.recalT} \
 -i {input.bamN} \
 -q {input.recalN} \
---algo TNscope \
+--algo {params.algo} \
+--disable_detector {params.disable_detect} \
 --tumor_sample {params.tumor} \
 --normal_sample {params.normal} \
 --dbsnp {input.dbsnp} \
 --cosmic {input.cosmic} \
 --pcr_indel_mode {params.pcr_model} \
-{params.tumor_options} \
-{params.normal_options} {output.vcf_tnscope};
+--min_init_tumor_lod {params.init_tumor_lod} \
+--min_tumor_lod {params.min_tumor_lod} \
+--min_init_normal_lod {params.init_normal_lod} \
+--min_normal_lod {params.min_normal_lod} \
+{output.vcf_tnscope};
 
 echo -e \"{params.tumor}\\tTUMOR\\n{params.normal}\\tNORMAL\" > {output.namemap_snv};
-cp {output.namemap_snv} {output.namemap_sv}
 rm -rf {params.tmpdir};
         """
