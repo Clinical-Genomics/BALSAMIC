@@ -222,6 +222,7 @@ class BaseSNVFilters:
         analysis_type: Optional[Enum] = None,
         variant_caller: Optional[Enum] = None,
         soft_filter_normals: Optional[bool] = None,
+        exome: Optional[bool] = False,
     ) -> str:
         """
         Get a set of filter names based on various attributes.
@@ -241,6 +242,7 @@ class BaseSNVFilters:
             analysis_type,
             variant_caller,
             soft_filter_normals,
+            exome,
         )
         # Extract filter_names
         filter_names = [f.filter_name for f in filters]
