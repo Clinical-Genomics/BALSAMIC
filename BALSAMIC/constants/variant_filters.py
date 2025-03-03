@@ -229,17 +229,17 @@ class BaseSNVFilters:
             analysis_type (Optional[Enum]): Filter based on analysis type (default: None).
             variant_caller (Optional[Enum]): Filter based on variant caller (default: None).
             soft_filter_normals (Optional[bool]): If True, removes filters in MATCHED_NORMAL_FILTER_NAMES.
-
+            exome (Optional[bool]): Filter based on exome sequencing (default: False).
         Returns:
             str: bcftools filter string
         """
         # Use the shared filtering logic and extract filter names
         filters = cls.filter_criteria(
-            category,
-            analysis_type,
-            variant_caller,
-            soft_filter_normals,
-            exome,
+            category=category,
+            analysis_type=analysis_type,
+            variant_caller=variant_caller,
+            soft_filter_normals=soft_filter_normals,
+            exome=exome,
         )
         # Extract filter_names
         filter_names = [f.filter_name for f in filters]
