@@ -22,11 +22,13 @@ def get_singularity_bind_paths(
         get_resolved_fastq_files_directory(sample_config["analysis"]["fastq_path"])
     )
     cache_dir: Path = Path(os.path.commonpath(sample_config["reference"].values()))
+    sentieon_install_dir: Path = Path(sample_config["sentieon"]["sentieon_install_dir"])
     singularity_bind_paths: List[SingularityBindPath] = [
         SingularityBindPath(source=fastq_dir, destination=fastq_dir),
         SingularityBindPath(source=ASSETS_DIR, destination=ASSETS_DIR),
         SingularityBindPath(source=analysis_dir, destination=analysis_dir),
         SingularityBindPath(source=cache_dir, destination=cache_dir),
+        SingularityBindPath(source=sentieon_install_dir, destination=sentieon_install_dir),
     ]
     if sample_config.get("panel"):
         capture_kit_path: Path = Path(sample_config.get("panel").get("capture_kit"))
