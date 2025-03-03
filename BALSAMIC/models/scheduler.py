@@ -120,6 +120,13 @@ class Scheduler(BaseModel):
             return f"--ntasks {ntasks}"
         return ""
 
+    def get_memory_option(self) -> str:
+        """Return the maximum memory allocation."""
+        mem: str = self.job_properties["cluster"].get("mem")
+        if mem:
+            return f"--mem {mem}MB"
+        return ""
+
     def get_time_option(self) -> str:
         """Return the allocation time."""
         time: str = self.job_properties["cluster"].get("time")
@@ -166,6 +173,7 @@ class Scheduler(BaseModel):
             f"{self.get_acctg_freq_option()} "
             f"{self.get_ntasks_option()} "
             f"{self.get_time_option()} "
+            f"{self.get_memory_option()} "
             f"{self.get_partition_option()} "
             f"{self.job_script} "
         )

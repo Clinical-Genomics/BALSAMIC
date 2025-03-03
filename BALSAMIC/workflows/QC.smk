@@ -70,8 +70,11 @@ params = BalsamicWorkflowConfig.model_validate(WORKFLOW_PARAMS)
 # Fastp parameters
 fastp_parameters: Dict = get_fastp_parameters(config_model)
 
+analysis_type = config_model.analysis.analysis_type
+sequencing_type = config_model.analysis.sequencing_type
+
 # Capture kit name
-if config["analysis"]["sequencing_type"] != "wgs":
+if sequencing_type != "wgs":
     capture_kit = os.path.split(config["panel"]["capture_kit"])[1]
 
 # explicitly check if cluster_config dict has zero keys.
@@ -92,12 +95,10 @@ LOG.info('Genome version set to %s', config["reference"]["genome_version"])
 os.environ['TMPDIR'] = get_result_dir(config)
 
 # Include rules
-analysis_type = config['analysis']["analysis_type"]
-sequence_type = config['analysis']["sequencing_type"]
 
 rules_to_include = []
 for workflow_type, value in SNAKEMAKE_RULES.items():
-    if workflow_type in ["common", analysis_type + "_" + sequence_type]:
+    if workflow_type in ["common", analysis_type + "_" + sequencing_type]:
         rules_to_include.extend(value.get("qc", []) + value.get("align", []) + value.get("misc", []))
 rules_to_include = [rule for rule in rules_to_include if "umi" not in rule and "report" not in rule]
 
