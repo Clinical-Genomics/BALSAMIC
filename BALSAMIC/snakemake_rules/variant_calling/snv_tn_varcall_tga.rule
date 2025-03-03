@@ -18,19 +18,20 @@ rule sentieon_tnscope_tga_tumor_normal:
         Path(benchmark_dir, "sentieon_tnscope_umi_" + config["analysis"]["case_id"] + ".tsv").as_posix()
     params:
         algo = params.tnscope_tga.algo,
-        case_name= config["analysis"]["case_id"],
         error_rate = params.tnscope_tga.error_rate,
         init_tumor_lod = params.tnscope_tga.init_tumorLOD,
-        normal = "NORMAL",
         padding = params.tnscope_tga.padding,
         pcr_model = params.tnscope_tga.pcr_model,
         prune_factor = params.tnscope_tga.prunefactor,
-        sentieon_exec=config_model.sentieon.sentieon_exec,
-        sentieon_lic=config_model.sentieon.sentieon_license,
-        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-        tumor = "TUMOR",
         tumor_af = params.tnscope_tga.filter_tumor_af,
         tumor_lod = params.tnscope_tga.min_tumorLOD,
+        case_name= config["analysis"]["case_id"],
+        disable_detect= params.tnscope_tga.disable_detect,
+        tmpdir= tempfile.mkdtemp(prefix=tmp_dir),
+        tumor= "TUMOR",
+        normal= "NORMAL",
+        sentieon_exec=config_model.sentieon.sentieon_exec,
+        sentieon_lic=config_model.sentieon.sentieon_license,
         housekeeper_id= {"id": config["analysis"]["case_id"],"tags": "research"}
     threads:
         get_threads(cluster_config, "sentieon_tnscope_tga_tumor_normal")
@@ -51,7 +52,7 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 --interval {input.bed} \
 --interval_padding {params.padding} \
 --algo {params.algo} \
---disable_detector sv \
+--disable_detector {params.disable_detect} \
 --tumor_sample {params.tumor} \
 --normal_sample {params.normal} \
 --dbsnp {input.dbsnp} \
