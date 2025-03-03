@@ -172,7 +172,7 @@ class BaseSNVFilters:
             variant_caller (Optional[Enum]): Filter based on variant caller (default: None).
             soft_filter_normals (Optional[bool]): If True, excludes filters in MATCHED_NORMAL_FILTER_NAMES.
             exclude_variantcaller_filters (Optional[bool]): If True, excludes the variantcaller filters.
-
+            exome (Optional[bool]): Filter based on exome sequencing (default: False).
         Returns:
             List[VCFFilter]: A list of matching filter objects.
         """
@@ -266,7 +266,7 @@ class BaseSNVFilters:
             analysis_type (Optional[Enum]): Filter based on analysis type (default: None).
             variant_caller (Optional[Enum]): Filter based on variant caller (default: None).
             exclude_variantcaller_filters (Optional[bool]): If True, excludes the variantcaller filters.
-
+            exome (Optional[bool]): Filter based on exome sequencing (default: False).
         Returns:
             List[VCFFilter]: A list of matching filter objects.
         """

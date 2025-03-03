@@ -26,16 +26,15 @@ Changed:
 * Updated cluster resources for tnscope WGS TN https://github.com/Clinical-Genomics/BALSAMIC/pull/1535
 * Disable SV calling in TNscope https://github.com/Clinical-Genomics/BALSAMIC/pull/1541
 
-
 Removed:
 ^^^^^^^^
 * Remove WGS-level GC-bias metric from TGA workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1521
 
 Fixed:
 ^^^^^^
-
 * Merged VarDict and TNscope variants now correctly show both callers in FOUND_IN info field https://github.com/Clinical-Genomics/BALSAMIC/pull/1499
 * Fixed somalier container https://github.com/Clinical-Genomics/BALSAMIC/pull/1538
+
 
 [16.0.1]
 -------
