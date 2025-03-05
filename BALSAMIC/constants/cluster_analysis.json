@@ -27,6 +27,10 @@
 		"time": "01:00:00",
 		"n": 1
 	},
+	"pad_bedfile": {
+		"time": "01:00:00",
+		"n": 1
+	},
 	"cnvkit_create_coverage": {
 		"time": "6:00:00",
 		"n": 18
@@ -206,12 +210,12 @@
 	},
 	"vardict_tumor_normal": {
 		"time": "12:00:00",
-		"n": 1,
+		"n": 8,
 		"mem": 30000
 	},
 	"vardict_tumor_only": {
 		"time": "10:00:00",
-		"n": 1,
+		"n": 8,
 		"mem": 30000
 	},
 	"sentieon_TNscope": {
