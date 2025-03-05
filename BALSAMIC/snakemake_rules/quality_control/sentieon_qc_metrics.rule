@@ -8,7 +8,8 @@ if config["analysis"]["sequencing_type"] == 'wgs':
             reference = config["reference"]["reference_genome"]
         output:
             wgs_metrics = qc_dir + "{sample_type}.{sample}_sentieon_wgs_metrics.txt",
-            coverage_metrics = qc_dir + "{sample_type}.{sample}_coverage.gz"
+            coverage_metrics_y = qc_dir + "{sample_type}.{sample}_Y_cov_per_base.txt",
+            coverage_metrics_x = qc_dir + "{sample_type}.{sample}_X_cov_per_base.txt"
         benchmark:
             Path(benchmark_dir,'sentieon_wgs_metrics_' + "{sample_type}_{sample}.tsv").as_posix()
         params:
@@ -41,14 +42,15 @@ if config["analysis"]["sequencing_type"] == 'wgs':
     -r {input.reference} \
     --algo CoverageMetrics \
     --gene_list {params.gene_list} {params.cov_threshold} \
-    {output.coverage_metrics}_tmp;
+    {params.tmpdir}/coverage_per_base_wgs.txt ;
     
-    gzip -c {output.coverage_metrics}_tmp > {output.coverage_metrics} ;
-    rm {output.coverage_metrics}_tmp ;
+    grep ^Y {params.tmpdir}/coverage_per_base_wgs.txt | cut -f2 > {output.coverage_metrics_y} ;
+    grep ^X {params.tmpdir}/coverage_per_base_wgs.txt | cut -f2 > {output.coverage_metrics_x} ;
+
     rm -rf {params.tmpdir} ;
             """
 
-    rule sentieon_qc_metrics:
+    rule sentieon_qc_metric_wgs:
         input:
             ref = config["reference"]["reference_genome"],
             bam_files = lambda wildcards: config_model.get_bam_name_per_lane(bam_dir = bam_dir, sample_name = wildcards.sample)
@@ -94,14 +96,12 @@ if config["analysis"]["sequencing_type"] == 'wgs':
     rm -rf {params.tmpdir}
             """
 else:
-    rule sentieon_qc_metrics:
+    rule sentieon_qc_metrics_tga:
         input:
             ref=config["reference"]["reference_genome"],
             bam=lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample, specified_suffix="align_sort"),
         output:
             insert_size_metrics=Path(qc_dir,"{sample_type}.{sample}.insert_size_metrics.txt").as_posix(),
-            gc_bias_metrics=Path(qc_dir,"{sample_type}.{sample}.gc_bias.txt").as_posix(),
-            gc_bias_summary=Path(qc_dir,"{sample_type}.{sample}.gc_bias_summary.txt").as_posix(),
             quality_by_cycle_metrics=Path(qc_dir,"{sample_type}.{sample}.quality_by_cycle_metrics.txt").as_posix(),
             quality_distribution_metrics=Path(qc_dir,"{sample_type}.{sample}.quality_distribution_metrics.txt").as_posix(),
             base_distribution_metrics=Path(qc_dir,"{sample_type}.{sample}.base_distribution_by_cycle_metrics.txt").as_posix()
@@ -130,7 +130,6 @@ else:
     -r {input.ref} \
     -i {input.bam} \
     --algo InsertSizeMetricAlgo --min_read_ratio {params.min_read_ratio} {output.insert_size_metrics} \
-    --algo GCBias --summary {output.gc_bias_summary} {output.gc_bias_metrics} \
     --algo MeanQualityByCycle {output.quality_by_cycle_metrics} \
     --algo QualDistribution {output.quality_distribution_metrics} \
     --algo BaseDistributionByCycle {output.base_distribution_metrics} ;
@@ -138,32 +137,60 @@ else:
     rm -rf {params.tmpdir}
             """
 
-rule sentieon_plot_qc_metrics:
-    input:
-        insert_size_metrics = Path(qc_dir,"{sample_type}.{sample}.insert_size_metrics.txt").as_posix(),
-        gc_bias_metrics = Path(qc_dir,"{sample_type}.{sample}.gc_bias.txt").as_posix(),
-        quality_by_cycle_metrics = Path(qc_dir,"{sample_type}.{sample}.quality_by_cycle_metrics.txt").as_posix(),
-        quality_distribution_metrics = Path(qc_dir,"{sample_type}.{sample}.quality_distribution_metrics.txt").as_posix()
-    output:
-        insert_size_pdf =  Path(qc_dir,"{sample_type}.{sample}.insert_size_metrics.pdf").as_posix(),
-        gc_bias_pdf = Path(qc_dir,"{sample_type}.{sample}.gc_bias.pdf").as_posix(),
-        quality_by_cycle_pdf = Path(qc_dir,"{sample_type}.{sample}.quality_by_cycle_metrics.pdf").as_posix(),
-        quality_distribution_pdf = Path(qc_dir,"{sample_type}.{sample}.quality_distribution_metrics.pdf").as_posix(),
-    benchmark:
-        Path(benchmark_dir, "sentieon_plot_qc_metrics_{sample_type}.{sample}.tsv").as_posix()
-    params:
-        sample_id = "{sample}",
-        sentieon_exec = config_model.sentieon.sentieon_exec,
-        sentieon_lic = config_model.sentieon.sentieon_license,
-    threads:
-        get_threads(cluster_config,'sentieon_plot_qc_metrics')
-    message:
-        ("Creates plots from various QC metrics by Sentieon mimicking Picard tools"
-        "Current sample: {params.sample_id}")
-    shell:
-        """
-{params.sentieon_exec} plot InsertSizeMetricAlgo {input.insert_size_metrics} -o {output.insert_size_pdf} ; 
-{params.sentieon_exec} plot GCBias {input.gc_bias_metrics} -o {output.gc_bias_pdf} ; 
-{params.sentieon_exec} plot MeanQualityByCycle {input.quality_by_cycle_metrics} -o {output.quality_by_cycle_pdf} ; 
-{params.sentieon_exec} plot QualDistribution {input.quality_distribution_metrics} -o {output.quality_distribution_pdf} ;
-        """
+if config["analysis"]["sequencing_type"] == 'wgs':
+    rule sentieon_plot_qc_metrics_wgs:
+        input:
+            insert_size_metrics = Path(qc_dir,"{sample_type}.{sample}.insert_size_metrics.txt").as_posix(),
+            gc_bias_metrics = Path(qc_dir,"{sample_type}.{sample}.gc_bias.txt").as_posix(),
+            quality_by_cycle_metrics = Path(qc_dir,"{sample_type}.{sample}.quality_by_cycle_metrics.txt").as_posix(),
+            quality_distribution_metrics = Path(qc_dir,"{sample_type}.{sample}.quality_distribution_metrics.txt").as_posix()
+        output:
+            insert_size_pdf =  Path(qc_dir,"{sample_type}.{sample}.insert_size_metrics.pdf").as_posix(),
+            gc_bias_pdf = Path(qc_dir,"{sample_type}.{sample}.gc_bias.pdf").as_posix(),
+            quality_by_cycle_pdf = Path(qc_dir,"{sample_type}.{sample}.quality_by_cycle_metrics.pdf").as_posix(),
+            quality_distribution_pdf = Path(qc_dir,"{sample_type}.{sample}.quality_distribution_metrics.pdf").as_posix(),
+        benchmark:
+            Path(benchmark_dir, "sentieon_plot_qc_metrics_{sample_type}.{sample}.tsv").as_posix()
+        params:
+            sample_id = "{sample}",
+            sentieon_exec = config_model.sentieon.sentieon_exec,
+            sentieon_lic = config_model.sentieon.sentieon_license,
+        threads:
+            get_threads(cluster_config,'sentieon_plot_qc_metrics')
+        message:
+            ("Creates plots from various QC metrics by Sentieon mimicking Picard tools"
+            "Current sample: {params.sample_id}")
+        shell:
+            """
+    {params.sentieon_exec} plot InsertSizeMetricAlgo {input.insert_size_metrics} -o {output.insert_size_pdf} ; 
+    {params.sentieon_exec} plot GCBias {input.gc_bias_metrics} -o {output.gc_bias_pdf} ; 
+    {params.sentieon_exec} plot MeanQualityByCycle {input.quality_by_cycle_metrics} -o {output.quality_by_cycle_pdf} ; 
+    {params.sentieon_exec} plot QualDistribution {input.quality_distribution_metrics} -o {output.quality_distribution_pdf} ;
+            """
+else:
+    rule sentieon_plot_qc_metrics_tga:
+        input:
+            insert_size_metrics = Path(qc_dir,"{sample_type}.{sample}.insert_size_metrics.txt").as_posix(),
+            quality_by_cycle_metrics = Path(qc_dir,"{sample_type}.{sample}.quality_by_cycle_metrics.txt").as_posix(),
+            quality_distribution_metrics = Path(qc_dir,"{sample_type}.{sample}.quality_distribution_metrics.txt").as_posix()
+        output:
+            insert_size_pdf =  Path(qc_dir,"{sample_type}.{sample}.insert_size_metrics.pdf").as_posix(),
+            quality_by_cycle_pdf = Path(qc_dir,"{sample_type}.{sample}.quality_by_cycle_metrics.pdf").as_posix(),
+            quality_distribution_pdf = Path(qc_dir,"{sample_type}.{sample}.quality_distribution_metrics.pdf").as_posix(),
+        benchmark:
+            Path(benchmark_dir, "sentieon_plot_qc_metrics_{sample_type}.{sample}.tsv").as_posix()
+        params:
+            sample_id = "{sample}",
+            sentieon_exec = config_model.sentieon.sentieon_exec,
+            sentieon_lic = config_model.sentieon.sentieon_license,
+        threads:
+            get_threads(cluster_config,'sentieon_plot_qc_metrics')
+        message:
+            ("Creates plots from various QC metrics by Sentieon mimicking Picard tools"
+            "Current sample: {params.sample_id}")
+        shell:
+            """
+    {params.sentieon_exec} plot InsertSizeMetricAlgo {input.insert_size_metrics} -o {output.insert_size_pdf} ; 
+    {params.sentieon_exec} plot MeanQualityByCycle {input.quality_by_cycle_metrics} -o {output.quality_by_cycle_pdf} ; 
+    {params.sentieon_exec} plot QualDistribution {input.quality_distribution_metrics} -o {output.quality_distribution_pdf} ;
+            """
