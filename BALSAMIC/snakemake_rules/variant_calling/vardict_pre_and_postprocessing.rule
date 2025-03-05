@@ -28,7 +28,7 @@ sed 's/^chr//g;/_/d' {input.chrom} | sort -k1,1 > {params.pad_bed_dir}hg19.chrom
 
 bedtools slop -b 100 -i {input.bed} -g {params.pad_bed_dir}hg19.chrom.sizes \
 | sort -k1,1 -k2,2n \
-| bedtools merge > {params.pad_bed_dir}100bp_padding_{params.origin_bed}; done;
+| bedtools merge > {params.pad_bed_dir}100bp_padding_{params.origin_bed} ;
 
 readlink -f {input.bam};
         """
