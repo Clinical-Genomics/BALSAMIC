@@ -25,6 +25,7 @@ Changed:
 * Change VarDict memory usage to fix crashes in production https://github.com/Clinical-Genomics/BALSAMIC/pull/1537
 * Updated cluster resources for tnscope WGS TN https://github.com/Clinical-Genomics/BALSAMIC/pull/1535
 * Disable SV calling in TNscope https://github.com/Clinical-Genomics/BALSAMIC/pull/1541
+* Remove VarDict parallelization per chromosome https://github.com/Clinical-Genomics/BALSAMIC/pull/1544
 
 Removed:
 ^^^^^^^^
