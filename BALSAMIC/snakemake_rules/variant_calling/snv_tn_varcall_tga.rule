@@ -96,7 +96,7 @@ rule vardict_tumor_normal:
         """
 export TMPDIR={params.tmpdir};
 export _JAVA_OPTIONS="-Djava.io.tmpdir={params.tmpdir} -Xss256k"; 
-export VAR_DICT_OPTS='\"-Xms5G\" \"-Xmx15G\" \"-XX:+UseG1GC\" \"-XX:MaxHeapFreeRatio=50\" \"-verbose:gc\" \"-XX:+PrintGCDetails\"'; 
+export VAR_DICT_OPTS='\"-Xms5G\" \"-Xmx15G\" \"-XX:+UseG1GC\" \"-XX:MaxHeapFreeRatio=50\"'; 
 
 vardict-java -I 600 -G {input.fa} -f {params.af} -N {params.case_name} \
 -b \"{input.bamT}|{input.bamN}\" \
