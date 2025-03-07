@@ -46,6 +46,7 @@ class SequencingType(StrEnum):
 
     TARGETED: str = "targeted"
     WGS: str = "wgs"
+    WES: str = "wes"
 
 
 class SampleType(StrEnum):
@@ -119,6 +120,7 @@ class BioinfoTools(StrEnum):
     SVDB: str = "svdb"
     TABIX: str = "tabix"
     TIDDIT: str = "tiddit"
+    TNSCOPE: str = "tnscope"
     VARDICT: str = "vardict"
     VCF2CYTOSURE: str = "vcf2cytosure"
     VCFANNO: str = "vcfanno"

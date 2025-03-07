@@ -8,7 +8,7 @@ rule bcftools_get_somaticINDEL_research:
   output:
     vcf_indel_research = vcf_dir + "SNV.somatic.{case_name}.{var_caller}.indel.research.vcf.gz",
   benchmark:
-    Path(benchmark_dir, "vep_somatic_research_snv.{case_name}.{var_caller}.tsv").as_posix()
+    Path(benchmark_dir, "bcftools_get_somaticINDEL_research.{case_name}.{var_caller}.tsv").as_posix()
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
   params:
@@ -29,7 +29,7 @@ rule cadd_annotate_somaticINDEL_research:
   output:
     cadd_indel_research = vep_dir + "SNV.somatic.{case_name}.{var_caller}.cadd_indel.research.tsv.gz",
   benchmark:
-    Path(benchmark_dir, "vep_somatic_research_snv.{case_name}.{var_caller}.tsv").as_posix()
+    Path(benchmark_dir, "cadd_annotate_somaticINDEL_research.{case_name}.{var_caller}.tsv").as_posix()
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("cadd") + ".sif").as_posix()
   params:
@@ -52,7 +52,7 @@ rule bcftools_annotate_somaticINDEL_research:
   output:
     vcf_indel_research = vep_dir + "SNV.somatic.{case_name}.{var_caller}.cadd_indel.research.vcf.gz",
   benchmark:
-    Path(benchmark_dir, "vep_somatic_research_snv.{case_name}.{var_caller}.tsv").as_posix()
+    Path(benchmark_dir, "bcftools_annotate_somaticINDEL_research.{case_name}.{var_caller}.tsv").as_posix()
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
   params:
@@ -88,7 +88,7 @@ rule vep_annotate_somaticSNV_research:
     vcf_snv_unfiltered = vep_dir + "SNV.somatic.{case_name}.{var_caller}.research.vcf.gz",
     vcfanno_research_toml = vep_dir + "SNV.somatic.{case_name}.{var_caller}_vcfanno_research.toml"
   benchmark:
-    Path(benchmark_dir, "vep_somatic_research_snv.{case_name}.{var_caller}.tsv").as_posix()
+    Path(benchmark_dir, "vep_annotate_somaticSNV_research.{case_name}.{var_caller}.tsv").as_posix()
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix()
   params:
@@ -133,7 +133,7 @@ rule vcfanno_annotate_somaticSNV_clinical:
   output:
     vcf_snv_clinical = vep_dir + "SNV.somatic.{case_name}.{var_caller}.clinical.vcf.gz",
   benchmark:
-    Path(benchmark_dir, "vcfanno_somatic_clinical_snv.{case_name}.{var_caller}.tsv").as_posix()
+    Path(benchmark_dir, "vcfanno_annotate_somaticSNV_clinical.{case_name}.{var_caller}.tsv").as_posix()
   singularity:
     Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix()
   params:

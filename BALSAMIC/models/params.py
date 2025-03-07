@@ -1,5 +1,5 @@
 """Balsamic analysis parameters models."""
-from typing import Optional
+from typing import List, Optional
 
 from pydantic import BaseModel, ConfigDict, field_validator
 from BALSAMIC.constants.analysis import SequencingType
@@ -142,54 +142,20 @@ class UMIParamsConsensuscall(BaseModel):
     tag: str = "XR"
 
 
-class UMIParamsTNscope(BaseModel):
-    """This class defines the params settings used as constants in UMI workflow-rule tnscope.
-
-    Attributes:
-        algo: str; choice of sentieon varcall algorithm. eg. 'TNscope'
-        disable_detect: str; disable variant detector. eg 'sv' or 'snv_indel'
-        filter_tumor_af: float (required); minimum allelic frequency to detect
-        min_tumorLOD: int (required); minimum tumor log odds in the final call of variants
-        init_tumorLOD: float (required); minimum tumor log odds in the initial pass calling variants
-        error_rate: int (required); allow error-rate to consider in calling
-        prunefactor: int (required); pruning factor in the kmer graph
-        padding: int(required); amount to pad bed interval regions
-        pcr_model: str (required). PCR indel model used to weed out false positive indels. Eg: none- PCR free samples.
-    """
+class ParamsTNscope(BaseModel):
+    """This class defines the TNscope params."""
 
     algo: str
-    filter_tumor_af: float
-    init_tumorLOD: float
-    min_tumorLOD: int
-    error_rate: int
-    prunefactor: int
-    padding: int
-    disable_detect: str
-    pcr_model: str
-
-
-class TGAParamsTNscope(BaseModel):
-    """This class defines the params settings used as constants in TGA workflow-rule tnscope.
-
-    Attributes:
-        algo: str; choice of sentieon varcall algorithm. eg. 'TNscope'
-        filter_tumor_af: float (required); minimum allelic frequency to detect
-        min_tumorLOD: int (required); minimum tumor log odds in the final call of variants
-        init_tumorLOD: float (required); minimum tumor log odds in the initial pass calling variants
-        error_rate: int (required); allow error-rate to consider in calling
-        prunefactor: int (required); pruning factor in the kmer graph
-        padding: int(required); amount to pad bed interval regions
-        pcr_model: str (required). PCR indel model used to weed out false positive indels. Eg: none- PCR free samples.
-    """
-
-    algo: str
-    filter_tumor_af: float
-    init_tumorLOD: float
-    min_tumorLOD: int
-    error_rate: int
-    prunefactor: int
-    padding: int
-    pcr_model: str
+    filter_tumor_af: Optional[float] = None
+    init_tumorLOD: Optional[float] = None
+    min_tumorLOD: Optional[float] = None
+    init_normalLOD: Optional[float] = None
+    min_normalLOD: Optional[float] = None
+    error_rate: Optional[int] = None
+    prunefactor: Optional[int] = None
+    padding: Optional[int] = None
+    disable_detect: Optional[str] = None
+    pcr_model: Optional[str] = None
 
 
 class BAMPostProcessingParams(BaseModel):
@@ -243,6 +209,8 @@ class BalsamicWorkflowConfig(BaseModel):
         umiextract : params defined in the rule sentieon_umiextract
         umiconsensuscall: params defined in the rule sentieon_consensuscall
         tnscope_umi: params defined in the rule sentieon_tnscope_umi
+        tnscope_tga_tumor_only: params defined in the rule sentieon_tnscope_tga_tumor_only
+        tnscope_tga_tumor_normal: params defined in the rule sentieon_tnscope_tga_tumor_normal
 
     Functions:
         - get_manta_settings: Return setting for manta rule
@@ -260,8 +228,9 @@ class BalsamicWorkflowConfig(BaseModel):
     umicommon: UMIParamsCommon
     umiextract: UMIParamsUMIextract
     umiconsensuscall: UMIParamsConsensuscall
-    tnscope_umi: UMIParamsTNscope
-    tnscope_tga: TGAParamsTNscope
+    tnscope_umi: ParamsTNscope
+    tnscope_tga: ParamsTNscope
+    tnscope_wgs: ParamsTNscope
 
     def get_manta_settings(self, sequencing_type) -> str:
         """Return correct setting for manta rules depending on sequencing type."""
@@ -270,11 +239,11 @@ class BalsamicWorkflowConfig(BaseModel):
         return self.manta.tga_settings
 
 
-class VCFAttributes(BaseModel):
+class VCFFilter(BaseModel):
     """General purpose filter to manage various VCF attributes
 
     This class handles three parameters for the purpose filtering variants
-    based on a tag_values, filter_name, and which field in VCF.
+    based on a tag_values, filter_name, and which field in the VCF.
 
     E.g. AD=VCFAttributes(tag_value=5, filter_name="balsamic_low_tumor_ad", field="INFO")
     A value of 5 from INFO field and filter_name will be balsamic_low_tumor_ad
@@ -283,33 +252,28 @@ class VCFAttributes(BaseModel):
         tag_value: float
         filter_name: str
         field: str
+        Description: str (optional); filter description
+        analysis_type: str (optional); specific sequencing type such paired or single for which to apply the filter
+        variant_caller: str (optional); the specific variant caller for which to apply the filter
+        exome: bool (optional); if the filter should only be applied for exome
     """
 
-    tag_value: float
+    tag_value: Optional[float] = None
     filter_name: str
-    field: str
+    field: Optional[str] = None
+    Description: Optional[str] = None
+    analysis_type: Optional[str] = None
+    variant_caller: Optional[str] = None
+    exome: Optional[bool] = None
 
 
-class VarCallerFilter(BaseModel):
-    """General purpose for variant caller filters
+class StructuralVariantFilters(BaseModel):
+    """Variant filters for Structural Variants
 
-    This class handles attributes and filter for variant callers
+    This class handles attributes and filter for structural variants
 
     Attributes:
-        AD: VCFAttributes (required); minimum allelic depth
-        AF_min: VCFAttributes (optional); minimum allelic fraction
-        high_normal_tumor_af_frac: VCFAttributes (optional); maximum normal allele frequency / tumor allele frequency
-        MQ: VCFAttributes (optional); minimum mapping quality
-        DP: VCFAttributes (optional); minimum read depth
-        pop_freq: VCFAttributes (optional); maximum gnomad allele frequency
-        pop_freq_umi: VCFAttributes (optional); maximum gnomad_af for UMI workflow
-        strand_reads: VCFAttributes (optional); minimum strand specific read counts
-        qss: VCFAttributes (optional); minimum sum of base quality scores
-        sor: VCFAttributes (optional); minimum symmetrical log-odds ratio
-        artefact_snv_freq: VCFAttributes (optional); maximum artefact-database snv allele frequency
-        swegen_snv_freq: VCFAttributes (optional); maximum swegen snv allele frequency
         swegen_sv_freq: VCFAttributes (optional); maximum swegen sv allele frequency
-        loqusdb_clinical_snv_freq: VCFAttributes (optional); maximum loqusdb clinical snv allele frequency
         loqusdb_clinical_sv_freq: VCFAttributes (optional); maximum loqusdb clinical sv allele frequency
         low_pr_sr_count: VCFAttributes (optional); minumum Manta variant read support
         varcaller_name: str (required); variant caller name
@@ -318,22 +282,9 @@ class VarCallerFilter(BaseModel):
         description: str (required); comment section for description
     """
 
-    AD: Optional[VCFAttributes] = None
-    AF_min: Optional[VCFAttributes] = None
-    high_normal_tumor_af_frac: Optional[VCFAttributes] = None
-    MQ: Optional[VCFAttributes] = None
-    DP: Optional[VCFAttributes] = None
-    pop_freq: Optional[VCFAttributes] = None
-    pop_freq_umi: Optional[VCFAttributes] = None
-    strand_reads: Optional[VCFAttributes] = None
-    qss: Optional[VCFAttributes] = None
-    sor: Optional[VCFAttributes] = None
-    artefact_snv_freq: Optional[VCFAttributes] = None
-    swegen_snv_freq: Optional[VCFAttributes] = None
-    swegen_sv_freq: Optional[VCFAttributes] = None
-    loqusdb_clinical_snv_freq: Optional[VCFAttributes] = None
-    loqusdb_clinical_sv_freq: Optional[VCFAttributes] = None
-    low_pr_sr_count: Optional[VCFAttributes] = None
+    swegen_sv_freq: Optional[VCFFilter] = None
+    loqusdb_clinical_sv_freq: Optional[VCFFilter] = None
+    low_pr_sr_count: Optional[VCFFilter] = None
     varcaller_name: str
     filter_type: str
     analysis_type: str
