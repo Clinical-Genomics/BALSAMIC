@@ -26,6 +26,7 @@ Changed:
 * Updated cluster resources for tnscope WGS TN https://github.com/Clinical-Genomics/BALSAMIC/pull/1535
 * Disable SV calling in TNscope https://github.com/Clinical-Genomics/BALSAMIC/pull/1541
 * Remove VarDict parallelization per chromosome https://github.com/Clinical-Genomics/BALSAMIC/pull/1544
+* Renamed CLNACC INFO field to CLNVID https://github.com/Clinical-Genomics/BALSAMIC/pull/1547
 
 Removed:
 ^^^^^^^^
