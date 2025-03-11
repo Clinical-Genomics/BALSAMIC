@@ -1,3 +1,10 @@
+[16.0.2]
+--------
+
+Changed:
+^^^^^^^^
+* increased sleep time to 25 minutes https://github.com/Clinical-Genomics/BALSAMIC/pull/1551
+
 [16.0.1]
 -------
 
