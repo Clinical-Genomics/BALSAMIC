@@ -3,7 +3,7 @@
 
 Changed:
 ^^^^^^^^
-* increased sleep time to 25 minutes https://github.com/Clinical-Genomics/BALSAMIC/pull/1551
+* Increased sleep time to 25 minutes https://github.com/Clinical-Genomics/BALSAMIC/pull/1551
 
 [16.0.1]
 -------
