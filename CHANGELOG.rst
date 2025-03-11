@@ -37,6 +37,12 @@ Fixed:
 * Merged VarDict and TNscope variants now correctly show both callers in FOUND_IN info field https://github.com/Clinical-Genomics/BALSAMIC/pull/1499
 * Fixed somalier container https://github.com/Clinical-Genomics/BALSAMIC/pull/1538
 
+[16.0.2]
+--------
+
+Changed:
+^^^^^^^^
+* Increased sleep time to 25 minutes https://github.com/Clinical-Genomics/BALSAMIC/pull/1551
 
 [16.0.1]
 -------
