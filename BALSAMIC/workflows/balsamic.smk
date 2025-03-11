@@ -775,7 +775,7 @@ wildcard_constraints:
 
 rule all:
     input:
-        quality_control_results + analysis_specific_results,
+        quality_control_results + analysis_specific_results, Path(get_result_dir(config), "start_analysis").as_posix(),
     output:
         finish_file=Path(get_result_dir(config), "analysis_finish").as_posix(),
     params:
