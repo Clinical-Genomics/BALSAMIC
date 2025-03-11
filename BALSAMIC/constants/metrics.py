@@ -31,7 +31,7 @@ METRICS: Dict[str, dict] = {
             "GC_DROPOUT": {"condition": {"norm": "lt", "threshold": 1.00}},
         },
         "gicfdna": {
-            "PCT_TARGET_BASES_1000X": {"condition": {"norm": "gt", "threshold": 0.95}},
+            "PCT_TARGET_BASES_1000X": {"condition": {"norm": "gt", "threshold": 0.95}}
         },
         "gmcksolid": {
             "PCT_TARGET_BASES_250X": {"condition": {"norm": "gt", "threshold": 0.95}},
@@ -70,19 +70,25 @@ METRICS: Dict[str, dict] = {
             "PCT_TARGET_BASES_20X": {"condition": {"norm": "gt", "threshold": 0.95}},
         },
         "twistexomecomprehensive": {
+            "GC_DROPOUT": {"condition": {"norm": "lt", "threshold": 10.00}},
+            "AT_DROPOUT": {"condition": {"norm": "lt", "threshold": 10.00}},
             "PCT_TARGET_BASES_20X": {"condition": {"norm": "gt", "threshold": 0.95}},
         },
     },
     "wgs": {
         "MEAN_INSERT_SIZE": {"condition": None},
-        "MEDIAN_COVERAGE": {"condition": None},
+        "MEDIAN_COVERAGE": {
+            "condition": {"norm": "gt", "threshold": 26}
+        },  # Normal sample
         "PERCENT_DUPLICATION": {"condition": None},
-        "PCT_15X": {"condition": {"norm": "gt", "threshold": 0.95}},  # Normal sample
+        "PCT_15X": {"condition": None},
         "PCT_30X": {"condition": None},
         "PCT_60X": {"condition": {"norm": "gt", "threshold": 0.80}},  # Tumor sample
         "PCT_100X": {"condition": None},
         "FOLD_80_BASE_PENALTY": {"condition": None},
         "PCT_PF_READS_IMPROPER_PAIRS": {"condition": {"norm": "le", "threshold": 0.05}},
+        "GC_DROPOUT": {"condition": {"norm": "lt", "threshold": 5.00}},
+        "AT_DROPOUT": {"condition": {"norm": "lt", "threshold": 5.00}},
     },
     "variants": {
         "NUMBER_OF_SITES": {"condition": {"norm": "lt", "threshold": 50000}},
