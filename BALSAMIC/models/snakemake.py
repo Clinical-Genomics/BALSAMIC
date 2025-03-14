@@ -172,7 +172,6 @@ class SnakemakeExecutable(BaseModel):
             f"{f'--mail-user {self.mail_user}' if self.mail_user else ''} "
             f"--profile {self.profile} "
             f"--qos {self.qos} "
-            f"--script-dir {self.script_dir.as_posix()}'"
         )
         return remove_unnecessary_spaces(cluster_submit_command)
 
