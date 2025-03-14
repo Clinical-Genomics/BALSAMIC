@@ -174,6 +174,7 @@ def analysis(
                             f"{snakemake_executable.get_command()}"]
             submit_file.write("\n".join(sbatch_lines) + "\n")
         # Submit sbatch script to cluster
+        subprocess.run(f"sbatch {script_path.as_posix()}/BALSAMIC_snakemake_submit.sh", shell=True)
 
     else:
         LOG.info(f"Starting {analysis_workflow} workflow...")

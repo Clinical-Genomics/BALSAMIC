@@ -174,18 +174,3 @@ class SnakemakeExecutable(BaseModel):
             f"--qos {self.qos}'"
         )
         return remove_unnecessary_spaces(cluster_submit_command)
-
-
-"""
-snakemake --notemp -p --rerun-trigger mtime --directory $a/BALSAMIC_run
- --snakefile $b --configfiles $c 
- --use-singularity --singularity-args 
- '--cleanenv --bind /home/mathias.johansson/development/balsamic/BALSAMIC_dev/BALSAMIC/BALSAMIC/assets:/home/mathias.johansson/development/balsamic/BALSAMIC_dev/BALSAMIC/BALSAMIC/assets'
- -j 999 --jobname BALSAMIC.ethicalwildcat.{rulename}.{jobid}.sh 
- --cluster-config $cc 
- --cluster 'sbatch 
- --error /home/proj/development/cancer/mathias/implementations/change_submit/ethicalwildcat/log/BALSAMIC.ethicalwildcat.{rulename}.{jobid}.err 
- --output /home/proj/development/cancer/mathias/implementations/change_submit/ethicalwildcat/log/BALSAMIC.ethicalwildcat.{rulename}.{jobid}.stdout 
- --qos normal --profile slurm --account development'
-
-"""
