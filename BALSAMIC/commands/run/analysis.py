@@ -162,16 +162,17 @@ def analysis(
         LOG.info(f"Creating sbatch-script to submit jobs.")
         # Create sbatch script here with snakemake run
         with open(f"{script_path.as_posix()}/BALSAMIC_snakemake_submit.sh", "w") as submit_file:
-            submit_file.write("#!/bin/bash -l")
-            submit_file.write("#SBATCH --account=development")
-            submit_file.write("#SBATCH --ntasks=1")
-            submit_file.write("#SBATCH --mem=5G")
-            submit_file.write("#SBATCH --time=20:00:00")
-            submit_file.write("#SBATCH --qos=high")
-            submit_file.write("#SBATCH --cpus-per-task=1")
-            submit_file.write("source /home/proj/production/servers/resources/hasta.scilifelab.se/usestage.sh")
-            submit_file.write("conda activate D_balsamic_DEV_MJ")
-            submit_file.write(f"{snakemake_executable.get_command()}")
+            sbatch_lines = ["#!/bin/bash -l",
+                            "#SBATCH --account=development",
+                            "#SBATCH --ntasks=1",
+                            "#SBATCH --mem=5G",
+                            "#SBATCH --time=20:00:00",
+                            "#SBATCH --qos=high",
+                            "#SBATCH --cpus-per-task=1",
+                            "source /home/proj/production/servers/resources/hasta.scilifelab.se/usestage.sh",
+                            "conda activate D_balsamic_DEV_MJ",
+                            f"{snakemake_executable.get_command()}"]
+            submit_file.write("\n".join(sbatch_lines) + "\n")
         # Submit sbatch script to cluster
 
     else:
