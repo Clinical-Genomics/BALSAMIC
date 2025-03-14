@@ -144,7 +144,6 @@ class SnakemakeExecutable(BaseModel):
             f"{self.get_force_flag()} "
             f"{self.get_run_analysis_flag()} "
             f"{self.get_snakemake_cluster_options()} "
-            f"{self.get_config_options()} "
             f"{self.get_snakemake_options_command()}"
         )
         return remove_unnecessary_spaces(snakemake_command)
@@ -172,7 +171,7 @@ class SnakemakeExecutable(BaseModel):
             f"{f'--mail-user {self.mail_user}' if self.mail_user else ''} "
             f"--profile {self.profile} "
             f"--qos {self.qos} "
-            f"--script-dir {self.script_dir.as_posix()}"
+            f"--script-dir {self.script_dir.as_posix()}'"
         )
         return remove_unnecessary_spaces(cluster_submit_command)
 
