@@ -23,6 +23,7 @@ from BALSAMIC.commands.options import (
     OPTION_QUIET,
     OPTION_RUN_ANALYSIS,
     OPTION_RUN_MODE,
+    OPTION_RUN_INTERACTIVELY,
     OPTION_SAMPLE_CONFIG,
     OPTION_SNAKEFILE,
     OPTION_SNAKEMAKE_OPT,
@@ -57,6 +58,7 @@ LOG = logging.getLogger(__name__)
 @OPTION_QUIET
 @OPTION_RUN_ANALYSIS
 @OPTION_RUN_MODE
+@OPTION_RUN_INTERACTIVELY
 @OPTION_SAMPLE_CONFIG
 @OPTION_SNAKEFILE
 @OPTION_SNAKEMAKE_OPT
@@ -71,6 +73,7 @@ def analysis(
     dragen: bool,
     profile: ClusterProfile,
     run_analysis: bool,
+    run_interactively: bool,
     qos: QOS,
     force_all: bool,
     snakemake_opt: List[str],
@@ -128,7 +131,7 @@ def analysis(
         snakefile if snakefile else get_snakefile(analysis_type, analysis_workflow)
     )
 
-    LOG.info(f"Starting {analysis_workflow} workflow...")
+    LOG.info(f"Organizing snakemake run information")
     snakemake_executable: SnakemakeExecutable = SnakemakeExecutable(
         account=account,
         benchmark=benchmark,
@@ -154,16 +157,28 @@ def analysis(
         snakemake_options=snakemake_opt,
         working_dir=Path(analysis_dir, case_name, "BALSAMIC_run"),
     )
-    subprocess.run(
-        f"{sys.executable} -m {snakemake_executable.get_command()}",
-        shell=True,
-    )
 
-    if run_analysis and run_mode == "cluster":
-        sacct_file_path: Path = Path(log_path, f"{case_name}.sacct")
-        yaml_file_path: Path = Path(result_path, f"{profile}_jobids.yaml")
-        write_sacct_to_yaml(
-            case_id=case_name,
-            sacct_file_path=sacct_file_path,
-            yaml_file_path=yaml_file_path,
+    if not run_interactively:
+        LOG.info(f"Creating sbatch-script to submit jobs.")
+        # Create sbatch script here with snakemake run
+        with open(f"{script_path.as_posix()}/BALSAMIC_snakemake_submit.sh", "w") as submit_file:
+            submit_file.write("#!/bin/bash -l")
+            submit_file.write("#SBATCH --account=development")
+            submit_file.write("#SBATCH --ntasks=1")
+            submit_file.write("#SBATCH --mem=5G")
+            submit_file.write("#SBATCH --time=20:00:00")
+            submit_file.write("#SBATCH --qos=high")
+            submit_file.write("#SBATCH --cpus-per-task=1")
+            submit_file.write("source /home/proj/production/servers/resources/hasta.scilifelab.se/usestage.sh")
+            submit_file.write("conda activate D_balsamic_DEV_MJ")
+            submit_file.write(f"{snakemake_executable.get_command()}")
+        # Submit sbatch script to cluster
+
+    else:
+        LOG.info(f"Starting {analysis_workflow} workflow...")
+        subprocess.run(
+            f"{sys.executable} -m {snakemake_executable.get_command()}",
+            shell=True,
         )
+
+

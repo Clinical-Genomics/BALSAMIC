@@ -141,6 +141,13 @@ OPTION_CLUSTER_CONFIG = click.option(
     help="Cluster configuration JSON file path",
 )
 
+OPTION_RUN_INTERACTIVELY = click.option(
+    "--run-interactively",
+    is_flag=True,
+    default=False,
+    help="Run Snakemake job submission interactively instead of submitting the submitter to cluster.",
+)
+
 OPTION_SOFT_FILTER_NORMAL = click.option(
     "--soft-filter-normal",
     is_flag=True,

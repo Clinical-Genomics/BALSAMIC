@@ -80,12 +80,10 @@ class SnakemakeExecutable(BaseModel):
             return f"disable_variant_caller={disable_variant_caller}"
         return ""
 
-    def get_config_files_option(self) -> str:
-        """Return string representation of the config files."""
-        config_files_option: str = f"--configfiles {self.config_path.as_posix()}"
-        if self.cluster_config_path:
-            config_files_option += f" {self.cluster_config_path.as_posix()}"
-        return config_files_option
+    def get_config_file_option(self) -> str:
+        """Return string representation of the config file."""
+        return f"--configfile {self.config_path.as_posix()}"
+
 
     def get_config_options(self) -> str:
         """Return Snakemake config options to be submitted."""
@@ -140,7 +138,7 @@ class SnakemakeExecutable(BaseModel):
             f"snakemake --notemp -p --rerun-trigger mtime "
             f"--directory {self.working_dir.as_posix()} "
             f"--snakefile {self.snakefile.as_posix()} "
-            f"{self.get_config_files_option()} "
+            f"{self.get_config_file_option()} "
             f"{self.get_singularity_bind_paths_option()} "
             f"{self.get_quiet_flag()} "
             f"{self.get_force_flag()} "
@@ -155,7 +153,7 @@ class SnakemakeExecutable(BaseModel):
         """Return Snakemake cluster options to be submitted."""
         if self.run_mode == RunMode.CLUSTER:
             snakemake_cluster_options: str = (
-                f"--immediate-submit -j {MAX_JOBS} "
+                f"-j {MAX_JOBS} "
                 f"--jobname BALSAMIC.{self.case_id}.{{rulename}}.{{jobid}}.sh "
                 f"--cluster-config {self.cluster_config_path.as_posix()} "
                 f"--cluster {self.get_cluster_submit_command()}"
@@ -166,7 +164,7 @@ class SnakemakeExecutable(BaseModel):
     def get_cluster_submit_command(self) -> str:
         """Get cluster command to be submitted by Snakemake."""
         cluster_submit_command: str = (
-            f"'{sys.executable} {IMMEDIATE_SUBMIT_PATH.as_posix()} "
+            f"'sbatch "
             f"--account {self.account} "
             f"{'--benchmark' if self.benchmark else ''} "
             f"--log-dir {self.log_dir.as_posix()} "
@@ -174,8 +172,21 @@ class SnakemakeExecutable(BaseModel):
             f"{f'--mail-user {self.mail_user}' if self.mail_user else ''} "
             f"--profile {self.profile} "
             f"--qos {self.qos} "
-            f"--script-dir {self.script_dir.as_posix()} "
-            f"{self.case_id} "
-            "{dependencies}'"
+            f"--script-dir {self.script_dir.as_posix()}"
         )
         return remove_unnecessary_spaces(cluster_submit_command)
+
+
+"""
+snakemake --notemp -p --rerun-trigger mtime --directory $a/BALSAMIC_run
+ --snakefile $b --configfiles $c 
+ --use-singularity --singularity-args 
+ '--cleanenv --bind /home/mathias.johansson/development/balsamic/BALSAMIC_dev/BALSAMIC/BALSAMIC/assets:/home/mathias.johansson/development/balsamic/BALSAMIC_dev/BALSAMIC/BALSAMIC/assets'
+ -j 999 --jobname BALSAMIC.ethicalwildcat.{rulename}.{jobid}.sh 
+ --cluster-config $cc 
+ --cluster 'sbatch 
+ --error /home/proj/development/cancer/mathias/implementations/change_submit/ethicalwildcat/log/BALSAMIC.ethicalwildcat.{rulename}.{jobid}.err 
+ --output /home/proj/development/cancer/mathias/implementations/change_submit/ethicalwildcat/log/BALSAMIC.ethicalwildcat.{rulename}.{jobid}.stdout 
+ --qos normal --profile slurm --account development'
+
+"""
