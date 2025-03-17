@@ -104,9 +104,9 @@ def analysis(
 
     # Initialize balsamic model to run validation tests
     config_model = ConfigModel.model_validate(sample_config)
-
+    config_model_dict: dict = config_model.model_dump(by_alias=True, exclude_none=True)
     LOG.info("Dumping updated config model")
-    write_json(json_obj=config_model, path=sample_config_path)
+    write_json(json_obj=config_model_dict, path=sample_config_path)
 
     case_name = config_model.analysis.case_id
 
