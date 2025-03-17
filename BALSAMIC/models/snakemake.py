@@ -7,7 +7,7 @@ from pydantic import BaseModel, DirectoryPath, Field, FilePath, field_validator
 
 from BALSAMIC.constants.analysis import RunMode
 from BALSAMIC.constants.cluster import MAX_JOBS, QOS, ClusterMailType, ClusterProfile
-from BALSAMIC.constants.paths import IMMEDIATE_SUBMIT_PATH
+from BALSAMIC.constants.paths import CONSTANTS_DIR
 from BALSAMIC.utils.utils import remove_unnecessary_spaces
 
 
@@ -154,8 +154,7 @@ class SnakemakeExecutable(BaseModel):
             snakemake_cluster_options: str = (
                 f"-j {MAX_JOBS} "
                 f"--jobname BALSAMIC.{self.case_id}.{{rulename}}.{{jobid}}.sh "
-                f"--cluster-config {self.cluster_config_path.as_posix()} "
-                f"--cluster {self.get_cluster_submit_command()}"
+                f"--profile {CONSTANTS_DIR}"
             )
             return remove_unnecessary_spaces(snakemake_cluster_options)
         return ""

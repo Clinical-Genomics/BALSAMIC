@@ -16,6 +16,9 @@ rule sentieon_dedup:
         sample_id = "{sample}"
     threads:
         get_threads(cluster_config, 'sentieon_dedup')
+    resources:
+        runtime=1440,
+        mem_mb=40000
     message:
         ("Collects read information using sentieon LocusCollector and mark duplicated reads. "
          "Current sample: {params.sample_id}")
@@ -61,6 +64,9 @@ rule sentieon_realign:
         sample_id = "{sample}"
     threads:
         get_threads(cluster_config, 'sentieon_realign')
+    resources:
+        runtime=1440,
+        mem_mb=40000
     message:
         "INDEL realignment using sentieon realigner for sample: {params.sample_id}"
     shell:
@@ -101,6 +107,9 @@ rule sentieon_base_calibration:
         sample = "{sample_type}"
     threads:
         get_threads(cluster_config, 'sentieon_base_calibration')
+    resources:
+        runtime=1440,
+        mem_mb=40000
     message:
         "Base recalibration using Sentieon tools for {params.sample}"
     shell:

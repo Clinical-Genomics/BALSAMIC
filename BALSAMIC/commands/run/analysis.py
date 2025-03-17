@@ -39,7 +39,7 @@ from BALSAMIC.models.config import ConfigModel
 from BALSAMIC.models.snakemake import SnakemakeExecutable
 from BALSAMIC.utils.analysis import get_singularity_bind_paths
 from BALSAMIC.utils.cli import createDir, get_config_path, get_snakefile
-from BALSAMIC.utils.io import write_sacct_to_yaml
+from BALSAMIC.utils.io import write_json
 
 LOG = logging.getLogger(__name__)
 
@@ -98,8 +98,15 @@ def analysis(
     with open(sample_config_path, "r") as sample_fh:
         sample_config = json.load(sample_fh)
 
+    LOG.info(f"Updating config with account and QOS")
+    sample_config["qos"] = qos
+    sample_config["account"] = account
+
     # Initialize balsamic model to run validation tests
     config_model = ConfigModel.model_validate(sample_config)
+
+    LOG.info("Dumping updated config model")
+    write_json(json_obj=config_model, path=sample_config_path)
 
     case_name = config_model.analysis.case_id
 
@@ -130,6 +137,7 @@ def analysis(
     snakefile: Path = (
         snakefile if snakefile else get_snakefile(analysis_type, analysis_workflow)
     )
+
 
     LOG.info(f"Organizing snakemake run information")
     snakemake_executable: SnakemakeExecutable = SnakemakeExecutable(

@@ -12,6 +12,9 @@ rule create_final_vcf_namemap:
         "Creating final vcf namemap."
     threads:
         get_threads(cluster_config, "create_final_vcf_namemap")
+    resources:
+        runtime=10,
+        mem_mb=100
     shell:
         """
 echo -e {params.status_to_sample_id} > {output.namemap};
