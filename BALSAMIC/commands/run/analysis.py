@@ -125,8 +125,8 @@ def analysis(
     LOG.info(f"Updating config model with account and QOS")
     config_model.qos = qos
     config_model.account = account
-    config_model.analysis.log = log_path
-    config_model.analysis.script = script_path
+    config_model.analysis.log = log_path.as_posix()
+    config_model.analysis.script = script_path.as_posix()
 
     config_model_dict: dict = config_model.model_dump(by_alias=True, exclude_none=True)
     LOG.info("Dumping updated config model")
