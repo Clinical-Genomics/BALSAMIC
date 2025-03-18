@@ -141,6 +141,13 @@ OPTION_CLUSTER_CONFIG = click.option(
     help="Cluster configuration JSON file path",
 )
 
+OPTION_CLUSTER_ENV = click.option(
+    "--cluster-env",
+    type=click.Path(),
+    help="Path to cluster environment path (useprod.sh / usestage.sh)",
+)
+
+
 OPTION_RUN_INTERACTIVELY = click.option(
     "--run-interactively",
     is_flag=True,

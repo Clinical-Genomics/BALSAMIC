@@ -17,6 +17,7 @@ from BALSAMIC.commands.options import (
     OPTION_CLUSTER_MAIL_TYPE,
     OPTION_CLUSTER_PROFILE,
     OPTION_CLUSTER_QOS,
+    OPTION_CLUSTER_ENV,
     OPTION_DISABLE_VARIANT_CALLER,
     OPTION_DRAGEN,
     OPTION_FORCE_ALL,
@@ -52,6 +53,7 @@ LOG = logging.getLogger(__name__)
 @OPTION_CLUSTER_MAIL_TYPE
 @OPTION_CLUSTER_PROFILE
 @OPTION_CLUSTER_QOS
+@OPTION_CLUSTER_ENV
 @OPTION_DISABLE_VARIANT_CALLER
 @OPTION_DRAGEN
 @OPTION_FORCE_ALL
@@ -69,6 +71,7 @@ def analysis(
     sample_config: Path,
     run_mode: RunMode,
     cluster_config: Path,
+    cluster_env: Path,
     benchmark: bool,
     dragen: bool,
     profile: ClusterProfile,
@@ -171,13 +174,12 @@ def analysis(
     )
 
 
-    # jobscript: "{config[analysis][script]}/BALSAMIC.{config[analysis][case_id]}.{rulename}.%j.sh"
-
     if not run_interactively:
         LOG.info(f"Creating sbatch-script to submit jobs.")
         # Create sbatch script here with snakemake run
-        conda_env = os.popen("echo $CONDA_DEFAULT_ENV").read().strip()
+        conda_env = os.environ.get("CONDA_DEFAULT_ENV", "")
         LOG.info(f"Setting conda environment in job-submission script to: {conda_env}")
+
         with open(f"{script_path.as_posix()}/BALSAMIC_snakemake_submit.sh", "w") as submit_file:
             sbatch_lines = ["#!/bin/bash -l",
                             f"#SBATCH --account={account}",
@@ -188,11 +190,15 @@ def analysis(
                             "#SBATCH --mem=5G",
                             "#SBATCH --time=60:00:00",
                             f"#SBATCH --qos={qos}",
-                            "#SBATCH --cpus-per-task=1",
-                            "source /home/proj/production/servers/resources/hasta.scilifelab.se/usestage.sh",
-                            f"conda activate {conda_env}",
-                            f"{snakemake_executable.get_command()}"]
+                            "#SBATCH --cpus-per-task=1"]
+            
+            if cluster_env:
+                LOG.info(f"Setting cluster environment in job-submission script to: {cluster_env}")
+                sbatch_lines.append(f"source {cluster_env}")
+
+            sbatch_lines.extend([f"conda activate {conda_env}", f"{snakemake_executable.get_command()}"])
             submit_file.write("\n".join(sbatch_lines) + "\n")
+
         # Submit sbatch script to cluster
         subprocess.run(f"sbatch {script_path.as_posix()}/BALSAMIC_snakemake_submit.sh", shell=True)
 
