@@ -176,12 +176,15 @@ def analysis(
         with open(f"{script_path.as_posix()}/BALSAMIC_snakemake_submit.sh", "w") as submit_file:
             sbatch_lines = ["#!/bin/bash -l",
                             f"#SBATCH --account={account}",
+                            f"#SBATCH --job-name=BALSAMIC_snakemake_submit.{case_name}.%j",
+                            f"#SBATCH --output={log_path}/BALSAMIC_snakemake_submit.{case_name}.%j.out",
+                            f"#SBATCH --error={log_path}/BALSAMIC_snakemake_submit.{case_name}.%j.err",
                             "#SBATCH --ntasks=1",
                             "#SBATCH --mem=5G",
-                            "#SBATCH --time=20:00:00",
+                            "#SBATCH --time=60:00:00",
                             f"#SBATCH --qos={qos}",
                             "#SBATCH --cpus-per-task=1",
-                            "source /home/proj/production/servers/resources/hasta.scilifelab.se/usestage.sh"
+                            "source /home/proj/production/servers/resources/hasta.scilifelab.se/usestage.sh",
                             f"conda activate {conda_env}",
                             f"{snakemake_executable.get_command()}"]
             submit_file.write("\n".join(sbatch_lines) + "\n")
