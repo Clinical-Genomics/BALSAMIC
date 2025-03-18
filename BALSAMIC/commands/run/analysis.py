@@ -139,7 +139,7 @@ def analysis(
     )
 
 
-    LOG.info(f"Organizing snakemake run information")
+    LOG.info("Organizing snakemake run information")
     snakemake_executable: SnakemakeExecutable = SnakemakeExecutable(
         account=account,
         benchmark=benchmark,
@@ -166,19 +166,23 @@ def analysis(
         working_dir=Path(analysis_dir, case_name, "BALSAMIC_run"),
     )
 
+
+
     if not run_interactively:
         LOG.info(f"Creating sbatch-script to submit jobs.")
         # Create sbatch script here with snakemake run
+        conda_env = os.popen("echo $CONDA_DEFAULT_ENV").read().strip()
+        LOG.info(f"Setting conda environment in job-submission script to: {conda_env}")
         with open(f"{script_path.as_posix()}/BALSAMIC_snakemake_submit.sh", "w") as submit_file:
             sbatch_lines = ["#!/bin/bash -l",
-                            "#SBATCH --account=development",
+                            f"#SBATCH --account={account}",
                             "#SBATCH --ntasks=1",
                             "#SBATCH --mem=5G",
                             "#SBATCH --time=20:00:00",
-                            "#SBATCH --qos=high",
+                            f"#SBATCH --qos={qos}",
                             "#SBATCH --cpus-per-task=1",
-                            "source /home/proj/production/servers/resources/hasta.scilifelab.se/usestage.sh",
-                            "conda activate D_balsamic_DEV_MJ",
+                            "source /home/proj/production/servers/resources/hasta.scilifelab.se/usestage.sh"
+                            f"conda activate {conda_env}",
                             f"{snakemake_executable.get_command()}"]
             submit_file.write("\n".join(sbatch_lines) + "\n")
         # Submit sbatch script to cluster
