@@ -98,15 +98,9 @@ def analysis(
     with open(sample_config_path, "r") as sample_fh:
         sample_config = json.load(sample_fh)
 
-    LOG.info(f"Updating config with account and QOS")
-    sample_config["qos"] = qos
-    sample_config["account"] = account
 
     # Initialize balsamic model to run validation tests
     config_model = ConfigModel.model_validate(sample_config)
-    config_model_dict: dict = config_model.model_dump(by_alias=True, exclude_none=True)
-    LOG.info("Dumping updated config model")
-    write_json(json_obj=config_model_dict, path=sample_config_path)
 
     case_name = config_model.analysis.case_id
 
@@ -127,6 +121,16 @@ def analysis(
         if existing_log_files:
             log_path = Path(createDir(log_path.as_posix(), []))
             script_path = Path(createDir(script_path.as_posix(), []))
+
+    LOG.info(f"Updating config model with account and QOS")
+    config_model.qos = qos
+    config_model.account = account
+    config_model.analysis.log = log_path
+    config_model.analysis.script = script_path
+
+    config_model_dict: dict = config_model.model_dump(by_alias=True, exclude_none=True)
+    LOG.info("Dumping updated config model")
+    write_json(json_obj=config_model_dict, path=sample_config_path)
 
     for analysis_sub_dir in analysis_directories_list:
         analysis_sub_dir.mkdir(exist_ok=True)
