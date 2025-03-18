@@ -21,6 +21,9 @@ rule bcftools_filter_merged_research_tumor_only:
     case_name = '{case_name}'
   threads:
     get_threads(cluster_config, 'bcftools_filter_tnscope_research_tumor_only')
+  resources:
+    runtime=280,
+    mem_mb=15000
   message:
     "Filtering TGA tumor-only merged annotated research variants using bcftools for {params.case_name}"
   shell:
@@ -57,6 +60,9 @@ rule bcftools_filter_merged_clinical_tumor_only:
     case_name = '{case_name}'
   threads:
     get_threads(cluster_config, 'bcftools_filter_tnscope_clinical_tumor_only')
+  resources:
+    runtime=280,
+    mem_mb=15000
   message:
     "Filtering TGA tumor-only merged annotated clinical variants using bcftools for {params.case_name}"
   shell:

@@ -4,24 +4,27 @@
 
 
 rule vep_somatic_research_sv:
-  input:
-    vcf_research = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.research.vcf.gz",
-    header = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.sample_name_map",
-  output:
-    vcf_research_vep = vep_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.research.vep.vcf.gz",
-  benchmark:
-    Path(benchmark_dir, "vep_somatic_research_sv." + config["analysis"]["case_id"] + ".svdb.tsv").as_posix()
-  singularity:
-    Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix()
-  params:
-    message_text = "SV.somatic." + config["analysis"]["case_id"] + ".svdb.research.vcf.gz",
-    vep_cache = config["reference"]["vep_dir"],
-    vep_defaults = params.vep.vep_filters
-  threads:
-    get_threads(cluster_config, "vep_somatic_research_sv")
-  message:
-    "Running vep annotation for structural and copy number variants on {params.message_text}"
-  shell:
+    input:
+        vcf_research = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.research.vcf.gz",
+        header = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.sample_name_map",
+    output:
+        vcf_research_vep = vep_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.research.vep.vcf.gz",
+    benchmark:
+        Path(benchmark_dir, "vep_somatic_research_sv." + config["analysis"]["case_id"] + ".svdb.tsv").as_posix()
+    singularity:
+        Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix()
+    params:
+        message_text = "SV.somatic." + config["analysis"]["case_id"] + ".svdb.research.vcf.gz",
+        vep_cache = config["reference"]["vep_dir"],
+        vep_defaults = params.vep.vep_filters
+    threads:
+        get_threads(cluster_config, "vep_somatic_research_sv")
+    resources:
+        runtime=720,
+        mem_mb=80000
+    message:
+        "Running vep annotation for structural and copy number variants on {params.message_text}"
+    shell:
         """
 vep_path=$(dirname $(readlink -f $(which vep)));
 export PERL5LIB=;
@@ -40,24 +43,27 @@ tabix -p vcf -f {output.vcf_research_vep};
 
 
 rule svdb_annotate_somatic_research_sv:
-  input:
-    vcf_sv_research_vep = vep_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.research.vep.vcf.gz",
-    header = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.sample_name_map",
-  output:
-    vcf_research = vep_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.research.vcf.gz",
-  benchmark:
-    Path(benchmark_dir, "svdb_annotate_somatic_research_sv." + config["analysis"]["case_id"] + ".svdb.tsv").as_posix()
-  singularity:
-    Path(singularity_image, config["bioinfo_tools"].get("svdb") + ".sif").as_posix()
-  params:
-    swegen_sv_frequency = swegen_sv,
-    tmp_vcf = temp(vep_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.research.tmp.swegen.vcf"),
-    message_text = "SV.somatic." + config["analysis"]["case_id"] + ".svdb.research.vep.vcf.gz",
-  threads:
-    get_threads(cluster_config, "svdb_annotate_somatic_research_sv")
-  message:
-    "Running SVDB for annotating research SVs with Swegen database on {params.message_text}"
-  shell:
+    input:
+        vcf_sv_research_vep = vep_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.research.vep.vcf.gz",
+        header = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.sample_name_map",
+    output:
+        vcf_research = vep_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.research.vcf.gz",
+    benchmark:
+        Path(benchmark_dir, "svdb_annotate_somatic_research_sv." + config["analysis"]["case_id"] + ".svdb.tsv").as_posix()
+    singularity:
+        Path(singularity_image, config["bioinfo_tools"].get("svdb") + ".sif").as_posix()
+    params:
+        swegen_sv_frequency = swegen_sv,
+        tmp_vcf = temp(vep_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.research.tmp.swegen.vcf"),
+        message_text = "SV.somatic." + config["analysis"]["case_id"] + ".svdb.research.vep.vcf.gz",
+    threads:
+        get_threads(cluster_config, "svdb_annotate_somatic_research_sv")
+    resources:
+        runtime=720,
+        mem_mb=25000
+    message:
+        "Running SVDB for annotating research SVs with Swegen database on {params.message_text}"
+    shell:
         """
 if [[ -f "{params.swegen_sv_frequency}" ]]; then
     svdb --query --bnd_distance 5000 --overlap 0.80 \
@@ -69,7 +75,6 @@ else
 fi
 
 tabix -p vcf -f {output.vcf_research};
-
         """
 
 
@@ -88,6 +93,9 @@ rule svdb_annotate_clinical_obs_somatic_clinical_sv:
         vcf_clinical_obs = temp(vep_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.clinical_obs.vcf"),
     threads:
         get_threads(cluster_config, "svdb_annotate_clinical_obs_somatic_clinical_sv")
+    resources:
+        runtime=600,
+        mem_mb=25000
     message:
         "Annotating structural and copy number variants with clinical observations using SVDB for {params.case_name}",
     shell:
@@ -122,6 +130,9 @@ rule svdb_annotate_somatic_obs_somatic_clinical_sv:
         vcf_somatic_obs = temp(vep_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.somatic_obs.vcf"),
     threads:
         get_threads(cluster_config, "svdb_annotate_somatic_obs_somatic_clinical_sv")
+    resources:
+        runtime=600,
+        mem_mb=25000
     message:
         "Annotating structural and copy number variants with clinical observations using SVDB for {params.case_name}",
     shell:

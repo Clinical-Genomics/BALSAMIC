@@ -22,6 +22,9 @@ rule bcftools_filter_TNscope_umi_research_tumor_normal:
     variant_caller = "tnscope_umi"
   threads:
     get_threads(cluster_config, 'bcftools_filter_TNscope_umi_research_tumor_normal')
+  resources:
+    runtime=280,
+    mem_mb=10000
   message:
     "Filtering TNscope_umi tumor-normal annotated research variants using bcftools and "
     "adding FOUND_IN tags to the output VCF file for {params.case_name} "
@@ -72,6 +75,9 @@ rule bcftools_filter_TNscope_umi_clinical_tumor_normal:
     variant_caller = "tnscope_umi"
   threads:
     get_threads(cluster_config, 'bcftools_filter_TNscope_umi_clinical_tumor_normal')
+  resources:
+    runtime=280,
+    mem_mb=10000
   message:
     "Filtering TNscope_umi tumor-normal annotated clinical variants using bcftools and "
     "adding FOUND_IN tags to the output VCF file for {params.case_name} "

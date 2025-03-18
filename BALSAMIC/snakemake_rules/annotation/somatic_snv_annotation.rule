@@ -13,6 +13,9 @@ rule bcftools_get_somaticINDEL_research:
     Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
   params:
     message_text = "SNV.somatic.{case_name}.{var_caller}.research.vcf.gz",
+  resources:
+    runtime=60,
+    mem_mb=5000
   threads:
     get_threads(cluster_config, "bcftools_get_somaticINDEL_research")
   message:
@@ -34,6 +37,9 @@ rule cadd_annotate_somaticINDEL_research:
     Path(singularity_image, config["bioinfo_tools"].get("cadd") + ".sif").as_posix()
   params:
     message_text = "SNV.somatic.{case_name}.{var_caller}.research.vcf.gz",
+  resources:
+    runtime=1080,
+    mem_mb=5000
   threads:
     get_threads(cluster_config, "cadd_annotate_somaticINDEL_research")
   message:
@@ -60,6 +66,9 @@ rule bcftools_annotate_somaticINDEL_research:
     message_text = "SNV.somatic.{case_name}.{var_caller}.research.vcf.gz",
   threads:
     get_threads(cluster_config, "bcftools_annotate_somaticINDEL_research")
+  resources:
+    runtime=60,
+    mem_mb=5000
   message:
     "Running bcftools to annotate INDELs on {params.message_text}"
   shell:
@@ -100,6 +109,9 @@ rule vep_annotate_somaticSNV_research:
     vep_defaults = params.vep.vep_filters
   threads:
     get_threads(cluster_config, "vep_annotate_somaticSNV_research")
+  resources:
+    runtime=1080,
+    mem_mb=50000
   message:
     "Running vep annotation on SNVs and INDELs in {params.message_text}"
   shell:
@@ -146,6 +158,9 @@ rule vcfanno_annotate_somaticSNV_clinical:
     vcfanno_clinical_toml = temp(vep_dir + "SNV.somatic.{case_name}.{var_caller}_vcfanno_clinical.toml"),
   threads:
     get_threads(cluster_config, "vcfanno_annotate_somaticSNV_clinical")
+  resources:
+    runtime=1080,
+    mem_mb=50000
   message:
     "Running vcfanno annotation for single nuceotide variants on {params.message_text}"
   shell:

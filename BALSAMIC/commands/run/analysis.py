@@ -191,7 +191,7 @@ def analysis(
                             "#SBATCH --time=60:00:00",
                             f"#SBATCH --qos={qos}",
                             "#SBATCH --cpus-per-task=1"]
-            
+
             if cluster_env:
                 LOG.info(f"Setting cluster environment in job-submission script to: {cluster_env}")
                 sbatch_lines.append(f"source {cluster_env}")

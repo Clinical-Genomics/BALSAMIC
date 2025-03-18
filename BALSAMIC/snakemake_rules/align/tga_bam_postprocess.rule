@@ -74,7 +74,7 @@ rule samtools_fixmate:
         sample_id="{sample}"
     resources:
         runtime=270,
-        mem_mb=20000
+        mem_mb=60000
     threads:
         get_threads(cluster_config,"samtools_fixmate")
     message:

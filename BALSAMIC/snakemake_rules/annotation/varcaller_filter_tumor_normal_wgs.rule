@@ -20,6 +20,9 @@ rule bcftools_filter_tnscope_research_tumor_normal:
     case_name = '{case_name}'
   threads:
     get_threads(cluster_config, 'bcftools_filter_tnscope_research_tumor_normal')
+  resources:
+    runtime=280,
+    mem_mb=10000
   message:
     "Filtering WGS tumor-normal tnscope annotated research variants using bcftools for {params.case_name}"
   shell:
@@ -56,6 +59,9 @@ rule bcftools_filter_tnscope_clinical_tumor_normal:
     case_name = '{case_name}',
   threads:
     get_threads(cluster_config, 'bcftools_filter_tnscope_clinical_tumor_normal')
+  resources:
+    runtime=280,
+    mem_mb=10000
   message:
     "Filtering WGS tumor-normal tnscope annotated clinical variants using bcftools for {params.case_name}"
   shell:
