@@ -20,6 +20,9 @@ rule vep_annotate_germlineVAR_tumor:
     vep_defaults = params.vep.vep_filters
   threads:
     get_threads(cluster_config, 'vep_germline')
+  resources:
+    runtime=360,
+    mem_mb=20000
   message:
     "Running vep annotation on germline variants for {params.sample} sample"
   shell:
@@ -59,6 +62,9 @@ rule vep_annotate_germlineVAR_normal:
     vep_defaults = params.vep.vep_filters
   threads:
     get_threads(cluster_config, 'vep_germline')
+  resources:
+    runtime=360,
+    mem_mb=20000
   message:
     "Running vep annotation on germline variants for {params.sample} sample"
   shell:

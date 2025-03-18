@@ -171,6 +171,7 @@ def analysis(
     )
 
 
+    # jobscript: "{config[analysis][script]}/BALSAMIC.{config[analysis][case_id]}.{rulename}.%j.sh"
 
     if not run_interactively:
         LOG.info(f"Creating sbatch-script to submit jobs.")

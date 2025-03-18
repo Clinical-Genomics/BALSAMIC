@@ -18,6 +18,9 @@ rule genmod_score_snvs:
     housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "scored"}
   threads:
     get_threads(cluster_config, 'genmod_score_snvs')
+  resources:
+    runtime=280,
+    mem_mb=1000
   message:
     ("Scoring annotated SNV variants using genmod for {params.case_name}")
   shell:

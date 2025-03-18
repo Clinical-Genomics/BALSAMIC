@@ -17,6 +17,9 @@ rule msisensorpro_scan_reference:
   params:
     tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
     case_id = config["analysis"]["case_id"],
+  resources:
+    runtime=280,
+    mem_mb=1000
   message:
     "Scanning microsatellite sites using msisensor-pro for {params.case_id}"
   shell:
@@ -39,6 +42,9 @@ rule msisensorpro_msi_tumor_normal:
     Path(singularity_image,config["bioinfo_tools"].get("msisensorpro") + ".sif").as_posix()
   threads:
     get_threads(cluster_config,"msisensorpro_msi_tumor_normal")
+  resources:
+    runtime=280,
+    mem_mb=1000
   params:
     tmpdir=tempfile.mkdtemp(prefix=tmp_dir),
     case_id=config["analysis"]["case_id"],
