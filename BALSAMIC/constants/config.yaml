@@ -2,7 +2,7 @@ cluster: "sbatch --account {config[account]} --qos {config[qos]} --time={resourc
 jobs: 999
 default-resources:
     - runtime=120
-    - mem_mm=4000
+    - mem_mb=4000
     - threads=2
 restart-times: 1
 max-status-checks-per-second: 10
