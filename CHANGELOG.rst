@@ -36,6 +36,7 @@ Fixed:
 ^^^^^^
 * Merged VarDict and TNscope variants now correctly show both callers in FOUND_IN info field https://github.com/Clinical-Genomics/BALSAMIC/pull/1499
 * Fixed somalier container https://github.com/Clinical-Genomics/BALSAMIC/pull/1538
+* Removed median coverage qc threshold from wgs tumor samples https://github.com/Clinical-Genomics/BALSAMIC/pull/1555
 
 [16.0.2]
 --------
