@@ -12,8 +12,10 @@ rule bcftools_merge_germlineSNV_research:
         Path(f"{benchmark_dir}/bcftools_merge_germlineSNV_{config['analysis']['case_id']}.tsv").as_posix()
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
-    threads:
-        get_threads(cluster_config, "bcftools_merge_germlineSNV_research")
+    threads: 2
+    resources:
+        runtime=280,
+        mem_mb=10000
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         case_name = config["analysis"]["case_id"],
@@ -57,8 +59,10 @@ rule cnvkit_segment_CNV_research:
         Path(f"{benchmark_dir}/cnvkit_segment_{config['analysis']['case_id']}.tsv").as_posix()
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("cnvkit") + ".sif").as_posix()
-    threads:
-        get_threads(cluster_config, "cnvkit_segment_CNV_research")
+    threads: 18
+    resources:
+        runtime=360,
+        mem_mb=20000
     params:
         housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "cnv"},
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
@@ -131,8 +135,10 @@ rule purecn_call_CNV_research:
         Path(f"{benchmark_dir}/purecn_call_{config['analysis']['case_id']}.tsv").as_posix()
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("purecn") + ".sif").as_posix()
-    threads:
-        get_threads(cluster_config, "purecn_call_CNV_research")
+    threads: 10
+    resources:
+        runtime=360,
+        mem_mb=20000
     params:
         cnv_dir = cnv_dir,
         name = config["analysis"]["case_id"],
@@ -223,8 +229,10 @@ rule cnvkit_call_CNV_research:
         Path(benchmark_dir + "cnvkit_call_CNV_research" + config["analysis"]["case_id"] + ".tsv").as_posix()
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("cnvkit") + ".sif").as_posix()
-    threads:
-        get_threads(cluster_config, "cnvkit_call_CNV_research")
+    threads: 10
+    resources:
+        runtime=360,
+        mem_mb=20000
     params:
         housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "cnv"},
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
@@ -307,8 +315,10 @@ rule delly_cnv_tumor_normal:
         normal = "NORMAL",
         tumor = "TUMOR",
         case_name = config["analysis"]["case_id"]
-    threads:
-        get_threads(cluster_config, "delly_tumor_normal")
+    threads: 36
+    resources:
+        runtime=720,
+        mem_mb=40000
     message:
         ("Calling copy number variants using delly for {params.case_name}")
     shell:
@@ -346,8 +356,10 @@ rule bcftools_sort_cnvkitCNV_research:
         Path(f"{benchmark_dir}/bcftools_sort_cnvkitCNV_research_{config['analysis']['case_id']}.tsv").as_posix()
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
-    threads:
-        get_threads(cluster_config, "bcftools_sort_cnvkitCNV_research")
+    threads: 2
+    resources:
+        runtime=60,
+        mem_mb=10000
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         cnv_dir = cnv_dir,
