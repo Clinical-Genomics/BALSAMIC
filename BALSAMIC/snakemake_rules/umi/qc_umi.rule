@@ -17,8 +17,10 @@ rule picard_umiaware:
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         sample_id = "{sample}"
-    threads:
-        get_threads(cluster_config, "picard_umiaware")
+    threads: 12
+    resources:
+        runtime=280,
+        mem_mb=16000
     message:
         "Marking duplicates using Picardtools with UmiAware for {params.sample_id}"
     shell:
@@ -50,8 +52,10 @@ rule picard_collecthsmetrics_umi:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         baitsetname = os.path.basename(config["panel"]["capture_kit"]),
         sample_id = "{sample}"
-    threads:
-        get_threads(cluster_config, "CollectHsMetrics")
+    threads: 8
+    resources:
+        runtime=280,
+        mem_mb=16000
     message:
         "Collecting HSmetrics using Picardtools for {params.sample_id}"
     shell:
@@ -89,8 +93,10 @@ rule samtools_view_calculatemeanfamilydepth_umi:
     params:
         sample_id = "{sample}",
         tmpdir= tempfile.mkdtemp(prefix=tmp_dir),
-    threads:
-        get_threads(cluster_config, "samtools_view_calculatemeanfamilydepth_umi")
+    threads: 8
+    resources:
+        runtime=280,
+        mem_mb=16000
     message:
         "Calculating mean family depth using samtools and awk for {params.sample_id}"
     shell:

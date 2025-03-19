@@ -23,6 +23,9 @@ rule picard_CollectAlignmentSummaryMetrics:
         sample = "{sample}"
     threads:
         get_threads(cluster_config, "picard_qc")
+    resources:
+        runtime=360,
+        mem_mb=15000
     message:
         "Calculating picard alignment summary metrics for sample {params.sample}"
     shell:

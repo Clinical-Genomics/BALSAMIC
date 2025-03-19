@@ -15,6 +15,9 @@ if config["analysis"]["sequencing_type"] != 'wgs':
             Path(singularity_image, config["bioinfo_tools"].get("vcf2cytosure") + ".sif").as_posix()
         threads:
             get_threads(cluster_config, "vcf2cytosure_convert")
+        resources:
+            runtime=120,
+            mem_mb=10000
         params:
             case_name = config["analysis"]["case_id"],
             gender = config["analysis"]["gender"],
@@ -38,6 +41,9 @@ elif config["analysis"]["sequencing_type"] == 'wgs' and config["analysis"]["anal
             Path(singularity_image, config["bioinfo_tools"].get("vcf2cytosure") + ".sif").as_posix()
         threads:
             get_threads(cluster_config, "vcf2cytosure_convert")
+        resources:
+            runtime=120,
+            mem_mb=10000
         params:
             case_name = config["analysis"]["case_id"],
             gender = config["analysis"]["gender"],
@@ -64,6 +70,9 @@ elif config["analysis"]["sequencing_type"] == "wgs" and config["analysis"]["anal
             Path(singularity_image, config["bioinfo_tools"].get("vcf2cytosure") + ".sif").as_posix()
         threads:
             get_threads(cluster_config, "vcf2cytosure_convert")
+        resources:
+            runtime=120,
+            mem_mb=10000
         params:
             case_name = config["analysis"]["case_id"],
             gender= config["analysis"]["gender"],

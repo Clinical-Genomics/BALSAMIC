@@ -19,6 +19,9 @@ rule bcftools_filter_sv_research:
     housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "research"},
   threads:
     get_threads(cluster_config, "bcftools_filter_svdb_research")
+  resources:
+    runtime=120,
+    mem_mb=10000
   message:
     "Filtering merged research structural and copy number variants using bcftools for {params.case_name}"
   shell:
@@ -50,6 +53,9 @@ rule bcftools_filter_sv_clinical:
     housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "clinical"},
   threads:
     get_threads(cluster_config, "bcftools_filter_svdb_clinical")
+  resources:
+    runtime=120,
+    mem_mb=10000
   message:
     "Filtering merged clinical structural and copy number variants using bcftools for {params.case_name}"
   shell:

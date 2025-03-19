@@ -20,6 +20,9 @@ rule concatenate_fastqs:
         sample="{sample}",
     threads:
         get_threads(cluster_config, "concatenate")
+    resources:
+        runtime=60,
+        mem_mb=20000
     message:
         "Sample {params.sample} FASTQ concatenation per read-direction, before UMI extraction"
     shell:

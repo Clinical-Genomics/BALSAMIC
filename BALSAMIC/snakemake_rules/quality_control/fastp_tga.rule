@@ -20,6 +20,9 @@ rule fastp_adapter_trim_tga:
         sample = "{sample}"
     threads:
         get_threads(cluster_config, 'fastp_quality_trim')
+    resources:
+        runtime=350,
+        mem_mb=15000
     message:
         "Adapter trimming for fastqs for sample: {params.sample}"
     shell:
@@ -59,6 +62,9 @@ rule sentieon_umiextract_tga:
         sample = "{sample}"
     threads:
         get_threads(cluster_config, "sentieon_umiextract")
+    resources:
+        runtime=350,
+        mem_mb=15000
     message:
         "Extracing UMI tags using sentieon for {params.sample}"
     shell:
@@ -95,6 +101,9 @@ rule fastp_quality_trim_tga:
         sample = "{sample}"
     threads:
         get_threads(cluster_config, 'fastp_quality_trim')
+    resources:
+        runtime=350,
+        mem_mb=15000
     message:
         "Quality for fastqs for sample: {params.sample}"
     shell:

@@ -18,8 +18,10 @@ rule picard_CollectHsMetrics_WGS:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         bed_name = Path(config_model.reference["refgene_bed"]).name,
         sample = "{sample}"
-    threads:
-        get_threads(cluster_config, "picard_CollectHsMetrics")
+    threads: 8
+    resources:
+        runtime=360,
+        mem_mb=30000
     message:
         "Calculating picard HsMetrics for sample {params.sample}"
     shell:
@@ -61,8 +63,10 @@ rule picard_CollectWgsMetrics:
         mem = "16g",
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         sample = "{sample}"
-    threads:
-        get_threads(cluster_config,"picard_CollectWgsMetrics")
+    threads: 8
+    resources:
+        runtime=360,
+        mem_mb=16000
     message:
         "Collecting various picard quality metrics for wgs sample {params.sample}"
     shell:

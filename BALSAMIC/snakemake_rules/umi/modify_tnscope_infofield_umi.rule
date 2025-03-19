@@ -12,8 +12,10 @@ rule modify_tnscope_infofield_umi:
         modify_tnscope_infofield = get_script_path("modify_tnscope_infofield.py"),
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         case_name = config["analysis"]["case_id"]
-    threads:
-        get_threads(cluster_config, 'modify_tnscope_infofield')
+    threads: 2
+    resources:
+        runtime=60,
+        mem_mb=10000
     message:
         "Add DP and AF tumor sample info to INFO field for case: {params.case_name}"
     shell:

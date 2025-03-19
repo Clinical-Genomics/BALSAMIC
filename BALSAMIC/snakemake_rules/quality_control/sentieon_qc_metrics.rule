@@ -20,8 +20,10 @@ if config["analysis"]["sequencing_type"] == 'wgs':
             sentieon_exec = config_model.sentieon.sentieon_exec,
             sentieon_lic = config_model.sentieon.sentieon_license,
             sample = '{sample}'
-        threads:
-            get_threads(cluster_config, 'sentieon_wgs_metrics')
+        threads: 8
+        resources:
+            runtime=280,
+            mem_mb=32000
         message:
             "Calculate coverage metrics for wgs cases using sentieon tools for sample {params.sample}"
         shell:
@@ -70,8 +72,10 @@ if config["analysis"]["sequencing_type"] == 'wgs':
             sample_id = "{sample}",
             min_read_ratio=params.insert_size_metrics.min_read_ratio,
             adapter = config["QC"]["adapter"]
-        threads:
-            get_threads(cluster_config, 'sentieon_qc_metrics')
+        threads: 8
+        resources:
+            runtime=280,
+            mem_mb=32000
         message:
             ("Creates multiple different alignment QC metrics based on Picard tools"
              "Current sample: {params.sample_id}")

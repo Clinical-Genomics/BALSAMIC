@@ -26,8 +26,10 @@ rule sentieon_tnscope_wgs_tumor_only:
         disable_detect = params.tnscope_wgs.disable_detect,
         case_name = config["analysis"]["case_id"],
         housekeeper_id= {"id": config["analysis"]["case_id"],"tags": "research"}
-    threads:
-        get_threads(cluster_config, 'sentieon_TNscope_tumor_only')
+    threads: 36
+    resources:
+        runtime=1440,
+        mem_mb=60000
     message:
         "Calling SNVs using sentieon TNscope for {params.case_name}"
     shell:

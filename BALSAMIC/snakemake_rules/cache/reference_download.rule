@@ -12,6 +12,9 @@ rule download_references:
             Path(config["references_dir"], wildcards.reference_path).as_posix()
         ),
     threads: get_threads(cluster_config=cluster_config, rule_name="download_references")
+    resources:
+        runtime=6000,
+        mem_mb=50000
     message:
         "Downloading reference file {output.reference_path}"
     benchmark:

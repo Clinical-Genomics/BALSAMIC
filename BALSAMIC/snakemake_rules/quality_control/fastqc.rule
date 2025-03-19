@@ -16,8 +16,7 @@ rule fastqc:
         fastqc_dir = fastqc_dir,
         fastq_file_name = "{fastq_file_names}",
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir)
-    threads:
-        get_threads(cluster_config, "fastqc")
+    threads: 4
     resources:
         runtime=280,
         mem_mb=8000

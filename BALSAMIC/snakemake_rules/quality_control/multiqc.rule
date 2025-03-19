@@ -133,6 +133,10 @@ rule multiqc:
         qc_dir = qc_dir,
         case_name = config["analysis"]["case_id"],
         exclude_module = "vep"
+    threads: 4
+    resources:
+        runtime=60,
+        mem_mb=10000
     message:
         "Aggregrate quality metrics results using multiqc for sample {params.case_name}"
     shell:

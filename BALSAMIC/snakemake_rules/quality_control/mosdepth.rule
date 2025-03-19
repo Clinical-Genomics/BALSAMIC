@@ -24,8 +24,10 @@ rule mosdepth_coverage:
         quantize = params.mosdepth.quantize,
         sample_name = '{sample}',
         output_dir = qc_dir,
-    threads:
-        get_threads(cluster_config, "mosdepth_coverage")
+    threads: 12
+    resources:
+        runtime=280,
+        mem_mb=12000
     message:
         "Calculate coverage using mosdepth for sample {params.sample_name}"
     shell:

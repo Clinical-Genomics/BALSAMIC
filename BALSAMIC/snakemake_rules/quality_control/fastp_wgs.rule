@@ -21,8 +21,10 @@ rule fastp_quality_and_adapter_trim_wgs:
         quality_trim = " ".join(fastp_parameters["fastp_trim_qual"]),
         adapter_trim = " ".join(fastp_parameters["fastp_trim_adapter"]),
         fastq_pattern = "{fastq_pattern}"
-    threads:
-        get_threads(cluster_config, 'fastp')
+    threads: 12
+    resources:
+        runtime=350,
+        mem_mb=15000
     message:
         "Quality control and trimming of UMI-removed fastqs for fastq pattern: {params.fastq_pattern}"
     shell:

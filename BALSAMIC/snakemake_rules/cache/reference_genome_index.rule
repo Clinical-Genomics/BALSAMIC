@@ -13,6 +13,9 @@ rule picard_dict_reference_genome:
     singularity:
         f"{config['containers_dir']}/{config['bioinfo_tools']['picard']}.{FileType.SIF}"
     threads: get_threads(cluster_config=cluster_config, rule_name="picard_dict_reference_genome")
+    resources:
+        runtime=60,
+        mem_mb=15000
     message:
         "Creating a sequence dictionary for a reference file {input.reference_genome}"
     benchmark:
@@ -36,6 +39,9 @@ rule fasta_index_reference_genome:
     singularity:
         f"{config['containers_dir']}/{config['bioinfo_tools']['samtools']}.{FileType.SIF}"
     threads: get_threads(cluster_config=cluster_config, rule_name="fasta_index_reference_genome")
+    resources:
+        runtime=60,
+        mem_mb=15000
     message:
         "FASTA format indexing of the reference genome file {input.reference_genome}"
     benchmark:
@@ -58,6 +64,9 @@ rule bwa_index_reference_genome:
     singularity:
         f"{config['containers_dir']}/{config['bioinfo_tools']['bwa']}.{FileType.SIF}"
     threads: get_threads(cluster_config=cluster_config, rule_name="bwa_index_reference_genome")
+    resources:
+        runtime=60,
+        mem_mb=15000
     message:
         "BWA indexing of the reference genome file {input.reference_genome}"
     benchmark:

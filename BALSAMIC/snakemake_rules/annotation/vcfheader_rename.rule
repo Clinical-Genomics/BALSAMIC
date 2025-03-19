@@ -18,6 +18,9 @@ rule vcfheader_rename_germline:
         sample_id = config_model.get_sample_name_by_type(SampleType.NORMAL)
     threads:
         get_threads(cluster_config,'vcfheader_rename_germline')
+    resources:
+        runtime=120,
+        mem_mb=10000
     message:
         "Renaming header in DNAscope germline VCF output from {params.sample_name} to {params.sample_id}"
     shell:

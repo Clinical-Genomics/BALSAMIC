@@ -16,8 +16,10 @@ rule sentieon_DNAscope:
         sentieon_exec = config_model.sentieon.sentieon_exec,
         sentieon_lic = config_model.sentieon.sentieon_license,
         sample = '{sample_type}'
-    threads:
-        get_threads(cluster_config, 'sentieon_DNAscope')
+    threads: 36
+    resources:
+        runtime=1440,
+        mem_mb=20000
     message:
         "Calling germline variants using Sentieon DNAscope for {params.sample}"
     shell:
@@ -52,8 +54,10 @@ rule manta_germline:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         runmode = "local",
         sample = "{sample_type}"
-    threads:
-        get_threads(cluster_config,"manta_germline")
+    threads: 16
+    resources:
+        runtime=300,
+        mem_mb=40000
     message:
         "Calling germline variants using manta for {params.sample}"
     shell:

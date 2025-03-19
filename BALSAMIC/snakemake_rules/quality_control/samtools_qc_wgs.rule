@@ -14,8 +14,10 @@ rule samtools_qc:
         Path(singularity_image,config["bioinfo_tools"].get("samtools") + ".sif").as_posix()
     params:
         sample_id = "{sample}"
-    threads:
-        get_threads(cluster_config, "samtools_qc")
+    threads: 16
+    resources:
+        runtime=280,
+        mem_mb=16000
     message:
         "Calculating alignment stats for sample: {params.sample_id}"
     shell:
