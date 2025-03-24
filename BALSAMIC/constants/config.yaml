@@ -9,6 +9,20 @@ max-status-checks-per-second: 10
 local-cores: 1
 
 set-threads:
+    samtools_qc_umi_collapsed: 16
+    samtools_qc_wgs: 16
+    samtools_qc_tga: 16
+    sambamba_exon_depth: 8
+    sambamba_panel_depth: 8
+    cnv_report: 1
+    collect_custom_qc_metrics: 1
+    picard_CollectHsMetrics_WGS: 8
+    picard_CollectAlignmentSummaryMetrics: 8
+    picard_CollectHsMetrics: 8
+    multiqc: 4
+    mosdepth_coverage: 12
+    gatk_create_readcount_pon: 86
+    create_reference: 8
     dragen_align_call_tumor_only: 36
     concatenate_fastqs: 1
     vcfheader_rename_germline: 4
@@ -65,6 +79,48 @@ set-threads:
     gatk_update_vcf_sequence_dictionary: 5
 
 set-resources:
+    samtools_qc_umi_collapsed:
+        runtime: 280
+        mem: 16000
+    samtools_qc_tga:
+        runtime: 280
+        mem: 16000
+    samtools_qc_wgs:
+        runtime: 280
+        mem: 30000
+    sambamba_exon_depth:
+        runtime: 150
+        mem: 16000
+    sambamba_panel_depth:
+        runtime: 150
+        mem: 16000
+    cnv_report:
+        runtime: 20
+        mem: 100
+    collect_custom_qc_metrics:
+        runtime: 20
+        mem: 100
+    picard_CollectHsMetrics_WGS:
+        runtime: 360
+        mem: 16000
+    picard_CollectAlignmentSummaryMetrics:
+        runtime: 360
+        mem: 15000
+    picard_CollectHsMetrics:
+        runtime: 360
+        mem: 15000
+    multiqc:
+        runtime: 60
+        mem: 10000
+    mosdepth_coverage:
+        runtime: 280
+        mem: 12000
+    gatk_create_readcount_pon:
+        runtime: 3600
+        mem: 170000
+    create_reference:
+        runtime: 120
+        mem: 15000
     dragen_align_call_tumor_only:
         runtime: 1200
         mem: 120000

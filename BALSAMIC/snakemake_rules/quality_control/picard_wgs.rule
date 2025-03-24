@@ -18,10 +18,6 @@ rule picard_CollectHsMetrics_WGS:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         bed_name = Path(config_model.reference["refgene_bed"]).name,
         sample = "{sample}"
-    threads: 8
-    resources:
-        runtime=360,
-        mem_mb=30000
     message:
         "Calculating picard HsMetrics for sample {params.sample}"
     shell:

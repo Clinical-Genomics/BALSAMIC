@@ -3,7 +3,6 @@
 
 rule concatenate_fastqs:
     input:
-        wake_up = result_dir + "start_analysis",
         fastqs_fwd=lambda wildcards: config_model.get_all_fastqs_for_sample(
             sample_name=wildcards.sample, fastq_types=[FastqName.FWD]
         ),

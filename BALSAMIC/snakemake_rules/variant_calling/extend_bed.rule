@@ -2,7 +2,6 @@
 rule extend_short_bedregions:
     input:
         baits_bed = config_model.panel.capture_kit,
-        wake_up= result_dir + "start_analysis",
     output:
         baits_bed_expanded=Path(cnv_dir + "capture_kit_expanded.bed").as_posix(),
     benchmark:

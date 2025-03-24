@@ -2,7 +2,7 @@
 # coding: utf-8
 
 
-rule samtools_qc:
+rule samtools_qc_tga:
     input:
         bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample, specified_suffix="align_sort")
     output:
@@ -15,10 +15,6 @@ rule samtools_qc:
         Path(singularity_image,config["bioinfo_tools"].get("samtools") + ".sif").as_posix()
     params:
         sample_id = "{sample}"
-    threads: 16
-    resources:
-        runtime=280,
-        mem_mb=16000
     message:
         "Calculating alignment stats for sample: {params.sample_id}"
     shell:
@@ -41,10 +37,6 @@ rule samtools_qc_umi_collapsed:
         Path(singularity_image,config["bioinfo_tools"].get("samtools") + ".sif").as_posix()
     params:
         sample_id = "{sample}"
-    threads: 16
-    resources:
-        runtime=280,
-        mem_mb=16000
     message:
         "Calculating alignment stats for sample after UMI collapse: {params.sample_id}"
     shell:

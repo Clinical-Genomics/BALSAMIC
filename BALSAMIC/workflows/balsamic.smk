@@ -30,7 +30,6 @@ from BALSAMIC.constants.variant_filters import (
 )
 from BALSAMIC.constants.workflow_params import (
     WORKFLOW_PARAMS,
-    SLEEP_BEFORE_START,
 )
 from BALSAMIC.models.config import ConfigModel
 from BALSAMIC.models.params import BalsamicWorkflowConfig, StructuralVariantFilters

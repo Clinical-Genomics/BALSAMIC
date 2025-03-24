@@ -107,8 +107,6 @@ VCF_DICT = {
     },
 }
 
-SLEEP_BEFORE_START = 10
-
 WORKFLOW_PARAMS = {
     "bam_post_processing": {
         "manta_max_base_quality": 70,

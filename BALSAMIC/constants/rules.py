@@ -30,7 +30,6 @@ canfam_cache_rules: List[str] = common_cache_rules + [
 
 SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
     "common": {
-        "misc": ["snakemake_rules/misc/sleep.rule"],
         "qc": [
             "snakemake_rules/quality_control/fastqc.rule",
             "snakemake_rules/quality_control/multiqc.rule",

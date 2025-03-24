@@ -9,10 +9,6 @@ rule cnv_report:
     params:
         housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "clinical"},
         cnv_report_script= get_script_path("generate_cnv_report.py"),
-    threads: 1
-    resources:
-        runtime=20,
-        mem_mb=100
     message:
         "Generating CNV report PDF"
     shell:
