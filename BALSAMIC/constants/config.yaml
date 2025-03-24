@@ -9,6 +9,14 @@ max-status-checks-per-second: 10
 local-cores: 1
 
 set-threads:
+    dragen_align_call_tumor_only: 36
+    concatenate_fastqs: 1
+    vcfheader_rename_germline: 4
+    vcf2cytosure_convert_tumor_normal: 8
+    vcf2cytosure_convert_tumor_only: 8
+    vcf2cytosure_convert: 8
+    bcftools_filter_sv_clinical: 8
+    bcftools_filter_sv_research: 8
     bcftools_filter_tnscope_clinical_tumor_only: 8
     bcftools_filter_tnscope_research_tumor_only: 8
     bcftools_filter_TNscope_umi_clinical_tumor_only: 4
@@ -57,6 +65,31 @@ set-threads:
     gatk_update_vcf_sequence_dictionary: 5
 
 set-resources:
+    dragen_align_call_tumor_only:
+        runtime: 1200
+        mem: 120000
+        partition: "dragen"
+    concatenate_fastqs:
+        runtime: 60
+        mem: 20000
+    vcfheader_rename_germline:
+        runtime: 120
+        mem: 1000
+    vcf2cytosure_convert_tumor_normal:
+        runtime: 120
+        mem: 10000
+    vcf2cytosure_convert_tumor_only:
+        runtime: 120
+        mem: 10000
+    vcf2cytosure_convert:
+        runtime: 120
+        mem: 10000
+    bcftools_filter_sv_research:
+        runtime: 120
+        mem: 10000
+    bcftools_filter_sv_clinical:
+        runtime: 120
+        mem: 10000
     bcftools_filter_tnscope_clinical_tumor_only:
         runtime: 280
         mem: 30000
