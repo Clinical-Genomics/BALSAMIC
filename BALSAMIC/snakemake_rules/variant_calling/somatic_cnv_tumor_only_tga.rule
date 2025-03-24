@@ -263,7 +263,7 @@ rule delly_cnv_tumor_only:
     threads: 36
     resources:
         runtime=720,
-        mem_mb=40000
+        mem_mb=10000
     message:
         ("Calling copy number variants using delly for {params.case_name}")
     shell:
