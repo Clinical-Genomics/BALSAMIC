@@ -9,18 +9,58 @@ max-status-checks-per-second: 10
 local-cores: 1
 
 set-threads:
+    sentieon_align_sort_umireads: 12
+    cap_base_quality: 10
+    sentieon_dedup_consensus: 36
+    samtools_fixmate: 16
+    bam_compress_tumor: 20
+    bam_compress_normal: 20
+    fastqc: 4
     fastp_adapter_trim_tga: 4
-    purecn_call_CNV_research: 5
+    fastp_quality_trim_tga: 8
+    fastp_quality_and_adapter_trim_wgs: 12
+    sentieon_umiextract_tga: 8
+    purecn_call_CNV_research: 10
     bedtools_pad_bedfile: 1
     vardict_sort: 2
     gatk_update_vcf_sequence_dictionary: 5
 
 set-resources:
+    sentieon_align_sort_umireads:
+        mem: 20000
+        runtime: 1440
+    cap_base_quality:
+        mem: 20000
+        runtime: 300
+    sentieon_dedup_consensus:
+        mem: 15000
+        runtime: 1440
+    samtools_fixmate:
+        mem: 60000
+        runtime: 270
+    bam_compress_tumor:
+        mem: 20000
+        runtime: 280
+    bam_compress_normal:
+        mem: 20000
+        runtime: 280
+    fastqc:
+        mem: 8000
+        runtime: 280
+    fastp_quality_and_adapter_trim_wgs:
+        mem: 15000
+        runtime: 350
     fastp_adapter_trim_tga:
         mem: 20000MB
         runtime: 400
+    fastp_quality_trim_tga:
+        mem: 15000
+        runtime: 350
+    sentieon_umiextract_tga:
+        mem: 15000
+        runtime: 350
     purecn_call_CNV_research:
-        mem: 10000MB
+        mem: 20000MB
     bedtools_pad_bedfile:
         mem: 1000MB
     vardict_sort:
