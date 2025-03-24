@@ -7,3 +7,24 @@ default-resources:
 restart-times: 1
 max-status-checks-per-second: 10
 local-cores: 1
+
+set-threads:
+    fastp_adapter_trim_tga: 4
+    purecn_call_CNV_research: 5
+    bedtools_pad_bedfile: 1
+    vardict_sort: 2
+    gatk_update_vcf_sequence_dictionary: 5
+
+set-resources:
+    fastp_adapter_trim_tga:
+        mem: 20000MB
+        runtime: 400
+    purecn_call_CNV_research:
+        mem: 10000MB
+    bedtools_pad_bedfile:
+        mem: 1000MB
+    vardict_sort:
+        mem: 20000MB
+    gatk_update_vcf_sequence_dictionary:
+        runtime: 600
+        mem: 20000MB

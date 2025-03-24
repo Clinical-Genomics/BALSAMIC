@@ -3,8 +3,7 @@
 rule bedtools_pad_bedfile:
     input:
         bed = config["panel"]["capture_kit"],
-        chrom = config["reference"]["genome_chrom_size"],
-        bam = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample)
+        chrom = config["reference"]["genome_chrom_size"]
     output:
         bed = vcf_dir + "pad_bedfile/" + "100bp_padding_" + capture_kit
     benchmark:

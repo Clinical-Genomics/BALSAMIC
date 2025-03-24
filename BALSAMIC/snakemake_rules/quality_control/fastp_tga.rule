@@ -18,11 +18,6 @@ rule fastp_adapter_trim_tga:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         adapter_trim = " ".join(fastp_parameters["fastp_trim_adapter"]),
         sample = "{sample}"
-    threads:
-        get_threads(cluster_config, 'fastp_quality_trim')
-    resources:
-        runtime=350,
-        mem_mb=15000
     message:
         "Adapter trimming for fastqs for sample: {params.sample}"
     shell:
