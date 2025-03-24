@@ -9,6 +9,18 @@ max-status-checks-per-second: 10
 local-cores: 1
 
 set-threads:
+    somalier_relate: 1
+    somalier_extract_tumor: 1
+    somalier_extract_normal: 1
+    sex_prediction_tga_tumor_only: 2
+    sex_prediction_tga_tumor_normal: 2
+    sex_prediction_wgs_tumor_only: 2
+    sex_prediction_wgs_tumor_normal: 2
+    sentieon_plot_qc_metrics_tga: 4
+    sentieon_plot_qc_metrics_wgs: 4
+    sentieon_qc_metrics_tga: 8
+    sentieon_qc_metric_wgs: 8
+    sentieon_wgs_metrics: 8
     samtools_qc_umi_collapsed: 16
     samtools_qc_wgs: 16
     samtools_qc_tga: 16
@@ -79,6 +91,42 @@ set-threads:
     gatk_update_vcf_sequence_dictionary: 5
 
 set-resources:
+    somalier_relate:
+        runtime: 60
+        mem: 5000
+    somalier_extract_tumor:
+        runtime: 60
+        mem: 5000
+    somalier_extract_normal:
+        runtime: 60
+        mem: 5000
+    sex_prediction_tga_tumor_only:
+        runtime: 60
+        mem: 5000
+    sex_prediction_tga_tumor_normal:
+        runtime: 60
+        mem: 5000
+    sex_prediction_wgs_tumor_only:
+        runtime: 60
+        mem: 5000
+    sex_prediction_wgs_tumor_normal:
+        runtime: 60
+        mem: 5000
+    sentieon_plot_qc_metrics_tga:
+        runtime: 30
+        mem: 2000
+    sentieon_plot_qc_metrics_wgs:
+        runtime: 30
+        mem: 5000
+    sentieon_qc_metrics_tga:
+        runtime: 280
+        mem: 15000
+    sentieon_qc_metric_wgs:
+        runtime: 280
+        mem: 32000
+    sentieon_wgs_metrics:
+        runtime: 280
+        mem: 32000
     samtools_qc_umi_collapsed:
         runtime: 280
         mem: 16000
