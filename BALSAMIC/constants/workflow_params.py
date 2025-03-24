@@ -107,7 +107,7 @@ VCF_DICT = {
     },
 }
 
-SLEEP_BEFORE_START = 1500
+SLEEP_BEFORE_START = 10
 
 WORKFLOW_PARAMS = {
     "bam_post_processing": {
