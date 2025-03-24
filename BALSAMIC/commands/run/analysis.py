@@ -10,7 +10,6 @@ from typing import List
 import click
 
 from BALSAMIC.commands.options import (
-    OPTION_BENCHMARK,
     OPTION_CLUSTER_ACCOUNT,
     OPTION_CLUSTER_CONFIG,
     OPTION_CLUSTER_MAIL,
@@ -18,7 +17,6 @@ from BALSAMIC.commands.options import (
     OPTION_CLUSTER_PROFILE,
     OPTION_CLUSTER_QOS,
     OPTION_CLUSTER_ENV,
-    OPTION_DISABLE_VARIANT_CALLER,
     OPTION_DRAGEN,
     OPTION_FORCE_ALL,
     OPTION_QUIET,
@@ -46,7 +44,6 @@ LOG = logging.getLogger(__name__)
 
 
 @click.command("analysis", short_help="Run the analysis on a sample config-file")
-@OPTION_BENCHMARK
 @OPTION_CLUSTER_ACCOUNT
 @OPTION_CLUSTER_CONFIG
 @OPTION_CLUSTER_MAIL
@@ -54,7 +51,6 @@ LOG = logging.getLogger(__name__)
 @OPTION_CLUSTER_PROFILE
 @OPTION_CLUSTER_QOS
 @OPTION_CLUSTER_ENV
-@OPTION_DISABLE_VARIANT_CALLER
 @OPTION_DRAGEN
 @OPTION_FORCE_ALL
 @OPTION_QUIET
@@ -72,7 +68,6 @@ def analysis(
     run_mode: RunMode,
     cluster_config: Path,
     cluster_env: Path,
-    benchmark: bool,
     dragen: bool,
     profile: ClusterProfile,
     run_analysis: bool,
@@ -84,7 +79,6 @@ def analysis(
     mail_user: str,
     mail_type: ClusterMailType,
     quiet: bool,
-    disable_variant_caller: str,
 ):
     """Run BALSAMIC workflow on the provided sample's config file."""
     LOG.info(f"BALSAMIC started with log level {context.obj['log_level']}.")
@@ -149,13 +143,11 @@ def analysis(
     LOG.info("Organizing snakemake run information")
     snakemake_executable: SnakemakeExecutable = SnakemakeExecutable(
         account=account,
-        benchmark=benchmark,
         case_id=case_name,
         cluster_config_path=cluster_config
         if cluster_config
         else get_config_path(ClusterConfigType.ANALYSIS),
         config_path=sample_config_path,
-        disable_variant_caller=disable_variant_caller,
         dragen=dragen,
         force=force_all,
         log_dir=log_path.as_posix(),

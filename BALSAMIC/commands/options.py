@@ -65,13 +65,6 @@ OPTION_BALSAMIC_CACHE = click.option(
     help="Path to BALSAMIC cache",
 )
 
-OPTION_BENCHMARK = click.option(
-    "--benchmark",
-    default=False,
-    is_flag=True,
-    help="Profile slurm jobs. Make sure you have slurm profiler enabled in your HPC.",
-)
-
 OPTION_CACHE_VERSION = click.option(
     "--cache-version",
     show_default=True,
@@ -197,12 +190,6 @@ OPTION_COSMIC_KEY = click.option(
     required=False,
     type=click.STRING,
     help="Cosmic DB authentication key",
-)
-
-OPTION_DISABLE_VARIANT_CALLER = click.option(
-    "--disable-variant-caller",
-    help=f"Run workflow with selected variant caller(s) disable. Use comma to remove multiple variant callers. Valid "
-    f"values are: {list(VCF_DICT.keys())}",
 )
 
 OPTION_DRAGEN = click.option(

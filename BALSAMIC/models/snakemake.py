@@ -28,11 +28,9 @@ class SnakemakeExecutable(BaseModel):
 
     Attributes:
         account (Optional[str])                                      : Scheduler account.
-        benchmark (Optional[bool])                                   : Slurm jobs profiling option.
         case_id (str)                                                : Analysis case name.
         cluster_config_path (Optional[FilePath])                     : Cluster configuration file path.
         config_path (FilePath)                                       : Sample configuration file.
-        disable_variant_caller (Optional[str])                       : Disable variant caller.
         dragen (Optional[bool])                                      : FLag for enabling or disabling Dragen suite.
         force (bool)                                                 : Force snakemake execution.
         log_dir (Optional[DirectoryPath])                            : Logging directory.
@@ -52,11 +50,9 @@ class SnakemakeExecutable(BaseModel):
     """
 
     account: Optional[str] = None
-    benchmark: bool = False
     case_id: str
     cluster_config_path: Optional[FilePath] = None
     config_path: FilePath
-    disable_variant_caller: Optional[str] = Field(default=None, validate_default=True)
     dragen: bool = False
     force: bool = False
     log_dir: Optional[DirectoryPath] = None
@@ -73,22 +69,14 @@ class SnakemakeExecutable(BaseModel):
     snakemake_options: Optional[List[str]] = None
     working_dir: Path
 
-    @field_validator("disable_variant_caller")
-    def get_disable_variant_caller_option(cls, disable_variant_caller: str) -> str:
-        """Return string representation of the disable_variant_caller option."""
-        if disable_variant_caller:
-            return f"disable_variant_caller={disable_variant_caller}"
-        return ""
-
     def get_config_file_option(self) -> str:
         """Return string representation of the config file."""
         return f"--configfile {self.config_path.as_posix()}"
 
-
     def get_config_options(self) -> str:
         """Return Snakemake config options to be submitted."""
         return remove_unnecessary_spaces(
-            f"--config {self.disable_variant_caller} {self.get_dragen_flag()}"
+            f"{f'--config {self.get_dragen_flag()}' if self.get_dragen_flag() else ''} "
         )
 
     def get_dragen_flag(self) -> str:
@@ -139,6 +127,7 @@ class SnakemakeExecutable(BaseModel):
             f"--directory {self.working_dir.as_posix()} "
             f"--snakefile {self.snakefile.as_posix()} "
             f"{self.get_config_file_option()} "
+            f"{self.get_config_options()} "
             f"{self.get_singularity_bind_paths_option()} "
             f"{self.get_quiet_flag()} "
             f"{self.get_force_flag()} "
@@ -164,7 +153,6 @@ class SnakemakeExecutable(BaseModel):
         cluster_submit_command: str = (
             f"'sbatch "
             f"--account {self.account} "
-            f"{'--benchmark' if self.benchmark else ''} "
             f"--error {self.log_dir.as_posix()}/BALSAMIC.{self.case_id}.{{rulename}}.{{jobid}}.err "
             f"--output {self.log_dir.as_posix()}/BALSAMIC.{self.case_id}.{{rulename}}.{{jobid}}.stdout "         
             f"{f'--mail-type {self.mail_type}' if self.mail_type else ''} "
