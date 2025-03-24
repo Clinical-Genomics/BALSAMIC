@@ -55,11 +55,6 @@ rule sentieon_umiextract_tga:
         sentieon_lic = config_model.sentieon.sentieon_license,
         ds_params = params.umiextract.read_structure,
         sample = "{sample}"
-    threads:
-        get_threads(cluster_config, "sentieon_umiextract")
-    resources:
-        runtime=350,
-        mem_mb=15000
     message:
         "Extracing UMI tags using sentieon for {params.sample}"
     shell:
@@ -94,11 +89,6 @@ rule fastp_quality_trim_tga:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         quality_trim = " ".join(fastp_parameters["fastp_trim_qual"]),
         sample = "{sample}"
-    threads:
-        get_threads(cluster_config, 'fastp_quality_trim')
-    resources:
-        runtime=350,
-        mem_mb=15000
     message:
         "Quality for fastqs for sample: {params.sample}"
     shell:
