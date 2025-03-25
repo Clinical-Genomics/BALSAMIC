@@ -1,7 +1,7 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
 
-rule sentieon_DNAscope:
+rule sentieon_DNAscope_tga:
     input:
         bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_type = wildcards.sample_type),
         ref = config["reference"]["reference_genome"],
@@ -40,7 +40,7 @@ rm -rf {params.tmpdir};
         """
 
 
-rule manta_germline:
+rule manta_germline_tga:
     input:
         fa = config["reference"]["reference_genome"],
         bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_type = wildcards.sample_type, specified_suffix="dedup.fixmate.qualcapped"),
