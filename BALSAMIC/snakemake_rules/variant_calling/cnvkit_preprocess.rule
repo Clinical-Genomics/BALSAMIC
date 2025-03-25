@@ -8,10 +8,6 @@ rule create_target:
         antitargets = cnv_dir + "antitarget.bed",
     singularity:
         Path(singularity_image, "cnvkit.sif").as_posix()
-    threads: 2
-    resources:
-        runtime=360,
-        mem_mb=10000
     benchmark:
         Path(benchmark_dir, "cnvkit.targets.tsv").as_posix()
     shell:
@@ -36,10 +32,6 @@ rule create_coverage:
         min_mapq = params.common.min_mapq,
     singularity:
         Path(singularity_image, "cnvkit.sif").as_posix()
-    threads: 18
-    resources:
-        runtime=360,
-        mem_mb=10000
     message:
         "Segmenting genomic regions using CNVkit for {params.case_name}"
     shell:

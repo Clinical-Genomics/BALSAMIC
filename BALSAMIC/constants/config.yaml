@@ -9,6 +9,21 @@ max-status-checks-per-second: 10
 local-cores: 1
 
 set-threads:
+    sentieon_DNAscope: 36
+    finalize_gens_outputfiles: 1
+    gens_preprocess_tga: 1
+    sentieon_DNAscope_gnomad_tga: 12
+    gens_preprocess_wgs: 1
+    gatk_denoise_read_counts: 10
+    sentieon_DNAscope_gnomad: 36
+    gatk_collectreadcounts: 5
+    bedtools_sort_and_merge: 1
+    extend_short_bedregions: 1
+    create_coverage: 18
+    create_target: 2
+    sentieon_align_sort_umireads_umi: 12
+    sentieon_tnscope_umi_tn: 12
+    sentieon_tnscope_umi: 12
     bam_compress_normal_umi: 20
     bam_compress_tumor_umi: 20
     sentieon_consensusfilter_umi: 10
@@ -106,6 +121,51 @@ set-threads:
     gatk_update_vcf_sequence_dictionary: 5
 
 set-resources:
+    sentieon_DNAscope:
+        runtime: 1440
+        mem: 20000
+    finalize_gens_outputfiles:
+        runtime: 60
+        mem: 10000
+    gens_preprocess_tga:
+        runtime: 60
+        mem: 10000
+    sentieon_DNAscope_gnomad_tga:
+        runtime: 1440
+        mem: 20000
+    gens_preprocess_wgs:
+        runtime: 60
+        mem: 10000
+    gatk_denoise_read_counts:
+        runtime: 600
+        mem: 60000
+    sentieon_DNAscope_gnomad:
+        runtime: 1440
+        mem: 100000
+    gatk_collectreadcounts:
+        runtime: 350
+        mem: 40000
+    bedtools_sort_and_merge:
+        runtime: 20
+        mem: 400
+    extend_short_bedregions:
+        runtime: 20
+        mem: 400
+    create_coverage:
+        runtime: 360
+        mem: 10000
+    create_target:
+        runtime: 360
+        mem: 10000
+    sentieon_align_sort_umireads_umi:
+        runtime: 1440
+        mem: 16000
+    sentieon_tnscope_umi_tn:
+        runtime: 280
+        mem: 16000
+    sentieon_tnscope_umi:
+        runtime: 280
+        mem: 16000
     bam_compress_normal_umi:
         runtime: 280
         mem: 16000

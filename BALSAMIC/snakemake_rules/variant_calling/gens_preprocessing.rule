@@ -18,10 +18,6 @@ if config["analysis"]["sequencing_type"] == SequencingType.WGS:
             sample = "{sample}"
         benchmark:
             Path(benchmark_dir, "sentieon_DNAscope_gnomad_{sample}.tsv").as_posix()
-        threads: 36
-        resources:
-            runtime=1440,
-            mem_mb=100000
         message:
             "Calling germline variants on positions in Gnomad AF > 0.05 using Sentieon DNAscope for {params.sample}"
         shell:
@@ -56,10 +52,6 @@ if config["analysis"]["sequencing_type"] == SequencingType.WGS:
             Path(benchmark_dir,"gatk_denoise_read_counts_{sample}.tsv").as_posix()
         singularity:
             Path(singularity_image,config["bioinfo_tools"].get("gatk") + ".sif").as_posix()
-        threads: 10
-        resources:
-            runtime=600,
-            mem_mb=60000
         message:
             "Running GATK DenoiseReadCounts on {params.sample} for GENS."
         shell:
@@ -89,10 +81,6 @@ if config["analysis"]["sequencing_type"] == SequencingType.WGS:
             sample="{sample}"
         benchmark:
             Path(benchmark_dir, "gens_preprocess_wgs_{sample}.tsv").as_posix()
-        threads: 1
-        resources:
-            runtime=60,
-            mem_mb=10000
         message:
             "Formatting output for GENS for sample: {params.sample}."
         shell:
@@ -117,10 +105,6 @@ else:
             sample="{sample}"
         benchmark:
             Path(benchmark_dir,"sentieon_DNAscope_gnomad_{sample}.tsv").as_posix()
-        threads: 12
-        resources:
-            runtime=1440,
-            mem_mb=20000
         message:
             "Calling germline variants on positions in Gnomad AF > 0.05 using Sentieon DNAscope for {params.sample}"
         shell:
