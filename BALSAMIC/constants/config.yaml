@@ -1,4 +1,4 @@
-cluster: "sbatch --account {config[account]} --qos {config[qos]} --time={resources.runtime} --mem={resources.mem_mb}M --cpus-per-task={threads} --error {config[analysis][log]}/BALSAMIC.{config[analysis][case_id]}.{rulename}.%j.err --output {config[analysis][log]}/BALSAMIC.{config[analysis][case_id]}.{rulename}.%j.out"
+cluster: "sbatch --account {config[account]} --qos {config[qos]} --time={resources.runtime} --mem={resources.mem_mb}M --cpus-per-task={resources.threads} --error {config[analysis][log]}/BALSAMIC.{config[analysis][case_id]}.{rulename}.%j.err --output {config[analysis][log]}/BALSAMIC.{config[analysis][case_id]}.{rulename}.%j.out"
 jobs: 999
 default-resources:
     - runtime=120
