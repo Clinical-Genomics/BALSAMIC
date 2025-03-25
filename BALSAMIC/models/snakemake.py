@@ -124,7 +124,6 @@ class SnakemakeExecutable(BaseModel):
         """Return Snakemake command to be submitted."""
         snakemake_command: str = (
             f"snakemake --notemp -p --rerun-trigger mtime "
-            f"--report {self.log_dir.as_posix()}/resources.html "
             f"--directory {self.working_dir.as_posix()} "
             f"--snakefile {self.snakefile.as_posix()} "
             f"{self.get_config_file_option()} "

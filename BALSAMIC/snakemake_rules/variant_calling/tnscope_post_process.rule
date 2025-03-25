@@ -21,8 +21,6 @@ if config["analysis"]["sequencing_type"] == 'targeted':
             matched_normal_filternames=",".join(BaseSNVFilters.MATCHED_NORMAL_FILTER_NAMES),
             sentieon_exec=config_model.sentieon.sentieon_exec,
             sentieon_lic=config_model.sentieon.sentieon_license,
-        threads:
-            get_threads(cluster_config,'post_process_tnscope')
         message:
             "Merge TNscope SNVs with same phaseID to MNVs."
             "Add DP and AF tumor sample info and FOUND_IN to INFO field: {params.case_name}"
@@ -46,8 +44,6 @@ if config["analysis"]["sequencing_type"] == 'targeted':
             case_name=config["analysis"]["case_id"],
         benchmark:
             Path(benchmark_dir,'tnscope_sort_' + config["analysis"]["case_id"] + ".tsv").as_posix()
-        threads:
-            get_threads(cluster_config,"tnscope_sort")
         message:
             ("Sorting TNscope MNV post-processed files with awk {params.case_name}")
         shell:
@@ -75,8 +71,6 @@ if config["analysis"]["sequencing_type"] == 'targeted':
             tmpdir=tempfile.mkdtemp(prefix=tmp_dir),
             case_name=config["analysis"]["case_id"],
             variant_caller="tnscope"
-        threads:
-            get_threads(cluster_config,'post_process_tnscope')
         message:
             "Add DP and AF tumor sample info and FOUND_IN to INFO field and remove MERGED variants: {params.case_name}"
         shell:

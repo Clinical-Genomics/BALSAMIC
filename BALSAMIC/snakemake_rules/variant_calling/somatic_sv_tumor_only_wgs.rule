@@ -2,7 +2,7 @@
 # coding: utf-8
 
 
-rule manta_tumor_only:
+rule manta_tumor_only_wgs:
     input:
         fa = config["reference"]["reference_genome"],
         bamT = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample)
@@ -21,8 +21,6 @@ rule manta_tumor_only:
         case_name = config["analysis"]["case_id"],
         manta_install_path= "/opt/conda/share/manta-1.6.0-3",
         low_pr_sr_count = [MANTA_FILTERS.low_pr_sr_count.tag_value,MANTA_FILTERS.low_pr_sr_count.filter_name],
-    threads:
-        get_threads(cluster_config, "manta_tumor_only")
     message:
         ("Calling structural variants using manta for {params.case_name} and"
         "index the compressed vcf file")
@@ -56,7 +54,7 @@ rm -rf {params.tmpdir};
       """
 
 
-rule delly_sv_tumor_only:
+rule delly_sv_tumor_only_wgs:
     input:
         fa = config["reference"]["reference_genome"],
         bamT = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
@@ -72,8 +70,6 @@ rule delly_sv_tumor_only:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         tumor = "TUMOR",
         case_name = config["analysis"]["case_id"]
-    threads:
-        get_threads(cluster_config, "delly_tumor_only")
     message:
         ("Calling structural variants using delly for {params.case_name}")
     shell:
@@ -88,7 +84,7 @@ rm -rf {params.tmpdir};
         """
 
 
-rule delly_cnv_tumor_only:
+rule delly_cnv_tumor_only_wgs:
     input:
         fa = config["reference"]["reference_genome"],
         bamT = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
@@ -107,8 +103,6 @@ rule delly_cnv_tumor_only:
         housekeeper_id= {"id": config["analysis"]["case_id"],"tags": "clinical"},
         tumor = "TUMOR",
         case_name = config["analysis"]["case_id"]
-    threads:
-        get_threads(cluster_config, "delly_tumor_only")
     message:
         ("Calling copy number variants using delly for {params.case_name}")
     shell:
@@ -122,7 +116,7 @@ echo -e \"{params.tumor}\\tTUMOR\" > {output.namemap};
 rm -rf {params.tmpdir};
         """
 
-rule tiddit_sv_tumor_only:
+rule tiddit_sv_tumor_only_wgs:
     input:
         fa = config["reference"]["reference_genome"],
         bamT = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample)
@@ -139,8 +133,6 @@ rule tiddit_sv_tumor_only:
         housekeeper_id= {"id": config["analysis"]["case_id"],"tags": "clinical"},
         tumor = "TUMOR",
         case_name = config["analysis"]["case_id"]
-    threads:
-        get_threads(cluster_config, "tiddit_sv_tumor_only")
     message:
         ("Calling structural variants using tiddit for {params.case_name}")
     shell:
@@ -162,7 +154,7 @@ echo -e \"{params.tumor}\\tTUMOR\" > {output.namemap};
 rm -rf {params.tmpdir};
         """
 
-rule cnvpytor_tumor_only:
+rule cnvpytor_tumor_only_wgs:
     input:
         bamT = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
         vcfT = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.vcf.gz",
@@ -180,8 +172,6 @@ rule cnvpytor_tumor_only:
         housekeeper_id= {"id": config["analysis"]["case_id"],"tags": "clinical"},
         tumor = "TUMOR",
         case_name = config["analysis"]["case_id"]
-    threads:
-        get_threads(cluster_config, "cnvpytor_tumor_only")
     message:
         ("Calling copy number variants using cnvpytor for {params.case_name}")
     shell:
@@ -229,7 +219,7 @@ echo -e \"{params.tumor}\\tTUMOR\" > {output.namemap};
 rm -rf {params.tmpdir};
         """
 
-rule igh_dux4_detection_tumor_only:
+rule igh_dux4_detection_tumor_only_wgs:
     input:
         fa = config["reference"]["reference_genome"],
         bamT = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample)
@@ -243,8 +233,6 @@ rule igh_dux4_detection_tumor_only:
         genome_version = config["reference"]["genome_version"],
         custom_sv_detection_script = get_script_path("igh_dux4_detection.sh"),
         case_name = config["analysis"]["case_id"],
-    threads:
-        get_threads(cluster_config, "igh_dux4_detection")
     message:
         "Detecting IGH::DUX4 rearrangement for {params.case_name} using samtools."
     shell:

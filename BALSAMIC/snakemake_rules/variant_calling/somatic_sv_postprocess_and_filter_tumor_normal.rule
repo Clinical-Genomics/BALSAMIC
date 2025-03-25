@@ -16,15 +16,13 @@ if config["analysis"]["sequencing_type"] == 'wgs':
       params:
           case_name=config["analysis"]["case_id"],
           process_cnv=get_script_path("process_CNV.py"),
-      threads:
-          get_threads(cluster_config,"bcftools_process_SV_CNV")
       message:
           ("Processing SVs and CNVs for {params.case_name}")
       shell:
         """
-  bcftools view  --threads {threads} -f PASS -O z -o {output.delly_sv} {input.delly_sv};
+  bcftools view  --threads {resource.threads} -f PASS -O z -o {output.delly_sv} {input.delly_sv};
   
-  bcftools view --threads {threads} -f PASS -O z -o {output.tmp_delly_cnv} {input.delly_cnv};
+  bcftools view --threads {resource.threads} -f PASS -O z -o {output.tmp_delly_cnv} {input.delly_cnv};
   
   python {params.process_cnv} -f {output.tmp_delly_cnv} -c delly | bgzip -l 9 -c > {output.delly_cnv};
   
@@ -54,8 +52,6 @@ else:
       params:
           case_name = config["analysis"]["case_id"],
           process_cnv = get_script_path("process_CNV.py"),
-      threads:
-          get_threads(cluster_config, "bcftools_process_SV_CNV")
       message:
           ("Processing SVs and CNVs for {params.case_name}")
       shell:

@@ -2,7 +2,7 @@
 # coding: utf-8
 
 
-rule manta_tumor_normal:
+rule manta_tumor_normal_tga:
     input:
         fa = config["reference"]["reference_genome"],
         bamN = config_model.get_final_bam_name(bam_dir=bam_dir, sample_name=normal_sample, specified_suffix="dedup.fixmate.qualcapped"),
@@ -59,7 +59,7 @@ echo -e \"{params.normal}\\tNORMAL\\n{params.tumor}\\tTUMOR\" > {output.namemap}
 rm -rf {params.tmpdir};
         """
 
-rule delly_sv_tumor_normal:
+rule delly_sv_tumor_normal_tga:
     input:
         fa = config["reference"]["reference_genome"],
         bamN = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = normal_sample),
