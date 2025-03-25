@@ -9,6 +9,21 @@ max-status-checks-per-second: 10
 local-cores: 1
 
 set-threads:
+    bam_compress_normal_umi: 20
+    bam_compress_tumor_umi: 20
+    sentieon_consensusfilter_umi: 10
+    sentieon_bwa_umiconsensus: 36
+    sentieon_consensuscall_umi: 36
+    samtools_view_calculatemeanfamilydepth_umi: 8
+    picard_collecthsmetrics_umi: 8
+    picard_umiaware: 12
+    modify_tnscope_infofield_umi: 2
+    bcftools_query_generatebackgroundaf_umitable: 8
+    merge_cnv_pdf_reports: 1
+    image_to_pdf: 1
+    msi_to_pdf: 1
+    txt_to_pdf: 1
+    csv_to_pdf: 1
     somalier_relate: 1
     somalier_extract_tumor: 1
     somalier_extract_normal: 1
@@ -91,6 +106,51 @@ set-threads:
     gatk_update_vcf_sequence_dictionary: 5
 
 set-resources:
+    bam_compress_normal_umi:
+        runtime: 280
+        mem: 16000
+    bam_compress_tumor_umi:
+        runtime: 280
+        mem: 16000
+    sentieon_consensusfilter_umi:
+        runtime: 280
+        mem: 16000
+    sentieon_bwa_umiconsensus:
+        runtime: 480
+        mem: 16000
+    sentieon_consensuscall_umi:
+        runtime: 360
+        mem: 16000
+    samtools_view_calculatemeanfamilydepth_umi:
+        runtime: 280
+        mem: 16000
+    picard_collecthsmetrics_umi:
+        runtime: 280
+        mem: 16000
+    picard_umiaware:
+        runtime: 280
+        mem: 16000
+    modify_tnscope_infofield_umi:
+        runtime: 60
+        mem: 10000
+    bcftools_query_generatebackgroundaf_umitable:
+        runtime: 60
+        mem: 10000
+    merge_cnv_pdf_reports:
+        runtime: 60
+        mem: 5000
+    image_to_pdf:
+        runtime: 60
+        mem: 5000
+    msi_to_pdf:
+        runtime: 60
+        mem: 5000
+    txt_to_pdf:
+        runtime: 60
+        mem: 5000
+    csv_to_pdf:
+        runtime: 60
+        mem: 5000
     somalier_relate:
         runtime: 60
         mem: 5000
@@ -147,7 +207,7 @@ set-resources:
         mem: 100
     collect_custom_qc_metrics:
         runtime: 20
-        mem: 100
+        mem: 1000
     picard_CollectHsMetrics_WGS:
         runtime: 360
         mem: 16000
@@ -276,7 +336,7 @@ set-resources:
         runtime: 10
         mem: 100
     sentieon_align_sort:
-        mem: 20000
+        mem: attempt * 20000
         runtime: 1440
     sentieon_align_sort_umireads:
         mem: 20000

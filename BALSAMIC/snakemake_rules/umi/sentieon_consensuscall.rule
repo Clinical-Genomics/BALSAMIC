@@ -136,10 +136,6 @@ rule bam_compress_tumor_umi:
     params:
         sample_id = "{sample}",
         housekeeper_id= {"id": tumor_sample, "tags": "umi_tumor"}
-    threads: 20
-    resources:
-        runtime=280,
-        mem_mb=16000
     message:
         "Compressing UMI bam to cram for {params.sample_id}"
     shell:
@@ -162,10 +158,6 @@ if config['analysis']['analysis_type'] == "paired":
         params:
             sample_id = "{sample}",
             housekeeper_id= {"id": normal_sample, "tags": "umi_normal"}
-        threads: 20
-        resources:
-            runtime=280,
-            mem_mb=16000
         message:
             "Compressing UMI bam to cram for {params.sample_id}"
         shell:
