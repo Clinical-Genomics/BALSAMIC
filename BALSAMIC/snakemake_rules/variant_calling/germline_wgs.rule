@@ -33,7 +33,7 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 export SENTIEON_DNASCOPE={params.sentieon_ml_dnascope};
 
 {params.sentieon_exec} driver \
--t {threads} \
+-t {resources.threads} \
 -r {input.ref} \
 -i {input.bam} \
 -q {input.recal_table} \
@@ -74,7 +74,7 @@ configManta.py \
 --referenceFasta={input.fa} \
 --runDir={params.tmpdir};
 
-python {params.tmpdir}/runWorkflow.py -m {params.runmode} -j {threads};
+python {params.tmpdir}/runWorkflow.py -m {params.runmode} -j {resources.threads};
 
 cp {params.tmpdir}/results/variants/diploidSV.vcf.gz {output.final};
 

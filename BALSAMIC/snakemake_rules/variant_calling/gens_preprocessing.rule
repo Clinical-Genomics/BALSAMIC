@@ -28,7 +28,7 @@ if config["analysis"]["sequencing_type"] == SequencingType.WGS:
     export SENTIEON_DNASCOPE={params.sentieon_ml_dnascope};
     
     {params.sentieon_exec} driver \
-    -t {threads} \
+    -t {resources.threads} \
     -r {input.ref} \
     -i {input.bam} \
     --algo DNAscope \
@@ -114,7 +114,7 @@ else:
     export SENTIEON_LICENSE={params.sentieon_lic};
   
      {params.sentieon_exec} driver \
-    -t {threads} \
+    -t {resources.threads} \
     -r {input.ref} \
     -i {input.bam} \
     --interval {input.bed} \

@@ -29,10 +29,10 @@ rule bcftools_filter_merged_research_tumor_only:
   shell:
     """
 
-bcftools view --threads {threads} {input.vcf_snv_research} | \
-bcftools filter --threads {threads} --include 'INFO/GNOMADAF_popmax <= {params.pop_freq[0]} || INFO/GNOMADAF_popmax == \".\"' --soft-filter '{params.pop_freq[1]}' --mode '+' | \
-bcftools filter --threads {threads} --include 'INFO/SWEGENAF <= {params.swegen_freq[0]} || INFO/SWEGENAF == \".\"' --soft-filter '{params.swegen_freq[1]}' --mode '+' |\
-bcftools view --threads {threads} --exclude '{params.hard_filters}' -o {output.vcf_pass_merged} -O z;
+bcftools view --threads {resources.threads} {input.vcf_snv_research} | \
+bcftools filter --threads {resources.threads} --include 'INFO/GNOMADAF_popmax <= {params.pop_freq[0]} || INFO/GNOMADAF_popmax == \".\"' --soft-filter '{params.pop_freq[1]}' --mode '+' | \
+bcftools filter --threads {resources.threads} --include 'INFO/SWEGENAF <= {params.swegen_freq[0]} || INFO/SWEGENAF == \".\"' --soft-filter '{params.swegen_freq[1]}' --mode '+' |\
+bcftools view --threads {resources.threads} --exclude '{params.hard_filters}' -o {output.vcf_pass_merged} -O z;
 
 tabix -p vcf -f {output.vcf_pass_merged};
 
@@ -69,12 +69,12 @@ rule bcftools_filter_merged_clinical_tumor_only:
     """
 
 bcftools view {input.vcf_snv_clinical} | \
-bcftools reheader --threads {threads} -s {input.namemap} | \
-bcftools filter --threads {threads} --include 'INFO/ArtefactFrq <= {params.artefact_freq[0]} || INFO/ArtefactFrq == \".\"' --soft-filter '{params.artefact_freq[1]}' --mode '+' |\
-bcftools filter --threads {threads} --include 'INFO/GNOMADAF_popmax <= {params.pop_freq[0]} || INFO/GNOMADAF_popmax == \".\"' --soft-filter '{params.pop_freq[1]}' --mode '+' | \
-bcftools filter --threads {threads} --include 'INFO/SWEGENAF <= {params.swegen_freq[0]} || INFO/SWEGENAF == \".\"' --soft-filter '{params.swegen_freq[1]}' --mode '+' | \
-bcftools filter --threads {threads} --include 'INFO/Frq <= {params.loqusdb_clinical_freq[0]} || INFO/Frq == \".\"' --soft-filter '{params.loqusdb_clinical_freq[1]}' --mode '+' | \
-bcftools view --threads {threads} --exclude '{params.hard_filters}' -o {output.vcf_pass_merged} -O z;
+bcftools reheader --threads {resources.threads} -s {input.namemap} | \
+bcftools filter --threads {resources.threads} --include 'INFO/ArtefactFrq <= {params.artefact_freq[0]} || INFO/ArtefactFrq == \".\"' --soft-filter '{params.artefact_freq[1]}' --mode '+' |\
+bcftools filter --threads {resources.threads} --include 'INFO/GNOMADAF_popmax <= {params.pop_freq[0]} || INFO/GNOMADAF_popmax == \".\"' --soft-filter '{params.pop_freq[1]}' --mode '+' | \
+bcftools filter --threads {resources.threads} --include 'INFO/SWEGENAF <= {params.swegen_freq[0]} || INFO/SWEGENAF == \".\"' --soft-filter '{params.swegen_freq[1]}' --mode '+' | \
+bcftools filter --threads {resources.threads} --include 'INFO/Frq <= {params.loqusdb_clinical_freq[0]} || INFO/Frq == \".\"' --soft-filter '{params.loqusdb_clinical_freq[1]}' --mode '+' | \
+bcftools view --threads {resources.threads} --exclude '{params.hard_filters}' -o {output.vcf_pass_merged} -O z;
 
 tabix -p vcf -f {output.vcf_pass_merged};
 

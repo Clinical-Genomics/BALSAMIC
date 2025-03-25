@@ -33,7 +33,7 @@ export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
 
 {params.sentieon_exec} umi consensus \
--t {threads} \
+-t {resources.threads} \
 -i {input.bam} \
 -o {output.fastq_consensus} \
 --input_format {params.ip_format} \
@@ -77,7 +77,7 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 
 {params.sentieon_exec} bwa mem \
 -R '@RG\\tID:{params.sample_id}\\tSM:{params.sample_type}\\tLB:TargetPanel\\tPL:ILLUMINA' \
--t {threads} \
+-t {resources.threads} \
 -K {params.ip_bases} \
 -p -C {input.ref_fa} \
 {input.fq_consensus} | \
@@ -140,7 +140,7 @@ rule bam_compress_tumor_umi:
         "Compressing UMI bam to cram for {params.sample_id}"
     shell:
         """
-samtools view -h -T {input.fasta} --threads {threads} -C -o {output.cram} {input.bam}; 
+samtools view -h -T {input.fasta} --threads {resources.threads} -C -o {output.cram} {input.bam}; 
 samtools index {output.cram}; 
         """
 
@@ -162,6 +162,6 @@ if config['analysis']['analysis_type'] == "paired":
             "Compressing UMI bam to cram for {params.sample_id}"
         shell:
             """
-    samtools view -h -T {input.fasta} --threads {threads} -C -o {output.cram} {input.bam}; 
+    samtools view -h -T {input.fasta} --threads {resources.threads} -C -o {output.cram} {input.bam}; 
     samtools index {output.cram}; 
             """

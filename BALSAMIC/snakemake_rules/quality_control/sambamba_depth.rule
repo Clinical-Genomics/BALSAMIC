@@ -34,7 +34,7 @@ sambamba depth region \
 --regions {input.bed} \
 --min-base-quality={params.base_qual} \
 --filter {params.filter_string} \
---nthreads {threads} \
+--nthreads {resources.threads} \
 `echo $covStr` {input.bam} > {output}; 
         """
 
@@ -73,5 +73,5 @@ sambamba depth region \
 --cov-threshold {params.cov_1} --cov-threshold {params.cov_2} \
 --cov-threshold {params.cov_3} --cov-threshold {params.cov_4} \
 --cov-threshold {params.cov_5} \
---nthreads {threads} {input.bam} > {output};
+--nthreads {resources.threads} {input.bam} > {output};
         """

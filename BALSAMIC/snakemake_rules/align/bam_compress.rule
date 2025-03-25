@@ -23,7 +23,7 @@ rule bam_compress_tumor:
         "Compressing bam to cram for {params.sample_id}"
     shell:
         """
-samtools view -h -T {input.fasta} --threads {threads} -C -o {output.cram} {input.bam}; 
+samtools view -h -T {input.fasta} --threads {resources.threads} -C -o {output.cram} {input.bam}; 
 samtools index {output.cram}; 
         """
 
@@ -49,6 +49,6 @@ rule bam_compress_normal:
         "Compressing bam to cram for {params.sample_id}"
     shell:
         """
-samtools view -h -T {input.fasta} --threads {threads} -C -o {output.cram} {input.bam}; 
+samtools view -h -T {input.fasta} --threads {resources.threads} -C -o {output.cram} {input.bam}; 
 samtools index {output.cram}; 
         """

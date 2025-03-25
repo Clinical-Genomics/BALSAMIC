@@ -27,7 +27,7 @@ rule vcfheader_rename_germline:
         """
 echo -e \"{params.sample_name}\\t{params.sample_id}\" > {output.namemap};
 
-bcftools reheader --threads {threads} \
+bcftools reheader --threads {resources.threads} \
 -s {output.namemap} {input.vcf} \
 -o {output.vcf_dnascope};
 
