@@ -18,11 +18,6 @@ rule sentieon_align_sort_umireads:
         sample_id = "{sample}",
         sample_type = lambda wildcards: config_model.get_sample_type_by_name(wildcards.sample, uppercase=True),
         ip_bases = params.umicommon.align_intbases,
-    threads:
-        get_threads(cluster_config, 'sentieon_align_sort')
-    resources:
-        runtime=1440,
-        mem_mb=20000
     message:
         ("Align fastq reads using sentieon bwa-mem and sort reads using samtools for sample type: "
         "{params.sample_type} : {params.sample_id}")

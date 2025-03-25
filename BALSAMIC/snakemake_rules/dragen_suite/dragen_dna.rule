@@ -18,11 +18,6 @@ rule dragen_align_call_tumor_only:
         tmp_reference_dir = Path(result_dir, "dragen", "reference").as_posix(),
         sample_name = tumor_sample,
         output_file_prefix = "SNV.somatic." + config["analysis"]["case_id"] + ".dragen"
-    threads:
-        get_threads(cluster_config, "dragen_align_call_tumor_only")
-    resources:
-        runtime=600,
-        mem_mb=80000
     message:
         "DRAGEN align and variant call for {params.sample_name}"
     shell:

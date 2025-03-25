@@ -91,11 +91,6 @@ rule svdb_annotate_clinical_obs_somatic_clinical_sv:
         case_name = config["analysis"]["case_id"],
         clinical_sv_observations = clinical_sv,
         vcf_clinical_obs = temp(vep_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.clinical_obs.vcf"),
-    threads:
-        get_threads(cluster_config, "svdb_annotate_clinical_obs_somatic_clinical_sv")
-    resources:
-        runtime=600,
-        mem_mb=25000
     message:
         "Annotating structural and copy number variants with clinical observations using SVDB for {params.case_name}",
     shell:
@@ -128,11 +123,6 @@ rule svdb_annotate_somatic_obs_somatic_clinical_sv:
         case_name = config["analysis"]["case_id"],
         somatic_sv_observations = somatic_sv,
         vcf_somatic_obs = temp(vep_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.somatic_obs.vcf"),
-    threads:
-        get_threads(cluster_config, "svdb_annotate_somatic_obs_somatic_clinical_sv")
-    resources:
-        runtime=600,
-        mem_mb=25000
     message:
         "Annotating structural and copy number variants with clinical observations using SVDB for {params.case_name}",
     shell:

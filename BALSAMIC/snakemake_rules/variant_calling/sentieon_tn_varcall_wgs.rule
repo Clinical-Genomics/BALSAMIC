@@ -31,10 +31,6 @@ rule sentieon_tnscope_wgs_tumor_normal:
         disable_detect = params.tnscope_wgs.disable_detect,
         case_name = config["analysis"]["case_id"],
         housekeeper_id= {"id": config["analysis"]["case_id"],"tags": "research"}
-    threads: 36
-    resources:
-        runtime=1440,
-        mem_mb=80000
     message:
         ("Calling SNVs using Sentieon TNscope for sample {params.case_name}")
     shell:

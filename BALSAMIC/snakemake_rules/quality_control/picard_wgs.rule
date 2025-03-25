@@ -59,10 +59,6 @@ rule picard_CollectWgsMetrics:
         mem = "16g",
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         sample = "{sample}"
-    threads: 8
-    resources:
-        runtime=360,
-        mem_mb=16000
     message:
         "Collecting various picard quality metrics for wgs sample {params.sample}"
     shell:

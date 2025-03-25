@@ -8,10 +8,6 @@ rule create_reference:
         ref_cnn = pon_reference
     singularity:
         Path(singularity_image, "cnvkit.sif").as_posix()
-    resources:
-        runtime=120,
-        mem_mb=15000
-    threads: 8
     benchmark:
         Path(benchmark_dir, "cnvkit.reference.tsv").as_posix()
     shell:

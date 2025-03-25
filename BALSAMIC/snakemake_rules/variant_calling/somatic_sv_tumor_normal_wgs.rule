@@ -294,8 +294,6 @@ rule igh_dux4_detection_tumor_normal_wgs:
         genome_version = config["reference"]["genome_version"],
         custom_sv_detection_script = get_script_path("igh_dux4_detection.sh"),
         case_name = config["analysis"]["case_id"],
-    threads:
-        get_threads(cluster_config, "igh_dux4_detection")
     message:
         "Detecting IGH::DUX4 rearrangement for {params.case_name} using samtools."
     shell:

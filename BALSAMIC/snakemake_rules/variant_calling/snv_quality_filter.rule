@@ -21,10 +21,6 @@ if config["analysis"]["sequencing_type"] == 'wgs' and config["analysis"]["analys
         sor = get_tag_and_filtername(snv_quality_filters, "balsamic_high_strand_oddsratio"),
         hard_filters = WgsSNVFilters.get_bcftools_filter_string(category="quality", analysis_type=analysis_type, variant_caller=BioinfoTools.TNSCOPE, soft_filter_normals=soft_filter_normal),
         case_name = config["analysis"]["case_id"],
-      threads: 8
-      resources:
-        runtime=100,
-        mem_mb=10000
       message:
         "Quality filtering WGS tumor-only tnscope variants using bcftools for {params.case_name}"
       shell:
@@ -64,10 +60,6 @@ elif config["analysis"]["sequencing_type"] == 'wgs' and config["analysis"]["anal
         in_normal = get_tag_and_filtername(snv_quality_filters, "in_normal"),
         hard_filters = WgsSNVFilters.get_bcftools_filter_string(category="quality", analysis_type=analysis_type, variant_caller=BioinfoTools.TNSCOPE, soft_filter_normals=soft_filter_normal),
         case_name = config["analysis"]["case_id"],
-      threads: 8
-      resources:
-        runtime=100,
-        mem_mb=10000
       message:
         "Quality filtering WGS tumor-normal tnscope variants using bcftools for {params.case_name}"
       shell:
@@ -103,10 +95,6 @@ if config["analysis"]["sequencing_type"] == 'targeted' and config["analysis"]["a
       rpa=get_tag_and_filtername(snv_quality_filters,"balsamic_high_tnscope_rpa"),
       hard_filters=TgaSNVFilters.get_bcftools_filter_string(category="quality", analysis_type=analysis_type, variant_caller=BioinfoTools.TNSCOPE, soft_filter_normals=soft_filter_normal, exome=exome),
       case_name=config["analysis"]["case_id"],
-    threads: 8
-    resources:
-      runtime=100,
-      mem_mb=10000
     message:
       "Quality filtering vardict tumor-only annotated variants using bcftools for {params.case_name}"
     shell:
@@ -139,10 +127,6 @@ if config["analysis"]["sequencing_type"] == 'targeted' and config["analysis"]["a
       AF_min=get_tag_and_filtername(snv_quality_filters, "balsamic_low_af"),
       hard_filters=TgaSNVFilters.get_bcftools_filter_string(category="quality", analysis_type=analysis_type, variant_caller=BioinfoTools.VARDICT, soft_filter_normals=soft_filter_normal, exome=exome),
       case_name=config["analysis"]["case_id"],
-    threads: 8
-    resources:
-      runtime=100,
-      mem_mb=10000
     message:
       "Quality filtering vardict tumor-only annotated variants using bcftools for {params.case_name}"
     shell:
@@ -178,10 +162,6 @@ elif config["analysis"]["sequencing_type"] == 'targeted' and config["analysis"][
       in_normal = get_tag_and_filtername(snv_quality_filters, "in_normal"),
       hard_filters = TgaSNVFilters.get_bcftools_filter_string(category="quality", analysis_type=analysis_type, variant_caller=BioinfoTools.TNSCOPE, soft_filter_normals=soft_filter_normal, exome=exome),
       case_name = config["analysis"]["case_id"],
-    threads: 8
-    resources:
-      runtime=100,
-      mem_mb=10000
     message:
       "Quality filtering vardict tumor-normal variants using bcftools for {params.case_name} "
     shell:
@@ -216,10 +196,6 @@ elif config["analysis"]["sequencing_type"] == 'targeted' and config["analysis"][
       in_normal=get_tag_and_filtername(snv_quality_filters,"in_normal"),
       hard_filters=TgaSNVFilters.get_bcftools_filter_string(category="quality", analysis_type=analysis_type, variant_caller=BioinfoTools.VARDICT, soft_filter_normals=soft_filter_normal, exome=exome),
       case_name=config["analysis"]["case_id"],
-    threads: 8
-    resources:
-      runtime=100,
-      mem_mb=10000
     message:
       "Quality filtering vardict tumor-normal variants using bcftools for {params.case_name} "
     shell:
@@ -251,10 +227,6 @@ if config_model.analysis.analysis_workflow == AnalysisWorkflow.BALSAMIC_UMI and 
       case_name = config["analysis"]["case_id"],
       in_normal=get_tag_and_filtername(umi_snv_quality_filters,"in_normal"),
       hard_filters=TgaUmiSNVFilters.get_bcftools_filter_string(category="quality", analysis_type=analysis_type, variant_caller=BioinfoTools.TNSCOPE, soft_filter_normals=soft_filter_normal),
-    threads: 8
-    resources:
-      runtime=100,
-      mem_mb=10000
     message:
       "Quality filtering TNscope_umi tumor-normal annotated variants using bcftools for {params.case_name} "
     shell:
@@ -281,10 +253,6 @@ elif config_model.analysis.analysis_workflow == AnalysisWorkflow.BALSAMIC_UMI an
     params:
       hard_filters=TgaUmiSNVFilters.get_bcftools_filter_string(category="quality", analysis_type=analysis_type, variant_caller=BioinfoTools.TNSCOPE, soft_filter_normals=soft_filter_normal),
       case_name=config["analysis"]["case_id"],
-    threads: 8
-    resources:
-      runtime=100,
-      mem_mb=10000
     message:
       "Quality filtering tnscope_umi tumor-only variants using bcftools for {params.case_name}"
     shell:

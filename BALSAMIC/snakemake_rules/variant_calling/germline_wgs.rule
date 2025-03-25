@@ -19,10 +19,6 @@ rule sentieon_DNAscope_wgs:
         sample = "{sample_type}"
     benchmark:
         Path(benchmark_dir, 'sentieon_DNAscope_' + "{sample_type}.tsv").as_posix()
-    threads: 36
-    resources:
-        runtime=1440,
-        mem_mb=60000
     message:
         "Calling germline variants using Sentieon DNAscope for {params.sample}"
     shell:
@@ -59,10 +55,6 @@ rule manta_germline_wgs:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         runmode = "local",
         sample = "{sample_type}"
-    threads: 36
-    resources:
-        runtime=1440,
-        mem_mb=60000
     message:
         "Calling germline variants using manta for {params.sample}"
     shell:

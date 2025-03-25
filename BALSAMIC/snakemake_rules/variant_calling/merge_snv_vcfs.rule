@@ -12,10 +12,6 @@ rule bcftools_normalise_vcfs:
     params:
         case_name = config["analysis"]["case_id"],
         variant_caller = "{caller}",
-    threads: 2
-    resources:
-        runtime=120,
-        mem_mb=10000
     message:
         "Normalising variants for {params.variant_caller} {params.case_name}"
     shell:
@@ -38,10 +34,6 @@ rule merge_snv_vcfs:
     params:
         modify_tnscope_infofield = get_script_path("merge_snv_variantcallers.py"),
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-    threads: 2
-    resources:
-        runtime=120,
-        mem_mb=20000
     message:
         "Merging VCFs with custom python script using vcfpy"
     shell:

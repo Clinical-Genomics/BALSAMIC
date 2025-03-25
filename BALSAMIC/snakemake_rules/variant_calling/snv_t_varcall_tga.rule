@@ -31,10 +31,6 @@ rule sentieon_tnscope_tga_tumor_only:
         tumor_af = params.tnscope_tga.filter_tumor_af,
         tumor_lod = params.tnscope_tga.min_tumorLOD,
         housekeeper_id= {"id": config["analysis"]["case_id"],"tags": "research"}
-    threads: 16
-    resources:
-        runtime=280,
-        mem_mb=20000
     message:
         "Calling single nucleotide variants using TNscope for {params.tumor}"
     shell:
@@ -87,10 +83,6 @@ rule vardict_tumor_only:
         max_mm = params.vardict.max_mm,
         col_info = params.vardict.column_info,
         case_name = config["analysis"]["case_id"],
-    threads: 16
-    resources:
-        runtime=280,
-        mem_mb=25000
     message:
         "Calling single nucleotide variants using vardict for {params.case_name}"
     shell:
@@ -130,10 +122,6 @@ rule post_process_vardict:
         Path(benchmark_dir,'vardict_merge_' + config["analysis"]["case_id"] + ".tsv").as_posix()
     singularity:
         Path(singularity_image,config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
-    threads: 2
-    resources:
-        runtime=280,
-        mem_mb=10000
     message:
         ("Bgzip, index and reheader merged VarDict vcf and add FOUND_IN for case: {params.case_name}")
     shell:

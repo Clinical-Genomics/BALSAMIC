@@ -16,10 +16,6 @@ rule somalier_extract_normal:
     params:
         outdir = Path(qc_dir,'somalier').as_posix(),
         case_name = config["analysis"]["case_id"],
-    threads: 1
-    resources:
-        runtime=60,
-        mem_mb=5000
     message:
         "Running somalier extract for normal sample of {params.case_name}"
     shell:
@@ -42,10 +38,6 @@ rule somalier_extract_tumor:
     params:
         outdir = Path(qc_dir,'somalier').as_posix(),
         case_name=config["analysis"]["case_id"],
-    threads: 1
-    resources:
-        runtime=60,
-        mem_mb=5000
     message:
         "Running somalier extract for tumor sample of {params.case_name}"
     shell:
@@ -69,10 +61,6 @@ rule somalier_relate:
     params:
         outprefix = Path(qc_dir,'somalier', 'somalier').as_posix(),
         case_name=config["analysis"]["case_id"],
-    threads: 1
-    resources:
-        runtime=60,
-        mem_mb=5000
     message:
         "Running somalier relate for {params.case_name}"
     shell:

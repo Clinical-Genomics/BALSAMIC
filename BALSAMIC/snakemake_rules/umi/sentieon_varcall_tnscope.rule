@@ -31,10 +31,6 @@ rule sentieon_tnscope_umi:
         padding = params.tnscope_umi.padding,
         tumor = "TUMOR",
         pcr_model = params.tnscope_umi.pcr_model
-    threads: 12
-    resources:
-        runtime=280,
-        mem_mb=16000
     message:
         "Calling single nucleotide variants using TNscope for {params.tumor}"
     shell:

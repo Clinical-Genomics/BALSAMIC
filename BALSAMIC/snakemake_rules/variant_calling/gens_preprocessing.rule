@@ -141,10 +141,6 @@ else:
             sample="{sample}"
         benchmark:
             Path(benchmark_dir, "gens_preprocess_tga_{sample}.tsv").as_posix()
-        threads: 1
-        resources:
-            runtime=60,
-            mem_mb=10000
         message:
             "Formatting output for GENS for sample: {params.sample}."
         shell:
@@ -166,10 +162,6 @@ rule finalize_gens_outputfiles:
         Path(benchmark_dir, "finalize_gens_outputfiles_{sample}_{gens_input}.tsv").as_posix()
     singularity:
         Path(singularity_image,config["bioinfo_tools"].get("bgzip") + ".sif").as_posix()
-    threads: 1
-    resources:
-        runtime=60,
-        mem_mb=10000
     message:
         "Bgzip and index GENS output: {params.gens_input} for sample: {params.sample_id}."
     shell:

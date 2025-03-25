@@ -16,10 +16,6 @@ if config["analysis"]["sequencing_type"] == 'wgs' and config["analysis"]["analys
         params:
             sex_check_script = get_script_path("sex_prediction_wgs.py"),
             case_name = config["analysis"]["case_id"],
-        threads: 2
-        resources:
-            runtime=60,
-            mem_mb=5000
         message:
             "Running sex_prediction on case {params.case_name}"
         shell:
@@ -43,10 +39,6 @@ elif config["analysis"]["sequencing_type"] == 'wgs' and config["analysis"]["anal
         params:
             sex_check_script = get_script_path("sex_prediction_wgs.py"),
             case_name = config["analysis"]["case_id"],
-        threads: 2
-        resources:
-            runtime=60,
-            mem_mb=5000
         message:
             "Running sex_prediction on case {params.case_name}"
         shell:
@@ -70,10 +62,6 @@ elif config["analysis"]["sequencing_type"] == 'targeted' and config["analysis"][
         params:
             sex_check_script = get_script_path("sex_prediction_tga.py"),
             case_name = config["analysis"]["case_id"],
-        threads: 2
-        resources:
-            runtime=60,
-            mem_mb=5000
         message:
             "Running sex_prediction on tumor and normal sample of {params.case_name}"
         shell:
@@ -97,10 +85,6 @@ elif config["analysis"]["sequencing_type"] == 'targeted' and config["analysis"][
         params:
             sex_check_script = get_script_path("sex_prediction_tga.py"),
             case_name = config["analysis"]["case_id"],
-        threads: 2
-        resources:
-            runtime=60,
-            mem_mb=5000
         message:
             "Running sex_prediction on tumor sample of {params.case_name}"
         shell:

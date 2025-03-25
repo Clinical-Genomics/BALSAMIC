@@ -11,14 +11,9 @@ rule bam_compress_tumor:
         Path(benchmark_dir, "bam_compress_tumor_{sample}.tsv").as_posix()
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("compress") + ".sif").as_posix()
-    resources:
-        runtime=280,
-        mem_mb=20000
     params:
         sample_id = "{sample}",
         housekeeper_id= {"id": "{sample}", "tags": "tumor"}
-    threads:
-        get_threads(cluster_config, "bam_compress")
     message:
         "Compressing bam to cram for {params.sample_id}"
     shell:
@@ -37,14 +32,9 @@ rule bam_compress_normal:
         Path(benchmark_dir, "bam_compress_normal_{sample}.tsv").as_posix()
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("compress") + ".sif").as_posix()
-    resources:
-        runtime=280,
-        mem_mb=20000
     params:
         sample_id = "{sample}",
         housekeeper_id= {"id": "{sample}", "tags": "normal"}
-    threads:
-        get_threads(cluster_config, "bam_compress")
     message:
         "Compressing bam to cram for {params.sample_id}"
     shell:

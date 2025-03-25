@@ -17,10 +17,6 @@ rule sentieon_consensuscall_umi:
         tag = params.umiconsensuscall.tag,
         ip_format = params.umiconsensuscall.align_format,
         sample_id = '{sample}'
-    threads: 36
-    resources:
-        runtime=360,
-        mem_mb=16000
     message: 
         "Calling consensus molecules using sentieon for {params.sample_id}"
     shell:
@@ -60,10 +56,6 @@ rule sentieon_bwa_umiconsensus:
         ip_bases = params.umicommon.align_intbases,
         sample_id = "{sample}",
         sample_type = lambda wildcards: config_model.get_sample_type_by_name(wildcards.sample, uppercase=True),
-    threads: 36
-    resources:
-        runtime=480,
-        mem_mb=16000
     message:
          "Mapping consensus reads and sorting using sentieon bwa-mem for {params.sample_id}"
     shell:
@@ -106,10 +98,6 @@ rule sentieon_consensusfilter_umi:
         consensusfilter_script = get_script_path("FilterDuplexUMIconsensus.awk"),
         minreads = params.umiconsensuscall.filter_minreads,
         sample_id = '{sample}',
-    threads: 10
-    resources:
-        runtime=280,
-        mem_mb=16000
     message:
         "Filtering consensus reads based on XZ tag for {params.sample_id}"
     shell:

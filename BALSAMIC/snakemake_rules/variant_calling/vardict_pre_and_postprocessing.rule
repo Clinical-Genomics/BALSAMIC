@@ -10,8 +10,6 @@ rule bedtools_pad_bedfile:
         Path(benchmark_dir, 'bedtools_pad_bedfile.tsv').as_posix()
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("bedtools") + ".sif").as_posix()
-    threads:
-        get_threads(cluster_config, "pad_bedfile")
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         pad_bed_dir = vcf_dir + "pad_bedfile/",
@@ -42,8 +40,6 @@ rule vardict_sort:
         case_name=config["analysis"]["case_id"],
     benchmark:
         Path(benchmark_dir, 'vardict_sort_' + config["analysis"]["case_id"] + ".tsv").as_posix()
-    threads:
-        get_threads(cluster_config,"vardict_sort")
     message:
         ("Sorting VarDict VCF with awk {params.case_name}")
     shell:
@@ -69,8 +65,6 @@ rule gatk_update_vcf_sequence_dictionary:
         Path(benchmark_dir,"gatk_update_vcf_sequence_dictionary" + config["analysis"]["case_id"] + ".tsv").as_posix()
     singularity:
         Path(singularity_image,config["bioinfo_tools"].get("gatk") + ".sif").as_posix()
-    threads:
-        get_threads(cluster_config,"gatk_collectreadcounts")
     message:
         "Running GATK UpdateVCFSequenceDictionary on VarDict VCF."
     shell:

@@ -24,8 +24,6 @@ rule manta_tumor_normal_tga:
         manta_install_path = "/opt/conda/share/manta-1.6.0-3",
         low_pr_sr_count_value = MANTA_FILTERS.low_pr_sr_count.tag_value,
         low_pr_sr_count_filter_name = MANTA_FILTERS.low_pr_sr_count.filter_name,
-    threads:
-        get_threads(cluster_config, "manta_tumor_normal")
     message:
         ("Calling structural variants using manta for {params.case_name} and "
         "index the compressed vcf file")
@@ -77,8 +75,6 @@ rule delly_sv_tumor_normal_tga:
         tumor = "TUMOR",
         normal = "NORMAL",
         case_name = config["analysis"]["case_id"]
-    threads:
-        get_threads(cluster_config, "delly_tumor_normal")
     message:
         ("Calling structural variants using delly for {params.case_name},"
         "filter somatic variants and finally convert from bcf to compressed vcf file")

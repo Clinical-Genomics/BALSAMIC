@@ -20,11 +20,6 @@ rule bcftools_filter_TNscope_umi_research_tumor_normal:
     case_name = '{case_name}',
     edit_vcf_script = get_script_path("edit_vcf_info.py"),
     variant_caller = "tnscope_umi"
-  threads:
-    get_threads(cluster_config, 'bcftools_filter_TNscope_umi_research_tumor_normal')
-  resources:
-    runtime=280,
-    mem_mb=10000
   message:
     "Filtering TNscope_umi tumor-normal annotated research variants using bcftools and "
     "adding FOUND_IN tags to the output VCF file for {params.case_name} "
@@ -73,11 +68,6 @@ rule bcftools_filter_TNscope_umi_clinical_tumor_normal:
     hard_filters = TgaUmiSNVFilters.get_bcftools_filter_string(category="clinical", analysis_type=analysis_type, soft_filter_normals=soft_filter_normal),
     edit_vcf_script = get_script_path("edit_vcf_info.py"),
     variant_caller = "tnscope_umi"
-  threads:
-    get_threads(cluster_config, 'bcftools_filter_TNscope_umi_clinical_tumor_normal')
-  resources:
-    runtime=280,
-    mem_mb=10000
   message:
     "Filtering TNscope_umi tumor-normal annotated clinical variants using bcftools and "
     "adding FOUND_IN tags to the output VCF file for {params.case_name} "
