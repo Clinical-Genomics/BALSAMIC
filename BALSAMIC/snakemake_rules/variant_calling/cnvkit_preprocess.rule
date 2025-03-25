@@ -38,8 +38,8 @@ rule create_coverage:
         """
 export TMPDIR={params.tmpdir} ;
 
-cnvkit.py coverage {input.bam} {input.target_bed} -o {output.target_cnn} --min-mapq {params.min_mapq} --processes {threads} ;
-cnvkit.py coverage {input.bam} {input.antitarget_bed} -o {output.antitarget_cnn} --min-mapq {params.min_mapq} --processes {threads} ;
+cnvkit.py coverage {input.bam} {input.target_bed} -o {output.target_cnn} --min-mapq {params.min_mapq} --processes {resources.threads} ;
+cnvkit.py coverage {input.bam} {input.antitarget_bed} -o {output.antitarget_cnn} --min-mapq {params.min_mapq} --processes {resources.threads} ;
 
 rm -rf {params.tmpdir}
         """

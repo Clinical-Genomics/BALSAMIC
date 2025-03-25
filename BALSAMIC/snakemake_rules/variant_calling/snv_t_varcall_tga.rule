@@ -45,7 +45,7 @@ export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
 
 {params.sentieon_exec} driver \
--t {threads} \
+-t {resources.threads} \
 -r {input.ref_fa} \
 -i {input.bam} \
 --interval {input.bed} \
@@ -105,7 +105,7 @@ vardict-java -I 600 \
 -G {input.fa} \
 -f {params.af} \
 -N {params.case_name} \
--th {threads} \
+-th {resources.threads} \
 -b {input.bamT} \
 {params.col_info} {input.bed} \
 | teststrandbias.R \

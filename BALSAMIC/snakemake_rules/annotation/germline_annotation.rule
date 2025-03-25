@@ -36,7 +36,7 @@ vep \
 --dir_plugins $vep_path \
 --input_file {input.vcf} \
 --output_file {output.vcf_tumor} \
---fork {threads} \
+--fork {resources.threads} \
 {params.vep_defaults} \
 --custom {input.cosmic},COSMIC,vcf,exact,0,CDS,GENE,STRAND,CNT,AA;
 
@@ -78,7 +78,7 @@ vep \
 --dir_plugins $vep_path \
 --input_file {input.vcf} \
 --output_file {output.vcf_normal} \
---fork {threads} \
+--fork {resources.threads} \
 {params.vep_defaults} \
 --custom {input.cosmic},COSMIC,vcf,exact,0,CDS,GENE,STRAND,CNT,AA;
 

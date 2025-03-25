@@ -29,7 +29,7 @@ export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
 
 {params.sentieon_exec} driver \
--t {threads} \
+-t {resources.threads} \
 -r {input.ref} \
 -i {input.bam} \
 --interval {input.interval} \
@@ -69,7 +69,7 @@ configManta.py \
 --referenceFasta={input.fa} \
 --runDir={params.tmpdir};
 
-python {params.tmpdir}/runWorkflow.py -m {params.runmode} -j {threads};
+python {params.tmpdir}/runWorkflow.py -m {params.runmode} -j {resources.threads};
 
 cp {params.tmpdir}/results/variants/diploidSV.vcf.gz {output.final};
 

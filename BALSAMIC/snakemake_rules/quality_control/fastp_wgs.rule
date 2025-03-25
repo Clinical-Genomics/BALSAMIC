@@ -27,7 +27,7 @@ rule fastp_quality_and_adapter_trim_wgs:
 export TMPDIR={params.tmpdir};
 
 fastp \
---thread {threads} \
+--thread {resources.threads} \
 --in1 {input.fastq_r1} \
 --in2 {input.fastq_r2} \
 --out1 {output.fastq_r1} \
