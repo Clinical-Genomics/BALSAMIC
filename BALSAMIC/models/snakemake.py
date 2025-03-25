@@ -143,7 +143,7 @@ class SnakemakeExecutable(BaseModel):
             snakemake_cluster_options: str = (
                 f"-j {MAX_JOBS} "
                 f"--jobname BALSAMIC.{self.case_id}.{{rulename}}.{{jobid}}.sh "
-                f"--profile {CONSTANTS_DIR}"
+                f"--profile {CONSTANTS_DIR} --workflow-profile {CONSTANTS_DIR}/workflow_profile/"
             )
             return remove_unnecessary_spaces(snakemake_cluster_options)
         return ""
