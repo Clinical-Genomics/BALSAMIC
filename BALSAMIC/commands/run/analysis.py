@@ -37,7 +37,7 @@ from BALSAMIC.constants.cluster import (
 from BALSAMIC.models.config import ConfigModel
 from BALSAMIC.models.snakemake import SnakemakeExecutable
 from BALSAMIC.utils.analysis import get_singularity_bind_paths
-from BALSAMIC.utils.cli import createDir, get_config_path, get_snakefile
+from BALSAMIC.utils.cli import createDir, get_snakefile
 from BALSAMIC.utils.io import write_json
 from BALSAMIC.utils.logging import add_file_logging
 
@@ -90,10 +90,10 @@ def analysis(
 
     config_model = ConfigModel.model_validate(sample_config)
 
-    case_name = config_model.analysis.case_id
-    LOG.info(f"Starting analysis on: {case_name}.")
+    case_id = config_model.analysis.case_id
+    LOG.info(f"Starting analysis on: {case_id}.")
 
-    log_file = Path(config_model.analysis.analysis_dir, case_name, LogFile.LOGNAME).as_posix()
+    log_file = Path(config_model.analysis.analysis_dir, case_id, LogFile.LOGNAME).as_posix()
     LOG.info(f"Setting BALSAMIC logfile path to: {log_file}.")
     add_file_logging(log_file, logger_name=__name__)
 
@@ -150,14 +150,14 @@ def analysis(
     LOG.info("Organizing snakemake run information")
     snakemake_executable: SnakemakeExecutable = SnakemakeExecutable(
         account=account,
-        case_id=case_name,
+        case_id=case_id,
         config_path=sample_config_path,
         dragen=dragen,
         force=force_all,
         log_dir=log_path.as_posix(),
         mail_type=mail_type,
         mail_user=mail_user,
-        profile=cluster_profile,
+        cluster_profile=cluster_profile,
         workflow_profile=workflow_profile,
         qos=qos,
         quiet=quiet,
@@ -167,7 +167,7 @@ def analysis(
         singularity_bind_paths=get_singularity_bind_paths(sample_config),
         snakefile=snakefile,
         snakemake_options=snakemake_opt,
-        working_dir=Path(analysis_dir, case_name, "BALSAMIC_run"),
+        working_dir=Path(analysis_dir, case_id, "BALSAMIC_run"),
     )
 
 
@@ -180,9 +180,9 @@ def analysis(
         with open(f"{script_path.as_posix()}/BALSAMIC_snakemake_submit.sh", "w") as submit_file:
             sbatch_lines = ["#!/bin/bash -l",
                             f"#SBATCH --account={account}",
-                            f"#SBATCH --job-name=BALSAMIC_snakemake_submit.{case_name}.%j",
-                            f"#SBATCH --output={log_path}/BALSAMIC_snakemake_submit.{case_name}.%j.out",
-                            f"#SBATCH --error={log_path}/BALSAMIC_snakemake_submit.{case_name}.%j.err",
+                            f"#SBATCH --job-name=BALSAMIC_snakemake_submit.{case_id}.%j",
+                            f"#SBATCH --output={log_path}/BALSAMIC_snakemake_submit.{case_id}.%j.out",
+                            f"#SBATCH --error={log_path}/BALSAMIC_snakemake_submit.{case_id}.%j.err",
                             "#SBATCH --ntasks=1",
                             "#SBATCH --mem=5G",
                             "#SBATCH --time=60:00:00",

@@ -161,7 +161,7 @@ OPTION_CLUSTER_MAIL_TYPE = click.option(
 
 OPTION_CLUSTER_PROFILE = click.option(
     "-p",
-    "--profile",
+    "--cluster-profile",
     show_default=True,
     type=click.Path(exists=True, resolve_path=True),
     default=CONSTANTS_DIR,

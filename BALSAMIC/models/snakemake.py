@@ -56,7 +56,7 @@ class SnakemakeExecutable(BaseModel):
     log_dir: Optional[DirectoryPath] = None
     mail_type: Optional[ClusterMailType] = None
     mail_user: Optional[str] = None
-    profile: Path
+    cluster_profile: Path
     workflow_profile: Path
     qos: Optional[QOS] = None
     quiet: bool = False
@@ -142,7 +142,7 @@ class SnakemakeExecutable(BaseModel):
             snakemake_cluster_options: str = (
                 f"-j {MAX_JOBS} "
                 f"--jobname BALSAMIC.{self.case_id}.{{rulename}}.{{jobid}}.sh "
-                f"--profile {self.profile} --workflow-profile {self.workflow_profile}"
+                f"--profile {self.cluster_profile} --workflow-profile {self.workflow_profile}"
             )
             return remove_unnecessary_spaces(snakemake_cluster_options)
         return ""
