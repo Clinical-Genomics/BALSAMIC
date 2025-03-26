@@ -4,7 +4,9 @@ from typing import Dict, List
 
 from BALSAMIC.constants.cache import DockerContainers
 
-
+class LogFile():
+    """Logfile constants"""
+    LOGNAME: str = "balsamic.log"
 class RunMode(StrEnum):
     """Balsamic workflow run mode."""
 

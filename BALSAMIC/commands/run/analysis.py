@@ -9,6 +9,8 @@ from typing import List
 
 import click
 
+from BALSAMIC import __version__ as balsamic_version
+
 from BALSAMIC.commands.options import (
     OPTION_CLUSTER_ACCOUNT,
     OPTION_CLUSTER_CONFIG,
@@ -27,7 +29,7 @@ from BALSAMIC.commands.options import (
     OPTION_SNAKEFILE,
     OPTION_SNAKEMAKE_OPT,
 )
-from BALSAMIC.constants.analysis import RunMode
+from BALSAMIC.constants.analysis import RunMode, LogFile
 from BALSAMIC.constants.cluster import (
     QOS,
     ClusterConfigType,
@@ -39,6 +41,7 @@ from BALSAMIC.models.snakemake import SnakemakeExecutable
 from BALSAMIC.utils.analysis import get_singularity_bind_paths
 from BALSAMIC.utils.cli import createDir, get_config_path, get_snakefile
 from BALSAMIC.utils.io import write_json
+from BALSAMIC.utils.logging import add_file_logging
 
 LOG = logging.getLogger(__name__)
 
@@ -81,6 +84,22 @@ def analysis(
     quiet: bool,
 ):
     """Run BALSAMIC workflow on the provided sample's config file."""
+
+    LOG.info(f"Initializing balsamic config model from json to run validation tests: {sample_config}.")
+    sample_config_path: Path = Path(sample_config).absolute()
+    with open(sample_config_path, "r") as sample_fh:
+        sample_config = json.load(sample_fh)
+
+    config_model = ConfigModel.model_validate(sample_config)
+
+    case_name = config_model.analysis.case_id
+    LOG.info(f"Starting analysis on: {case_name}.")
+
+    log_file = Path(config_model.analysis.analysis_dir, case_name, LogFile.LOGNAME).as_posix()
+    LOG.info(f"Setting BALSAMIC logfile path to: {log_file}.")
+    add_file_logging(log_file, logger_name=LOG)
+
+    LOG.info(f"Running BALSAMIC version {balsamic_version}")
     LOG.info(f"BALSAMIC started with log level {context.obj['log_level']}.")
 
     if run_mode == RunMode.CLUSTER and not run_analysis:
@@ -90,16 +109,6 @@ def analysis(
     if run_mode == RunMode.CLUSTER and not account:
         LOG.info("An account is required for cluster run mode")
         raise click.Abort()
-
-    sample_config_path: Path = Path(sample_config).absolute()
-    with open(sample_config_path, "r") as sample_fh:
-        sample_config = json.load(sample_fh)
-
-
-    # Initialize balsamic model to run validation tests
-    config_model = ConfigModel.model_validate(sample_config)
-
-    case_name = config_model.analysis.case_id
 
     # Create directories for results, logs, scripts and benchmark files
     result_path: Path = Path(config_model.analysis.result)
