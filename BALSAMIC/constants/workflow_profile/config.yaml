@@ -600,8 +600,8 @@ set-resources:
         runtime: 1440
         threads: 36
     samtools_fixmate:
-        mem_mb: 60000
-        runtime: 270
+        mem_mb: attempt * 80000 * 0.8
+        runtime: 560
         threads: 16
     bam_compress_tumor:
         mem_mb: 20000
