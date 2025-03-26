@@ -410,7 +410,50 @@ def get_pon_sample_list(fastq_path: str) -> List[SampleInstanceModel]:
     return sample_list
 
 
+
+
 def generate_graph(config_collection_dict, config_path):
+    """Generate DAG graph using Snakemake stdout output via subprocess."""
+
+    snakefile = get_snakefile(
+        analysis_type=config_collection_dict["analysis"]["analysis_type"],
+        analysis_workflow=config_collection_dict["analysis"]["analysis_workflow"],
+    )
+
+    # Run Snakemake as a subprocess to capture the DAG output
+    result = subprocess.run(
+        [
+            "snakemake",
+            "--snakefile", snakefile,
+            "--dryrun",
+            "--configfile", config_path,
+            "--printrulegraph"
+        ],
+        capture_output=True,
+        text=True,
+        check=True
+    )
+
+    graph_dot = result.stdout  # Capture Snakemake's output
+
+    # Modify the output for Graphviz
+    graph_title = "_".join(
+        ["BALSAMIC", balsamic_version, config_collection_dict["analysis"]["case_id"]]
+    )
+    graph_dot = graph_dot.replace(
+        "snakemake_dag {", f'BALSAMIC {{ label="{graph_title}"; labelloc="t";'
+    )
+
+    # Generate DAG visualization
+    graph_obj = graphviz.Source(
+        graph_dot,
+        filename=".".join(config_collection_dict["analysis"]["dag"].split(".")[:-1]),
+        format="pdf",
+        engine="dot",
+    )
+    graph_obj.render(cleanup=True)
+
+def generate_graphY(config_collection_dict, config_path):
     """Generate DAG graph using snakemake stdout output."""
 
     with CaptureStdout() as graph_dot:
