@@ -12,7 +12,7 @@ import click
 from BALSAMIC.commands.options import (
     OPTION_CACHE_VERSION,
     OPTION_CLUSTER_ACCOUNT,
-    OPTION_CLUSTER_CONFIG,
+    OPTION_WORKFLOW_PROFILE,
     OPTION_CLUSTER_MAIL,
     OPTION_CLUSTER_MAIL_TYPE,
     OPTION_CLUSTER_PROFILE,
@@ -33,7 +33,6 @@ from BALSAMIC.constants.cluster import (
     QOS,
     ClusterConfigType,
     ClusterMailType,
-    ClusterProfile,
 )
 from BALSAMIC.models.cache import CacheConfig, ReferencesCanFam, ReferencesHg
 from BALSAMIC.models.snakemake import SnakemakeExecutable
@@ -51,10 +50,10 @@ LOG = logging.getLogger(__name__)
 @OPTION_OUT_DIR
 @OPTION_CACHE_VERSION
 @OPTION_CLUSTER_ACCOUNT
-@OPTION_CLUSTER_CONFIG
 @OPTION_CLUSTER_MAIL
 @OPTION_CLUSTER_MAIL_TYPE
 @OPTION_CLUSTER_PROFILE
+@OPTION_WORKFLOW_PROFILE
 @OPTION_CLUSTER_QOS
 @OPTION_COSMIC_KEY
 @OPTION_FORCE_ALL
@@ -76,7 +75,8 @@ def initialize(
     mail_type: Optional[ClusterMailType],
     mail_user: Optional[str],
     out_dir: str,
-    profile: ClusterProfile,
+    profile: Path,
+    workflow_profile: Path,
     qos: QOS,
     quiet: bool,
     run_analysis: bool,
