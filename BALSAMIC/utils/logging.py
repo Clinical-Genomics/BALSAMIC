@@ -9,13 +9,20 @@ def add_file_logging(log_file: str, logger_name: str = None):
     """
     logger = logging.getLogger(logger_name) if logger_name else logging.getLogger()
 
-    # Avoid adding duplicate handlers
-    if not any(isinstance(h, logging.FileHandler) for h in logger.handlers):
-        file_handler = logging.FileHandler(log_file)
-        file_handler.setLevel(logging.INFO)
+    # Avoid adding duplicate file handlers
+    if any(isinstance(h, logging.FileHandler) for h in logger.handlers):
+        return
 
-        # Copy formatter from an existing handler if available
-        if logger.handlers:
-            file_handler.setFormatter(logger.handlers[0].formatter)
+    file_handler = logging.FileHandler(log_file)
+    file_handler.setLevel(logging.INFO)
 
-        logger.addHandler(file_handler)
+    # Try to copy the formatter from an existing handler (likely from coloredlogs)
+    for handler in logger.handlers:
+        if handler.formatter:
+            file_handler.setFormatter(handler.formatter)
+            break
+    else:
+        # Fallback to a default formatter if no other handler has a formatter
+        file_handler.setFormatter(logging.Formatter("%(asctime)s - %(levelname)s - %(message)s"))
+
+    logger.addHandler(file_handler)
