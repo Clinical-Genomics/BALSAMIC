@@ -89,8 +89,6 @@ rule svdb_merge_tumor_normal:
         case_name = config["analysis"]["case_id"],
         vcf= lambda wildcards, input:[input[index] + ":" + svdb_callers_prio[index] for index in range(0,len(input))],
         svdb_priority= ",".join(svdb_callers_prio)
-    threads:
-        get_threads(cluster_config, "svdb_merge_tumor_normal")
     message:
         "Merging structural and copy number variants using SVDB for {params.case_name}"
     shell:
@@ -115,8 +113,6 @@ rule bcftools_quality_filter_svdb:
         Path(singularity_image,config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
     params:
         case_name = config["analysis"]["case_id"],
-    threads:
-        get_threads(cluster_config, "bcftools_quality_filter_svdb")
     message:
         "Filtering merged research structural and copy number variants using bcftools for {params.case_name}"
     shell:

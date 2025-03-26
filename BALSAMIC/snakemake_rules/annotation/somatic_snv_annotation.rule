@@ -92,11 +92,6 @@ rule vep_annotate_somaticSNV_research:
     vcfanno_research_annotations = dump_toml(research_annotations),
     vep_cache = config["reference"]["vep_dir"],
     vep_defaults = params.vep.vep_filters
-  threads:
-    get_threads(cluster_config, "vep_annotate_somaticSNV_research")
-  resources:
-    runtime=1080,
-    mem_mb=50000
   message:
     "Running vep annotation on SNVs and INDELs in {params.message_text}"
   shell:
@@ -141,11 +136,6 @@ rule vcfanno_annotate_somaticSNV_clinical:
     cancer_somatic_snv = cancer_somatic_snv_obs,
     vcfanno_clinical_annotations = dump_toml(clinical_annotations),
     vcfanno_clinical_toml = temp(vep_dir + "SNV.somatic.{case_name}.{var_caller}_vcfanno_clinical.toml"),
-  threads:
-    get_threads(cluster_config, "vcfanno_annotate_somaticSNV_clinical")
-  resources:
-    runtime=1080,
-    mem_mb=50000
   message:
     "Running vcfanno annotation for single nuceotide variants on {params.message_text}"
   shell:

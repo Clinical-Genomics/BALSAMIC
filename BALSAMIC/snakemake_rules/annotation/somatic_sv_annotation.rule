@@ -17,11 +17,6 @@ rule vep_somatic_research_sv:
         message_text = "SV.somatic." + config["analysis"]["case_id"] + ".svdb.research.vcf.gz",
         vep_cache = config["reference"]["vep_dir"],
         vep_defaults = params.vep.vep_filters
-    threads:
-        get_threads(cluster_config, "vep_somatic_research_sv")
-    resources:
-        runtime=720,
-        mem_mb=80000
     message:
         "Running vep annotation for structural and copy number variants on {params.message_text}"
     shell:
@@ -56,11 +51,6 @@ rule svdb_annotate_somatic_research_sv:
         swegen_sv_frequency = swegen_sv,
         tmp_vcf = temp(vep_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.research.tmp.swegen.vcf"),
         message_text = "SV.somatic." + config["analysis"]["case_id"] + ".svdb.research.vep.vcf.gz",
-    threads:
-        get_threads(cluster_config, "svdb_annotate_somatic_research_sv")
-    resources:
-        runtime=720,
-        mem_mb=25000
     message:
         "Running SVDB for annotating research SVs with Swegen database on {params.message_text}"
     shell:
