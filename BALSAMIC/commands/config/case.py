@@ -135,7 +135,7 @@ def case_config(
     LOG.info(f"Starting configuring analysis case: {case_id}.")
 
     LOG.info(f"Creating case analysis directory: {analysis_dir}/{case_id}.")
-    Path(analysis_dir, case_id).mkdir(exists_ok=True)
+    Path(analysis_dir, case_id).mkdir(exist_ok=True)
 
     log_file = Path(analysis_dir, case_id, LogFile.LOGNAME).as_posix()
     LOG.info(f"Setting BALSAMIC logfile path to: {log_file}.")
