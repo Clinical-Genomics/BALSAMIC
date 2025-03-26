@@ -141,7 +141,7 @@ def case_config(
     LOG.info(f"Setting BALSAMIC logfile path to: {log_file}.")
     add_file_logging(log_file, logger_name=__name__)
 
-    LOG.info(f"Running BALSAMIC version {balsamic_version}")
+    LOG.info(f"Running BALSAMIC version {balsamic_version} -- CONFIG CASE")
     LOG.info(f"BALSAMIC started with log level {context.obj['log_level']}.")
 
     LOG.info("Collecting reference and annotation file paths.")

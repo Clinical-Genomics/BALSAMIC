@@ -91,14 +91,16 @@ def analysis(
     config_model = ConfigModel.model_validate(sample_config)
 
     case_id = config_model.analysis.case_id
-    LOG.info(f"Starting analysis on: {case_id}.")
+
 
     log_file = Path(config_model.analysis.analysis_dir, case_id, LogFile.LOGNAME).as_posix()
     LOG.info(f"Setting BALSAMIC logfile path to: {log_file}.")
     add_file_logging(log_file, logger_name=__name__)
 
-    LOG.info(f"Running BALSAMIC version {balsamic_version}")
+    LOG.info(f"Running BALSAMIC version {balsamic_version} -- RUN ANALYSIS")
     LOG.info(f"BALSAMIC started with log level {context.obj['log_level']}.")
+    LOG.info(f"Using case config file: {sample_config}")
+    LOG.info(f"Starting analysis on: {case_id}.")
 
     if run_mode == RunMode.CLUSTER and not run_analysis:
         LOG.info("Changing run-mode to local on dry-run")
@@ -114,6 +116,7 @@ def analysis(
     script_path: Path = Path(config_model.analysis.script)
     benchmark_path: Path = Path(config_model.analysis.benchmark)
 
+    LOG.info(f"Creating analysis and log directories.")
     analysis_directories_list = [result_path, log_path, script_path, benchmark_path]
 
     for analysis_sub_dir in analysis_directories_list:
@@ -126,18 +129,15 @@ def analysis(
             log_path = Path(createDir(log_path.as_posix(), []))
             script_path = Path(createDir(script_path.as_posix(), []))
 
-    LOG.info(f"Updating config model with account and QOS")
+    LOG.info(f"Updating config model with account: {account} and QOS: {qos}")
     config_model.qos = qos
     config_model.account = account
     config_model.analysis.log = log_path.as_posix()
     config_model.analysis.script = script_path.as_posix()
 
     config_model_dict: dict = config_model.model_dump(by_alias=True, exclude_none=True)
-    LOG.info("Dumping updated config model")
+    LOG.info(f"Dumping updated config model to JSON: {sample_config_path}")
     write_json(json_obj=config_model_dict, path=sample_config_path)
-
-    for analysis_sub_dir in analysis_directories_list:
-        analysis_sub_dir.mkdir(exist_ok=True)
 
     analysis_type = config_model.analysis.analysis_type
     analysis_workflow = config_model.analysis.analysis_workflow
