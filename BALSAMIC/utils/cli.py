@@ -440,9 +440,9 @@ def generate_graph(config_collection_dict, config_path):
     graph_title = "_".join(
         ["BALSAMIC", balsamic_version, config_collection_dict["analysis"]["case_id"]]
     )
-    graph_dot = graph_dot.replace(
-        "snakemake_dag {", f'BALSAMIC {{ label="{graph_title}"; labelloc="t";'
-    )
+    #graph_dot = graph_dot.replace(
+    #    "snakemake_dag {", f'BALSAMIC {{ label="{graph_title}"; labelloc="t";'
+    #)
 
     # Generate DAG visualization
     graph_obj = graphviz.Source(
