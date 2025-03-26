@@ -83,15 +83,13 @@ def analysis(
 ):
     """Run BALSAMIC workflow on the provided sample's config file."""
 
-    LOG.info(f"Initializing balsamic config model from json to run validation tests: {sample_config}.")
+    LOG.info(f"Initializing balsamic config model from config JSON: {sample_config}.")
     sample_config_path: Path = Path(sample_config).absolute()
     with open(sample_config_path, "r") as sample_fh:
         sample_config = json.load(sample_fh)
 
     config_model = ConfigModel.model_validate(sample_config)
-
     case_id = config_model.analysis.case_id
-
 
     log_file = Path(config_model.analysis.analysis_dir, case_id, LogFile.LOGNAME).as_posix()
     LOG.info(f"Setting BALSAMIC logfile path to: {log_file}.")
@@ -99,7 +97,7 @@ def analysis(
 
     LOG.info(f"Running BALSAMIC version {balsamic_version} -- RUN ANALYSIS")
     LOG.info(f"BALSAMIC started with log level {context.obj['log_level']}.")
-    LOG.info(f"Using case config file: {sample_config}")
+    LOG.info(f"Using case config file: {sample_config_path}")
     LOG.info(f"Starting analysis on: {case_id}.")
 
     if run_mode == RunMode.CLUSTER and not run_analysis:
@@ -145,7 +143,6 @@ def analysis(
     snakefile: Path = (
         snakefile if snakefile else get_snakefile(analysis_type, analysis_workflow)
     )
-
 
     LOG.info("Organizing snakemake run information")
     snakemake_executable: SnakemakeExecutable = SnakemakeExecutable(
