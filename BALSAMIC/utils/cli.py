@@ -427,7 +427,7 @@ def generate_graph(config_collection_dict, config_path):
             "--snakefile", snakefile,
             "--dryrun",
             "--configfile", config_path,
-            "--printrulegraph"
+            "--dag"
         ],
         capture_output=True,
         text=True,

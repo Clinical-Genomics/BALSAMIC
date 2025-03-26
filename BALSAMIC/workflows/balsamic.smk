@@ -333,10 +333,6 @@ if "swegen_sv_frequency" in config["reference"]:
 if config["analysis"]["sequencing_type"] != "wgs":
     capture_kit = os.path.split(config["panel"]["capture_kit"])[1]
 
-# explicitly check if cluster_config dict has zero keys.
-if len(cluster_config.keys()) == 0:
-    cluster_config = config
-
 if "hg38" in config["reference"]["reference_genome"]:
     config["reference"]["genome_version"] = "hg38"
 elif "canfam3" in config["reference"]["reference_genome"]:
