@@ -112,7 +112,7 @@ requirements: List[str] = [
     "wrapt==1.15.0",
     "yapf==0.40.1",
     "yarl==1.9.2",
-    "yte==1.5.1",
+    "yte==1.7.0",
     "zipp==3.16.2",
 ]
 
