@@ -6,7 +6,7 @@ from typing import List, Optional
 from pydantic import BaseModel, DirectoryPath, Field, FilePath, field_validator
 
 from BALSAMIC.constants.analysis import RunMode
-from BALSAMIC.constants.cluster import MAX_JOBS, QOS, ClusterMailType, ClusterProfile
+from BALSAMIC.constants.cluster import MAX_JOBS, QOS, ClusterMailType
 from BALSAMIC.utils.utils import remove_unnecessary_spaces
 
 
