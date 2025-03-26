@@ -7,7 +7,6 @@ from pydantic import BaseModel, DirectoryPath, Field, FilePath, field_validator
 
 from BALSAMIC.constants.analysis import RunMode
 from BALSAMIC.constants.cluster import MAX_JOBS, QOS, ClusterMailType, ClusterProfile
-from BALSAMIC.constants.paths import CONSTANTS_DIR
 from BALSAMIC.utils.utils import remove_unnecessary_spaces
 
 
@@ -29,14 +28,14 @@ class SnakemakeExecutable(BaseModel):
     Attributes:
         account (Optional[str])                                      : Scheduler account.
         case_id (str)                                                : Analysis case name.
-        cluster_config_path (Optional[FilePath])                     : Cluster configuration file path.
         config_path (FilePath)                                       : Sample configuration file.
         dragen (Optional[bool])                                      : FLag for enabling or disabling Dragen suite.
         force (bool)                                                 : Force snakemake execution.
         log_dir (Optional[DirectoryPath])                            : Logging directory.
         mail_type (Optional[ClusterMailType])                        : Email type triggering job status notifications.
         mail_user (Optional[str])                                    : User email to receive job status notifications.
-        profile (Optional[ClusterProfile])                           : Cluster profile to submit jobs.
+        profile: Path                                                : Directory containing snakemake cluster profile
+        workflow_profile: Path                                       : Directory contianing snakemake workflow profile specifying rule resources
         qos (Optional[QOS])                                          : QOS for sbatch jobs.
         quiet (Optional[bool])                                       : Quiet mode for snakemake.
         run_analysis (bool)                                          : Flag to run the actual analysis.
@@ -51,14 +50,14 @@ class SnakemakeExecutable(BaseModel):
 
     account: Optional[str] = None
     case_id: str
-    cluster_config_path: Optional[FilePath] = None
     config_path: FilePath
     dragen: bool = False
     force: bool = False
     log_dir: Optional[DirectoryPath] = None
     mail_type: Optional[ClusterMailType] = None
     mail_user: Optional[str] = None
-    profile: Optional[ClusterProfile] = None
+    profile: Path
+    workflow_profile: Path
     qos: Optional[QOS] = None
     quiet: bool = False
     run_analysis: bool = False
@@ -143,7 +142,7 @@ class SnakemakeExecutable(BaseModel):
             snakemake_cluster_options: str = (
                 f"-j {MAX_JOBS} "
                 f"--jobname BALSAMIC.{self.case_id}.{{rulename}}.{{jobid}}.sh "
-                f"--profile {CONSTANTS_DIR} --workflow-profile {CONSTANTS_DIR}/workflow_profile/"
+                f"--profile {self.profile} --workflow-profile {self.workflow_profile}"
             )
             return remove_unnecessary_spaces(snakemake_cluster_options)
         return ""

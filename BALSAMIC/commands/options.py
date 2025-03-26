@@ -1,7 +1,7 @@
 """Balsamic command options."""
 
 import click
-
+from pathlib import Path
 from BALSAMIC import __version__ as balsamic_version
 from BALSAMIC.constants.analysis import (
     ANALYSIS_WORKFLOWS,
@@ -15,14 +15,12 @@ from BALSAMIC.constants.analysis import (
 from BALSAMIC.constants.cache import GENOME_VERSIONS, CacheVersion, GenomeVersion
 from BALSAMIC.constants.cluster import (
     CLUSTER_MAIL_TYPES,
-    CLUSTER_PROFILES,
     QOS,
     QOS_OPTIONS,
-    ClusterProfile,
 )
 from BALSAMIC.constants.constants import LOG_LEVELS, LogLevel
 from BALSAMIC.constants.rules import DELIVERY_RULES
-from BALSAMIC.constants.workflow_params import VCF_DICT
+from BALSAMIC.constants.paths import CONSTANTS_DIR, WORKFLOW_PROFILE
 from BALSAMIC.utils.cli import (
     validate_cache_version,
     validate_exome_option,
@@ -128,12 +126,6 @@ OPTION_CLUSTER_ACCOUNT = click.option(
     help="Cluster account to run jobs",
 )
 
-OPTION_CLUSTER_CONFIG = click.option(
-    "--cluster-config",
-    type=click.Path(),
-    help="Cluster configuration JSON file path",
-)
-
 OPTION_CLUSTER_ENV = click.option(
     "--cluster-env",
     type=click.Path(),
@@ -171,9 +163,17 @@ OPTION_CLUSTER_PROFILE = click.option(
     "-p",
     "--profile",
     show_default=True,
-    default=ClusterProfile.SLURM,
-    type=click.Choice(CLUSTER_PROFILES),
-    help="Cluster profile to submit jobs",
+    type=click.Path(exists=True, resolve_path=True),
+    default=CONSTANTS_DIR,
+    help="Directory containing snakemake cluster profile",
+)
+
+OPTION_WORKFLOW_PROFILE = click.option(
+    "--workflow-profile",
+    show_default=True,
+    type=click.Path(exists=True, resolve_path=True),
+    default=WORKFLOW_PROFILE,
+    help="Directory contianing snakemake workflow profile specifying rule resources",
 )
 
 OPTION_CLUSTER_QOS = click.option(

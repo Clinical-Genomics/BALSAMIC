@@ -13,9 +13,9 @@ from BALSAMIC import __version__ as balsamic_version
 
 from BALSAMIC.commands.options import (
     OPTION_CLUSTER_ACCOUNT,
-    OPTION_CLUSTER_CONFIG,
     OPTION_CLUSTER_MAIL,
     OPTION_CLUSTER_MAIL_TYPE,
+    OPTION_WORKFLOW_PROFILE,
     OPTION_CLUSTER_PROFILE,
     OPTION_CLUSTER_QOS,
     OPTION_CLUSTER_ENV,
@@ -32,9 +32,7 @@ from BALSAMIC.commands.options import (
 from BALSAMIC.constants.analysis import RunMode, LogFile
 from BALSAMIC.constants.cluster import (
     QOS,
-    ClusterConfigType,
     ClusterMailType,
-    ClusterProfile,
 )
 from BALSAMIC.models.config import ConfigModel
 from BALSAMIC.models.snakemake import SnakemakeExecutable
@@ -48,10 +46,10 @@ LOG = logging.getLogger(__name__)
 
 @click.command("analysis", short_help="Run the analysis on a sample config-file")
 @OPTION_CLUSTER_ACCOUNT
-@OPTION_CLUSTER_CONFIG
 @OPTION_CLUSTER_MAIL
 @OPTION_CLUSTER_MAIL_TYPE
 @OPTION_CLUSTER_PROFILE
+@OPTION_WORKFLOW_PROFILE
 @OPTION_CLUSTER_QOS
 @OPTION_CLUSTER_ENV
 @OPTION_DRAGEN
@@ -69,10 +67,10 @@ def analysis(
     snakefile: Path,
     sample_config: Path,
     run_mode: RunMode,
-    cluster_config: Path,
     cluster_env: Path,
     dragen: bool,
-    profile: ClusterProfile,
+    cluster_profile: Path,
+    workflow_profile: Path,
     run_analysis: bool,
     run_interactively: bool,
     qos: QOS,
@@ -153,16 +151,14 @@ def analysis(
     snakemake_executable: SnakemakeExecutable = SnakemakeExecutable(
         account=account,
         case_id=case_name,
-        cluster_config_path=cluster_config
-        if cluster_config
-        else get_config_path(ClusterConfigType.ANALYSIS),
         config_path=sample_config_path,
         dragen=dragen,
         force=force_all,
         log_dir=log_path.as_posix(),
         mail_type=mail_type,
         mail_user=mail_user,
-        profile=profile,
+        profile=cluster_profile,
+        workflow_profile=workflow_profile,
         qos=qos,
         quiet=quiet,
         run_analysis=run_analysis,

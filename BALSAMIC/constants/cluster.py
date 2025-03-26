@@ -8,18 +8,7 @@ MAX_JOBS: int = 999
 class ClusterConfigType(StrEnum):
     """Analysis workflow config type."""
 
-    ANALYSIS: str = "cluster_analysis"
     CACHE: str = "cluster_cache"
-
-
-class ClusterProfile(StrEnum):
-    """Profile to submit jobs to the cluster."""
-
-    SLURM: str = "slurm"
-
-
-CLUSTER_PROFILES: List[ClusterProfile] = [profile for profile in ClusterProfile]
-
 
 class ClusterAccount(StrEnum):
     """Cluster job submission account."""
