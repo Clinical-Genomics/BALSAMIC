@@ -148,6 +148,7 @@ class SnakemakeExecutable(BaseModel):
         return ""
 
     # "sbatch --account {config[account]} --qos {config[qos]} --time={resources.runtime} --mem={resources.mem_mb}M --cpus-per-task={resources.threads} --error {config[analysis][log]}/BALSAMIC.{config[analysis][case_id]}.{rulename}.%j.err --output {config[analysis][log]}/BALSAMIC.{config[analysis][case_id]}.{rulename}.%j.out"
+    #  --error {self.log_dir.as_posix()}/BALSAMIC.{self.case_id}.{{rulename}}.{{jobid}}.err --output {self.log_dir.as_posix()}/BALSAMIC.{self.case_id}.{{rulename}}.{{jobid}}.stdout'
 
     def get_cluster_submit_command(self) -> str:
         """Get cluster command to be submitted by Snakemake."""
