@@ -434,19 +434,28 @@ def generate_graph(config_collection_dict, config_path):
         check=True
     )
 
-    graph_dot = result.stdout  # Capture Snakemake's output
+    # Process the output
+    graph_dot_lines = result.stdout.split("\n")
 
-    # Modify the output for Graphviz
-    graph_title = "_".join(
-        ["BALSAMIC", balsamic_version, config_collection_dict["analysis"]["case_id"]]
-    )
-    #graph_dot = graph_dot.replace(
-    #    "snakemake_dag {", f'BALSAMIC {{ label="{graph_title}"; labelloc="t";'
-    #)
+    # Remove any extra log lines at the start
+    graph_dot_lines = [line for line in graph_dot_lines if not line.startswith("Building DAG")]
+
+    # Construct a custom title
+    balsamic_version = "16.0.2"  # Update this dynamically if needed
+    case_id = config_collection_dict["analysis"]["case_id"]
+    graph_title = f'BALSAMIC {balsamic_version} {case_id}'
+
+    # Replace the graph definition line to include the title
+    for i, line in enumerate(graph_dot_lines):
+        if line.strip().startswith("digraph snakemake_dag {"):
+            graph_dot_lines[i] = f'digraph BALSAMIC {{ label="{graph_title}"; labelloc="t";'
+            break
+
+    graph_dot_cleaned = "\n".join(graph_dot_lines)
 
     # Generate DAG visualization
     graph_obj = graphviz.Source(
-        graph_dot,
+        graph_dot_cleaned,
         filename=".".join(config_collection_dict["analysis"]["dag"].split(".")[:-1]),
         format="pdf",
         engine="dot",
