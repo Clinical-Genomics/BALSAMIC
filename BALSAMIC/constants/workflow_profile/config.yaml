@@ -572,11 +572,11 @@ set-resources:
         mem_mb: 20000
         threads: 10
     sentieon_align_sort:
-        mem_mb: attempt * 20000
+        mem_mb: 20000
         runtime: 1440
         threads: 12
     sentieon_align_sort_umireads:
-        mem_mb: attempt * 20000
+        mem_mb: 20000
         runtime: 1440
         threads: 12
     cap_base_quality:
@@ -600,7 +600,7 @@ set-resources:
         runtime: 1440
         threads: 36
     samtools_fixmate:
-        mem_mb: attempt * 80000
+        mem_mb: 80000
         runtime: 560
         threads: 16
     bam_compress_tumor:
