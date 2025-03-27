@@ -4,8 +4,8 @@ default-resources:
     mem_mb: 4000
     threads: 2
     slurm_partition: "core"
-    slurm_account: "development"
-    slurm_extra: "'--qos high'"
+    slurm_account: "placeholder"
+    slurm_extra: "'placeholder'"
 restart-times: 3
 max-status-checks-per-second: 1
 local-cores: 1
