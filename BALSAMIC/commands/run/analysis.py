@@ -148,10 +148,10 @@ def analysis(
     cluster_yaml = read_yaml(Path(cluster_profile, "config.yaml").as_posix())
 
     # Update the placeholder fields
-    config["default-resources"]["slurm_account"] = account
-    config["default-resources"]["slurm_extra"] = f"'--qos {qos} --error {log_path.as_posix()}/BALSAMIC.{case_id}.{{rulename}}.{{jobid}}.err --output {log_path.as_posix()}/BALSAMIC.{case_id}.{{rulename}}.{{jobid}}.stdout'"
+    cluster_yaml["default-resources"]["slurm_account"] = account
+    cluster_yaml["default-resources"]["slurm_extra"] = f"'--qos {qos} --error {log_path.as_posix()}/BALSAMIC.{case_id}.{{rulename}}.{{jobid}}.err --output {log_path.as_posix()}/BALSAMIC.{case_id}.{{rulename}}.{{jobid}}.stdout'"
 
-    write_yaml(Path(config_model.analysis.analysis_dir, case_id, "config.yaml").as_posix())
+    write_yaml(cluster_yaml, Path(config_model.analysis.analysis_dir, case_id, "config.yaml").as_posix())
 
     LOG.info("Organizing snakemake run information")
     snakemake_executable: SnakemakeExecutable = SnakemakeExecutable(
