@@ -1,9 +1,9 @@
 cluster: "sbatch --account {config[account]} --qos {config[qos]} --time={resources.runtime} --mem={resources.mem_mb}M --cpus-per-task={resources.threads} --error {config[analysis][log]}/BALSAMIC.{config[analysis][case_id]}.{rulename}.%j.err --output {config[analysis][log]}/BALSAMIC.{config[analysis][case_id]}.{rulename}.%j.out"
 jobs: 999
 default-resources:
-    - runtime: 120
-    - mem_mb: 4000
-    - threads: 2
+    runtime: 120
+    mem_mb: 4000
+    threads: 2
 restart-times: 3
 max-status-checks-per-second: 10
 local-cores: 1
