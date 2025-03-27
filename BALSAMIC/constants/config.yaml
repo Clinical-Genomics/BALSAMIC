@@ -4,7 +4,7 @@ default-resources:
     mem_mb: 4000
     threads: 2
     slurm_partition: "core"
-    slurm_account: "{config[account]}"
+    slurm_account: f"{config[account]}"
     slurm_extra: "'--qos {config[qos]} --error {self.log_dir.as_posix()}/BALSAMIC.{self.case_id}.{{rulename}}.{{jobid}}.err --output {self.log_dir.as_posix()}/BALSAMIC.{self.case_id}.{{rulename}}.{{jobid}}.stdout'"
 restart-times: 3
 max-status-checks-per-second: 1
