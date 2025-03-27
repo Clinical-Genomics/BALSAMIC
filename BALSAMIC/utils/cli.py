@@ -441,6 +441,7 @@ def generate_graph(config_collection_dict, config_path):
     graph_dot_lines = [line for line in graph_dot_lines if not line.startswith("Building DAG")]
 
     # Construct a custom title
+    balsamic_version = "16.0.2"  # Update this dynamically if needed
     case_id = config_collection_dict["analysis"]["case_id"]
     graph_title = f'BALSAMIC {balsamic_version} {case_id}'
 
