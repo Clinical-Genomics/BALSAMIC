@@ -1,3 +1,11 @@
+jobs: 999
+default-resources:
+    - runtime=120
+    - mem_mb=4000
+    - threads=2
+restart-times: 3
+max-status-checks-per-second: 1
+local-cores: 1
 executor: slurm
 slurm:
   account: "{config[account]}"
@@ -7,11 +15,3 @@ slurm:
   cpus-per-task: "{resources.threads}"
   output: "{config[analysis][log]}/BALSAMIC.{config[analysis][case_id]}.{rulename}.%j.out"
   error: "{config[analysis][log]}/BALSAMIC.{config[analysis][case_id]}.{rulename}.%j.err"
-jobs: 999
-default-resources:
-    - runtime: 120
-    - mem_mb: 4000
-    - threads: 2
-restart-times: 3
-max-status-checks-per-second: 1
-local-cores: 1
