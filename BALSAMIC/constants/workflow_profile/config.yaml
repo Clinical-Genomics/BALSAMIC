@@ -592,7 +592,6 @@ set-resources:
         runtime: 1440
         threads: 36
     sentieon_dedup_consensus:
-        mem_mb: lambda wc, input: max(2.5 * input.size_mb, 300)
         runtime: 1440
         threads: 36
     sentieon_base_calibration:
