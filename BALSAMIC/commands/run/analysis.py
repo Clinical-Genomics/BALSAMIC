@@ -4,6 +4,7 @@ import logging
 import os
 import re
 import subprocess
+import textwrap
 import sys
 from pathlib import Path
 from typing import List
@@ -168,57 +169,69 @@ def analysis(
         working_dir=Path(analysis_dir, case_id, "BALSAMIC_run"),
     )
 
-
     if not run_interactively:
-        LOG.info(f"Creating sbatch-script to submit jobs.")
-        # Create sbatch script here with snakemake run
+        LOG.info("Creating sbatch script to submit jobs.")
+
+        # Get conda environment
         conda_env = os.environ.get("CONDA_DEFAULT_ENV", "")
-        LOG.info(f"Setting conda environment in job-submission script to: {conda_env}")
+        LOG.info(f"Using conda environment: {conda_env}")
 
-        with open(f"{script_path.as_posix()}/BALSAMIC_snakemake_submit.sh", "w") as submit_file:
-            sbatch_lines = ["#!/bin/bash -l",
-                            f"#SBATCH --account={account}",
-                            f"#SBATCH --job-name=BALSAMIC_snakemake_submit.{case_id}.%j",
-                            f"#SBATCH --output={log_path}/BALSAMIC_snakemake_submit.{case_id}.%j.out",
-                            f"#SBATCH --error={log_path}/BALSAMIC_snakemake_submit.{case_id}.%j.err",
-                            "#SBATCH --ntasks=1",
-                            "#SBATCH --mem=5G",
-                            "#SBATCH --time=60:00:00",
-                            f"#SBATCH --qos={qos}",
-                            "#SBATCH --cpus-per-task=1"]
+        # Define sbatch script path
+        sbatch_script_path = Path(script_path, "BALSAMIC_snakemake_submit.sh").as_posix()
 
-            if cluster_env:
-                LOG.info(f"Setting cluster environment in job-submission script to: {cluster_env}")
-                sbatch_lines.append(f"source {cluster_env}")
+        # Construct sbatch script content
+        sbatch_script = textwrap.dedent(f"""\
+            #!/bin/bash -l
+            #SBATCH --account={account}
+            #SBATCH --job-name=BALSAMIC_snakemake_submit.{case_id}.%j
+            #SBATCH --output={log_path}/BALSAMIC_snakemake_submit.{case_id}.%j.out
+            #SBATCH --error={log_path}/BALSAMIC_snakemake_submit.{case_id}.%j.err
+            #SBATCH --ntasks=1
+            #SBATCH --mem=5G
+            #SBATCH --time=60:00:00
+            #SBATCH --qos={qos}
+            #SBATCH --cpus-per-task=1
+        """)
 
-            sbatch_lines.extend([f"conda activate {conda_env}", f"{snakemake_executable.get_command()}"])
-            submit_file.write("\n".join(sbatch_lines) + "\n")
+        if cluster_env:
+            LOG.info(f"Loading cluster environment: {cluster_env}")
+            sbatch_script += f"\nsource {cluster_env}\n"
 
-        # Submit sbatch script to cluster
-        sbatch_command = f"sbatch {script_path.as_posix()}/BALSAMIC_snakemake_submit.sh"
+        sbatch_script += f"\nconda activate {conda_env}\n{snakemake_executable.get_command()}\n"
+
+        # Write sbatch script
+        with open(sbatch_script_path, "w") as submit_file:
+            submit_file.write(sbatch_script)
+
+        LOG.info(f"Sbatch script written to: {sbatch_script_path}")
+
+        # Submit job to SLURM
+        sbatch_command = f"sbatch {sbatch_script_path}"
+        LOG.info(f"Submitting job with command: {sbatch_command}")
         result = subprocess.run(sbatch_command, shell=True, capture_output=True, text=True)
 
         if result.returncode == 0:
             output = result.stdout.strip()
             match = re.search(r"Submitted batch job (\d+)", output)
+
             if match:
                 job_id = match.group(1)
-                LOG.info(f"Successfully submitted job with Job ID: {job_id}")
-                # Write yaml for TB
-                trailblazer_yaml = {}
-                # Append job ID to the case_id key
-                trailblazer_yaml[case_id] = [job_id]
-                slurm_jobids_yaml_path: str = Path(result_path.as_posix(), "slurm_jobids.yaml").as_posix()
+                LOG.info(f"Job submitted successfully with Job ID: {job_id}")
+
+                # Write job ID to YAML
+                trailblazer_yaml = {case_id: [job_id]}
+                slurm_jobids_yaml_path = Path(result_path, "slurm_jobids.yaml").as_posix()
                 write_yaml(trailblazer_yaml, slurm_jobids_yaml_path)
+                LOG.info(f"Job ID written to {slurm_jobids_yaml_path}")
             else:
-                LOG.warning("Could not extract Job ID from sbatch output.")
+                LOG.warning(f"Could not extract Job ID from sbatch output: {output}")
         else:
-            LOG.error(f"sbatch submission failed: {result.stderr.strip()}")
+            LOG.error(f"sBatch submission failed: {result.stderr.strip()}")
+
     else:
-        LOG.info(f"Starting {analysis_workflow} workflow...")
+        LOG.info(f"Starting {analysis_workflow} workflow interactively.")
         subprocess.run(
             f"{sys.executable} -m {snakemake_executable.get_command()}",
             shell=True,
+            check=True,
         )
-
-
