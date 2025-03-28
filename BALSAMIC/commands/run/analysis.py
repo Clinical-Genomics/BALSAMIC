@@ -8,7 +8,6 @@ from pathlib import Path
 from typing import List
 
 import click
-import yaml
 
 from BALSAMIC import __version__ as balsamic_version
 
@@ -39,7 +38,7 @@ from BALSAMIC.models.config import ConfigModel
 from BALSAMIC.models.snakemake import SnakemakeExecutable
 from BALSAMIC.utils.analysis import get_singularity_bind_paths
 from BALSAMIC.utils.cli import createDir, get_snakefile
-from BALSAMIC.utils.io import write_json, read_yaml, write_yaml
+from BALSAMIC.utils.io import write_json
 from BALSAMIC.utils.logging import add_file_logging
 
 LOG = logging.getLogger(__name__)
@@ -144,14 +143,6 @@ def analysis(
     snakefile: Path = (
         snakefile if snakefile else get_snakefile(analysis_type, analysis_workflow)
     )
-    LOG.info("Creating cluster profile yaml")
-    cluster_yaml = read_yaml(Path(cluster_profile, "config.yaml").as_posix())
-
-    # Update the placeholder fields
-    cluster_yaml["default-resources"]["slurm_account"] = account
-    cluster_yaml["default-resources"]["slurm_extra"] = f"--qos {qos} --error {log_path.as_posix()}/BALSAMIC.{case_id}.%x.%j.err --output {log_path.as_posix()}/BALSAMIC.{case_id}.%x.%j.stdout"
-
-    write_yaml(cluster_yaml, Path(config_model.analysis.analysis_dir, case_id, "config.yaml").as_posix())
 
     LOG.info("Organizing snakemake run information")
     snakemake_executable: SnakemakeExecutable = SnakemakeExecutable(
@@ -163,7 +154,7 @@ def analysis(
         log_dir=log_path.as_posix(),
         mail_type=mail_type,
         mail_user=mail_user,
-        cluster_profile=Path(config_model.analysis.analysis_dir, case_id).as_posix(),
+        cluster_profile=cluster_profile,
         workflow_profile=workflow_profile,
         qos=qos,
         quiet=quiet,
