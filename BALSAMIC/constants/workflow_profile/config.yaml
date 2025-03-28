@@ -576,7 +576,7 @@ set-resources:
         runtime: 1440
         threads: 12
     sentieon_align_sort_umireads:
-        mem_mb: 20000
+        mem_mb: 40000
         runtime: 1440
         threads: 12
     cap_base_quality:
