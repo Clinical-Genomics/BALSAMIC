@@ -410,59 +410,7 @@ def get_pon_sample_list(fastq_path: str) -> List[SampleInstanceModel]:
     return sample_list
 
 
-
-
 def generate_graph(config_collection_dict, config_path):
-    """Generate DAG graph using Snakemake stdout output via subprocess."""
-
-    snakefile = get_snakefile(
-        analysis_type=config_collection_dict["analysis"]["analysis_type"],
-        analysis_workflow=config_collection_dict["analysis"]["analysis_workflow"],
-    )
-
-    # Run Snakemake as a subprocess to capture the DAG output
-    result = subprocess.run(
-        [
-            "snakemake",
-            "--snakefile", snakefile,
-            "--dryrun",
-            "--configfile", config_path,
-            "--dag"
-        ],
-        capture_output=True,
-        text=True,
-        check=True
-    )
-
-    # Process the output
-    graph_dot_lines = result.stdout.split("\n")
-
-    # Remove any extra log lines at the start
-    graph_dot_lines = [line for line in graph_dot_lines if not line.startswith("Building DAG")]
-
-    # Construct a custom title
-    balsamic_version = "16.0.2"  # Update this dynamically if needed
-    case_id = config_collection_dict["analysis"]["case_id"]
-    graph_title = f'BALSAMIC {balsamic_version} {case_id}'
-
-    # Replace the graph definition line to include the title
-    for i, line in enumerate(graph_dot_lines):
-        if line.strip().startswith("digraph snakemake_dag {"):
-            graph_dot_lines[i] = f'digraph BALSAMIC {{ label="{graph_title}"; labelloc="t";'
-            break
-
-    graph_dot_cleaned = "\n".join(graph_dot_lines)
-
-    # Generate DAG visualization
-    graph_obj = graphviz.Source(
-        graph_dot_cleaned,
-        filename=".".join(config_collection_dict["analysis"]["dag"].split(".")[:-1]),
-        format="pdf",
-        engine="dot",
-    )
-    graph_obj.render(cleanup=True)
-
-def generate_graphY(config_collection_dict, config_path):
     """Generate DAG graph using snakemake stdout output."""
 
     with CaptureStdout() as graph_dot:
