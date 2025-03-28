@@ -98,7 +98,7 @@ requirements: List[str] = [
     "six==1.16.0",
     "smart-open==6.3.0",
     "smmap==5.0.0",
-    "snakemake==9.1.2",
+    "snakemake==7.32.4"
     "stopit==1.1.2",
     "tabulate==0.9.0",
     "throttler==1.2.2",
@@ -112,7 +112,7 @@ requirements: List[str] = [
     "wrapt==1.15.0",
     "yapf==0.40.1",
     "yarl==1.9.2",
-    "yte==1.7.0",
+    "yte==1.5.1",
     "zipp==3.16.2",
 ]
 
