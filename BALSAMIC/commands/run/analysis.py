@@ -2,6 +2,7 @@
 import json
 import logging
 import os
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -38,7 +39,7 @@ from BALSAMIC.models.config import ConfigModel
 from BALSAMIC.models.snakemake import SnakemakeExecutable
 from BALSAMIC.utils.analysis import get_singularity_bind_paths
 from BALSAMIC.utils.cli import createDir, get_snakefile
-from BALSAMIC.utils.io import write_json
+from BALSAMIC.utils.io import write_json, write_yaml
 from BALSAMIC.utils.logging import add_file_logging
 
 LOG = logging.getLogger(__name__)
@@ -194,8 +195,25 @@ def analysis(
             submit_file.write("\n".join(sbatch_lines) + "\n")
 
         # Submit sbatch script to cluster
-        subprocess.run(f"sbatch {script_path.as_posix()}/BALSAMIC_snakemake_submit.sh", shell=True)
+        sbatch_command = f"sbatch {script_path.as_posix()}/BALSAMIC_snakemake_submit.sh"
+        result = subprocess.run(sbatch_command, shell=True, capture_output=True, text=True)
 
+        if result.returncode == 0:
+            output = result.stdout.strip()
+            match = re.search(r"Submitted batch job (\d+)", output)
+            if match:
+                job_id = match.group(1)
+                LOG.info(f"Successfully submitted job with Job ID: {job_id}")
+                # Write yaml for TB
+                trailblazer_yaml = {}
+                # Append job ID to the case_id key
+                trailblazer_yaml[case_id] = [job_id]
+                slurm_jobids_yaml_path: str = Path(result_path.as_posix(), "slurm_jobids.yaml").as_posix()
+                write_yaml(trailblazer_yaml, slurm_jobids_yaml_path)
+            else:
+                LOG.warning("Could not extract Job ID from sbatch output.")
+        else:
+            LOG.error(f"sbatch submission failed: {result.stderr.strip()}")
     else:
         LOG.info(f"Starting {analysis_workflow} workflow...")
         subprocess.run(
