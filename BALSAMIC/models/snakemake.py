@@ -122,7 +122,7 @@ class SnakemakeExecutable(BaseModel):
     def get_command(self) -> str:
         """Return Snakemake command to be submitted."""
         snakemake_command: str = (
-            f"snakemake --notemp -p --rerun-trigger mtime "
+            f"snakemake --notemp -p --rerun-trigger mtime --retries 3 "
             f"--directory {self.working_dir.as_posix()} "
             f"--snakefile {self.snakefile.as_posix()} "
             f"{self.get_config_file_option()} "
@@ -146,9 +146,6 @@ class SnakemakeExecutable(BaseModel):
             )
             return remove_unnecessary_spaces(snakemake_cluster_options)
         return ""
-
-    # "sbatch --account {config[account]} --qos {config[qos]} --time={resources.runtime} --mem={resources.mem_mb}M --cpus-per-task={resources.threads} --error {config[analysis][log]}/BALSAMIC.{config[analysis][case_id]}.{rulename}.%j.err --output {config[analysis][log]}/BALSAMIC.{config[analysis][case_id]}.{rulename}.%j.out"
-    #  --error {self.log_dir.as_posix()}/BALSAMIC.{self.case_id}.{{rulename}}.{{jobid}}.err --output {self.log_dir.as_posix()}/BALSAMIC.{self.case_id}.{{rulename}}.{{jobid}}.stdout'
 
     def get_cluster_submit_command(self) -> str:
         """Get cluster command to be submitted by Snakemake."""
