@@ -149,7 +149,7 @@ def analysis(
 
     # Update the placeholder fields
     cluster_yaml["default-resources"]["slurm_account"] = account
-    cluster_yaml["default-resources"]["slurm_extra"] = f"--qos {qos} --error {log_path.as_posix()}/BALSAMIC.{case_id}.{{rulename}}.{{jobid}}.err --output {log_path.as_posix()}/BALSAMIC.{case_id}.{{rulename}}.{{jobid}}.stdout"
+    cluster_yaml["default-resources"]["slurm_extra"] = f"--qos {qos} --error {log_path.as_posix()}/BALSAMIC.{case_id}.%x.%j.err --output {log_path.as_posix()}/BALSAMIC.{case_id}.%x.%j.stdout"
 
     write_yaml(cluster_yaml, Path(config_model.analysis.analysis_dir, case_id, "config.yaml").as_posix())
 
