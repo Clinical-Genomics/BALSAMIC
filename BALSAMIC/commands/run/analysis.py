@@ -212,7 +212,7 @@ def analysis(
 
         if result.returncode == 0:
             output = result.stdout.strip()
-            match = re.search(r"Submitted batch job (\d+)", output)
+            match = re.search(r"Submitted sbatch job (\d+)", output)
 
             if match:
                 job_id = match.group(1)
@@ -226,7 +226,7 @@ def analysis(
             else:
                 LOG.warning(f"Could not extract Job ID from sbatch output: {output}")
         else:
-            LOG.error(f"sBatch submission failed: {result.stderr.strip()}")
+            LOG.error(f"sbatch submission failed: {result.stderr.strip()}")
 
     else:
         LOG.info(f"Starting {analysis_workflow} workflow interactively.")
