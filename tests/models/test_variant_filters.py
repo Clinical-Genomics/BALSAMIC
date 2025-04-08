@@ -124,12 +124,8 @@ def test_wes_tga_read_depth_snv_filter():
     """Test correct retrieval of WES specific DP value"""
 
     # GIVEN WES and TGA filters
-    wes_filters = TgaSNVFilters.get_filters(
-        category="quality", sequencing_type=SequencingType.WES
-    )
-    tga_filters = TgaSNVFilters.get_filters(
-        category="quality", sequencing_type=SequencingType.TARGETED
-    )
+    wes_filters = TgaSNVFilters.get_filters(category="quality", exome=True)
+    tga_filters = TgaSNVFilters.get_filters(category="quality", exome=False)
 
     # WHEN extracting DP specific filter
     wes_dp_filter = get_tag_and_filtername(wes_filters, "balsamic_low_tumor_dp")

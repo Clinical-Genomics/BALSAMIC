@@ -142,54 +142,20 @@ class UMIParamsConsensuscall(BaseModel):
     tag: str = "XR"
 
 
-class UMIParamsTNscope(BaseModel):
-    """This class defines the params settings used as constants in UMI workflow-rule tnscope.
-
-    Attributes:
-        algo: str; choice of sentieon varcall algorithm. eg. 'TNscope'
-        disable_detect: str; disable variant detector. eg 'sv' or 'snv_indel'
-        filter_tumor_af: float (required); minimum allelic frequency to detect
-        min_tumorLOD: int (required); minimum tumor log odds in the final call of variants
-        init_tumorLOD: float (required); minimum tumor log odds in the initial pass calling variants
-        error_rate: int (required); allow error-rate to consider in calling
-        prunefactor: int (required); pruning factor in the kmer graph
-        padding: int(required); amount to pad bed interval regions
-        pcr_model: str (required). PCR indel model used to weed out false positive indels. Eg: none- PCR free samples.
-    """
+class ParamsTNscope(BaseModel):
+    """This class defines the TNscope params."""
 
     algo: str
-    filter_tumor_af: float
-    init_tumorLOD: float
-    min_tumorLOD: int
-    error_rate: int
-    prunefactor: int
-    padding: int
-    disable_detect: str
-    pcr_model: str
-
-
-class TGAParamsTNscope(BaseModel):
-    """This class defines the params settings used as constants in TGA workflow-rule tnscope.
-
-    Attributes:
-        algo: str; choice of sentieon varcall algorithm. eg. 'TNscope'
-        filter_tumor_af: float (required); minimum allelic frequency to detect
-        min_tumorLOD: int (required); minimum tumor log odds in the final call of variants
-        init_tumorLOD: float (required); minimum tumor log odds in the initial pass calling variants
-        error_rate: int (required); allow error-rate to consider in calling
-        prunefactor: int (required); pruning factor in the kmer graph
-        padding: int(required); amount to pad bed interval regions
-        pcr_model: str (required). PCR indel model used to weed out false positive indels. Eg: none- PCR free samples.
-    """
-
-    algo: str
-    filter_tumor_af: float
-    init_tumorLOD: float
-    min_tumorLOD: int
-    error_rate: int
-    prunefactor: int
-    padding: int
-    pcr_model: str
+    filter_tumor_af: Optional[float] = None
+    init_tumorLOD: Optional[float] = None
+    min_tumorLOD: Optional[float] = None
+    init_normalLOD: Optional[float] = None
+    min_normalLOD: Optional[float] = None
+    error_rate: Optional[int] = None
+    prunefactor: Optional[int] = None
+    padding: Optional[int] = None
+    disable_detect: Optional[str] = None
+    pcr_model: Optional[str] = None
 
 
 class BAMPostProcessingParams(BaseModel):
@@ -243,6 +209,8 @@ class BalsamicWorkflowConfig(BaseModel):
         umiextract : params defined in the rule sentieon_umiextract
         umiconsensuscall: params defined in the rule sentieon_consensuscall
         tnscope_umi: params defined in the rule sentieon_tnscope_umi
+        tnscope_tga_tumor_only: params defined in the rule sentieon_tnscope_tga_tumor_only
+        tnscope_tga_tumor_normal: params defined in the rule sentieon_tnscope_tga_tumor_normal
 
     Functions:
         - get_manta_settings: Return setting for manta rule
@@ -260,8 +228,9 @@ class BalsamicWorkflowConfig(BaseModel):
     umicommon: UMIParamsCommon
     umiextract: UMIParamsUMIextract
     umiconsensuscall: UMIParamsConsensuscall
-    tnscope_umi: UMIParamsTNscope
-    tnscope_tga: TGAParamsTNscope
+    tnscope_umi: ParamsTNscope
+    tnscope_tga: ParamsTNscope
+    tnscope_wgs: ParamsTNscope
 
     def get_manta_settings(self, sequencing_type) -> str:
         """Return correct setting for manta rules depending on sequencing type."""
@@ -284,18 +253,18 @@ class VCFFilter(BaseModel):
         filter_name: str
         field: str
         Description: str (optional); filter description
-        sequencing_type: str (optional); specific sequencing type such WES or TGA for which to apply the filter
         analysis_type: str (optional); specific sequencing type such paired or single for which to apply the filter
         variant_caller: str (optional); the specific variant caller for which to apply the filter
+        exome: bool (optional); if the filter should only be applied for exome
     """
 
     tag_value: Optional[float] = None
     filter_name: str
     field: Optional[str] = None
     Description: Optional[str] = None
-    sequencing_type: Optional[str] = None
     analysis_type: Optional[str] = None
     variant_caller: Optional[str] = None
+    exome: Optional[bool] = None
 
 
 class StructuralVariantFilters(BaseModel):

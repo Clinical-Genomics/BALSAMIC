@@ -206,15 +206,20 @@
 	},
 	"vardict_tumor_normal": {
 		"time": "12:00:00",
-		"n": 18
+		"n": 6
 	},
 	"vardict_tumor_only": {
 		"time": "10:00:00",
-		"n": 18
+		"n": 6
 	},
 	"sentieon_TNscope": {
 		"time": "24:00:00",
 		"n": 36
+	},
+	"sentieon_tnscope_wgs_tumor_normal": {
+		"time": "24:00:00",
+		"n": 36,
+		"mem": 80000
 	},
 	"sentieon_TNscope_tumor_only": {
 		"time": "24:00:00",
@@ -274,19 +279,23 @@
 	},
 	"bcftools_get_somaticINDEL_research": {
 		"time": "1:00:00",
-		"n": 36
+		"n": 4
+	},
+	"bcftools_annotate_somaticINDEL_research": {
+		"time": "1:00:00",
+		"n": 4
 	},
 	"cadd_annotate_somaticINDEL_research": {
 		"time": "18:00:00",
-		"n": 36
+		"n": 4
 	},
 	"vep_annotate_somaticSNV_research": {
 		"time": "18:00:00",
-		"n": 36
+		"n": 12
 	},
 	"vcfanno_annotate_somaticSNV_clinical": {
 		"time": "18:00:00",
-		"n" : 36
+		"n" : 12
 	},
 	"vep_somatic_research_sv": {
 		"time": "12:00:00",
@@ -383,10 +392,6 @@
 	"bcftools_process_SV_CNV": {
 		"time": "01:00:00",
 		"n": 8
-	},
-	"bcftools_split_tnscope_variants": {
-		"time": "01:00:00",
-		"n": 4
 	},
 	"post_process_tnscope": {
 		"time": "01:00:00",

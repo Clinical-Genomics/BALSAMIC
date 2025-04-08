@@ -29,7 +29,6 @@ from BALSAMIC.constants.variant_filters import (
     get_tag_and_filtername,
 )
 from BALSAMIC.constants.workflow_params import (
-    VARCALL_PARAMS,
     WORKFLOW_PARAMS,
     SLEEP_BEFORE_START,
 )
@@ -138,16 +137,21 @@ if config_model.panel:
 else:
     SNV_FILTERS = WgsSNVFilters
 
-snv_quality_filters = SNV_FILTERS.get_filters(category="quality", sequencing_type=sequencing_type, analysis_type=analysis_type)
-snv_research_filters = SNV_FILTERS.get_filters(category="research", sequencing_type=sequencing_type, analysis_type=analysis_type)
-snv_clinical_filters = SNV_FILTERS.get_filters(category="clinical", sequencing_type=sequencing_type, analysis_type=analysis_type)
-
+if sequencing_type == "targeted":
+    exome = config_model.panel.exome
+    snv_quality_filters = SNV_FILTERS.get_filters(category="quality", analysis_type=analysis_type, exome=exome)
+    snv_research_filters = SNV_FILTERS.get_filters(category="research", analysis_type=analysis_type, exome=exome)
+    snv_clinical_filters = SNV_FILTERS.get_filters(category="clinical", analysis_type=analysis_type, exome=exome)
+else:
+    snv_quality_filters = SNV_FILTERS.get_filters(category="quality", analysis_type=analysis_type)
+    snv_research_filters = SNV_FILTERS.get_filters(category="research", analysis_type=analysis_type)
+    snv_clinical_filters = SNV_FILTERS.get_filters(category="clinical", analysis_type=analysis_type)
 
 if config_model.analysis.analysis_workflow == AnalysisWorkflow.BALSAMIC_UMI:
     SNV_FILTERS = TgaUmiSNVFilters
-    umi_snv_quality_filters = SNV_FILTERS.get_filters(category="quality", sequencing_type=sequencing_type, analysis_type=analysis_type)
-    umi_snv_research_filters = SNV_FILTERS.get_filters(category="research", sequencing_type=sequencing_type, analysis_type=analysis_type)
-    umi_snv_clinical_filters = SNV_FILTERS.get_filters(category="clinical", sequencing_type=sequencing_type, analysis_type=analysis_type)
+    umi_snv_quality_filters = SNV_FILTERS.get_filters(category="quality", analysis_type=analysis_type)
+    umi_snv_research_filters = SNV_FILTERS.get_filters(category="research", analysis_type=analysis_type)
+    umi_snv_clinical_filters = SNV_FILTERS.get_filters(category="clinical", analysis_type=analysis_type)
 
 
 
@@ -188,15 +192,25 @@ research_annotations.append(
                     "CLNREVSTAT",
                     "CLNSIG",
                     "ORIGIN",
+                    "ONC",
+                    "ONCDN",
+                    "ONCREVSTAT",
+                    "ONCDISDB",
+                    "ONCCONF",
                     "CLNVC",
                     "CLNVCSO",
                 ],
-                "ops": ["self", "self", "self", "self", "self", "self"],
+                "ops": ["self", "self", "self", "self", "self", "self", "self", "self", "self", "self", "self"],
                 "names": [
                     "CLNACC",
                     "CLNREVSTAT",
                     "CLNSIG",
                     "ORIGIN",
+                    "ONC",
+                    "ONCDN",
+                    "ONCREVSTAT",
+                    "ONCDISDB",
+                    "ONCCONF",
                     "CLNVC",
                     "CLNVCSO",
                 ],
