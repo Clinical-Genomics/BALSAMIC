@@ -224,7 +224,7 @@ def get_metric_condition(
     req_metrics = requested_metrics[metric]["condition"]
     if sequencing_type == "wgs" and (
         (metric == "PCT_60X" and sample_type == "normal")
-        or (metric == "PCT_15X" and sample_type == "tumor")
+        or (metric == "MEDIAN_COVERAGE" and sample_type == "tumor")
     ):
         req_metrics = None
 
