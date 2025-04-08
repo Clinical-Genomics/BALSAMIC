@@ -12,9 +12,8 @@ rule sentieon_tnscope_tga_tumor_only:
         bed = config["panel"]["capture_kit"],
         dbsnp = config["reference"]["dbsnp"]
     output:
-        vcf_tnscope = vcf_dir + "sentieon_tnscope" + "/" + "ALL.somatic." + config["analysis"]["case_id"] + ".tnscope.vcf.gz",
+        vcf_tnscope = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.vcf.gz",
         namemap_snv = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.sample_name_map",
-        namemap_sv = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".tnscope.sample_name_map",
     benchmark:
         Path(benchmark_dir, "sentieon_tnscope_" + config["analysis"]["case_id"] + ".tsv").as_posix()
     params:
@@ -24,12 +23,14 @@ rule sentieon_tnscope_tga_tumor_only:
         padding = params.tnscope_tga.padding,
         pcr_model = params.tnscope_tga.pcr_model,
         prune_factor = params.tnscope_tga.prunefactor,
+        disable_detect= params.tnscope_tga.disable_detect,
         sentieon_exec=config_model.sentieon.sentieon_exec,
         sentieon_lic=config_model.sentieon.sentieon_license,
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         tumor = "TUMOR",
         tumor_af = params.tnscope_tga.filter_tumor_af,
         tumor_lod = params.tnscope_tga.min_tumorLOD,
+        housekeeper_id= {"id": config["analysis"]["case_id"],"tags": "research"}
     threads:
         get_threads(cluster_config, "sentieon_tnscope_tga_t_only")
     message:
@@ -48,6 +49,7 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 --interval {input.bed} \
 --interval_padding {params.padding} \
 --algo {params.algo} \
+--disable_detector {params.disable_detect} \
 --tumor_sample {params.tumor} \
 --dbsnp {input.dbsnp} \
 --trim_soft_clip \
@@ -61,7 +63,6 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 {output.vcf_tnscope};
 
 echo -e \"{params.tumor}\\tTUMOR\" > {output.namemap_snv};
-cp {output.namemap_snv} {output.namemap_sv};
 rm -rf {params.tmpdir};
         """
 
@@ -70,11 +71,11 @@ rule vardict_tumor_only:
     input:
         fa = config["reference"]["reference_genome"],
         bamT = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
-        bed = vcf_dir + "split_bed/{bedchrom}." + capture_kit,
+        bed = vcf_dir + "pad_bedfile/" + "100bp_padding_" + capture_kit
     output:
-        temp(vcf_dir + "vardict/split_vcf/{bedchrom}_vardict.vcf.gz")
+        vcf = vcf_dir + "vardict/vardict.vcf"
     benchmark:
-        Path(benchmark_dir, 'vardict_tumor_only_' + '{bedchrom}.tsv').as_posix()
+        Path(benchmark_dir,'vardict_tumor_only.tsv').as_posix()
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("vardict") + ".sif").as_posix()
     params:
@@ -93,8 +94,8 @@ rule vardict_tumor_only:
 export PERL5LIB=;
 
 export TMPDIR={params.tmpdir};
-export _JAVA_OPTIONS="-Djava.io.tmpdir={params.tmpdir}"; 
-export VAR_DICT_OPTS='\"-Xms45G\" \"-Xmx90G\"'; 
+export _JAVA_OPTIONS="-Djava.io.tmpdir={params.tmpdir} -Xss256k"; 
+export VAR_DICT_OPTS='\"-Xms10G\" \"-Xmx25G\" \"-XX:+UseG1GC\" \"-XX:MaxHeapFreeRatio=50\"'; 
 
 vardict-java -I 600 \
 -G {input.fa} \
@@ -105,16 +106,14 @@ vardict-java -I 600 \
 {params.col_info} {input.bed} \
 | teststrandbias.R \
 | var2vcf_valid.pl -P {params.max_pval} \
--m {params.max_mm} -E -f {params.af} -N {params.case_name} \
-| bgzip > {output};
+-m {params.max_mm} -E -f {params.af} -N {params.case_name} > {output.vcf};
 
-tabix -p vcf {output};
 rm -rf {params.tmpdir};
     """
 
 rule post_process_vardict:
     input:
-        vcf_sorted = vcf_dir + "vardict/merged_sorted.vardict.vcf"
+        vcf = vcf_dir + "vardict/vardict.sorted.vcf"
     output:
         vcf_vardict = vcf_dir + "vardict/SNV.somatic." + config["analysis"]["case_id"] + ".vardict.vcf.gz",
         namemap=vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.sample_name_map"
@@ -137,16 +136,16 @@ mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
 
 python {params.edit_vcf_script} \
---input_vcf {input.vcf_sorted} \
---output_vcf {params.tmpdir}/vardict_merged_sorted.temp.vcf \
+--input_vcf {input.vcf} \
+--output_vcf {params.tmpdir}/vardict_edit.vcf \
 --variant_caller {params.variant_caller};
 
-bgzip {params.tmpdir}/vardict_merged_sorted.temp.vcf  ; 
-tabix -f -p vcf {params.tmpdir}/vardict_merged_sorted.temp.vcf.gz ;
+bgzip {params.tmpdir}/vardict_edit.vcf ; 
+tabix -f -p vcf {params.tmpdir}/vardict_edit.vcf.gz ;
 
 echo \"TUMOR\" > {params.tmpdir}/reheader ;
 
-bcftools reheader -s {params.tmpdir}/reheader {params.tmpdir}/vardict_merged_sorted.temp.vcf.gz -o {output.vcf_vardict} ;
+bcftools reheader -s {params.tmpdir}/reheader {params.tmpdir}/vardict_edit.vcf.gz -o {output.vcf_vardict} ;
 tabix -f -p vcf {output.vcf_vardict} ;
 
 echo -e \"tTUMOR\\tTUMOR\" > {output.namemap} ; 

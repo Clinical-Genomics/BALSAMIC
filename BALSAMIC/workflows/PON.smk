@@ -60,10 +60,13 @@ sample_names: List[str] = config_model.get_all_sample_names()
 # Fastp parameters
 fastp_parameters: Dict = get_fastp_parameters(config_model)
 
-sequence_type = config['analysis']["sequencing_type"]
+analysis_type = config_model.analysis.analysis_type
+sequencing_type = config_model.analysis.sequencing_type
+
+
 rules_to_include = []
 rules_to_include.append("snakemake_rules/misc/sleep.rule")
-if sequence_type == SequencingType.TARGETED:
+if sequencing_type == SequencingType.TARGETED:
     rules_to_include.append("snakemake_rules/concatenation/concatenation.rule")
     rules_to_include.append("snakemake_rules/quality_control/fastp_tga.rule")
     rules_to_include.append("snakemake_rules/align/tga_sentieon_alignment.rule")
