@@ -1,11 +1,3 @@
-# Variantcaller parameters
-VARCALL_PARAMS = {
-    "tnscope": {
-        "tumor": "--min_init_tumor_lod 1.0 --min_tumor_lod 8",
-        "normal": "--min_init_normal_lod 0.5 --min_normal_lod 1.0",
-    }
-}
-
 # Configuration of VCF settings
 VCF_DICT = {
     "tnscope_umi": {
@@ -214,5 +206,15 @@ WORKFLOW_PARAMS = {
         "error_rate": 5,
         "prunefactor": 3,
         "padding": 100,
+        "disable_detect": "sv",
+    },
+    "tnscope_wgs": {
+        "algo": "TNscope",
+        "init_tumorLOD": 1.0,
+        "min_tumorLOD": 8,
+        "init_normalLOD": 0.5,
+        "min_normalLOD": 1.0,
+        "disable_detect": "sv",
+        "pcr_model": "NONE",
     },
 }
