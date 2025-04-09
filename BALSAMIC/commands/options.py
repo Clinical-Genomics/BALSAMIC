@@ -4,6 +4,7 @@ import click
 from pathlib import Path
 from BALSAMIC import __version__ as balsamic_version
 from BALSAMIC.constants.analysis import (
+    SubmitSnakemake,
     ANALYSIS_WORKFLOWS,
     PON_WORKFLOWS,
     RUN_MODES,
@@ -159,6 +160,15 @@ OPTION_CLUSTER_PROFILE = click.option(
     type=click.Path(exists=True, resolve_path=True),
     default=CONSTANTS_DIR,
     help="Directory containing snakemake cluster profile",
+)
+
+OPTION_MAX_RUN_HOURS = click.option(
+    "--max-run-hours",
+    required=False,
+    show_default=True,
+    default=SubmitSnakemake.MAX_RUN_HOURS,
+    type=click.INT,
+    help="The maximum number of hours that the sbatch script for snakemake is allowed to run on the cluster.",
 )
 
 OPTION_WORKFLOW_PROFILE = click.option(

@@ -19,6 +19,7 @@ from BALSAMIC.commands.options import (
     OPTION_CLUSTER_MAIL_TYPE,
     OPTION_WORKFLOW_PROFILE,
     OPTION_CLUSTER_PROFILE,
+    OPTION_MAX_RUN_HOURS,
     OPTION_CLUSTER_QOS,
     OPTION_DRAGEN,
     OPTION_FORCE_ALL,
@@ -36,10 +37,11 @@ from BALSAMIC.constants.cluster import (
     ClusterMailType,
 )
 from BALSAMIC.models.config import ConfigModel
+from BALSAMIC.models.sbatchsubmitter import SbatchSubmitter
 from BALSAMIC.models.snakemake import SnakemakeExecutable
 from BALSAMIC.utils.analysis import get_singularity_bind_paths
 from BALSAMIC.utils.cli import createDir, get_snakefile
-from BALSAMIC.utils.io import write_json, write_yaml
+from BALSAMIC.utils.io import write_json
 from BALSAMIC.utils.logging import add_file_logging
 
 LOG = logging.getLogger(__name__)
@@ -50,6 +52,7 @@ LOG = logging.getLogger(__name__)
 @OPTION_CLUSTER_MAIL
 @OPTION_CLUSTER_MAIL_TYPE
 @OPTION_CLUSTER_PROFILE
+@OPTION_MAX_RUN_HOURS
 @OPTION_WORKFLOW_PROFILE
 @OPTION_CLUSTER_QOS
 @OPTION_DRAGEN
@@ -69,6 +72,7 @@ def analysis(
     run_mode: RunMode,
     dragen: bool,
     cluster_profile: Path,
+    max_run_hours: int,
     workflow_profile: Path,
     run_analysis: bool,
     run_interactively: bool,
@@ -167,59 +171,22 @@ def analysis(
     )
 
     if not run_interactively:
-        LOG.info("Creating sbatch script to submit jobs.")
-
-        # Get conda environment
-        conda_env_path = os.environ.get("CONDA_PREFIX", "")
-        LOG.info(f"Using conda environment: {conda_env_path}")
-
-        # Define sbatch script path
-        sbatch_script_path = Path(script_path, "BALSAMIC_snakemake_submit.sh").as_posix()
-
-        # Construct sbatch script content
-        sbatch_script = textwrap.dedent(f"""\
-            #!/bin/bash -l
-            #SBATCH --account={account}
-            #SBATCH --job-name=BALSAMIC_snakemake_submit.{case_id}.%j
-            #SBATCH --output={log_path}/BALSAMIC_snakemake_submit.{case_id}.%j.out
-            #SBATCH --error={log_path}/BALSAMIC_snakemake_submit.{case_id}.%j.err
-            #SBATCH --ntasks=1
-            #SBATCH --mem=5G
-            #SBATCH --time=80:00:00
-            #SBATCH --qos={qos}
-            #SBATCH --cpus-per-task=1
-        """)
-
-        sbatch_script += f"\nconda run -p {conda_env_path} {snakemake_executable.get_command()}\n"
-
-        # Write sbatch script
-        with open(sbatch_script_path, "w") as submit_file:
-            submit_file.write(sbatch_script)
-
-        LOG.info(f"Sbatch script written to: {sbatch_script_path}")
-
-        # Submit job to SLURM
-        sbatch_command = f"sbatch {sbatch_script_path}"
-        LOG.info(f"Submitting job with command: {sbatch_command}")
-        result = subprocess.run(sbatch_command, shell=True, capture_output=True, text=True)
-
-        if result.returncode == 0:
-            output = result.stdout.strip()
-            match = re.search(r"Submitted sbatch job (\d+)", output)
-
-            if match:
-                job_id = match.group(1)
-                LOG.info(f"Job submitted successfully with Job ID: {job_id}")
-
-                # Write job ID to YAML
-                trailblazer_yaml = {case_id: [job_id]}
-                slurm_jobids_yaml_path = Path(result_path, "slurm_jobids.yaml").as_posix()
-                write_yaml(trailblazer_yaml, slurm_jobids_yaml_path)
-                LOG.info(f"Job ID written to {slurm_jobids_yaml_path}")
-            else:
-                LOG.warning(f"Could not extract Job ID from sbatch output: {output}")
-        else:
-            LOG.error(f"sbatch submission failed: {result.stderr.strip()}")
+        LOG.info(f"Submitting {analysis_workflow} workflow to cluster.")
+        submitter = SbatchSubmitter(
+            case_id=case_id,
+            script_path=Path(script_path),
+            result_path=Path(result_path),
+            log_path=Path(log_path),
+            account=account,
+            qos=qos,
+            max_run_hours=max_run_hours,
+            snakemake_executable=snakemake_executable,
+            logger=LOG,
+        )
+        submitter.create_sbatch_script()
+        job_id = submitter.submit_job()
+        if job_id:
+            submitter.write_job_id_yaml(job_id)
 
     else:
         LOG.info(f"Starting {analysis_workflow} workflow interactively.")

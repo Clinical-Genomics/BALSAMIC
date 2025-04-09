@@ -8,6 +8,9 @@ class LogFile():
     """Logfile constants"""
     LOGNAME: str = "balsamic.log"
 
+class SubmitSnakemake():
+    """Constants for sbatch script running snakemake on cluster"""
+    MAX_RUN_HOURS: int = 80
 class RunMode(StrEnum):
     """Balsamic workflow run mode."""
 
