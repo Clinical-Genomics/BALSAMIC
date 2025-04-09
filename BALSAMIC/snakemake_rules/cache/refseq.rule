@@ -16,6 +16,9 @@ rule preprocess_refseq:
     singularity:
         f"{config['containers_dir']}/{config['bioinfo_tools']['bedtools']}.{FileType.SIF}"
     threads: get_threads(cluster_config=cluster_config, rule_name="preprocess_refseq")
+    resources:
+        runtime=60,
+        mem_mb=15000
     message:
         "Preprocessing RefSeq's gene files {input.refgene_sql} and {input.refgene_txt}"
     benchmark:

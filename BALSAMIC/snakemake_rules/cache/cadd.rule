@@ -11,6 +11,9 @@ rule index_cadd:
     singularity:
         f"{config['containers_dir']}/{config['bioinfo_tools']['tabix']}.{FileType.SIF}"
     threads: get_threads(cluster_config=cluster_config, rule_name="index_cadd")
+    resources:
+        runtime=120,
+        mem_mb=15000
     message:
         "Indexing CADD file {input.cadd_snv}"
     benchmark:

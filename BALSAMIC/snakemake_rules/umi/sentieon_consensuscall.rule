@@ -17,8 +17,6 @@ rule sentieon_consensuscall_umi:
         tag = params.umiconsensuscall.tag,
         ip_format = params.umiconsensuscall.align_format,
         sample_id = '{sample}'
-    threads: 
-        get_threads(cluster_config, "sentieon_consensuscall_umi")
     message: 
         "Calling consensus molecules using sentieon for {params.sample_id}"
     shell:
@@ -31,7 +29,7 @@ export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
 
 {params.sentieon_exec} umi consensus \
--t {threads} \
+-t {resources.threads} \
 -i {input.bam} \
 -o {output.fastq_consensus} \
 --input_format {params.ip_format} \
@@ -58,8 +56,6 @@ rule sentieon_bwa_umiconsensus:
         ip_bases = params.umicommon.align_intbases,
         sample_id = "{sample}",
         sample_type = lambda wildcards: config_model.get_sample_type_by_name(wildcards.sample, uppercase=True),
-    threads:
-        get_threads(cluster_config, "sentieon_bwa_umiconsensus")
     message:
          "Mapping consensus reads and sorting using sentieon bwa-mem for {params.sample_id}"
     shell:
@@ -73,7 +69,7 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 
 {params.sentieon_exec} bwa mem \
 -R '@RG\\tID:{params.sample_id}\\tSM:{params.sample_type}\\tLB:TargetPanel\\tPL:ILLUMINA' \
--t {threads} \
+-t {resources.threads} \
 -K {params.ip_bases} \
 -p -C {input.ref_fa} \
 {input.fq_consensus} | \
@@ -102,8 +98,6 @@ rule sentieon_consensusfilter_umi:
         consensusfilter_script = get_script_path("FilterDuplexUMIconsensus.awk"),
         minreads = params.umiconsensuscall.filter_minreads,
         sample_id = '{sample}',
-    threads:
-        get_threads(cluster_config, "sentieon_consensusfilter_umi")
     message:
         "Filtering consensus reads based on XZ tag for {params.sample_id}"
     shell:
@@ -130,13 +124,11 @@ rule bam_compress_tumor_umi:
     params:
         sample_id = "{sample}",
         housekeeper_id= {"id": tumor_sample, "tags": "umi_tumor"}
-    threads:
-        get_threads(cluster_config, "bam_compress")
     message:
         "Compressing UMI bam to cram for {params.sample_id}"
     shell:
         """
-samtools view -h -T {input.fasta} --threads {threads} -C -o {output.cram} {input.bam}; 
+samtools view -h -T {input.fasta} --threads {resources.threads} -C -o {output.cram} {input.bam}; 
 samtools index {output.cram}; 
         """
 
@@ -154,12 +146,10 @@ if config['analysis']['analysis_type'] == "paired":
         params:
             sample_id = "{sample}",
             housekeeper_id= {"id": normal_sample, "tags": "umi_normal"}
-        threads:
-            get_threads(cluster_config, "bam_compress")
         message:
             "Compressing UMI bam to cram for {params.sample_id}"
         shell:
             """
-    samtools view -h -T {input.fasta} --threads {threads} -C -o {output.cram} {input.bam}; 
+    samtools view -h -T {input.fasta} --threads {resources.threads} -C -o {output.cram} {input.bam}; 
     samtools index {output.cram}; 
             """
