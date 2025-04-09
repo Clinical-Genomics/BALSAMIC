@@ -20,7 +20,6 @@ from BALSAMIC.commands.options import (
     OPTION_WORKFLOW_PROFILE,
     OPTION_CLUSTER_PROFILE,
     OPTION_CLUSTER_QOS,
-    OPTION_CLUSTER_ENV,
     OPTION_DRAGEN,
     OPTION_FORCE_ALL,
     OPTION_QUIET,
@@ -53,7 +52,6 @@ LOG = logging.getLogger(__name__)
 @OPTION_CLUSTER_PROFILE
 @OPTION_WORKFLOW_PROFILE
 @OPTION_CLUSTER_QOS
-@OPTION_CLUSTER_ENV
 @OPTION_DRAGEN
 @OPTION_FORCE_ALL
 @OPTION_QUIET
@@ -69,7 +67,6 @@ def analysis(
     snakefile: Path,
     sample_config: Path,
     run_mode: RunMode,
-    cluster_env: Path,
     dragen: bool,
     cluster_profile: Path,
     workflow_profile: Path,
@@ -173,8 +170,8 @@ def analysis(
         LOG.info("Creating sbatch script to submit jobs.")
 
         # Get conda environment
-        conda_env = os.environ.get("CONDA_DEFAULT_ENV", "")
-        LOG.info(f"Using conda environment: {conda_env}")
+        conda_env_path = os.environ.get("CONDA_PREFIX", "")
+        LOG.info(f"Using conda environment: {conda_env_path}")
 
         # Define sbatch script path
         sbatch_script_path = Path(script_path, "BALSAMIC_snakemake_submit.sh").as_posix()
@@ -188,16 +185,12 @@ def analysis(
             #SBATCH --error={log_path}/BALSAMIC_snakemake_submit.{case_id}.%j.err
             #SBATCH --ntasks=1
             #SBATCH --mem=5G
-            #SBATCH --time=60:00:00
+            #SBATCH --time=80:00:00
             #SBATCH --qos={qos}
             #SBATCH --cpus-per-task=1
         """)
 
-        if cluster_env:
-            LOG.info(f"Loading cluster environment: {cluster_env}")
-            sbatch_script += f"\nsource {cluster_env}\n"
-
-        sbatch_script += f"\nconda activate {conda_env}\n{snakemake_executable.get_command()}\n"
+        sbatch_script += f"\nconda run -p {conda_env_path} {snakemake_executable.get_command()}\n"
 
         # Write sbatch script
         with open(sbatch_script_path, "w") as submit_file:

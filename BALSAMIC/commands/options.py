@@ -126,13 +126,6 @@ OPTION_CLUSTER_ACCOUNT = click.option(
     help="Cluster account to run jobs",
 )
 
-OPTION_CLUSTER_ENV = click.option(
-    "--cluster-env",
-    type=click.Path(),
-    help="Path to cluster environment path (useprod.sh / usestage.sh)",
-)
-
-
 OPTION_RUN_INTERACTIVELY = click.option(
     "--run-interactively",
     is_flag=True,
@@ -173,7 +166,7 @@ OPTION_WORKFLOW_PROFILE = click.option(
     show_default=True,
     type=click.Path(exists=True, resolve_path=True),
     default=WORKFLOW_PROFILE,
-    help="Directory contianing snakemake workflow profile specifying rule resources",
+    help="Directory containing snakemake workflow profile specifying rule resources",
 )
 
 OPTION_CLUSTER_QOS = click.option(
