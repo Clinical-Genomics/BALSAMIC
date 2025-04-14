@@ -572,7 +572,6 @@ set-resources:
         mem_mb: 20000
         threads: 10
     sentieon_align_sort:
-        mem_mb: 20000
         runtime: 1440
         threads: 12
     sentieon_align_sort_umireads:
