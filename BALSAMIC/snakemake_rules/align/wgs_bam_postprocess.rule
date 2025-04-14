@@ -9,6 +9,8 @@ rule sentieon_dedup:
         metrics = Path(qc_dir, "{sample_type}.{sample}.dedup.metrics").as_posix()
     benchmark:
         Path(benchmark_dir, "sentieon_dedup_{sample_type}.{sample}.tsv").as_posix()
+    resources:
+        mem_mb = lambda wc, input: max(3.2 * input.size_mb, 10000)
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         sentieon_exec = config_model.sentieon.sentieon_exec,
