@@ -2,7 +2,7 @@
 Installation
 ============
 
-This section describes steps to install BALSAMIC (**version** = 16.0.2)
+This section describes steps to install BALSAMIC (**version** = 17.0.0)
 
 
 
