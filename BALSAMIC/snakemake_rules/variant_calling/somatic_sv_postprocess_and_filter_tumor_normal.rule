@@ -20,9 +20,9 @@ if config["analysis"]["sequencing_type"] == 'wgs':
           ("Processing SVs and CNVs for {params.case_name}")
       shell:
         """
-  bcftools view  --threads {resource.threads} -f PASS -O z -o {output.delly_sv} {input.delly_sv};
+  bcftools view  --threads {resources.threads} -f PASS -O z -o {output.delly_sv} {input.delly_sv};
   
-  bcftools view --threads {resource.threads} -f PASS -O z -o {output.tmp_delly_cnv} {input.delly_cnv};
+  bcftools view --threads {resources.threads} -f PASS -O z -o {output.tmp_delly_cnv} {input.delly_cnv};
   
   python {params.process_cnv} -f {output.tmp_delly_cnv} -c delly | bgzip -l 9 -c > {output.delly_cnv};
   
