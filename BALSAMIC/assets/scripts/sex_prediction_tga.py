@@ -22,7 +22,7 @@ def process_coverage_data(filepath: str) -> Optional[pd.DataFrame]:
     data: pd.DataFrame = pd.read_csv(filepath, sep="\t", header=None, names=colnames)
     filtered_data = data[data["chromosome"].isin(["X", "Y"])].copy()
 
-    if filtered_data.shape[0] < 10:
+    if filtered_data[filtered_data.chromosome == "Y"].shape[0] < 5 or filtered_data[filtered_data.chromosome == "X"].shape[0] < 5:
         warnings.warn(
             "Cannot compute sex due to insufficient data, ignoring", UserWarning
         )

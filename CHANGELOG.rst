@@ -1,3 +1,10 @@
+[X.X.X]
+--------
+
+Fixed:
+^^^^^^
+* fixed bug in panel sex-prediction script when no targets in y-chromosome exists in panel
+
 
 [17.0.0]
 -------
