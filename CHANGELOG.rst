@@ -1,5 +1,5 @@
 
-[X.X.X]
+[17.0.0]
 -------
 
 Added:
@@ -25,6 +25,8 @@ Changed:
 * Change VarDict memory usage to fix crashes in production https://github.com/Clinical-Genomics/BALSAMIC/pull/1537
 * Updated cluster resources for tnscope WGS TN https://github.com/Clinical-Genomics/BALSAMIC/pull/1535
 * Disable SV calling in TNscope https://github.com/Clinical-Genomics/BALSAMIC/pull/1541
+* Remove VarDict parallelization per chromosome https://github.com/Clinical-Genomics/BALSAMIC/pull/1544
+* Renamed CLNACC INFO field to CLNVID https://github.com/Clinical-Genomics/BALSAMIC/pull/1547
 
 Removed:
 ^^^^^^^^
@@ -34,6 +36,7 @@ Fixed:
 ^^^^^^
 * Merged VarDict and TNscope variants now correctly show both callers in FOUND_IN info field https://github.com/Clinical-Genomics/BALSAMIC/pull/1499
 * Fixed somalier container https://github.com/Clinical-Genomics/BALSAMIC/pull/1538
+* Removed median coverage qc threshold from wgs tumor samples https://github.com/Clinical-Genomics/BALSAMIC/pull/1555
 
 [16.0.2]
 --------

@@ -188,7 +188,7 @@ research_annotations.append(
             {
                 "file": Path(config["reference"]["clinvar"]).as_posix(),
                 "fields": [
-                    "CLNACC",
+                    "CLNVID",
                     "CLNREVSTAT",
                     "CLNSIG",
                     "ORIGIN",
@@ -202,7 +202,7 @@ research_annotations.append(
                 ],
                 "ops": ["self", "self", "self", "self", "self", "self", "self", "self", "self", "self", "self"],
                 "names": [
-                    "CLNACC",
+                    "CLNVID",
                     "CLNREVSTAT",
                     "CLNSIG",
                     "ORIGIN",
