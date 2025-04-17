@@ -8,7 +8,7 @@ from typing import Annotated, Dict, List, Optional
 from pydantic import AfterValidator, BaseModel, field_validator, model_validator
 
 from BALSAMIC import __version__ as balsamic_version
-from BALSAMIC.constants.cluster import QOS, ClusterMailType
+from BALSAMIC.constants.cluster import QOS
 from BALSAMIC.constants.analysis import (
     AnalysisType,
     AnalysisWorkflow,
@@ -247,16 +247,6 @@ class ConfigModel(BaseModel):
     sentieon: Sentieon
     qos: Optional[QOS] = None
     account: Optional[str] = None
-    mail_type: Optional[str] = " "
-    mail_user: Optional[str] = " "
-
-    @field_validator("mail_type")
-    def complete_mail_type_arg(cls, mail_type: str):
-        return f"--mail-type {mail_type}"
-
-    @field_validator("mail_user")
-    def complete_mail_user_arg(cls, mail_user: str):
-        return f"--mail-user {mail_user}"
 
     @field_validator("reference")
     def abspath_as_str(cls, reference: Dict[str, Path]):

@@ -2517,7 +2517,6 @@ def fixture_snakemake_executable_data(
     return {
         "account": ClusterAccount.DEVELOPMENT.value,
         "case_id": case_id_tumor_only,
-        "cluster_config_path": reference_file,
         "config_path": reference_file,
         "disable_variant_caller": "tnscope",
         "log_dir": session_tmp_path,
@@ -2556,15 +2555,11 @@ def fixture_snakemake_executable_validated_data(
     return {
         "account": ClusterAccount.DEVELOPMENT.value,
         "case_id": case_id_tumor_only,
-        "cluster_config_path": reference_file,
         "config_path": reference_file,
         "disable_variant_caller": "disable_variant_caller=tnscope",
         "dragen": False,
         "force": False,
         "log_dir": session_tmp_path,
-        "mail_type": None,
-        "mail_user": mail_user_option,
-        "profile": ClusterProfile.SLURM,
         "qos": QOS.HIGH,
         "quiet": True,
         "run_analysis": True,
