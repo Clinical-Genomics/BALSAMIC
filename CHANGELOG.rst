@@ -8,7 +8,7 @@ Added:
 Changed:
 ^^^^^^^^
 
-* Updated ensembl vep to version 113.4
+* Updated ensembl vep to version 113.4 https://github.com/Clinical-Genomics/BALSAMIC/pull/1567
 
 Removed:
 ^^^^^^^^
