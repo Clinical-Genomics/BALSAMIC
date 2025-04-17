@@ -1,7 +1,6 @@
 """Balsamic command options."""
 
 import click
-from pathlib import Path
 from BALSAMIC import __version__ as balsamic_version
 from BALSAMIC.constants.analysis import (
     SubmitSnakemake,

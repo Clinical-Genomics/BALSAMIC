@@ -15,8 +15,6 @@ from BALSAMIC import __version__ as balsamic_version
 
 from BALSAMIC.commands.options import (
     OPTION_CLUSTER_ACCOUNT,
-    OPTION_CLUSTER_MAIL,
-    OPTION_CLUSTER_MAIL_TYPE,
     OPTION_WORKFLOW_PROFILE,
     OPTION_CLUSTER_PROFILE,
     OPTION_MAX_RUN_HOURS,
@@ -48,8 +46,6 @@ LOG = logging.getLogger(__name__)
 
 @click.command("analysis", short_help="Run the analysis on a sample config-file")
 @OPTION_CLUSTER_ACCOUNT
-@OPTION_CLUSTER_MAIL
-@OPTION_CLUSTER_MAIL_TYPE
 @OPTION_CLUSTER_PROFILE
 @OPTION_MAX_RUN_HOURS
 @OPTION_WORKFLOW_PROFILE
