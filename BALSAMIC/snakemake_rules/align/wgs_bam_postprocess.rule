@@ -9,13 +9,13 @@ rule sentieon_dedup:
         metrics = Path(qc_dir, "{sample_type}.{sample}.dedup.metrics").as_posix()
     benchmark:
         Path(benchmark_dir, "sentieon_dedup_{sample_type}.{sample}.tsv").as_posix()
+    resources:
+        mem_mb = lambda wc, input: max(3.2 * input.size_mb, 10000)
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         sentieon_exec = config_model.sentieon.sentieon_exec,
         sentieon_lic = config_model.sentieon.sentieon_license,
         sample_id = "{sample}"
-    threads:
-        get_threads(cluster_config, 'sentieon_dedup')
     message:
         ("Collects read information using sentieon LocusCollector and mark duplicated reads. "
          "Current sample: {params.sample_id}")
@@ -28,13 +28,13 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 shell_bam_files=$(echo {input.bam_files} | sed 's/ / -i /g') ;
 
 {params.sentieon_exec} driver \
--t {threads} \
+-t {resources.threads} \
 -i $shell_bam_files \
 --algo LocusCollector \
 --fun score_info {output.score} ;
 
 {params.sentieon_exec} driver \
--t {threads} \
+-t {resources.threads} \
 -i $shell_bam_files \
 --algo Dedup \
 --score_info {output.score} \
@@ -59,8 +59,6 @@ rule sentieon_realign:
         sentieon_exec = config_model.sentieon.sentieon_exec,
         sentieon_lic = config_model.sentieon.sentieon_license,
         sample_id = "{sample}"
-    threads:
-        get_threads(cluster_config, 'sentieon_realign')
     message:
         "INDEL realignment using sentieon realigner for sample: {params.sample_id}"
     shell:
@@ -71,7 +69,7 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 
 {params.sentieon_exec} driver \
 -r {input.ref} \
--t {threads} \
+-t {resources.threads} \
 -i {input.bam} \
 --algo Realigner \
 -k {input.mills} \
@@ -99,8 +97,6 @@ rule sentieon_base_calibration:
         sentieon_exec = config_model.sentieon.sentieon_exec,
         sentieon_lic = config_model.sentieon.sentieon_license,
         sample = "{sample_type}"
-    threads:
-        get_threads(cluster_config, 'sentieon_base_calibration')
     message:
         "Base recalibration using Sentieon tools for {params.sample}"
     shell:
@@ -111,7 +107,7 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 
 {params.sentieon_exec} driver \
 -r {input.ref} \
--t {threads} \
+-t {resources.threads} \
 -i {input.bam} \
 --algo QualCal \
 -k {input.dbsnp} \
@@ -120,7 +116,7 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 
 {params.sentieon_exec} driver \
 -r {input.ref} \
--t {threads} \
+-t {resources.threads} \
 -i {input.bam} \
 -q {output.recal_data_table} \
 --algo QualCal \
@@ -129,7 +125,7 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 -k {input.indel_1kg} {output.recal_data_table}.post;
 
 {params.sentieon_exec} driver \
--t {threads} \
+-t {resources.threads} \
 --algo QualCal \
 --plot --before {output.recal_data_table} \
 --after {output.recal_data_table}.post {output.qual_recal};
