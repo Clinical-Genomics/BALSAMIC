@@ -13,8 +13,6 @@ from BALSAMIC.commands.options import (
     OPTION_CACHE_VERSION,
     OPTION_CLUSTER_ACCOUNT,
     OPTION_WORKFLOW_PROFILE,
-    OPTION_CLUSTER_MAIL,
-    OPTION_CLUSTER_MAIL_TYPE,
     OPTION_CLUSTER_PROFILE,
     OPTION_CLUSTER_QOS,
     OPTION_COSMIC_KEY,
@@ -31,8 +29,6 @@ from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV, RunMode
 from BALSAMIC.constants.cache import REFERENCE_FILES, GenomeVersion
 from BALSAMIC.constants.cluster import (
     QOS,
-    ClusterConfigType,
-    ClusterMailType,
 )
 from BALSAMIC.models.cache import CacheConfig, ReferencesCanFam, ReferencesHg
 from BALSAMIC.models.snakemake import SnakemakeExecutable
@@ -50,8 +46,6 @@ LOG = logging.getLogger(__name__)
 @OPTION_OUT_DIR
 @OPTION_CACHE_VERSION
 @OPTION_CLUSTER_ACCOUNT
-@OPTION_CLUSTER_MAIL
-@OPTION_CLUSTER_MAIL_TYPE
 @OPTION_CLUSTER_PROFILE
 @OPTION_WORKFLOW_PROFILE
 @OPTION_CLUSTER_QOS
@@ -71,8 +65,6 @@ def initialize(
     cosmic_key: str,
     force_all: bool,
     genome_version: GenomeVersion,
-    mail_type: Optional[ClusterMailType],
-    mail_user: Optional[str],
     out_dir: str,
     cluster_profile: Path,
     workflow_profile: Path,
@@ -151,8 +143,6 @@ def initialize(
         config_path=config_path,
         force=force_all,
         log_dir=log_dir,
-        mail_type=mail_type,
-        mail_user=mail_user,
         profile=cluster_profile,
         workflow_profile=workflow_profile,
         qos=qos,
