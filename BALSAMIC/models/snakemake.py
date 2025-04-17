@@ -6,7 +6,7 @@ from typing import List, Optional
 from pydantic import BaseModel, DirectoryPath, FilePath
 
 from BALSAMIC.constants.analysis import RunMode
-from BALSAMIC.constants.cluster import MAX_JOBS, QOS, ClusterMailType
+from BALSAMIC.constants.cluster import MAX_JOBS, QOS
 from BALSAMIC.utils.utils import remove_unnecessary_spaces
 
 
@@ -32,8 +32,6 @@ class SnakemakeExecutable(BaseModel):
         dragen (Optional[bool])                                      : FLag for enabling or disabling Dragen suite.
         force (bool)                                                 : Force snakemake execution.
         log_dir (Optional[DirectoryPath])                            : Logging directory.
-        mail_type (Optional[ClusterMailType])                        : Email type triggering job status notifications.
-        mail_user (Optional[str])                                    : User email to receive job status notifications.
         profile: Path                                                : Directory containing snakemake cluster profile
         workflow_profile: Path                                       : Directory contianing snakemake workflow profile specifying rule resources
         qos (Optional[QOS])                                          : QOS for sbatch jobs.
@@ -54,8 +52,6 @@ class SnakemakeExecutable(BaseModel):
     dragen: bool = False
     force: bool = False
     log_dir: Optional[DirectoryPath] = None
-    mail_type: Optional[ClusterMailType] = None
-    mail_user: Optional[str] = None
     cluster_profile: Path
     workflow_profile: Path
     qos: Optional[QOS] = None
@@ -147,18 +143,3 @@ class SnakemakeExecutable(BaseModel):
             return remove_unnecessary_spaces(snakemake_cluster_options)
         return ""
 
-    def get_cluster_submit_command(self) -> str:
-        """Get cluster command to be submitted by Snakemake."""
-        cluster_submit_command: str = (
-            f"'sbatch "
-            f"--account {self.account} "
-            f"--error {self.log_dir.as_posix()}/BALSAMIC.{self.case_id}.{{rulename}}.{{jobid}}.err "
-            f"--output {self.log_dir.as_posix()}/BALSAMIC.{self.case_id}.{{rulename}}.{{jobid}}.stdout "
-            f"{f'--mail-type {self.mail_type}' if self.mail_type else ''} "
-            f"{f'--mail-user {self.mail_user}' if self.mail_user else ''} "
-            f"--qos {self.qos}'"
-        )
-        return remove_unnecessary_spaces(cluster_submit_command)
-
-
-# cluster: "sbatch --account {config[account]} --qos {config[qos]} --time={resources.runtime} --mem={resources.mem_mb}M --cpus-per-task={resources.threads} --error {config[analysis][log]}/BALSAMIC.{config[analysis][case_id]}.{rulename}.%j.err --output {config[analysis][log]}/BALSAMIC.{config[analysis][case_id]}.{rulename}.%j.out"

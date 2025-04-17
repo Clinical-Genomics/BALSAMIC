@@ -34,7 +34,6 @@ from BALSAMIC.commands.options import (
 from BALSAMIC.constants.analysis import RunMode, LogFile
 from BALSAMIC.constants.cluster import (
     QOS,
-    ClusterMailType,
 )
 from BALSAMIC.models.config import ConfigModel
 from BALSAMIC.models.sbatchsubmitter import SbatchSubmitter
@@ -80,8 +79,6 @@ def analysis(
     force_all: bool,
     snakemake_opt: List[str],
     account: str,
-    mail_user: str,
-    mail_type: ClusterMailType,
     quiet: bool,
 ):
     """Run BALSAMIC workflow on the provided sample's config file."""
@@ -133,12 +130,10 @@ def analysis(
             script_path = Path(createDir(script_path.as_posix(), []))
 
     LOG.info(
-        f"Updating config model with account: {account}, QOS: {qos} and email arguments: {f'--mail-type mail_type' if mail_type else ''} {f'--mail-user mail_user' if mail_user else ''}"
+        f"Updating config model with account: {account}, QOS: {qos}"
     )
     config_model.qos = qos
     config_model.account = account
-    config_model.mail_user = mail_user
-    config_model.mail_type = mail_type
     config_model.analysis.log = log_path.as_posix()
     config_model.analysis.script = script_path.as_posix()
 
@@ -161,8 +156,6 @@ def analysis(
         dragen=dragen,
         force=force_all,
         log_dir=log_path.as_posix(),
-        mail_type=mail_type,
-        mail_user=mail_user,
         cluster_profile=cluster_profile,
         workflow_profile=workflow_profile,
         qos=qos,

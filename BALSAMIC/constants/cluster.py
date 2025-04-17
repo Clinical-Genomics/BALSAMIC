@@ -28,17 +28,3 @@ class QOS(StrEnum):
 
 QOS_OPTIONS: List[QOS] = [qos for qos in QOS]
 
-
-class ClusterMailType(StrEnum):
-    """Cluster job mail type notification."""
-
-    ALL: str = "ALL"
-    BEGIN: str = "BEGIN"
-    END: str = "END"
-    FAIL: str = "FAIL"
-    NONE: str = "NONE"
-    REQUEUE: str = "REQUEUE"
-    TIME_LIMIT: str = "TIME_LIMIT"
-
-
-CLUSTER_MAIL_TYPES: List[ClusterMailType] = [mail_type for mail_type in ClusterMailType]

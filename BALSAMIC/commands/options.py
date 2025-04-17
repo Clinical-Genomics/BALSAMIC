@@ -15,7 +15,6 @@ from BALSAMIC.constants.analysis import (
 )
 from BALSAMIC.constants.cache import GENOME_VERSIONS, CacheVersion, GenomeVersion
 from BALSAMIC.constants.cluster import (
-    CLUSTER_MAIL_TYPES,
     QOS,
     QOS_OPTIONS,
 )
@@ -139,18 +138,6 @@ OPTION_SOFT_FILTER_NORMAL = click.option(
     is_flag=True,
     default=False,
     help="Flag to disable hard-filtering on presence of variants in matched normal sample",
-)
-
-OPTION_CLUSTER_MAIL = click.option(
-    "--mail-user",
-    type=click.STRING,
-    help="User email to receive notifications from the cluster",
-)
-
-OPTION_CLUSTER_MAIL_TYPE = click.option(
-    "--mail-type",
-    type=click.Choice(CLUSTER_MAIL_TYPES),
-    help="The mail type triggering cluster emails",
 )
 
 OPTION_CLUSTER_PROFILE = click.option(
