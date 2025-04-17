@@ -97,12 +97,30 @@ At each step only variants with filters `PASS` and `triallelic_site` are kept an
 **Targeted Genome Analysis**
 #############################
 
+Regarding matched normal analyses
+******************************************
+
+Since Balsamic v17.0.0 the option `--soft-filter-normal` was added and automatically applied for all Targeted Genome Analyses with a matched normal.
+
+This option disables hard-filtering on the matched normal specific filters; `germline_risk` from TNscope and the `in_normal` custom bcftools filter mentioned below under *Relative tumor AF in normal*.
+
+These matched normal soft-filters can optionally be applied out in Scout to revert to the original hard-filter behaviour.
+
+
 Somatic Callers for reporting SNVs/INDELS
 ******************************************
 
 
-For SNV/InDel calling in the TGA analyses of balsamic both VarDict and TNscope are used. Lists of variants are produced from both tools, which are then normalised and quality filtered before being merged.
+For SNV/InDel calling in the TGA analyses of balsamic both VarDict and TNscope are used. Lists of variants are produced from both tools, which are then normalised and quality filtered before being merged with a custom made python script which can be found in `BALSAMIC/assets/scripts/merge_snv_variantcallers.py`.
 
+The requirement for merging variants with this script is a perfect match of; CHROM, POS, REF and ALT fields.
+
+The INFO fields from both VCFs are merged entirely, and when the same field exists in both variants it is converted to a comma-separated list. An exception to this behaviour is the AF and DP fields for which the single values are maintained (from the first VCF in the positional argument), and new fields called AF_LIST and DP_LIST are created which contains a list of values from both callers.
+
+Calling and quality filtration
+******************************************
+
+This section focuses on the calling and quality filtration done on VarDict and TNscope variant calls.
 
 **Vardict**
 ===========
@@ -116,7 +134,7 @@ There are two slightly different post-processing filters activated depending on 
 
 Following is the set of criteria applied for filtering vardict results. It is used for both tumor-normal and tumor-only samples.
 
-**Post-call Quality Filters for panels**
+**Post-call Quality Filters**
 
 *Mean Mapping Quality (MQ)*: Refers to the root mean square (RMS) mapping quality of all the reads spanning the given variant site.
 
@@ -142,14 +160,8 @@ Following is the set of criteria applied for filtering vardict results. It is us
 
     Minimum AF >= 0.005
 
-**Post-call Quality Filters for exomes**
+**Post-call Quality Filters for specific for exomes**
 
-
-*Mean Mapping Quality (MQ)*: Refers to the root mean square (RMS) mapping quality of all the reads spanning the given variant site.
-
-::
-
-    MQ >= 30
 
 *Total Depth (DP)*: Refers to the overall read depth supporting the called variant.
 
@@ -157,32 +169,19 @@ Following is the set of criteria applied for filtering vardict results. It is us
 
     DP >= 20
 
-*Variant depth (VD)*: Total reads supporting the ALT allele
-
-::
-
-    VD >= 5
-
-*Allelic Frequency (AF)*: Fraction of the reads supporting the alternate allele
-
-::
-
-    Minimum AF >= 0.005
 
 
 **Attention:**
 **BALSAMIC <= v8.2.7 uses minimum AF 1% (0.01). From Balsamic v8.2.8, minimum VAF is changed to 0.7% (0.007). From v16.0.0 minimum VAF is changed to 0.5% (0.005).**
 
-**For normal matched analyses**
+**Specific for VarDict normal matched analyses**
 
 *Relative tumor AF in normal*: Allows for maximum Tumor-In-Normal-Contamination of 30%.
 
 ::
 
-    excludes variant if: AF(normal) / AF(tumor) > 0.3
+    marks variant with soft-filter `in_normal` variant if: AF(normal) / AF(tumor) > 0.3
 
-**Note:**
-**Additionally, the variant is excluded for tumor-normal cases if marked as 'germline' in the `STATUS` column of the VCF file.**
 
 
 **Sentieon's TNscope**
@@ -237,6 +236,7 @@ The `TNscope <https://www.biorxiv.org/content/10.1101/250647v1.abstract>`_ algor
 *min_base_qual*: Minimal base quality to consider in calling
 
 ::
+
     min_base_qual = 15
 
 *min_tumor_allele_frac*: Set the minimum tumor AF to be considered as potential variant site.
@@ -251,7 +251,8 @@ The `TNscope <https://www.biorxiv.org/content/10.1101/250647v1.abstract>`_ algor
 
     interval_padding = 100
 
-**Post-call Filters**
+
+**Post-call Quality Filters**
 
 *Total Depth (DP)*: Refers to the overall read depth supporting the called variant.
 
@@ -271,8 +272,23 @@ The `TNscope <https://www.biorxiv.org/content/10.1101/250647v1.abstract>`_ algor
 
     Minimum AF >= 0.005
 
+*RPA*: Number of times tandem repeat unit is repeated, for each allele (including reference)
 
-**For tumor only analyses**
+::
+
+    RPA < 12
+
+**Post-call Quality Filters for specific for exomes**
+
+
+*Total Depth (DP)*: Refers to the overall read depth supporting the called variant.
+
+::
+
+    DP >= 20
+
+
+**Specific for TNscope tumor only analyses**
 
 *Average base quality score*
 
@@ -289,7 +305,13 @@ The `TNscope <https://www.biorxiv.org/content/10.1101/250647v1.abstract>`_ algor
 **Note:**
 **Additionally, variants labeled with triallelic site filter are not filtered out**
 
-**For normal matched analyses**
+**Specific for TNscope normal matched analyses**
+
+*SOR*: Symmetric Odds Ratio of 2x2 contingency table to detect strand bias
+
+::
+
+    SOR < 3
 
 *alt_allele_in_normal*: Default filter set by TNscope was considered too stringent in filtering tumor in normal and is removed.
 
@@ -302,10 +324,38 @@ The `TNscope <https://www.biorxiv.org/content/10.1101/250647v1.abstract>`_ algor
 
 ::
 
-    excludes variant if: AF(normal) / AF(tumor) > 0.3
+    marks variant with soft-filter `in_normal` variant if: AF(normal) / AF(tumor) > 0.3
 
 
-**Post-call Observation database Filters**
+**Post-processing of TNscope variants**
+
+After quality-filtering TNscope variants and before merging with VarDict variants the phased SNVs and InDels from TNscope are merged together to MNVs using a slightly modified script from `Sentieon-scripts <https://github.com/Sentieon/sentieon-scripts/blob/master/merge_mnp/merge_mnp.py>`_ which can be found in ``BALSAMIC/assets/scripts/merge_mnp.py``
+
+This was done to avoid multiple representations of the same variant as VarDict already outputs these types of variants as MNVs, and because VEP isn't coded to handle phased SNVs in the interpretation of protein effect.
+
+In the merging of phased SNVs to MNV we need to handle how to consolidate information from multiple variants into a single metric, and importantly also for the FILTER column.
+
+An example is a MNV created by merging a phased germline SNV with a somatic SNV. This has been solved as follows:
+
+- `MNV_CONFLICTING_FILTERS`: Is a filter given to MNVs with constituent variants with different filters (such as `in_normal` and `PASS`)
+
+
+However, as we may have multiple filters which means essentially the same thing, such as germline_risk and in_normal, MNVs created from the merging of variants with only those filters aren't actually conflicting.
+
+Therefore the logic for setting `MNV_CONFLICTING_FILTERS` has been made a bit more complex, and in summary there are 3 possible outcomes for filters when merging SNVs/InDels into MNVs:
+
+1. Single filter such as PASS, when all constituting variants all have the same filter and no other.
+2. Multiple filters, such as in_normal,germline_risk, when all constituting variants have at least 1 of the matched normal filters.
+3. `MNV_CONFLICTING_FILTERS` when the merged variants have conflicting filters, and they don't all contain matched normal filters.
+
+.. note::
+
+    In addition to this a few more fields are added to the INFO field of the created MNVs containing comma-separated lists of AD, AF, and FILTER from its constituting variants.
+
+Post-call Observation database Filters
+********************************************
+
+This section contains post call and quality filtrations, on the TNscope and VarDict merged VCF.
 
 
 *GNOMADAF_POPMAX*: Maximum Allele Frequency across populations
@@ -336,6 +386,13 @@ This above corresponds to at least 4 observations in a database of 29 cases of m
 
 **Target Genome Analysis with UMI's into account**
 **************************************************
+
+This section contains specific filters and settings for the balsamic-umi workflow, which filters on UMI group size (default 3,1,1) before variant-calling.
+
+Calling and quality filtration
+******************************************
+
+This section focuses on calling and quality filters.
 
 **Sentieon's TNscope**
 =======================
@@ -425,7 +482,10 @@ It means that at least `3` read-pairs need to support the UMI-group (based on th
 
     excludes variant if: AF(normal) / AF(tumor) > 0.3
 
-**Post-call Observation database Filters**
+Post-call Observation database Filters
+********************************************
+
+This section contains population database frequency filters.
 
 *GNOMADAF_POPMAX*: Maximum Allele Frequency across populations
 
@@ -449,6 +509,11 @@ The variants scored as `PASS` or `triallelic_sites` are included in the final vc
 
 **Whole Genome Sequencing (WGS)**
 **********************************
+
+Calling and quality filtration
+******************************************
+
+This section focuses on calling and quality filters.
 
 **Sentieon's TNscope**
 =======================
@@ -507,6 +572,12 @@ The `TNscope <https://www.biorxiv.org/content/10.1101/250647v1.abstract>`_ algor
 
     AD(tumor) >= 3
 
+*SOR*: Symmetric Odds Ratio of 2x2 contingency table to detect strand bias
+
+::
+
+    SOR < 4
+
 *Allelic Frequency (AF)*: Fraction of the reads supporting the alternate allele
 
 ::
@@ -526,25 +597,10 @@ The `TNscope <https://www.biorxiv.org/content/10.1101/250647v1.abstract>`_ algor
 
     excludes variant if: AF(normal) / AF(tumor) > 0.3
 
-**Post-call Observation database Filters**
 
-*GNOMADAF_POPMAX*: Maximum Allele Frequency across populations
-
-::
-
-    GNOMADAF_popmax <= 0.001 (or) GNOMADAF_popmax == "."
-
-::
-
-    SWEGENAF <= 0.01  (or) SWEGENAF == "."
-
-*Frq*: Frequency of observation of the variants from normal `Clinical` samples
-
-::
-
-    Frq <= 0.01  (or) Frq == "."
 
 The variants scored as `PASS` or `triallelic_sites` are included in the final vcf file (`SNV.somatic.<CASE_ID>.tnscope.<research/clinical>.filtered.pass.vcf.gz`).
+
 
 **TNscope filtering (tumor_only)**
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -604,7 +660,10 @@ The somatic variants in TNscope raw VCF file (`SNV.somatic.<CASE_ID>.tnscope.all
 
     SOR < 3
 
-**Post-call Observation database Filters**
+Post-call Observation database Filters
+********************************************
+
+This section contains population database frequency filters.
 
 *GNOMADAF_POPMAX*: Maximum Allele Frequency across populations
 

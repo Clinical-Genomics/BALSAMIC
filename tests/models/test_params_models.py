@@ -15,10 +15,10 @@ from BALSAMIC.models.params import (
     QCModel,
     UMIParamsCommon,
     UMIParamsConsensuscall,
-    UMIParamsTNscope,
+    ParamsTNscope,
     UMIParamsUMIextract,
-    VarCallerFilter,
-    VCFAttributes,
+    VCFFilter,
+    StructuralVariantFilters,
 )
 
 
@@ -108,8 +108,8 @@ def test_qc_model():
     assert QCModel.model_validate(valid_args)
 
 
-def test_vcfattributes():
-    """test VCFAttributes model for correct validation"""
+def test_varcallerfilter():
+    """test VCFFilter model for correct validation"""
 
     # GIVEN a VCF attribute
     dummy_attribute = {
@@ -119,23 +119,26 @@ def test_vcfattributes():
     }
 
     # WHEN building the model
-    dummy_attribute_built = VCFAttributes(**dummy_attribute)
+    dummy_attribute_built = VCFFilter(**dummy_attribute)
 
-    # THEN assert values can be reterived currently
+    # THEN assert required values are set
     assert isclose(dummy_attribute_built.tag_value, 5.0)
     assert dummy_attribute_built.field == "INFO"
     assert dummy_attribute_built.filter_name == "dummy_filter_name"
 
 
-def test_varcallerfilter():
-    """test required VarCallerFilters for being set correctly"""
+def test_structuralvariantfilters():
+    """test StructuralVariantFilters model for correct validation"""
 
-    # GIVEN a VarCallerFilter
+    # GIVEN a SV VarCallerFilter
     dummy_varcaller = {
-        "AD": {"tag_value": 5.0, "filter_name": "dummy_alt_depth", "field": "INFO"},
-        "DP": {"tag_value": 100.0, "filter_name": "dummy_depth", "field": "INFO"},
-        "pop_freq": {
-            "tag_value": 0.005,
+        "low_pr_sr_count": {
+            "tag_value": 4,
+            "filter_name": "low_pr_sr_count",
+            "field": "INFO",
+        },
+        "loqusdb_clinical_sv_freq": {
+            "tag_value": 0.02,
             "filter_name": "dummy_pop_freq",
             "field": "INFO",
         },
@@ -146,11 +149,11 @@ def test_varcallerfilter():
     }
 
     # WHEN building the model
-    dummy_varcaller_filter = VarCallerFilter(**dummy_varcaller)
+    dummy_varcaller_filter = StructuralVariantFilters(**dummy_varcaller)
 
     # THEN assert required values are set
-    assert isclose(dummy_varcaller_filter.AD.tag_value, 5.0)
-    assert isclose(dummy_varcaller_filter.DP.tag_value, 100.0)
+    assert isclose(dummy_varcaller_filter.low_pr_sr_count.tag_value, 4)
+    assert isclose(dummy_varcaller_filter.loqusdb_clinical_sv_freq.tag_value, 0.02)
     assert dummy_varcaller_filter.analysis_type == "dummy_tumor_only"
 
 
@@ -211,8 +214,8 @@ def test_umiparams_consensuscall():
     assert test_consensuscall_built.tag == "XZ"
 
 
-def test_umiparams_tnscope():
-    """test UMIParamsTNscope model for correct validation"""
+def test_params_tnscope():
+    """test ParamsTNscope model for correct validation"""
 
     # GIVEN tnscope params
     test_tnscope_params = {
@@ -228,7 +231,7 @@ def test_umiparams_tnscope():
     }
 
     # WHEN building the model
-    test_tnscope_params_built = UMIParamsTNscope(**test_tnscope_params)
+    test_tnscope_params_built = ParamsTNscope(**test_tnscope_params)
 
     # THEN assert values
     assert test_tnscope_params_built.algo == "algoname"

@@ -1,3 +1,60 @@
+[17.0.1]
+--------
+
+Added:
+^^^^^^
+
+Changed:
+^^^^^^^^
+
+Removed:
+^^^^^^^^
+
+Fixed:
+^^^^^^
+
+* fixed bug in panel sex-prediction script when no targets in y-chromosome exists in panel https://github.com/Clinical-Genomics/BALSAMIC/pull/1563
+
+
+[17.0.0]
+-------
+
+Added:
+^^^^^^
+* Added option to disable hard filter of variants in matched normal https://github.com/Clinical-Genomics/BALSAMIC/pull/1509
+* Added check to verify sample sex for all workflows https://github.com/Clinical-Genomics/BALSAMIC/pull/1516
+* SOR filter to WGS TN SNV quality filter https://github.com/Clinical-Genomics/BALSAMIC/pull/1506
+* GT field to IGH-DUX4 variant https://github.com/Clinical-Genomics/BALSAMIC/pull/1527
+* ONC field annotations from Clinvar https://github.com/Clinical-Genomics/BALSAMIC/pull/1527
+* Added memory option https://github.com/Clinical-Genomics/BALSAMIC/pull/1535
+* Added max SOR 3 to TNscope TGA TN workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1526
+* Added max RPA 12 to TNscope TGA workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1526
+
+Changed:
+^^^^^^^^
+* Reworked bcftools filters https://github.com/Clinical-Genomics/BALSAMIC/pull/1509
+* Renamed high_normal_tumor_af_frac to in_normal https://github.com/Clinical-Genomics/BALSAMIC/pull/1509
+* check to verify sample sex for all workflows https://github.com/Clinical-Genomics/BALSAMIC/pull/1516
+* Merging SNVs into MNVs in TNscope TGA https://github.com/Clinical-Genomics/BALSAMIC/pull/1524
+* Change raw delivery SNV file for TGA to before any post-processing https://github.com/Clinical-Genomics/BALSAMIC/pull/1524
+* Changed VarDict and TNscope VCF merged method to custom script https://github.com/Clinical-Genomics/BALSAMIC/pull/1499
+* Changed QC thresholds for WGS normal and WES https://github.com/Clinical-Genomics/BALSAMIC/pull/1477
+* Change VarDict memory usage to fix crashes in production https://github.com/Clinical-Genomics/BALSAMIC/pull/1537
+* Updated cluster resources for tnscope WGS TN https://github.com/Clinical-Genomics/BALSAMIC/pull/1535
+* Disable SV calling in TNscope https://github.com/Clinical-Genomics/BALSAMIC/pull/1541
+* Remove VarDict parallelization per chromosome https://github.com/Clinical-Genomics/BALSAMIC/pull/1544
+* Renamed CLNACC INFO field to CLNVID https://github.com/Clinical-Genomics/BALSAMIC/pull/1547
+
+Removed:
+^^^^^^^^
+* Remove WGS-level GC-bias metric from TGA workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1521
+
+Fixed:
+^^^^^^
+* Merged VarDict and TNscope variants now correctly show both callers in FOUND_IN info field https://github.com/Clinical-Genomics/BALSAMIC/pull/1499
+* Fixed somalier container https://github.com/Clinical-Genomics/BALSAMIC/pull/1538
+* Removed median coverage qc threshold from wgs tumor samples https://github.com/Clinical-Genomics/BALSAMIC/pull/1555
+
 [16.0.2]
 --------
 
@@ -14,7 +71,7 @@ Removed:
 
 
 [16.0.0]
--------
+--------
 
 Added:
 ^^^^^^
@@ -36,6 +93,7 @@ Added:
 * Added Raw TNscope calls and unfiltered research-annotated SNVs to delivery https://github.com/Clinical-Genomics/BALSAMIC/pull/1475
 * Argument for SNV Artefact LoqusDB to all workflows https://github.com/Clinical-Genomics/BALSAMIC/pull/1481
 * TNscope tag to variant info-field for TGA workflow https://github.com/Clinical-Genomics/BALSAMIC/pull/1497
+* Python script for merging duplicate SNV calls https://github.com/Clinical-Genomics/BALSAMIC/pull/1499
 
 Changed:
 ^^^^^^^^
