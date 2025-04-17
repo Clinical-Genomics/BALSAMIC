@@ -224,7 +224,7 @@ REFERENCE_FILES: Dict[GenomeVersion, Dict[str, dict]] = {
             "dir_name": "variants",
         },
         "cadd_snv": {
-            "url": "https://kircherlab.bihealth.org/download/CADD/v1.6/GRCh37/whole_genome_SNVs.tsv.gz",
+            "url": "https://kircherlab.bihealth.org/download/CADD/v1.7/GRCh37/whole_genome_SNVs.tsv.gz",
             "file_type": FileType.TSV,
             "gzip": False,
             "file_name": "hg19.cadd_snv.tsv.gz",
@@ -401,7 +401,7 @@ REFERENCE_FILES: Dict[GenomeVersion, Dict[str, dict]] = {
             "dir_name": "variants",
         },
         "cadd_snv": {
-            "url": "https://kircherlab.bihealth.org/download/CADD/v1.6/GRCh38/whole_genome_SNVs.tsv.gz",
+            "url": "https://kircherlab.bihealth.org/download/CADD/v1.7/GRCh38/whole_genome_SNVs.tsv.gz",
             "file_type": FileType.TSV,
             "gzip": False,
             "file_name": "hg38.cadd_snv.tsv.gz",

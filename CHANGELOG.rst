@@ -9,6 +9,7 @@ Changed:
 ^^^^^^^^
 
 * Updated ensembl vep to version 113.4 https://github.com/Clinical-Genomics/BALSAMIC/pull/1567
+* Updated CADD to version 1.7.2 https://github.com/Clinical-Genomics/BALSAMIC/pull/1567
 
 Removed:
 ^^^^^^^^
