@@ -1,4 +1,4 @@
-FROM continuumio/miniconda3
+FROM continuumio/miniconda3:25.1.1-2
 
 LABEL base.image="continuumio/miniconda3" \
     maintainer="Clinical Genomics" \
@@ -19,6 +19,13 @@ RUN conda env create -n ${CONTAINER_NAME} -f environment.yaml && \
     rm -f environment.yaml
 
 ENV PATH="/opt/conda/envs/${CONTAINER_NAME}/bin/:${PATH}"
+
+# Run as a non-root
+RUN useradd -m dockeruser
+USER dockeruser
+
+# Set the work directory
+WORKDIR /home/dockeruser/
 
 # Set the default shell
 SHELL ["/bin/bash", "-c"]

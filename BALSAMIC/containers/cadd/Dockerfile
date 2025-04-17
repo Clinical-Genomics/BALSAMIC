@@ -1,4 +1,4 @@
-FROM continuumio/miniconda3
+FROM continuumio/miniconda3:25.1.1-2
 
 LABEL base.image="continuumio/miniconda3" \
     software="cadd" \
@@ -25,6 +25,13 @@ ENV PATH="/opt/conda/envs/${CONTAINER_NAME}/bin/:${PATH}"
 # The cadd-scripts conda package is available as cadd.sh instead
 # of CADD.sh. Make link to keep compatibility
 RUN ln -s /opt/conda/envs/cadd/bin/cadd.sh /opt/conda/envs/cadd/bin/CADD.sh
+
+# Run as a non-root
+RUN useradd -m dockeruser
+USER dockeruser
+
+# Set the work directory
+WORKDIR /home/dockeruser/
 
 # Set the default shell
 SHELL ["/bin/bash", "-c"]
