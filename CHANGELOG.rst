@@ -1,3 +1,23 @@
+
+[X.X.X]
+--------
+
+Added:
+^^^^^^
+
+Changed:
+^^^^^^^^
+
+* Updated ensembl vep to version 113.4
+
+Removed:
+^^^^^^^^
+
+Fixed:
+^^^^^^
+
+
+
 [17.0.1]
 --------
 
