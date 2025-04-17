@@ -15,6 +15,7 @@ from BALSAMIC.utils.cli import add_doc as doc
 
 LOG = logging.getLogger(__name__)
 
+
 @click.group()
 @OPTION_LOG_LEVEL
 @click.version_option(version=balsamic_version)

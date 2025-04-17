@@ -27,7 +27,6 @@ from BALSAMIC.constants.cluster import (
     QOS,
     ClusterAccount,
     ClusterConfigType,
-    ClusterProfile,
     ClusterMailType,
 )
 from BALSAMIC.constants.constants import FileType
@@ -47,7 +46,6 @@ from BALSAMIC.models.cache import (
     ReferencesHg,
 )
 from BALSAMIC.models.config import ConfigModel
-from BALSAMIC.models.scheduler import Scheduler
 from BALSAMIC.models.snakemake import SingularityBindPath, SnakemakeExecutable
 from BALSAMIC.utils.io import read_json, read_yaml, write_json
 from .helpers import ConfigHelper, Map
@@ -2557,7 +2555,6 @@ def fixture_snakemake_executable_validated_data(
     """Return snakemake model expected data."""
     return {
         "account": ClusterAccount.DEVELOPMENT.value,
-        "benchmark": False,
         "case_id": case_id_tumor_only,
         "cluster_config_path": reference_file,
         "config_path": reference_file,
@@ -2598,58 +2595,3 @@ def job_properties() -> Dict[str, Any]:
             "mail_type": ClusterMailType.ALL.value,
         }
     }
-
-
-@pytest.fixture(scope="session")
-def scheduler_data(
-    case_id_tumor_only: str,
-    job_properties: Dict[str, Any],
-    empty_file: Path,
-    empty_dir: Path,
-    mail_user_option: str,
-) -> Dict[str, Any]:
-    """Return raw scheduler model data."""
-    return {
-        "account": ClusterAccount.DEVELOPMENT.value,
-        "case_id": case_id_tumor_only,
-        "dependencies": ["1", "2", "3"],
-        "job_properties": job_properties,
-        "job_script": empty_file.as_posix(),
-        "log_dir": empty_dir.as_posix(),
-        "mail_user": mail_user_option,
-        "mail_type": ClusterMailType.FAIL.value,
-        "profile": ClusterProfile.SLURM.value,
-        "qos": QOS.HIGH,
-    }
-
-
-@pytest.fixture(scope="session")
-def scheduler_validated_data(
-    case_id_tumor_only: str,
-    job_properties: Dict[str, Any],
-    empty_file: Path,
-    empty_dir: Path,
-    mail_user_option: str,
-) -> Dict[str, Any]:
-    """Return scheduler model validated data."""
-    return {
-        "account": f"--account {ClusterAccount.DEVELOPMENT}",
-        "benchmark": False,
-        "case_id": case_id_tumor_only,
-        "dependencies": ["1", "2", "3"],
-        "job_properties": job_properties,
-        "job_script": empty_file,
-        "log_dir": empty_dir,
-        "mail_type": "--mail-type FAIL",
-        "mail_user": f"--mail-user {mail_user_option}",
-        "profile": ClusterProfile.SLURM,
-        "profiling_interval": 10,
-        "profiling_type": "task",
-        "qos": "--qos high",
-    }
-
-
-@pytest.fixture(scope="session")
-def scheduler_model(scheduler_data: Dict[str, Any]) -> Scheduler:
-    """Return scheduler pydantic model."""
-    return Scheduler(**scheduler_data)

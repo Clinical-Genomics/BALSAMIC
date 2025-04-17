@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Optional
 from BALSAMIC.utils.io import write_json, write_yaml
 
+
 class SbatchSubmitter:
     def __init__(
         self,
@@ -36,7 +37,8 @@ class SbatchSubmitter:
         self.log.info("Creating sbatch script to submit jobs.")
         self.log.info(f"Using conda environment: {self.conda_env_path}")
 
-        sbatch_header = textwrap.dedent(f"""\
+        sbatch_header = textwrap.dedent(
+            f"""\
             #!/bin/bash -l
             #SBATCH --account={self.account}
             #SBATCH --job-name=BALSAMIC_snakemake_submit.{self.case_id}.%j
@@ -47,7 +49,8 @@ class SbatchSubmitter:
             #SBATCH --time={self.max_run_hours}:00:00
             #SBATCH --qos={self.qos}
             #SBATCH --cpus-per-task=1
-        """)
+        """
+        )
 
         sbatch_command = f"\nconda run -p {self.conda_env_path} {self.snakemake_executable.get_command()}\n"
 
@@ -62,7 +65,9 @@ class SbatchSubmitter:
         sbatch_command = f"sbatch {self.sbatch_script_path}"
         self.log.info(f"Submitting job with command: {sbatch_command}")
 
-        result = subprocess.run(sbatch_command, shell=True, capture_output=True, text=True)
+        result = subprocess.run(
+            sbatch_command, shell=True, capture_output=True, text=True
+        )
 
         if result.returncode == 0:
             output = result.stdout.strip()
@@ -72,14 +77,15 @@ class SbatchSubmitter:
                 self.log.info(f"Job submitted successfully with Job ID: {job_id}")
                 return job_id
             else:
-                self.log.warning(f"Could not extract Job ID from sbatch output: {output}")
+                self.log.warning(
+                    f"Could not extract Job ID from sbatch output: {output}"
+                )
         else:
             self.log.error(f"sbatch submission failed: {result.stderr.strip()}")
 
         return None
 
     def write_job_id_yaml(self, job_id: str) -> None:
-
         yaml_path = self.result_path / "slurm_jobids.yaml"
         write_yaml({self.case_id: [job_id]}, yaml_path)
         self.log.info(f"Job ID written to {yaml_path}")

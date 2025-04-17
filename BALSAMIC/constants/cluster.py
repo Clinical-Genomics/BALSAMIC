@@ -10,6 +10,7 @@ class ClusterConfigType(StrEnum):
 
     CACHE: str = "cluster_cache"
 
+
 class ClusterAccount(StrEnum):
     """Cluster job submission account."""
 

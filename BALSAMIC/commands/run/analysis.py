@@ -94,7 +94,9 @@ def analysis(
     config_model = ConfigModel.model_validate(sample_config)
     case_id = config_model.analysis.case_id
 
-    log_file = Path(config_model.analysis.analysis_dir, case_id, LogFile.LOGNAME).as_posix()
+    log_file = Path(
+        config_model.analysis.analysis_dir, case_id, LogFile.LOGNAME
+    ).as_posix()
     LOG.info(f"Setting BALSAMIC logfile path to: {log_file}.")
     add_file_logging(log_file, logger_name=__name__)
 
@@ -130,9 +132,13 @@ def analysis(
             log_path = Path(createDir(log_path.as_posix(), []))
             script_path = Path(createDir(script_path.as_posix(), []))
 
-    LOG.info(f"Updating config model with account: {account} and QOS: {qos}")
+    LOG.info(
+        f"Updating config model with account: {account}, QOS: {qos} and email arguments: {f'--mail-type mail_type' if mail_type else ''} {f'--mail-user mail_user' if mail_user else ''}"
+    )
     config_model.qos = qos
     config_model.account = account
+    config_model.mail_user = mail_user
+    config_model.mail_type = mail_type
     config_model.analysis.log = log_path.as_posix()
     config_model.analysis.script = script_path.as_posix()
 

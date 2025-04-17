@@ -40,7 +40,12 @@ from BALSAMIC.commands.options import (
     OPTION_TUMOR_SAMPLE_NAME,
     OPTION_UMI_MIN_READS,
 )
-from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV, AnalysisWorkflow, Gender, LogFile
+from BALSAMIC.constants.analysis import (
+    BIOINFO_TOOL_ENV,
+    AnalysisWorkflow,
+    Gender,
+    LogFile,
+)
 from BALSAMIC.constants.cache import GenomeVersion
 from BALSAMIC.constants.constants import FileType
 from BALSAMIC.constants.paths import (
