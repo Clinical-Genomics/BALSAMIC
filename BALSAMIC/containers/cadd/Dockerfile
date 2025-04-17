@@ -16,15 +16,14 @@ ARG CONTAINER_NAME
 COPY BALSAMIC/containers/${CONTAINER_NAME}/${CONTAINER_NAME}.yaml environment.yaml
 
 # Create conda environment
+# The cadd-scripts conda package is available as cadd.sh instead
+# of CADD.sh so we make link to keep compatibility
 RUN conda env create -n ${CONTAINER_NAME} -f environment.yaml && \
     conda clean -afy && \
-    rm -f environment.yaml
+    rm -f environment.yaml && \
+    ln -s /opt/conda/envs/cadd/bin/cadd.sh /opt/conda/envs/cadd/bin/CADD.sh
 
 ENV PATH="/opt/conda/envs/${CONTAINER_NAME}/bin/:${PATH}"
-
-# The cadd-scripts conda package is available as cadd.sh instead
-# of CADD.sh. Make link to keep compatibility
-RUN ln -s /opt/conda/envs/cadd/bin/cadd.sh /opt/conda/envs/cadd/bin/CADD.sh
 
 # Run as a non-root
 RUN useradd -m dockeruser
