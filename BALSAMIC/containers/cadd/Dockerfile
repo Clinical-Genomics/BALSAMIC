@@ -12,6 +12,13 @@ LABEL base.image="continuumio/miniconda3" \
 
 ARG CONTAINER_NAME
 
+# Run as a non-root
+RUN useradd -m dockeruser
+USER dockeruser
+
+# Set the work directory
+WORKDIR /home/dockeruser/
+
 # Copy enviroment file
 COPY BALSAMIC/containers/${CONTAINER_NAME}/${CONTAINER_NAME}.yaml environment.yaml
 
@@ -24,13 +31,6 @@ RUN conda env create -n ${CONTAINER_NAME} -f environment.yaml && \
     ln -s /opt/conda/envs/cadd/bin/cadd.sh /opt/conda/envs/cadd/bin/CADD.sh
 
 ENV PATH="/opt/conda/envs/${CONTAINER_NAME}/bin/:${PATH}"
-
-# Run as a non-root
-RUN useradd -m dockeruser
-USER dockeruser
-
-# Set the work directory
-WORKDIR /home/dockeruser/
 
 # Set the default shell
 SHELL ["/bin/bash", "-c"]
