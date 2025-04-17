@@ -247,8 +247,8 @@ class ConfigModel(BaseModel):
     sentieon: Sentieon
     qos: Optional[QOS] = None
     account: Optional[str] = None
-    mail_type: Optional[str] = ""
-    mail_user: Optional[str] = ""
+    mail_type: Optional[str] = " "
+    mail_user: Optional[str] = " "
 
     @field_validator("mail_type")
     def complete_mail_type_arg(cls, mail_type: str):
