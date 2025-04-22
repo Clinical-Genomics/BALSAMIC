@@ -5,7 +5,6 @@ from datetime import datetime
 from functools import partial
 from pathlib import Path
 from typing import Any, Dict, List
-from unittest import mock
 
 import pytest
 from _pytest.tmpdir import TempPathFactory
@@ -13,7 +12,6 @@ from click.testing import CliRunner
 from pydantic_core import Url
 
 from BALSAMIC import __version__ as balsamic_version
-from BALSAMIC.assets.scripts.sex_prediction_tga import predict_sex_main
 from BALSAMIC.assets.scripts.preprocess_gens import cli as gens_preprocessing_cli
 from BALSAMIC.commands.base import cli
 from BALSAMIC.constants.analysis import (
@@ -23,12 +21,7 @@ from BALSAMIC.constants.analysis import (
     RunMode,
 )
 from BALSAMIC.constants.cache import REFERENCE_FILES, DockerContainers, GenomeVersion
-from BALSAMIC.constants.cluster import (
-    QOS,
-    ClusterAccount,
-    ClusterConfigType,
-    ClusterMailType,
-)
+from BALSAMIC.constants.cluster import QOS, ClusterAccount, ClusterConfigType
 from BALSAMIC.constants.constants import FileType
 from BALSAMIC.constants.paths import (
     CONSTANTS_DIR,
@@ -2518,10 +2511,9 @@ def fixture_snakemake_executable_data(
         "account": ClusterAccount.DEVELOPMENT.value,
         "case_id": case_id_tumor_only,
         "config_path": reference_file,
-        "disable_variant_caller": "tnscope",
         "log_dir": session_tmp_path,
-        "mail_user": mail_user_option,
-        "profile": ClusterProfile.SLURM,
+        "cluster_profile": reference_file,
+        "workflow_profile": reference_file,
         "qos": QOS.HIGH,
         "quiet": True,
         "run_analysis": True,
@@ -2576,17 +2568,3 @@ def fixture_snakemake_executable_validated_data(
 def job_id() -> str:
     """Return cluster job identifier."""
     return "12345"
-
-
-@pytest.fixture(scope="session")
-def job_properties() -> Dict[str, Any]:
-    """Cluster job properties."""
-    return {
-        "cluster": {
-            "partition": "core",
-            "n": "1",
-            "time": "10:00:00",
-            "mem": "1000",
-            "mail_type": ClusterMailType.ALL.value,
-        }
-    }

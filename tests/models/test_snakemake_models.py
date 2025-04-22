@@ -5,8 +5,7 @@ from pathlib import Path
 from typing import Any, Dict
 
 import pytest
-from BALSAMIC.constants.cluster import MAX_JOBS, QOS, ClusterAccount, ClusterProfile
-from BALSAMIC.constants.paths import IMMEDIATE_SUBMIT_PATH
+from BALSAMIC.constants.cluster import MAX_JOBS, QOS, ClusterAccount
 from BALSAMIC.models.snakemake import SingularityBindPath, SnakemakeExecutable
 from pydantic import ValidationError
 

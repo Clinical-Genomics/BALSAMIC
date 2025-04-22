@@ -27,4 +27,3 @@ class QOS(StrEnum):
 
 
 QOS_OPTIONS: List[QOS] = [qos for qos in QOS]
-

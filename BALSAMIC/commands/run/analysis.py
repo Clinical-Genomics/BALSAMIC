@@ -125,9 +125,7 @@ def analysis(
             log_path = Path(createDir(log_path.as_posix(), []))
             script_path = Path(createDir(script_path.as_posix(), []))
 
-    LOG.info(
-        f"Updating config model with account: {account}, QOS: {qos}"
-    )
+    LOG.info(f"Updating config model with account: {account}, QOS: {qos}")
     config_model.qos = qos
     config_model.account = account
     config_model.analysis.log = log_path.as_posix()

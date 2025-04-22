@@ -142,4 +142,3 @@ class SnakemakeExecutable(BaseModel):
             )
             return remove_unnecessary_spaces(snakemake_cluster_options)
         return ""
-
