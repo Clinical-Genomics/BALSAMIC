@@ -63,10 +63,7 @@ def test_get_config_files_option(
     config_files_option: str = snakemake_executable.get_config_file_option()
 
     # THEN the expected format should be returned
-    assert (
-        config_files_option
-        == f"--configfile {reference_file.as_posix()}"
-    )
+    assert config_files_option == f"--configfile {reference_file.as_posix()}"
 
 
 def test_get_config_options(snakemake_executable: SnakemakeExecutable):

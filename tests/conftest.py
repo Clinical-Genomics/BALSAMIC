@@ -320,10 +320,12 @@ def environ():
     """Create operating system's environment object."""
     return "os.environ"
 
+
 @pytest.fixture(scope="session")
 def default_snakemake_resources() -> DefaultResources:
     """Return snakemake default resource."""
     return DefaultResources(["threads=1", "mem_mb=4000", "runtime=60"])
+
 
 @pytest.fixture(scope="session")
 def reference():

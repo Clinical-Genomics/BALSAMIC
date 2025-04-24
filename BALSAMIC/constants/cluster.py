@@ -4,6 +4,7 @@ from typing import List
 
 MAX_JOBS: int = 999
 
+
 class ClusterAccount(StrEnum):
     """Cluster job submission account."""
 

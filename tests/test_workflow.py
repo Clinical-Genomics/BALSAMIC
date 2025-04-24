@@ -31,7 +31,12 @@ def test_workflow_tumor_only_tga_hg19(
             "SENTIEON_INSTALL_DIR": sentieon_install_dir,
         },
     ):
-        assert snakemake.snakemake(snakefile, configfiles=[config_json], dryrun=True, default_resources=default_snakemake_resources)
+        assert snakemake.snakemake(
+            snakefile,
+            configfiles=[config_json],
+            dryrun=True,
+            default_resources=default_snakemake_resources,
+        )
 
         # THEN the following rules should not be included
         assert "igh_dux4_detection_tumor_only" not in caplog.text
@@ -60,7 +65,12 @@ def test_workflow_tumor_normal_tga_hg19(
             "SENTIEON_INSTALL_DIR": sentieon_install_dir,
         },
     ):
-        assert snakemake.snakemake(snakefile, configfiles=[config_json], dryrun=True, default_resources=default_snakemake_resources)
+        assert snakemake.snakemake(
+            snakefile,
+            configfiles=[config_json],
+            dryrun=True,
+            default_resources=default_snakemake_resources,
+        )
 
         # THEN the following rules should not be included
         assert "igh_dux4_detection_tumor_normal" not in caplog.text
@@ -89,7 +99,12 @@ def test_workflow_tumor_only_wgs_hg19(
             "SENTIEON_INSTALL_DIR": sentieon_install_dir,
         },
     ):
-        assert snakemake.snakemake(snakefile, configfiles=[config_json], dryrun=True, default_resources=default_snakemake_resources)
+        assert snakemake.snakemake(
+            snakefile,
+            configfiles=[config_json],
+            dryrun=True,
+            default_resources=default_snakemake_resources,
+        )
 
         # THEN the following rules should be included
         assert "igh_dux4_detection_tumor_only" in caplog.text
@@ -118,14 +133,22 @@ def test_workflow_tumor_normal_wgs_hg19(
             "SENTIEON_INSTALL_DIR": sentieon_install_dir,
         },
     ):
-        assert snakemake.snakemake(snakefile, configfiles=[config_json], dryrun=True, default_resources=default_snakemake_resources)
+        assert snakemake.snakemake(
+            snakefile,
+            configfiles=[config_json],
+            dryrun=True,
+            default_resources=default_snakemake_resources,
+        )
 
         # THEN the following rules should be included
         assert "igh_dux4_detection_tumor_normal" in caplog.text
 
 
 def test_workflow_qc_tumor_only_hg19(
-    tumor_only_config_qc, sentieon_install_dir, sentieon_license, default_snakemake_resources
+    tumor_only_config_qc,
+    sentieon_install_dir,
+    sentieon_license,
+    default_snakemake_resources,
 ):
     # GIVEN a sample config dict and a snakefile
     workflow = "single"
@@ -141,11 +164,19 @@ def test_workflow_qc_tumor_only_hg19(
             "SENTIEON_INSTALL_DIR": sentieon_install_dir,
         },
     ):
-        assert snakemake.snakemake(snakefile, configfiles=[config_json], dryrun=True, default_resources=default_snakemake_resources)
+        assert snakemake.snakemake(
+            snakefile,
+            configfiles=[config_json],
+            dryrun=True,
+            default_resources=default_snakemake_resources,
+        )
 
 
 def test_workflow_qc_tumor_normal_hg19(
-    tumor_normal_config_qc, sentieon_install_dir, sentieon_license, default_snakemake_resources
+    tumor_normal_config_qc,
+    sentieon_install_dir,
+    sentieon_license,
+    default_snakemake_resources,
 ):
     # GIVEN a sample config dict and a snakefile
     workflow = "paired"
@@ -161,4 +192,9 @@ def test_workflow_qc_tumor_normal_hg19(
             "SENTIEON_INSTALL_DIR": sentieon_install_dir,
         },
     ):
-        assert snakemake.snakemake(snakefile, configfiles=[config_json], dryrun=True, default_resources=default_snakemake_resources)
+        assert snakemake.snakemake(
+            snakefile,
+            configfiles=[config_json],
+            dryrun=True,
+            default_resources=default_snakemake_resources,
+        )

@@ -45,6 +45,7 @@ def test_init_hg(
     ).exists()
     assert result.exit_code == EXIT_SUCCESS
 
+
 def test_init_hg_no_cosmic_key(invoke_cli: partial, tmp_path: Path, cosmic_key: str):
     """Test Balsamic init command when a COSMIC key is not provided."""
 
