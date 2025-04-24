@@ -65,7 +65,6 @@ sequencing_type = config_model.analysis.sequencing_type
 
 
 rules_to_include = []
-rules_to_include.append("snakemake_rules/misc/sleep.rule")
 if sequencing_type == SequencingType.TARGETED:
     rules_to_include.append("snakemake_rules/concatenation/concatenation.rule")
     rules_to_include.append("snakemake_rules/quality_control/fastp_tga.rule")

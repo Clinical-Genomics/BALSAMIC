@@ -7,10 +7,6 @@ rule convert_delly_exclusion_file:
         exclusion_file=cache_config.references.delly_exclusion.file_path,
     output:
         exclusion_converted_file=cache_config.references.get_delly_exclusion_converted_file_path(),
-    threads: get_threads(cluster_config=cluster_config, rule_name="convert_delly_exclusion_file")
-    resources:
-        runtime=60,
-        mem_mb=2000
     message:
         "Converting delly exclusion file {input.exclusion_file}"
     benchmark:

@@ -12,7 +12,7 @@ import click
 from BALSAMIC.commands.options import (
     OPTION_CACHE_VERSION,
     OPTION_CLUSTER_ACCOUNT,
-    OPTION_WORKFLOW_PROFILE,
+    OPTION_CACHE_PROFILE,
     OPTION_CLUSTER_PROFILE,
     OPTION_CLUSTER_QOS,
     OPTION_COSMIC_KEY,
@@ -34,7 +34,7 @@ from BALSAMIC.models.cache import CacheConfig, ReferencesCanFam, ReferencesHg
 from BALSAMIC.models.snakemake import SnakemakeExecutable
 from BALSAMIC.utils.analysis import get_cache_singularity_bind_paths
 from BALSAMIC.utils.cache import get_containers
-from BALSAMIC.utils.cli import get_config_path, get_snakefile
+from BALSAMIC.utils.cli import get_snakefile
 from BALSAMIC.utils.io import generate_workflow_graph, write_json
 
 LOG = logging.getLogger(__name__)
@@ -47,7 +47,7 @@ LOG = logging.getLogger(__name__)
 @OPTION_CACHE_VERSION
 @OPTION_CLUSTER_ACCOUNT
 @OPTION_CLUSTER_PROFILE
-@OPTION_WORKFLOW_PROFILE
+@OPTION_CACHE_PROFILE
 @OPTION_CLUSTER_QOS
 @OPTION_COSMIC_KEY
 @OPTION_FORCE_ALL
@@ -67,7 +67,7 @@ def initialize(
     genome_version: GenomeVersion,
     out_dir: str,
     cluster_profile: Path,
-    workflow_profile: Path,
+    cache_profile: Path,
     qos: QOS,
     quiet: bool,
     run_analysis: bool,
@@ -143,8 +143,8 @@ def initialize(
         config_path=config_path,
         force=force_all,
         log_dir=log_dir,
-        profile=cluster_profile,
-        workflow_profile=workflow_profile,
+        cluster_profile=cluster_profile,
+        workflow_profile=cache_profile,
         qos=qos,
         quiet=quiet,
         run_analysis=run_analysis,

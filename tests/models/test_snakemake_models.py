@@ -60,25 +60,25 @@ def test_get_config_files_option(
     # GIVEN a snakemake executable model with a mocked config file
 
     # WHEN calling the method
-    config_files_option: str = snakemake_executable.get_config_files_option()
+    config_files_option: str = snakemake_executable.get_config_file_option()
 
     # THEN the expected format should be returned
     assert (
         config_files_option
-        == f"--configfiles {reference_file.as_posix()} {reference_file.as_posix()}"
+        == f"--configfile {reference_file.as_posix()}"
     )
 
 
 def test_get_config_options(snakemake_executable: SnakemakeExecutable):
     """Test formatting of the snakemake config options."""
 
-    # GIVEN a snakemake executable model disabling some variant callers
+    #  GIVEN a snakemake executable model with a dragen flag
 
     # WHEN calling the method
     snakemake_config_options: str = snakemake_executable.get_config_options()
 
     # THEN the expected format should be returned
-    assert snakemake_config_options == "--account development"
+    assert snakemake_config_options == "--config dragen=True"
 
 
 def test_get_dragen_flag(snakemake_executable: SnakemakeExecutable):
@@ -217,8 +217,8 @@ def test_get_snakemake_command(
         snakemake_command
         == f"snakemake --notemp -p --rerun-trigger mtime --directory {session_tmp_path.as_posix()} "
         f"--snakefile {reference_file.as_posix()} "
-        f"--configfiles {reference_file.as_posix()} "
+        f"--configfile {reference_file.as_posix()} --config dragen=True "
         f"--use-singularity --singularity-args '--cleanenv --bind {session_tmp_path.as_posix()}:/' --quiet "
         f"-j {MAX_JOBS} --jobname BALSAMIC.{case_id_tumor_only}.{{rulename}}.{{jobid}}.sh "
-        f"--profile {reference_file.as_posix()} --workflow-profile  {reference_file.as_posix()}"
+        f"--profile {reference_file.as_posix()} --workflow-profile {reference_file.as_posix()} --cores 36"
     )

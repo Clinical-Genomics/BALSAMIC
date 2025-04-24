@@ -23,7 +23,7 @@ from BALSAMIC.constants.analysis import (
     RunMode,
 )
 from BALSAMIC.constants.cache import REFERENCE_FILES, DockerContainers, GenomeVersion
-from BALSAMIC.constants.cluster import QOS, ClusterAccount, ClusterConfigType
+from BALSAMIC.constants.cluster import QOS, ClusterAccount
 from BALSAMIC.constants.constants import FileType
 from BALSAMIC.constants.paths import (
     CONSTANTS_DIR,
@@ -319,14 +319,6 @@ def invoke_gens_cli(cli_runner):
 def environ():
     """Create operating system's environment object."""
     return "os.environ"
-
-
-@pytest.fixture(scope="session")
-def cluster_analysis_config_path() -> str:
-    """Return cluster analysis configuration file."""
-    return Path(
-        CONSTANTS_DIR, f"{ClusterConfigType.ANALYSIS}.{FileType.YAML}"
-    ).as_posix()
 
 @pytest.fixture(scope="session")
 def default_snakemake_resources() -> DefaultResources:
@@ -2493,7 +2485,7 @@ def fixture_singularity_bind_path(
 
 @pytest.fixture(scope="session", name="snakemake_options_command")
 def fixture_snakemake_options_command() -> List[str]:
-    """Return mocked singularity bind path model."""
+    """Return mocked snakemake options."""
     return ["--cores", "36"]
 
 
@@ -2521,6 +2513,7 @@ def fixture_snakemake_executable_data(
         "cluster_profile": reference_file,
         "workflow_profile": reference_file,
         "qos": QOS.HIGH,
+        "dragen": True,
         "quiet": True,
         "run_analysis": True,
         "run_mode": RunMode.CLUSTER,
@@ -2554,10 +2547,11 @@ def fixture_snakemake_executable_validated_data(
         "account": ClusterAccount.DEVELOPMENT.value,
         "case_id": case_id_tumor_only,
         "config_path": reference_file,
-        "disable_variant_caller": "disable_variant_caller=tnscope",
-        "dragen": False,
+        "dragen": True,
         "force": False,
         "log_dir": session_tmp_path,
+        "cluster_profile": reference_file,
+        "workflow_profile": reference_file,
         "qos": QOS.HIGH,
         "quiet": True,
         "run_analysis": True,

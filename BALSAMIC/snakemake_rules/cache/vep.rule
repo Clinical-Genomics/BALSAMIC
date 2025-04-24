@@ -13,10 +13,6 @@ rule download_vep:
         plugins=VEP_PLUGINS,
     singularity:
         f"{config['containers_dir']}/{config['bioinfo_tools']['ensembl-vep']}.{FileType.SIF}"
-    threads: get_threads(cluster_config=cluster_config, rule_name="download_vep")
-    resources:
-        runtime=120,
-        mem_mb=30000
     message:
         "Downloading and installing VEP package in {output.vep_dir}"
     benchmark:

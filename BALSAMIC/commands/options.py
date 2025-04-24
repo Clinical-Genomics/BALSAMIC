@@ -19,7 +19,7 @@ from BALSAMIC.constants.cluster import (
 )
 from BALSAMIC.constants.constants import LOG_LEVELS, LogLevel
 from BALSAMIC.constants.rules import DELIVERY_RULES
-from BALSAMIC.constants.paths import CONSTANTS_DIR, WORKFLOW_PROFILE
+from BALSAMIC.constants.paths import CONSTANTS_DIR, WORKFLOW_PROFILE, CACHE_PROFILE
 from BALSAMIC.utils.cli import (
     validate_cache_version,
     validate_exome_option,
@@ -163,6 +163,14 @@ OPTION_WORKFLOW_PROFILE = click.option(
     type=click.Path(exists=True, resolve_path=True),
     default=WORKFLOW_PROFILE,
     help="Directory containing snakemake workflow profile specifying rule resources",
+)
+
+OPTION_CACHE_PROFILE = click.option(
+    "--cache-profile",
+    show_default=True,
+    type=click.Path(exists=True, resolve_path=True),
+    default=CACHE_PROFILE,
+    help="Directory containing snakemake cache profile specifying rule resources for cache workflow",
 )
 
 OPTION_CLUSTER_QOS = click.option(

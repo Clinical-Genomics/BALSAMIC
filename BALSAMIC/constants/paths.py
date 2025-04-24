@@ -6,6 +6,7 @@ from pathlib import Path
 BALSAMIC_DIR: Path = Path(sys.modules["BALSAMIC"].__file__).parent.resolve()
 CONSTANTS_DIR: Path = Path(BALSAMIC_DIR, "constants")
 WORKFLOW_PROFILE: Path = Path(CONSTANTS_DIR, "workflow_profile")
+CACHE_PROFILE: Path = Path(CONSTANTS_DIR, "cache_profile")
 CONTAINERS_DIR: Path = Path(BALSAMIC_DIR, "containers")
 ASSETS_DIR: Path = Path(BALSAMIC_DIR, "assets")
 SCRIPT_DIR: Path = Path(ASSETS_DIR, "scripts")

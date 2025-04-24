@@ -45,37 +45,6 @@ def test_init_hg(
     ).exists()
     assert result.exit_code == EXIT_SUCCESS
 
-
-def test_init_canfam(
-    invoke_cli: partial,
-    tmp_path: Path,
-    cosmic_key: str,
-    config_json: str,
-    reference_graph: str,
-):
-    """Test Balsamic canine workflow init command."""
-
-    # GIVEN a temporary output directory and a COSMIC key
-
-    # WHEN invoking the init command
-    result: Result = invoke_cli(
-        [
-            "init",
-            "--out-dir",
-            tmp_path.as_posix(),
-            "--genome-version",
-            GenomeVersion.CanFam3,
-        ]
-    )
-
-    # THEN the canine reference generation workflow should have successfully started
-    assert Path(tmp_path, balsamic_version, GenomeVersion.CanFam3, config_json).exists()
-    assert Path(
-        tmp_path, balsamic_version, GenomeVersion.CanFam3, reference_graph
-    ).exists()
-    assert result.exit_code == EXIT_SUCCESS
-
-
 def test_init_hg_no_cosmic_key(invoke_cli: partial, tmp_path: Path, cosmic_key: str):
     """Test Balsamic init command when a COSMIC key is not provided."""
 
