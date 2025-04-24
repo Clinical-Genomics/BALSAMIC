@@ -1,3 +1,20 @@
+[17.0.1]
+--------
+
+Added:
+^^^^^^
+
+Changed:
+^^^^^^^^
+
+Removed:
+^^^^^^^^
+
+Fixed:
+^^^^^^
+
+* fixed bug in panel sex-prediction script when no targets in y-chromosome exists in panel https://github.com/Clinical-Genomics/BALSAMIC/pull/1563
+
 
 [17.0.0]
 -------
