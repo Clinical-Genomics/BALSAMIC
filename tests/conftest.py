@@ -11,6 +11,8 @@ from _pytest.tmpdir import TempPathFactory
 from click.testing import CliRunner
 from pydantic_core import Url
 
+from snakemake.resources import DefaultResources
+
 from BALSAMIC import __version__ as balsamic_version
 from BALSAMIC.assets.scripts.preprocess_gens import cli as gens_preprocessing_cli
 from BALSAMIC.commands.base import cli
@@ -323,9 +325,13 @@ def environ():
 def cluster_analysis_config_path() -> str:
     """Return cluster analysis configuration file."""
     return Path(
-        CONSTANTS_DIR, f"{ClusterConfigType.ANALYSIS}.{FileType.JSON}"
+        CONSTANTS_DIR, f"{ClusterConfigType.ANALYSIS}.{FileType.YAML}"
     ).as_posix()
 
+@pytest.fixture(scope="session")
+def default_snakemake_resources() -> DefaultResources:
+    """Return snakemake default resource."""
+    return DefaultResources(["threads=1", "mem_mb=4000", "runtime=60"])
 
 @pytest.fixture(scope="session")
 def reference():

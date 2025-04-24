@@ -9,7 +9,7 @@ class ClusterConfigType(StrEnum):
     """Analysis workflow config type."""
 
     CACHE: str = "cluster_cache"
-
+    ANALYSIS: str = "config"
 
 class ClusterAccount(StrEnum):
     """Cluster job submission account."""
