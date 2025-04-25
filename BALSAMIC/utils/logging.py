@@ -1,5 +1,6 @@
 import logging
 
+
 def add_file_logging(log_file: str, logger_name: str = None):
     """Adds a file handler to the specified logger without modifying its format.
 

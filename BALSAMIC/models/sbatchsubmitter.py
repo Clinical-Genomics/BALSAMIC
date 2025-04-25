@@ -4,10 +4,26 @@ import textwrap
 import subprocess
 from pathlib import Path
 from typing import Optional
-from BALSAMIC.utils.io import write_json, write_yaml
+from BALSAMIC.utils.io import write_yaml
 
 
 class SbatchSubmitter:
+    """SLURM job submission model for running a Snakemake workflow.
+
+    Attributes:
+        case_id (str)                  : Identifier for the analysis case.
+        script_path (Path)            : Directory where the sbatch script will be created.
+        result_path (Path)            : Directory where the job ID YAML file will be written.
+        log_path (Path)               : Directory where SLURM output and error logs will be written.
+        account (str)                 : SLURM account to charge for the job.
+        qos (str)                     : SLURM quality of service level.
+        max_run_hours (int)          : Maximum allowed run time for the job, in hours.
+        snakemake_executable         : Object representing the Snakemake command to be executed.
+        logger                        : Logger instance for capturing logs.
+        conda_env_path (str)         : Path to the active conda environment, from $CONDA_PREFIX.
+        sbatch_script_path (Path)    : Path to the generated sbatch script file.
+    """
+
     def __init__(
         self,
         case_id: str,
@@ -62,6 +78,11 @@ class SbatchSubmitter:
         self.log.info(f"Sbatch script written to: {self.sbatch_script_path}")
 
     def submit_job(self) -> Optional[str]:
+        """Submit the generated sbatch script to the SLURM scheduler.
+
+        Returns:
+            Optional[str]: The SLURM job ID if the submission is successful, otherwise None.
+        """
         sbatch_command = f"sbatch {self.sbatch_script_path}"
         self.log.info(f"Submitting job with command: {sbatch_command}")
 
@@ -86,6 +107,14 @@ class SbatchSubmitter:
         return None
 
     def write_job_id_yaml(self, job_id: str) -> None:
+        """Write the submitted job ID to a YAML file.
+
+        The file is saved at `case_id/analysis/slurm_jobids.yaml` and stores the job ID
+        under the corresponding `case_id`.
+
+        Args:
+            job_id (str): The SLURM job ID to record.
+        """
         yaml_path = self.result_path / "slurm_jobids.yaml"
         write_yaml({self.case_id: [job_id]}, yaml_path)
         self.log.info(f"Job ID written to {yaml_path}")

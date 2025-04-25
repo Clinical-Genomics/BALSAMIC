@@ -9,6 +9,7 @@ import pytest
 from BALSAMIC.utils.logging import add_file_logging
 from BALSAMIC.constants.constants import LogLevel
 
+
 def test_writes_messages_to_file(tmp_path: Path, caplog: pytest.LogCaptureFixture):
     """The helper should attach a FileHandler that receives log records."""
 
@@ -47,6 +48,7 @@ def test_writes_messages_to_file(tmp_path: Path, caplog: pytest.LogCaptureFixtur
     # THEN message should not be stored in logfile
     assert "invisible" not in log_file.read_text()
 
+
 def test_add_file_logging_does_not_duplicate_handlers(tmp_path: Path):
     """Test that logger function correctly only adds one filehandler in case its accidentally added twice."""
 
@@ -68,4 +70,3 @@ def test_add_file_logging_does_not_duplicate_handlers(tmp_path: Path):
 
     # THEN 1 file handler should exist
     assert sum(isinstance(h, logging.FileHandler) for h in logger.handlers) == 1
-

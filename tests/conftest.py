@@ -10,7 +10,7 @@ import pytest
 from _pytest.tmpdir import TempPathFactory
 from click.testing import CliRunner
 from pydantic_core import Url
-
+from unittest.mock import MagicMock, patch, mock_open
 from snakemake.resources import DefaultResources
 
 from BALSAMIC import __version__ as balsamic_version
@@ -26,7 +26,6 @@ from BALSAMIC.constants.cache import REFERENCE_FILES, DockerContainers, GenomeVe
 from BALSAMIC.constants.cluster import QOS, ClusterAccount
 from BALSAMIC.constants.constants import FileType
 from BALSAMIC.constants.paths import (
-    CONSTANTS_DIR,
     FASTQ_TEST_INFO,
     TEST_DATA_DIR,
     SENTIEON_TNSCOPE_MODEL,
@@ -40,6 +39,7 @@ from BALSAMIC.models.cache import (
     References,
     ReferencesHg,
 )
+from BALSAMIC.models.sbatchsubmitter import SbatchSubmitter
 from BALSAMIC.models.config import ConfigModel
 from BALSAMIC.models.snakemake import SingularityBindPath, SnakemakeExecutable
 from BALSAMIC.utils.io import read_json, read_yaml, write_json
@@ -319,6 +319,23 @@ def invoke_gens_cli(cli_runner):
 def environ():
     """Create operating system's environment object."""
     return "os.environ"
+
+
+@pytest.fixture
+def submitter(tmp_path):
+    return SbatchSubmitter(
+        case_id="test_case",
+        script_path=tmp_path,
+        result_path=tmp_path,
+        log_path=tmp_path,
+        account="dummy_account",
+        qos="low",
+        max_run_hours=2,
+        snakemake_executable=MagicMock(
+            get_command=lambda: "snakemake --snakefile Snakefile"
+        ),
+        logger=MagicMock(),
+    )
 
 
 @pytest.fixture(scope="session")
