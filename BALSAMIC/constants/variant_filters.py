@@ -152,6 +152,9 @@ class BaseSNVFilters:
         "germline_risk",
         "in_normal",
     ]
+    DEFAULT_SOFT_FILTERS: List[str] = [
+        "HighOccurrenceFrq",
+    ]
 
     @classmethod
     def filter_criteria(
@@ -201,6 +204,13 @@ class BaseSNVFilters:
             matching_filters += [
                 f for f in cls.INTERNAL_VARIANT_CALLER_FILTERS if filter_matches(f)
             ]
+
+        # Exclude default soft filters
+        matching_filters = [
+            f
+            for f in matching_filters
+            if f.filter_name not in cls.DEFAULT_SOFT_FILTERS
+        ]
 
         # Exclude filters if soft_filter_normals is set
         if soft_filter_normals:
@@ -337,6 +347,7 @@ class TgaSNVFilters(BaseSNVFilters):
     clinical = research + [
         VCFFilter(tag_value=0.01, filter_name="Frq", field="INFO"),
         VCFFilter(tag_value=0.1, filter_name="ArtefactFrq", field="INFO"),
+        VCFFilter(tag_value=0.2, filter_name="HighOccurrenceFrq", field="INFO"),
     ]
     quality = [
         VCFFilter(

@@ -108,7 +108,7 @@ clinical_sv = ""
 somatic_sv = ""
 swegen_sv = ""
 
-if config["analysis"]["sequencing_type"] != "wgs":
+if config_model.analysis.sequencing_type != SequencingType.WGS:
     pon_cnn: str = get_pon_cnn(config)
 
 # Run information
@@ -319,6 +319,25 @@ if "cancer_somatic_snv_observations" in config["reference"]:
         }
     )
     cancer_somatic_snv_obs: str = get_cancer_somatic_snv_observations(config)
+
+if "cancer_somatic_snv_panel_observations" in config["reference"]:
+    cancer_somatic_snv_panel_obs: str = Path(config["reference"]["cancer_somatic_snv_panel_observations"]).as_posix(),
+    clinical_annotations.append(
+        {
+            "annotation": [
+                {
+                    "file": cancer_somatic_snv_obs,
+                    "fields": ["Frq", "Obs", "Hom"],
+                    "ops": ["self", "self", "self"],
+                    "names": [
+                        "Cancer_Somatic_Panel_Frq",
+                        "Cancer_Somatic_Panel_Obs",
+                        "Cancer_Somatic_Panel_Hom",
+                    ],
+                }
+            ]
+        }
+    )
 
 if "clinical_sv_observations" in config["reference"]:
     clinical_sv: str = get_clinical_sv_observations(config)

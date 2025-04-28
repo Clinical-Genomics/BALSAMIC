@@ -102,6 +102,13 @@ OPTION_CANCER_SOMATIC_SNV_OBSERVATIONS = click.option(
     help="VCF path of cancer SNV tumor observations (WGS analysis workflow)",
 )
 
+OPTION_CANCER_SOMATIC_SNV_PANEL_OBSERVATIONS = click.option(
+    "--cancer-somatic-snv-panel-observations",
+    type=click.Path(exists=True, resolve_path=True),
+    required=False,
+    help="VCF path of cancer SNV tumor observations from matching gene panel",
+)
+
 OPTION_CANCER_SOMATIC_SV_OBSERVATIONS = click.option(
     "--cancer-somatic-sv-observations",
     type=click.Path(exists=True, resolve_path=True),
