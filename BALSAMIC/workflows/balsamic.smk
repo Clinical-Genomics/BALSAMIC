@@ -40,7 +40,6 @@ from BALSAMIC.utils.io import read_yaml, write_finish_file, write_json
 from BALSAMIC.utils.rule import (
     dump_toml,
     get_cancer_germline_snv_observations,
-    get_cancer_somatic_snv_observations,
     get_capture_kit,
     get_clinical_snv_observations,
     get_clinical_sv_observations,
@@ -302,11 +301,12 @@ if "cancer_germline_snv_observations" in config["reference"]:
     cancer_germline_snv_obs: str = get_cancer_germline_snv_observations(config)
 
 if "cancer_somatic_snv_observations" in config["reference"]:
+    cancer_somatic_snv_obs: str = Path(config["reference"]["cancer_somatic_snv_observations"]).as_posix(),
     clinical_annotations.append(
         {
             "annotation": [
                 {
-                    "file": get_cancer_somatic_snv_observations(config),
+                    "file": cancer_somatic_snv_obs,
                     "fields": ["Frq", "Obs", "Hom"],
                     "ops": ["self", "self", "self"],
                     "names": [
@@ -318,7 +318,6 @@ if "cancer_somatic_snv_observations" in config["reference"]:
             ]
         }
     )
-    cancer_somatic_snv_obs: str = get_cancer_somatic_snv_observations(config)
 
 if "cancer_somatic_snv_panel_observations" in config["reference"]:
     cancer_somatic_snv_panel_obs: str = Path(config["reference"]["cancer_somatic_snv_panel_observations"]).as_posix(),
