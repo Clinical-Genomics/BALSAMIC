@@ -74,6 +74,7 @@ LOG = logging.getLogger(__name__)
 @OPTION_CADD_ANNOTATIONS
 @OPTION_CANCER_GERMLINE_SNV_OBSERVATIONS
 @OPTION_CANCER_SOMATIC_SNV_OBSERVATIONS
+@OPTION_CANCER_SOMATIC_SNV_PANEL_OBSERVATIONS
 @OPTION_CANCER_SOMATIC_SV_OBSERVATIONS
 @OPTION_CASE_ID
 @OPTION_CLINICAL_SNV_OBSERVATIONS
@@ -107,6 +108,7 @@ def case_config(
     cadd_annotations: Path,
     cancer_germline_snv_observations: Path,
     cancer_somatic_snv_observations: Path,
+    cancer_somatic_snv_panel_observations: Path,
     cancer_somatic_sv_observations: Path,
     case_id: str,
     clinical_snv_observations: Path,
@@ -161,6 +163,7 @@ def case_config(
         "clinical_sv_observations": clinical_sv_observations,
         "cancer_germline_snv_observations": cancer_germline_snv_observations,
         "cancer_somatic_snv_observations": cancer_somatic_snv_observations,
+        "cancer_somatic_snv_panel_observations": cancer_somatic_snv_panel_observations,
         "cancer_somatic_sv_observations": cancer_somatic_sv_observations,
         "swegen_snv_frequency": swegen_snv,
         "swegen_sv_frequency": swegen_sv,
