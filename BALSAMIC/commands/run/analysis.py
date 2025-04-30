@@ -112,7 +112,7 @@ def analysis(
     script_path: Path = Path(config_model.analysis.script)
     benchmark_path: Path = Path(config_model.analysis.benchmark)
 
-    LOG.info(f"Creating analysis and log directories.")
+    LOG.info("Creating analysis and log directories.")
     analysis_directories_list = [result_path, log_path, script_path, benchmark_path]
 
     for analysis_sub_dir in analysis_directories_list:

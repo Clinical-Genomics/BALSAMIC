@@ -10,7 +10,7 @@ import pytest
 from _pytest.tmpdir import TempPathFactory
 from click.testing import CliRunner
 from pydantic_core import Url
-from unittest.mock import MagicMock, patch, mock_open
+from unittest.mock import MagicMock
 from snakemake.resources import DefaultResources
 
 from BALSAMIC import __version__ as balsamic_version
