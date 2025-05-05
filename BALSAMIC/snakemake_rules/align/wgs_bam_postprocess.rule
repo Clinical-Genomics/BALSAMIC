@@ -10,7 +10,7 @@ rule sentieon_dedup:
     benchmark:
         Path(benchmark_dir, "sentieon_dedup_{sample_type}.{sample}.tsv").as_posix()
     resources:
-        mem_mb = lambda wc, input: max(3.2 * input.size_mb, 10000)
+        mem_mb = lambda wc, input: min(max(3.2 * input.size_mb, 10000), 500000) # Cap at 500GB
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         sentieon_exec = config_model.sentieon.sentieon_exec,
