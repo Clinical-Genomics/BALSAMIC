@@ -588,10 +588,6 @@ set-resources:
     sentieon_dedup:
         runtime: 1440
         threads: 36
-    sentieon_realign:
-        mem_mb: 40000
-        runtime: 1440
-        threads: 36
     sentieon_dedup_consensus:
         runtime: 1440
         threads: 36
