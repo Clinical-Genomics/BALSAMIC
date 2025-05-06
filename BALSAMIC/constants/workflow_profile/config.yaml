@@ -578,6 +578,9 @@ set-resources:
     sentieon_align_sort:
         runtime: 1440
         threads: 12
+    sentieon_realign:
+        runtime: 1440
+        threads: 36
     sentieon_align_sort_umireads:
         runtime: 1440
         threads: 12
