@@ -380,7 +380,7 @@ set-resources:
         mem_mb: 20000
         threads: 8
     picard_CollectWgsMetrics:
-        runtime: 280
+        runtime: 600
         mem_mb: 20000
         threads: 8
     samtools_qc_umi_collapsed:
@@ -569,11 +569,11 @@ set-resources:
         threads: 1
     vep_annotate_germlineVAR_normal:
         runtime: 360
-        mem_mb: 20000
+        mem_mb: 30000
         threads: 10
     vep_annotate_germlineVAR_tumor:
         runtime: 360
-        mem_mb: 20000
+        mem_mb: 30000
         threads: 10
     sentieon_align_sort:
         runtime: 1440
