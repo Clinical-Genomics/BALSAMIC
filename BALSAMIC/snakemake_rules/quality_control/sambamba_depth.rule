@@ -20,8 +20,6 @@ rule sambamba_panel_depth:
         cov_step = 50,
         filter_string="'not (unmapped or mate_is_unmapped) and not duplicate and not failed_quality_control and mapping_quality > 10'",
         sample = '{sample}'
-    threads:
-        get_threads(cluster_config, 'sambamba_panel_depth')
     message:
         "Calculate depth statistics using sambamba for sample {params.sample}"
     shell:
@@ -32,7 +30,7 @@ sambamba depth region \
 --regions {input.bed} \
 --min-base-quality={params.base_qual} \
 --filter {params.filter_string} \
---nthreads {threads} \
+--nthreads {resources.threads} \
 `echo $covStr` {input.bam} > {output}; 
         """
 
@@ -56,8 +54,6 @@ rule sambamba_exon_depth:
         cov_5 = "250",
         filter_string = "'not (unmapped or mate_is_unmapped) and not duplicate and not failed_quality_control and mapping_quality > 10'",
         sample = '{sample}'
-    threads:
-        get_threads(cluster_config,'sambamba_exon_depth')
     message:
         "Calculate exon depth stastics using sambamba for sample {params.sample}"
     shell:
@@ -69,5 +65,5 @@ sambamba depth region \
 --cov-threshold {params.cov_1} --cov-threshold {params.cov_2} \
 --cov-threshold {params.cov_3} --cov-threshold {params.cov_4} \
 --cov-threshold {params.cov_5} \
---nthreads {threads} {input.bam} > {output};
+--nthreads {resources.threads} {input.bam} > {output};
         """

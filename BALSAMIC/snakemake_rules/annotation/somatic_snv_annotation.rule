@@ -13,13 +13,11 @@ rule bcftools_get_somaticINDEL_research:
     Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
   params:
     message_text = "SNV.somatic.{case_name}.{var_caller}.research.vcf.gz",
-  threads:
-    get_threads(cluster_config, "bcftools_get_somaticINDEL_research")
   message:
     "Running bcftools to get INDELs from {params.message_text}"
   shell:
         """
-bcftools view --threads {threads} --output-type v --output-file {output.vcf_indel_research} --types indels {input.vcf_research};
+bcftools view --threads {resources.threads} --output-type v --output-file {output.vcf_indel_research} --types indels {input.vcf_research};
 tabix -p vcf -f  {output.vcf_indel_research} 
         """
 
@@ -34,8 +32,6 @@ rule cadd_annotate_somaticINDEL_research:
     Path(singularity_image, config["bioinfo_tools"].get("cadd") + ".sif").as_posix()
   params:
     message_text = "SNV.somatic.{case_name}.{var_caller}.research.vcf.gz",
-  threads:
-    get_threads(cluster_config, "cadd_annotate_somaticINDEL_research")
   message:
     "Running cadd annotation for INDELs on {params.message_text}"
   shell:
@@ -58,8 +54,6 @@ rule bcftools_annotate_somaticINDEL_research:
   params:
     header_line = temp(f"{vep_dir}cadd_header_line.txt"),
     message_text = "SNV.somatic.{case_name}.{var_caller}.research.vcf.gz",
-  threads:
-    get_threads(cluster_config, "bcftools_annotate_somaticINDEL_research")
   message:
     "Running bcftools to annotate INDELs on {params.message_text}"
   shell:
@@ -69,7 +63,7 @@ echo '##INFO=<ID=CADD,Number=1,Type=Float,Description=\"The Combined Annotation 
 
 tabix -s 1 -b 2 -e 2 -c "##" -f {input.cadd_indel_research}        
 
-bcftools annotate --threads {threads} --output-type v \
+bcftools annotate --threads {resources.threads} --output-type v \
 --header-lines {params.header_line} \
 --columns Chrom,Pos,Ref,Alt,-,CADD \
 --annotations {input.cadd_indel_research} \
@@ -98,8 +92,6 @@ rule vep_annotate_somaticSNV_research:
     vcfanno_research_annotations = dump_toml(research_annotations),
     vep_cache = config["reference"]["vep_dir"],
     vep_defaults = params.vep.vep_filters
-  threads:
-    get_threads(cluster_config, "vep_annotate_somaticSNV_research")
   message:
     "Running vep annotation on SNVs and INDELs in {params.message_text}"
   shell:
@@ -109,8 +101,8 @@ export PERL5LIB=;
 
 echo \'{params.vcfanno_research_annotations}\' > {output.vcfanno_research_toml};
 
-vcfanno -p {threads} {output.vcfanno_research_toml} {input.vcf_snv_research} \
-| bcftools view --threads {threads} -O z -o {params.tmp_vcf_research} ;
+vcfanno -p {resources.threads} {output.vcfanno_research_toml} {input.vcf_snv_research} \
+| bcftools view --threads {resources.threads} -O z -o {params.tmp_vcf_research} ;
 
 vep \
 --dir $vep_path \
@@ -118,7 +110,7 @@ vep \
 --dir_plugins $vep_path \
 --input_file {params.tmp_vcf_research} \
 --output_file {output.vcf_snv_unfiltered} \
---fork {threads} \
+--fork {resources.threads} \
 {params.vep_defaults} \
 --custom {input.cosmic},COSMIC,vcf,exact,0,CDS,GENE,STRAND,CNT,AA ;
 
@@ -144,16 +136,14 @@ rule vcfanno_annotate_somaticSNV_clinical:
     cancer_somatic_snv = cancer_somatic_snv_obs,
     vcfanno_clinical_annotations = dump_toml(clinical_annotations),
     vcfanno_clinical_toml = temp(vep_dir + "SNV.somatic.{case_name}.{var_caller}_vcfanno_clinical.toml"),
-  threads:
-    get_threads(cluster_config, "vcfanno_annotate_somaticSNV_clinical")
   message:
     "Running vcfanno annotation for single nuceotide variants on {params.message_text}"
   shell:
         """
 if [[ -f "{params.clinical_snv}" || -f "{params.cancer_germline_snv}" || -f "{params.cancer_somatic_snv}" || -f "{params.artefact_snv}" ]]; then
     echo \'{params.vcfanno_clinical_annotations}\' > {params.vcfanno_clinical_toml};
-    vcfanno -p {threads} {params.vcfanno_clinical_toml} {input.vcf_snv_research} | \
-    bcftools view --threads {threads} -O z -o {output.vcf_snv_clinical};
+    vcfanno -p {resources.threads} {params.vcfanno_clinical_toml} {input.vcf_snv_research} | \
+    bcftools view --threads {resources.threads} -O z -o {output.vcf_snv_clinical};
 else
     cp {input.vcf_snv_research} {output.vcf_snv_clinical};
 fi

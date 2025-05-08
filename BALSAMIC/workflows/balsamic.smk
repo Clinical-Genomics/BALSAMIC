@@ -30,7 +30,6 @@ from BALSAMIC.constants.variant_filters import (
 )
 from BALSAMIC.constants.workflow_params import (
     WORKFLOW_PARAMS,
-    SLEEP_BEFORE_START,
 )
 from BALSAMIC.models.config import ConfigModel
 from BALSAMIC.models.params import BalsamicWorkflowConfig, StructuralVariantFilters
@@ -57,8 +56,6 @@ from BALSAMIC.utils.rule import (
     get_variant_callers,
     get_vcf,
 )
-from BALSAMIC.utils.workflowscripts import plot_analysis
-from pypdf import PdfWriter
 from snakemake.exceptions import RuleException, WorkflowError
 from yapf.yapflib.yapf_api import FormatFile
 
@@ -333,10 +330,6 @@ if "swegen_sv_frequency" in config["reference"]:
 # Capture kit name
 if config["analysis"]["sequencing_type"] != "wgs":
     capture_kit = os.path.split(config["panel"]["capture_kit"])[1]
-
-# explicitly check if cluster_config dict has zero keys.
-if len(cluster_config.keys()) == 0:
-    cluster_config = config
 
 if "hg38" in config["reference"]["reference_genome"]:
     config["reference"]["genome_version"] = "hg38"
@@ -714,40 +707,6 @@ if (
         )
 
 LOG.info(f"Following outputs will be delivered {analysis_specific_results}")
-
-if "benchmark_plots" in config:
-    log_dir = config["analysis"]["log"]
-    if not check_executable("sh5util"):
-        LOG.warning("sh5util executable does not exist. Won't be able to plot analysis")
-    else:
-        # Make individual plot per job
-        for log_file in Path(log_dir).glob("*.err"):
-            log_file_list = log_file.name.split(".")
-            job_name = ".".join(log_file_list[0:4])
-            job_id = log_file_list[4].split("_")[1]
-            h5_file = generate_h5(job_name, job_id, log_file.parent)
-            benchmark_plot = Path(benchmark_dir, job_name + ".pdf")
-
-            log_file_plot = plot_analysis(log_file, h5_file, benchmark_plot)
-            logging.debug(
-                "Plot file for {} available at: {}".format(
-                    log_file.as_posix(), log_file_plot
-                )
-            )
-
-        # Merge plots into one based on rule name
-        for my_rule in vars(rules).keys():
-            my_rule_pdf = PdfWriter()
-            my_rule_plots = list()
-            for plots in Path(benchmark_dir).glob(f"BALSAMIC*.{my_rule}.*.pdf"):
-                my_rule_pdf.append(plots.as_posix())
-                my_rule_plots.append(plots)
-            my_rule_pdf.write(Path(benchmark_dir, my_rule + ".pdf").as_posix())
-            my_rule_pdf.close()
-
-            # Delete previous plots after merging
-            for plots in my_rule_plots:
-                plots.unlink()
 
 if "delivery" in config:
     wildcard_dict = {
