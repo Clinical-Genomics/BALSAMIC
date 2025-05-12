@@ -141,4 +141,4 @@ class SnakemakeExecutable(BaseModel):
                 f"--profile {self.cluster_profile} --workflow-profile {self.workflow_profile}"
             )
             return remove_unnecessary_spaces(snakemake_cluster_options)
-        return "--cores 8 --resources mem_mb=32000,threads=8"
+        return "--default-resources mem_mb=32000 threads=8"
