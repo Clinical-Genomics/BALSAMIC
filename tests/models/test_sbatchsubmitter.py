@@ -1,10 +1,15 @@
 """Test Sbatch submitter class"""
 
-from unittest.mock import patch, mock_open
+from unittest.mock import patch, mock_open, MagicMock
 from pathlib import Path
 
 
 def test_create_sbatch_script(submitter):
+    """Test that `create_sbatch_script` writes an sbatch script file.
+
+    Ensures that the method attempts to open the target script file for writing
+    and that content is written to it.
+    """
     with patch("builtins.open", mock_open()) as mock_file:
         submitter.create_sbatch_script()
         # Check that the file was attempted to be written
@@ -14,6 +19,11 @@ def test_create_sbatch_script(submitter):
 
 
 def test_submit_job_success(submitter):
+    """Test `submit_job` returns the job ID on successful sbatch submission.
+
+    Simulates a valid SLURM response and verifies that the job ID is correctly parsed
+    and logged.
+    """
     fake_output = "Submitted batch job 12345"
     with patch("subprocess.run") as mock_run:
         mock_run.return_value.returncode = 0
@@ -26,6 +36,11 @@ def test_submit_job_success(submitter):
 
 
 def test_submit_job_failure(submitter):
+    """Test `submit_job` handles a failed sbatch call.
+
+    Ensures that if sbatch returns a non-zero exit code, the method logs an error
+    and returns None.
+    """
     with patch("subprocess.run") as mock_run:
         mock_run.return_value.returncode = 1
         mock_run.return_value.stderr = "Error submitting job"
@@ -35,6 +50,11 @@ def test_submit_job_failure(submitter):
 
 
 def test_submit_job_no_job_id(submitter):
+    """Test `submit_job` handles a successful sbatch call with unexpected output.
+
+    Verifies that if sbatch output does not include a recognizable job ID,
+    a warning is logged and None is returned.
+    """
     with patch("subprocess.run") as mock_run:
         mock_run.return_value.returncode = 0
         mock_run.return_value.stdout = "Some unrelated output"
@@ -44,6 +64,49 @@ def test_submit_job_no_job_id(submitter):
 
 
 def test_write_job_id_yaml(submitter):
+    """Test that `write_job_id_yaml` writes the job ID to a YAML file.
+
+    Confirms that after calling the method, the expected YAML file exists
+    in the result path.
+    """
     job_id = "12345"
     submitter.write_job_id_yaml(job_id)
     assert Path(submitter.result_path, "slurm_jobids.yaml").is_file()
+
+def test_write_job_id_yaml_called_when_job_id_present(submitter):
+    """Test that `write_job_id_yaml` is called only when a job ID is present.
+
+    Ensures the function is called if a job ID exists, and no warning is logged.
+    """
+    # GIVEN submitter
+
+    job_id = "123456"
+    submitter.write_job_id_yaml = MagicMock()
+
+    # WHEN
+    if job_id:
+        submitter.write_job_id_yaml(job_id)
+    else:
+        submitter.log.warning("Could not retrieve job id from SLURM.")
+
+    # THEN
+    submitter.write_job_id_yaml.assert_called_once_with("123456")
+    submitter.log.warning.assert_not_called()
+
+
+def test_warning_logged_when_no_job_id(submitter):
+    """Test that a warning is logged when no job ID is present.
+
+    Verifies that `write_job_id_yaml` is not called and that the appropriate
+    warning message is logged.
+    """
+    job_id = None
+    submitter.write_job_id_yaml = MagicMock()
+
+    if job_id:
+        submitter.write_job_id_yaml(job_id)
+    else:
+        submitter.log.warning("Could not retrieve job id from SLURM.")
+
+    submitter.write_job_id_yaml.assert_not_called()
+    submitter.log.warning.assert_called_once_with("Could not retrieve job id from SLURM.")

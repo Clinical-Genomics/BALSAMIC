@@ -180,6 +180,8 @@ def analysis(
         job_id = submitter.submit_job()
         if job_id:
             submitter.write_job_id_yaml(job_id)
+        else:
+            LOG.warning("Could not retrieve job id from SLURM.")
 
     else:
         LOG.info(f"Starting {analysis_workflow} workflow interactively.")
