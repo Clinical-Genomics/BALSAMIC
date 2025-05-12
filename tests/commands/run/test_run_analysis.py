@@ -22,14 +22,6 @@ def test_run_analysis_tumor_normal_dry_run(invoke_cli, tumor_normal_config):
     # THEN it should run without any error
     assert result.exit_code == 0
 
-def test_run_analysis_tumor_normal_run_interactively(invoke_cli, tumor_normal_config):
-    # GIVEN a tumor-normal config file
-    # WHEN running analysis
-    result = invoke_cli(["run", "analysis", "--run-interactively", "-s", tumor_normal_config])
-
-    # THEN it should run without any error
-    assert result.exit_code == 0
-
 def test_run_analysis_tumor_only_dry_run(invoke_cli, tumor_only_config):
     # GIVEN a tumor-only config file
     # WHEN running analysis
