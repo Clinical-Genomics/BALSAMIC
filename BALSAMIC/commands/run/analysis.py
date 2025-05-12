@@ -178,6 +178,7 @@ def analysis(
         )
         submitter.create_sbatch_script()
         job_id = submitter.submit_job()
+        
         if job_id:
             submitter.write_job_id_yaml(job_id)
         else:
