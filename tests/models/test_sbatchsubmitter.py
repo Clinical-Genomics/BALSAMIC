@@ -73,6 +73,7 @@ def test_write_job_id_yaml(submitter):
     submitter.write_job_id_yaml(job_id)
     assert Path(submitter.result_path, "slurm_jobids.yaml").is_file()
 
+
 def test_write_job_id_yaml_called_when_job_id_present(submitter):
     """Test that `write_job_id_yaml` is called only when a job ID is present.
 
@@ -109,4 +110,6 @@ def test_warning_logged_when_no_job_id(submitter):
         submitter.log.warning("Could not retrieve job id from SLURM.")
 
     submitter.write_job_id_yaml.assert_not_called()
-    submitter.log.warning.assert_called_once_with("Could not retrieve job id from SLURM.")
+    submitter.log.warning.assert_called_once_with(
+        "Could not retrieve job id from SLURM."
+    )
