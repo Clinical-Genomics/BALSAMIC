@@ -30,8 +30,10 @@ def test_run_analysis_tumor_normal_run_interactively(invoke_cli, tumor_normal_co
         ["run", "analysis", "-s", tumor_normal_config, "--run-interactively"]
     )
 
-    # THEN it should run with error because snakemake resources cannot be
+    # THEN it should run without error
     assert result.exit_code == 0
+    # THEN the start interactive string should be printed
+    assert "Starting balsamic workflow interactively" in result.output
 
 
 def test_run_analysis_tumor_only_dry_run(invoke_cli, tumor_only_config):
