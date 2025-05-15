@@ -70,6 +70,22 @@ class SbatchSubmitter:
 
         sbatch_command = f"\nconda run -p {self.conda_env_path} {self.snakemake_executable.get_command()}\n"
 
+        success_status_check = textwrap.dedent(
+            f"""\
+            if [[ -f "{self.result_path}/analysis_status.txt" ]]; then
+                STATUS=$(cat "{self.result_path}/analysis_status.txt")
+                echo "Snakemake analysis status: ${STATUS}"
+                if [[ "${STATUS}" != "SUCCESS" ]]; then
+                    echo "Analysis failed: ${STATUS}"
+                    exit 1
+                fi
+            else
+                echo "No status file found; assuming failure"
+                exit 2
+            fi
+        """
+        )
+
         full_script = sbatch_header + sbatch_command
 
         with open(self.sbatch_script_path, "w") as f:

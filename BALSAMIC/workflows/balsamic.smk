@@ -765,6 +765,7 @@ rule all:
         quality_control_results + analysis_specific_results,
     output:
         finish_file=Path(get_result_dir(config), "analysis_finish").as_posix(),
+        status_file=Path(get_result_dir(config), "analysis_status.txt").as_posix(),
     params:
         tmp_dir=tmp_dir,
         case_name=config["analysis"]["case_id"],
@@ -773,21 +774,32 @@ rule all:
     run:
         import datetime
         import shutil
-
         from BALSAMIC.utils.metrics import validate_qc_metrics
 
-        # Perform validation of extracted QC metrics
+        status = "SUCCESS"
+
         try:
             validate_qc_metrics(read_yaml(input[0]))
         except ValueError as val_exc:
             LOG.error(val_exc)
-            raise BalsamicError
+            status = "QC_VALIDATION_FAILED"
+        except Exception as exc:
+            LOG.error(exc)
+            status = "UNKNOWN_ERROR"
 
-            # Remove temporary directory tree
+        # Clean up tmp
         try:
             shutil.rmtree(params.tmp_dir)
         except OSError as e:
             print("Error: %s - %s." % (e.filename, e.strerror))
 
-            # Finish timestamp file
+        # Write status to file
+        with open(output.status_file,"w") as status_fh:
+            status_fh.write(status + "\n")
+
+        # Always write finish file if we've reached here
         write_finish_file(file_path=output.finish_file)
+
+        # Raise to trigger rule failure if needed
+        if status != "SUCCESS":
+            raise ValueError(f"Final rule failed with status: {status}")
