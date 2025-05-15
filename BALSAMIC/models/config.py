@@ -8,6 +8,7 @@ from typing import Annotated, Dict, List, Optional
 from pydantic import AfterValidator, BaseModel, field_validator, model_validator
 
 from BALSAMIC import __version__ as balsamic_version
+from BALSAMIC.constants.cluster import QOS
 from BALSAMIC.constants.analysis import (
     AnalysisType,
     AnalysisWorkflow,
@@ -215,6 +216,8 @@ class ConfigModel(BaseModel):
         analysis: Field(AnalysisModel); Pydantic model containing workflow variables
         custom_filters: Field(CustomFilters); custom parameters for variant filtering
         sentieon: Field(required); Sentieon model attributes
+        qos: Field(QOS);
+        account: Cluster account to run jobs
 
     This class also contains functions that help retrieve sample and file information,
     facilitating BALSAMIC run operations in Snakemake.
@@ -242,6 +245,8 @@ class ConfigModel(BaseModel):
     analysis: AnalysisModel
     custom_filters: CustomFilters | None = None
     sentieon: Sentieon
+    qos: Optional[QOS] = None
+    account: Optional[str] = None
 
     @field_validator("reference")
     def abspath_as_str(cls, reference: Dict[str, Path]):
