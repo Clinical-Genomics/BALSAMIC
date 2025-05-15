@@ -74,9 +74,9 @@ class SbatchSubmitter:
             f"""\
             if [[ -f "{self.result_path}/analysis_status.txt" ]]; then
                 STATUS=$(cat "{self.result_path}/analysis_status.txt")
-                echo "Snakemake analysis status: ${STATUS}"
-                if [[ "${STATUS}" != "SUCCESS" ]]; then
-                    echo "Analysis failed: ${STATUS}"
+                echo "Snakemake analysis status: $STATUS"
+                if [[ "$STATUS" != "SUCCESS" ]]; then
+                    echo "Analysis failed: $STATUS"
                     exit 1
                 fi
             else
