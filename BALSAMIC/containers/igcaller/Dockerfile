@@ -41,9 +41,9 @@ RUN wget https://github.com/samtools/samtools/releases/download/${SAMTOOLS_VERSI
     cd .. && rm -rf samtools-${SAMTOOLS_VERSION}*
 
 # Clone IgCaller at branch v1.3 and set permissions
-RUN git clone https://github.com/ferrannadeu/IgCaller.git /opt/IgCaller && \
-    cd /opt/IgCaller && \
-    git checkout tags/v1.3 && \
+RUN  /opt/IgCaller && \
+    cd /opt/IgCaller && \git clone https://github.com/ferrannadeu/IgCaller.git
+    git checkout -b igcaller-v1.3 v1.3 && \
     chmod +x /opt/IgCaller/IgCaller
 
 # Set working directory
