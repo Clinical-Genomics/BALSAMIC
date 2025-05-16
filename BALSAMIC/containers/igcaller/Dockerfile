@@ -51,7 +51,6 @@ WORKDIR $IG_CALLER_DIR
 # Install Python dependencies
 RUN pip install --no-cache-dir \
     regex==2020.11.13 \
-    argparse==1.4.0 \
     numpy==1.16.3 \
     scipy==1.3.0
 
