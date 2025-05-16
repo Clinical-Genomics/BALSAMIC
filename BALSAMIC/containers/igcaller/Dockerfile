@@ -1,6 +1,6 @@
 FROM python:3.8-slim
 
-LABEL maintainer="Your Name <your.email@example.com>"
+LABEL maintainer="blabla"
 LABEL description="IgCaller v1.3 with Samtools v1.9"
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -10,21 +10,23 @@ ENV HTSLIB_VERSION=1.9
 
 # Install build tools and dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    git \
     build-essential \
-    wget \
-    curl \
-    make \
     gcc \
+    gfortran \
+    libatlas-base-dev \
+    libffi-dev \
     libbz2-dev \
     liblzma-dev \
-    libncurses5-dev \
-    libncursesw5-dev \
-    libcurl4-openssl-dev \
     libssl-dev \
+    libsqlite3-dev \
+    libreadline-dev \
+    libncursesw5-dev \
+    libxml2-dev \
+    libxmlsec1-dev \
     zlib1g-dev \
-    ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
+    libblas-dev \
+    liblapack-dev && \
+    rm -rf /var/lib/apt/lists/*
 
 # Download and install htslib (required for samtools)
 RUN wget https://github.com/samtools/htslib/releases/download/${HTSLIB_VERSION}/htslib-${HTSLIB_VERSION}.tar.bz2 && \
