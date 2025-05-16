@@ -13,6 +13,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     gcc \
     gfortran \
+    autoconf \
+    automake \
+    libtool \
+    pkg-config \
     libatlas-base-dev \
     libffi-dev \
     libbz2-dev \
@@ -25,7 +29,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libxmlsec1-dev \
     zlib1g-dev \
     libblas-dev \
-    liblapack-dev && \
+    liblapack-dev \
+    wget \
+    git \
+    ca-certificates && \
     rm -rf /var/lib/apt/lists/*
 
 # Download and install htslib (required for samtools)
