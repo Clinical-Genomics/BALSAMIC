@@ -43,7 +43,7 @@ rule cadd_annotate_somaticINDEL_research:
         """
 export TMPDIR={params.tmpdir};
         
-CADD.sh -g GRCh37 -o {output.cadd_indel_research} {input.vcf_indel_research}
+CADD.sh -m -g GRCh37 -o {output.cadd_indel_research} {input.vcf_indel_research}
 
         """
 
