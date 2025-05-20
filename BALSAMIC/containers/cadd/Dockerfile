@@ -21,7 +21,9 @@ COPY BALSAMIC/containers/${CONTAINER_NAME}/${CONTAINER_NAME}.yaml /tmp/environme
 RUN conda env create -n ${CONTAINER_NAME} -f /tmp/environment.yaml && \
     conda clean -afy && \
     rm -f /tmp/environment.yaml && \
-    ln -s /opt/conda/envs/cadd/bin/cadd.sh /opt/conda/envs/cadd/bin/CADD.sh
+    ln -s /opt/conda/envs/cadd/bin/cadd.sh /opt/conda/envs/cadd/bin/CADD.sh && \
+    mkdir -p /opt/conda/envs/cadd/share/cadd-scripts-1.7.2-1/envs/apptainer && \
+    mkdir -p /opt/conda/envs/cadd/share/cadd-scripts-1.7.2-1/envs/conda
 
 ENV PATH="/opt/conda/envs/${CONTAINER_NAME}/bin/:${PATH}"
 
