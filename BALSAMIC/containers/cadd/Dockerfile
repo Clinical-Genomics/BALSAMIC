@@ -12,20 +12,27 @@ LABEL base.image="continuumio/miniconda3" \
 
 ARG CONTAINER_NAME
 
-# Copy enviroment file
-COPY BALSAMIC/containers/${CONTAINER_NAME}/${CONTAINER_NAME}.yaml /tmp/environment.yaml
+# Create, download and create conda environments
+RUN conda config --set channel_priority strict && \
+    conda install -c conda-forge -c bioconda 'snakemake=8' unzip && \
+    conda clean -afy  && \
+    wget --no-verbose \
+    https://github.com/kircherlab/CADD-scripts/archive/refs/tags/v1.7.2.zip \
+    -O /opt/conda/share/CADD.zip && \
+    unzip -o /opt/conda/share/CADD.zip -d /opt/conda/share/ && \
+    rm /opt/conda/share/CADD.zip && \
+    export CADD=/opt/conda/share/CADD-scripts-1.7.2 && \
+    cd $CADD  && \
+    snakemake test/input.tsv.gz \
+    --software-deployment-method conda \
+    --conda-create-envs-only \
+    --conda-prefix envs/conda \
+    --configfile config/config_GRCh38_v1.7.yml \
+    --snakefile Snakefile -c 1 && \
+    ln -s $CADD/CADD.sh /opt/conda/bin/CADD.sh
 
-# Create conda environment
-# The cadd-scripts conda package is available as cadd.sh instead
-# of CADD.sh so we make link to keep compatibility
-RUN conda env create -n ${CONTAINER_NAME} -f /tmp/environment.yaml && \
-    conda clean -afy && \
-    rm -f /tmp/environment.yaml && \
-    ln -s /opt/conda/envs/cadd/bin/cadd.sh /opt/conda/envs/cadd/bin/CADD.sh && \
-    mkdir -p /opt/conda/envs/cadd/share/cadd-scripts-1.7.2-1/envs/apptainer && \
-    mkdir -p /opt/conda/envs/cadd/share/cadd-scripts-1.7.2-1/envs/conda
-
-ENV PATH="/opt/conda/envs/${CONTAINER_NAME}/bin/:${PATH}"
+# Set CADD as enviromental variable
+ENV CADD=/opt/conda/share/CADD-scripts-1.7.2
 
 # Run as a non-root
 RUN useradd -m dockeruser
