@@ -13,6 +13,8 @@ LABEL base.image="continuumio/miniconda3" \
 ARG CONTAINER_NAME
 
 # Create, download and create conda environments
+# Note: to avoid breaking the binding data in balsamic keep the folder as /opt/conda/share/CADD-scripts
+# Alternatively update CADD_ANNOTATIONS_CONTAINER_DIR in balsamic
 RUN conda config --set channel_priority strict && \
     conda install -c conda-forge -c bioconda 'snakemake=8' unzip && \
     conda clean -afy  && \
@@ -21,7 +23,8 @@ RUN conda config --set channel_priority strict && \
     -O /opt/conda/share/CADD.zip && \
     unzip -o /opt/conda/share/CADD.zip -d /opt/conda/share/ && \
     rm /opt/conda/share/CADD.zip && \
-    export CADD=/opt/conda/share/CADD-scripts-1.7.2 && \
+    mv /opt/conda/share/CADD-scripts-1.7.2 /opt/conda/share/CADD-scripts && \
+    export CADD=/opt/conda/share/CADD-scripts && \
     cd $CADD  && \
     snakemake test/input.tsv.gz \
     --software-deployment-method conda \
@@ -32,7 +35,7 @@ RUN conda config --set channel_priority strict && \
     ln -s $CADD/CADD.sh /opt/conda/bin/CADD.sh
 
 # Set CADD as enviromental variable
-ENV CADD=/opt/conda/share/CADD-scripts-1.7.2
+ENV CADD=/opt/conda/share/CADD-scripts
 
 # Run as a non-root
 RUN useradd -m dockeruser
