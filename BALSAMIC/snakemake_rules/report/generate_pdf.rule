@@ -11,8 +11,6 @@ rule csv_to_pdf:
         csv_to_pdf_script=get_script_path("csv_to_pdf.py"),
         loh_regions=f"{cnv_dir}CNV.somatic.{config['analysis']['case_id']}.purecn.LOHregions.csv",
         loh_genes=f"{cnv_dir}CNV.somatic.{config['analysis']['case_id']}.purecn.LOHgenes.csv",
-    threads:
-        get_threads(cluster_config=cluster_config, rule_name="csv_to_pdf")
     message:
         "Converting CSV files to PDF"
     shell:
@@ -32,8 +30,6 @@ rule txt_to_pdf:
         sample_statistics_pdf=f"{vcf_dir}CNV.somatic.{config['analysis']['case_id']}.ascat.samplestatistics.txt.pdf",
     params:
         csv_to_pdf_script=get_script_path("csv_to_pdf.py"),
-    threads:
-        get_threads(cluster_config=cluster_config, rule_name="txt_to_pdf")
     message:
         "Converting AscatNgs statistics TXT file to PDF"
     shell:
@@ -50,8 +46,6 @@ rule msi_to_pdf:
         msi_result_pdf= f"{vcf_dir}MSI.somatic.{config['analysis']['case_id']}.msisensorpro.msi.pdf",
     params:
         csv_to_pdf_script=get_script_path("csv_to_pdf.py"),
-    threads:
-        get_threads(cluster_config=cluster_config, rule_name="txt_to_pdf")
     message:
         "Converting MSI TXT file to PDF"
     shell:
@@ -69,8 +63,6 @@ rule image_to_pdf:
         plot="|".join(config_model.get_cnv_report_plots()),
     params:
         image_to_pdf_script=get_script_path("image_to_pdf.py"),
-    threads:
-        get_threads(cluster_config=cluster_config, rule_name="image_to_pdf")
     message:
         "Converting CNV PNG files to PDF"
     shell:

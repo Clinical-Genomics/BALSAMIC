@@ -17,7 +17,6 @@ from _pytest.tmpdir import TempPathFactory
 from BALSAMIC.commands.config.case import case_config
 from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV, SampleType, SequencingType
 from BALSAMIC.constants.cache import CacheVersion
-from BALSAMIC.constants.cluster import ClusterConfigType
 from BALSAMIC.constants.constants import FileType
 from BALSAMIC.constants.paths import CONTAINERS_DIR
 from BALSAMIC.models.config import ConfigModel, FastqInfoModel, SampleInstanceModel
@@ -30,7 +29,6 @@ from BALSAMIC.utils.cli import (
     generate_h5,
     get_analysis_fastq_files_directory,
     get_bioinfo_tools_version,
-    get_config_path,
     get_fastq_info,
     get_file_extension,
     get_file_status_string,
@@ -62,7 +60,6 @@ from BALSAMIC.utils.rule import (
     get_rule_output,
     get_sample_type_from_sample_name,
     get_script_path,
-    get_threads,
     get_variant_callers,
     get_vcf,
 )
@@ -425,19 +422,6 @@ def test_capturestdout():
     assert "".join(captured_stdout_message) == test_stdout_message
 
 
-def test_get_config_path(cluster_analysis_config_path: str):
-    """Test return of a config path given its type."""
-
-    # GIVEN an analysis config path
-
-    # WHEN retrieving the cluster analysis configuration
-    cluster_analysis: Path = get_config_path(ClusterConfigType.ANALYSIS)
-
-    # THEN an analysis cluster json should be returned
-    assert cluster_analysis.exists()
-    assert cluster_analysis.as_posix() == cluster_analysis_config_path
-
-
 def test_write_json(tmp_path, reference):
     # GIVEN a dict from sample json file
     tmp = tmp_path / "tmp"
@@ -617,16 +601,6 @@ def test_write_yaml(metrics_yaml_path: str, tmp_path: Path):
 
     # THEN assert that all data is kept
     assert written_metrics_data == metrics_data
-
-
-def test_get_threads(cluster_analysis_config_path: str):
-    # GIVEN cluster config file and rule name
-    cluster_config = json.load(open(cluster_analysis_config_path, "r"))
-    rule_name = "sentieon_align_sort"
-
-    # WHEN passing cluster_config and rule_name
-    # THEN It should return threads value '12'
-    assert get_threads(cluster_config, rule_name)
 
 
 def test_get_file_status_string_file_exists(tmpdir):
