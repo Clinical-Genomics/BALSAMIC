@@ -14,7 +14,7 @@ class LogFile:
 class SubmitSnakemake:
     """Constants for sbatch script running snakemake on cluster"""
 
-    MAX_RUN_HOURS: int = 80
+    MAX_RUN_HOURS: int = 120
 
 
 class RunMode(StrEnum):

@@ -523,6 +523,10 @@ set-resources:
         runtime: 600
         mem_mb: 15000
         threads: 8
+    svdb_annotate_somatic_obs_somatic_clinical_sv:
+        runtime: 600
+        mem_mb: 15000
+        threads: 8
     svdb_annotate_somatic_research_sv:
         runtime: 720
         mem_mb: 15000
