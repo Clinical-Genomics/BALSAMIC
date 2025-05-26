@@ -11,7 +11,7 @@ from BALSAMIC.constants.paths import BALSAMIC_DIR, REFSEQ_SCRIPT_PATH
 from BALSAMIC.constants.rules import SNAKEMAKE_RULES
 from BALSAMIC.models.cache import CacheConfig, AnalysisReferences
 from BALSAMIC.utils.io import write_finish_file, write_json
-from BALSAMIC.utils.rule import get_threads
+from BALSAMIC.utils.rule import get_threads, get_script_path
 from BALSAMIC.utils.utils import get_relative_paths_dict
 
 LOG = logging.getLogger(__name__)

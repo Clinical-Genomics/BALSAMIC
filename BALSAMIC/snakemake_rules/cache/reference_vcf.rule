@@ -57,7 +57,7 @@ rule postprocess_clinvar:
     message:
         "Adding INFO field CLNVID to ClinVar VCF: {input.clinvar}"
     params:
-        add_clnvid_script = get_script_path("add_clnvid_field.py"),
+        add_clnvid_script=get_script_path("add_clnvid_field.py"),
     benchmark:
         f"{cache_config.references.clinvar.file_path}.postprocess_clinvar.benchmark.{FileType.TSV}"
     log:
