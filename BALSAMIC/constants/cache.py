@@ -213,7 +213,8 @@ REFERENCE_FILES: Dict[GenomeVersion, Dict[str, dict]] = {
             "url": "https://ftp.ncbi.nlm.nih.gov/pub/clinvar/vcf_GRCh37/clinvar.vcf.gz",
             "file_type": FileType.VCF,
             "gzip": True,
-            "file_name": "clinvar.vcf",
+            "file_name": "clinvar_preprocess.vcf",
+            "final_file_name": "clinvar.vcf",
             "dir_name": "variants",
         },
         "somalier_sites": {
@@ -390,7 +391,7 @@ REFERENCE_FILES: Dict[GenomeVersion, Dict[str, dict]] = {
             "url": "https://ftp.ncbi.nlm.nih.gov/pub/clinvar/vcf_GRCh38/clinvar.vcf.gz",
             "file_type": FileType.VCF,
             "gzip": True,
-            "file_name": "clinvar.vcf",
+            "file_name": "clinvar_preprocess.vcf",
             "dir_name": "variants",
         },
         "somalier_sites": {

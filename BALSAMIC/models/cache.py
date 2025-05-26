@@ -37,8 +37,10 @@ class ReferenceUrl(BaseModel):
     file_type: FileType
     gzip: bool
     file_name: str
+    final_file_name: Optional[str] = None
     dir_name: str
     file_path: Optional[str] = None
+    final_file_path: Optional[str] = None
     secret: Optional[str] = None
 
 
@@ -312,6 +314,15 @@ class CacheConfig(BaseModel):
                 if reference
                 else None
             )
+            reference.final_file_path = (
+                Path(
+                    info.data.get("references_dir"),
+                    reference.dir_name,
+                    reference.final_file_name,
+                ).as_posix()
+                if reference.final_file_name
+                else None
+            )
             reference.secret = (
                 info.data.get("cosmic_key") if "cosmic" in reference_key else None
             )
@@ -400,7 +411,7 @@ class CacheConfig(BaseModel):
             self.references.ascat_gc_correction.file_path,
             self.references.cadd_snv.file_path,
             self.references.simple_repeat.file_path,
-            f"{self.references.clinvar.file_path}.{FileType.GZ}",
+            f"{self.references.clinvar.final_file_name}.{FileType.GZ}",
             f"{self.references.cosmic.file_path}.{FileType.GZ}",
             f"{self.references.dbsnp.file_path}.{FileType.GZ}",
             self.references.rank_score.file_path,

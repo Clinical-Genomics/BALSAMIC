@@ -45,3 +45,26 @@ rule index_vcfs:
         """
         tabix -p vcf "{input.vcf_gz}" &> "{log}"
         """
+
+rule postprocess_clinvar:
+    """Add new info-field based on clinvar variant ID: CLNVID"""
+    input:
+        clinvar=f"{cache_config.cache_config.references.clinvar.file_path.{FileType.GZ}",
+    output:
+        clinvar=f"{cache_config.references.clinvar.final_file_path}.{FileType.GZ}",
+    singularity:
+        f"{config['containers_dir']}/{config['bioinfo_tools']['bcftools']}.{FileType.SIF}"
+    message:
+        "Adding INFO field CLNVID to ClinVar VCF: {input.clinvar}"
+    params:
+        header_path=cache_config.variants_dir.as_posix()
+    benchmark:
+        f"{cache_config.references.clinvar.file_path}.benchmark.{FileType.TSV}"
+    log:
+        f"{cache_config.references.clinvar.file_path}.benchmark.{FileType.LOG}",
+    shell:
+        """
+        echo '##INFO=<ID=CLNVID,Number=1,Type=Integer,Description="ClinVar Variation ID">' > {params.header_path}/clnvid_header.txt
+
+        bcftools annotate --header-lines {params.header_path}/clnvid_header.txt {input.clinvar} | perl -nae 'if($_=~/^#/) { print $_;} else { chomp; my $line = $_; say STDOUT $_ . q{;CLNVID=} . $F[2] }' | bgzip -c > {output.clinvar}
+        """
