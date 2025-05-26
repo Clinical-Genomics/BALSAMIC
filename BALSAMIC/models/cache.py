@@ -411,7 +411,7 @@ class CacheConfig(BaseModel):
             self.references.ascat_gc_correction.file_path,
             self.references.cadd_snv.file_path,
             self.references.simple_repeat.file_path,
-            f"{self.references.clinvar.final_file_name}.{FileType.GZ}",
+            f"{self.references.clinvar.final_file_path}.{FileType.GZ}",
             f"{self.references.cosmic.file_path}.{FileType.GZ}",
             f"{self.references.dbsnp.file_path}.{FileType.GZ}",
             self.references.rank_score.file_path,
