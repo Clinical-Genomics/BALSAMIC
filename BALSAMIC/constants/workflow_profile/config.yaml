@@ -581,12 +581,15 @@ set-resources:
         threads: 10
     sentieon_align_sort:
         runtime: 1440
+        mem_mb: 40000
         threads: 12
     sentieon_realign:
         runtime: 1440
+        mem_mb: 80000
         threads: 36
     sentieon_align_sort_umireads:
         runtime: 1440
+        mem_mb: 40000
         threads: 12
     cap_base_quality:
         mem_mb: 10000
@@ -594,9 +597,11 @@ set-resources:
         threads: 10
     sentieon_dedup:
         runtime: 1440
+        mem_mb: 80000
         threads: 36
     sentieon_dedup_consensus:
         runtime: 1440
+        mem_mb: 20000
         threads: 36
     sentieon_base_calibration:
         mem_mb: 25000
