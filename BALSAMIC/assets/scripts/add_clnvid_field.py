@@ -1,5 +1,4 @@
-import sys
-import gzip
+import click
 from typing import TextIO
 
 
@@ -16,14 +15,14 @@ def add_clnvid_header(output_handle: TextIO) -> None:
 
 def process_vcf(input_path: str, output_path: str) -> None:
     """
-    Processes a gzipped VCF file, adds the CLNVID INFO field based on the ID column,
-    and writes to a new gzipped VCF file.
+    Processes a plain text VCF file, adds the CLNVID INFO field based on the ID column,
+    and writes to a new plain text VCF file.
 
     Parameters:
-        input_path (str): Path to the input VCF file (gzip compressed).
-        output_path (str): Path to the output VCF file (gzip compressed).
+        input_path (str): Path to the input VCF file.
+        output_path (str): Path to the output VCF file.
     """
-    with gzip.open(input_path, 'rt') as infile, gzip.open(output_path, 'wt') as outfile:
+    with open(input_path, 'r') as infile, open(output_path, 'w') as outfile:
         for line in infile:
             if line.startswith('##'):
                 outfile.write(line)
@@ -40,15 +39,18 @@ def process_vcf(input_path: str, output_path: str) -> None:
                 outfile.write('\t'.join(fields) + '\n')
 
 
-def main() -> None:
+@click.command()
+@click.argument('input_path', type=click.Path(exists=True, readable=True, dir_okay=False))
+@click.argument('output_path', type=click.Path(writable=True, dir_okay=False))
+def main(input_path: str, output_path: str) -> None:
     """
-    Main entry point for the script. Expects two command-line arguments:
-    input path and output path.
-    """
-    if len(sys.argv) != 3:
-        print("Usage: add_clnvid_field.py <input.vcf.gz> <output.vcf.gz>", file=sys.stderr)
-        sys.exit(1)
+    Adds a CLNVID INFO field to each record in a VCF file based on the ID column.
 
-    input_vcf = sys.argv[1]
-    output_vcf = sys.argv[2]
-    process_vcf(input_vcf, output_vcf)
+    INPUT_PATH: Path to the input (non-gzipped) VCF file.
+    OUTPUT_PATH: Path to the output (non-gzipped) VCF file.
+    """
+    process_vcf(input_path, output_path)
+
+
+if __name__ == '__main__':
+    main()

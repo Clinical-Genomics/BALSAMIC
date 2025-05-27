@@ -49,9 +49,10 @@ rule index_vcfs:
 rule postprocess_clinvar:
     """Add new info-field based on clinvar variant ID: CLNVID"""
     input:
-        clinvar=f"{cache_config.references.clinvar.file_path}.{FileType.GZ}",
+        clinvar=f"{cache_config.references.clinvar.file_path}",
     output:
         clinvar=f"{cache_config.references.clinvar.final_file_path}.{FileType.GZ}",
+        clinvar_tbi=f"{cache_config.references.clinvar.final_file_path}.{FileType.TBI}",
     singularity:
         f"{config['containers_dir']}/{config['bioinfo_tools']['bcftools']}.{FileType.SIF}"
     message:
@@ -64,5 +65,11 @@ rule postprocess_clinvar:
         f"{cache_config.references.clinvar.file_path}.postprocess_clinvar.{FileType.LOG}",
     shell:
         """
-        python {params.add_clnvid_script} {input.clinvar} {output.clinvar}
+        python {params.add_clnvid_script} {input.clinvar} {input.clinvar}.tmp.vcf
+        
+        bgzip {input.clinvar}.tmp.vcf
+        
+        mv {input.clinvar}.tmp.vcf {output.clinvar}
+        
+        tabix -p vcf {output.clinvar}
         """
