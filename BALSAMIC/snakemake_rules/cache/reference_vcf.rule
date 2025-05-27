@@ -50,6 +50,7 @@ rule postprocess_clinvar:
     """Add new info-field based on clinvar variant ID: CLNVID"""
     input:
         clinvar=f"{cache_config.references.clinvar.file_path}",
+        singularity_image=f"{config['containers_dir']}/{config['bioinfo_tools']['bcftools']}.{FileType.SIF}"
     output:
         clinvar=f"{cache_config.references.clinvar.final_file_path}.{FileType.GZ}",
         clinvar_tbi=f"{cache_config.references.clinvar.final_file_path}.{FileType.TBI}",
