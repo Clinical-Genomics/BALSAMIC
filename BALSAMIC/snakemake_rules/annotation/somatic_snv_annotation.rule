@@ -34,16 +34,13 @@ rule cadd_annotate_somaticINDEL_research:
     Path(singularity_image, config["bioinfo_tools"].get("cadd") + ".sif").as_posix()
   params:
     message_text = "SNV.somatic.{case_name}.{var_caller}.research.vcf.gz",
-    tmpdir= tempfile.mkdtemp(prefix=tmp_dir)
   threads:
     get_threads(cluster_config, "cadd_annotate_somaticINDEL_research")
   message:
     "Running cadd annotation for INDELs on {params.message_text}"
   shell:
         """
-export TMPDIR={params.tmpdir};
-        
-CADD.sh -m -g GRCh37 -o {output.cadd_indel_research} {input.vcf_indel_research}
+CADD.sh -g GRCh37 -o {output.cadd_indel_research} {input.vcf_indel_research}
 
         """
 

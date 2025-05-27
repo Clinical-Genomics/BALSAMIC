@@ -1,7 +1,1 @@
-channels:
-  - conda-forge
-  - bioconda
-  - defaults
-dependencies:
-  - cadd-scripts=1.7.2
-  - snakemake=9.3.0
+- cadd=1.6
