@@ -92,7 +92,9 @@ class SbatchSubmitter:
         """
         )
 
-        full_script = sbatch_header + sbatch_command + job_status_check + success_status_check
+        full_script = (
+            sbatch_header + sbatch_command + job_status_check + success_status_check
+        )
 
         with open(self.sbatch_script_path, "w") as f:
             f.write(full_script)

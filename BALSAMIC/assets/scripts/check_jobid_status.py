@@ -3,9 +3,17 @@ import re
 import subprocess
 from pathlib import Path
 
+
 @click.command()
-@click.argument("log_dir", type=click.Path(exists=True, file_okay=False, path_type=Path))
-@click.option("--output", "-o", type=click.Path(writable=True, path_type=Path), help="Path to output file for failed jobs.")
+@click.argument(
+    "log_dir", type=click.Path(exists=True, file_okay=False, path_type=Path)
+)
+@click.option(
+    "--output",
+    "-o",
+    type=click.Path(writable=True, path_type=Path),
+    help="Path to output file for failed jobs.",
+)
 def check_failed_jobs(log_dir, output):
     """
     Scan LOG_DIR for SLURM log files (*.out, *.err), extract job IDs,
@@ -13,8 +21,8 @@ def check_failed_jobs(log_dir, output):
 
     If --output is provided, results are written to a file.
     """
-    jobid_pattern = re.compile(r'\.(\d+)\.(?:out|err)$')
-    stderr_pattern = re.compile(r'StdErr=(\S+)')
+    jobid_pattern = re.compile(r"\.(\d+)\.(?:out|err)$")
+    stderr_pattern = re.compile(r"StdErr=(\S+)")
     job_ids = set()
 
     # Extract job IDs from filenames
@@ -36,7 +44,7 @@ def check_failed_jobs(log_dir, output):
                 ["scontrol", "show", "job", jobid],
                 capture_output=True,
                 text=True,
-                check=True
+                check=True,
             )
             output_text = result.stdout
             if "JobState=FAILED" in output_text:
@@ -63,6 +71,7 @@ def check_failed_jobs(log_dir, output):
                 click.echo(f"  - {jid}\t{stderr}")
         else:
             click.echo("All jobs completed successfully.")
+
 
 if __name__ == "__main__":
     check_failed_jobs()
