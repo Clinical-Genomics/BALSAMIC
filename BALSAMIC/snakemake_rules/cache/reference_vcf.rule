@@ -69,7 +69,7 @@ rule postprocess_clinvar:
         
         bgzip {input.clinvar}.tmp.vcf
         
-        mv {input.clinvar}.tmp.vcf {output.clinvar}
+        mv {input.clinvar}.tmp.vcf.gz {output.clinvar}
         
         tabix -p vcf {output.clinvar}
         """
