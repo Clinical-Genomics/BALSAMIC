@@ -40,6 +40,7 @@ from BALSAMIC.utils.analysis import get_singularity_bind_paths
 from BALSAMIC.utils.cli import createDir, get_snakefile
 from BALSAMIC.utils.io import write_json
 from BALSAMIC.utils.logging import add_file_logging
+from BALSAMIC.utils.rule import get_script_path
 
 LOG = logging.getLogger(__name__)
 
@@ -169,6 +170,7 @@ def analysis(
             case_id=case_id,
             script_path=Path(script_path),
             result_path=Path(result_path),
+            check_jobid_status_script=get_script_path("check_jobid_status.py"),
             log_path=Path(log_path),
             account=account,
             qos=qos,
