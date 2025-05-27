@@ -29,6 +29,7 @@ class SbatchSubmitter:
         case_id: str,
         script_path: Path,
         result_path: Path,
+        check_jobid_status_script: str,
         log_path: Path,
         account: str,
         qos: str,
