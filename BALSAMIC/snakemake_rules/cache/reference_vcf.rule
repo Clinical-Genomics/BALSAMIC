@@ -52,7 +52,6 @@ rule postprocess_clinvar:
         clinvar=f"{cache_config.references.clinvar.file_path}.{FileType.GZ}",
     output:
         clinvar=f"{cache_config.references.clinvar.final_file_path}.{FileType.GZ}",
-        clinvar_tbi=f"{cache_config.references.clinvar.final_file_path}.{FileType.TBI}",
     message:
         "Adding INFO field CLNVID to ClinVar VCF: {input.clinvar}"
     params:
@@ -65,5 +64,25 @@ rule postprocess_clinvar:
         """
         python {params.add_clnvid_script} {input.clinvar} {output.clinvar}
         
+        tabix -p vcf {output.clinvar}
+        """
+
+rule index_postprocessed_clinvar_vcf:
+    """Index postprocessed clinvar VCF"""
+    input:
+        clinvar=f"{cache_config.references.clinvar.final_file_path}.{FileType.GZ}",
+        singularity_image=f"{config['containers_dir']}/{config['bioinfo_tools']['tabix']}.{FileType.SIF}",
+    output:
+        clinvar_tbi=f"{cache_config.references.clinvar.final_file_path}.{FileType.TBI}",
+    singularity:
+        f"{config['containers_dir']}/{config['bioinfo_tools']['tabix']}.{FileType.SIF}"
+    message:
+        "Index postprocessed ClinVar VCF: {input.clinvar}"
+    benchmark:
+        f"{cache_config.references.clinvar.file_path}.tabix_postprocess_clinvar.benchmark.{FileType.TSV}"
+    log:
+        f"{cache_config.references.clinvar.file_path}.tabix_postprocess_clinvar.{FileType.LOG}",
+    shell:
+        """
         tabix -p vcf {output.clinvar}
         """
