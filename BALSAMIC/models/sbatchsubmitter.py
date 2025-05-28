@@ -125,7 +125,9 @@ class SbatchSubmitter:
                 self.log.info(f"Job submitted successfully with Job ID: {job_id}")
                 return job_id
             else:
-                self.log.warning(f"Could not extract Job ID from sbatch output: {output}")
+                self.log.warning(
+                    f"Could not extract Job ID from sbatch output: {output}"
+                )
         except subprocess.CalledProcessError as e:
             self.log.error(f"sbatch submission failed: {e.stderr.strip()}")
 
