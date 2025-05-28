@@ -108,14 +108,16 @@ class SbatchSubmitter:
         Returns:
             Optional[str]: The SLURM job ID if the submission is successful, otherwise None.
         """
-        sbatch_command = f"sbatch {self.sbatch_script_path}"
-        self.log.info(f"Submitting job with command: {sbatch_command}")
+        command = ["sbatch", str(self.sbatch_script_path)]
+        self.log.info(f"Submitting job with command: {' '.join(command)}")
 
-        result = subprocess.run(
-            sbatch_command, shell=True, capture_output=True, text=True
-        )
-
-        if result.returncode == 0:
+        try:
+            result = subprocess.run(
+                command,
+                capture_output=True,
+                text=True,
+                check=True,
+            )
             output = result.stdout.strip()
             match = re.search(r"Submitted batch job (\d+)", output)
             if match:
@@ -123,11 +125,9 @@ class SbatchSubmitter:
                 self.log.info(f"Job submitted successfully with Job ID: {job_id}")
                 return job_id
             else:
-                self.log.warning(
-                    f"Could not extract Job ID from sbatch output: {output}"
-                )
-        else:
-            self.log.error(f"sbatch submission failed: {result.stderr.strip()}")
+                self.log.warning(f"Could not extract Job ID from sbatch output: {output}")
+        except subprocess.CalledProcessError as e:
+            self.log.error(f"sbatch submission failed: {e.stderr.strip()}")
 
         return None
 
