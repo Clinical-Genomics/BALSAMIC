@@ -54,6 +54,7 @@ def write_results(output_file, failed, cancelled):
             click.echo("All jobs completed successfully.")
     click.echo(f"Results written to {output_file}")
 
+
 @click.command()
 @click.argument(
     "log_dir", type=click.Path(exists=True, file_okay=False, path_type=Path)
@@ -87,6 +88,7 @@ def check_failed_jobs(log_dir: Path, output: Path):
             categorize_job(jobid, output_text, failed_jobs_info, cancelled_jobs_info)
 
     write_results(output, failed_jobs_info, cancelled_jobs_info)
+
 
 if __name__ == "__main__":
     check_failed_jobs()
