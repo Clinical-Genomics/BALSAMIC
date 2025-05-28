@@ -63,8 +63,6 @@ rule postprocess_clinvar:
     shell:
         """
         python {params.add_clnvid_script} {input.clinvar} {output.clinvar}
-        
-        tabix -p vcf {output.clinvar}
         """
 
 rule index_postprocessed_clinvar_vcf:
