@@ -14,6 +14,7 @@ class SbatchSubmitter:
         case_id (str)                  : Identifier for the analysis case.
         script_path (Path)            : Directory where the sbatch script will be created.
         result_path (Path)            : Directory where the job ID YAML file will be written.
+        check_jobid_status_script (str): Python script for reporting failed or cancelled statuses of jobs in logdir
         log_path (Path)               : Directory where SLURM output and error logs will be written.
         account (str)                 : SLURM account to charge for the job.
         qos (str)                     : SLURM quality of service level.
