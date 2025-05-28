@@ -3,6 +3,7 @@
 
 Added:
 ^^^^^^
+* added rule and script for adding CLNVID to clinvar during cache installation
 
 Changed:
 ^^^^^^^^
