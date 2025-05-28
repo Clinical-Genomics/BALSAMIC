@@ -6,10 +6,8 @@ def add_clnvid_header(output_handle) -> None:
     """
     Writes the INFO header line for the CLNVID field to the output VCF.
     """
-    header_line = (
-        '##INFO=<ID=CLNVID,Number=1,Type=Integer,Description="ClinVar Variation ID">'
-    )
-    output_handle.write(f"{header_line}\n")
+    header_line = '##INFO=<ID=CLNVID,Number=1,Type=Integer,Description="ClinVar Variation ID">'
+    output_handle.write(f"{header_line}\n".encode("utf-8"))
 
 
 def process_vcf(input_path: str, output_path: str) -> None:
