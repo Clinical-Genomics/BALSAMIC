@@ -17,8 +17,6 @@ rule sentieon_dedup_consensus:
         sentieon_exec = config_model.sentieon.sentieon_exec,
         sentieon_lic = config_model.sentieon.sentieon_license,
         sample_id = "{sample}"
-    threads:
-        get_threads(cluster_config, 'sentieon_dedup')
     message:
         ("Collects read information using sentieon LocusCollector and collapse duplicate reads based on UMIs. "
          "Current sample: {params.sample_id}")
@@ -29,7 +27,7 @@ export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
 
 {params.sentieon_exec} driver \
--t {threads} \
+-t {resources.threads} \
 -r {input.ref} \
 -i {input.bam} \
 --algo LocusCollector \
@@ -37,7 +35,7 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 --consensus --umi_tag XR --fun score_info {output.score} ;
 
 {params.sentieon_exec} driver \
--t {threads} \
+-t {resources.threads} \
 -r {input.ref} \
 -i {input.bam} \
 --algo Dedup \
@@ -69,8 +67,6 @@ rule samtools_fixmate:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         postprocess_fixmate_script = get_script_path("postprocess_fixmate_bam.awk"),
         sample_id="{sample}"
-    threads:
-        get_threads(cluster_config,"samtools_fixmate")
     message:
         "Running samtools collate and fixmate for: {params.sample_id}"
     shell:
@@ -79,11 +75,11 @@ export TMPDIR={params.tmpdir} ;
 mkdir -p {params.tmpdir}/collate ;
 mkdir -p {params.tmpdir}/sort ; 
 
-samtools collate -@ {threads} -O -u {input.bam} {params.tmpdir}/collate/{wildcards.sample}_collate_tmp | \
-samtools fixmate -O SAM --reference {input.ref} -@ {threads} - - | \
+samtools collate -@ {resources.threads} -O -u {input.bam} {params.tmpdir}/collate/{wildcards.sample}_collate_tmp | \
+samtools fixmate -O SAM --reference {input.ref} -@ {resources.threads} - - | \
 awk -f {params.postprocess_fixmate_script} - | \
-samtools sort -@ {threads} -m 4G -O BAM -T {params.tmpdir}/sort/{wildcards.sample}_sort_tmp - | \
-samtools calmd -@ {threads} -b - {input.ref} > {output.bam} ;
+samtools sort -@ {resources.threads} -m 4G -O BAM -T {params.tmpdir}/sort/{wildcards.sample}_sort_tmp - | \
+samtools calmd -@ {resources.threads} -b - {input.ref} > {output.bam} ;
 samtools index {output.bam} ;
 
 rm -rf {params.tmpdir}
@@ -102,12 +98,10 @@ rule cap_base_quality:
         sample_id = "{sample}",
         cap_base_qualities = get_script_path("cap_base_quality_in_bam.py"),
         max_quality = params.bam_post_processing.manta_max_base_quality
-    threads:
-        get_threads(cluster_config, "cap_base_quality")
     message:
         "Capping base qualities to {params.max_quality} in bamfile using pysam in sample: {params.sample_id}"
     shell:
         """
 python {params.cap_base_qualities} --max-quality {params.max_quality} {input.bam} {output.bam} ; 
-samtools index -@ {threads} {output.bam}
+samtools index -@ {resources.threads} {output.bam}
         """

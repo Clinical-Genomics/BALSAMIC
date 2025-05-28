@@ -6,8 +6,8 @@
 rule dragen_align_call_tumor_only:
     input:
         reference = config["reference"]["reference_genome"],
-        fastq_r1 = Path(fastq_dir, "{sample}_concat_R_1.fp.fastq.gz".format(sample=tumor_sample)).as_posix(),
-        fastq_r2 = Path(fastq_dir, "{sample}_concat_R_2.fp.fastq.gz".format(sample=tumor_sample)).as_posix()
+        fastq_r1 = fastq_dir + "concat.tumor.{sample}_1.fastq.gz",
+        fastq_r2 = fastq_dir + "concat.tumor.{sample}_2.fastq.gz"
     output:
         bam = Path(result_dir, "dragen", "SNV.somatic." + config["analysis"]["case_id"] + ".dragen_tumor.bam").as_posix(),
         vcf = Path(result_dir, "dragen", "SNV.somatic." + config["analysis"]["case_id"] + ".dragen.vcf.gz").as_posix()
@@ -18,8 +18,6 @@ rule dragen_align_call_tumor_only:
         tmp_reference_dir = Path(result_dir, "dragen", "reference").as_posix(),
         sample_name = tumor_sample,
         output_file_prefix = "SNV.somatic." + config["analysis"]["case_id"] + ".dragen"
-    threads:
-        get_threads(cluster_config, "dragen_align_call_tumor_only")
     message:
         "DRAGEN align and variant call for {params.sample_name}"
     shell:

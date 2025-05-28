@@ -2,7 +2,6 @@
 rule extend_short_bedregions:
     input:
         baits_bed = config_model.panel.capture_kit,
-        wake_up= result_dir + "start_analysis",
     output:
         baits_bed_expanded=Path(cnv_dir + "capture_kit_expanded.bed").as_posix(),
     benchmark:
@@ -12,8 +11,6 @@ rule extend_short_bedregions:
     params:
         bedfile_extend_script = get_script_path("extend_bedfile.py"),
         minimum_region_size = params.bed_pre_processing.minimum_region_size
-    threads:
-        get_threads(cluster_config, "extend_short_bedregions")
     message:
         "Extending regions in bedfile to a minimum size of {params.minimum_region_size}."
     shell:
@@ -31,8 +28,6 @@ rule bedtools_sort_and_merge:
         Path(benchmark_dir, 'bedtools_merge_expanded_bedfile.tsv').as_posix()
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("bedtools") + ".sif").as_posix()
-    threads:
-        get_threads(cluster_config, "bedtools_merge")
     message:
         "Running bedtools sort and merge to merge potentially overlapping regions."
     shell:
