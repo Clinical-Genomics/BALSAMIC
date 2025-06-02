@@ -800,3 +800,10 @@ rule all:
         with open(params.status_file,"w") as status_fh:
             status_fh.write(status + "\n")
             status_fh.write(error_message + "\n")
+
+        # Always write finish file if we've reached here
+        write_finish_file(file_path=output.finish_file)
+
+        # Raise to trigger rule failure if needed
+        if status != "SUCCESS":
+            raise ValueError(f"Final rule failed with status: {status}")
