@@ -72,7 +72,7 @@ class SbatchSubmitter:
         )
 
         # Run snakemake workflow
-        sbatch_command = f"\nconda run -p {self.conda_env_path} {self.snakemake_executable.get_command()}\n"
+        sbatch_command = f"\nstdbuf -oL -eL conda run -p {self.conda_env_path} {self.snakemake_executable.get_command()}\n"
 
         # Check the status of submitted jobs
         job_status_check = f"\nconda run -p {self.conda_env_path} python {self.check_jobid_status_script} {self.log_path} --output {self.result_path}/analysis_status.txt\n"
