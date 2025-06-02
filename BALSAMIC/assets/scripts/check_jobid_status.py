@@ -41,7 +41,7 @@ def categorize_job(jobid, output_text, failed, cancelled):
 
 
 def write_results(output_file, failed, cancelled):
-    with output_file.open("w") as out_f:
+    with output_file.open("a") as out_f:
         if failed:
             out_f.write("Failed jobs:\n")
             for jobid, stderr in failed:
