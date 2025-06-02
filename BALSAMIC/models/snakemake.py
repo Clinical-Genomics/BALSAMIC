@@ -118,7 +118,7 @@ class SnakemakeExecutable(BaseModel):
     def get_command(self) -> str:
         """Return Snakemake command to be submitted."""
         snakemake_command: str = (
-            f"snakemake --notemp -p --rerun-trigger mtime --restart-times 1 --max-inventory-time 60 --keep-going "
+            f"snakemake --notemp -p --rerun-trigger mtime --restart-times 1 --keep-going "
             f"--directory {self.working_dir.as_posix()} "
             f"--snakefile {self.snakefile.as_posix()} "
             f"{self.get_config_file_option()} "

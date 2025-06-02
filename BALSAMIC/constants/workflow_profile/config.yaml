@@ -632,7 +632,7 @@ set-resources:
         runtime: 400
         threads: 4
     fastp_quality_trim_tga:
-        mem_mb: 6000
+        mem_mb: 16000
         runtime: 350
         threads: 8
     sentieon_umiextract_tga:
