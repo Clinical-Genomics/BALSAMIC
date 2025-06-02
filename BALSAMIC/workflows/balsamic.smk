@@ -796,6 +796,7 @@ rule all:
         # Write status to file
         with open(params.status_file,"w") as status_fh:
             status_fh.write(status + "\n")
+            status_fh.write(val_exc + "\n")
 
         # Always write finish file if we've reached here
         write_finish_file(file_path=output.finish_file)
