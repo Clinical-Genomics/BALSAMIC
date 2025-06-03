@@ -144,6 +144,7 @@ def initialize(
         force=force_all,
         log_dir=log_dir,
         cluster_profile=cluster_profile,
+        cluster_job_status_script=get_script_path("cluster_job_status.py"),
         workflow_profile=cache_profile,
         qos=qos,
         quiet=quiet,
