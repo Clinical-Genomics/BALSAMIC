@@ -261,7 +261,7 @@ set-resources:
         threads: 2
     sentieon_align_sort_umireads_umi:
         runtime: 1440
-        mem_mb: 16000
+        mem_mb: 26000
         threads: 12
     sentieon_tnscope_umi_tn:
         runtime: 280
@@ -369,7 +369,7 @@ set-resources:
         threads: 4
     sentieon_qc_metrics_tga:
         runtime: 280
-        mem_mb: 10000
+        mem_mb: 20000
         threads: 8
     sentieon_qc_metric_wgs:
         runtime: 280
@@ -601,7 +601,7 @@ set-resources:
         threads: 36
     sentieon_dedup_consensus:
         runtime: 1440
-        mem_mb: 20000
+        mem_mb: 25000
         threads: 36
     sentieon_base_calibration:
         mem_mb: 25000
