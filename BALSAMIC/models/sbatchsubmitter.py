@@ -30,7 +30,7 @@ class SbatchSubmitter:
         case_id: str,
         script_path: Path,
         result_path: Path,
-        check_jobid_status_script: str,
+        scan_finished_jobid_status: str,
         log_path: Path,
         account: str,
         qos: str,
@@ -41,8 +41,7 @@ class SbatchSubmitter:
         self.case_id = case_id
         self.script_path = script_path
         self.result_path = result_path
-        self.check_jobid_status_script = check_jobid_status_script
-        self.cluster_job_status_script = cluster_job_status_script
+        self.scan_finished_jobid_status = scan_finished_jobid_status
         self.log_path = log_path
         self.account = account
         self.qos = qos
@@ -76,7 +75,7 @@ class SbatchSubmitter:
         sbatch_command = f"\nconda run -p {self.conda_env_path} {self.snakemake_executable.get_command()}\n"
 
         # Check the status of submitted jobs
-        job_status_check = f"\nconda run -p {self.conda_env_path} python {self.check_jobid_status_script} {self.log_path} --output {self.result_path}/analysis_status.txt\n"
+        job_status_check = f"\nconda run -p {self.conda_env_path} python {self.scan_finished_jobid_status} {self.log_path} --output {self.result_path}/analysis_status.txt\n"
 
         # Check the final success status of the workflow
         success_status_check = textwrap.dedent(

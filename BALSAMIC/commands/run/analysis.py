@@ -171,7 +171,7 @@ def analysis(
             case_id=case_id,
             script_path=Path(script_path),
             result_path=Path(result_path),
-            check_jobid_status_script=get_script_path("check_jobid_status.py"),
+            scan_finished_jobid_status=get_script_path("scan_finished_jobid_status.py"),
             log_path=Path(log_path),
             account=account,
             qos=qos,
