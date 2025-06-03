@@ -14,9 +14,9 @@ except subprocess.CalledProcessError:
     sys.exit(0)
 
 # Normalize states for Snakemake
-if state in ["COMPLETED"]:
+if "COMPLETED" in state:
     print("success")
-elif state in ["FAILED", "CANCELLED", "TIMEOUT", "NODE_FAIL", "OUT_OF_MEMORY"]:
+elif any(x in state for x in ["FAILED", "CANCELLED", "TIMEOUT", "NODE_FAIL", "OUT_OF_MEMORY"]):
     print("failed")
 else:
     print("running")
