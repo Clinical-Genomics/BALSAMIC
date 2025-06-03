@@ -152,6 +152,7 @@ def analysis(
         force=force_all,
         log_dir=log_path.as_posix(),
         cluster_profile=cluster_profile,
+        cluster_job_status_script=get_script_path("cluster_job_status.py"),
         workflow_profile=workflow_profile,
         qos=qos,
         quiet=quiet,

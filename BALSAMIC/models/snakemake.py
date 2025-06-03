@@ -29,10 +29,11 @@ class SnakemakeExecutable(BaseModel):
         account (Optional[str])                                      : Scheduler account.
         case_id (str)                                                : Analysis case name.
         config_path (FilePath)                                       : Sample configuration file.
-        dragen (Optional[bool])                                      : FLag for enabling or disabling Dragen suite.
+        dragen (Optional[bool])                                      : Flag for enabling or disabling Dragen suite.
         force (bool)                                                 : Force snakemake execution.
         log_dir (Optional[DirectoryPath])                            : Logging directory.
-        profile: Path                                                : Directory containing snakemake cluster profile
+        cluster_profile: Path                                        : Directory containing snakemake cluster profile
+        cluster_job_status_script (FilePath)                         : Path to script for snakemake to parse more slurm job-statuses
         workflow_profile: Path                                       : Directory contianing snakemake workflow profile specifying rule resources
         qos (Optional[QOS])                                          : QOS for sbatch jobs.
         quiet (Optional[bool])                                       : Quiet mode for snakemake.
@@ -53,6 +54,7 @@ class SnakemakeExecutable(BaseModel):
     force: bool = False
     log_dir: Optional[DirectoryPath] = None
     cluster_profile: Path
+    cluster_job_status_script: FilePath
     workflow_profile: Path
     qos: Optional[QOS] = None
     quiet: bool = False
@@ -73,7 +75,9 @@ class SnakemakeExecutable(BaseModel):
         return remove_unnecessary_spaces(
             f"{f'--config {self.get_dragen_flag()}' if self.get_dragen_flag() else ''} "
         )
-
+    def get_cluster_status_script(self) -> str:
+        """Return cluster-status argument."""
+        return f"--cluster-status {self.cluster_job_status_script.as_posix()}"
     def get_dragen_flag(self) -> str:
         """Return string representation of the dragen flag."""
         if self.dragen:
@@ -118,7 +122,7 @@ class SnakemakeExecutable(BaseModel):
     def get_command(self) -> str:
         """Return Snakemake command to be submitted."""
         snakemake_command: str = (
-            f"snakemake --notemp -p --rerun-trigger mtime --restart-times 1 --keep-going --printshellcmds --show-failed-logs "
+            f"snakemake --notemp -p --rerun-trigger mtime "
             f"--directory {self.working_dir.as_posix()} "
             f"--snakefile {self.snakefile.as_posix()} "
             f"{self.get_config_file_option()} "
@@ -128,6 +132,7 @@ class SnakemakeExecutable(BaseModel):
             f"{self.get_force_flag()} "
             f"{self.get_run_analysis_flag()} "
             f"{self.get_snakemake_cluster_options()} "
+            f"{self.get_cluster_status_script()} "
             f"{self.get_snakemake_options_command()}"
         )
         return remove_unnecessary_spaces(snakemake_command)

@@ -42,6 +42,7 @@ class SbatchSubmitter:
         self.script_path = script_path
         self.result_path = result_path
         self.check_jobid_status_script = check_jobid_status_script
+        self.cluster_job_status_script = cluster_job_status_script
         self.log_path = log_path
         self.account = account
         self.qos = qos
