@@ -285,7 +285,7 @@ set-resources:
         threads: 10
     sentieon_bwa_umiconsensus:
         runtime: 480
-        mem_mb: 16000
+        mem_mb: 30000
         threads: 36
     sentieon_consensuscall_umi:
         runtime: 360
