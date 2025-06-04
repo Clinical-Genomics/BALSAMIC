@@ -75,9 +75,11 @@ class SnakemakeExecutable(BaseModel):
         return remove_unnecessary_spaces(
             f"{f'--config {self.get_dragen_flag()}' if self.get_dragen_flag() else ''} "
         )
+
     def get_cluster_status_script(self) -> str:
         """Return cluster-status argument."""
         return f'--cluster-status "python {self.cluster_job_status_script.as_posix()}"'
+
     def get_dragen_flag(self) -> str:
         """Return string representation of the dragen flag."""
         if self.dragen:

@@ -36,6 +36,7 @@ from BALSAMIC.utils.analysis import get_cache_singularity_bind_paths
 from BALSAMIC.utils.cache import get_containers
 from BALSAMIC.utils.cli import get_snakefile
 from BALSAMIC.utils.io import generate_workflow_graph, write_json
+from BALSAMIC.utils.rule import get_script_path
 
 LOG = logging.getLogger(__name__)
 

@@ -327,7 +327,7 @@ def submitter(tmp_path):
         case_id="test_case",
         script_path=tmp_path,
         result_path=tmp_path,
-        check_jobid_status_script=tmp_path,
+        scan_finished_jobid_status=tmp_path,
         log_path=tmp_path,
         account="dummy_account",
         qos="low",
