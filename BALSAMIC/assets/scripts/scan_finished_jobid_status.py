@@ -16,7 +16,7 @@ def extract_job_ids(log_dir):
 def get_job_state(jobid):
     try:
         result = subprocess.run(
-            ["scontrol", "show", "job", jobid],
+            ["/usr/bin/scontrol", "show", "job", jobid],
             capture_output=True,
             text=True,
             check=True,

@@ -7,7 +7,7 @@ jobid = sys.argv[1]
 
 try:
     output = subprocess.check_output(
-        ["sacct", "-j", jobid, "--format=State", "--noheader"],
+        ["/usr/bin/sacct", "-j", jobid, "--format=State", "--noheader"],
         stderr=subprocess.DEVNULL,
     )
     state = output.decode().split()[0].strip()
