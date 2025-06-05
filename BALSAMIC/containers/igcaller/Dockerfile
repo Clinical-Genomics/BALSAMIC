@@ -57,11 +57,17 @@ RUN git clone https://github.com/ferrannadeu/IgCaller.git /opt/IgCaller && \
 # Set working directory
 WORKDIR $IG_CALLER_DIR
 
-# Install Python dependencies
+# Install wheel to enable binary wheels
+RUN pip install --upgrade pip setuptools wheel
+
+# Install compatible versions separately
 RUN pip install --no-cache-dir \
-    regex==2020.11.13 \
-    numpy==1.16.3 \
-    scipy==1.3.0
+    numpy==1.18.5 \
+    regex==2020.11.13
+
+# Then install scipy (requires numpy to be pre-installed)
+RUN pip install --no-cache-dir \
+    scipy==1.4.1
 
 # Add IgCaller to PATH
 ENV PATH="${IG_CALLER_DIR}:$PATH"
