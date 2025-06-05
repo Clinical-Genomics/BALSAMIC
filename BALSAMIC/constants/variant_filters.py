@@ -467,6 +467,11 @@ SVDB_FILTER_SETTINGS = {
         "filter_name": "Frq",
         "field": "INFO",
     },
+    "loqusdb_artefact_sv_obs": {
+        "tag_value": 5,
+        "filter_name": "ArtefactObs",
+        "field": "INFO",
+    },
     "varcaller_name": "svdb",
     "filter_type": "general",
     "analysis_type": "tumor_only,tumor_normal",
