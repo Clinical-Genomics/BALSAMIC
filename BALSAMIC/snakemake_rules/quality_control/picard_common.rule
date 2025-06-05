@@ -21,8 +21,6 @@ rule picard_CollectAlignmentSummaryMetrics:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         adapter = config["QC"]["adapter"],
         sample = "{sample}"
-    threads:
-        get_threads(cluster_config, "picard_qc")
     message:
         "Calculating picard alignment summary metrics for sample {params.sample}"
     shell:

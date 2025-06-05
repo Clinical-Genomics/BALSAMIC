@@ -71,7 +71,7 @@ def test_run_analysis(invoke_cli):
     assert "--snakefile" in result.output
     assert "--sample-config" in result.output
     assert "--run-mode" in result.output
-    assert "--cluster-config" in result.output
+    assert "--workflow-profile" in result.output
     assert "--run-analysis" in result.output
 
 

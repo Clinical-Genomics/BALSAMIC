@@ -16,15 +16,13 @@ if config["analysis"]["sequencing_type"] == 'wgs':
       params:
           case_name=config["analysis"]["case_id"],
           process_cnv=get_script_path("process_CNV.py"),
-      threads:
-          get_threads(cluster_config,"bcftools_process_SV_CNV")
       message:
           ("Processing SVs and CNVs for {params.case_name}")
       shell:
         """
-  bcftools view  --threads {threads} -f PASS -O z -o {output.delly_sv} {input.delly_sv};
+  bcftools view  --threads {resources.threads} -f PASS -O z -o {output.delly_sv} {input.delly_sv};
   
-  bcftools view --threads {threads} -f PASS -O z -o {output.tmp_delly_cnv} {input.delly_cnv};
+  bcftools view --threads {resources.threads} -f PASS -O z -o {output.tmp_delly_cnv} {input.delly_cnv};
   
   python {params.process_cnv} -f {output.tmp_delly_cnv} -c delly | bgzip -l 9 -c > {output.delly_cnv};
   
@@ -54,15 +52,13 @@ else:
       params:
           case_name = config["analysis"]["case_id"],
           process_cnv = get_script_path("process_CNV.py"),
-      threads:
-          get_threads(cluster_config, "bcftools_process_SV_CNV")
       message:
           ("Processing SVs and CNVs for {params.case_name}")
       shell:
         """
-  bcftools view  --threads {threads} -f PASS -O z -o {output.delly_sv} {input.delly_sv};
+  bcftools view  --threads {resources.threads} -f PASS -O z -o {output.delly_sv} {input.delly_sv};
     
-  bcftools view --threads {threads} -f PASS -O z -o {output.tmp_delly_cnv} {input.delly_cnv};
+  bcftools view --threads {resources.threads} -f PASS -O z -o {output.tmp_delly_cnv} {input.delly_cnv};
     
   python {params.process_cnv} -f {output.tmp_delly_cnv} -c delly | bgzip -l 9 -c > {output.delly_cnv};
     
@@ -93,8 +89,6 @@ rule svdb_merge_tumor_normal:
         case_name = config["analysis"]["case_id"],
         vcf= lambda wildcards, input:[input[index] + ":" + svdb_callers_prio[index] for index in range(0,len(input))],
         svdb_priority= ",".join(svdb_callers_prio)
-    threads:
-        get_threads(cluster_config, "svdb_merge_tumor_normal")
     message:
         "Merging structural and copy number variants using SVDB for {params.case_name}"
     shell:
@@ -119,13 +113,11 @@ rule bcftools_quality_filter_svdb:
         Path(singularity_image,config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
     params:
         case_name = config["analysis"]["case_id"],
-    threads:
-        get_threads(cluster_config, "bcftools_quality_filter_svdb")
     message:
         "Filtering merged research structural and copy number variants using bcftools for {params.case_name}"
     shell:
       """
-  bcftools view --threads {threads} -f .,PASS -o {output.vcf_pass_svdb_research} -O z {input.vcf_svdb};
+  bcftools view --threads {resources.threads} -f .,PASS -o {output.vcf_pass_svdb_research} -O z {input.vcf_svdb};
   
   tabix -p vcf -f {output.vcf_pass_svdb_research};
       """

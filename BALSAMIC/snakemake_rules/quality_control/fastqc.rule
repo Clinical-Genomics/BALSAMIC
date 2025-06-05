@@ -4,7 +4,6 @@
 rule fastqc:
     """Perform quality control checks on raw sequence data."""
     input:
-        wake_up = result_dir + "start_analysis",
         fastq = input_fastq_dir + "{fastq_file_names}.fastq.gz"
     output:
         fastqc_zip = fastqc_dir + "{fastq_file_names}_fastqc.zip"
@@ -16,14 +15,13 @@ rule fastqc:
         fastqc_dir = fastqc_dir,
         fastq_file_name = "{fastq_file_names}",
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir)
-    threads: get_threads(cluster_config, "fastqc")
     message:
         "Running FastQC on {params.fastq_file_name}"
     shell:
         """
 export TMPDIR={params.tmpdir};
     
-fastqc --threads {threads} {input.fastq} \
+fastqc --threads {resources.threads} {input.fastq} \
 --dir {params.tmpdir} \
 --outdir {params.fastqc_dir};
 
