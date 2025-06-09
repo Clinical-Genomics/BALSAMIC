@@ -110,7 +110,7 @@ rule svdb_annotate_artefact_sv:
         Path(singularity_image, config["bioinfo_tools"].get("svdb") + ".sif").as_posix()
     params:
         case_name = config["analysis"]["case_id"],
-        artefact_sv_observations = artefact_sv,
+        artefact_sv_observations = artefact_sv_obs,
         vcf_artefact_obs = temp(vep_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.artefact_sv.vcf"),
     threads:
         get_threads(cluster_config, "svdb_annotate_artefact_sv")
