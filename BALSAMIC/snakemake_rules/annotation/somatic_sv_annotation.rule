@@ -122,14 +122,14 @@ if [[ -f "{params.artefact_sv_observations}" ]]; then
     svdb --query --bnd_distance 500 --overlap 0.80 \
     --in_occ Obs --out_occ ArtefactObs --in_frq Frq --out_frq ArtefactFrq \
     --db {params.artefact_sv_observations} --query_vcf {input.vcf_sv_clinical_obs} > {params.vcf_artefact_obs}
-    bgzip -l 9 -c {params.vcf_clinical_obs} > {output.vcf_sv_artefact_obs};
+    bgzip -l 9 -c {params.vcf_artefact_obs} > {output.vcf_sv_artefact_obs};
 else
     cp {input.vcf_sv_clinical_obs} {output.vcf_sv_artefact_obs};
 fi
 
 tabix -p vcf -f {output.vcf_sv_artefact_obs};
 
-rm {params.vcf_sv_clinical_obs} 
+rm {params.vcf_artefact_obs} 
         """
 
 rule svdb_annotate_somatic_obs_somatic_clinical_sv:
