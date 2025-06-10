@@ -71,5 +71,5 @@ RUN pip install --no-cache-dir \
     scipy==1.4.1
 
 # Create a wrapper script that runs IgCaller
-RUN echo '#!/bin/bash\npython3 /opt/IgCaller/igcaller.py "$@"' > /usr/local/bin/igcaller && \
+RUN echo '#!/bin/bash\npython3 /opt/IgCaller/IgCaller.py "$@"' > /usr/local/bin/igcaller && \
     chmod +x /usr/local/bin/igcaller
