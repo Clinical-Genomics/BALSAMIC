@@ -601,7 +601,7 @@ set-resources:
         threads: 36
     sentieon_dedup_consensus:
         runtime: 1440
-        mem_mb: 45000
+        mem_mb: 60000
         threads: 36
     sentieon_base_calibration:
         mem_mb: 25000
