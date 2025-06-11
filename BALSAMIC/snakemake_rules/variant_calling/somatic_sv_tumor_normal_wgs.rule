@@ -170,7 +170,7 @@ rule ascat_tumor_normal_wgs:
         normal = "NORMAL",
         genome = config["reference"]["genome_version"],
         case_name = config["analysis"]["case_id"],
-        gender = config["analysis"]["gender"]
+        gender = config_model.get_tumor_gender,
     message:
         ("Calling copy number variants using ascatNGS for {params.case_name}")
     shell:
