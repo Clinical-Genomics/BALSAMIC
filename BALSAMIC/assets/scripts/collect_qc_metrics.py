@@ -25,17 +25,10 @@ from BALSAMIC.utils.rule import (
 @click.argument("output_path", type=click.Path(exists=False), required=True)
 @click.argument("multiqc_data_path", type=click.Path(exists=True), required=True)
 @click.argument("counts_path", nargs=-1, type=click.Path(exists=True), required=False)
-@click.option(
-    "--sex-prediction-path",
-    type=click.Path(exists=True),
-    required=False,
-    help="Path to sex prediction json (optional for balsamic-qc)",
-)
 def collect_qc_metrics(
     config_path: Path,
     output_path: Path,
     multiqc_data_path: Path,
-    sex_prediction_path: Path,
     counts_path: List[Path],
 ):
     """Extracts the requested metrics from a JSON multiqc file and saves them to a YAML file
@@ -44,7 +37,6 @@ def collect_qc_metrics(
         config_path: Path; case config file path
         output_path: Path; destination path for the extracted YAML formatted metrics
         multiqc_data_path: Path; multiqc JSON path from which the metrics will be extracted
-        sex_prediction_path: Path; sex prediction JSON path from which sex prediction info will be extracted
         counts_path: Path; list of variant caller specific files containing the number of variants
     """
 
@@ -57,10 +49,6 @@ def collect_qc_metrics(
     # Number of variants
     for count in counts_path:
         metrics += get_variant_metrics(count)
-
-    # Sex check
-    if sex_prediction_path:
-        metrics += get_sex_check_metrics(sex_prediction_path, config)
 
     # Relatedness
     analysis_type = get_analysis_type(config)
@@ -118,33 +106,6 @@ def get_multiqc_data_source(multiqc_data: dict, sample: str, tool: str) -> str:
                             source_subtool
                         ][sample]
                     )
-
-
-def get_sex_check_metrics(sex_prediction_path: str, config: dict) -> list:
-    """Retrieves the sex check metrics and returns them as a Metric list."""
-    metric = "compare_predicted_to_given_sex"
-    case_id: str = config["analysis"]["case_id"]
-    sex_prediction: dict = read_json(sex_prediction_path)
-
-    given_sex: str = config["analysis"]["gender"]
-
-    sex_check_metrics = []
-
-    for sample_type in ["tumor", "normal"]:
-        if sample_type in sex_prediction:
-            predicted_sex = sex_prediction[sample_type]["predicted_sex"]
-            sex_prediction_metrics = Metric(
-                id=f"{case_id}_{sample_type}",
-                input=os.path.basename(sex_prediction_path),
-                name=metric.upper(),
-                step="sex_check",
-                value=predicted_sex,
-                condition={"norm": "eq", "threshold": given_sex},
-            ).model_dump()
-            sex_check_metrics.append(sex_prediction_metrics)
-
-    return sex_check_metrics
-
 
 def get_relatedness_metrics(multiqc_data: dict) -> list:
     """Retrieves the relatedness metrics and returns them as a Metric list."""

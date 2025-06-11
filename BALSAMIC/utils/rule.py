@@ -21,7 +21,6 @@ from BALSAMIC.utils.exc import WorkflowRunError
 
 LOG = logging.getLogger(__name__)
 
-
 def get_vcf(config, var_caller, sample):
     """
     input: BALSAMIC config file

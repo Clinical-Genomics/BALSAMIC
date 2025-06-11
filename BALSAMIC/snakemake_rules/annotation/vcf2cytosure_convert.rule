@@ -6,7 +6,8 @@ if config["analysis"]["sequencing_type"] != 'wgs':
     rule vcf2cytosure_convert:
         input:
             cnvkit_vcf = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".cnvkit.vcf.gz",
-            cnvkit_cnr = cnv_dir + "tumor.merged" + ".cnr"
+            cnvkit_cnr = cnv_dir + "tumor.merged" + ".cnr",
+            sex_prediction_json = qc_dir + "sex_prediction.json"
         output:
             cgh_tumor = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".cnvkit.vcf2cytosure.cgh"
         benchmark:
@@ -28,6 +29,7 @@ elif config["analysis"]["sequencing_type"] == 'wgs' and config["analysis"]["anal
         input:
             delly_vcf = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".dellycnv.vcf.gz",
             tiddit_cov_tumor = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".tumor.tiddit_cov.bed",
+            sex_prediction_json = qc_dir + "sex_prediction.json"
         output:
             cgh_tumor = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".tumor.vcf2cytosure.cgh"
         benchmark:
@@ -50,6 +52,7 @@ elif config["analysis"]["sequencing_type"] == "wgs" and config["analysis"]["anal
             ascat_vcf = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.vcf.gz",
             tiddit_cov_tumor = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".tumor.tiddit_cov.bed",
             tiddit_cov_normal = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".normal.tiddit_cov.bed",
+            sex_prediction_json = qc_dir + "sex_prediction.json"
         output:
             ascat_vcf = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".filtered.ascat.vcf.gz",
             cgh_tumor = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".tumor.vcf2cytosure.cgh",
