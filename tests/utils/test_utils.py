@@ -21,7 +21,6 @@ from BALSAMIC.constants.constants import FileType
 from BALSAMIC.constants.paths import CONTAINERS_DIR
 from BALSAMIC.models.config import ConfigModel, FastqInfoModel, SampleInstanceModel
 from BALSAMIC.utils.cli import (
-    CaptureStdout,
     check_executable,
     convert_deliverables_tags,
     createDir,
@@ -43,6 +42,7 @@ from BALSAMIC.utils.cli import (
 )
 from BALSAMIC.utils.exc import BalsamicError, WorkflowRunError
 from BALSAMIC.utils.io import (
+    CaptureStdout,
     read_json,
     read_csv,
     read_vcf_file,

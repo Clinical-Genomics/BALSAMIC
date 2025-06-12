@@ -1,10 +1,12 @@
 """Input/Output utility methods."""
 
 import csv
+import sys
 import gzip
 import json
 import logging
 from datetime import datetime
+from io import StringIO
 from pathlib import Path
 from typing import List, Any
 
@@ -13,11 +15,24 @@ import yaml
 from graphviz import Source
 
 from BALSAMIC import __version__ as balsamic_version
-from BALSAMIC.utils.cli import CaptureStdout
 from BALSAMIC.utils.exc import BalsamicError
 
 LOG = logging.getLogger(__name__)
 
+class CaptureStdout(list):
+    """
+    Captures stdout.
+    """
+
+    def __enter__(self):
+        self._stdout = sys.stdout
+        sys.stdout = self._stringio = StringIO()
+        return self
+
+    def __exit__(self, *args):
+        self.extend(self._stringio.getvalue().splitlines())
+        del self._stringio  # free up some memory
+        sys.stdout = self._stdout
 
 def generate_workflow_graph(
     config_path: Path, directory_path: Path, snakefile: Path, title: str
