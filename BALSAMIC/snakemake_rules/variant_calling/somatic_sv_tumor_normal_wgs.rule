@@ -2,7 +2,7 @@
 # coding: utf-8
 
 
-rule manta_tumor_normal:
+rule manta_tumor_normal_wgs:
     input:
         fa = config["reference"]["reference_genome"],
         bamN = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = normal_sample),
@@ -24,8 +24,6 @@ rule manta_tumor_normal:
         manta_install_path = "/opt/conda/share/manta-1.6.0-3",
         low_pr_sr_count_value = MANTA_FILTERS.low_pr_sr_count.tag_value,
         low_pr_sr_count_filter_name = MANTA_FILTERS.low_pr_sr_count.filter_name,
-    threads:
-        get_threads(cluster_config, "manta_tumor_normal")
     message:
         ("Calling structural variants using manta for {params.case_name} and "
         "index the compressed vcf file")
@@ -41,7 +39,7 @@ configManta.py \
 --referenceFasta={input.fa} \
 --runDir={params.tmpdir};
 
-python {params.tmpdir}/runWorkflow.py -m {params.runmode} -j {threads};
+python {params.tmpdir}/runWorkflow.py -m {params.runmode} -j {resources.threads};
 
 {params.manta_install_path}/libexec/convertInversion.py \
   $samtools_path \
@@ -50,7 +48,7 @@ python {params.tmpdir}/runWorkflow.py -m {params.runmode} -j {threads};
 
 bgzip -l 9 {params.tmpdir}/results/variants/somaticSV_converted.vcf ;
 
-bcftools filter --threads {threads} --exclude 'SUM(FORMAT/PR[1:1]+FORMAT/SR[1:1]) < {params.low_pr_sr_count_value}' --soft-filter '{params.low_pr_sr_count_filter_name}' --mode '+' -o {output.final} -O z {params.tmpdir}/results/variants/somaticSV_converted.vcf.gz
+bcftools filter --threads {resources.threads} --exclude 'SUM(FORMAT/PR[1:1]+FORMAT/SR[1:1]) < {params.low_pr_sr_count_value}' --soft-filter '{params.low_pr_sr_count_filter_name}' --mode '+' -o {output.final} -O z {params.tmpdir}/results/variants/somaticSV_converted.vcf.gz
 
 tabix -p vcf -f {output.final};
 
@@ -59,7 +57,7 @@ echo -e \"{params.normal}\\tNORMAL\\n{params.tumor}\\tTUMOR\" > {output.namemap}
 rm -rf {params.tmpdir};
         """
 
-rule delly_sv_tumor_normal:
+rule delly_sv_tumor_normal_wgs:
     input:
         fa = config["reference"]["reference_genome"],
         bamN = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = normal_sample),
@@ -77,8 +75,6 @@ rule delly_sv_tumor_normal:
         tumor = "TUMOR",
         normal = "NORMAL",
         case_name = config["analysis"]["case_id"]
-    threads:
-        get_threads(cluster_config, "delly_tumor_normal")
     message:
         ("Calling structural variants using delly for {params.case_name},"
         "filter somatic variants and finally convert from bcf to compressed vcf file")
@@ -98,7 +94,7 @@ rm -rf {params.tmpdir};
         """
 
 
-rule delly_cnv_tumor_normal:
+rule delly_cnv_tumor_normal_wgs:
     input:
         fa = config["reference"]["reference_genome"],
         bamN = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = normal_sample),
@@ -118,8 +114,6 @@ rule delly_cnv_tumor_normal:
         normal = "NORMAL",
         tumor = "TUMOR",
         case_name = config["analysis"]["case_id"]
-    threads:
-        get_threads(cluster_config, "delly_tumor_normal")
     message:
         ("Calling copy number variants using delly for {params.case_name}")
     shell:
@@ -147,7 +141,7 @@ echo -e \"{params.tumor}\\tTUMOR\\n{params.normal}\\tNORMAL\" > {output.namemap}
 rm -rf {params.tmpdir};
         """
 
-rule ascat_tumor_normal:
+rule ascat_tumor_normal_wgs:
     input:
         fa = config["reference"]["reference_genome"] ,
         bamN = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = normal_sample),
@@ -176,8 +170,6 @@ rule ascat_tumor_normal:
         genome = config["reference"]["genome_version"],
         case_name = config["analysis"]["case_id"],
         gender = config["analysis"]["gender"]
-    threads:
-        get_threads(cluster_config, "ascat_tumor_normal")
     message:
         ("Calling copy number variants using ascatNGS for {params.case_name}")
     shell:
@@ -192,7 +184,7 @@ ascat.pl \
   -species human \
   -genderChr Y \
   -assembly {params.genome} \
-  -cpus {threads} \
+  -cpus {resources.threads} \
   -reference {input.fa} \
   -snp_gc {input.gccorrection} \
   -outdir {params.tmpdir} \
@@ -225,7 +217,7 @@ echo -e \"{params.tumor}\\tTUMOR\\n{params.normal}\\tNORMAL\" > {output.namemap}
 rm -rf {params.tmpdir};
         """
 
-rule tiddit_sv_tumor_normal:
+rule tiddit_sv_tumor_normal_wgs:
     input:
         fa = config["reference"]["reference_genome"],
         bamN = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = normal_sample),
@@ -247,8 +239,6 @@ rule tiddit_sv_tumor_normal:
         normal = "NORMAL",
         case_name = config["analysis"]["case_id"],
         filter_svs = get_script_path("filter_SVs.py")
-    threads:
-        get_threads(cluster_config, "tiddit_sv_tumor_normal")
     message:
         ("Calling structural variants using tiddit for {params.case_name}")
     shell:
@@ -289,7 +279,7 @@ rm -rf {params.tmpdir};
         """
 
 
-rule igh_dux4_detection_tumor_normal:
+rule igh_dux4_detection_tumor_normal_wgs:
     input:
         fa = config["reference"]["reference_genome"],
         bamT = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
@@ -304,8 +294,6 @@ rule igh_dux4_detection_tumor_normal:
         genome_version = config["reference"]["genome_version"],
         custom_sv_detection_script = get_script_path("igh_dux4_detection.sh"),
         case_name = config["analysis"]["case_id"],
-    threads:
-        get_threads(cluster_config, "igh_dux4_detection")
     message:
         "Detecting IGH::DUX4 rearrangement for {params.case_name} using samtools."
     shell:
