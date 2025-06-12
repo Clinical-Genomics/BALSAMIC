@@ -1,6 +1,7 @@
 """Balsamic analysis config case models."""
 
 import re
+import os
 from glob import glob
 from pathlib import Path
 from typing import Annotated, Dict, List, Optional
@@ -478,6 +479,8 @@ class ConfigModel(BaseModel):
         """Return the bioinformatically predicted sex of the tumor sample if the given sex is unknown."""
         if self.analysis.gender != Gender.UNKNOWN:
             return self.analysis.gender
+        elif not os.path.exists(input.sex_prediction_json):
+            return Gender.UNKNOWN
         else:
             sex_prediction: dict = read_json(input.sex_prediction_json)
             return sex_prediction[SampleType.TUMOR]["predicted_sex"]
