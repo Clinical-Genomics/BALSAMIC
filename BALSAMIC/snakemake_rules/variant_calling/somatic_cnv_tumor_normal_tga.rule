@@ -206,6 +206,7 @@ rule cnvkit_call_CNV_research:
         cns_initial = cnv_dir + "tumor.initial.cns",
         cnr = cnv_dir + "tumor.merged.cnr",
         snv_merged = vcf_dir + "SNV.germline.merged.dnascope.vcf.gz",
+        sex_prediction_json = qc_dir + "sex_prediction.json"
     output:
         cns = cnv_dir + "tumor.merged.cns",
         gene_breaks = cnv_dir + config["analysis"]["case_id"] + ".gene_breaks",
@@ -223,7 +224,7 @@ rule cnvkit_call_CNV_research:
         cnv_dir = cnv_dir,
         cnsr = lambda wc: "tumor.merged.cn{s,r}",
         case_name = config["analysis"]["case_id"],
-        gender = config["analysis"]["gender"],
+        gender = config_model.get_tumor_gender,
         tumor_sample_id = "TUMOR",
         normal_sample_id = "NORMAL",
     message:

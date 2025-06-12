@@ -16,7 +16,6 @@ from BALSAMIC.assets.scripts.collect_qc_metrics import (
     get_variant_metrics,
     get_metric_condition,
     get_relatedness_metrics,
-    get_sex_check_metrics,
     get_sample_id,
 )
 
@@ -239,7 +238,7 @@ def test_get_variant_metrics(bcftools_counts_path):
 
 
 def test_collect_qc_metrics_targeted(
-    tmp_path, config_path, multiqc_data_path, cli_runner, tga_male_sex_prediction
+    tmp_path, config_path, multiqc_data_path, cli_runner
 ):
     """tests qc metrics yaml file generation for targeted analysis"""
 
@@ -255,8 +254,6 @@ def test_collect_qc_metrics_targeted(
             str(config_path),
             str(output_path),
             str(multiqc_data_path),
-            "--sex-prediction-path",
-            str(tga_male_sex_prediction),
         ],
     )
 
@@ -302,30 +299,6 @@ def test_get_sample_id(tumor_sample_name):
     ]
     for multiqc_key in multiqc_sampleid_keys:
         assert get_sample_id(multiqc_key) == tumor_sample_name
-
-
-def test_get_sex_check_metrics(tga_male_sex_prediction, config_dict):
-    """Tests sex check metric retrieval."""
-    # GIVEN male sex prediction JSON and male config dictionary
-
-    # GIVEN an expected MetricsModel dictionary
-    expected_sex_check_metric = [
-        {
-            "header": None,
-            "id": "id1_tumor",
-            "input": "male_sex_prediction.json",
-            "name": "COMPARE_PREDICTED_TO_GIVEN_SEX",
-            "step": "sex_check",
-            "value": "male",
-            "condition": {"norm": "eq", "threshold": "male"},
-        }
-    ]
-
-    # WHEN comparing predicted male sex and supplied male gender
-    sex_metrics: list = get_sex_check_metrics(tga_male_sex_prediction, config_dict)
-
-    # THEN check that the relatedness metrics has been correctly shaped
-    assert sex_metrics == expected_sex_check_metric
 
 
 def test_get_relatedness_metrics(multiqc_data_dict):

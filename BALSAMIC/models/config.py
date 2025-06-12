@@ -1,6 +1,7 @@
 """Balsamic analysis config case models."""
 
 import re
+import os
 from glob import glob
 from pathlib import Path
 from typing import Annotated, Dict, List, Optional
@@ -8,6 +9,7 @@ from typing import Annotated, Dict, List, Optional
 from pydantic import AfterValidator, BaseModel, field_validator, model_validator
 
 from BALSAMIC import __version__ as balsamic_version
+from BALSAMIC.utils.io import read_json
 from BALSAMIC.constants.cluster import QOS
 from BALSAMIC.constants.analysis import (
     AnalysisType,
@@ -142,7 +144,7 @@ class AnalysisModel(BaseModel):
 
     Raises:
         ValueError:
-            When gender is set to any other than [female, male]
+            When gender is set to any other than [female, male, unknown]
             When analysis_type is set to any value other than [single, paired, pon]
             When sequencing_type is set to any value other than [wgs, targeted]
             When analysis_workflow is set to any other than [balsamic, balsamic-qc, balsamic-umi]
@@ -472,3 +474,13 @@ class ConfigModel(BaseModel):
             f"CNV.somatic.{self.analysis.case_id}.ascat.germline.png",
             f"CNV.somatic.{self.analysis.case_id}.ascat.sunrise.png",
         ]
+
+    def get_tumor_gender(self, wildcards, input):
+        """Return the bioinformatically predicted sex of the tumor sample if the given sex is unknown."""
+        if self.analysis.gender != Gender.UNKNOWN:
+            return self.analysis.gender
+        elif not os.path.exists(input.sex_prediction_json):
+            return Gender.UNKNOWN
+        else:
+            sex_prediction: dict = read_json(input.sex_prediction_json)
+            return sex_prediction[SampleType.TUMOR]["predicted_sex"]
