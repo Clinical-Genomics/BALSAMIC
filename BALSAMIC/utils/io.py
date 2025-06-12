@@ -19,6 +19,7 @@ from BALSAMIC.utils.exc import BalsamicError
 
 LOG = logging.getLogger(__name__)
 
+
 class CaptureStdout(list):
     """
     Captures stdout.
@@ -33,6 +34,7 @@ class CaptureStdout(list):
         self.extend(self._stringio.getvalue().splitlines())
         del self._stringio  # free up some memory
         sys.stdout = self._stdout
+
 
 def generate_workflow_graph(
     config_path: Path, directory_path: Path, snakefile: Path, title: str

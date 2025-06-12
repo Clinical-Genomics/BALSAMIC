@@ -107,6 +107,7 @@ def get_multiqc_data_source(multiqc_data: dict, sample: str, tool: str) -> str:
                         ][sample]
                     )
 
+
 def get_relatedness_metrics(multiqc_data: dict) -> list:
     """Retrieves the relatedness metrics and returns them as a Metric list."""
     source_tool = "Somalier"

@@ -22,6 +22,7 @@ from BALSAMIC.utils.io import CaptureStdout
 
 LOG = logging.getLogger(__name__)
 
+
 def add_doc(docstring):
     """
     A decorator for adding docstring. Taken shamelessly from stackexchange.

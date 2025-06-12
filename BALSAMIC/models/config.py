@@ -484,4 +484,3 @@ class ConfigModel(BaseModel):
         else:
             sex_prediction: dict = read_json(input.sex_prediction_json)
             return sex_prediction[SampleType.TUMOR]["predicted_sex"]
-
