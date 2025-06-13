@@ -275,6 +275,7 @@ class StructuralVariantFilters(BaseModel):
     Attributes:
         swegen_sv_freq: VCFAttributes (optional); maximum swegen sv allele frequency
         loqusdb_clinical_sv_freq: VCFAttributes (optional); maximum loqusdb clinical sv allele frequency
+        loqusdb_artefact_sv_obs: VCFAttributes (optional); maximum loqusdb artefact sv allele obs
         low_pr_sr_count: VCFAttributes (optional); minumum Manta variant read support
         varcaller_name: str (required); variant caller name
         filter_type: str (required); filter name for variant caller
@@ -284,6 +285,7 @@ class StructuralVariantFilters(BaseModel):
 
     swegen_sv_freq: Optional[VCFFilter] = None
     loqusdb_clinical_sv_freq: Optional[VCFFilter] = None
+    loqusdb_artefact_sv_obs: Optional[VCFFilter] = None
     low_pr_sr_count: Optional[VCFFilter] = None
     varcaller_name: str
     filter_type: str
