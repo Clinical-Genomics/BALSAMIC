@@ -16,15 +16,13 @@ rule vcfheader_rename_germline:
         housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "genotype"},
         sample_name = "NORMAL",
         sample_id = config_model.get_sample_name_by_type(SampleType.NORMAL)
-    threads:
-        get_threads(cluster_config,'vcfheader_rename_germline')
     message:
         "Renaming header in DNAscope germline VCF output from {params.sample_name} to {params.sample_id}"
     shell:
         """
 echo -e \"{params.sample_name}\\t{params.sample_id}\" > {output.namemap};
 
-bcftools reheader --threads {threads} \
+bcftools reheader --threads {resources.threads} \
 -s {output.namemap} {input.vcf} \
 -o {output.vcf_dnascope};
 

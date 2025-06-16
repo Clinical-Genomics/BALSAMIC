@@ -14,8 +14,6 @@ rule gatk_collectreadcounts:
         Path(benchmark_dir, "gatk_collectreadcounts_{sample}.tsv").as_posix()
     singularity:
         Path(singularity_image,config["bioinfo_tools"].get("gatk") + ".sif").as_posix()
-    threads:
-        get_threads(cluster_config, "gatk_collectreadcounts")
     message:
         "Running GATK CollectReadCounts on {params.sample} for GENS."
     shell:

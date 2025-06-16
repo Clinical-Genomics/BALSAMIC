@@ -1,0 +1,49 @@
+set-resources:
+    all:
+        threads: 1
+        runtime: 15
+        mem_mb: 5000
+    index_cadd:
+        threads: 12
+        runtime: 120
+        mem_mb: 15000
+    convert_delly_exclusion_file:
+        threads: 2
+        runtime: 60
+        mem_mb: 2000
+    download_references:
+        threads: 24
+        runtime: 6000
+        mem_mb: 50000
+    picard_dict_reference_genome:
+        threads: 12
+        runtime: 60
+        mem_mb: 15000
+    fasta_index_reference_genome:
+        threads: 24
+        runtime: 60
+        mem_mb: 15000
+    bwa_index_reference_genome:
+        threads: 24
+        runtime: 60
+        mem_mb: 15000
+    compress_vcfs:
+        threads: 12
+        runtime: 60
+        mem_mb: 15000
+    index_vcfs:
+        threads: 12
+        runtime: 60
+        mem_mb: 15000
+    preprocess_refseq:
+        threads: 12
+        runtime: 60
+        mem_mb: 15000
+    download_containers:
+        threads: 12
+        runtime: 60
+        mem_mb: 15000
+    download_vep:
+        threads: 24
+        runtime: 120
+        mem_mb: 30000

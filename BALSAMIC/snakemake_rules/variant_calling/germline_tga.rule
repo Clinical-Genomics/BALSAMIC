@@ -1,7 +1,7 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
 
-rule sentieon_DNAscope:
+rule sentieon_DNAscope_tga:
     input:
         bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_type = wildcards.sample_type),
         ref = config["reference"]["reference_genome"],
@@ -16,8 +16,6 @@ rule sentieon_DNAscope:
         sentieon_exec = config_model.sentieon.sentieon_exec,
         sentieon_lic = config_model.sentieon.sentieon_license,
         sample = '{sample_type}'
-    threads:
-        get_threads(cluster_config, 'sentieon_DNAscope')
     message:
         "Calling germline variants using Sentieon DNAscope for {params.sample}"
     shell:
@@ -27,7 +25,7 @@ export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
 
 {params.sentieon_exec} driver \
--t {threads} \
+-t {resources.threads} \
 -r {input.ref} \
 -i {input.bam} \
 --interval {input.interval} \
@@ -38,7 +36,7 @@ rm -rf {params.tmpdir};
         """
 
 
-rule manta_germline:
+rule manta_germline_tga:
     input:
         fa = config["reference"]["reference_genome"],
         bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_type = wildcards.sample_type, specified_suffix="dedup.fixmate.qualcapped"),
@@ -52,8 +50,6 @@ rule manta_germline:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         runmode = "local",
         sample = "{sample_type}"
-    threads:
-        get_threads(cluster_config,"manta_germline")
     message:
         "Calling germline variants using manta for {params.sample}"
     shell:
@@ -65,7 +61,7 @@ configManta.py \
 --referenceFasta={input.fa} \
 --runDir={params.tmpdir};
 
-python {params.tmpdir}/runWorkflow.py -m {params.runmode} -j {threads};
+python {params.tmpdir}/runWorkflow.py -m {params.runmode} -j {resources.threads};
 
 cp {params.tmpdir}/results/variants/diploidSV.vcf.gz {output.final};
 
