@@ -1,3 +1,21 @@
+[X.X.X]
+--------
+
+Added:
+^^^^^^
+
+Changed:
+^^^^^^^^
+
+
+Removed:
+^^^^^^^^
+* removed immediate submit functionality
+
+Fixed:
+^^^^^^
+
+
 [17.0.1]
 --------
 

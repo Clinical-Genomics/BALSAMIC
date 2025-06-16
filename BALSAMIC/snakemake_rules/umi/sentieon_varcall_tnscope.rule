@@ -31,8 +31,6 @@ rule sentieon_tnscope_umi:
         padding = params.tnscope_umi.padding,
         tumor = "TUMOR",
         pcr_model = params.tnscope_umi.pcr_model
-    threads:
-        get_threads(cluster_config, "sentieon_tnscope_umi")
     message:
         "Calling single nucleotide variants using TNscope for {params.tumor}"
     shell:
@@ -42,7 +40,7 @@ export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
 
 {params.sentieon_exec} driver \
--t {threads} \
+-t {resources.threads} \
 -r {input.ref_fa} \
 -i {input.bam} \
 --interval {input.bed} \
