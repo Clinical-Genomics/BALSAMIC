@@ -31,8 +31,6 @@ rule sentieon_tnscope_tga_tumor_only:
         tumor_af = params.tnscope_tga.filter_tumor_af,
         tumor_lod = params.tnscope_tga.min_tumorLOD,
         housekeeper_id= {"id": config["analysis"]["case_id"],"tags": "research"}
-    threads:
-        get_threads(cluster_config, "sentieon_tnscope_tga_t_only")
     message:
         "Calling single nucleotide variants using TNscope for {params.tumor}"
     shell:
@@ -43,7 +41,7 @@ export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
 
 {params.sentieon_exec} driver \
--t {threads} \
+-t {resources.threads} \
 -r {input.ref_fa} \
 -i {input.bam} \
 --interval {input.bed} \
@@ -85,8 +83,6 @@ rule vardict_tumor_only:
         max_mm = params.vardict.max_mm,
         col_info = params.vardict.column_info,
         case_name = config["analysis"]["case_id"],
-    threads:
-        get_threads(cluster_config, "vardict_tumor_only")
     message:
         "Calling single nucleotide variants using vardict for {params.case_name}"
     shell:
@@ -101,7 +97,7 @@ vardict-java -I 600 \
 -G {input.fa} \
 -f {params.af} \
 -N {params.case_name} \
--th {threads} \
+-th {resources.threads} \
 -b {input.bamT} \
 {params.col_info} {input.bed} \
 | teststrandbias.R \
@@ -126,8 +122,6 @@ rule post_process_vardict:
         Path(benchmark_dir,'vardict_merge_' + config["analysis"]["case_id"] + ".tsv").as_posix()
     singularity:
         Path(singularity_image,config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
-    threads:
-        get_threads(cluster_config,"post_process_vardict")
     message:
         ("Bgzip, index and reheader merged VarDict vcf and add FOUND_IN for case: {params.case_name}")
     shell:
