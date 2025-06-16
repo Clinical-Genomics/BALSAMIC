@@ -39,6 +39,14 @@ set-resources:
         threads: 24
         runtime: 600
         mem_mb: 60000
+    delly_cnv_tumor_only:
+        threads: 12
+        runtime: 340
+        mem_mb: 20000
+    delly_cnv_tumor_normal:
+        threads: 12
+        runtime: 340
+        mem_mb: 20000
     delly_cnv_tumor_only_wgs:
         threads: 24
         runtime: 600
