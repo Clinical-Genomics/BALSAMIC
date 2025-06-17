@@ -1,10 +1,10 @@
 """QC validation metrics model."""
 import logging
-from typing import Optional, Any, List, Annotated
+from typing import Optional, Any, List, Annotated, Callable
 
 from pydantic import BaseModel, AfterValidator
 
-from BALSAMIC.constants.metrics import VALID_OPS
+from BALSAMIC.constants.metrics import VALID_OPS, METRIC_WARNINGS
 
 LOG = logging.getLogger(__name__)
 
@@ -42,34 +42,52 @@ class Metric(BaseModel):
     value: Any
     condition: Optional[MetricCondition]
 
+def validate_metric(metric: Metric) -> Metric:
+    """
+    Checks if a metric meets its filtering condition.
 
-def validate_metric(metric: Metric):
-    """Checks if a metric meets its filtering condition."""
-    if metric.condition:
-        norm: Optional[str] = metric.condition.norm
-        threshold: Optional[Any] = metric.condition.threshold
-        value: Any = metric.value
+    Raises:
+    ValueError
+        If the operator is unsupported, the operands are incompatible,
+        or the metric fails validation and is **not** listed in
+        ``METRIC_WARNINGS``
+    """
 
-        # Validate the norm operator
-        if norm not in VALID_OPS:
-            raise ValueError(f"Unsupported operation: {norm}")
+    cond = metric.condition
+    if cond is None:
+        LOG.info("QC metric %s: %s (no condition).", metric.name, metric.value)
+        return metric
 
-        # Attempt validation using the operator
-        try:
-            if not VALID_OPS[norm](value, threshold):
-                raise ValueError(
-                    f"QC metric {metric.name}: {value} validation has failed. "
-                    f"(Condition: {norm} {threshold}, ID: {metric.id})."
-                )
-        except TypeError:
-            raise ValueError(
-                f"Type mismatch in QC metric {metric.name}: {value} and {threshold} "
-                f"are not compatible with operator {norm}. (ID: {metric.id})."
-            )
+    op: Optional[Callable[[Any, Any], bool]] = VALID_OPS.get(cond.norm)
+    if op is None:
+        raise ValueError(f"Unsupported operation: {cond.norm!r}")
 
-    LOG.info(f"QC metric {metric.name}: {metric.value} meets its condition.")
+    try:
+        passed = op(metric.value, cond.threshold)
+    except TypeError as exc:
+        raise ValueError(
+            f"Type mismatch for QC metric {metric.name}: "
+            f"{metric.value!r} {cond.norm} {cond.threshold!r} (ID: {metric.id})"
+        ) from exc
+
+    if passed:
+        LOG.info(
+            "QC metric %s: %s meets its condition (%s %s, ID: %s).",
+            metric.name, metric.value, cond.norm, cond.threshold, metric.id
+        )
+        return metric
+
+    # ── Validation failed ──────────────────────────────────────────────
+    msg = (
+        f"QC metric {metric.name}: {metric.value} failed "
+        f"(condition: {cond.norm} {cond.threshold}, ID: {metric.id})."
+    )
+    if metric.name in METRIC_WARNINGS:
+        LOG.info(msg)
+    else:
+        raise ValueError(msg)
+
     return metric
-
 
 class MetricValidation(BaseModel):
     """Defines the metric validation model.

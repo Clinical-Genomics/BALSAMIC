@@ -4,7 +4,7 @@ from typing import Any, Dict
 import pytest
 
 from BALSAMIC.models.metrics import MetricValidation, Metric, MetricCondition
-
+from BALSAMIC.assets.scripts.collect_qc_metrics import get_sex_check_metrics
 
 def test_metric_condition():
     """Test MetricCondition attributes parsing."""
@@ -94,6 +94,23 @@ def test_multiple_metric_validation_fail(qc_extracted_metrics: dict):
     assert metrics[4]["name"] in str(val_exc.value)
     assert metrics[8]["name"] in str(val_exc.value)
 
+
+def test_wrong_sex_check_metrics(tga_female_sex_prediction: str, config_dict: dict):
+    """Test MetricValidation for capturing conflicting predicted to given sex."""
+
+    # GIVEN female sex prediction JSON and male config dictionary
+    sex_metrics: list = get_sex_check_metrics(tga_female_sex_prediction, config_dict)
+
+    # WHEN comparing predicted female sex and supplied male gender
+    # THEN check that the model filters the metrics according to its norm
+    with pytest.raises(ValueError) as val_exc:
+        MetricValidation(metrics=sex_metrics)
+
+    # THEN a ValueError should be triggered containing this text
+    assert (
+        "QC metric COMPARE_PREDICTED_TO_GIVEN_SEX: female validation has failed. "
+        "(Condition: eq male, ID: id1_tumor)." in str(val_exc.value)
+    )
 
 def test_validate_metric_type_error():
     """Test MetricValidation TypeError for incompatible variable-type comparisons."""
