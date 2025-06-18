@@ -35,8 +35,8 @@ def collect_qc_metrics(
     config_path: Path,
     output_path: Path,
     multiqc_data_path: Path,
-    sex_prediction_path: Path,
     counts_path: List[Path],
+    sex_prediction_path: Path,
 ):
     """Extracts the requested metrics from a JSON multiqc file and saves them to a YAML file
 
@@ -44,8 +44,8 @@ def collect_qc_metrics(
         config_path: Path; case config file path
         output_path: Path; destination path for the extracted YAML formatted metrics
         multiqc_data_path: Path; multiqc JSON path from which the metrics will be extracted
-        sex_prediction_path: Path; sex prediction JSON path from which sex prediction info will be extracted
         counts_path: Path; list of variant caller specific files containing the number of variants
+        sex_prediction_path: Path; sex prediction JSON path from which sex prediction info will be extracted
     """
 
     config = read_json(config_path)
