@@ -42,6 +42,7 @@ class Metric(BaseModel):
     value: Any
     condition: Optional[MetricCondition]
 
+
 def validate_metric(metric: Metric) -> Metric:
     """
     Checks if a metric meets its filtering condition.
@@ -73,14 +74,18 @@ def validate_metric(metric: Metric) -> Metric:
     if passed:
         LOG.info(
             "QC metric %s: %s meets its condition (%s %s, ID: %s).",
-            metric.name, metric.value, cond.norm, cond.threshold, metric.id
+            metric.name,
+            metric.value,
+            cond.norm,
+            cond.threshold,
+            metric.id,
         )
         return metric
 
     # ── Validation failed ──────────────────────────────────────────────
     msg = (
-        f"QC metric {metric.name}: {metric.value} failed "
-        f"(condition: {cond.norm} {cond.threshold}, ID: {metric.id})."
+        f"QC metric {metric.name}: {metric.value} validation has failed. "
+        f"(Condition: {cond.norm} {cond.threshold}, ID: {metric.id})."
     )
     if metric.name in METRIC_WARNINGS:
         LOG.info(msg)
@@ -88,6 +93,7 @@ def validate_metric(metric: Metric) -> Metric:
         raise ValueError(msg)
 
     return metric
+
 
 class MetricValidation(BaseModel):
     """Defines the metric validation model.

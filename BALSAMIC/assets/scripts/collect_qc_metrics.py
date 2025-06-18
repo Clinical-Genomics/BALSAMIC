@@ -119,6 +119,7 @@ def get_multiqc_data_source(multiqc_data: dict, sample: str, tool: str) -> str:
                         ][sample]
                     )
 
+
 def get_sex_check_metrics(sex_prediction_path: str, config: dict) -> list:
     """Retrieves the sex check metrics and returns them as a Metric list."""
     metric = "compare_predicted_to_given_sex"
@@ -143,6 +144,7 @@ def get_sex_check_metrics(sex_prediction_path: str, config: dict) -> list:
             sex_check_metrics.append(sex_prediction_metrics)
 
     return sex_check_metrics
+
 
 def get_relatedness_metrics(multiqc_data: dict) -> list:
     """Retrieves the relatedness metrics and returns them as a Metric list."""
