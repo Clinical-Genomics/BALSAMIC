@@ -53,7 +53,7 @@ Depending on the sequencing type, BALSAMIC is currently running the following st
 
 **Note:** igh_dux4 is not a variant caller itself. This is a custom script that uses samtools to detect read pairs supporting IGH::DUX4 rearrangements.
 
-It is mandatory to provide the gender of the sample from BALSAMIC version >= 10.0.0 For CNV analysis.
+From BALSAMIC version >= 18.0.0, if no gender information is provided to case configuration step, the gender used in CNV analysis will be derived from the predicted sex (see `Sex check <https://balsamic.readthedocs.io/en/latest/balsamic_qc.html>`_ for more information.)
 
 Further details about a specific caller can be found in the links for the repositories containing the documentation for SV and CNV callers along with the links for the articles are listed in `bioinfo softwares <https://balsamic.readthedocs.io/en/latest/bioinfo_softwares.html>`_.
 

@@ -223,7 +223,7 @@ OPTION_GENDER = click.option(
     "--gender",
     required=False,
     type=click.Choice([Gender.FEMALE, Gender.MALE, Gender.UNKNOWN]),
-    default=Gender.FEMALE,
+    default=Gender.UNKNOWN,
     show_default=True,
     help="Sample associated gender",
 )
