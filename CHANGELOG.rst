@@ -3,14 +3,16 @@
 
 Added:
 ^^^^^^
+* sex prediction result used for cnv analysis for unknown gender cases https://github.com/Clinical-Genomics/BALSAMIC/pull/1581
 
 Changed:
 ^^^^^^^^
-
+* given vs predicted sex check changed to warning https://github.com/Clinical-Genomics/BALSAMIC/pull/1581
 
 Removed:
 ^^^^^^^^
 * removed immediate submit functionality
+* removed balsamic status check functionality https://github.com/Clinical-Genomics/BALSAMIC/pull/1581
 
 Fixed:
 ^^^^^^
