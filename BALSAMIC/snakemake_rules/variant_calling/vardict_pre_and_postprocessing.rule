@@ -89,15 +89,17 @@ rule vardict_move_svs:
     benchmark:
         Path(benchmark_dir,"vardict_move_svs" + config["analysis"]["case_id"] + ".tsv").as_posix()
     singularity:
-        Path(singularity_image,config["bioinfo_tools"].get("gatk") + ".sif").as_posix()
+        Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
     message:
         "Moving SVs from VarDict VCF to separate VCF."
     shell:
         """
 export TMPDIR={params.tmpdir};  
 
-
-gatk UpdateVCFSequenceDictionary -V {input.vcf} --source-dictionary $ref --replace --output {output.vcf_vardict} ;
+bcftools view view -i 'INFO/SVTYPE!=""' -Oz -o {output.vcf_vardict_sv} {input.vcf_vardict}
+tabix -p vcf -f {output.vcf_vardict_sv}
+bcftools view view -i 'INFO/SVTYPE!=""' -Oz -o {output.vcf_vardict} {input.vcf_vardict}
+tabix -p vcf -f {output.vcf_vardict}
 
 rm -rf {params.tmpdir}
         """
