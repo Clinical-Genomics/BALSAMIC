@@ -57,9 +57,8 @@ rule gatk_update_vcf_sequence_dictionary:
         ref = config["reference"]["reference_genome"],
         vcf = vcf_dir + "vardict/SNV.somatic." + config["analysis"]["case_id"] + ".vardict.vcf.gz",
     output:
-        vcf_vardict = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.vcf.gz",
+        vcf_vardict = vcf_dir + "vardict/SNV_SV.somatic." + config["analysis"]["case_id"] + ".vardict.vcf.gz",
     params:
-        housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "research"},
         tmpdir=tempfile.mkdtemp(prefix=tmp_dir),
     benchmark:
         Path(benchmark_dir,"gatk_update_vcf_sequence_dictionary" + config["analysis"]["case_id"] + ".tsv").as_posix()
@@ -75,5 +74,30 @@ ref=$(echo {input.ref} | sed 's/.fasta/.dict/g') ;
 
 gatk UpdateVCFSequenceDictionary -V {input.vcf} --source-dictionary $ref --replace --output {output.vcf_vardict} ;
       
+rm -rf {params.tmpdir}
+        """
+
+rule vardict_move_svs:
+    input:
+        vcf_vardict = vcf_dir + "vardict/SNV_SV.somatic." + config["analysis"]["case_id"] + ".vardict.vcf.gz"
+    output:
+        vcf_vardict=vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.vcf.gz",
+        vcf_vardict_sv=vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".vardict.vcf.gz",
+    params:
+        housekeeper_id={"id": config["analysis"]["case_id"], "tags": "research"},
+        tmpdir=tempfile.mkdtemp(prefix=tmp_dir),
+    benchmark:
+        Path(benchmark_dir,"vardict_move_svs" + config["analysis"]["case_id"] + ".tsv").as_posix()
+    singularity:
+        Path(singularity_image,config["bioinfo_tools"].get("gatk") + ".sif").as_posix()
+    message:
+        "Moving SVs from VarDict VCF to separate VCF."
+    shell:
+        """
+export TMPDIR={params.tmpdir};  
+
+
+gatk UpdateVCFSequenceDictionary -V {input.vcf} --source-dictionary $ref --replace --output {output.vcf_vardict} ;
+
 rm -rf {params.tmpdir}
         """

@@ -127,6 +127,10 @@ set-resources:
         threads: 1
         mem_mb: 20000
         runtime: 30
+    vardict_move_svs:
+        threads: 1
+        mem_mb: 10000
+        runtime: 30
     gatk_update_vcf_sequence_dictionary:
         runtime: 600
         threads: 5
