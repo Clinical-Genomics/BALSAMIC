@@ -9,5 +9,5 @@ dependencies:
   - bedtools=2.31.1
   - python=3.12.3
   - vcfanno=0.3.5
-  - genmod=3.10.1
+  - genmod=3.7.4
   - annotsv=3.4.6
