@@ -37,7 +37,7 @@ VCF_DICT = {
     },
     "vardict": {
         "mutation": "somatic",
-        "mutation_type": "SNV",
+        "mutation_type": ["SNV", "SV"],
         "analysis_type": ["paired", "single"],
         "sequencing_type": ["targeted"],
         "workflow_solution": ["BALSAMIC"],
@@ -106,8 +106,6 @@ VCF_DICT = {
         "workflow_solution": ["BALSAMIC"],
     },
 }
-
-SLEEP_BEFORE_START = 1500
 
 WORKFLOW_PARAMS = {
     "bam_post_processing": {
