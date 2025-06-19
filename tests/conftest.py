@@ -354,7 +354,7 @@ def reference():
         "wgs_calling_regions": "genome/wgs_calling_regions.v1",
         "genome_chrom_size": "genome/hg19.chrom.sizes",
         "refgene_bed": "genome/refseq.flat.bed",
-        "rank_score": "genome/cancer_rank_model_-v0.1-.ini",
+        "rank_score": "genome/cancer_rank_model_-v0.2-.ini",
         "access_regions": "genome/access-5k-mappable.hg19.bed",
         "delly_exclusion": "genome/delly_exclusion.tsv",
         "delly_exclusion_converted": "genome/delly_exclusion_converted.tsv",

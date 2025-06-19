@@ -154,10 +154,10 @@ REFERENCE_FILES: Dict[GenomeVersion, Dict[str, dict]] = {
             "dir_name": "genome",
         },
         "rank_score": {
-            "url": "https://raw.githubusercontent.com/Clinical-Genomics/reference-files/master/cancer/rank_model/cancer_rank_model_-v0.1-.ini",
+            "url": "https://raw.githubusercontent.com/Clinical-Genomics/reference-files/master/cancer/rank_model/cancer_rank_model_-v0.2-.ini",
             "file_type": FileType.TXT,
             "gzip": False,
-            "file_name": "cancer_rank_model_-v0.1-.ini",
+            "file_name": "cancer_rank_model_-v0.2-.ini",
             "dir_name": "genome",
         },
         "access_regions": {
@@ -331,7 +331,7 @@ REFERENCE_FILES: Dict[GenomeVersion, Dict[str, dict]] = {
             "dir_name": "genome",
         },
         "rank_score": {
-            "url": "https://raw.githubusercontent.com/Clinical-Genomics/reference-files/master/cancer/rank_model/cancer_rank_model_-v0.1-.ini",
+            "url": "https://raw.githubusercontent.com/Clinical-Genomics/reference-files/master/cancer/rank_model/cancer_rank_model_-v0.2-.ini",
             "file_type": FileType.TXT,
             "gzip": False,
             "file_name": "cancer_rank_model_-v0.1-.ini",
