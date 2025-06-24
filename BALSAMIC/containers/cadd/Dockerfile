@@ -13,8 +13,8 @@ LABEL about.license="MIT License (MIT)"
 ## Install snakemake and unzip. Download and extract CADD repository
 RUN conda install -y -c conda-forge -c bioconda snakemake=7.32.2 unzip && \
     conda clean -afy && \
-    wget --no-verbose \
-    https://github.com/kircherlab/CADD-scripts/archive/CADD1.6.zip \
+    wget --no-verbose --max-redirect=0 \
+    https://codeload.github.com/kircherlab/CADD-scripts/zip/refs/tags/CADD1.6 \
     -O /opt/conda/share/CADD1.6.zip && \
     unzip -o /opt/conda/share/CADD1.6.zip -d /opt/conda/share/ && \
     rm /opt/conda/share/CADD1.6.zip && \
