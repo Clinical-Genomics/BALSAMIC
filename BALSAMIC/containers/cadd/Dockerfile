@@ -10,12 +10,10 @@ LABEL about.home="https://cadd.gs.washington.edu/"
 LABEL about.documentation="https://cadd.gs.washington.edu/info"
 LABEL about.license="MIT License (MIT)"
 
-## Install snakemake and unzip
+## Install snakemake and unzip. Download and extract CADD repository
 RUN conda install -y -c conda-forge -c bioconda snakemake=7.32.2 unzip && \
-    conda clean -afy
-
-## Donwload and extract CADD repository
-RUN wget --no-verbose \
+    conda clean -afy && \
+    wget --no-verbose \
     https://github.com/kircherlab/CADD-scripts/archive/CADD1.6.zip \
     -O /opt/conda/share/CADD1.6.zip && \
     unzip -o /opt/conda/share/CADD1.6.zip -d /opt/conda/share/ && \
