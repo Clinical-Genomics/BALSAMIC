@@ -23,10 +23,10 @@ RUN conda install -y -c conda-forge -c bioconda snakemake=7.32.2 unzip && \
     --conda-prefix /opt/conda/share/CADD-scripts/envs \
     --cores 1 --configfile config/config_GRCh38_v1.6.yml --snakefile Snakefile && \
     ln -s /opt/conda/share/CADD-scripts/CADD.sh /opt/conda/bin/CADD.sh && \
-    conda clean -yfa
+    conda clean -yfa  && \
+    useradd -m dockeruser
 
 # Run as a non-root
-RUN useradd -m dockeruser
 USER dockeruser
 
 # Set the work directory
