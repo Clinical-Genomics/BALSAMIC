@@ -20,7 +20,6 @@ Fixed:
 * Fixed varcall_py27 container for Manta https://github.com/Clinical-Genomics/BALSAMIC/pull/1567
 
 
-
 [17.0.1]
 --------
 
