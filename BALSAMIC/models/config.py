@@ -85,7 +85,7 @@ class VarcallerAttribute(BaseModel):
     """
 
     mutation: MutationOrigin
-    mutation_type: MutationType
+    mutation_type: List[MutationType]
     analysis_type: Optional[List[AnalysisType]] = None
     sequencing_type: Optional[List[SequencingType]] = None
     workflow_solution: Optional[List[WorkflowSolution]] = None
