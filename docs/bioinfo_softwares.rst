@@ -57,7 +57,7 @@ ensembl-vep
 ~~~~~~~~~~~
 :Source code: `GitHub` `<https://github.com/Ensembl/ensembl-vep>`_
 :Article: `Genome Biology` `<https://genomebiology.biomedcentral.com/articles/10.1186/s13059-016-0974-4>`_
-:Version: `104.3`
+:Version: `113.4`
 
 fastp
 ~~~~~
