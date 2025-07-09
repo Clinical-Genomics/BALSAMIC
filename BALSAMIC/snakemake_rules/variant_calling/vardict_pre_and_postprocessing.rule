@@ -81,8 +81,8 @@ rule vardict_move_svs:
     input:
         vcf_vardict = vcf_dir + "vardict/SNV_SV.somatic." + config["analysis"]["case_id"] + ".vardict.vcf.gz"
     output:
-        vcf_vardict=vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.vcf.gz",
-        vcf_vardict_sv=vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".vardict.vcf.gz",
+        vcf_vardict = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.vcf.gz",
+        vcf_vardict_sv = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".vardict.vcf.gz",
     params:
         housekeeper_id={"id": config["analysis"]["case_id"], "tags": "research"},
         tmpdir=tempfile.mkdtemp(prefix=tmp_dir),
@@ -96,9 +96,9 @@ rule vardict_move_svs:
         """
 export TMPDIR={params.tmpdir};  
 
-bcftools view view -i 'INFO/SVTYPE!=""' -Oz -o {output.vcf_vardict_sv} {input.vcf_vardict}
+bcftools view -i 'INFO/SVTYPE!=""' -Oz -o {output.vcf_vardict_sv} {input.vcf_vardict}
 tabix -p vcf -f {output.vcf_vardict_sv}
-bcftools view view -i 'INFO/SVTYPE!=""' -Oz -o {output.vcf_vardict} {input.vcf_vardict}
+bcftools view -e 'INFO/SVTYPE!=""' -Oz -o {output.vcf_vardict} {input.vcf_vardict}
 tabix -p vcf -f {output.vcf_vardict}
 
 rm -rf {params.tmpdir}
