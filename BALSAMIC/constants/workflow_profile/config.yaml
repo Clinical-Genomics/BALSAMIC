@@ -107,10 +107,6 @@ set-resources:
         threads: 2
         runtime: 60
         mem_mb: 10000
-    delly_cnv_tumor_normal:
-        threads: 36
-        runtime: 720
-        mem_mb: 10000
     cnvkit_call_CNV_research:
         threads: 10
         mem_mb: 5000
