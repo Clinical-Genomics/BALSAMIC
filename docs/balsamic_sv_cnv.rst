@@ -168,11 +168,20 @@ The following filter applies for both tumor-normal and tumor-only samples in add
 
     SWEGENAF <= 0.02  (or) SWEGENAF == "."
 
-*Frq*: Frequency of observation of the variants from normal `Clinical` samples
+*Frq*: Frequency of observation of the variants from germline calls on normal `Clinical` samples
 
 ::
 
     Frq <= 0.02  (or) Frq == "."
+
+*ArtefactObs*: Number of observations of the variants from somatic calls on 55 merged WGS normal samples (4 samples, approximately 120X coverage)
+
+::
+
+  ArtefactObs <= 4  (or) ArtefactObs == "."
+
+.. note:: The above filter ArtefactObs is only active for the WGS workflow.
+
 
 The variants scored as `PASS` are included in the final vcf file (`SNV.somatic.<CASE_ID>.svdb.<research/clinical>.filtered.pass.vcf.gz`).
 
