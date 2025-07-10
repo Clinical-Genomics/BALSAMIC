@@ -17,7 +17,7 @@ def add_file_logging(log_file: str, logger_name: str = None):
     file_handler = logging.FileHandler(log_file)
     file_handler.setLevel(logging.INFO)
 
-    # Try to copy the formatter from an existing handler (likely from coloredlogs)
+    # Try to copy the formatter from an existing handler
     for handler in logger.handlers:
         if handler.formatter:
             file_handler.setFormatter(handler.formatter)

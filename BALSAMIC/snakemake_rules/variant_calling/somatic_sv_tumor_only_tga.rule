@@ -19,7 +19,6 @@ rule manta_tumor_only_tga:
         runmode = "local",
         tumor = config_model.get_sample_name_by_type(SampleType.TUMOR),
         case_name = config["analysis"]["case_id"],
-        manta_install_path= "/opt/conda/share/manta-1.6.0-3",
         low_pr_sr_count = [MANTA_FILTERS.low_pr_sr_count.tag_value,MANTA_FILTERS.low_pr_sr_count.filter_name],
     message:
         ("Calling structural variants using manta for {params.case_name} and"
@@ -37,7 +36,7 @@ configManta.py \
 
 python {params.tmpdir}/runWorkflow.py -m {params.runmode} -j {resources.threads};
 
-{params.manta_install_path}/libexec/convertInversion.py \
+convertInversion.py \
   $samtools_path \
   {input.fa} \
   {params.tmpdir}/results/variants/tumorSV.vcf.gz > {params.tmpdir}/results/variants/tumorSV_converted.vcf; 
