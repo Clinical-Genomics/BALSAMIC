@@ -34,6 +34,11 @@ Depending on the sequencing type, BALSAMIC is currently running the following st
      - tumor-normal, tumor-only
      - somatic, germline
      - SV
+   * - VarDict
+     - TGA, WES
+     - tumor-normal, tumor-only
+     - somatic
+     - SV
    * - TIDDIT
      - WGS
      - tumor-normal, tumor-only
@@ -136,13 +141,15 @@ Further information regarding the TIDDIT tumor normal filtration: As translocati
      - WGS
         tumor-only
    * - | 1. manta
-       | 2. dellysv
-       | 3. cnvkit
-       | 4. dellycnv
+       | 2. vardict
+       | 3. dellysv
+       | 4. cnvkit
+       | 5. dellycnv
      - | 1. manta
-       | 2. dellysv
-       | 3. cnvkit
-       | 4. dellycnv
+       | 2. vardict
+       | 3. dellysv
+       | 4. cnvkit
+       | 5. dellycnv
      - | 1. manta
        | 2. dellysv
        | 3. ascat
