@@ -6,3 +6,4 @@ default-resources:
     threads: 2
 max-status-checks-per-second: 10
 local-cores: 1
+restart-times: 2

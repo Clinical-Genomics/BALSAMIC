@@ -39,6 +39,14 @@ set-resources:
         threads: 24
         runtime: 600
         mem_mb: 60000
+    delly_cnv_tumor_only:
+        threads: 12
+        runtime: 340
+        mem_mb: 20000
+    delly_cnv_tumor_normal:
+        threads: 12
+        runtime: 340
+        mem_mb: 20000
     delly_cnv_tumor_only_wgs:
         threads: 24
         runtime: 600
@@ -98,10 +106,6 @@ set-resources:
     bcftools_sort_cnvkitCNV_research:
         threads: 2
         runtime: 60
-        mem_mb: 10000
-    delly_cnv_tumor_normal:
-        threads: 36
-        runtime: 720
         mem_mb: 10000
     cnvkit_call_CNV_research:
         threads: 10
@@ -213,7 +217,7 @@ set-resources:
         threads: 16
     sentieon_DNAscope_tga:
         runtime: 1440
-        mem_mb: 10000
+        mem_mb: 25000
         threads: 36
     finalize_gens_outputfiles:
         runtime: 60
@@ -605,7 +609,7 @@ set-resources:
         threads: 36
     sentieon_dedup_consensus:
         runtime: 1440
-        mem_mb: 45000
+        mem_mb: 60000
         threads: 36
     sentieon_base_calibration:
         mem_mb: 25000
