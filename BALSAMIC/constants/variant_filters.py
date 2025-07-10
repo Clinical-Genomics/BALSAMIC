@@ -468,7 +468,7 @@ SVDB_FILTER_SETTINGS = {
         "field": "INFO",
     },
     "loqusdb_artefact_sv_obs": {
-        "tag_value": 5,
+        "tag_value": 4,
         "filter_name": "ArtefactObs",
         "field": "INFO",
     },
