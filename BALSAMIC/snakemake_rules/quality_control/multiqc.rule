@@ -97,7 +97,7 @@ else:
     # alignment summary metrics
     multiqc_input.extend(expand(qc_dir + "{sample_type}.{sample}.alignment_summary_metrics.txt", sample_type="tumor", sample=tumor_sample))
     if config['analysis']['analysis_type'] == "paired":
-        multiqc_input.extend(expand(qc_dir + "{sample_type}.{sample}.alignment_summary_metrics.txt", sample_type="normal", sample=tumor_sample))
+        multiqc_input.extend(expand(qc_dir + "{sample_type}.{sample}.alignment_summary_metrics.txt", sample_type="normal", sample=normal_sample))
 
     # sambamba metrics
     multiqc_input.extend(expand(qc_dir + "tumor.{sample}.cov.bed", sample=tumor_sample))

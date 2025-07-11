@@ -1,13 +1,13 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
 
-if config["analysis"]["sequencing_type"] != "wgs":
+if config["analysis"]["sequencing_type"] == "wgs":
     rule picard_CollectAlignmentSummaryMetrics_WGS:
         input:
             bam = Path(bam_dir + "{sample_type}.{sample}.{fastq_pattern}.align_sort.bam").as_posix(),
             fa = config["reference"]["reference_genome"]
         output:
-            alignment_metrics = Path(qc_dir,"{sample_type}.{sample}.{fastq_pattern}.alignment_summary_metrics.txt").as_posix(),
+            alignment_metrics = qc_dir + "{sample_type}.{sample}.{fastq_pattern}.alignment_summary_metrics.txt"
         benchmark:
             Path(benchmark_dir, "CollectAlignmentSummaryMetrics.{sample_type}.{sample}.{fastq_pattern}.tsv").as_posix()
         singularity:
@@ -38,7 +38,7 @@ else:
             bam = Path(bam_dir, "{sample_type}.{sample}.align_sort.bam").as_posix(),
             fa = config["reference"]["reference_genome"]
         output:
-            alignment_metrics = Path(qc_dir,"{sample_type}.{sample}.alignment_summary_metrics.txt").as_posix(),
+            alignment_metrics = qc_dir + "{sample_type}.{sample}.alignment_summary_metrics.txt"
         benchmark:
             Path(benchmark_dir, "CollectAlignmentSummaryMetrics.{sample_type}.{sample}.tsv").as_posix()
         singularity:
