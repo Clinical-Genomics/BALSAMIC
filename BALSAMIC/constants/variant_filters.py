@@ -347,7 +347,7 @@ class TgaSNVFilters(BaseSNVFilters):
     clinical = research + [
         VCFFilter(tag_value=0.01, filter_name="Frq", field="INFO"),
         VCFFilter(tag_value=0.1, filter_name="ArtefactFrq", field="INFO"),
-        VCFFilter(tag_value=0.25, filter_name="HighOccurrenceFrq", field="INFO"),
+        VCFFilter(tag_value=0.3, filter_name="HighOccurrenceFrq", field="INFO"),
     ]
     quality = [
         VCFFilter(
