@@ -172,7 +172,6 @@ class BaseSNVFilters:
             category (Literal["clinical", "research", "quality"]): The filter category to use.
             analysis_type (Optional[Enum]): Filter based on analysis type (default: None).
             variant_caller (Optional[Enum]): Filter based on variant caller (default: None).
-            soft_filter_normals (Optional[bool]): If True, excludes filters in MATCHED_NORMAL_FILTER_NAMES.
             exclude_variantcaller_filters (Optional[bool]): If True, excludes the variantcaller filters.
             exome (Optional[bool]): Filter based on exome sequencing (default: False).
         Returns:
@@ -232,7 +231,6 @@ class BaseSNVFilters:
             category=category,
             analysis_type=analysis_type,
             variant_caller=variant_caller,
-            soft_filter_normals=soft_filter_normals,
             exome=exome,
         )
 
