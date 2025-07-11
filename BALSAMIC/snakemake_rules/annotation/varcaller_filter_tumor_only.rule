@@ -47,7 +47,7 @@ rule bcftools_filter_merged_clinical_tumor_only:
     Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
   params:
     artefact_freq = get_tag_and_filtername(snv_clinical_filters, "ArtefactFrq"),
-    somatic_snv_panel_freq= get_tag_and_filtername(snv_clinical_filters, "HighOccurrenceFrq"),
+    somatic_snv_panel_freq = get_tag_and_filtername(snv_clinical_filters, "HighOccurrenceFrq"),
     pop_freq = get_tag_and_filtername(snv_research_filters, "balsamic_high_pop_freq"),
     swegen_freq = get_tag_and_filtername(snv_research_filters, "SWEGENAF"),
     loqusdb_clinical_freq = get_tag_and_filtername(snv_clinical_filters, "Frq"),
