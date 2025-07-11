@@ -18,6 +18,7 @@ from BALSAMIC.commands.options import (
     OPTION_CADD_ANNOTATIONS,
     OPTION_CANCER_GERMLINE_SNV_OBSERVATIONS,
     OPTION_CANCER_SOMATIC_SNV_OBSERVATIONS,
+    OPTION_CANCER_SOMATIC_SNV_PANEL_OBSERVATIONS,
     OPTION_CANCER_SOMATIC_SV_OBSERVATIONS,
     OPTION_CASE_ID,
     OPTION_CLINICAL_SNV_OBSERVATIONS,
@@ -39,6 +40,7 @@ from BALSAMIC.commands.options import (
     OPTION_SWEGEN_SV,
     OPTION_TUMOR_SAMPLE_NAME,
     OPTION_UMI_MIN_READS,
+    OPTION_WHITELIST_SNVS,
 )
 from BALSAMIC.constants.analysis import (
     BIOINFO_TOOL_ENV,
@@ -102,6 +104,7 @@ LOG = logging.getLogger(__name__)
 @OPTION_SWEGEN_SV
 @OPTION_TUMOR_SAMPLE_NAME
 @OPTION_UMI_MIN_READS
+@OPTION_WHITELIST_SNVS
 @click.pass_context
 def case_config(
     context: click.Context,
@@ -136,6 +139,7 @@ def case_config(
     swegen_sv: Path,
     tumor_sample_name: str,
     umi_min_reads: str | None,
+    whitelist_snvs: Path,
 ):
     """Configure BALSAMIC workflow based on input arguments."""
 
@@ -187,6 +191,7 @@ def case_config(
         "cancer_somatic_sv_observations": cancer_somatic_sv_observations,
         "swegen_snv_frequency": swegen_snv,
         "swegen_sv_frequency": swegen_sv,
+        "whitelist_snvs": whitelist_snvs,
     }
     references.update(
         {
