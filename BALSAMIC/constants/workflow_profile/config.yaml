@@ -419,9 +419,13 @@ set-resources:
         runtime: 360
         mem_mb: 25000
         threads: 8
-    picard_CollectAlignmentSummaryMetrics:
+    picard_CollectAlignmentSummaryMetrics_TGA:
         runtime: 500
         mem_mb: 25000
+        threads: 8
+    picard_CollectAlignmentSummaryMetrics_WGS:
+        runtime: 500
+        mem_mb: 16000
         threads: 8
     picard_CollectHsMetrics:
         runtime: 360
