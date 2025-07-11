@@ -162,7 +162,6 @@ class BaseSNVFilters:
         category: Literal["clinical", "research", "quality"],
         analysis_type: Optional[Enum] = None,
         variant_caller: Optional[Enum] = None,
-        soft_filter_normals: Optional[bool] = None,
         exclude_variantcaller_filters: Optional[bool] = False,
         exome: Optional[bool] = False,
     ) -> List[VCFFilter]:
@@ -205,21 +204,6 @@ class BaseSNVFilters:
                 f for f in cls.INTERNAL_VARIANT_CALLER_FILTERS if filter_matches(f)
             ]
 
-        # Exclude default soft filters
-        matching_filters = [
-            f
-            for f in matching_filters
-            if f.filter_name not in cls.DEFAULT_SOFT_FILTERS
-        ]
-
-        # Exclude filters if soft_filter_normals is set
-        if soft_filter_normals:
-            matching_filters = [
-                f
-                for f in matching_filters
-                if f.filter_name not in cls.MATCHED_NORMAL_FILTER_NAMES
-            ]
-
         return matching_filters
 
     @classmethod
@@ -251,6 +235,22 @@ class BaseSNVFilters:
             soft_filter_normals=soft_filter_normals,
             exome=exome,
         )
+
+        # Exclude default soft filters
+        filters = [
+            f
+            for f in filters
+            if f.filter_name not in cls.DEFAULT_SOFT_FILTERS
+        ]
+
+        # Exclude filters if soft_filter_normals is set
+        if soft_filter_normals:
+            filters = [
+                f
+                for f in filters
+                if f.filter_name not in cls.MATCHED_NORMAL_FILTER_NAMES
+            ]
+
         # Extract filter_names
         filter_names = [f.filter_name for f in filters]
 
