@@ -322,7 +322,7 @@ if "cancer_somatic_snv_panel_observations" in config["reference"]:
         {
             "annotation": [
                 {
-                    "file": cancer_somatic_snv_obs,
+                    "file": cancer_somatic_snv_panel_obs,
                     "fields": ["Frq", "Obs", "Hom"],
                     "ops": ["self", "self", "self"],
                     "names": [
