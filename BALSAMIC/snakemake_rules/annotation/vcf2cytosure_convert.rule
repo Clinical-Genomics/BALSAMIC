@@ -16,7 +16,7 @@ if config["analysis"]["sequencing_type"] != 'wgs':
             Path(singularity_image, config["bioinfo_tools"].get("vcf2cytosure") + ".sif").as_posix()
         params:
             case_name = config["analysis"]["case_id"],
-            gender = config_model.get_tumor_gender,
+            gender = config_model.get_gender,
             housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "cnv-somatic"},
         message: "Converting CNVs from VCF to the CGH format using vcf2cytosure for {params.case_name}"
         shell:
@@ -38,7 +38,7 @@ elif config["analysis"]["sequencing_type"] == 'wgs' and config["analysis"]["anal
             Path(singularity_image, config["bioinfo_tools"].get("vcf2cytosure") + ".sif").as_posix()
         params:
             case_name = config["analysis"]["case_id"],
-            gender = config_model.get_tumor_gender,
+            gender = config_model.get_gender,
             housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "cnv-somatic"},
         message: "Converting CNVs from VCF to the CGH format using vcf2cytosure for {params.case_name}"
         shell:
@@ -63,7 +63,7 @@ elif config["analysis"]["sequencing_type"] == "wgs" and config["analysis"]["anal
             Path(singularity_image, config["bioinfo_tools"].get("vcf2cytosure") + ".sif").as_posix()
         params:
             case_name = config["analysis"]["case_id"],
-            gender = config_model.get_tumor_gender,
+            gender = config_model.get_gender,
             housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "cnv-somatic"},
         message: "Converting CNVs from VCF to the CGH format using vcf2cytosure for {params.case_name}"
         shell:

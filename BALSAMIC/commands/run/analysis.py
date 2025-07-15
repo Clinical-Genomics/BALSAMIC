@@ -29,7 +29,7 @@ from BALSAMIC.commands.options import (
     OPTION_SNAKEFILE,
     OPTION_SNAKEMAKE_OPT,
 )
-from BALSAMIC.constants.analysis import RunMode, LogFile
+from BALSAMIC.constants.analysis import RunMode
 from BALSAMIC.constants.cluster import (
     QOS,
 )
@@ -39,7 +39,7 @@ from BALSAMIC.models.snakemake import SnakemakeExecutable
 from BALSAMIC.utils.analysis import get_singularity_bind_paths
 from BALSAMIC.utils.cli import createDir, get_snakefile
 from BALSAMIC.utils.io import write_json
-from BALSAMIC.utils.logging import add_file_logging
+from BALSAMIC.utils.logging import add_file_logging, set_log_filename
 from BALSAMIC.utils.rule import get_script_path
 
 LOG = logging.getLogger(__name__)
@@ -87,10 +87,9 @@ def analysis(
 
     config_model = ConfigModel.model_validate(sample_config)
     case_id = config_model.analysis.case_id
+    analysis_dir = config_model.analysis.analysis_dir
 
-    log_file = Path(
-        config_model.analysis.analysis_dir, case_id, LogFile.LOGNAME
-    ).as_posix()
+    log_file = set_log_filename(analysis_dir)
     LOG.info(f"Setting BALSAMIC logfile path to: {log_file}.")
     add_file_logging(log_file, logger_name=__name__)
 

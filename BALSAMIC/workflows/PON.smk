@@ -16,7 +16,7 @@ from BALSAMIC.models.params import BalsamicWorkflowConfig
 from BALSAMIC.utils.exc import BalsamicError
 from BALSAMIC.utils.io import write_finish_file
 from BALSAMIC.utils.rule import get_fastp_parameters, get_result_dir, get_threads, get_script_path
-
+from BALSAMIC.utils.logging import add_file_logging, set_log_filename
 
 # Initialize ConfigModel
 config_model = ConfigModel.model_validate(config)
@@ -37,6 +37,11 @@ analysis_dir_home: str = config_model.analysis.analysis_dir
 analysis_dir: str = Path(analysis_dir_home, "analysis", case_id).as_posix() + "/"
 # Get result dir
 result_dir: str = Path(config_model.analysis.result).as_posix() + "/"
+
+log_file = set_log_filename(analysis_dir)
+add_file_logging(log_file, logger_name=__name__)
+
+LOG.info("Running BALSAMIC: PON.smk.")
 
 # Create a temporary directory with trailing /
 tmp_dir: str = Path(result_dir, "tmp").as_posix() + "/"

@@ -44,7 +44,6 @@ from BALSAMIC.constants.analysis import (
     BIOINFO_TOOL_ENV,
     AnalysisWorkflow,
     Gender,
-    LogFile,
 )
 from BALSAMIC.constants.cache import GenomeVersion
 from BALSAMIC.constants.constants import FileType
@@ -65,7 +64,7 @@ from BALSAMIC.utils.cli import (
 )
 from BALSAMIC.utils.io import read_json, write_json
 from BALSAMIC.utils.utils import get_absolute_paths_dict
-from BALSAMIC.utils.logging import add_file_logging
+from BALSAMIC.utils.logging import add_file_logging, set_log_filename
 
 LOG = logging.getLogger(__name__)
 
@@ -142,7 +141,7 @@ def case_config(
     LOG.info(f"Creating case analysis directory: {analysis_dir}/{case_id}.")
     Path(analysis_dir, case_id).mkdir(exist_ok=True)
 
-    log_file = Path(analysis_dir, case_id, LogFile.LOGNAME).as_posix()
+    log_file = set_log_filename(analysis_dir, run_start=True)
     LOG.info(f"Setting BALSAMIC logfile path to: {log_file}.")
     add_file_logging(log_file, logger_name=__name__)
 

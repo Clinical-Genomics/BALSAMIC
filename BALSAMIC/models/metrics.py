@@ -95,6 +95,34 @@ def validate_metric(metric: Metric) -> Metric:
     return metric
 
 
+def validate_metric(metric: Metric):
+    """Checks if a metric meets its filtering condition."""
+    if metric.condition:
+        norm: Optional[str] = metric.condition.norm
+        threshold: Optional[Any] = metric.condition.threshold
+        value: Any = metric.value
+
+        # Validate the norm operator
+        if norm not in VALID_OPS:
+            raise ValueError(f"Unsupported operation: {norm}")
+
+        # Attempt validation using the operator
+        try:
+            if not VALID_OPS[norm](value, threshold):
+                raise ValueError(
+                    f"QC metric {metric.name}: {value} validation has failed. "
+                    f"(Condition: {norm} {threshold}, ID: {metric.id})."
+                )
+        except TypeError:
+            raise ValueError(
+                f"Type mismatch in QC metric {metric.name}: {value} and {threshold} "
+                f"are not compatible with operator {norm}. (ID: {metric.id})."
+            )
+
+    LOG.info(f"QC metric {metric.name}: {metric.value} meets its condition.")
+    return metric
+
+
 class MetricValidation(BaseModel):
     """Defines the metric validation model.
 

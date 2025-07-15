@@ -9,7 +9,7 @@ from pydantic import ValidationError
 
 from BALSAMIC.constants.analysis import FastqName, SampleType, SequencingType, Gender
 from BALSAMIC.models.config import AnalysisModel, ConfigModel, SampleInstanceModel
-
+from BALSAMIC.utils.io import read_json, write_json
 from types import SimpleNamespace
 
 
@@ -430,15 +430,15 @@ def test_returns_known_gender(balsamic_model: ConfigModel, tga_female_sex_predic
     # GIVEN predicted female sex
     dummy_input = SimpleNamespace(sex_prediction_json=tga_female_sex_prediction)
 
-    # WHEN retrieving tumor sex from a given male
-    result = balsamic_model.get_tumor_gender(None, dummy_input)
+    # WHEN retrieving gender from a given male
+    result = balsamic_model.get_gender(None, dummy_input)
 
     # THEN return male
     assert result == Gender.MALE
 
 
-def test_returns_unknown_when_file_missing(balsamic_model: ConfigModel):
-    """If gender is UNKNOWN and the JSON file is absent, the function returns UNKNOWN."""
+def test_returns_female_when_file_missing(balsamic_model: ConfigModel):
+    """If gender is FEMALE and the JSON file is absent, the function returns FEMALE."""
 
     # GIVEN case with unknown gender
     balsamic_model.analysis.gender = Gender.UNKNOWN
@@ -446,11 +446,11 @@ def test_returns_unknown_when_file_missing(balsamic_model: ConfigModel):
     # GIVEN no sex prediction file
     dummy_input = SimpleNamespace(sex_prediction_json="/missing/file")
 
-    # WHEN retrieving tumor gender
-    result = balsamic_model.get_tumor_gender(None, dummy_input)
+    # WHEN retrieving gender
+    result = balsamic_model.get_gender(None, dummy_input)
 
     # THEN tumor gender should be unknown
-    assert result == Gender.UNKNOWN
+    assert result == Gender.FEMALE
 
 
 def test_reads_json_and_returns_prediction(
@@ -464,8 +464,62 @@ def test_reads_json_and_returns_prediction(
     # GIVEN case with unknown gender
     balsamic_model.analysis.gender = Gender.UNKNOWN
 
-    # WHEN retrieving tumor gender
-    result = balsamic_model.get_tumor_gender(None, dummy_input)
+    # WHEN retrieving gender
+    result = balsamic_model.get_gender(None, dummy_input)
+
+    # THEN tumor gender should be set to female
+    assert result == Gender.FEMALE
+
+
+def test_prioritise_normal_prediction(
+    balsamic_model: ConfigModel, tga_female_sex_prediction, tmp_path
+):
+    """If tumor and normal prediction is different, prioritise normal sex prediction."""
+
+    sex_prediction = read_json(tga_female_sex_prediction)
+
+    # GIVEN tumor predicted as female
+    sex_prediction[SampleType.TUMOR]["predicted_sex"] = Gender.FEMALE
+
+    # GIVEN normal predicted as male
+    sex_prediction[SampleType.NORMAL]["predicted_sex"] = Gender.MALE
+
+    sex_prediction_json = str(tmp_path / "tga_female_male_sex_prediction.json")
+    write_json(sex_prediction, sex_prediction_json)
+    dummy_input = SimpleNamespace(sex_prediction_json=sex_prediction_json)
+
+    # GIVEN case with unknown gender
+    balsamic_model.analysis.gender = Gender.UNKNOWN
+
+    # WHEN retrieving gender
+    result = balsamic_model.get_gender(None, dummy_input)
+
+    # THEN tumor gender should be set to male
+    assert result == Gender.MALE
+
+
+def test_default_female_gender(
+    balsamic_model: ConfigModel, tga_female_sex_prediction, tmp_path
+):
+    """If sex prediction and gender assignment is unknown, default to female gender."""
+
+    sex_prediction = read_json(tga_female_sex_prediction)
+
+    # GIVEN tumor predicted as UNKNOWN
+    sex_prediction[SampleType.TUMOR]["predicted_sex"] = Gender.UNKNOWN
+
+    # GIVEN normal predicted as UNKNOWN
+    sex_prediction[SampleType.NORMAL]["predicted_sex"] = Gender.UNKNOWN
+
+    sex_prediction_json = str(tmp_path / "tga_female_male_sex_prediction.json")
+    write_json(sex_prediction, sex_prediction_json)
+    dummy_input = SimpleNamespace(sex_prediction_json=sex_prediction_json)
+
+    # GIVEN case with unknown gender
+    balsamic_model.analysis.gender = Gender.UNKNOWN
+
+    # WHEN retrieving gender
+    result = balsamic_model.get_gender(None, dummy_input)
 
     # THEN tumor gender should be set to female
     assert result == Gender.FEMALE

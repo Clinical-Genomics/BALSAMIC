@@ -224,7 +224,7 @@ rule cnvkit_call_CNV_research:
         cnv_dir = cnv_dir,
         cnsr = lambda wc: "tumor.merged.cn{s,r}",
         case_name = config["analysis"]["case_id"],
-        gender = config_model.get_tumor_gender,
+        gender = config_model.get_gender,
         tumor_sample_id = "TUMOR",
         normal_sample_id = "NORMAL",
     message:

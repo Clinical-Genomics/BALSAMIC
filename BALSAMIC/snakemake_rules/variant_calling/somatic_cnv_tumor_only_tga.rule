@@ -178,7 +178,7 @@ rule cnvkit_call_CNV_research:
         cnv_dir = cnv_dir,
         cnsr = lambda wc: "tumor.merged.cn{s,r}",
         case_name = config["analysis"]["case_id"],
-        gender = config_model.get_tumor_gender,
+        gender = config_model.get_gender,
         sample_id = "TUMOR",
         genome_version = config["reference"]["genome_version"],
     message:
