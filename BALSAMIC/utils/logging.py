@@ -2,6 +2,7 @@ import logging
 from BALSAMIC.constants.analysis import LogFile
 import os
 import re
+from pathlib import Path
 
 
 def set_log_filename(analysis_dir: str, run_start: bool = False):
@@ -43,14 +44,15 @@ def set_log_filename(analysis_dir: str, run_start: bool = False):
         ):
             return LogFile.LOGNAME
         else:
-            return f"{LogFile.LOGNAME}.{latest_version + 1}"
+            return Path(f"{analysis_dir}/{LogFile.LOGNAME}.{latest_version + 1}").as_posix()
     else:
         # Return the latest existing logfile name
-        return (
+        logfile = (
             LogFile.LOGNAME
             if latest_version == 0
             else f"{LogFile.LOGNAME}.{latest_version}"
         )
+        return Path(f"{analysis_dir}/{logfile}").as_posix()
 
 
 def add_file_logging(log_file: str, logger_name: str = None):
