@@ -38,7 +38,7 @@ analysis_dir: str = Path(analysis_dir_home, "analysis", case_id).as_posix() + "/
 # Get result dir
 result_dir: str = Path(config_model.analysis.result).as_posix() + "/"
 
-log_file = set_log_filename(analysis_dir)
+log_file = set_log_filename(analysis_dir_home)
 add_file_logging(log_file, logger_name=__name__)
 
 LOG.info("Running BALSAMIC: PON.smk.")
