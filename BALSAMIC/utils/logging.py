@@ -25,10 +25,14 @@ def set_log_filename(analysis_dir: str, run_start: bool = False):
         - `LogFile.LOGNAME` is used as the base name (e.g., 'balsamic.log').
         - The version-less logfile (e.g., `balsamic.log`) is treated as version 0.
     """
-    latest_version = -1
+
+    if not Path(analysis_dir, LogFile.LOGNAME).is_file():
+        return Path(analysis_dir, LogFile.LOGNAME).as_posix()
 
     # Pattern: match balsamic.log or balsamic.log.1, .2, etc.
     pattern = re.compile(rf"^{re.escape(LogFile.LOGNAME)}(?:\.(\d+))?$")
+
+    latest_version = -1
 
     for filename in os.listdir(analysis_dir):
         match = pattern.match(filename)
@@ -38,13 +42,7 @@ def set_log_filename(analysis_dir: str, run_start: bool = False):
                 latest_version = version
 
     if run_start:
-        # Suggest the next version name
-        if latest_version == 0 and not os.path.exists(
-            os.path.join(analysis_dir, LogFile.LOGNAME)
-        ):
-            return LogFile.LOGNAME
-        else:
-            return Path(f"{analysis_dir}/{LogFile.LOGNAME}.{latest_version + 1}").as_posix()
+        return Path(f"{analysis_dir}/{LogFile.LOGNAME}.{latest_version + 1}").as_posix()
     else:
         # Return the latest existing logfile name
         logfile = (
