@@ -95,7 +95,7 @@ def validate_metric(metric: Metric) -> Metric:
     return metric
 
 
-def validate_metric(metric: Metric):
+def validate_metric_original(metric: Metric):
     """Checks if a metric meets its filtering condition."""
     if metric.condition:
         norm: Optional[str] = metric.condition.norm
