@@ -32,13 +32,12 @@ params = BalsamicWorkflowConfig.model_validate(WORKFLOW_PARAMS)
 
 # Get case id/name
 case_id: str = config_model.analysis.case_id
-# Get analysis dir
-analysis_dir_home: str = config_model.analysis.analysis_dir
-analysis_dir: str = Path(analysis_dir_home, "analysis", case_id).as_posix() + "/"
+# Get case-dir
+case_dir: str = Path(config_model.analysis.analysis_dir, case_id).as_posix()
 # Get result dir
 result_dir: str = Path(config_model.analysis.result).as_posix() + "/"
 
-log_file = set_log_filename(analysis_dir_home)
+log_file = set_log_filename(case_dir)
 add_file_logging(log_file, logger_name=__name__)
 
 LOG.info("Running BALSAMIC: PON.smk.")
@@ -99,7 +98,7 @@ if pon_workflow in [PONWorkflow.GENS_MALE, PONWorkflow.GENS_FEMALE]:
     rules_to_include.append("snakemake_rules/variant_calling/gatk_read_counts.rule")
     rules_to_include.append("snakemake_rules/pon/gens_create_pon.rule")
 
-pon_finish = Path(analysis_dir + "analysis_PON_finish").as_posix()
+pon_finish = Path(result_dir + "analysis_PON_finish").as_posix()
 
 for r in rules_to_include:
     include: Path(BALSAMIC_DIR, r).as_posix()

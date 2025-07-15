@@ -70,14 +70,13 @@ shell.prefix("set -eo pipefail; ")
 
 # Get case id/name
 case_id: str = config_model.analysis.case_id
-# Get analysis dir
-analysis_dir_home: str = config_model.analysis.analysis_dir
-analysis_dir: str = Path(analysis_dir_home, "analysis", case_id).as_posix() + "/"
+# Get case-dir
+case_dir: str = Path(config_model.analysis.analysis_dir, case_id).as_posix()
 # Get result dir
 result_dir: str = Path(config_model.analysis.result).as_posix() + "/"
 
 LOG = logging.getLogger(__name__)
-log_file = set_log_filename(analysis_dir_home)
+log_file = set_log_filename(case_dir)
 add_file_logging(log_file, logger_name=__name__)
 
 LOG.info("Running BALSAMIC: balsamic.smk.")

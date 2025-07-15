@@ -89,7 +89,11 @@ def analysis(
     case_id = config_model.analysis.case_id
     analysis_dir = config_model.analysis.analysis_dir
 
-    log_file = set_log_filename(analysis_dir)
+    case_dir = f"{analysis_dir}/{case_id}"
+    LOG.info(f"Creating case analysis directory: {case_dir}.")
+    Path(case_dir).mkdir(exist_ok=True)
+
+    log_file = set_log_filename(case_dir)
     LOG.info(f"Setting BALSAMIC logfile path to: {log_file}.")
     add_file_logging(log_file, logger_name=__name__)
 

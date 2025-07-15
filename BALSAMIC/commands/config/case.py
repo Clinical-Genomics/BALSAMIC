@@ -138,10 +138,11 @@ def case_config(
 
     LOG.info(f"Starting configuring analysis case: {case_id}.")
 
-    LOG.info(f"Creating case analysis directory: {analysis_dir}/{case_id}.")
-    Path(analysis_dir, case_id).mkdir(exist_ok=True)
+    case_dir = f"{analysis_dir}/{case_id}"
+    LOG.info(f"Creating case analysis directory: {case_dir}.")
+    Path(case_dir).mkdir(exist_ok=True)
 
-    log_file = set_log_filename(analysis_dir, run_start=True)
+    log_file = set_log_filename(case_dir, run_start=True)
     LOG.info(f"Setting BALSAMIC logfile path to: {log_file}.")
     add_file_logging(log_file, logger_name=__name__)
 
