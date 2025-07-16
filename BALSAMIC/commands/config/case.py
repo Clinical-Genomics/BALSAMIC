@@ -194,11 +194,6 @@ def case_config(
     )
     LOG.info(f"Collected references: {references}")
 
-    analysis_fastq_dir: str = get_analysis_fastq_files_directory(
-        case_dir=Path(analysis_dir, case_id).as_posix(), fastq_path=fastq_path
-    )
-    LOG.info(f"Prepared analysis fastq-dir: {analysis_fastq_dir}")
-
     result_dir: Path = Path(analysis_dir, case_id, "analysis")
     log_dir: Path = Path(analysis_dir, case_id, "logs")
     script_dir: Path = Path(analysis_dir, case_id, "scripts")
@@ -224,7 +219,7 @@ def case_config(
             "soft_filter_normal": soft_filter_normal,
             "gender": gender,
             "analysis_dir": analysis_dir,
-            "fastq_path": analysis_fastq_dir,
+            "fastq_path": fastq_path,
             "analysis_type": "paired" if normal_sample_name else "single",
             "log": log_dir.as_posix(),
             "script": script_dir.as_posix(),
@@ -244,7 +239,7 @@ def case_config(
         samples=get_sample_list(
             tumor_sample_name=tumor_sample_name,
             normal_sample_name=normal_sample_name,
-            fastq_path=analysis_fastq_dir,
+            fastq_path=fastq_path,
         ),
         vcf=VCF_DICT,
         bioinfo_tools=BIOINFO_TOOL_ENV,
