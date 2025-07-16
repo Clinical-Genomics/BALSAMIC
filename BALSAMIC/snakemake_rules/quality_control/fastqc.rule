@@ -1,12 +1,13 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
 
+
 rule tumor_fastqc:
     """Perform quality control checks on raw sequence data."""
     input:
         fastq = tumor_fastq_dir + "{fastq_file_names}.fastq.gz"
     output:
-        fastqc_zip = fastqc_dir + "{fastq_file_names}_fastqc.zip"
+        fastqc_zip = fastqc_dir + "{fastq_file_names}_tumor_fastqc.zip"
     benchmark:
         Path(benchmark_dir, "fastqc_{fastq_file_names}.tsv").as_posix()
     singularity:
@@ -33,7 +34,7 @@ if analysis_type == AnalysisType.PAIRED:
         input:
             fastq=normal_fastq_dir + "{fastq_file_names}.fastq.gz"
         output:
-            fastqc_zip=fastqc_dir + "{fastq_file_names}_fastqc.zip"
+            fastqc_zip=fastqc_dir + "{fastq_file_names}_normal_fastqc.zip"
         benchmark:
             Path(benchmark_dir,"fastqc_{fastq_file_names}.tsv").as_posix()
         singularity:
