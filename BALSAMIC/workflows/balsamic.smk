@@ -788,11 +788,9 @@ rule all:
         try:
             validate_qc_metrics(read_yaml(input[0]))
         except ValueError as val_exc:
-            LOG.error(val_exc)
             error_message = str(val_exc)
             status = "QC_VALIDATION_FAILED"
         except Exception as exc:
-            LOG.error(exc)
             error_message = str(exc)
             status = "UNKNOWN_ERROR"
 
@@ -801,6 +799,11 @@ rule all:
             shutil.rmtree(params.tmp_dir)
         except OSError as e:
             print("Error: %s - %s." % (e.filename, e.strerror))
+
+        # Log status in balsamic.log
+
+        LOG.info(f"BALSAMIC completed with status: {status}" + "\n")
+        LOG.info(error_message + "\n")
 
         # Write status to file
         with open(params.status_file,"w") as status_fh:
