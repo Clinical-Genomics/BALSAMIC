@@ -214,7 +214,7 @@ OPTION_TUMOR_FASTQ_PATH = click.option(
 OPTION_NORMAL_FASTQ_PATH = click.option(
     "--normal-fastq-path",
     type=click.Path(exists=True, resolve_path=True),
-    required=True,
+    required=False,
     help="Path to directory containing unconcatenated FASTQ files for normal",
 )
 
