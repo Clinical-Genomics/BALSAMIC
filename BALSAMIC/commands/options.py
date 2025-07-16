@@ -204,11 +204,18 @@ OPTION_EXOME = click.option(
     callback=validate_exome_option,
 )
 
-OPTION_FASTQ_PATH = click.option(
-    "--fastq-path",
+OPTION_TUMOR_FASTQ_PATH = click.option(
+    "--tumor-fastq-path",
     type=click.Path(exists=True, resolve_path=True),
     required=True,
-    help="Path to directory containing unconcatenated FASTQ files",
+    help="Path to directory containing unconcatenated FASTQ files for tumor",
+)
+
+OPTION_NORMAL_FASTQ_PATH = click.option(
+    "--normal-fastq-path",
+    type=click.Path(exists=True, resolve_path=True),
+    required=False,
+    help="Path to directory containing unconcatenated FASTQ files for normal",
 )
 
 OPTION_FORCE_ALL = click.option(

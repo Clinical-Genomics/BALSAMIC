@@ -18,13 +18,13 @@ def get_singularity_bind_paths(
 ) -> List[SingularityBindPath]:
     """Return a list of singularity binding paths for Balsamic analysis."""
     analysis_dir: Path = Path(sample_config["analysis"]["analysis_dir"])
-    fastq_dir: Path = Path(
-        get_resolved_fastq_files_directory(sample_config["analysis"]["fastq_path"])
+    tumor_fastq_dir: Path = Path(
+        get_resolved_fastq_files_directory(sample_config["analysis"]["tumor_fastq_path"])
     )
     cache_dir: Path = Path(os.path.commonpath(sample_config["reference"].values()))
     sentieon_install_dir: Path = Path(sample_config["sentieon"]["sentieon_install_dir"])
     singularity_bind_paths: List[SingularityBindPath] = [
-        SingularityBindPath(source=fastq_dir, destination=fastq_dir),
+        SingularityBindPath(source=tumor_fastq_dir, destination=tumor_fastq_dir),
         SingularityBindPath(source=ASSETS_DIR, destination=ASSETS_DIR),
         SingularityBindPath(source=analysis_dir, destination=analysis_dir),
         SingularityBindPath(source=cache_dir, destination=cache_dir),
@@ -32,6 +32,12 @@ def get_singularity_bind_paths(
             source=sentieon_install_dir, destination=sentieon_install_dir
         ),
     ]
+    if sample_config["analysis"]["analysis_type"] == "paired":
+        normal_fastq_dir: Path = Path(
+            get_resolved_fastq_files_directory(sample_config["analysis"]["normal_fastq_path"])
+        )
+        singularity_bind_paths.append(SingularityBindPath(source=normal_fastq_dir, destination=normal_fastq_dir))
+
     if sample_config.get("panel"):
         capture_kit_path: Path = Path(sample_config.get("panel").get("capture_kit"))
         singularity_bind_paths.append(

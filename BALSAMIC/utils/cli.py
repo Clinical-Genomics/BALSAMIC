@@ -344,13 +344,14 @@ def get_fastq_info(sample_name: str, fastq_path: str) -> Dict[str, FastqInfoMode
 
 
 def get_sample_list(
-    tumor_sample_name: str, normal_sample_name: Optional[str], fastq_path: str
+    tumor_sample_name: str, normal_sample_name: Optional[str], tumor_fastq_path: str, normal_fastq_path: Optional[str]
 ) -> List[Dict]:
     """Returns a list of SampleInstanceModel/s given the names of the tumor and/or normal samples.
     Args:
         tumor_sample_name (str). The sample_name of the tumor.
         normal_sample_name (str). The sample_name of the normal, if it exists.
-        fastq_path: (str). The path to the fastq-files for the supplied samples.
+        tumor_fastq_path: (str). The path to the fastq-files for the supplied samples.
+        normal_fastq_path: (str). The path to the fastq-files for the supplied samples.
 
     Returns:
         sample_list: List containing SampleInstanceModel/s.
@@ -359,7 +360,7 @@ def get_sample_list(
         {
             "name": tumor_sample_name,
             "type": SampleType.TUMOR,
-            "fastq_info": get_fastq_info(tumor_sample_name, fastq_path),
+            "fastq_info": get_fastq_info(tumor_sample_name, tumor_fastq_path),
         }
     ]
 
@@ -368,19 +369,19 @@ def get_sample_list(
             {
                 "name": normal_sample_name,
                 "type": SampleType.NORMAL,
-                "fastq_info": get_fastq_info(normal_sample_name, fastq_path),
+                "fastq_info": get_fastq_info(normal_sample_name, normal_fastq_path),
             }
         )
 
     return sample_list
 
 
-def get_pon_sample_list(fastq_path: str) -> List[SampleInstanceModel]:
+def get_pon_sample_list(normal_fastq_path: str) -> List[SampleInstanceModel]:
     """Returns a list of SampleInstanceModels to be used in PON generation."""
     sample_list: List[SampleInstanceModel] = []
     sample_names = set()
 
-    for fastq in Path(fastq_path).glob(f"*.{FileType.FASTQ}.{FileType.GZ}"):
+    for fastq in Path(normal_fastq_path).glob(f"*.{FileType.FASTQ}.{FileType.GZ}"):
         sample_names.add(fastq.name.split("_")[-4])
 
     if len(sample_names) < PonParams.MIN_PON_SAMPLES:
@@ -396,7 +397,7 @@ def get_pon_sample_list(fastq_path: str) -> List[SampleInstanceModel]:
             {
                 "name": sample_name,
                 "type": SampleType.NORMAL,
-                "fastq_info": get_fastq_info(sample_name, fastq_path),
+                "fastq_info": get_fastq_info(sample_name, normal_fastq_path),
             }
         )
 

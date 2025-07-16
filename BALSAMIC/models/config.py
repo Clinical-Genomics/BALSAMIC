@@ -151,11 +151,12 @@ class AnalysisModel(BaseModel):
     case_id: str
     soft_filter_normal: Optional[bool] = False
     analysis_type: AnalysisType
+    tumor_fastq_path: Annotated[str, AfterValidator(is_dir)]
+    normal_fastq_path: Optional[Annotated[str, AfterValidator(is_dir)]] = None
     gender: Optional[Gender] = None
     sequencing_type: SequencingType
     analysis_workflow: AnalysisWorkflow
     analysis_dir: Annotated[str, AfterValidator(is_dir)]
-    fastq_path: Annotated[str, AfterValidator(is_dir)]
     log: Annotated[str, AfterValidator(is_dir)]
     script: Annotated[str, AfterValidator(is_dir)]
     result: Annotated[str, AfterValidator(is_dir)]
@@ -293,39 +294,6 @@ class ConfigModel(BaseModel):
 
         return samples
 
-    @model_validator(mode="before")
-    def no_unassigned_fastqs_in_fastq_dir(cls, values):
-        """All fastq files in the supplied fastq-dir must have been assigned to the sample-dict."""
-
-        def get_all_fwd_rev_values(samples) -> List[str]:
-            # Return all fastq files in analysis
-            fwd_rev_values = []
-            for sample in samples:
-                for fastq_pattern in sample["fastq_info"]:
-                    fwd_rev_values.append(
-                        sample["fastq_info"][fastq_pattern][FastqName.FWD]
-                    )
-                    fwd_rev_values.append(
-                        sample["fastq_info"][fastq_pattern][FastqName.REV]
-                    )
-            return fwd_rev_values
-
-        fastq_path = values["analysis"]["fastq_path"]
-
-        # Get a set of all fastq files in fastq-directory
-        fastqs_in_fastq_path = set(glob(f"{fastq_path}/*fastq.gz"))
-
-        # Look for fastqs in sample dict
-        fastqs_assigned = set(get_all_fwd_rev_values(values["samples"]))
-
-        unassigned_fastqs = fastqs_in_fastq_path - fastqs_assigned
-        if unassigned_fastqs:
-            raise ValueError(
-                f"Fastqs in fastq-dir not assigned to sample config: {unassigned_fastqs}"
-            )
-
-        return values
-
     def get_all_sample_names(self) -> List[str]:
         """Return all sample names in the analysis."""
         return [sample.name for sample in self.samples]
@@ -357,10 +325,12 @@ class ConfigModel(BaseModel):
                         fastq_list.append(fastq_info.rev)
         return fastq_list
 
-    def get_all_fastq_names(self, remove_suffix: bool = False) -> List[str]:
+    def get_all_fastq_names(self, remove_suffix: bool = False, sample_name: Optional[str] = None) -> List[str]:
         """Return all fastq_names involved in analysis, optionally remove fastq.gz suffix."""
         fastq_names = []
         for sample in self.samples:
+            if sample_name is not None and sample.name != sample_name:
+                continue  # Skip non-matching samples if a specific one is requested
             for fastq_pattern, fastqs in sample.fastq_info.items():
                 if remove_suffix:
                     fastq_names.extend(
@@ -377,7 +347,6 @@ class ConfigModel(BaseModel):
                         ]
                     )
         return fastq_names
-
     def get_fastq_by_fastq_pattern(
         self, fastq_pattern: str, fastq_type: FastqName
     ) -> str:
