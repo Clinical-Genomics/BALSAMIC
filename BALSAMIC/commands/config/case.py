@@ -24,7 +24,8 @@ from BALSAMIC.commands.options import (
     OPTION_CLINICAL_SV_OBSERVATIONS,
     OPTION_SOFT_FILTER_NORMAL,
     OPTION_EXOME,
-    OPTION_FASTQ_PATH,
+    OPTION_TUMOR_FASTQ_PATH,
+    OPTION_NORMAL_FASTQ_PATH,
     OPTION_GENDER,
     OPTION_GENOME_INTERVAL,
     OPTION_GENOME_VERSION,
@@ -86,7 +87,8 @@ LOG = logging.getLogger(__name__)
 @OPTION_CLINICAL_SV_OBSERVATIONS
 @OPTION_SOFT_FILTER_NORMAL
 @OPTION_EXOME
-@OPTION_FASTQ_PATH
+@OPTION_TUMOR_FASTQ_PATH
+@OPTION_NORMAL_FASTQ_PATH
 @OPTION_GENDER
 @OPTION_GENOME_VERSION
 @OPTION_GENOME_INTERVAL
@@ -118,7 +120,8 @@ def case_config(
     clinical_snv_observations: Path,
     clinical_sv_observations: Path,
     exome: bool,
-    fastq_path: Path,
+    tumor_fastq_path: Path,
+    normal_fastq_path: Path,
     gender: Gender,
     genome_version: GenomeVersion,
     genome_interval: Path,
@@ -219,8 +222,9 @@ def case_config(
             "soft_filter_normal": soft_filter_normal,
             "gender": gender,
             "analysis_dir": analysis_dir,
-            "fastq_path": fastq_path,
             "analysis_type": "paired" if normal_sample_name else "single",
+            "tumor_fastq_path": tumor_fastq_path,
+            "normal_fastq_path": normal_fastq_path,
             "log": log_dir.as_posix(),
             "script": script_dir.as_posix(),
             "result": result_dir.as_posix(),
@@ -239,7 +243,8 @@ def case_config(
         samples=get_sample_list(
             tumor_sample_name=tumor_sample_name,
             normal_sample_name=normal_sample_name,
-            fastq_path=fastq_path,
+            tumor_fastq_path=tumor_fastq_path,
+            normal_fastq_path=normal_fastq_path,
         ),
         vcf=VCF_DICT,
         bioinfo_tools=BIOINFO_TOOL_ENV,
