@@ -43,64 +43,16 @@ class Metric(BaseModel):
     condition: Optional[MetricCondition]
 
 
-def validate_metric(metric: Metric) -> Metric:
-    """
-    Checks if a metric meets its filtering condition.
-
-    Raises:
-    ValueError
-        If the operator is unsupported, the operands are incompatible,
-        or the metric fails validation and is **not** listed in
-        ``METRIC_WARNINGS``
-    """
-
-    cond = metric.condition
-    if cond is None:
-        LOG.info("QC metric %s: %s (no condition).", metric.name, metric.value)
-        return metric
-
-    op: Optional[Callable[[Any, Any], bool]] = VALID_OPS.get(cond.norm)
-    if op is None:
-        raise ValueError(f"Unsupported operation: {cond.norm!r}")
-
-    try:
-        passed = op(metric.value, cond.threshold)
-    except TypeError as exc:
-        raise ValueError(
-            f"Type mismatch for QC metric {metric.name}: "
-            f"{metric.value!r} {cond.norm} {cond.threshold!r} (ID: {metric.id})"
-        ) from exc
-
-    if passed:
-        LOG.info(
-            "QC metric %s: %s meets its condition (%s %s, ID: %s).",
-            metric.name,
-            metric.value,
-            cond.norm,
-            cond.threshold,
-            metric.id,
-        )
-        return metric
-
-    # ── Validation failed ──────────────────────────────────────────────
-    msg = (
-        f"QC metric {metric.name}: {metric.value} validation has failed. "
-        f"(Condition: {cond.norm} {cond.threshold}, ID: {metric.id})."
-    )
-    if metric.name in METRIC_WARNINGS:
-        LOG.info(msg)
-    else:
-        raise ValueError(msg)
-
-    return metric
-
-
-def validate_metric_original(metric: Metric):
+def validate_metric(metric: Metric):
     """Checks if a metric meets its filtering condition."""
     if metric.condition:
         norm: Optional[str] = metric.condition.norm
         threshold: Optional[Any] = metric.condition.threshold
         value: Any = metric.value
+
+        # Ignore warning metrics from failing
+        if metric.name in METRIC_WARNINGS:
+            return metric
 
         # Validate the norm operator
         if norm not in VALID_OPS:
@@ -119,7 +71,6 @@ def validate_metric_original(metric: Metric):
                 f"are not compatible with operator {norm}. (ID: {metric.id})."
             )
 
-    LOG.info(f"QC metric {metric.name}: {metric.value} meets its condition.")
     return metric
 
 
