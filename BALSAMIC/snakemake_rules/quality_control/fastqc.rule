@@ -27,30 +27,30 @@ fastqc --threads {resources.threads} {input.fastq} \
 
 rm -rf {params.tmpdir}
         """
-
-rule normal_fastqc:
-    """Perform quality control checks on raw sequence data."""
-    input:
-        fastq=normal_fastq_dir + "{fastq_file_names}.fastq.gz"
-    output:
-        fastqc_zip=fastqc_dir + "{fastq_file_names}_fastqc.zip"
-    benchmark:
-        Path(benchmark_dir,"fastqc_{fastq_file_names}.tsv").as_posix()
-    singularity:
-        Path(singularity_image,config["bioinfo_tools"].get("fastqc") + ".sif").as_posix()
-    params:
-        fastqc_dir=fastqc_dir,
-        fastq_file_name="{fastq_file_names}",
-        tmpdir=tempfile.mkdtemp(prefix=tmp_dir)
-    message:
-        "Running FastQC on {params.fastq_file_name}"
-    shell:
-        """
-export TMPDIR={params.tmpdir};
-
-fastqc --threads {resources.threads} {input.fastq} \
---dir {params.tmpdir} \
---outdir {params.fastqc_dir};
-
-rm -rf {params.tmpdir}
-        """
+if analysis_type == AnalysisType.PAIRED:
+    rule normal_fastqc:
+        """Perform quality control checks on raw sequence data."""
+        input:
+            fastq=normal_fastq_dir + "{fastq_file_names}.fastq.gz"
+        output:
+            fastqc_zip=fastqc_dir + "{fastq_file_names}_fastqc.zip"
+        benchmark:
+            Path(benchmark_dir,"fastqc_{fastq_file_names}.tsv").as_posix()
+        singularity:
+            Path(singularity_image,config["bioinfo_tools"].get("fastqc") + ".sif").as_posix()
+        params:
+            fastqc_dir=fastqc_dir,
+            fastq_file_name="{fastq_file_names}",
+            tmpdir=tempfile.mkdtemp(prefix=tmp_dir)
+        message:
+            "Running FastQC on {params.fastq_file_name}"
+        shell:
+            """
+    export TMPDIR={params.tmpdir};
+    
+    fastqc --threads {resources.threads} {input.fastq} \
+    --dir {params.tmpdir} \
+    --outdir {params.fastqc_dir};
+    
+    rm -rf {params.tmpdir}
+            """
