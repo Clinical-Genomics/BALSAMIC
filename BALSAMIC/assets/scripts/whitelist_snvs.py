@@ -28,7 +28,7 @@ def matches_whitelist(variant, white):
 
     return partial_match(white["ref"], ref) and partial_match(white["alt"], alt)
 
-def whitelist_variants(variants, whitelist):
+def whitelist_variants(variants, whitelist=[]):
     for key, v in variants.items():
         whitelist_reasons = []
 
@@ -137,7 +137,9 @@ def main(vcf_path: str, whitelist_path: str, output_file: str) -> None:
 
     if whitelist_path:
         whitelist = read_whitelist(whitelist_path)
-        whitelist_variants(variants, whitelist)
+        variants = whitelist_variants(variants, whitelist)
+    else:
+        variants = whitelist_variants(variants)
 
     write_vcf(output_file, vcf_path, variants)
 
