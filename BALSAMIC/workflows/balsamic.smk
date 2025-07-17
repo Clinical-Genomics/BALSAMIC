@@ -339,6 +339,8 @@ if "cancer_somatic_snv_panel_observations" in config["reference"]:
 
 if "clinical_sv_observations" in config["reference"]:
     clinical_sv: str = get_clinical_sv_observations(config)
+else:
+    clinical_sv = None
 
 if "cancer_somatic_sv_observations" in config["reference"]:
     somatic_sv: str = get_somatic_sv_observations(config)
