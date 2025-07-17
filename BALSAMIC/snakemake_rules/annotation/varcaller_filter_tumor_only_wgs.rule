@@ -72,7 +72,7 @@ bcftools filter --threads {resources.threads} --include 'INFO/SWEGENAF <= {param
 bcftools filter --threads {resources.threads} --include 'INFO/Frq <= {params.loqusdb_clinical_freq[0]} || INFO/Frq == \".\"' --soft-filter '{params.loqusdb_clinical_freq[1]}' --mode '+' | \
 bcftools view --threads {resources.threads} --exclude '{params.hard_filters}' -o {params.tmpdir}/clinical.filtered.pass_before_whitelisted.vcf.gz ;
 
-if [[ ! -f "{params.whitelist_snvs}" ]]; then
+if [[ -f "{params.whitelist_snvs}" ]]; then
   python {params.whitelist_script} {params.tmpdir}/clinical.filtered.pass_before_whitelisted.vcf.gz --whitelist-path {params.whitelist_snvs} {params.tmpdir}/clinical.filtered.pass_after_whitelisted.vcf ;
 else:
   python {params.whitelist_script} {params.tmpdir}/clinical.filtered.pass_before_whitelisted.vcf.gz {params.tmpdir}/clinical.filtered.pass_after_whitelisted.vcf ;
