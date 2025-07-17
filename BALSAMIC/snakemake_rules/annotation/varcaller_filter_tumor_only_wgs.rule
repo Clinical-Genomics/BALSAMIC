@@ -74,7 +74,7 @@ bcftools view --threads {resources.threads} --exclude '{params.hard_filters}' -o
 
 if [[ -f "{params.whitelist_snvs}" ]]; then
   python {params.whitelist_script} {params.tmpdir}/clinical.filtered.pass_before_whitelisted.vcf.gz --whitelist-path {params.whitelist_snvs} {params.tmpdir}/clinical.filtered.pass_after_whitelisted.vcf ;
-else:
+else
   python {params.whitelist_script} {params.tmpdir}/clinical.filtered.pass_before_whitelisted.vcf.gz {params.tmpdir}/clinical.filtered.pass_after_whitelisted.vcf ;
 fi
 
