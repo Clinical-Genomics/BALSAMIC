@@ -28,7 +28,7 @@ def matches_whitelist(variant, white):
 
     return partial_match(white["ref"], ref) and partial_match(white["alt"], alt)
 
-def whitelist_variants(variants, whitelist=[]):
+def whitelist_variants(variants, whitelist: dict = {}):
     for key, v in variants.items():
         whitelist_reasons = []
 
