@@ -51,6 +51,9 @@ rule bcftools_filter_tnscope_clinical_tumor_normal:
     loqusdb_clinical_freq = get_tag_and_filtername(snv_clinical_filters, "Frq"),
     hard_filters = WgsSNVFilters.get_bcftools_filter_string(category="clinical", analysis_type=analysis_type, soft_filter_normals=soft_filter_normal),
     housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "clinical"},
+    whitelist_script= get_script_path("whitelist_snvs.py"),
+    whitelist_snvs= config_model.analysis.whitelist_snvs,
+    tmpdir= tempfile.mkdtemp(prefix=tmp_dir),
     case_name = '{case_name}',
   message:
     "Filtering WGS tumor-normal tnscope annotated clinical variants using bcftools for {params.case_name}"
@@ -61,7 +64,18 @@ bcftools filter --threads {resources.threads} --include 'INFO/ArtefactFrq <= {pa
 bcftools filter --threads {resources.threads} --include 'INFO/GNOMADAF_popmax <= {params.pop_freq[0]} || INFO/GNOMADAF_popmax == \".\"' --soft-filter '{params.pop_freq[1]}' --mode '+' | \
 bcftools filter --threads {resources.threads} --include 'INFO/SWEGENAF <= {params.swegen_freq[0]} || INFO/SWEGENAF == \".\"' --soft-filter '{params.swegen_freq[1]}' --mode '+' |\
 bcftools filter --threads {resources.threads} --include 'INFO/Frq <= {params.loqusdb_clinical_freq[0]} || INFO/Frq == \".\"' --soft-filter '{params.loqusdb_clinical_freq[1]}' --mode '+' |\
-bcftools view --threads {resources.threads} --exclude '{params.hard_filters}' -O z -o {output.vcf_pass_tnscope};
+bcftools view --threads {resources.threads} --exclude '{params.hard_filters}' -O z -o {params.tmpdir}/clinical.filtered.pass_before_whitelisted.vcf.gz ;
+
+if [[ ! -f "{params.whitelist_snvs}" ]]; then
+  python {params.whitelist_script} {params.tmpdir}/clinical.filtered.pass_before_whitelisted.vcf.gz --whitelist-path {params.whitelist_snvs} {params.tmpdir}/clinical.filtered.pass_after_whitelisted.vcf ;
+else:
+  python {params.whitelist_script} {params.tmpdir}/clinical.filtered.pass_before_whitelisted.vcf.gz {params.tmpdir}/clinical.filtered.pass_after_whitelisted.vcf ;
+fi
+
+bgzip {params.tmpdir}/clinical.filtered.pass_after_whitelisted.vcf ;
+mv {params.tmpdir}/clinical.filtered.pass_after_whitelisted.vcf.gz {output.vcf_pass_tnscope} ;
+
+tabix -p vcf -f {output.vcf_pass_tnscope};
 
 tabix -p vcf -f {output.vcf_pass_tnscope};
 

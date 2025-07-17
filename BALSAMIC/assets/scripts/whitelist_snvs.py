@@ -120,7 +120,7 @@ def read_whitelist(csv_path):
 
 @click.command()
 @click.argument("vcf_path", type=click.Path(exists=True))
-@click.argument("whitelist_path", type=click.Path(exists=True))
+@click.option("--whitelist-path", type=click.Path(exists=True), default=None, help="Optional path to whitelist file.")
 @click.argument("output_file", type=click.Path())
 def main(vcf_path: str, whitelist_path: str, output_file: str) -> None:
     """
@@ -128,16 +128,17 @@ def main(vcf_path: str, whitelist_path: str, output_file: str) -> None:
     supporting bgzip format.
 
     Parameters:
-    - vcf (str): Path to the first VCF file.
-    - whitelist (str): Path to whitelist file.
+    - vcf_path (str): Path to the first VCF file.
+    - whitelist_path (Optional[str]): Optional path to whitelist file.
     - output_file (str): Path to the output merged VCF file.
     """
 
     variants = read_variants(vcf_path)
-    whitelist = read_whitelist(whitelist_path)
 
+    if whitelist_path:
+        whitelist = read_whitelist(whitelist_path)
+        whitelist_variants(variants, whitelist)
 
-    whitelist_variants(variants, whitelist)
     write_vcf(output_file, vcf_path, variants)
 
 if __name__ == "__main__":

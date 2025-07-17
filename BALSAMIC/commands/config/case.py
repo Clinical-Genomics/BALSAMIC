@@ -190,8 +190,7 @@ def case_config(
         "cancer_somatic_snv_panel_observations": cancer_somatic_snv_panel_observations,
         "cancer_somatic_sv_observations": cancer_somatic_sv_observations,
         "swegen_snv_frequency": swegen_snv,
-        "swegen_sv_frequency": swegen_sv,
-        "whitelist_snvs": whitelist_snvs,
+        "swegen_sv_frequency": swegen_sv
     }
     references.update(
         {
@@ -242,6 +241,7 @@ def case_config(
             "sequencing_type": "targeted" if panel_bed else "wgs",
             "analysis_workflow": analysis_workflow,
             "config_creation_date": datetime.now().strftime("%Y-%m-%d %H:%M"),
+            "whitelist_snvs": whitelist_snvs,
         },
         custom_filters={"umi_min_reads": umi_min_reads if umi_min_reads else None},
         reference=references,
