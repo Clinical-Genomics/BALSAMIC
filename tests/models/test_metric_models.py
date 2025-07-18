@@ -125,7 +125,7 @@ def test_validate_metric_type_error():
     ]
 
     # Validate that the TypeError handling raises the correct ValueError
-    with pytest.raises(ValueError, match=r"Type mismatch for QC metric .*"):
+    with pytest.raises(ValueError, match=r"Type mismatch in QC metric .*"):
         MetricValidation(metrics=metrics)
 
 
