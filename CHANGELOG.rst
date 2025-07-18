@@ -4,7 +4,6 @@
 
 Added:
 ^^^^^^
-* sex prediction result used for cnv analysis for unknown gender cases https://github.com/Clinical-Genomics/BALSAMIC/pull/1581
 * sbatch script for snakemake sequential job submission https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
 * logfile for balsamic wrapper https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
 * analysis status text file for easier prodbioinfo handling https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
