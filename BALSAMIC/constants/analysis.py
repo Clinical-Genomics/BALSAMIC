@@ -8,7 +8,8 @@ from BALSAMIC.constants.cache import DockerContainers
 class LogFile:
     """Logfile constants"""
 
-    LOGNAME: str = "balsamic.log"
+    RUN_LOGNAME: str = "balsamic_run.log"
+    CONFIG_LOGNAME: str = "balsamic_config.log"
 
 
 class SubmitSnakemake:

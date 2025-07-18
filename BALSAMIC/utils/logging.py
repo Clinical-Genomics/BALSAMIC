@@ -5,32 +5,38 @@ import re
 from pathlib import Path
 
 
-def set_log_filename(analysis_dir: str, run_start: bool = False):
+def set_log_filename(analysis_dir: str, run_start: bool = False, config_case=False):
     """
     Determine the appropriate logfile name in a given analysis directory based on existing log versions.
 
     This function inspects the given directory for files following the naming pattern:
-    - `balsamic.log`
-    - `balsamic.log.1`, `balsamic.log.2`, etc.
+    - `balsamic.run.log`, `balsamic.run.log.1`, `balsamic.run.log.2`, ...
+    - or, if `config_case=True`: `balsamic.config.log`, `balsamic.config.log.1`, ...
 
     Args:
         analysis_dir (str): Path to the directory where log files are stored.
         run_start (bool): If False (default), return the latest existing logfile name.
                           If True, return the next incremented logfile name suitable for a new log.
+        config_case (bool): If True, use the config logfile base name (`balsamic.config.log`)
+                            instead of the run logfile name.
 
     Returns:
         str: The name of the logfile (either the latest existing or the next version, based on `run_start`).
 
     Notes:
-        - `LogFile.LOGNAME` is used as the base name (e.g., 'balsamic.log').
-        - The version-less logfile (e.g., `balsamic.log`) is treated as version 0.
+        - `LogFile.RUN_LOGNAME` and `LogFile.CONFIG_LOGNAME` are used as base names.
+        - The version-less logfile (e.g., `balsamic.run.log`) is treated as version 0.
     """
+    if config_case:
+        logname = LogFile.CONFIG_LOGNAME
+    else:
+        logname = LogFile.RUN_LOGNAME
 
-    if not Path(analysis_dir, LogFile.LOGNAME).is_file():
-        return Path(analysis_dir, LogFile.LOGNAME).as_posix()
+    if not Path(analysis_dir, logname).is_file():
+        return Path(analysis_dir, logname).as_posix()
 
     # Pattern: match balsamic.log or balsamic.log.1, .2, etc.
-    pattern = re.compile(rf"^{re.escape(LogFile.LOGNAME)}(?:\.(\d+))?$")
+    pattern = re.compile(rf"^{re.escape(logname)}(?:\.(\d+))?$")
 
     latest_version = -1
 
@@ -42,14 +48,10 @@ def set_log_filename(analysis_dir: str, run_start: bool = False):
                 latest_version = version
 
     if run_start:
-        return Path(f"{analysis_dir}/{LogFile.LOGNAME}.{latest_version + 1}").as_posix()
+        return Path(f"{analysis_dir}/{logname}.{latest_version + 1}").as_posix()
     else:
         # Return the latest existing logfile name
-        logfile = (
-            LogFile.LOGNAME
-            if latest_version == 0
-            else f"{LogFile.LOGNAME}.{latest_version}"
-        )
+        logfile = logname if latest_version == 0 else f"{logname}.{latest_version}"
         return Path(f"{analysis_dir}/{logfile}").as_posix()
 
 

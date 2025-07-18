@@ -6,8 +6,9 @@ from pathlib import Path
 
 import pytest
 
-from BALSAMIC.utils.logging import add_file_logging
+from BALSAMIC.utils.logging import add_file_logging, set_log_filename
 from BALSAMIC.constants.constants import LogLevel
+from BALSAMIC.constants.analysis import LogFile
 
 
 def test_writes_messages_to_file(tmp_path: Path, caplog: pytest.LogCaptureFixture):
@@ -104,3 +105,61 @@ def test_add_file_logging_uses_existing_formatter(tmp_path: Path):
     logger.info("formatter test")
     contents = log_file.read_text()
     assert "CUSTOM FORMAT: formatter test" in contents
+
+
+def test_no_log_files_run_case(tmp_path):
+    # GIVEN no log file exists for run
+    result = set_log_filename(str(tmp_path), run_start=True)
+    # THEN basic log file name should be returned
+    assert result == str(tmp_path / LogFile.RUN_LOGNAME)
+
+
+def test_no_log_files_config_case(tmp_path):
+    # GIVEN no log file exists for config case
+    result = set_log_filename(str(tmp_path), run_start=True, config_case=True)
+    # THEN basic log file name should be returned
+    assert result == str(tmp_path / LogFile.CONFIG_LOGNAME)
+
+
+def test_base_log_exists(tmp_path):
+    # GIVEN balsamic.log already exists
+    (tmp_path / LogFile.RUN_LOGNAME).touch()
+
+    # WHEN it is not a new balsamic run
+    result = set_log_filename(str(tmp_path))
+    assert result == str(tmp_path / LogFile.RUN_LOGNAME)
+
+    # run_start=True should return log.1
+    result = set_log_filename(str(tmp_path), run_start=True)
+    assert result == str(tmp_path / f"{LogFile.RUN_LOGNAME}.1")
+
+
+def test_multiple_versions_exist(tmp_path):
+    # Create balsamic.log, balsamic.log.1, balsamic.log.2
+    (tmp_path / f"{LogFile.RUN_LOGNAME}").touch()
+    (tmp_path / f"{LogFile.RUN_LOGNAME}.1").touch()
+    (tmp_path / f"{LogFile.RUN_LOGNAME}.2").touch()
+
+    # run_start=False should return latest balsamic.log.2
+    result = set_log_filename(str(tmp_path))
+    assert result == str(tmp_path / f"{LogFile.RUN_LOGNAME}.2")
+
+    # run_start=True should return balsamic.log.3
+    result = set_log_filename(str(tmp_path), run_start=True)
+    assert result == str(tmp_path / f"{LogFile.RUN_LOGNAME}.3")
+
+
+def test_irrelevant_files(tmp_path):
+    # Create unrelated files
+    (tmp_path / "otherfile.txt").touch()
+    (tmp_path / f"{LogFile.RUN_LOGNAME}").touch()
+    (tmp_path / f"{LogFile.RUN_LOGNAME}.10").touch()
+    (tmp_path / "balsamic_run.log.bad").touch()  # should be ignored
+
+    # run_start=False should return balsamic.log.10
+    result = set_log_filename(str(tmp_path))
+    assert result == str(tmp_path / f"{LogFile.RUN_LOGNAME}.10")
+
+    # run_start=True should return balsamic.log.11
+    result = set_log_filename(str(tmp_path), run_start=True)
+    assert result == str(tmp_path / f"{LogFile.RUN_LOGNAME}.11")
