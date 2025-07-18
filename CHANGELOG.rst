@@ -16,6 +16,7 @@ Changed:
 * Updated ensembl vep to version 113.4 https://github.com/Clinical-Genomics/BALSAMIC/pull/1567
 * Updated rank model to use GNOMADAF_popmax instead of deprecated gnomAD_AF https://github.com/Clinical-Genomics/BALSAMIC/pull/1567
 * given vs predicted sex check changed to warning https://github.com/Clinical-Genomics/BALSAMIC/pull/1581
+* using predicted sex in CNV analysis if assigned sex is unknown https://github.com/Clinical-Genomics/BALSAMIC/pull/1581
 
 Removed:
 ^^^^^^^^
