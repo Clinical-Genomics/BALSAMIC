@@ -197,7 +197,7 @@ set-resources:
         threads: 36
     sentieon_tnscope_wgs_tumor_only:
         runtime: 1440
-        mem_mb: 30000
+        mem_mb: 45000
         threads: 36
     merge_snv_vcfs:
         runtime: 120
@@ -213,7 +213,7 @@ set-resources:
         threads: 36
     sentieon_DNAscope_wgs:
         runtime: 1440
-        mem_mb: 30000
+        mem_mb: 50000
         threads: 36
     manta_germline_tga:
         runtime: 300
