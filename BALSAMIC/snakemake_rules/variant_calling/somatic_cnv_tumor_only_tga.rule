@@ -160,6 +160,7 @@ rule cnvkit_call_CNV_research:
         cnr = cnv_dir + "tumor.merged.cnr",
         snv_vcf = vcf_dir + "SNV.germline.tumor.dnascope.vcf.gz",
         bamT = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
+        sex_prediction_json = qc_dir + "sex_prediction.json"
     output:
         cns = cnv_dir + "tumor.merged.cns",
         gene_breaks = cnv_dir + config["analysis"]["case_id"] + ".gene_breaks",
@@ -177,7 +178,7 @@ rule cnvkit_call_CNV_research:
         cnv_dir = cnv_dir,
         cnsr = lambda wc: "tumor.merged.cn{s,r}",
         case_name = config["analysis"]["case_id"],
-        gender = config["analysis"]["gender"],
+        gender = config_model.get_gender,
         sample_id = "TUMOR",
         genome_version = config["reference"]["genome_version"],
     message:
