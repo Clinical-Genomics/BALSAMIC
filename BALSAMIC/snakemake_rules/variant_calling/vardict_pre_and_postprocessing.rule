@@ -57,7 +57,7 @@ rule gatk_update_vcf_sequence_dictionary:
         ref = config["reference"]["reference_genome"],
         vcf = vcf_dir + "vardict/SNV.somatic." + config["analysis"]["case_id"] + ".vardict.vcf.gz",
     output:
-        vcf_vardict = vcf_dir + "vardict/SNV_SV.somatic." + config["analysis"]["case_id"] + ".vardict.vcf.gz",
+        vcf_vardict = vcf_dir + "vardict/all.somatic." + config["analysis"]["case_id"] + ".vardict.vcf.gz",
     params:
         tmpdir=tempfile.mkdtemp(prefix=tmp_dir),
     benchmark:
@@ -79,7 +79,7 @@ rm -rf {params.tmpdir}
 
 rule vardict_move_svs:
     input:
-        vcf_vardict = vcf_dir + "vardict/SNV_SV.somatic." + config["analysis"]["case_id"] + ".vardict.vcf.gz"
+        vcf_vardict = vcf_dir + "vardict/all.somatic." + config["analysis"]["case_id"] + ".vardict.vcf.gz"
     output:
         vcf_vardict = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.vcf.gz",
         vcf_vardict_sv = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".vardict.vcf.gz",
