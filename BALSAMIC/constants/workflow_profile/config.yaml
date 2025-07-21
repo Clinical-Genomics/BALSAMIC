@@ -87,7 +87,11 @@ set-resources:
         threads: 12
         runtime: 340
         mem_mb: 15000
-    bcftools_quality_filter_svdb:
+    bcftools_quality_filter_svdb_tga:
+        threads: 4
+        runtime: 60
+        mem_mb: 10000
+    bcftools_quality_filter_svdb_wgs:
         threads: 4
         runtime: 60
         mem_mb: 10000
@@ -420,7 +424,7 @@ set-resources:
         mem_mb: 25000
         threads: 8
     picard_CollectAlignmentSummaryMetrics:
-        runtime: 500
+        runtime: 800
         mem_mb: 25000
         threads: 8
     picard_CollectHsMetrics:
@@ -527,7 +531,7 @@ set-resources:
         runtime: 600
         mem_mb: 15000
         threads: 8
-    svdb_annotate_artefact_sv:
+    svdb_annotate_artefact_sv_wgs:
         runtime: 600
         mem_mb: 15000
         threads: 8
@@ -537,11 +541,11 @@ set-resources:
         threads: 8
     svdb_annotate_somatic_research_sv:
         runtime: 720
-        mem_mb: 15000
+        mem_mb: 30000
         threads: 36
     vep_somatic_research_sv:
         runtime: 720
-        mem_mb: 120000
+        mem_mb: 150000
         threads: 36
     vcfanno_annotate_somaticSNV_clinical:
         runtime: 1080

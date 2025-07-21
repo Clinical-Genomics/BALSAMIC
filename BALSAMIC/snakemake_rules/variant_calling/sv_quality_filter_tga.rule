@@ -1,0 +1,21 @@
+
+
+rule bcftools_quality_filter_svdb_tga:
+    input:
+        vcf_svdb=vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.vcf.gz",
+    output:
+        vcf_pass_svdb_research=vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.research.vcf.gz",
+    benchmark:
+        Path(benchmark_dir,'bcftools_quality_filter_sv_' + config["analysis"]["case_id"] + ".tsv")
+    singularity:
+        Path(singularity_image,config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
+    params:
+        case_name=config["analysis"]["case_id"],
+    message:
+        "Filtering merged research structural and copy number variants using bcftools for {params.case_name}"
+    shell:
+        """
+    bcftools view --threads {resources.threads} -f .,PASS -o {output.vcf_pass_svdb_research} -O z {input.vcf_svdb};
+
+    tabix -p vcf -f {output.vcf_pass_svdb_research};
+        """
