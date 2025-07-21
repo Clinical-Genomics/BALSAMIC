@@ -102,7 +102,7 @@ rm {params.vcf_clinical_obs}
 
 rule svdb_annotate_somatic_obs_somatic_clinical_sv:
     input:
-        vcf_sv_clinical_obs = vep_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.artefact_sv.vcf.gz",
+        vcf_sv_clinical_obs = vep_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.clinical_obs.vcf.gz",
     output:
         vcf_sv_clinical = vep_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.clinical.vcf.gz",
     benchmark:
