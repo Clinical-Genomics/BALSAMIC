@@ -1,7 +1,7 @@
 #!/bin/bash
 # Test if commands exist
 
-valid_commands=( "d4tools" "-h" )
+valid_commands=( "d4tools")
 
 for valid_command in "${valid_commands[@]}"
 do
