@@ -2,7 +2,7 @@
 # coding: utf-8
 
 
-rule manta_tumor_only:
+rule manta_tumor_only_tga:
     input:
         fa = config["reference"]["reference_genome"],
         bamT = config_model.get_final_bam_name(bam_dir=bam_dir, sample_name=tumor_sample, specified_suffix="dedup.fixmate.qualcapped"),
@@ -20,8 +20,6 @@ rule manta_tumor_only:
         tumor = config_model.get_sample_name_by_type(SampleType.TUMOR),
         case_name = config["analysis"]["case_id"],
         low_pr_sr_count = [MANTA_FILTERS.low_pr_sr_count.tag_value,MANTA_FILTERS.low_pr_sr_count.filter_name],
-    threads:
-        get_threads(cluster_config, "manta_tumor_only")
     message:
         ("Calling structural variants using manta for {params.case_name} and"
         "index the compressed vcf file")
@@ -36,7 +34,7 @@ configManta.py \
 --referenceFasta={input.fa} \
 --runDir={params.tmpdir};
 
-python {params.tmpdir}/runWorkflow.py -m {params.runmode} -j {threads};
+python {params.tmpdir}/runWorkflow.py -m {params.runmode} -j {resources.threads};
 
 convertInversion.py \
   $samtools_path \
@@ -45,7 +43,7 @@ convertInversion.py \
 
 bgzip -l 9 {params.tmpdir}/results/variants/tumorSV_converted.vcf;
 
-bcftools filter --threads {threads} --exclude 'SUM(FORMAT/PR[0:1]+FORMAT/SR[0:1]) < {params.low_pr_sr_count[0]}' --soft-filter '{params.low_pr_sr_count[1]}' --mode '+' -o {output.final} -O z {params.tmpdir}/results/variants/tumorSV_converted.vcf.gz
+bcftools filter --threads {resources.threads} --exclude 'SUM(FORMAT/PR[0:1]+FORMAT/SR[0:1]) < {params.low_pr_sr_count[0]}' --soft-filter '{params.low_pr_sr_count[1]}' --mode '+' -o {output.final} -O z {params.tmpdir}/results/variants/tumorSV_converted.vcf.gz
 
 tabix -p vcf -f {output.final};
 
@@ -54,7 +52,7 @@ echo -e \"{params.tumor}\\tTUMOR\" > {output.namemap};
 rm -rf {params.tmpdir};
       """
 
-rule delly_sv_tumor_only:
+rule delly_sv_tumor_only_tga:
     input:
         fa = config["reference"]["reference_genome"],
         bamT = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
@@ -70,8 +68,6 @@ rule delly_sv_tumor_only:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         tumor = "TUMOR",
         case_name = config["analysis"]["case_id"]
-    threads:
-        get_threads(cluster_config, "delly_tumor_only")
     message:
         ("Calling structural variants using delly for {params.case_name}")
     shell:

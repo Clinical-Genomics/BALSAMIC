@@ -23,8 +23,6 @@ rule picard_CollectHsMetrics:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         baitsetname = Path(config["panel"]["capture_kit"]).name,
         sample = "{sample}"
-    threads:
-        get_threads(cluster_config, "picard_qc")
     message:
         "Calculating picard HsMetrics for sample {params.sample}"
     shell:

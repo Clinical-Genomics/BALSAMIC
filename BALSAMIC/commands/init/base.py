@@ -12,9 +12,7 @@ import click
 from BALSAMIC.commands.options import (
     OPTION_CACHE_VERSION,
     OPTION_CLUSTER_ACCOUNT,
-    OPTION_CLUSTER_CONFIG,
-    OPTION_CLUSTER_MAIL,
-    OPTION_CLUSTER_MAIL_TYPE,
+    OPTION_CACHE_PROFILE,
     OPTION_CLUSTER_PROFILE,
     OPTION_CLUSTER_QOS,
     OPTION_COSMIC_KEY,
@@ -31,16 +29,14 @@ from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV, RunMode
 from BALSAMIC.constants.cache import REFERENCE_FILES, GenomeVersion
 from BALSAMIC.constants.cluster import (
     QOS,
-    ClusterConfigType,
-    ClusterMailType,
-    ClusterProfile,
 )
 from BALSAMIC.models.cache import CacheConfig, ReferencesCanFam, ReferencesHg
 from BALSAMIC.models.snakemake import SnakemakeExecutable
 from BALSAMIC.utils.analysis import get_cache_singularity_bind_paths
 from BALSAMIC.utils.cache import get_containers
-from BALSAMIC.utils.cli import get_config_path, get_snakefile
+from BALSAMIC.utils.cli import get_snakefile
 from BALSAMIC.utils.io import generate_workflow_graph, write_json
+from BALSAMIC.utils.rule import get_script_path
 
 LOG = logging.getLogger(__name__)
 
@@ -51,10 +47,8 @@ LOG = logging.getLogger(__name__)
 @OPTION_OUT_DIR
 @OPTION_CACHE_VERSION
 @OPTION_CLUSTER_ACCOUNT
-@OPTION_CLUSTER_CONFIG
-@OPTION_CLUSTER_MAIL
-@OPTION_CLUSTER_MAIL_TYPE
 @OPTION_CLUSTER_PROFILE
+@OPTION_CACHE_PROFILE
 @OPTION_CLUSTER_QOS
 @OPTION_COSMIC_KEY
 @OPTION_FORCE_ALL
@@ -69,14 +63,12 @@ def initialize(
     context: click.Context,
     account: Optional[str],
     cache_version: str,
-    cluster_config: Path,
     cosmic_key: str,
     force_all: bool,
     genome_version: GenomeVersion,
-    mail_type: Optional[ClusterMailType],
-    mail_user: Optional[str],
     out_dir: str,
-    profile: ClusterProfile,
+    cluster_profile: Path,
+    cache_profile: Path,
     qos: QOS,
     quiet: bool,
     run_analysis: bool,
@@ -149,15 +141,12 @@ def initialize(
     snakemake_executable: SnakemakeExecutable = SnakemakeExecutable(
         account=account,
         case_id=cache_config.analysis.case_id,
-        cluster_config_path=cluster_config
-        if cluster_config
-        else get_config_path(ClusterConfigType.CACHE),
         config_path=config_path,
         force=force_all,
         log_dir=log_dir,
-        mail_type=mail_type,
-        mail_user=mail_user,
-        profile=profile,
+        cluster_profile=cluster_profile,
+        cluster_job_status_script=get_script_path("cluster_job_status.py"),
+        workflow_profile=cache_profile,
         qos=qos,
         quiet=quiet,
         run_analysis=run_analysis,

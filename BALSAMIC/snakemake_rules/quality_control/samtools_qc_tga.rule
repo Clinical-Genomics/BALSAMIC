@@ -2,7 +2,7 @@
 # coding: utf-8
 
 
-rule samtools_qc:
+rule samtools_qc_tga:
     input:
         bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample, specified_suffix="align_sort")
     output:
@@ -15,15 +15,13 @@ rule samtools_qc:
         Path(singularity_image,config["bioinfo_tools"].get("samtools") + ".sif").as_posix()
     params:
         sample_id = "{sample}"
-    threads:
-        get_threads(cluster_config, "samtools_qc")
     message:
         "Calculating alignment stats for sample: {params.sample_id}"
     shell:
         """
-samtools flagstats --threads {threads} {input.bam} > {output.flagstats};
-samtools stats --threads {threads} {input.bam} > {output.stats};
-samtools idxstats --threads {threads} {input.bam} > {output.idxstats};
+samtools flagstats --threads {resources.threads} {input.bam} > {output.flagstats};
+samtools stats --threads {resources.threads} {input.bam} > {output.stats};
+samtools idxstats --threads {resources.threads} {input.bam} > {output.idxstats};
         """
 
 rule samtools_qc_umi_collapsed:
@@ -39,13 +37,11 @@ rule samtools_qc_umi_collapsed:
         Path(singularity_image,config["bioinfo_tools"].get("samtools") + ".sif").as_posix()
     params:
         sample_id = "{sample}"
-    threads:
-        get_threads(cluster_config, "samtools_qc")
     message:
         "Calculating alignment stats for sample after UMI collapse: {params.sample_id}"
     shell:
         """
-samtools flagstats --threads {threads} {input.bam} > {output.flagstats};
-samtools stats --threads {threads} {input.bam} > {output.stats};
-samtools idxstats --threads {threads} {input.bam} > {output.idxstats};
+samtools flagstats --threads {resources.threads} {input.bam} > {output.flagstats};
+samtools stats --threads {resources.threads} {input.bam} > {output.stats};
+samtools idxstats --threads {resources.threads} {input.bam} > {output.idxstats};
         """

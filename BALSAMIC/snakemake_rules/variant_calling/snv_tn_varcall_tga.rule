@@ -33,8 +33,6 @@ rule sentieon_tnscope_tga_tumor_normal:
         sentieon_exec=config_model.sentieon.sentieon_exec,
         sentieon_lic=config_model.sentieon.sentieon_license,
         housekeeper_id= {"id": config["analysis"]["case_id"],"tags": "research"}
-    threads:
-        get_threads(cluster_config, "sentieon_tnscope_tga_tumor_normal")
     message:
         "Calling single nucleotide variants using TNscope for {params.case_name}"
     shell:
@@ -45,7 +43,7 @@ export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
 
 {params.sentieon_exec} driver \
--t {threads} \
+-t {resources.threads} \
 -r {input.ref_fa} \
 -i {input.bamT} \
 -i {input.bamN} \
@@ -88,8 +86,6 @@ rule vardict_tumor_normal:
         max_mm = params.vardict.max_mm,
         col_info = params.vardict.column_info,
         case_name = config["analysis"]["case_id"],
-    threads:
-        get_threads(cluster_config, "vardict_tumor_normal")
     message:
         "Calling variants using vardict for {params.case_name}"
     shell:
@@ -100,7 +96,7 @@ export VAR_DICT_OPTS='\"-Xms10G\" \"-Xmx25G\" \"-XX:+UseG1GC\" \"-XX:MaxHeapFree
 
 vardict-java -I 600 -G {input.fa} -f {params.af} -N {params.case_name} \
 -b \"{input.bamT}|{input.bamN}\" \
--th {threads} \
+-th {resources.threads} \
 {params.col_info} {input.bed} \
 | testsomatic.R \
 | var2vcf_paired.pl -P {params.max_pval} \
@@ -124,8 +120,6 @@ rule post_process_vardict:
         Path(benchmark_dir,'post_process_vardict_' + config["analysis"]["case_id"] + ".tsv").as_posix()
     singularity:
         Path(singularity_image,config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
-    threads:
-        get_threads(cluster_config,"post_process_vardict")
     message:
         ("Bgzip, index and reheader merged VarDict vcf for case: {params.case_name}")
     shell:

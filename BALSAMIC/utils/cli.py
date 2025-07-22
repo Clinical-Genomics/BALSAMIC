@@ -17,9 +17,7 @@ from colorclass import Color
 from BALSAMIC import __version__ as balsamic_version
 from BALSAMIC.constants.analysis import FASTQ_SUFFIXES, FastqName, PonParams, SampleType
 from BALSAMIC.constants.cache import CacheVersion
-from BALSAMIC.constants.cluster import ClusterConfigType
 from BALSAMIC.constants.constants import FileType
-from BALSAMIC.constants.paths import CONSTANTS_DIR
 from BALSAMIC.models.config import FastqInfoModel, SampleInstanceModel
 from BALSAMIC.utils.exc import BalsamicError
 
@@ -94,11 +92,6 @@ def get_snakefile(analysis_type, analysis_workflow="balsamic") -> str:
         snakefile = Path(p, "workflows", "QC.smk")
 
     return str(snakefile)
-
-
-def get_config_path(config_type: ClusterConfigType) -> Path:
-    """Return a config path given its type."""
-    return Path(CONSTANTS_DIR, f"{config_type}.{FileType.JSON}")
 
 
 def find_file_index(file_path):
