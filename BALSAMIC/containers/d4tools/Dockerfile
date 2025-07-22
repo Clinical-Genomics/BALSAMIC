@@ -17,14 +17,19 @@ ENV PATH="${VENV}/bin:$PATH"
 # Install required packages and Rust toolchain
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-    curl build-essential git ca-certificates liblzma-dev zlib1g-dev pkg-config \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+        build-essential \
+        ca-certificates \
+        curl \
+        git \
+        liblzma-dev \
+        pkg-config \
+        zlib1g-dev && \
+    apt-get clean && rm -rf /var/lib/apt/lists/* && \
+    curl https://sh.rustup.rs -sSf | bash -s -- -y
 
-# Install Rust using rustup
-RUN curl https://sh.rustup.rs -sSf | bash -s -- -y
 ENV PATH="/root/.cargo/bin:$PATH"
 
-# Clone and build d4tools v0.3.10
+# Clone, build, and install d4tools v0.3.10
 RUN git clone --depth 1 --branch v0.3.10 https://github.com/38/d4-format.git /tmp/d4-format && \
     cd /tmp/d4-format && \
     cargo build --release && \
