@@ -21,6 +21,7 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
     "common": {
         "qc": [
             "snakemake_rules/quality_control/fastqc.rule",
+            "snakemake_rules/quality_control/d4tools.rule",
             "snakemake_rules/quality_control/multiqc.rule",
             "snakemake_rules/quality_control/qc_metrics.rule",
             "snakemake_rules/quality_control/picard_common.rule",
@@ -176,6 +177,7 @@ DELIVERY_RULES: List[str] = [
     # QC
     "multiqc",
     "collect_custom_qc_metrics",
+    "create_d4file",
     # Alignment
     "bam_compress_tumor_umi",
     "bam_compress_normal_umi",

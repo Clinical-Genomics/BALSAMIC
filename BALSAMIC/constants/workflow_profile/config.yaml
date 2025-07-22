@@ -263,6 +263,10 @@ set-resources:
         runtime: 360
         mem_mb: 5000
         threads: 2
+    create_d4file:
+        runtime: 360
+        mem_mb: 40000
+        threads: 2
     sentieon_align_sort_umireads_umi:
         runtime: 1440
         mem_mb: 26000

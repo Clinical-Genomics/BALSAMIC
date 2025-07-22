@@ -9,9 +9,8 @@ rule create_d4file:
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("d4tools") + ".sif").as_posix()
     params:
+        housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "qc-metrics"},
         sample = "{sample}"
-    threads:
-        get_threads(cluster_config, "create_d4file")
     message:
         "Creating d4 coverage file for sample {params.sample}"
     shell:
