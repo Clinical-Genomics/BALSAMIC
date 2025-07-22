@@ -116,6 +116,7 @@ class BioinfoTools(StrEnum):
     COMPRESS: str = "compress"
     CSVKIT: str = "csvkit"
     DELLY: str = "delly"
+    D4TOOLS: str = "d4tools"
     VEP: str = "ensembl-vep"
     FASTP: str = "fastp"
     FASTQC: str = "fastqc"
