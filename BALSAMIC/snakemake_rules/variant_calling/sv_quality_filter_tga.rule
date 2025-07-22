@@ -1,6 +1,6 @@
 
 
-rule bcftools_quality_filter_svdb_tga:
+rule bcftools_quality_filter_svdb_wgs:
     input:
         vcf_svdb=vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.vcf.gz",
     output:

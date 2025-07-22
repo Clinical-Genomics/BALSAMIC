@@ -33,7 +33,7 @@ rm {params.vcf_artefact_obs}
         """
 
 
-rule bcftools_quality_filter_svdb_tga:
+rule bcftools_quality_filter_svdb_wgs:
     input:
         vcf_sv_artefact_obs=vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".artefact_sv.svdb.vcf.gz",
     output:
@@ -50,7 +50,7 @@ rule bcftools_quality_filter_svdb_tga:
         "Filtering merged research structural and copy number variants using bcftools for {params.case_name}"
     shell:
         """
-    bcftools filter --threads {resources.threads} --include 'INFO/ArtefactObs <= {params.loqusdb_artefact_sv_obs[0]} || INFO/ArtefactObs == \".\"' --soft-filter '{params.loqusdb_artefact_sv_obs[1]}' --mode '+' {input.vcf_svdb} |\
+    bcftools filter --threads {resources.threads} --include 'INFO/ArtefactObs <= {params.loqusdb_artefact_sv_obs[0]} || INFO/ArtefactObs == \".\"' --soft-filter '{params.loqusdb_artefact_sv_obs[1]}' --mode '+' {input.vcf_sv_artefact_obs} |\
     bcftools view --threads {resources.threads} -f .,PASS -o {output.vcf_pass_svdb_research} -O z ;
 
     tabix -p vcf -f {output.vcf_pass_svdb_research};
