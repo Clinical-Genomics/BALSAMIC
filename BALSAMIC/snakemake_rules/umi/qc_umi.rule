@@ -17,8 +17,6 @@ rule picard_umiaware:
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         sample_id = "{sample}"
-    threads:
-        get_threads(cluster_config, "picard_umiaware")
     message:
         "Marking duplicates using Picardtools with UmiAware for {params.sample_id}"
     shell:
@@ -50,8 +48,6 @@ rule picard_collecthsmetrics_umi:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         baitsetname = os.path.basename(config["panel"]["capture_kit"]),
         sample_id = "{sample}"
-    threads:
-        get_threads(cluster_config, "CollectHsMetrics")
     message:
         "Collecting HSmetrics using Picardtools for {params.sample_id}"
     shell:
@@ -89,15 +85,13 @@ rule samtools_view_calculatemeanfamilydepth_umi:
     params:
         sample_id = "{sample}",
         tmpdir= tempfile.mkdtemp(prefix=tmp_dir),
-    threads:
-        get_threads(cluster_config, "samtools_view_calculatemeanfamilydepth_umi")
     message:
         "Calculating mean family depth using samtools and awk for {params.sample_id}"
     shell:
         """
 export TMPDIR={params.tmpdir};
 
-samtools view -@ {threads} {input.bam} | \
+samtools view -@ {resources.threads} {input.bam} | \
 grep 'RX:Z:' | \
 sed 's/.*RX:Z:\\([ACGT-].*\\).*/\\1/' | \
 cut -f1 | \

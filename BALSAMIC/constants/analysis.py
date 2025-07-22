@@ -5,6 +5,18 @@ from typing import Dict, List
 from BALSAMIC.constants.cache import DockerContainers
 
 
+class LogFile:
+    """Logfile constants"""
+
+    LOGNAME: str = "balsamic.log"
+
+
+class SubmitSnakemake:
+    """Constants for sbatch script running snakemake on cluster"""
+
+    MAX_RUN_HOURS: int = 120
+
+
 class RunMode(StrEnum):
     """Balsamic workflow run mode."""
 

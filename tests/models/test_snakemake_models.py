@@ -5,8 +5,7 @@ from pathlib import Path
 from typing import Any, Dict
 
 import pytest
-from BALSAMIC.constants.cluster import MAX_JOBS, QOS, ClusterAccount, ClusterProfile
-from BALSAMIC.constants.paths import IMMEDIATE_SUBMIT_PATH
+from BALSAMIC.constants.cluster import MAX_JOBS, QOS, ClusterAccount
 from BALSAMIC.models.snakemake import SingularityBindPath, SnakemakeExecutable
 from pydantic import ValidationError
 
@@ -61,25 +60,22 @@ def test_get_config_files_option(
     # GIVEN a snakemake executable model with a mocked config file
 
     # WHEN calling the method
-    config_files_option: str = snakemake_executable.get_config_files_option()
+    config_files_option: str = snakemake_executable.get_config_file_option()
 
     # THEN the expected format should be returned
-    assert (
-        config_files_option
-        == f"--configfiles {reference_file.as_posix()} {reference_file.as_posix()}"
-    )
+    assert config_files_option == f"--configfile {reference_file.as_posix()}"
 
 
 def test_get_config_options(snakemake_executable: SnakemakeExecutable):
     """Test formatting of the snakemake config options."""
 
-    # GIVEN a snakemake executable model disabling some variant callers
+    #  GIVEN a snakemake executable model with a dragen flag
 
     # WHEN calling the method
     snakemake_config_options: str = snakemake_executable.get_config_options()
 
     # THEN the expected format should be returned
-    assert snakemake_config_options == "--config disable_variant_caller=tnscope"
+    assert snakemake_config_options == "--config dragen=True"
 
 
 def test_get_dragen_flag(snakemake_executable: SnakemakeExecutable):
@@ -176,32 +172,8 @@ def test_get_snakemake_options_command(snakemake_executable: SnakemakeExecutable
     assert snakemake_options_command == "--cores 36"
 
 
-def test_get_cluster_submit_command(
-    case_id_tumor_only: str,
-    mail_user_option: str,
-    session_tmp_path: Path,
-    snakemake_executable: SnakemakeExecutable,
-):
-    """Test formatting of the cluster submit command."""
-
-    # GIVEN a snakemake executable model with working environment paths
-
-    # WHEN calling the method
-    snakemake_cluster_submit_command: str = (
-        snakemake_executable.get_cluster_submit_command()
-    )
-
-    # THEN the expected format should be returned
-    assert snakemake_cluster_submit_command == (
-        f"'{sys.executable} {IMMEDIATE_SUBMIT_PATH.as_posix()} --account {ClusterAccount.DEVELOPMENT} "
-        f"--log-dir {session_tmp_path} --mail-user {mail_user_option} --profile {ClusterProfile.SLURM} "
-        f"--qos {QOS.HIGH} --script-dir {session_tmp_path} {case_id_tumor_only} {{dependencies}}'"
-    )
-
-
 def test_get_snakemake_cluster_options(
     case_id_tumor_only: str,
-    mail_user_option: str,
     reference_file: Path,
     session_tmp_path: Path,
     snakemake_executable: SnakemakeExecutable,
@@ -218,17 +190,13 @@ def test_get_snakemake_cluster_options(
     # THEN the expected format should be returned
     assert (
         snakemake_cluster_options
-        == f"--immediate-submit -j {MAX_JOBS} --jobname BALSAMIC.{case_id_tumor_only}.{{rulename}}.{{jobid}}.sh "
-        f"--cluster-config {reference_file.as_posix()} --cluster '{sys.executable} {IMMEDIATE_SUBMIT_PATH.as_posix()} "
-        f"--account {ClusterAccount.DEVELOPMENT} --log-dir {session_tmp_path} --mail-user {mail_user_option} "
-        f"--profile {ClusterProfile.SLURM} --qos {QOS.HIGH} --script-dir {session_tmp_path} {case_id_tumor_only} "
-        "{dependencies}'"
+        == f"-j {MAX_JOBS} --jobname BALSAMIC.{case_id_tumor_only}.{{rulename}}.{{jobid}}.sh "
+        f"--profile {reference_file.as_posix()} --workflow-profile {reference_file.as_posix()}"
     )
 
 
 def test_get_snakemake_command(
     case_id_tumor_only: str,
-    mail_user_option: str,
     reference_file: Path,
     session_tmp_path: Path,
     snakemake_executable: SnakemakeExecutable,
@@ -245,11 +213,8 @@ def test_get_snakemake_command(
         snakemake_command
         == f"snakemake --notemp -p --rerun-trigger mtime --directory {session_tmp_path.as_posix()} "
         f"--snakefile {reference_file.as_posix()} "
-        f"--configfiles {reference_file.as_posix()} {reference_file.as_posix()} "
+        f"--configfile {reference_file.as_posix()} --config dragen=True "
         f"--use-singularity --singularity-args '--cleanenv --bind {session_tmp_path.as_posix()}:/' --quiet "
-        f"--immediate-submit -j {MAX_JOBS} --jobname BALSAMIC.{case_id_tumor_only}.{{rulename}}.{{jobid}}.sh "
-        f"--cluster-config {reference_file.as_posix()} --cluster '{sys.executable} {IMMEDIATE_SUBMIT_PATH.as_posix()} "
-        f"--account {ClusterAccount.DEVELOPMENT} --log-dir {session_tmp_path} --mail-user {mail_user_option} "
-        f"--profile {ClusterProfile.SLURM} --qos {QOS.HIGH} --script-dir {session_tmp_path} {case_id_tumor_only} "
-        "{dependencies}' --config disable_variant_caller=tnscope --cores 36"
+        f"-j {MAX_JOBS} --jobname BALSAMIC.{case_id_tumor_only}.{{rulename}}.{{jobid}}.sh "
+        f'--profile {reference_file.as_posix()} --workflow-profile {reference_file.as_posix()} --cluster-status "python {reference_file.as_posix()}" --cores 36'
     )

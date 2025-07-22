@@ -20,8 +20,6 @@ if config["analysis"]["sequencing_type"] == 'wgs':
             sentieon_exec = config_model.sentieon.sentieon_exec,
             sentieon_lic = config_model.sentieon.sentieon_license,
             sample = '{sample}'
-        threads:
-            get_threads(cluster_config, 'sentieon_wgs_metrics')
         message:
             "Calculate coverage metrics for wgs cases using sentieon tools for sample {params.sample}"
         shell:
@@ -70,8 +68,6 @@ if config["analysis"]["sequencing_type"] == 'wgs':
             sample_id = "{sample}",
             min_read_ratio=params.insert_size_metrics.min_read_ratio,
             adapter = config["QC"]["adapter"]
-        threads:
-            get_threads(cluster_config, 'sentieon_qc_metrics')
         message:
             ("Creates multiple different alignment QC metrics based on Picard tools"
              "Current sample: {params.sample_id}")
@@ -84,7 +80,7 @@ if config["analysis"]["sequencing_type"] == 'wgs':
     shell_bam_files=$(echo {input.bam_files} | sed 's/ / -i /g') ;
     
     {params.sentieon_exec} driver \
-    -t {threads} \
+    -t {resources.threads} \
     -r {input.ref} \
     -i $shell_bam_files \
     --algo InsertSizeMetricAlgo --min_read_ratio {params.min_read_ratio} {output.insert_size_metrics} \
@@ -114,8 +110,6 @@ else:
             sample_id="{sample}",
             adapter=config["QC"]["adapter"],
             min_read_ratio=params.insert_size_metrics.min_read_ratio,
-        threads:
-            get_threads(cluster_config,'sentieon_qc_metrics')
         message:
             ("Creates multiple different alignment QC metrics based on Picard tools"
              "Current sample: {params.sample_id}")
@@ -126,7 +120,7 @@ else:
     export SENTIEON_LICENSE={params.sentieon_lic};
 
     {params.sentieon_exec} driver \
-    -t {threads} \
+    -t {resources.threads} \
     -r {input.ref} \
     -i {input.bam} \
     --algo InsertSizeMetricAlgo --min_read_ratio {params.min_read_ratio} {output.insert_size_metrics} \
@@ -155,8 +149,6 @@ if config["analysis"]["sequencing_type"] == 'wgs':
             sample_id = "{sample}",
             sentieon_exec = config_model.sentieon.sentieon_exec,
             sentieon_lic = config_model.sentieon.sentieon_license,
-        threads:
-            get_threads(cluster_config,'sentieon_plot_qc_metrics')
         message:
             ("Creates plots from various QC metrics by Sentieon mimicking Picard tools"
             "Current sample: {params.sample_id}")
@@ -183,8 +175,6 @@ else:
             sample_id = "{sample}",
             sentieon_exec = config_model.sentieon.sentieon_exec,
             sentieon_lic = config_model.sentieon.sentieon_license,
-        threads:
-            get_threads(cluster_config,'sentieon_plot_qc_metrics')
         message:
             ("Creates plots from various QC metrics by Sentieon mimicking Picard tools"
             "Current sample: {params.sample_id}")
