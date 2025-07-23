@@ -3,7 +3,7 @@ rule create_d4file_umi:
     input:
         bam = umi_dir + "{sample_type}.{sample}_consensusfiltered_umi.bam",
     output:
-        d4file_umi = Path(qc_dir,"{sample_type}.{sample}.umi_filtered.d4").as_posix(),
+        d4file_umi = Path(qc_dir,"{sample_type}.{sample}.umi.d4").as_posix(),
     benchmark:
         Path(benchmark_dir, "create_d4file_umi.{sample_type}.{sample}.tsv").as_posix()
     singularity:

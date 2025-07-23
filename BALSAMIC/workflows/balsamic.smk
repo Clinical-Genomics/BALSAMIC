@@ -535,6 +535,11 @@ quality_control_results.append(expand(qc_dir + "{sample_type}.{sample}.d4", samp
 if config["analysis"]["analysis_type"] == "paired":
     quality_control_results.append(expand(qc_dir + "{sample_type}.{sample}.d4", sample_type="normal", sample=normal_sample))
 
+if config["analysis"]["analysis_workflow"] == "balsamic-umi":
+    quality_control_results.append(expand(qc_dir + "{sample_type}.{sample}.umi.d4",sample_type="tumor",sample=tumor_sample))
+    if config["analysis"]["analysis_type"] == "paired":
+        quality_control_results.append(expand(qc_dir + "{sample_type}.{sample}.umi.d4",sample_type="normal",sample=normal_sample))
+
 # Analysis results
 analysis_specific_results = []
 
