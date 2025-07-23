@@ -5,7 +5,7 @@ rule svdb_annotate_artefact_sv_wgs:
     output:
         vcf_sv_artefact_obs=vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".artefact_sv.svdb.vcf.gz",
     benchmark:
-        Path(benchmark_dir,'svdb_annotate_artefact_sv.' + config["analysis"]["case_id"] + ".tsv")
+        Path(benchmark_dir,'svdb_annotate_artefact_sv_wgs.' + config["analysis"]["case_id"] + ".tsv")
     singularity:
         Path(singularity_image,config["bioinfo_tools"].get("svdb") + ".sif").as_posix()
     params:
@@ -39,7 +39,7 @@ rule bcftools_quality_filter_svdb_wgs:
     output:
         vcf_pass_svdb_research=vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.research.vcf.gz",
     benchmark:
-        Path(benchmark_dir,'bcftools_quality_filter_sv_' + config["analysis"]["case_id"] + ".tsv")
+        Path(benchmark_dir,'bcftools_quality_filter_svdb_wgs_' + config["analysis"]["case_id"] + ".tsv")
     singularity:
         Path(singularity_image,config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
     params:
