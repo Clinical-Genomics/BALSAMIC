@@ -8,6 +8,7 @@ Added:
 * logfile for balsamic wrapper https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
 * analysis status text file for easier prodbioinfo handling https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
 * requested memory to each rule https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
+* artefact-database filter for WGS SVs https://github.com/Clinical-Genomics/BALSAMIC/pull/1578
 
 Changed:
 ^^^^^^^^
