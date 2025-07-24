@@ -127,7 +127,11 @@ set-resources:
         threads: 1
         mem_mb: 2000
         runtime: 30
-    gatk_update_vcf_sequence_dictionary:
+    gatk_update_vcf_sequence_dictionary_tumor_normal:
+        runtime: 600
+        threads: 5
+        mem_mb: 10000
+    gatk_update_vcf_sequence_dictionary_tumor_only:
         runtime: 600
         threads: 5
         mem_mb: 10000
