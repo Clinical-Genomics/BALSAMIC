@@ -9,7 +9,7 @@ rule create_d4file_umi:
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("d4tools") + ".sif").as_posix()
     params:
-        housekeeper_id = {"id": "{sample}", "tags": "{sample_type}"},
+        housekeeper_id = {"id": "{sample}", "tags": "qc-metrics"},
         sample = "{sample}"
     message:
         "Creating d4 coverage file for sample {params.sample}"
