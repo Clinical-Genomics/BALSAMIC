@@ -235,11 +235,7 @@ class BaseSNVFilters:
         )
 
         # Exclude default soft filters
-        filters = [
-            f
-            for f in filters
-            if f.filter_name not in cls.DEFAULT_SOFT_FILTERS
-        ]
+        filters = [f for f in filters if f.filter_name not in cls.DEFAULT_SOFT_FILTERS]
 
         # Exclude filters if soft_filter_normals is set
         if soft_filter_normals:

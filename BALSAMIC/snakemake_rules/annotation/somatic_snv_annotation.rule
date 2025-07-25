@@ -136,8 +136,8 @@ rule vcfanno_annotate_somaticSNV_clinical:
     "Running vcfanno annotation for single nuceotide variants on {params.message_text}"
   shell:
         """
-if [[ ! -z "{params.vcfanno_clinical_annotations}"]]; then
-    echo \'{params.vcfanno_clinical_annotations}\' > {params.vcfanno_clinical_toml};
+if [[ ! -z "{params.vcfanno_clinical_annotations}" ]]; then
+    echo \'{params.vcfanno_clinical_annotations}\' > {params.vcfanno_clinical_toml} ;
     vcfanno -p {resources.threads} {params.vcfanno_clinical_toml} {input.vcf_snv_research} | \
     bcftools view --threads {resources.threads} -O z -o {output.vcf_snv_clinical};
 else

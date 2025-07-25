@@ -4,6 +4,7 @@ import click
 import gzip
 import csv
 
+
 def onc_clnsig(info: str) -> bool:
     for field in info.split(";"):
         if "=" not in field:
@@ -14,6 +15,7 @@ def onc_clnsig(info: str) -> bool:
         if key == "ONC" and "oncogenic" in value.lower():
             return True
     return False
+
 
 def matches_whitelist(variant, white):
     """Check if a variant matches a whitelist entry (with '...' support)."""
@@ -27,6 +29,7 @@ def matches_whitelist(variant, white):
         return query.strip("...") in target if "..." in query else query == target
 
     return partial_match(white["ref"], ref) and partial_match(white["alt"], alt)
+
 
 def whitelist_variants(variants, whitelist: dict = {}):
     for key, v in variants.items():
@@ -50,13 +53,18 @@ def whitelist_variants(variants, whitelist: dict = {}):
                 v["filter"] = "PASS"
     return variants
 
+
 def write_vcf(output_path, input_path, variants):
     with gzip.open(input_path, "rt") as input_vcf, open(output_path, "w") as out_vcf:
         for line in input_vcf:
             if line.startswith("#CHROM"):
                 # Add new INFO field descriptions before column header line
-                out_vcf.write('##INFO=<ID=WhitelistStatus,Number=1,Type=String,Description="Variant whitelisted based on CLNSIG/ONC or manually curated clinical list">\n')
-                out_vcf.write('##INFO=<ID=WhitelistedFilters,Number=1,Type=String,Description="Original filters for whitelisted variants that were overridden">\n')
+                out_vcf.write(
+                    '##INFO=<ID=WhitelistStatus,Number=1,Type=String,Description="Variant whitelisted based on CLNSIG/ONC or manually curated clinical list">\n'
+                )
+                out_vcf.write(
+                    '##INFO=<ID=WhitelistedFilters,Number=1,Type=String,Description="Original filters for whitelisted variants that were overridden">\n'
+                )
                 out_vcf.write(line)
                 break
             else:
@@ -76,6 +84,7 @@ def write_vcf(output_path, input_path, variants):
                 *v["samples"],
             ]
             out_vcf.write("\t".join(fields) + "\n")
+
 
 def read_variants(vcf: str) -> Dict[Tuple[str, str, str, str], Dict[str, str]]:
     """
@@ -109,9 +118,10 @@ def read_variants(vcf: str) -> Dict[Tuple[str, str, str, str], Dict[str, str]]:
             }
     return variants
 
+
 def read_whitelist(csv_path):
     whitelist = {}
-    with open(csv_path, newline='') as f:
+    with open(csv_path, newline="") as f:
         reader = csv.DictReader(f)
         for row in reader:
             whitelist[int(row["id"])] = row
@@ -120,7 +130,12 @@ def read_whitelist(csv_path):
 
 @click.command()
 @click.argument("vcf_path", type=click.Path(exists=True))
-@click.option("--whitelist-path", type=click.Path(exists=True), default=None, help="Optional path to whitelist file.")
+@click.option(
+    "--whitelist-path",
+    type=click.Path(exists=True),
+    default=None,
+    help="Optional path to whitelist file.",
+)
 @click.argument("output_file", type=click.Path())
 def main(vcf_path: str, whitelist_path: str, output_file: str) -> None:
     """
@@ -142,6 +157,7 @@ def main(vcf_path: str, whitelist_path: str, output_file: str) -> None:
         variants = whitelist_variants(variants)
 
     write_vcf(output_file, vcf_path, variants)
+
 
 if __name__ == "__main__":
     main()

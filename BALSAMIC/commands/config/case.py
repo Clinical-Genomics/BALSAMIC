@@ -190,7 +190,7 @@ def case_config(
         "cancer_somatic_snv_panel_observations": cancer_somatic_snv_panel_observations,
         "cancer_somatic_sv_observations": cancer_somatic_sv_observations,
         "swegen_snv_frequency": swegen_snv,
-        "swegen_sv_frequency": swegen_sv
+        "swegen_sv_frequency": swegen_sv,
     }
     references.update(
         {
