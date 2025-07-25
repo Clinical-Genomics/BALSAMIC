@@ -37,8 +37,15 @@ VCF_DICT = {
     },
     "vardict": {
         "mutation": "somatic",
-        "mutation_type": ["SNV", "SV"],
+        "mutation_type": ["SNV"],
         "analysis_type": ["paired", "single"],
+        "sequencing_type": ["targeted"],
+        "workflow_solution": ["BALSAMIC"],
+    },
+    "vardictsv": {
+        "mutation": "somatic",
+        "mutation_type": ["SV"],
+        "analysis_type": ["single"],
         "sequencing_type": ["targeted"],
         "workflow_solution": ["BALSAMIC"],
     },
