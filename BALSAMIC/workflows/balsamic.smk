@@ -765,10 +765,10 @@ rule all:
         quality_control_results + analysis_specific_results,
     output:
         finish_file=Path(get_result_dir(config), "analysis_finish").as_posix(),
-        status_file=Path(get_result_dir(config), "analysis_status.txt").as_posix(),
     params:
         tmp_dir=tmp_dir,
         case_name=config["analysis"]["case_id"],
+        status_file=Path(get_result_dir(config), "analysis_status.txt").as_posix(),
     message:
         "Finalizing analysis for {params.case_name}"
     run:
@@ -778,13 +778,16 @@ rule all:
 
         status = "SUCCESS"
 
+        error_message = ""
         try:
             validate_qc_metrics(read_yaml(input[0]))
         except ValueError as val_exc:
             LOG.error(val_exc)
+            error_message = str(val_exc)
             status = "QC_VALIDATION_FAILED"
         except Exception as exc:
             LOG.error(exc)
+            error_message = str(exc)
             status = "UNKNOWN_ERROR"
 
         # Clean up tmp
@@ -794,8 +797,9 @@ rule all:
             print("Error: %s - %s." % (e.filename, e.strerror))
 
         # Write status to file
-        with open(output.status_file,"w") as status_fh:
+        with open(params.status_file,"w") as status_fh:
             status_fh.write(status + "\n")
+            status_fh.write(error_message + "\n")
 
         # Always write finish file if we've reached here
         write_finish_file(file_path=output.finish_file)

@@ -197,7 +197,6 @@ def test_get_snakemake_cluster_options(
 
 def test_get_snakemake_command(
     case_id_tumor_only: str,
-    mail_user_option: str,
     reference_file: Path,
     session_tmp_path: Path,
     snakemake_executable: SnakemakeExecutable,
@@ -217,5 +216,5 @@ def test_get_snakemake_command(
         f"--configfile {reference_file.as_posix()} --config dragen=True "
         f"--use-singularity --singularity-args '--cleanenv --bind {session_tmp_path.as_posix()}:/' --quiet "
         f"-j {MAX_JOBS} --jobname BALSAMIC.{case_id_tumor_only}.{{rulename}}.{{jobid}}.sh "
-        f"--profile {reference_file.as_posix()} --workflow-profile {reference_file.as_posix()} --cores 36"
+        f'--profile {reference_file.as_posix()} --workflow-profile {reference_file.as_posix()} --cluster-status "python {reference_file.as_posix()}" --cores 36'
     )
