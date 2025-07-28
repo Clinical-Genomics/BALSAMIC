@@ -36,7 +36,7 @@ Depending on the sequencing type, BALSAMIC is currently running the following st
      - SV
    * - VarDict
      - TGA, WES
-     - tumor-normal, tumor-only
+     - tumor-only
      - somatic
      - SV
    * - TIDDIT
