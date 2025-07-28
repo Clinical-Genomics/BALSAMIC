@@ -149,10 +149,14 @@ class ReferencesHg(References):
         return [self.cadd_snv.file_path, f"{self.cadd_snv.file_path}.{FileType.TBI}"]
 
     def get_processed_clinvar_file_path(self) -> str:
-        return self.clinvar.file_path.replace(f"{FileType.GZ}", f"_processed.{FileType.GZ}")
+        return self.clinvar.file_path.replace(
+            f"{FileType.GZ}", f"_processed.{FileType.GZ}"
+        )
 
     def get_processed_clinvar_index_path(self) -> str:
-        return self.clinvar.file_path.replace(f"{FileType.GZ}", f"_processed.{FileType.GZ}.{FileType.TBI}")
+        return self.clinvar.file_path.replace(
+            f"{FileType.GZ}", f"_processed.{FileType.GZ}.{FileType.TBI}"
+        )
 
     def get_delly_file_paths(self) -> List[str]:
         """Return Delly associated output files."""
