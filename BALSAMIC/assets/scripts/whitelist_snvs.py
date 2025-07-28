@@ -4,11 +4,12 @@ import click
 import gzip
 import csv
 
-# --- Constants for INFO headers ---
+# --- Constants ---
 INFO_HEADERS = {
     "WhitelistStatus": "Variant whitelisted based on CLNSIG/ONC or manually curated clinical list",
     "WhitelistedFilters": "Original filters for whitelisted variants that were overridden",
 }
+VCF_FIELDS = ["chrom", "pos", "id", "ref", "alt", "qual", "filter", "info", "format"]
 
 
 # --- Utility functions ---
@@ -33,16 +34,16 @@ def onc_clnsig(info: str) -> bool:
     info_fields = parse_info(info)
     return (
         "CLNSIG" in info_fields and "pathogenic" in info_fields["CLNSIG"].lower()
-    ) or ("ONC" in info_fields and "oncogenic" in info_fields["ONC"].lower())
+    ) or (
+        "ONC" in info_fields and "oncogenic" in info_fields["ONC"].lower()
+    )
 
 
 def matches_whitelist(variant, white):
     """Check if a variant matches a whitelist entry (with '...' support)."""
     if variant["chrom"] != white["chrom"] or variant["pos"] != white["pos"]:
         return False
-    return partial_match(white["ref"], variant["ref"]) and partial_match(
-        white["alt"], variant["alt"]
-    )
+    return partial_match(white["ref"], variant["ref"]) and partial_match(white["alt"], variant["alt"])
 
 
 def whitelist_variants(variants, whitelist: dict = {}):
@@ -86,20 +87,9 @@ def write_vcf(output_path, input_path, variants):
             else:
                 out_vcf.write(line)
 
-        for key, v in variants.items():
-            fields = [
-                v["chrom"],
-                v["pos"],
-                v["id"],
-                v["ref"],
-                v["alt"],
-                v["qual"],
-                v["filter"],
-                v["info"],
-                v["format"],
-                *v["samples"],
-            ]
-            out_vcf.write("\t".join(fields) + "\n")
+        for v in variants.values():
+            line_fields = [str(v[field]) for field in VCF_FIELDS] + [str(s) for s in v["samples"]]
+            out_vcf.write("\t".join(line_fields) + "\n")
 
 
 def read_variants(vcf: str) -> Dict[Tuple[str, str, str, str], Dict[str, str]]:
@@ -110,20 +100,10 @@ def read_variants(vcf: str) -> Dict[Tuple[str, str, str, str], Dict[str, str]]:
             if line.startswith("#"):
                 continue
             fields: List[str] = line.strip().split("\t")
-            chrom, pos, v_id, ref, alt, qual, filter_, info, format_, *samples = fields
-            key = (chrom, pos, ref, alt)
-            variants[key] = {
-                "chrom": chrom,
-                "pos": pos,
-                "id": v_id,
-                "ref": ref,
-                "alt": alt,
-                "qual": qual,
-                "filter": filter_,
-                "info": info,
-                "format": format_,
-                "samples": samples,
-            }
+            variant_data = dict(zip(VCF_FIELDS, fields[:9]))
+            variant_data["samples"] = fields[9:]
+            key = (variant_data["chrom"], variant_data["pos"], variant_data["ref"], variant_data["alt"])
+            variants[key] = variant_data
     return variants
 
 
