@@ -318,15 +318,6 @@ class CacheConfig(BaseModel):
                 if reference
                 else None
             )
-            reference.final_file_path = (
-                Path(
-                    info.data.get("references_dir"),
-                    reference.dir_name,
-                    reference.final_file_name,
-                ).as_posix()
-                if reference.final_file_name
-                else None
-            )
             reference.secret = (
                 info.data.get("cosmic_key") if "cosmic" in reference_key else None
             )
