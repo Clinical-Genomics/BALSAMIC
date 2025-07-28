@@ -531,6 +531,12 @@ def tga_male_sex_prediction(test_data_dir: str) -> str:
 
 
 @pytest.fixture(scope="session")
+def whitelist_file(test_data_dir: str) -> str:
+    """Return path manually whitelisted variants file."""
+    return Path(test_data_dir, "vcfs", "whitelist.csv").as_posix()
+
+
+@pytest.fixture(scope="session")
 def pon_config_path(test_data_dir: str) -> str:
     """Created path for PON config json file."""
     return Path(test_data_dir, f"config_pon.{FileType.JSON}").as_posix()
@@ -1451,6 +1457,8 @@ def config_case_cli_tga(
         "--cancer-germline-snv-observations",
         cancer_germline_snv_observations_path,
         "--cancer-somatic-snv-observations",
+        cancer_somatic_snv_observations_path,
+        "--cancer-somatic-snv-panel-observations",
         cancer_somatic_snv_observations_path,
         "--sentieon-install-dir",
         sentieon_install_dir,

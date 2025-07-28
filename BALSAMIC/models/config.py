@@ -165,7 +165,7 @@ class AnalysisModel(BaseModel):
     config_creation_date: str
     pon_version: Optional[str] = None
     pon_workflow: Optional[PONWorkflow] = None
-    whitelist_snvs: Optional[Annotated[str, AfterValidator(is_file)]]
+    whitelist_snvs: Optional[Annotated[str, AfterValidator(is_file)]] = None
 
     @field_validator("pon_version")
     def validate_pon_version(cls, pon_version: Optional[str]):
