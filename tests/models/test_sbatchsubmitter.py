@@ -2,6 +2,7 @@
 
 from unittest.mock import patch, mock_open, MagicMock
 from pathlib import Path
+import subprocess
 
 
 def test_create_sbatch_script(submitter):
@@ -36,14 +37,12 @@ def test_submit_job_success(submitter):
 
 
 def test_submit_job_failure(submitter):
-    """Test `submit_job` handles a failed sbatch call.
+    """Test `submit_job` handles a failed sbatch call."""
+    error = subprocess.CalledProcessError(
+        returncode=1, cmd="sbatch", stderr="Error submitting job"
+    )
 
-    Ensures that if sbatch returns a non-zero exit code, the method logs an error
-    and returns None.
-    """
-    with patch("subprocess.run") as mock_run:
-        mock_run.return_value.returncode = 1
-        mock_run.return_value.stderr = "Error submitting job"
+    with patch("BALSAMIC.models.sbatchsubmitter.subprocess.run", side_effect=error):
         job_id = submitter.submit_job()
         assert job_id is None
         submitter.log.error.assert_called_once()

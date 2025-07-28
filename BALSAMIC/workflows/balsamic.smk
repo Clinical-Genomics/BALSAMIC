@@ -778,13 +778,16 @@ rule all:
 
         status = "SUCCESS"
 
+        error_message = ""
         try:
             validate_qc_metrics(read_yaml(input[0]))
         except ValueError as val_exc:
             LOG.error(val_exc)
+            error_message = str(val_exc)
             status = "QC_VALIDATION_FAILED"
         except Exception as exc:
             LOG.error(exc)
+            error_message = str(exc)
             status = "UNKNOWN_ERROR"
 
         # Clean up tmp
@@ -796,6 +799,7 @@ rule all:
         # Write status to file
         with open(params.status_file,"w") as status_fh:
             status_fh.write(status + "\n")
+            status_fh.write(error_message + "\n")
 
         # Always write finish file if we've reached here
         write_finish_file(file_path=output.finish_file)

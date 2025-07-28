@@ -1,20 +1,32 @@
+
 [X.X.X]
 --------
 
 Added:
 ^^^^^^
-* added rule and script for adding CLNVID to clinvar during cache installation
+* sbatch script for snakemake sequential job submission https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
+* logfile for balsamic wrapper https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
+* analysis status text file for easier prodbioinfo handling https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
+* requested memory to each rule https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
+* added rule and script for adding CLNVID to clinvar during cache installation https://github.com/Clinical-Genomics/BALSAMIC/pull/1576
+
 
 Changed:
 ^^^^^^^^
-
+* changed snakemake from running immediate submit to submitting snakemake job to cluster https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
+* Updated ensembl vep to version 113.4 https://github.com/Clinical-Genomics/BALSAMIC/pull/1567
+* Updated rank model to use GNOMADAF_popmax instead of deprecated gnomAD_AF https://github.com/Clinical-Genomics/BALSAMIC/pull/1567
 
 Removed:
 ^^^^^^^^
-* removed immediate submit functionality
+* removed immediate submit functionality https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
+* removed unused code for benchmark plotting https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
+* removed functionality to disable variant callers https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
+
 
 Fixed:
 ^^^^^^
+* Fixed varcall_py27 container for Manta https://github.com/Clinical-Genomics/BALSAMIC/pull/1567
 
 
 [17.0.1]
