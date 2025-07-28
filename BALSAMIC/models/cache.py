@@ -37,10 +37,8 @@ class ReferenceUrl(BaseModel):
     file_type: FileType
     gzip: bool
     file_name: str
-    final_file_name: Optional[str] = None
     dir_name: str
     file_path: Optional[str] = None
-    final_file_path: Optional[str] = None
     secret: Optional[str] = None
 
 
@@ -149,6 +147,12 @@ class ReferencesHg(References):
     def get_cadd_snv_file_paths(self) -> List[str]:
         """Return CADD SNV reference output files."""
         return [self.cadd_snv.file_path, f"{self.cadd_snv.file_path}.{FileType.TBI}"]
+
+    def get_processed_clinvar_file_path(self) -> str:
+        return self.clinvar.file_path.replace(f"{FileType.GZ}", f"_processed.{FileType.GZ}")
+
+    def get_processed_clinvar_index_path(self) -> str:
+        return self.clinvar.file_path.replace(f"{FileType.GZ}", f"_processed.{FileType.GZ}.{FileType.TBI}")
 
     def get_delly_file_paths(self) -> List[str]:
         """Return Delly associated output files."""
@@ -411,12 +415,13 @@ class CacheConfig(BaseModel):
             self.references.ascat_gc_correction.file_path,
             self.references.cadd_snv.file_path,
             self.references.simple_repeat.file_path,
-            f"{self.references.clinvar.final_file_path}.{FileType.GZ}",
             f"{self.references.cosmic.file_path}.{FileType.GZ}",
             f"{self.references.dbsnp.file_path}.{FileType.GZ}",
             self.references.rank_score.file_path,
             f"{self.references.somalier_sites.file_path}.{FileType.GZ}",
             self.references.wgs_calling_regions.file_path,
+            self.references.get_processed_clinvar_file_path(),
+            self.references.get_processed_clinvar_index_path(),
             *self.get_compressed_indexed_vcf_paths(),
             *self.references.get_1k_genome_file_paths(),
             *self.references.get_cadd_snv_file_paths(),
