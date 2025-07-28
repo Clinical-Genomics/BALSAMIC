@@ -8,6 +8,8 @@ Added:
 * logfile for balsamic wrapper https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
 * analysis status text file for easier prodbioinfo handling https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
 * requested memory to each rule https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
+* soft-filter for somatic cancer variants from panels https://github.com/Clinical-Genomics/BALSAMIC/pull/1570
+* whitelist script for setting PASS to soft-filtered clinically relevant variants https://github.com/Clinical-Genomics/BALSAMIC/pull/1570
 
 Changed:
 ^^^^^^^^
