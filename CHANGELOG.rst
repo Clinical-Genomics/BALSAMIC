@@ -14,6 +14,7 @@ Changed:
 * changed snakemake from running immediate submit to submitting snakemake job to cluster https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
 * Updated ensembl vep to version 113.4 https://github.com/Clinical-Genomics/BALSAMIC/pull/1567
 * Updated rank model to use GNOMADAF_popmax instead of deprecated gnomAD_AF https://github.com/Clinical-Genomics/BALSAMIC/pull/1567
+* Moved SVs from VarDict VCF to SV file https://github.com/Clinical-Genomics/BALSAMIC/pull/1584
 
 Removed:
 ^^^^^^^^
