@@ -148,6 +148,16 @@ class ReferencesHg(References):
         """Return CADD SNV reference output files."""
         return [self.cadd_snv.file_path, f"{self.cadd_snv.file_path}.{FileType.TBI}"]
 
+    def get_processed_clinvar_file_path(self) -> str:
+        return self.clinvar.file_path.replace(
+            f"{FileType.GZ}", f"_processed.{FileType.GZ}"
+        )
+
+    def get_processed_clinvar_index_path(self) -> str:
+        return self.clinvar.file_path.replace(
+            f"{FileType.GZ}", f"_processed.{FileType.GZ}.{FileType.TBI}"
+        )
+
     def get_delly_file_paths(self) -> List[str]:
         """Return Delly associated output files."""
         return [
@@ -400,12 +410,13 @@ class CacheConfig(BaseModel):
             self.references.ascat_gc_correction.file_path,
             self.references.cadd_snv.file_path,
             self.references.simple_repeat.file_path,
-            f"{self.references.clinvar.file_path}.{FileType.GZ}",
             f"{self.references.cosmic.file_path}.{FileType.GZ}",
             f"{self.references.dbsnp.file_path}.{FileType.GZ}",
             self.references.rank_score.file_path,
             f"{self.references.somalier_sites.file_path}.{FileType.GZ}",
             self.references.wgs_calling_regions.file_path,
+            self.references.get_processed_clinvar_file_path(),
+            self.references.get_processed_clinvar_index_path(),
             *self.get_compressed_indexed_vcf_paths(),
             *self.references.get_1k_genome_file_paths(),
             *self.references.get_cadd_snv_file_paths(),
@@ -434,7 +445,7 @@ class CacheConfig(BaseModel):
             ascat_gc_correction=self.references.ascat_gc_correction.file_path,
             cadd_snv=self.references.cadd_snv.file_path,
             simple_repeat=self.references.simple_repeat.file_path,
-            clinvar=f"{self.references.clinvar.file_path}.{FileType.GZ}",
+            clinvar=self.references.get_processed_clinvar_file_path(),
             cosmic=f"{self.references.cosmic.file_path}.{FileType.GZ}",
             dbsnp=f"{self.references.dbsnp.file_path}.{FileType.GZ}",
             delly_exclusion=self.references.delly_exclusion.file_path,
