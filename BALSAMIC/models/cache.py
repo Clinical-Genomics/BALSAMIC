@@ -445,7 +445,7 @@ class CacheConfig(BaseModel):
             ascat_gc_correction=self.references.ascat_gc_correction.file_path,
             cadd_snv=self.references.cadd_snv.file_path,
             simple_repeat=self.references.simple_repeat.file_path,
-            clinvar=f"{self.references.clinvar.file_path}.{FileType.GZ}",
+            clinvar=self.references.get_processed_clinvar_file_path(),
             cosmic=f"{self.references.cosmic.file_path}.{FileType.GZ}",
             dbsnp=f"{self.references.dbsnp.file_path}.{FileType.GZ}",
             delly_exclusion=self.references.delly_exclusion.file_path,
