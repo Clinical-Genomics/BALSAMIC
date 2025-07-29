@@ -1,5 +1,6 @@
 """Rules to process VCF reference files."""
 
+from BALSAMIC.utils.rule import get_script_path
 
 wildcard_constraints:
     vcf="|".join(cache_config.get_reference_file_paths_by_file_type(file_type=FileType.VCF)),
