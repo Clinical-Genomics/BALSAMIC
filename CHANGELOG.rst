@@ -6,6 +6,7 @@ Added:
 
 Changed:
 ^^^^^^^^
+* removing strand balance requirement of ref-allele in WGS TO strand bias filter https://github.com/Clinical-Genomics/BALSAMIC/pull/1594
 
 Removed:
 ^^^^^^^^
