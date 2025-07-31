@@ -647,12 +647,11 @@ The somatic variants in TNscope raw VCF file (`SNV.somatic.<CASE_ID>.tnscope.all
 
     SUM(QSS)/SUM(AD) >= 20
 
-*Read Counts*: Count of reads in a given (F1R2, F2R1) pair orientation supporting the alternate allele and reference alleles
+*Read Counts*: Count of reads in a given (F1R2, F2R1) pair orientation supporting the alternate allele
 
 ::
 
     ALT_F1R2 > 0, ALT_F2R1 > 0
-    REF_F1R2 > 0, REF_F2R1 > 0
 
 *SOR*: Symmetric Odds Ratio of 2x2 contingency table to detect strand bias
 
