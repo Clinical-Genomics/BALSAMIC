@@ -136,10 +136,12 @@ else:
 if sequencing_type == "targeted":
     exome = config_model.panel.exome
     snv_quality_filters = SNV_FILTERS.get_filters(category="quality", analysis_type=analysis_type, exome=exome)
+    snv_post_quality_filters = SNV_FILTERS.get_filters(category="post_quality", analysis_type=analysis_type, exome=exome)
     snv_research_filters = SNV_FILTERS.get_filters(category="research", analysis_type=analysis_type, exome=exome)
     snv_clinical_filters = SNV_FILTERS.get_filters(category="clinical", analysis_type=analysis_type, exome=exome)
 else:
     snv_quality_filters = SNV_FILTERS.get_filters(category="quality", analysis_type=analysis_type)
+    snv_post_quality_filters = SNV_FILTERS.get_filters(category="post_quality",analysis_type=analysis_type)
     snv_research_filters = SNV_FILTERS.get_filters(category="research", analysis_type=analysis_type)
     snv_clinical_filters = SNV_FILTERS.get_filters(category="clinical", analysis_type=analysis_type)
 
@@ -165,7 +167,7 @@ if config_model.custom_filters and config_model.custom_filters.umi_min_reads:
     params.umiconsensuscall.filter_minreads = config_model.custom_filters.umi_min_reads
 
 # vcfanno annotations
-research_annotations.append(
+gnomad_annotation = [
     {
         "annotation": [
             {
@@ -176,7 +178,7 @@ research_annotations.append(
             }
         ]
     }
-)
+]
 
 research_annotations.append(
     {
