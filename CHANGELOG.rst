@@ -7,7 +7,7 @@ Added:
 Changed:
 ^^^^^^^^
 * removing strand balance requirement of ref-allele in WGS TO strand bias filter https://github.com/Clinical-Genomics/BALSAMIC/pull/1594
-
+* lowered rare-disease germline loqusdb observation frequency for WGS SNVs to 0.007 from 0.01 https://github.com/Clinical-Genomics/BALSAMIC/pull/1594
 
 Removed:
 ^^^^^^^^

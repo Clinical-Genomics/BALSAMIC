@@ -681,7 +681,7 @@ This section contains population database frequency filters.
 
 ::
 
-    Frq <= 0.01  (or) Frq == "."
+    Frq <= 0.007  (or) Frq == "."
 
 The variants scored as `PASS` or `triallelic_sites` are included in the final vcf file (`SNV.somatic.<CASE_ID>.tnscope.<research/clinical>.filtered.pass.vcf.gz`).
 
