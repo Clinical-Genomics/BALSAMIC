@@ -10,12 +10,16 @@ Added:
 * requested memory to each rule https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
 * soft-filter for somatic cancer variants from panels https://github.com/Clinical-Genomics/BALSAMIC/pull/1570
 * whitelist script for setting PASS to soft-filtered clinically relevant variants https://github.com/Clinical-Genomics/BALSAMIC/pull/1570
+* relaxed post-quality gnomad population filter for SNVs https://github.com/Clinical-Genomics/BALSAMIC/pull/1597
 
 Changed:
 ^^^^^^^^
 * changed snakemake from running immediate submit to submitting snakemake job to cluster https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
 * Updated ensembl vep to version 113.4 https://github.com/Clinical-Genomics/BALSAMIC/pull/1567
 * Updated rank model to use GNOMADAF_popmax instead of deprecated gnomAD_AF https://github.com/Clinical-Genomics/BALSAMIC/pull/1567
+* Reduced breakend distance for SV observation frequency annotations to 1000 https://github.com/Clinical-Genomics/BALSAMIC/pull/159
+* Lowered threshold for max gnomad SNV frequency to 0.001 for all workflows https://github.com/Clinical-Genomics/BALSAMIC/pull/1597
+* Lowered threshold for rare disease loqusdb SNV frequency to 0.005 for all workflows https://github.com/Clinical-Genomics/BALSAMIC/pull/1597
 
 Removed:
 ^^^^^^^^
