@@ -2,7 +2,7 @@
 Tools and software
 =================================
 
-BALSAMIC ( **version** = 15.0.1 ) uses myriad of tools and softwares to analyze fastq files. This section covers why each
+BALSAMIC ( **version** = 17.0.1 ) uses myriad of tools and softwares to analyze fastq files. This section covers why each
 one is included: usage and parameters, and relevant external links.
 
 ascatNgs
@@ -15,7 +15,7 @@ bcftools
 ~~~~~~~~
 :Source code: `GitHub` `<https://github.com/samtools/bcftools>`_
 :Article: `Bioinformatics` `<https://pubmed.ncbi.nlm.nih.gov/21903627/>`_
-:Version: `>=1.10`
+:Version: `>=1.13`
 
 bedtools
 ~~~~~~~~
@@ -57,7 +57,7 @@ ensembl-vep
 ~~~~~~~~~~~
 :Source code: `GitHub` `<https://github.com/Ensembl/ensembl-vep>`_
 :Article: `Genome Biology` `<https://genomebiology.biomedcentral.com/articles/10.1186/s13059-016-0974-4>`_
-:Version: `104.3`
+:Version: `113.4`
 
 fastp
 ~~~~~
@@ -74,7 +74,7 @@ fastqc
 genmod
 ~~~~~~
 :Source code: `Github` `<https://github.com/Clinical-Genomics/genmod>`_
-:Version: `0.2.16`
+:Version: `3.7.4`
 
 manta
 ~~~~~
@@ -86,7 +86,7 @@ msisensor-pro
 ~~~~~~~~~~~~~
 :Source code: `GitHub` `<https://github.com/xjtu-omics/msisensor-pro>`_
 :Article: `Bioinformatics` `<https://doi.org/10.1016/j.gpb.2020.02.001>`_
-:Version: `1.2.0`
+:Version: `1.3.0`
 
 mosdepth
 ~~~~~~~~
@@ -116,19 +116,19 @@ samtools
 ~~~~~~~~
 :Source code: `GitHub` `<https://github.com/samtools/samtools>`_
 :Article: `Bioinformatics` `<https://pubmed.ncbi.nlm.nih.gov/19505943/>`_
-:Version: `>1.11`
+:Version: `1.15.1`
 
 sentieon-tools
 ~~~~~~~~~~~~~~
 :Source code: `Commercial Tool` `<https://www.sentieon.com/>`_
 :Article: `Bioinformatics` `<https://www.biorxiv.org/content/10.1101/115717v2>`_
-:Version: `202010.02`
+:Version: `202308.03`
 
 somalier
 ~~~~~~~~
 :Source code: `Github` `<https://github.com/brentp/somalier>`_
 :Article: `Genome Medicine` `<https://doi.org/10.1186/s13073-020-00761-2>`_
-:Version: `0.2.16`
+:Version: `0.2.19`
 
 svdb
 ~~~~
@@ -164,4 +164,4 @@ vcf2cytosure
 ~~~~~~~~~~~~~
 :Source code: `GitHub` `<https://github.com/NBISweden/vcf2cytosure>`_
 :Article: `-`
-:Version: `0.8`
+:Version: `0.9.1`

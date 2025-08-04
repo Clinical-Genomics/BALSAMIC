@@ -1,0 +1,51 @@
+# vim: syntax=python tabstop=4 expandtab
+# coding: utf-8
+
+
+rule samtools_qc:
+    input:
+        bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample, specified_suffix="align_sort")
+    output:
+        flagstats = Path(qc_dir, "{sample_type}.{sample}.samtools.flagstats.txt").as_posix(),
+        idxstats = Path(qc_dir, "{sample_type}.{sample}.samtools.idxstats.txt").as_posix(),
+        stats = Path(qc_dir, "{sample_type}.{sample}.samtools.stats.txt").as_posix(),
+    benchmark:
+        Path(benchmark_dir,"samtools_qc_{sample_type}_{sample}.tsv").as_posix()
+    singularity:
+        Path(singularity_image,config["bioinfo_tools"].get("samtools") + ".sif").as_posix()
+    params:
+        sample_id = "{sample}"
+    threads:
+        get_threads(cluster_config, "samtools_qc")
+    message:
+        "Calculating alignment stats for sample: {params.sample_id}"
+    shell:
+        """
+samtools flagstats --threads {threads} {input.bam} > {output.flagstats};
+samtools stats --threads {threads} {input.bam} > {output.stats};
+samtools idxstats --threads {threads} {input.bam} > {output.idxstats};
+        """
+
+rule samtools_qc_umi_collapsed:
+    input:
+        bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample)
+    output:
+        flagstats = Path(qc_dir, "{sample_type}.{sample}.umi_collapsed.samtools.flagstats.txt").as_posix(),
+        idxstats = Path(qc_dir, "{sample_type}.{sample}.umi_collapsed.samtools.idxstats.txt").as_posix(),
+        stats = Path(qc_dir, "{sample_type}.{sample}.umi_collapsed.samtools.stats.txt").as_posix(),
+    benchmark:
+        Path(benchmark_dir,"samtools_qc_umi_collapsed_{sample_type}_{sample}.tsv").as_posix()
+    singularity:
+        Path(singularity_image,config["bioinfo_tools"].get("samtools") + ".sif").as_posix()
+    params:
+        sample_id = "{sample}"
+    threads:
+        get_threads(cluster_config, "samtools_qc")
+    message:
+        "Calculating alignment stats for sample after UMI collapse: {params.sample_id}"
+    shell:
+        """
+samtools flagstats --threads {threads} {input.bam} > {output.flagstats};
+samtools stats --threads {threads} {input.bam} > {output.stats};
+samtools idxstats --threads {threads} {input.bam} > {output.idxstats};
+        """

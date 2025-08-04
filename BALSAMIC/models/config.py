@@ -93,12 +93,13 @@ class VarcallerAttribute(BaseModel):
 class VCFModel(BaseModel):
     """Contains VCF config"""
 
-    vardict: VarcallerAttribute
     tnscope: VarcallerAttribute
     dnascope: VarcallerAttribute
     tnscope_umi: VarcallerAttribute
     manta_germline: VarcallerAttribute
+    merged: VarcallerAttribute
     manta: VarcallerAttribute
+    vardict: VarcallerAttribute
     dellysv: VarcallerAttribute
     cnvkit: VarcallerAttribute
     ascat: VarcallerAttribute
@@ -115,6 +116,7 @@ class AnalysisModel(BaseModel):
     Attributes:
 
         case_id : Field(required); string case identifier
+        soft_filter_normal: (bool); optional parameter to disable hard-filtering on presence in mathed normal sample
         gender: Field(required); string case gender
         analysis_type : Field(required); string literal [single, paired, pon]
             single : if only tumor samples are provided
@@ -146,6 +148,7 @@ class AnalysisModel(BaseModel):
     """
 
     case_id: str
+    soft_filter_normal: Optional[bool] = False
     analysis_type: AnalysisType
     gender: Optional[Gender] = None
     sequencing_type: SequencingType
@@ -227,7 +230,7 @@ class ConfigModel(BaseModel):
         - get_final_bam_name: Return final bam name for downstream analysis.
     """
 
-    QC: QCModel
+    QC: QCModel = QCModel()
     samples: List[SampleInstanceModel]
     reference: Dict[str, Path]
     singularity: Dict[str, str]
@@ -399,18 +402,23 @@ class ConfigModel(BaseModel):
         bam_names = []
         for sample in self.samples:
             if sample.name == sample_name:
+                sample_type = self.get_sample_type_by_name(sample_name)
                 bam_names.extend(
                     [
-                        f"{bam_dir}{sample_name}_align_sort_{fastq_pattern}.bam"
+                        f"{bam_dir}{sample_type}.{sample_name}.{fastq_pattern}.align_sort.bam"
                         for fastq_pattern in sample.fastq_info
                     ]
                 )
         return bam_names
 
     def get_final_bam_name(
-        self, bam_dir: str, sample_name: str = None, sample_type: str = None
+        self,
+        bam_dir: str,
+        sample_name: str = None,
+        sample_type: str = None,
+        specified_suffix: str = None,
     ) -> str:
-        """Return final bam name to be used in downstream analysis."""
+        """Return bam name to be used in downstream analysis."""
 
         if not sample_name and not sample_type:
             raise ValueError(
@@ -431,13 +439,16 @@ class ConfigModel(BaseModel):
 
         if self.analysis.analysis_type == AnalysisType.PON:
             # Only dedup is necessary for panel of normals
-            final_bam_suffix = "dedup"
+            final_bam_suffix = "dedup.fixmate"
         elif self.analysis.sequencing_type == SequencingType.TARGETED:
-            # Only dedup is necessary for TGA
-            final_bam_suffix = "dedup_sorted"
+            # TGA uses UMIs
+            final_bam_suffix = "dedup.fixmate"
         else:
             # For WGS the bamfiles are realigned
             final_bam_suffix = "dedup.realign"
+
+        if specified_suffix:
+            final_bam_suffix = specified_suffix
 
         return f"{bam_dir}{sample_type}.{sample_name}.{final_bam_suffix}.bam"
 
