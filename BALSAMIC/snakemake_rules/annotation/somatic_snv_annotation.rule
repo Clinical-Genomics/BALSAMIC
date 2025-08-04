@@ -7,6 +7,7 @@ rule snv_gnomad_annotation_and_filtration:
     vcf_snv_research = vcf_dir + "SNV.somatic.{case_name}.{var_caller}.research.vcf.gz",
   output:
     research_gnomadfiltered = vcf_dir + "SNV.somatic.{case_name}.{var_caller}.research_gnomadfiltered.vcf.gz",
+    vcfanno_gnomad_annotation_toml = vcf_dir + "SNV.somatic.{case_name}.{var_caller}.vcfanno_gnomadsnv.toml"
   benchmark:
     Path(benchmark_dir, "snv_gnomad_annotation_and_filtration.{case_name}.{var_caller}.tsv").as_posix()
   singularity:

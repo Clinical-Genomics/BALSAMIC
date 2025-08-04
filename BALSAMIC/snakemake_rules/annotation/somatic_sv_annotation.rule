@@ -56,7 +56,7 @@ rule svdb_annotate_somatic_research_sv:
     shell:
         """
 if [[ -f "{params.swegen_sv_frequency}" ]]; then
-    svdb --query --bnd_distance 5000 --overlap 0.80 \
+    svdb --query --bnd_distance 1000 --overlap 0.80 \
     --in_occ OCC --out_occ swegen_obs --in_frq FRQ --out_frq SWEGENAF \
     --db {params.swegen_sv_frequency} --query_vcf {input.vcf_sv_research_vep} > {params.tmp_vcf};
     bgzip -l 9 -c {params.tmp_vcf} > {output.vcf_research};
@@ -86,7 +86,7 @@ rule svdb_annotate_clinical_obs_somatic_clinical_sv:
     shell:
         """
 if [[ -f "{params.clinical_sv_observations}" ]]; then
-    svdb --query --bnd_distance 10000 --overlap 0.80 \
+    svdb --query --bnd_distance 1000 --overlap 0.80 \
     --in_occ Obs --out_occ clin_obs --in_frq Frq --out_frq Frq \
     --db {params.clinical_sv_observations} --query_vcf {input.vcf_sv_research} > {params.vcf_clinical_obs}
     bgzip -l 9 -c {params.vcf_clinical_obs} > {output.vcf_sv_clinical_obs};
@@ -118,7 +118,7 @@ rule svdb_annotate_somatic_obs_somatic_clinical_sv:
     shell:
         """
 if [[ -f "{params.somatic_sv_observations}" ]]; then
-    svdb --query --bnd_distance 10000 --overlap 0.80 \
+    svdb --query --bnd_distance 1000 --overlap 0.80 \
     --in_occ Obs --out_occ Cancer_Somatic_Obs --in_frq Frq --out_frq Cancer_Somatic_Frq \
     --db {params.somatic_sv_observations} --query_vcf {input.vcf_sv_clinical_obs} > {params.vcf_somatic_obs}
     bgzip -l 9 -c {params.vcf_somatic_obs} > {output.vcf_sv_clinical};
