@@ -55,11 +55,11 @@ get_supporting_reads() {
 # Set information for tumor and normal
 supporting_reads_tumor=$(get_supporting_reads $tumor_bam)
 samples_header="TUMOR"
-samples_field="${supporting_reads_tumor}"
+samples_field="0/1:${supporting_reads_tumor}"
 if [ -n "$normal_bam" ]; then
     supporting_reads_normal=$(get_supporting_reads $normal_bam)
     samples_header="NORMAL\tTUMOR"
-    samples_field="${supporting_reads_normal}\t${supporting_reads_tumor}"
+    samples_field="0/0:${supporting_reads_normal}\t0/1:${supporting_reads_tumor}"
 fi
 
 
@@ -82,7 +82,7 @@ echo "vcf filter: $vcf_filter"
   echo '##INFO=<ID=IMPRECISE,Number=0,Type=Flag,Description="Imprecise structural variation">'
   echo '##FORMAT=<ID=DV,Number=1,Type=Integer,Description="Number of paired-ends that support the event">'
   echo -e "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\t${samples_header}"
-  echo -e "${igh_chr}\t${igh_pos}\tsamtools_igh_dux4\tN\tN[${dux4_chr}:${dux4_pos}[\t.\t${vcf_filter}\tSVTYPE=BND;IMPRECISE;\tDV\t${samples_field}"
+  echo -e "${igh_chr}\t${igh_pos}\tsamtools_igh_dux4\tN\tN[${dux4_chr}:${dux4_pos}[\t.\t${vcf_filter}\tSVTYPE=BND;IMPRECISE;\tGT:DV\t${samples_field}"
 } >> $output_vcf_tmp
 
 bgzip $output_vcf_tmp

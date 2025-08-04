@@ -1,0 +1,252 @@
+# vim: syntax=python tabstop=4 expandtab
+# coding: utf-8
+
+
+rule manta_tumor_only:
+    input:
+        fa = config["reference"]["reference_genome"],
+        bamT = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample)
+    output:
+        final = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".manta.vcf.gz",
+        namemap = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".manta.sample_name_map"
+    benchmark:
+        benchmark_dir + 'manta_tumor_only_' + config["analysis"]["case_id"] + ".tsv"
+    singularity:
+        Path(singularity_image, config["bioinfo_tools"].get("manta") + ".sif").as_posix()
+    params:
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
+        settings = params.get_manta_settings(sequencing_type=sequencing_type),
+        runmode = "local",
+        tumor = config_model.get_sample_name_by_type(SampleType.TUMOR),
+        case_name = config["analysis"]["case_id"],
+        low_pr_sr_count = [MANTA_FILTERS.low_pr_sr_count.tag_value,MANTA_FILTERS.low_pr_sr_count.filter_name],
+    threads:
+        get_threads(cluster_config, "manta_tumor_only")
+    message:
+        ("Calling structural variants using manta for {params.case_name} and"
+        "index the compressed vcf file")
+    shell:
+      """
+export TMPDIR={params.tmpdir} ;
+samtools_path=$(readlink -f $(which samtools)) ;
+
+configManta.py \
+{params.settings} \
+--tumorBam={input.bamT} \
+--referenceFasta={input.fa} \
+--runDir={params.tmpdir};
+
+python {params.tmpdir}/runWorkflow.py -m {params.runmode} -j {threads};
+
+convertInversion.py \
+  $samtools_path \
+  {input.fa} \
+  {params.tmpdir}/results/variants/tumorSV.vcf.gz > {params.tmpdir}/results/variants/tumorSV_converted.vcf; 
+
+bgzip -l 9 {params.tmpdir}/results/variants/tumorSV_converted.vcf;
+
+bcftools filter --threads {threads} --exclude 'SUM(FORMAT/PR[0:1]+FORMAT/SR[0:1]) < {params.low_pr_sr_count[0]}' --soft-filter '{params.low_pr_sr_count[1]}' --mode '+' -o {output.final} -O z {params.tmpdir}/results/variants/tumorSV_converted.vcf.gz
+
+tabix -p vcf -f {output.final};
+
+echo -e \"{params.tumor}\\tTUMOR\" > {output.namemap}; 
+
+rm -rf {params.tmpdir};
+      """
+
+
+rule delly_sv_tumor_only:
+    input:
+        fa = config["reference"]["reference_genome"],
+        bamT = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
+        excl = config["reference"]["delly_exclusion_converted"],
+    output:
+        bcf = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".delly.bcf",
+        namemap= vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".dellysv.sample_name_map",
+    benchmark:
+        benchmark_dir + 'delly_sv_tumor_only_' + config["analysis"]["case_id"] + ".tsv"
+    singularity:
+        Path(singularity_image, config["bioinfo_tools"].get("delly") + ".sif").as_posix()
+    params:
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
+        tumor = "TUMOR",
+        case_name = config["analysis"]["case_id"]
+    threads:
+        get_threads(cluster_config, "delly_tumor_only")
+    message:
+        ("Calling structural variants using delly for {params.case_name}")
+    shell:
+        """
+export TMPDIR={params.tmpdir} ;
+
+delly call -x {input.excl} -o {output.bcf} -g {input.fa} {input.bamT}
+
+echo -e \"{params.tumor}\\tTUMOR\" > {output.namemap};
+
+rm -rf {params.tmpdir};
+        """
+
+
+rule delly_cnv_tumor_only:
+    input:
+        fa = config["reference"]["reference_genome"],
+        bamT = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
+        bcf = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".delly.bcf",
+        map = config["reference"]["delly_mappability"],
+    output:
+        cnv_delly = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".delly.bcf",
+        rd_delly = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".dellycnv.cov.gz",
+        namemap= vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".dellycnv.sample_name_map",
+    benchmark:
+        benchmark_dir + 'delly_cnv_tumor_only_' + config["analysis"]["case_id"] + ".tsv"
+    singularity:
+        Path(singularity_image, config["bioinfo_tools"].get("delly") + ".sif").as_posix()
+    params:
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
+        housekeeper_id= {"id": config["analysis"]["case_id"],"tags": "clinical"},
+        tumor = "TUMOR",
+        case_name = config["analysis"]["case_id"]
+    threads:
+        get_threads(cluster_config, "delly_tumor_only")
+    message:
+        ("Calling copy number variants using delly for {params.case_name}")
+    shell:
+        """
+export TMPDIR={params.tmpdir} ;
+
+delly cnv -m {input.map} -g {input.fa} -c {output.rd_delly} -o {output.cnv_delly} -l {input.bcf} {input.bamT}
+
+echo -e \"{params.tumor}\\tTUMOR\" > {output.namemap};
+
+rm -rf {params.tmpdir};
+        """
+
+rule tiddit_sv_tumor_only:
+    input:
+        fa = config["reference"]["reference_genome"],
+        bamT = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample)
+    output:
+        vcf = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".tiddit.vcf.gz",
+        cov_tumor_tiddit = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".tumor.tiddit_cov.bed",
+        namemap= vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".tiddit.sample_name_map",
+    benchmark:
+        benchmark_dir + 'tiddit_sv_tumor_only_' + config["analysis"]["case_id"] + ".tsv"
+    singularity:
+        Path(singularity_image, config["bioinfo_tools"].get("tiddit") + ".sif").as_posix()
+    params:
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
+        housekeeper_id= {"id": config["analysis"]["case_id"],"tags": "clinical"},
+        tumor = "TUMOR",
+        case_name = config["analysis"]["case_id"]
+    threads:
+        get_threads(cluster_config, "tiddit_sv_tumor_only")
+    message:
+        ("Calling structural variants using tiddit for {params.case_name}")
+    shell:
+        """
+export TMPDIR={params.tmpdir} ;
+
+tiddit --cov -z 500 --ref {input.fa} --bam {input.bamT} -o {params.tmpdir}/{params.tumor}_cov &
+
+tiddit --sv -p 6 -r 6 -z 1000 --ref {input.fa} --bam {input.bamT} -o {params.tmpdir}/{params.tumor};
+
+grep -E "#|PASS" {params.tmpdir}/{params.tumor}.vcf | bgzip -l 9 -c > {output.vcf};
+
+tabix -p vcf -f {output.vcf};
+
+cp {params.tmpdir}/{params.tumor}_cov.bed {output.cov_tumor_tiddit};
+
+echo -e \"{params.tumor}\\tTUMOR\" > {output.namemap};
+
+rm -rf {params.tmpdir};
+        """
+
+rule cnvpytor_tumor_only:
+    input:
+        bamT = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
+        vcfT = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.vcf.gz",
+    output:
+        cnv_cnvpytor = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".cnvpytor.vcf.gz",
+        circular_cnvpytor = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".cnvpytor.circular.png",
+        scatter_cnvpytor = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".cnvpytor.scatter.png",
+        namemap= vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".cnvpytor.sample_name_map",
+    benchmark:
+        benchmark_dir + 'cnvpytor_tumor_only_' + config["analysis"]["case_id"] + ".tsv"
+    singularity:
+        Path(singularity_image, config["bioinfo_tools"].get("cnvpytor") + ".sif").as_posix()
+    params:
+        tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
+        housekeeper_id= {"id": config["analysis"]["case_id"],"tags": "clinical"},
+        tumor = "TUMOR",
+        case_name = config["analysis"]["case_id"]
+    threads:
+        get_threads(cluster_config, "cnvpytor_tumor_only")
+    message:
+        ("Calling copy number variants using cnvpytor for {params.case_name}")
+    shell:
+        """
+export TMPDIR={params.tmpdir} ;
+export tumor={params.tumor};
+
+export tumor_file={params.tmpdir}/$tumor
+
+cnvpytor --max_cores {threads} -root {params.tmpdir}/{params.tumor}.pytor -rd {input.bamT};
+
+cnvpytor --max_cores {threads} -root {params.tmpdir}/{params.tumor}.pytor -his 1000 10000 100000;
+
+cnvpytor --max_cores {threads} -root {params.tmpdir}/{params.tumor}.pytor  -partition 1000 10000 100000;
+
+cnvpytor --max_cores {threads} -root {params.tmpdir}/{params.tumor}.pytor -snp {input.vcfT} -sample {params.tumor};
+
+cnvpytor --max_cores {threads} -root {params.tmpdir}/{params.tumor}.pytor -mask_snps;
+
+cnvpytor --max_cores {threads} -root {params.tmpdir}/{params.tumor}.pytor -baf 10000 100000;
+
+cnvpytor --max_cores {threads} -root {params.tmpdir}/{params.tumor}.pytor -call 1000 10000 100000 1> {params.tmpdir}/{params.tumor}.call
+
+echo -e \"set print_filename $tumor_file.vcf\\n\
+set Q0_range -1 0.5\\nset p_range 0 0.0001\\n\
+set p_N 0 0.5\\nprint calls\" > {params.tmpdir}/{params.tumor}.out.sh;
+
+echo -e \"set rd_use_mask\\nset markersize 1\\nset grid vertical\\n\
+set output_filename $tumor_file.png\\nmanhattan\\ncircular\" > {params.tmpdir}/{params.tumor}.plot.sh;
+
+cnvpytor -root {params.tmpdir}/{params.tumor}.pytor \
+-view 100000 < {params.tmpdir}/{params.tumor}.plot.sh;
+
+for binsize in 1000 10000 100000; do cnvpytor -root {params.tmpdir}/{params.tumor}.pytor \
+-view $binsize < {params.tmpdir}/{params.tumor}.out.sh;done;
+
+cp {params.tmpdir}/{params.tumor}.global.0000.png {output.scatter_cnvpytor};
+
+cp {params.tmpdir}/{params.tumor}.circular.0001.png {output.circular_cnvpytor};
+
+bgzip -c -l 9 {params.tmpdir}/{params.tumor}.vcf > {output.cnv_cnvpytor};
+
+echo -e \"{params.tumor}\\tTUMOR\" > {output.namemap};
+
+rm -rf {params.tmpdir};
+        """
+
+rule igh_dux4_detection_tumor_only:
+    input:
+        fa = config["reference"]["reference_genome"],
+        bamT = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample)
+    output:
+        vcf = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".igh_dux4.vcf.gz",
+    benchmark:
+        benchmark_dir + 'igh_dux4_detection_tumor_only_' + config["analysis"]["case_id"] + ".tsv"
+    singularity:
+        Path(singularity_image, config["bioinfo_tools"].get("samtools") + ".sif").as_posix()
+    params:
+        genome_version = config["reference"]["genome_version"],
+        custom_sv_detection_script = get_script_path("igh_dux4_detection.sh"),
+        case_name = config["analysis"]["case_id"],
+    threads:
+        get_threads(cluster_config, "igh_dux4_detection")
+    message:
+        "Detecting IGH::DUX4 rearrangement for {params.case_name} using samtools."
+    shell:
+        """
+        bash {params.custom_sv_detection_script} {params.genome_version} {output.vcf} {input.bamT} 
+        """

@@ -10,16 +10,38 @@ from BALSAMIC.models.params import BalsamicWorkflowConfig
 from BALSAMIC.models.config import VarcallerAttribute
 from BALSAMIC.models.params import (
     ParamsManta,
-    ParamsVardict,
+    ParamsSentieonWGSMetrics,
     ParamsVEP,
     QCModel,
     UMIParamsCommon,
     UMIParamsConsensuscall,
-    UMIParamsTNscope,
+    ParamsTNscope,
     UMIParamsUMIextract,
-    VarCallerFilter,
-    VCFAttributes,
+    VCFFilter,
+    StructuralVariantFilters,
 )
+
+
+def test_params_sentieon_wgs_metrics():
+    """Test sentieon wgs metrics settings model for correct validation."""
+
+    # GIVEN Manta params
+    test_sentieon_wgs_metrics_params = {
+        "min_base_qual": 10,
+        "cov_threshold": [50, 100, 150, 200, 250],
+    }
+
+    # WHEN building the model
+    test_sentieon_wgs_metrics_built = ParamsSentieonWGSMetrics(
+        **test_sentieon_wgs_metrics_params
+    )
+
+    # THEN values should be correctly populated and parsed into the model
+    assert test_sentieon_wgs_metrics_built.min_base_qual == 10
+    assert (
+        test_sentieon_wgs_metrics_built.cov_threshold
+        == "--cov_thresh 50 --cov_thresh 100 --cov_thresh 150 --cov_thresh 200 --cov_thresh 250"
+    )
 
 
 def test_params_manta():
@@ -61,31 +83,10 @@ def test_get_manta_settings_wgs():
     assert manta_settings == ""
 
 
-def test_params_vardict():
-    """test UMIParamsVardict model for correct validation"""
-
-    # GIVEN vardict params
-    test_vardict_params = {
-        "allelic_frequency": 0.01,
-        "max_pval": 0.5,
-        "max_mm": 2,
-        "column_info": "-a 1 -b 2 -c 3",
-    }
-
-    # WHEN building the model
-    test_vardict_built = ParamsVardict(**test_vardict_params)
-
-    # THEN assert values
-    assert isclose(test_vardict_built.allelic_frequency, 0.01)
-    assert isclose(test_vardict_built.max_pval, 0.5)
-    assert test_vardict_built.max_mm == 2
-    assert test_vardict_built.column_info == "-a 1 -b 2 -c 3"
-
-
 def test_params_vep():
     """test UMIParamsVEP model for correct validation"""
 
-    # GIVEN vardict params
+    # GIVEN params
     test_vep = {"vep_filters": "all defaults params"}
 
     # WHEN building the model
@@ -107,8 +108,8 @@ def test_qc_model():
     assert QCModel.model_validate(valid_args)
 
 
-def test_vcfattributes():
-    """test VCFAttributes model for correct validation"""
+def test_varcallerfilter():
+    """test VCFFilter model for correct validation"""
 
     # GIVEN a VCF attribute
     dummy_attribute = {
@@ -118,23 +119,26 @@ def test_vcfattributes():
     }
 
     # WHEN building the model
-    dummy_attribute_built = VCFAttributes(**dummy_attribute)
+    dummy_attribute_built = VCFFilter(**dummy_attribute)
 
-    # THEN assert values can be reterived currently
+    # THEN assert required values are set
     assert isclose(dummy_attribute_built.tag_value, 5.0)
     assert dummy_attribute_built.field == "INFO"
     assert dummy_attribute_built.filter_name == "dummy_filter_name"
 
 
-def test_varcallerfilter():
-    """test required VarCallerFilters for being set correctly"""
+def test_structuralvariantfilters():
+    """test StructuralVariantFilters model for correct validation"""
 
-    # GIVEN a VarCallerFilter
+    # GIVEN a SV VarCallerFilter
     dummy_varcaller = {
-        "AD": {"tag_value": 5.0, "filter_name": "dummy_alt_depth", "field": "INFO"},
-        "DP": {"tag_value": 100.0, "filter_name": "dummy_depth", "field": "INFO"},
-        "pop_freq": {
-            "tag_value": 0.005,
+        "low_pr_sr_count": {
+            "tag_value": 4,
+            "filter_name": "low_pr_sr_count",
+            "field": "INFO",
+        },
+        "loqusdb_clinical_sv_freq": {
+            "tag_value": 0.02,
             "filter_name": "dummy_pop_freq",
             "field": "INFO",
         },
@@ -145,11 +149,11 @@ def test_varcallerfilter():
     }
 
     # WHEN building the model
-    dummy_varcaller_filter = VarCallerFilter(**dummy_varcaller)
+    dummy_varcaller_filter = StructuralVariantFilters(**dummy_varcaller)
 
     # THEN assert required values are set
-    assert isclose(dummy_varcaller_filter.AD.tag_value, 5.0)
-    assert isclose(dummy_varcaller_filter.DP.tag_value, 100.0)
+    assert isclose(dummy_varcaller_filter.low_pr_sr_count.tag_value, 4)
+    assert isclose(dummy_varcaller_filter.loqusdb_clinical_sv_freq.tag_value, 0.02)
     assert dummy_varcaller_filter.analysis_type == "dummy_tumor_only"
 
 
@@ -171,15 +175,11 @@ def test_umiparams_common():
 
     # GIVEN a UMI workflow common params
     test_commonparams = {
-        "align_header": "test_header_name",
         "align_intbases": 100,
-        "filter_tumor_af": 0.01,
     }
     # WHEN building the model
     test_commonparams_built = UMIParamsCommon(**test_commonparams)
     # THEN assert values
-    assert test_commonparams_built.align_header == "test_header_name"
-    assert isclose(test_commonparams_built.filter_tumor_af, 0.01)
     assert test_commonparams_built.align_intbases == 100
 
 
@@ -214,28 +214,32 @@ def test_umiparams_consensuscall():
     assert test_consensuscall_built.tag == "XZ"
 
 
-def test_umiparams_tnscope():
-    """test UMIParamsTNscope model for correct validation"""
+def test_params_tnscope():
+    """test ParamsTNscope model for correct validation"""
 
     # GIVEN tnscope params
     test_tnscope_params = {
         "algo": "algoname",
         "init_tumorLOD": 0.5,
         "min_tumorLOD": 6,
+        "filter_tumor_af": 0.01,
         "error_rate": 5,
         "prunefactor": 3,
         "padding": 30,
         "disable_detect": "abc",
+        "pcr_model": "NONE",
     }
 
     # WHEN building the model
-    test_tnscope_params_built = UMIParamsTNscope(**test_tnscope_params)
+    test_tnscope_params_built = ParamsTNscope(**test_tnscope_params)
 
     # THEN assert values
     assert test_tnscope_params_built.algo == "algoname"
     assert isclose(test_tnscope_params_built.init_tumorLOD, 0.5)
     assert test_tnscope_params_built.min_tumorLOD == 6
+    assert isclose(test_tnscope_params_built.filter_tumor_af, 0.01, rel_tol=1e-9)
     assert test_tnscope_params_built.error_rate == 5
     assert test_tnscope_params_built.prunefactor == 3
     assert test_tnscope_params_built.disable_detect == "abc"
+    assert test_tnscope_params_built.pcr_model == "NONE"
     assert test_tnscope_params_built.padding == 30
