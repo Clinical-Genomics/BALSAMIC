@@ -22,6 +22,8 @@ WORKDIR /project/BALSAMIC/containers/${CONTAINER_NAME}
 # Run the package installation script
 RUN sh ${CONTAINER_NAME}.sh ${CONTAINER_NAME}
 
+RUN apk add --no-cache bash git build-base zlib-dev
+
 # Install TIDDIT
 WORKDIR /project
 RUN python -m pip install --no-cache-dir --upgrade cython joblib pip requests && \
