@@ -48,6 +48,7 @@ class DockerContainers(StrEnum):
     CNVKIT: str = "cnvkit"
     CNVPYTOR: str = "cnvpytor"
     COVERAGE_QC: str = "coverage_qc"
+    D4TOOLS: str = "d4tools"
     DELLY: str = "delly"
     GATK: str = "gatk"
     HTSLIB: str = "htslib"
