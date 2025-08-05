@@ -381,11 +381,11 @@ set-resources:
         threads: 8
     sentieon_wgs_metrics:
         runtime: 280
-        mem_mb: 20000
+        mem_mb: 30000
         threads: 8
     picard_CollectWgsMetrics:
-        runtime: 600
-        mem_mb: 20000
+        runtime: 900
+        mem_mb: 30000
         threads: 8
     samtools_qc_umi_collapsed:
         runtime: 280
@@ -420,8 +420,8 @@ set-resources:
         mem_mb: 25000
         threads: 8
     picard_CollectAlignmentSummaryMetrics:
-        runtime: 500
-        mem_mb: 25000
+        runtime: 900
+        mem_mb: 30000
         threads: 8
     picard_CollectHsMetrics:
         runtime: 360
