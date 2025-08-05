@@ -1,23 +1,34 @@
-FROM continuumio/miniconda:4.7.12
+FROM continuumio/miniconda3:25.1.1-2
 
-LABEL base.image="continuumio/miniconda:4.7.12"
-LABEL about.home="https://github.com/Clinical-Genomics/BALSAMIC"
-LABEL about.documentation="https://balsamic.readthedocs.io/"
-LABEL about.license="MIT License (MIT)"
-LABEL about.maintainer="Hassan Foroughi hassan dot foroughi at scilifelab dot se" 
-LABEL about.description="Bioinformatic analysis pipeline for somatic mutations in cancer"
+LABEL base.image="continuumio/miniconda3" \
+    maintainer="Clinical Genomics" \
+    about.contact="support@clinicalgenomics.se" \
+    about.license="MIT License (MIT)" \
+    about.home="https://github.com/Clinical-Genomics/BALSAMIC" \
+    about.documentation="https://balsamic.readthedocs.io/" \
+    about.description="Bioinformatic analysis pipeline for somatic mutations in cancer"
 
-ENV PATH="/opt/conda/bin/:${PATH}"
-
-RUN apt-get --allow-releaseinfo-change update && apt-get install -y bash gcc git && rm -rf /var/lib/apt/lists/*
-
-ARG WORK_DIR=project
 ARG CONTAINER_NAME
 
-# Copy all project files
-COPY . /${WORK_DIR}
+# Copy enviroment file
+COPY BALSAMIC/containers/${CONTAINER_NAME}/${CONTAINER_NAME}.yaml /tmp/environment.yaml
 
-RUN cd /${WORK_DIR}/BALSAMIC/containers/${CONTAINER_NAME}/ && /bin/sh ${CONTAINER_NAME}.sh ${CONTAINER_NAME}
+# Create conda environment
+RUN conda env create -n ${CONTAINER_NAME} -f /tmp/environment.yaml && \
+    conda clean -afy && \
+    rm -f /tmp/environment.yaml
 
-# Clean work environment
-RUN rm -rf /${WORK_DIR} && conda clean --all --yes
+ENV PATH="/opt/conda/envs/${CONTAINER_NAME}/bin/:${PATH}"
+
+# Run as a non-root
+RUN useradd -m dockeruser
+USER dockeruser
+
+# Set the work directory
+WORKDIR /home/dockeruser/
+
+# Set the default shell
+SHELL ["/bin/bash", "-c"]
+
+# Define the default command
+CMD ["/bin/bash"]
