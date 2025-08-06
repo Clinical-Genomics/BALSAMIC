@@ -6,7 +6,13 @@ from glob import glob
 from pathlib import Path
 from typing import Annotated, Dict, List, Optional, Literal
 
-from pydantic import AfterValidator, BaseModel, field_validator, model_validator, field_serializer
+from pydantic import (
+    AfterValidator,
+    BaseModel,
+    field_validator,
+    model_validator,
+    field_serializer,
+)
 
 from BALSAMIC import __version__ as balsamic_version
 from BALSAMIC.constants.cluster import QOS

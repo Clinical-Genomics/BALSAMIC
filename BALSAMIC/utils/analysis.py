@@ -47,7 +47,9 @@ def get_singularity_bind_paths(
         if capture_kit:
             capture_kit_path = Path(capture_kit)
             singularity_bind_paths.append(
-                SingularityBindPath(source=capture_kit_path, destination=capture_kit_path)
+                SingularityBindPath(
+                    source=capture_kit_path, destination=capture_kit_path
+                )
             )
         if sample_config["panel"].get("pon_cnn"):
             pon_cnn_path = Path(sample_config["panel"]["pon_cnn"])
@@ -73,6 +75,7 @@ def get_singularity_bind_paths(
         )
 
     return singularity_bind_paths
+
 
 def get_cache_singularity_bind_paths(
     cache_config: CacheConfig,
