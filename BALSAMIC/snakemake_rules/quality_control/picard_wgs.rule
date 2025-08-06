@@ -16,7 +16,7 @@ rule picard_CollectHsMetrics_WGS:
     params:
         mem = "16g",
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-        bed_name = Path(config_model.reference["refgene_bed"]).name,
+        bed_name = Path(config_model.reference["refgene_bed"].file.as_posix()).name,
         sample = "{sample}"
     message:
         "Calculating picard HsMetrics for sample {params.sample}"
