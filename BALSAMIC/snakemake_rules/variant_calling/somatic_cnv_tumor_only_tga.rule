@@ -230,10 +230,10 @@ rm -rf {params.tmpdir};
 
 rule delly_cnv_tumor_only:
     input:
-        fa = config["reference"]["reference_genome"],
+        fa =config_model.reference["reference_genome"].file.as_posix(),
         bamT = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
         bcf = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".delly.bcf",
-        map = config["reference"]["delly_mappability"],
+        map = config_model.reference["delly_mappability"].file.as_posix(),
         baits_bed = config["panel"]["capture_kit"],
     output:
         cnv_delly=vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".delly.bcf",

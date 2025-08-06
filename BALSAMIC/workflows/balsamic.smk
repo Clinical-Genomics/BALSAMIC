@@ -147,6 +147,9 @@ params = BalsamicWorkflowConfig.model_validate(WORKFLOW_PARAMS)
 if config_model.custom_filters and config_model.custom_filters.umi_min_reads:
     params.umiconsensuscall.filter_minreads = config_model.custom_filters.umi_min_reads
 
+# reference file paths
+
+
 # vcfanno annotations
 
 clinical_sv = config_model.reference.get("clinical_sv_observations")
