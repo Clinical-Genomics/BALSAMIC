@@ -54,10 +54,8 @@ ANALYSIS_WORKFLOWS: List[AnalysisWorkflow] = [workflow for workflow in AnalysisW
 
 
 class AnnotationCategory(StrEnum):
-    """."""
-
-    RESEARCH: str = "research"
     CLINICAL: str = "clinical"
+    RESEARCH: str = "research"
 
 
 VARIANT_OBSERVATION_METAVALUES = {

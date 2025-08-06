@@ -208,9 +208,11 @@ class ReferenceModel(BaseModel):
     ops: Optional[List[str]] = None
     names: Optional[List[str]] = None
     columns: Optional[List[int]] = None
-    category: Optional[
-        Literal[AnnotationCategory.CLINICAL, AnnotationCategory.RESEARCH]
-    ] = None
+    category: Optional[AnnotationCategory] = None
+    
+    @field_serializer("file")
+    def _ser_file(self, v: Path, _info):
+        return v.as_posix()
 
     def is_annotated(self) -> bool:
         return (
