@@ -53,6 +53,124 @@ class AnalysisWorkflow(StrEnum):
 ANALYSIS_WORKFLOWS: List[AnalysisWorkflow] = [workflow for workflow in AnalysisWorkflow]
 
 
+class AnnotationCategory(StrEnum):
+    """."""
+
+    RESEARCH: str = "research"
+    CLINICAL: str = "clinical"
+
+
+VARIANT_OBSERVATION_METAVALUES = {
+    "gnomad_variant": {
+        "fields": ["AF", "AF_popmax"],
+        "ops": ["self", "self"],
+        "names": ["GNOMADAF", "GNOMADAF_popmax"],
+        "category": AnnotationCategory.RESEARCH,
+    },
+    "clinvar": {
+        "fields": [
+            "CLNVID",
+            "CLNREVSTAT",
+            "CLNSIG",
+            "ORIGIN",
+            "ONC",
+            "ONCDN",
+            "ONCREVSTAT",
+            "ONCDISDB",
+            "ONCCONF",
+            "CLNVC",
+            "CLNVCSO",
+        ],
+        "ops": [
+            "self",
+            "self",
+            "self",
+            "self",
+            "self",
+            "self",
+            "self",
+            "self",
+            "self",
+            "self",
+            "self",
+        ],
+        "names": [
+            "CLNVID",
+            "CLNREVSTAT",
+            "CLNSIG",
+            "ORIGIN",
+            "ONC",
+            "ONCDN",
+            "ONCREVSTAT",
+            "ONCDISDB",
+            "ONCCONF",
+            "CLNVC",
+            "CLNVCSO",
+        ],
+        "category": AnnotationCategory.RESEARCH,
+    },
+    "cadd_snv": {
+        "names": ["CADD"],
+        "ops": ["mean"],
+        "columns": [6],
+        "category": AnnotationCategory.RESEARCH,
+    },
+    "swegen_snv_frequency": {
+        "fields": ["AF", "AC_Hom", "AC_Het", "AC_Hemi"],
+        "ops": ["self", "self", "self", "self"],
+        "names": [
+            "SWEGENAF",
+            "SWEGENAAC_Hom",
+            "SWEGENAAC_Het",
+            "SWEGENAAC_Hemi",
+        ],
+        "category": AnnotationCategory.RESEARCH,
+    },
+    "artefact_snv_observations": {
+        "fields": ["Frq", "Obs", "Hom"],
+        "ops": ["self", "self", "self"],
+        "names": ["ArtefactFrq", "ArtefactObs", "ArtefactHom"],
+        "category": AnnotationCategory.CLINICAL,
+    },
+    "clinical_snv_observations": {
+        "fields": ["Frq", "Obs", "Hom"],
+        "ops": ["self", "self", "self"],
+        "names": ["Frq", "Obs", "Hom"],
+        "category": AnnotationCategory.CLINICAL,
+    },
+    "cancer_germline_snv_observations": {
+        "fields": ["Frq", "Obs", "Hom"],
+        "ops": ["self", "self", "self"],
+        "names": [
+            "Cancer_Germline_Frq",
+            "Cancer_Germline_Obs",
+            "Cancer_Germline_Hom",
+        ],
+        "category": AnnotationCategory.CLINICAL,
+    },
+    "cancer_somatic_snv_observations": {
+        "fields": ["Frq", "Obs", "Hom"],
+        "ops": ["self", "self", "self"],
+        "names": [
+            "Cancer_Somatic_Frq",
+            "Cancer_Somatic_Obs",
+            "Cancer_Somatic_Hom",
+        ],
+        "category": AnnotationCategory.CLINICAL,
+    },
+    "cancer_somatic_snv_panel_observations": {
+        "fields": ["Frq", "Obs", "Hom"],
+        "ops": ["self", "self", "self"],
+        "names": [
+            "Cancer_Somatic_Panel_Frq",
+            "Cancer_Somatic_Panel_Obs",
+            "Cancer_Somatic_Panel_Hom",
+        ],
+        "category": AnnotationCategory.CLINICAL,
+    },
+}
+
+
 class SequencingType(StrEnum):
     """Sequencing carried out."""
 
