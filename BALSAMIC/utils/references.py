@@ -1,45 +1,37 @@
 """Utility functions for Balsamic references."""
 from pathlib import Path
 from BALSAMIC.constants.analysis import VARIANT_OBSERVATION_METAVALUES
-from typing import Optional
+from typing import Dict, Any
 
 
 def merge_reference_metadata(
-    existing_refs: dict, observation_paths: Optional[dict] = None
-) -> dict:
+    existing_refs: dict[str, str],
+    observation_paths: dict[str, str] | None = None,
+) -> dict[str, dict]:
     """
-    Merge user-provided observation file paths and existing references
-    with static metadata definitions.
-    Returns a new merged references dict.
+    Build a merged references dict from simple {key: filepath} inputs.
+
+    - existing_refs: baseline paths; each becomes {"file": Path(...)} plus static metadata if available.
+    - observation_paths: optional overrides/additions applied after existing_refs; None values are ignored.
+
+    Returns:
+        { key: {"file": Path(...), **static_meta_if_any} }
     """
-    merged = {}
+    merged: Dict[str, Dict[str, Any]] = {}
 
-    # 1. Start with existing references
-    for key, value in existing_refs.items():
-        if isinstance(value, (str, Path)):
-            entry = {"file": Path(value)}
-        elif isinstance(value, dict):
-            entry = {**value, "file": Path(value["file"])}
-        else:
-            raise TypeError(f"Unsupported reference format for '{key}': {value!r}")
-
-        if key in VARIANT_OBSERVATION_METAVALUES:
-            # Merge in static metadata without overwriting file path
-            for meta_key, meta_val in VARIANT_OBSERVATION_METAVALUES[key].items():
-                entry.setdefault(meta_key, meta_val)
-
+    # 1) Seed with existing references
+    for key, fp in existing_refs.items():
+        entry: Dict[str, Any] = {"file": Path(fp)}
+        entry.update(VARIANT_OBSERVATION_METAVALUES.get(key, {}))
         merged[key] = entry
 
-    # 2. Add/update with command-line–provided observation paths (optional)
+    # 2) Apply observation overrides/additions
     if observation_paths:
-        for key, file_path in observation_paths.items():
-            if file_path is None:
+        for key, fp in observation_paths.items():
+            if fp is None:
                 continue
-
-            entry = {"file": Path(file_path)}
-            if key in VARIANT_OBSERVATION_METAVALUES:
-                entry.update(VARIANT_OBSERVATION_METAVALUES[key])
-
-            merged[key] = entry  # overrides existing if same key
+            entry: Dict[str, Any] = {"file": Path(fp)}
+            entry.update(VARIANT_OBSERVATION_METAVALUES.get(key, {}))
+            merged[key] = entry  # override or add
 
     return merged
