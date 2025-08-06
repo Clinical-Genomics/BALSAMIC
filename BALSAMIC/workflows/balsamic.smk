@@ -166,6 +166,7 @@ delly_exclusion_converted = config_model.reference["delly_exclusion_converted"].
 delly_mappability = config_model.reference["delly_mappability"].file.as_posix()
 access_regions = config_model.reference["access_regions"].file.as_posix()
 gnomad_min_af5 = config_model.reference["gnomad_min_af5"].file.as_posix()
+genome_chrom_size = config_model.reference["genome_chrom_size"].file.as_posix()
 
 # vcfanno annotations
 
