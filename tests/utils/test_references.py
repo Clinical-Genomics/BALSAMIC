@@ -1,5 +1,4 @@
 from BALSAMIC.utils.references import merge_reference_metadata
-from BALSAMIC.constants.analysis import VARIANT_OBSERVATION_METAVALUES
 from pathlib import Path
 
 def test_seeds_from_existing_and_adds_metadata():
