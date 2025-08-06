@@ -8,9 +8,9 @@
 rule sentieon_tnscope_tga_tumor_only:
     input:
         bam = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
-        ref_fa = config["reference"]["reference_genome"],
+        ref_fa = config_model.reference["reference_genome"].file.as_posix(),
         bed = config["panel"]["capture_kit"],
-        dbsnp = config["reference"]["dbsnp"]
+        dbsnp = config_model.reference["dbsnp"].file.as_posix(),
     output:
         vcf_tnscope = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.vcf.gz",
         namemap_snv = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.sample_name_map",
@@ -67,7 +67,7 @@ rm -rf {params.tmpdir};
 
 rule vardict_tumor_only:
     input:
-        fa = config["reference"]["reference_genome"],
+        fa = config_model.reference["reference_genome"].file.as_posix(),
         bamT = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
         bed = vcf_dir + "pad_bedfile/" + "100bp_padding_" + capture_kit
     output:

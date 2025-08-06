@@ -4,7 +4,7 @@
 
 rule manta_tumor_only_wgs:
     input:
-        fa = config["reference"]["reference_genome"],
+        fa = config_model.reference["reference_genome"].file.as_posix(),
         bamT = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample)
     output:
         final = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".manta.vcf.gz",
@@ -55,9 +55,9 @@ rm -rf {params.tmpdir};
 
 rule delly_sv_tumor_only_wgs:
     input:
-        fa = config["reference"]["reference_genome"],
+        fa = config_model.reference["reference_genome"].file.as_posix(),
         bamT = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
-        excl = config["reference"]["delly_exclusion_converted"],
+        excl = config_model.reference["delly_exclusion_converted"].file.as_posix()
     output:
         bcf = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".delly.bcf",
         namemap= vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".dellysv.sample_name_map",
@@ -85,10 +85,10 @@ rm -rf {params.tmpdir};
 
 rule delly_cnv_tumor_only_wgs:
     input:
-        fa = config["reference"]["reference_genome"],
+        fa = config_model.reference["reference_genome"].file.as_posix(),
         bamT = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
         bcf = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".delly.bcf",
-        map = config["reference"]["delly_mappability"],
+        map = config_model.reference["delly_mappability"].file.as_posix()
     output:
         cnv_delly = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".delly.bcf",
         rd_delly = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".dellycnv.cov.gz",
@@ -117,7 +117,7 @@ rm -rf {params.tmpdir};
 
 rule tiddit_sv_tumor_only_wgs:
     input:
-        fa = config["reference"]["reference_genome"],
+        fa = config_model.reference["reference_genome"].file.as_posix(),
         bamT = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample)
     output:
         vcf = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".tiddit.vcf.gz",

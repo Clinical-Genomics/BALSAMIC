@@ -2,10 +2,10 @@
 
 rule sentieon_align_sort:
     input:
-        ref = config["reference"]["reference_genome"],
+        ref = config_model.reference["reference_genome"].file.as_posix(),
         fastq_r1 = Path(fastq_dir, "{sample_type}.{sample}.{fastq_pattern}_1.fp.fastq.gz").as_posix(),
         fastq_r2 = Path(fastq_dir, "{sample_type}.{sample}.{fastq_pattern}_2.fp.fastq.gz").as_posix(),
-        refidx = expand(config["reference"]["reference_genome"] + ".{prefix}", prefix=["amb","ann","bwt","pac","sa"])
+        refidx = expand(config["reference"]["reference_genome"]["file"] + ".{prefix}", prefix=["amb","ann","bwt","pac","sa"])
     output:
         bam_out = Path(bam_dir, "{sample_type}.{sample}.{fastq_pattern}.align_sort.bam").as_posix()
     benchmark:

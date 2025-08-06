@@ -42,7 +42,7 @@ rm -rf {params.tmpdir}
 rule sentieon_bwa_umiconsensus:
     """Alignment of consensus reads"""
     input:
-        ref_fa = config["reference"]["reference_genome"],
+        ref_fa = config_model.reference["reference_genome"].file.as_posix(),
         fq_consensus = umi_dir + "{sample_type}.{sample}.consensuscall_umi.fastq.gz"
     output:
         align_consensus = umi_dir + "{sample_type}.{sample}.consensuscalled_umi.bam"

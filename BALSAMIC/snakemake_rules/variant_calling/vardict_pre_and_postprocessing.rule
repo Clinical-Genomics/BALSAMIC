@@ -3,7 +3,7 @@
 rule bedtools_pad_bedfile:
     input:
         bed = config["panel"]["capture_kit"],
-        chrom = config["reference"]["genome_chrom_size"]
+        chrom = config_model.reference["genome_chrom_size"].file.as_posix()
     output:
         bed = vcf_dir + "pad_bedfile/" + "100bp_padding_" + capture_kit
     benchmark:
@@ -54,7 +54,7 @@ rm -rf {params.tmpdir} ;
 
 rule gatk_update_vcf_sequence_dictionary:
     input:
-        ref = config["reference"]["reference_genome"],
+        ref = config_model.reference["reference_genome"].file.as_posix(),
         vcf = vcf_dir + "vardict/SNV.somatic." + config["analysis"]["case_id"] + ".vardict.vcf.gz",
     output:
         vcf_vardict = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.vcf.gz",

@@ -4,7 +4,7 @@
 
 rule sentieon_dedup_consensus:
     input:
-        ref = config["reference"]["reference_genome"],
+        ref = config_model.reference["reference_genome"].file.as_posix(),
         bam = Path(bam_dir, "{sample_type}.{sample}.align_sort.bam").as_posix(),
     output:
         bam = Path(bam_dir, "{sample_type}.{sample}.dedup.bam").as_posix(),
@@ -55,7 +55,7 @@ rule samtools_fixmate:
     The unaligned mate start position is 10125, should be 0
     """
     input:
-        ref = config["reference"]["reference_genome"],
+        ref = config_model.reference["reference_genome"].file.as_posix(),
         bam = Path(bam_dir,"{sample_type}.{sample}.dedup.bam").as_posix(),
     output:
         bam = Path(bam_dir,"{sample_type}.{sample}.dedup.fixmate.bam").as_posix(),

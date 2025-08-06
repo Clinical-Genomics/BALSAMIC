@@ -3,9 +3,9 @@
 
 rule sentieon_align_sort_umireads_umi:
     input:
-        ref = config["reference"]["reference_genome"],
+        ref = config_model.reference["reference_genome"].file.as_posix(),
         interleaved_fastq = fastq_dir + "{sample_type}.{sample}_umiextract_interleaved.fastq.gz",
-        refidx = expand(config["reference"]["reference_genome"] + ".{prefix}", prefix=["amb","ann","bwt","pac","sa"])
+        refidx = expand(config_model.reference["vep_dir"].file.as_posix() + ".{prefix}", prefix=["amb","ann","bwt","pac","sa"])
     output:
         bam_out = Path(bam_dir, "{sample_type}.{sample}.umi_align_sort.bam").as_posix()
     benchmark:

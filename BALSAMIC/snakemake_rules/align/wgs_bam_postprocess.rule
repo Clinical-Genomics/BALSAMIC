@@ -44,10 +44,10 @@ rm -rf {params.tmpdir}
 
 rule sentieon_realign:
     input:
-        ref = config["reference"]["reference_genome"],
-        mills = config["reference"]["mills_1kg"],
+        ref = config_model.reference["reference_genome"].file.as_posix(),
+        mills = config_model.reference["mills_1kg"].file.as_posix(),
         bam = Path(bam_dir, "{sample_type}.{sample}.dedup.bam").as_posix(),
-        indel_1kg = config["reference"]["known_indel_1kg"]
+        indel_1kg = config_model.reference["known_indel_1kg"].file.as_posix()
     output:
         bam = Path(bam_dir, "{sample_type}.{sample}.dedup.realign.bam").as_posix()
     benchmark:
@@ -79,10 +79,10 @@ rm -rf {params.tmpdir}
 
 rule sentieon_base_calibration:
     input:
-        ref = config["reference"]["reference_genome"],
-        mills = config["reference"]["mills_1kg"],
-        indel_1kg = config["reference"]["known_indel_1kg"],
-        dbsnp = config["reference"]["dbsnp"],
+        ref = config_model.reference["reference_genome"].file.as_posix(),
+        mills = config_model.reference["mills_1kg"].file.as_posix(),
+        indel_1kg = config_model.reference["known_indel_1kg"].file.as_posix(),
+        dbsnp = config_model.reference["dbsnp"].file.as_posix(),
         bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_type = wildcards.sample_type)
     output:
         recal_data_table = Path(bam_dir, "{sample_type}.recal_data.table").as_posix(),

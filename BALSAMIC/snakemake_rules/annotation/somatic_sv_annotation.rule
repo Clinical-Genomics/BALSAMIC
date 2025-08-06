@@ -15,7 +15,7 @@ rule vep_somatic_research_sv:
         Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix()
     params:
         message_text = "SV.somatic." + config["analysis"]["case_id"] + ".svdb.research.vcf.gz",
-        vep_cache = config["reference"]["vep_dir"],
+        vep_cache = config_model.reference["vep_dir"].file.as_posix(),
         vep_defaults = params.vep.vep_filters
     message:
         "Running vep annotation for structural and copy number variants on {params.message_text}"

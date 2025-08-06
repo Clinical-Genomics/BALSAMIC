@@ -4,7 +4,7 @@
 
 rule manta_tumor_normal_tga:
     input:
-        fa = config["reference"]["reference_genome"],
+        fa = onfig_model.reference["reference_genome"].file.as_posix(),
         bamN = config_model.get_final_bam_name(bam_dir=bam_dir, sample_name=normal_sample, specified_suffix="dedup.fixmate.qualcapped"),
         bamT = config_model.get_final_bam_name(bam_dir=bam_dir, sample_name=tumor_sample, specified_suffix="dedup.fixmate.qualcapped"),
     output:
