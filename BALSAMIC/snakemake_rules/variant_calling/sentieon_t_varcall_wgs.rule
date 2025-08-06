@@ -4,9 +4,9 @@
 
 rule sentieon_tnscope_wgs_tumor_only:
     input:
-        ref = config_model.reference["reference_genome"].file.as_posix(),
-        dbsnp = config_model.reference["dbsnp"].file.as_posix(),
-        cosmic = config_model.reference["cosmic"].file.as_posix(),
+        ref = reference_genome,
+        dbsnp = dbsnp,
+        cosmic = cosmic,
         bam = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
         recal = expand(bam_dir + "tumor.recal_data.table")
     output:

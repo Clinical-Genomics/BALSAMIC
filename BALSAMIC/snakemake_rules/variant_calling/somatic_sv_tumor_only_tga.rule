@@ -4,7 +4,7 @@
 
 rule manta_tumor_only_tga:
     input:
-        fa = config_model.reference["reference_genome"].file.as_posix(),
+        fa = reference_genome,
         bamT = config_model.get_final_bam_name(bam_dir=bam_dir, sample_name=tumor_sample, specified_suffix="dedup.fixmate.qualcapped"),
     output:
         final = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".manta.vcf.gz",
@@ -54,9 +54,9 @@ rm -rf {params.tmpdir};
 
 rule delly_sv_tumor_only_tga:
     input:
-        fa = config_model.reference["reference_genome"].file.as_posix(),
+        fa = reference_genome,
         bamT = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
-        excl = config_model.reference["delly_exclusion_converted"].file.as_posix()
+        excl = delly_exclusion_converted
     output:
         bcf = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".delly.bcf",
         namemap= vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".dellysv.sample_name_map",

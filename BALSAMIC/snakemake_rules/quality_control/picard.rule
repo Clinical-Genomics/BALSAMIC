@@ -8,10 +8,10 @@ else:
 
 rule picard_CollectHsMetrics:
     input:
-        fadict = (config_model.reference["reference_genome"].file.as_posix().replace(".fasta",".dict")),
+        fadict = (reference_genome.replace(".fasta",".dict")),
         bed = config["panel"]["capture_kit"],
         bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample),
-        fa = config_model.reference["reference_genome"].file.as_posix()
+        fa = reference_genome
     output:
         hs_metrics = qc_dir + "{sample_type}.{sample}.hsmetric.txt"
     benchmark:

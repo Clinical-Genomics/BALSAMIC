@@ -54,7 +54,7 @@ rm -rf {params.tmpdir} ;
 
 rule gatk_update_vcf_sequence_dictionary:
     input:
-        ref = config_model.reference["reference_genome"].file.as_posix(),
+        ref = reference_genome,
         vcf = vcf_dir + "vardict/SNV.somatic." + config["analysis"]["case_id"] + ".vardict.vcf.gz",
     output:
         vcf_vardict = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.vcf.gz",

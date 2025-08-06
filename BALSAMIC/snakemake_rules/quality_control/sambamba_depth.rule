@@ -38,7 +38,7 @@ sambamba depth region \
 rule sambamba_exon_depth:
     input:
         bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample),
-        bed = config_model.reference["refgene_bed"].file.as_posix()
+        bed = refgene_bed
     output:
         qc_dir + "{sample_type}.{sample}.exon.cov.bed"
     benchmark:

@@ -40,9 +40,9 @@ rm -rf {params.tmpdir};
 
 rule cnvkit_segment_CNV_research:
     input:
-        access_bed = config_model.reference["access_regions"].file.as_posix(),
-        fasta = config_model.reference["reference_genome"].file.as_posix(),
-        refgene_flat = config_model.reference["refgene_flat"].file.as_posix(),
+        access_bed = access_regions,
+        fasta = reference_genome,
+        refgene_flat = refgene_flat,
         tumor_target_cnn=expand(cnv_dir + "{sample}.targetcoverage.cnn", sample=tumor_sample),
         tumor_antitarget_cnn=expand(cnv_dir + "{sample}.antitargetcoverage.cnn", sample=tumor_sample),
         normal_target_cnn=expand(cnv_dir + "{sample}.targetcoverage.cnn",sample=normal_sample),
@@ -116,8 +116,8 @@ rm -rf {params.tmpdir};
 
 rule purecn_call_CNV_research:
     input:
-        fasta = config_model.reference["reference_genome"].file.as_posix(),
-        refgene_flat = config_model.reference["refgene_flat"].file.as_posix(),
+        fasta = reference_genome,
+        refgene_flat = refgene_flat,
         snv_merged = vcf_dir + "SNV.germline.merged.dnascope.vcf.gz",
         segment = cnv_dir + "tumor.seg",
         cnr = cnv_dir + "tumor.merged.cnr",
@@ -199,9 +199,9 @@ rm -rf {params.tmpdir};
 
 rule cnvkit_call_CNV_research:
     input:
-        access_bed = config_model.reference["access_regions"].file.as_posix(),
-        fasta = config_model.reference["reference_genome"].file.as_posix(),
-        refgene_flat = config_model.reference["refgene_flat"].file.as_posix(),
+        access_bed = access_regions,
+        fasta = reference_genome,
+        refgene_flat = refgene_flat,
         purity_ploidy = cnv_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".purecn.purity.csv",
         cns_initial = cnv_dir + "tumor.initial.cns",
         cnr = cnv_dir + "tumor.merged.cnr",
@@ -283,7 +283,7 @@ rule delly_cnv_tumor_normal:
         fa = config_model.reference["reference_genome"].file.as_posix(),
         bamN = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = normal_sample),
         bamT = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
-        map =config_model.reference["delly_mappability"].file.as_posix(),
+        map = delly_mappability
         baits_bed = config["panel"]["capture_kit"],
     output:
         cnv_delly = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".delly.bcf",

@@ -4,7 +4,7 @@
 
 rule manta_tumor_normal_wgs:
     input:
-        fa = config_model.reference["reference_genome"].file.as_posix(),
+        fa = reference_genome,
         bamN = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = normal_sample),
         bamT = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample)
     output:
@@ -61,7 +61,7 @@ rule delly_sv_tumor_normal_wgs:
         fa = config_model.reference["reference_genome"].file.as_posix(),
         bamN = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = normal_sample),
         bamT = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
-        excl = config_model.reference["delly_exclusion_converted"].file.as_posix()
+        excl = delly_exclusion_converted
     output:
         final = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".delly.bcf",
         namemap = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".dellysv.sample_name_map",
@@ -98,7 +98,7 @@ rule delly_cnv_tumor_normal_wgs:
         fa = config_model.reference["reference_genome"].file.as_posix(),
         bamN = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = normal_sample),
         bamT = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
-        map = config_model.reference["delly_mappability"].file.as_posix()
+        map = delly_mappability
     output:
         cnv_delly = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".delly.bcf",
         rd_delly = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".dellycnv.cov.gz",
@@ -145,7 +145,7 @@ rule ascat_tumor_normal_wgs:
         fa = config_model.reference["reference_genome"].file.as_posix(),
         bamN = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = normal_sample),
         bamT = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
-        gccorrection = config_model.reference["ascat_gc_correction"].file.as_posix(),
+        gccorrection = ascat_gc_correction,
     output:
         final_vcf = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".raw.ascat.vcf.gz",
         ascat_copynumber = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.copynumber.txt.gz",

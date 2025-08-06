@@ -42,7 +42,7 @@ rm -rf {params.tmpdir}
 rule sentieon_bwa_umiconsensus:
     """Alignment of consensus reads"""
     input:
-        ref_fa = config_model.reference["reference_genome"].file.as_posix(),
+        ref_fa = reference_genome,
         fq_consensus = umi_dir + "{sample_type}.{sample}.consensuscall_umi.fastq.gz"
     output:
         align_consensus = umi_dir + "{sample_type}.{sample}.consensuscalled_umi.bam"
@@ -114,7 +114,7 @@ samtools index {output};
 rule bam_compress_tumor_umi:
     input:
         bam = umi_dir + "tumor.{sample}_consensusfiltered_umi.bam",
-        fasta = config_model.reference["reference_genome"]
+        fasta = reference_genome
     output:
         cram = umi_dir + "tumor.{sample}.consensusfiltered_umi.cram",
     benchmark:
@@ -136,7 +136,7 @@ if config['analysis']['analysis_type'] == "paired":
     rule bam_compress_normal_umi:
         input:
             bam = umi_dir + "normal.{sample}_consensusfiltered_umi.bam",
-            fasta = config_model.reference["reference_genome"]
+            fasta = reference_genome
         output:
             cram = umi_dir + "normal.{sample}.consensusfiltered_umi.cram"
         benchmark:

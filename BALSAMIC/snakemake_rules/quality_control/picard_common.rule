@@ -9,7 +9,7 @@ else:
 rule picard_CollectAlignmentSummaryMetrics:
     input:
         bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample),
-        fa = config_model.reference["reference_genome"].file.as_posix()
+        fa = reference_genome
     output:
         alignment_metrics = Path(qc_dir,"{sample_type}.{sample}.alignment_summary_metrics.txt").as_posix(),
     benchmark:

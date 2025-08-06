@@ -77,7 +77,7 @@ tabix -p vcf -f  {output.vcf_indel_research}
 rule vep_annotate_somaticSNV_research:
   input:
     vcf_snv_research = vep_dir + "SNV.somatic.{case_name}.{var_caller}.cadd_indel.research.vcf.gz",
-    cosmic =config_model.reference["cosmic"].file.as_posix(),
+    cosmic = cosmic
   output:
     vcf_snv_unfiltered = vep_dir + "SNV.somatic.{case_name}.{var_caller}.research.vcf.gz",
     vcfanno_research_toml = vep_dir + "SNV.somatic.{case_name}.{var_caller}_vcfanno_research.toml"
@@ -90,7 +90,7 @@ rule vep_annotate_somaticSNV_research:
     message_text = "SNV.somatic.{case_name}.{var_caller}.research.vcf.gz",
     tmp_vcf_research = temp(vep_dir + "SNV.somatic.{case_name}.{var_caller}.tmp.research.vcf.gz"),
     vcfanno_research_annotations = config_model.retrieve_annotations_toml(category=AnnotationCategory.RESEARCH),
-    vep_cache = config_model.reference["vep_dir"].file.as_posix(),
+    vep_cache = vep_cache_dir,
     vep_defaults = params.vep.vep_filters
   message:
     "Running vep annotation on SNVs and INDELs in {params.message_text}"

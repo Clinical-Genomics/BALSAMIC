@@ -5,7 +5,7 @@
 
 rule dragen_align_call_tumor_only:
     input:
-        reference = config_model.reference["reference_genome"].file.as_posix(),
+        reference = reference_genome,
         fastq_r1 = fastq_dir + "concat.tumor.{sample}_1.fastq.gz",
         fastq_r2 = fastq_dir + "concat.tumor.{sample}_2.fastq.gz"
     output:
