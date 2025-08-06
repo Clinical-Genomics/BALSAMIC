@@ -21,8 +21,17 @@ def get_singularity_bind_paths(
     fastq_dir: Path = Path(
         get_resolved_fastq_files_directory(sample_config["analysis"]["fastq_path"])
     )
-    cache_dir: Path = Path(os.path.commonpath(sample_config["reference"].values()))
+
+    reference_dict = sample_config.get("reference", {}) or {}
+    ref_files = [
+        v["file"]
+        for v in reference_dict.values()
+        if isinstance(v, dict) and "file" in v and v["file"]
+    ]
+    cache_dir: Path = Path(os.path.commonpath(ref_files)) if ref_files else analysis_dir
+
     sentieon_install_dir: Path = Path(sample_config["sentieon"]["sentieon_install_dir"])
+
     singularity_bind_paths: List[SingularityBindPath] = [
         SingularityBindPath(source=fastq_dir, destination=fastq_dir),
         SingularityBindPath(source=ASSETS_DIR, destination=ASSETS_DIR),
@@ -32,34 +41,38 @@ def get_singularity_bind_paths(
             source=sentieon_install_dir, destination=sentieon_install_dir
         ),
     ]
+
     if sample_config.get("panel"):
-        capture_kit_path: Path = Path(sample_config.get("panel").get("capture_kit"))
-        singularity_bind_paths.append(
-            SingularityBindPath(source=capture_kit_path, destination=capture_kit_path)
-        )
-        if sample_config.get("panel").get("pon_cnn"):
-            pon_cnn_path: Path = Path(sample_config.get("panel").get("pon_cnn"))
+        capture_kit = sample_config["panel"].get("capture_kit")
+        if capture_kit:
+            capture_kit_path = Path(capture_kit)
+            singularity_bind_paths.append(
+                SingularityBindPath(source=capture_kit_path, destination=capture_kit_path)
+            )
+        if sample_config["panel"].get("pon_cnn"):
+            pon_cnn_path = Path(sample_config["panel"]["pon_cnn"])
             singularity_bind_paths.append(
                 SingularityBindPath(source=pon_cnn_path, destination=pon_cnn_path)
             )
+
     if sample_config.get("background_variants"):
-        background_variants_path: Path = Path(sample_config.get("background_variants"))
+        background_variants_path = Path(sample_config["background_variants"])
         singularity_bind_paths.append(
             SingularityBindPath(
                 source=background_variants_path, destination=background_variants_path
             )
         )
-    if sample_config.get("reference").get("cadd_annotations"):
-        cadd_annotations_path: Path = Path(
-            sample_config.get("reference").get("cadd_annotations")
-        )
+
+    cadd = reference_dict.get("cadd_annotations")
+    if isinstance(cadd, dict) and "file" in cadd and cadd["file"]:
+        cadd_annotations_path = Path(cadd["file"])
         singularity_bind_paths.append(
             SingularityBindPath(
                 source=cadd_annotations_path, destination=CADD_ANNOTATIONS_CONTAINER_DIR
             )
         )
-    return singularity_bind_paths
 
+    return singularity_bind_paths
 
 def get_cache_singularity_bind_paths(
     cache_config: CacheConfig,

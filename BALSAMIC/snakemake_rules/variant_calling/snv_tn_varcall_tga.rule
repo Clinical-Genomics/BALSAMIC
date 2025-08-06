@@ -8,9 +8,9 @@ rule sentieon_tnscope_tga_tumor_normal:
     input:
         bamN = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = normal_sample),
         bamT = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
-        ref_fa = config["reference"]["reference_genome"],
+        ref_fa = reference_genome,
         bed = config["panel"]["capture_kit"],
-        dbsnp = config["reference"]["dbsnp"]
+        dbsnp = dbsnp
     output:
         vcf_tnscope = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.vcf.gz",
         namemap_snv = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.sample_name_map",
@@ -69,7 +69,7 @@ echo -e \"{params.tumor}\\tTUMOR\\n{params.normal}\\tNORMAL\" > {output.namemap_
 
 rule vardict_tumor_normal:
     input:
-        fa = config["reference"]["reference_genome"],
+        fa = reference_genome,
         bamN = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = normal_sample),
         bamT = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
         bed = vcf_dir + "pad_bedfile/" + "100bp_padding_" + capture_kit

@@ -14,7 +14,7 @@ rule snv_gnomad_annotation_and_filtration:
     Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix()
   params:
     pop_freq = get_tag_and_filtername(snv_post_quality_filters, "gnomad_hard_threshold"),
-    gnomad_annotation = dump_toml(gnomad_annotation),
+    gnomad_annotation = config_model.retrieve_annotations_toml(category=AnnotationCategory.POST_QUALITY),
     tmpdir = tempfile.mkdtemp(prefix=tmp_dir)
   message:
     "Annotating and filtering based on gnomad frequencies on SNVs and INDELs"
@@ -105,7 +105,7 @@ tabix -p vcf -f  {output.vcf_indel_research}
 rule vep_annotate_somaticSNV_research:
   input:
     vcf_snv_research = vep_dir + "SNV.somatic.{case_name}.{var_caller}.cadd_indel.research.vcf.gz",
-    cosmic = config["reference"]["cosmic"]
+    cosmic = cosmic
   output:
     vcf_snv_unfiltered = vep_dir + "SNV.somatic.{case_name}.{var_caller}.research.vcf.gz",
     vcfanno_research_toml = vep_dir + "SNV.somatic.{case_name}.{var_caller}_vcfanno_research.toml"
@@ -117,8 +117,8 @@ rule vep_annotate_somaticSNV_research:
     housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "research"},
     message_text = "SNV.somatic.{case_name}.{var_caller}.research.vcf.gz",
     tmp_vcf_research = temp(vep_dir + "SNV.somatic.{case_name}.{var_caller}.tmp.research.vcf.gz"),
-    vcfanno_research_annotations = dump_toml(research_annotations),
-    vep_cache = config["reference"]["vep_dir"],
+    vcfanno_research_annotations = config_model.retrieve_annotations_toml(category=AnnotationCategory.RESEARCH),
+    vep_cache = vep_cache_dir,
     vep_defaults = params.vep.vep_filters
   message:
     "Running vep annotation on SNVs and INDELs in {params.message_text}"
@@ -158,7 +158,7 @@ rule vcfanno_annotate_somaticSNV_clinical:
     Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix()
   params:
     message_text = "SNV.somatic.{case_name}.{var_caller}.clinical.vcf.gz",
-    vcfanno_clinical_annotations = dump_toml(clinical_annotations),
+    vcfanno_clinical_annotations = config_model.retrieve_annotations_toml(category=AnnotationCategory.CLINICAL),
     vcfanno_clinical_toml = temp(vep_dir + "SNV.somatic.{case_name}.{var_caller}_vcfanno_clinical.toml"),
   message:
     "Running vcfanno annotation for single nuceotide variants on {params.message_text}"

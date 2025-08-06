@@ -1,11 +1,12 @@
 """Balsamic analysis config case models."""
 
 import re
+import toml
 from glob import glob
 from pathlib import Path
-from typing import Annotated, Dict, List, Optional
+from typing import Annotated, Dict, List, Optional, Literal
 
-from pydantic import AfterValidator, BaseModel, field_validator, model_validator
+from pydantic import AfterValidator, BaseModel, field_validator, model_validator, field_serializer
 
 from BALSAMIC import __version__ as balsamic_version
 from BALSAMIC.constants.cluster import QOS
@@ -20,6 +21,7 @@ from BALSAMIC.constants.analysis import (
     SampleType,
     SequencingType,
     WorkflowSolution,
+    AnnotationCategory,
 )
 from BALSAMIC.models.params import QCModel
 from BALSAMIC.models.validators import is_dir, is_file
@@ -200,6 +202,27 @@ class Sentieon(BaseModel):
     tnscope_model: Annotated[str, AfterValidator(is_file)]
 
 
+class ReferenceModel(BaseModel):
+    file: Path
+    fields: Optional[List[str]] = None
+    ops: Optional[List[str]] = None
+    names: Optional[List[str]] = None
+    columns: Optional[List[int]] = None
+    category: Optional[AnnotationCategory] = None
+
+    @field_serializer("file")
+    def _ser_file(self, v: Path, _info):
+        return v.as_posix()
+
+    def is_annotated(self) -> bool:
+        return (
+            self.fields is not None and self.ops is not None and self.names is not None
+        )
+
+    def as_path(self) -> Path:
+        return self.file
+
+
 class ConfigModel(BaseModel):
     """
     Class providing common functions and variables for different balsamic workflows.
@@ -236,7 +259,7 @@ class ConfigModel(BaseModel):
 
     QC: QCModel = QCModel()
     samples: List[SampleInstanceModel]
-    reference: Dict[str, Path]
+    reference: Dict[str, ReferenceModel]
     singularity: Dict[str, str]
     bioinfo_tools: Dict
     bioinfo_tools_version: Dict
@@ -248,12 +271,6 @@ class ConfigModel(BaseModel):
     sentieon: Sentieon
     qos: Optional[QOS] = None
     account: Optional[str] = None
-
-    @field_validator("reference")
-    def abspath_as_str(cls, reference: Dict[str, Path]):
-        for k, v in reference.items():
-            reference[k] = Path(v).resolve().as_posix()
-        return reference
 
     @field_validator("singularity")
     def transform_path_to_dict(cls, singularity: Dict[str, str]):
@@ -326,6 +343,32 @@ class ConfigModel(BaseModel):
             )
 
         return values
+
+    def retrieve_annotations(self, category: Optional[str] = None) -> List[Dict]:
+        """Builds the annotations list, optionally filtered by category."""
+        annotations = []
+        for ref in self.reference.values():
+            if ref.is_annotated() and (category is None or ref.category == category):
+                annotations.append(
+                    {
+                        "annotation": [
+                            {
+                                "file": ref.as_path().as_posix(),
+                                "fields": ref.fields,
+                                "ops": ref.ops,
+                                "names": ref.names,
+                            }
+                        ]
+                    }
+                )
+        return annotations
+
+    def retrieve_annotations_toml(self, category: Optional[str] = None) -> str:
+        """Returns TOML string of clinical annotations, optionally filtered by category."""
+        toml_annotations = ""
+        for annotation in self.retrieve_annotations(category):
+            toml_annotations += toml.dumps(annotation)
+        return toml_annotations
 
     def get_all_sample_names(self) -> List[str]:
         """Return all sample names in the analysis."""
