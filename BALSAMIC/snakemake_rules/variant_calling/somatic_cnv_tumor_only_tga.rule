@@ -70,7 +70,7 @@ rm -rf {params.tmpdir};
 
 rule purecn_call_CNV_research:
     input:
-        fasta = reference_genome
+        fasta = reference_genome,
         refgene_flat = refgene_flat,
         snv_vcf = vcf_dir + "SNV.germline.tumor.dnascope.vcf.gz",
         segment = cnv_dir + "tumor.seg",
