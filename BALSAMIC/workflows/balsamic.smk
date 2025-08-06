@@ -149,25 +149,25 @@ if config_model.custom_filters and config_model.custom_filters.umi_min_reads:
 
 # reference file paths
 
-reference_genome = config_model.reference["reference_genome"].file.as_posix(),
-dbsnp = config_model.reference["dbsnp"].file.as_posix(),
-mills_1kg = config_model.reference["mills_1kg"].file.as_posix(),
-known_indel_1kg = config_model.reference["known_indel_1kg"].file.as_posix(),
-cosmic = config_model.reference["cosmic"].file.as_posix(),
-vep_cache_dir = config_model.reference["vep_dir"].file.as_posix(),
-rank_score = config_model.reference["rank_score"].file.as_posix(),
-wgs_calling_regions = config_model.reference["wgs_calling_regions"].file.as_posix(),
-refgene_bed = config_model.reference["refgene_bed"].file.as_posix(),
-refgene_txt = config_model.reference["refgene_txt"].file.as_posix(),
+reference_genome = config_model.reference["reference_genome"].file.as_posix()
+dbsnp = config_model.reference["dbsnp"].file.as_posix()
+mills_1kg = config_model.reference["mills_1kg"].file.as_posix()
+known_indel_1kg = config_model.reference["known_indel_1kg"].file.as_posix()
+cosmic = config_model.reference["cosmic"].file.as_posix()
+vep_cache_dir = config_model.reference["vep_dir"].file.as_posix()
+rank_score = config_model.reference["rank_score"].file.as_posix()
+wgs_calling_regions = config_model.reference["wgs_calling_regions"].file.as_posix()
+refgene_bed = config_model.reference["refgene_bed"].file.as_posix()
+refgene_txt = config_model.reference["refgene_txt"].file.as_posix()
 refgene_flat = config_model.reference["refgene_flat"].file.as_posix()
-somalier_sites = config_model.reference["somalier_sites"].file.as_posix(),
-ascat_gc_correction = config_model.reference["ascat_gc_correction"].file.as_posix(),
-delly_exclusion_converted = config_model.reference["delly_exclusion_converted"].file.as_posix(),
-delly_mappability = config_model.reference["delly_mappability"].file.as_posix(),
-access_regions = config_model.reference["access_regions"].file.as_posix(),
+somalier_sites = config_model.reference["somalier_sites"].file.as_posix()
+ascat_gc_correction = config_model.reference["ascat_gc_correction"].file.as_posix()
+delly_exclusion_converted = config_model.reference["delly_exclusion_converted"].file.as_posix()
+delly_mappability = config_model.reference["delly_mappability"].file.as_posix()
+access_regions = config_model.reference["access_regions"].file.as_posix()
 
 if config_model.analysis.sequencing_type == SequencingType.WGS:
-    gnomad_min_af5 = config_model.reference["gnomad_min_af5"].file.as_posix(),
+    gnomad_min_af5 = config_model.reference["gnomad_min_af5"].file.as_posix()
 
 # vcfanno annotations
 
