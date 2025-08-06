@@ -67,7 +67,7 @@ rm -rf {params.tmpdir};
 
 rule vardict_tumor_only:
     input:
-        fa = config_model.reference["reference_genome"].file.as_posix(),
+        fa = reference_genome,
         bamT = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
         bed = vcf_dir + "pad_bedfile/" + "100bp_padding_" + capture_kit
     output:

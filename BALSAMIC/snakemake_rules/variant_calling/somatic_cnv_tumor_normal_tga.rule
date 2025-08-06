@@ -280,7 +280,7 @@ rm -rf {params.tmpdir};
 
 rule delly_cnv_tumor_normal:
     input:
-        fa = config_model.reference["reference_genome"].file.as_posix(),
+        fa =reference_genome,
         bamN = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = normal_sample),
         bamT = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
         map = delly_mappability

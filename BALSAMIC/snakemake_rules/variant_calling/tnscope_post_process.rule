@@ -7,7 +7,7 @@ if config["analysis"]["sequencing_type"] == 'targeted':
     rule merge_tnscope_to_mnvs:
         input:
             vcf_tnscope=vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.research.pre_process.vcf.gz",
-            ref=config["reference"]["reference_genome"],
+            ref=reference_genome,
         output:
             vcf_tnscope=vcf_dir + "sentieon_tnscope/SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.research.mnvs.vcf",
         benchmark:
@@ -87,7 +87,7 @@ else:
     rule post_process_tnscope_info_fields_wgs:
         input:
             vcf_tnscope = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.research.pre_process.vcf",
-            ref = config["reference"]["reference_genome"],
+            ref = reference_genome,
         output:
             vcf_tnscope = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.research.vcf.gz",
         benchmark:

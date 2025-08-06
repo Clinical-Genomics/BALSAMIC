@@ -58,7 +58,7 @@ rm -rf {params.tmpdir};
 
 rule delly_sv_tumor_normal_wgs:
     input:
-        fa = config_model.reference["reference_genome"].file.as_posix(),
+        fa = reference_genome,
         bamN = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = normal_sample),
         bamT = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
         excl = delly_exclusion_converted
@@ -95,7 +95,7 @@ rm -rf {params.tmpdir};
 
 rule delly_cnv_tumor_normal_wgs:
     input:
-        fa = config_model.reference["reference_genome"].file.as_posix(),
+        fa = reference_genome,
         bamN = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = normal_sample),
         bamT = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
         map = delly_mappability
@@ -142,7 +142,7 @@ rm -rf {params.tmpdir};
 
 rule ascat_tumor_normal_wgs:
     input:
-        fa = config_model.reference["reference_genome"].file.as_posix(),
+        fa = reference_genome,
         bamN = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = normal_sample),
         bamT = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
         gccorrection = ascat_gc_correction,
@@ -218,7 +218,7 @@ rm -rf {params.tmpdir};
 
 rule tiddit_sv_tumor_normal_wgs:
     input:
-        fa = config["reference"]["reference_genome"],
+        fa = reference_genome,
         bamN = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = normal_sample),
         bamT = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample)
     output:
@@ -280,7 +280,7 @@ rm -rf {params.tmpdir};
 
 rule igh_dux4_detection_tumor_normal_wgs:
     input:
-        fa = config["reference"]["reference_genome"],
+        fa = reference_genome,
         bamT = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
         bamN = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name= normal_sample),
     output:
