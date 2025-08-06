@@ -16,7 +16,8 @@ from BALSAMIC.constants.analysis import (
     SampleType,
     SequencingType,
     AnalysisType,
-    BioinfoTools)
+    BioinfoTools,
+    AnnotationCategory)
 from BALSAMIC.constants.paths import BALSAMIC_DIR
 from BALSAMIC.constants.rules import SNAKEMAKE_RULES
 from BALSAMIC.constants.variant_filters import (
@@ -37,20 +38,13 @@ from BALSAMIC.utils.cli import check_executable, generate_h5
 from BALSAMIC.utils.exc import BalsamicError
 from BALSAMIC.utils.io import read_yaml, write_finish_file, write_json
 from BALSAMIC.utils.rule import (
-    dump_toml,
-    get_cancer_germline_snv_observations,
     get_capture_kit,
-    get_clinical_snv_observations,
-    get_clinical_sv_observations,
     get_fastp_parameters,
     get_pon_cnn,
     get_result_dir,
     get_rule_output,
     get_script_path,
     get_sequencing_type,
-    get_somatic_sv_observations,
-    get_swegen_snv,
-    get_swegen_sv,
     get_threads,
     get_variant_callers,
     get_vcf,
@@ -92,17 +86,6 @@ delivery_dir: str = Path(result_dir, "delivery").as_posix() + "/"
 umi_dir: str = Path(result_dir, "umi").as_posix() + "/"
 umi_qc_dir: str = Path(qc_dir, "umi_qc").as_posix() + "/"
 
-# Annotations
-research_annotations = []
-clinical_annotations = []
-artefact_snv_obs = ""
-clinical_snv_obs = ""
-cancer_germline_snv_obs = ""
-cancer_somatic_snv_obs = ""
-swegen_snv = ""
-clinical_sv = ""
-somatic_sv = ""
-swegen_sv = ""
 
 if config_model.analysis.sequencing_type != SequencingType.WGS:
     pon_cnn: str = get_pon_cnn(config)
@@ -164,198 +147,46 @@ params = BalsamicWorkflowConfig.model_validate(WORKFLOW_PARAMS)
 if config_model.custom_filters and config_model.custom_filters.umi_min_reads:
     params.umiconsensuscall.filter_minreads = config_model.custom_filters.umi_min_reads
 
+# reference file paths
+
+reference_genome = config_model.reference["reference_genome"].file.as_posix()
+dbsnp = config_model.reference["dbsnp"].file.as_posix()
+mills_1kg = config_model.reference["mills_1kg"].file.as_posix()
+known_indel_1kg = config_model.reference["known_indel_1kg"].file.as_posix()
+cosmic = config_model.reference["cosmic"].file.as_posix()
+vep_cache_dir = config_model.reference["vep_dir"].file.as_posix()
+rank_score = config_model.reference["rank_score"].file.as_posix()
+wgs_calling_regions = config_model.reference["wgs_calling_regions"].file.as_posix()
+refgene_bed = config_model.reference["refgene_bed"].file.as_posix()
+refgene_txt = config_model.reference["refgene_txt"].file.as_posix()
+refgene_flat = config_model.reference["refgene_flat"].file.as_posix()
+somalier_sites = config_model.reference["somalier_sites"].file.as_posix()
+ascat_gc_correction = config_model.reference["ascat_gc_correction"].file.as_posix()
+delly_exclusion_converted = config_model.reference["delly_exclusion_converted"].file.as_posix()
+delly_mappability = config_model.reference["delly_mappability"].file.as_posix()
+access_regions = config_model.reference["access_regions"].file.as_posix()
+gnomad_min_af5 = config_model.reference["gnomad_min_af5"].file.as_posix()
+genome_chrom_size = config_model.reference["genome_chrom_size"].file.as_posix()
+
 # vcfanno annotations
-research_annotations.append(
-    {
-        "annotation": [
-            {
-                "file": Path(config["reference"]["gnomad_variant"]).as_posix(),
-                "fields": ["AF", "AF_popmax"],
-                "ops": ["self", "self"],
-                "names": ["GNOMADAF", "GNOMADAF_popmax"],
-            }
-        ]
-    }
-)
 
-research_annotations.append(
-    {
-        "annotation": [
-            {
-                "file": Path(config["reference"]["clinvar"]).as_posix(),
-                "fields": [
-                    "CLNVID",
-                    "CLNREVSTAT",
-                    "CLNSIG",
-                    "ORIGIN",
-                    "ONC",
-                    "ONCDN",
-                    "ONCREVSTAT",
-                    "ONCDISDB",
-                    "ONCCONF",
-                    "CLNVC",
-                    "CLNVCSO",
-                ],
-                "ops": ["self", "self", "self", "self", "self", "self", "self", "self", "self", "self", "self"],
-                "names": [
-                    "CLNVID",
-                    "CLNREVSTAT",
-                    "CLNSIG",
-                    "ORIGIN",
-                    "ONC",
-                    "ONCDN",
-                    "ONCREVSTAT",
-                    "ONCDISDB",
-                    "ONCCONF",
-                    "CLNVC",
-                    "CLNVCSO",
-                ],
-            }
-        ]
-    }
-)
+clinical_sv = config_model.reference.get("clinical_sv_observations")
+clinical_sv = clinical_sv.file.as_posix() if clinical_sv else None
 
-research_annotations.append(
-    {
-        "annotation": [
-            {
-                "file": Path(config["reference"]["cadd_snv"]).as_posix(),
-                "names": ["CADD"],
-                "ops": ["mean"],
-                "columns": [6],
-            }
-        ]
-    }
-)
+somatic_sv = config_model.reference.get("cancer_somatic_sv_observations")
+somatic_sv = somatic_sv.file.as_posix() if somatic_sv else None
 
-
-if "swegen_snv_frequency" in config["reference"]:
-    research_annotations.append(
-        {
-            "annotation": [
-                {
-                    "file": get_swegen_snv(config),
-                    "fields": ["AF", "AC_Hom", "AC_Het", "AC_Hemi"],
-                    "ops": ["self", "self", "self", "self"],
-                    "names": [
-                        "SWEGENAF",
-                        "SWEGENAAC_Hom",
-                        "SWEGENAAC_Het",
-                        "SWEGENAAC_Hemi",
-                    ],
-                }
-            ]
-        }
-    )
-
-if "artefact_snv_observations" in config["reference"]:
-    clinical_annotations.append(
-        {
-            "annotation": [
-                {
-                    "file": Path(config["reference"]["artefact_snv_observations"]).as_posix(),
-                    "fields": ["Frq", "Obs", "Hom"],
-                    "ops": ["self", "self", "self"],
-                    "names": ["ArtefactFrq", "ArtefactObs", "ArtefactHom"],
-                }
-            ]
-        }
-    )
-    artefact_snv_obs: str = Path(config["reference"]["artefact_snv_observations"]).as_posix()
-
-if "clinical_snv_observations" in config["reference"]:
-    clinical_annotations.append(
-        {
-            "annotation": [
-                {
-                    "file": get_clinical_snv_observations(config),
-                    "fields": ["Frq", "Obs", "Hom"],
-                    "ops": ["self", "self", "self"],
-                    "names": ["Frq", "Obs", "Hom"],
-                }
-            ]
-        }
-    )
-    clinical_snv_obs: str = get_clinical_snv_observations(config)
-
-if "cancer_germline_snv_observations" in config["reference"]:
-    clinical_annotations.append(
-        {
-            "annotation": [
-                {
-                    "file": get_cancer_germline_snv_observations(config),
-                    "fields": ["Frq", "Obs", "Hom"],
-                    "ops": ["self", "self", "self"],
-                    "names": [
-                        "Cancer_Germline_Frq",
-                        "Cancer_Germline_Obs",
-                        "Cancer_Germline_Hom",
-                    ],
-                }
-            ]
-        }
-    )
-    cancer_germline_snv_obs: str = get_cancer_germline_snv_observations(config)
-
-
-if "cancer_somatic_snv_observations" in config["reference"]:
-    clinical_annotations.append(
-        {
-            "annotation": [
-                {
-                    "file": Path(config["reference"]["cancer_somatic_snv_observations"]).as_posix(),
-                    "fields": ["Frq", "Obs", "Hom"],
-                    "ops": ["self", "self", "self"],
-                    "names": [
-                        "Cancer_Somatic_Frq",
-                        "Cancer_Somatic_Obs",
-                        "Cancer_Somatic_Hom",
-                    ],
-                }
-            ]
-        }
-    )
-    cancer_somatic_snv_obs: str = Path(config["reference"]["cancer_somatic_snv_observations"]).as_posix()
-
-if "cancer_somatic_snv_panel_observations" in config["reference"]:
-    clinical_annotations.append(
-        {
-            "annotation": [
-                {
-                    "file": Path(config["reference"]["cancer_somatic_snv_panel_observations"]).as_posix(),
-                    "fields": ["Frq", "Obs", "Hom"],
-                    "ops": ["self", "self", "self"],
-                    "names": [
-                        "Cancer_Somatic_Panel_Frq",
-                        "Cancer_Somatic_Panel_Obs",
-                        "Cancer_Somatic_Panel_Hom",
-                    ],
-                }
-            ]
-        }
-    )
-    cancer_somatic_snv_panel_obs: str = Path(config["reference"]["cancer_somatic_snv_panel_observations"]).as_posix()
-
-
-if "clinical_sv_observations" in config["reference"]:
-    clinical_sv: str = get_clinical_sv_observations(config)
-else:
-    clinical_sv = None
-
-if "cancer_somatic_sv_observations" in config["reference"]:
-    somatic_sv: str = get_somatic_sv_observations(config)
-
-if "swegen_sv_frequency" in config["reference"]:
-    swegen_sv: str = get_swegen_sv(config)
+swegen_sv = config_model.reference.get("swegen_sv_frequency")
+swegen_sv = swegen_sv.file.as_posix() if swegen_sv else None
 
 
 # Capture kit name
 if config["analysis"]["sequencing_type"] != "wgs":
     capture_kit = os.path.split(config["panel"]["capture_kit"])[1]
 
-if "hg38" in config["reference"]["reference_genome"]:
+if "hg38" in config["reference"]["reference_genome"]["file"]:
     config["reference"]["genome_version"] = "hg38"
-elif "canfam3" in config["reference"]["reference_genome"]:
+elif "canfam3" in config["reference"]["reference_genome"]["file"]:
     config["reference"]["genome_version"] = "canfam3"
     LOG.error(
         "The main BALSAMIC workflow is not compatible with the canfam3 genome version "

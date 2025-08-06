@@ -47,6 +47,7 @@ from BALSAMIC.constants.analysis import (
     AnalysisWorkflow,
     Gender,
     LogFile,
+    VARIANT_OBSERVATION_METAVALUES,
 )
 from BALSAMIC.constants.cache import GenomeVersion
 from BALSAMIC.constants.constants import FileType
@@ -68,6 +69,7 @@ from BALSAMIC.utils.cli import (
 from BALSAMIC.utils.io import read_json, write_json
 from BALSAMIC.utils.utils import get_absolute_paths_dict
 from BALSAMIC.utils.logging import add_file_logging
+from BALSAMIC.utils.references import merge_reference_metadata
 
 LOG = logging.getLogger(__name__)
 
@@ -181,6 +183,7 @@ def case_config(
                     if path is not None
                 }
             )
+
     variants_observations = {
         "artefact_snv_observations": artefact_snv_observations,
         "clinical_snv_observations": clinical_snv_observations,
@@ -192,13 +195,13 @@ def case_config(
         "swegen_snv_frequency": swegen_snv,
         "swegen_sv_frequency": swegen_sv,
     }
-    references.update(
-        {
-            observations: path
-            for observations, path in variants_observations.items()
-            if path is not None
-        }
+
+    references = merge_reference_metadata(
+        existing_refs=references,
+        observation_paths=variants_observations,
+        metadata_lookup=VARIANT_OBSERVATION_METAVALUES,
     )
+
     LOG.info(f"Collected references: {references}")
 
     analysis_fastq_dir: str = get_analysis_fastq_files_directory(

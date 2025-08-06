@@ -1,7 +1,7 @@
 
 rule bcftools_normalise_vcfs:
     input:
-        ref = config["reference"]["reference_genome"],
+        ref = reference_genome,
         vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".{caller}.research.vcf.gz",
     output:
         vcf_normalised = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".{caller}.research.normalised.vcf.gz",
