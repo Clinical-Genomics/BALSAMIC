@@ -149,13 +149,13 @@ if config_model.custom_filters and config_model.custom_filters.umi_min_reads:
 
 # vcfanno annotations
 
-clinical_sv = config.reference.get("clinical_sv_observations")
+clinical_sv = config_model.reference.get("clinical_sv_observations")
 clinical_sv = clinical_sv.file.as_posix() if clinical_sv else None
 
-somatic_sv = config.reference.get("cancer_somatic_sv_observations")
+somatic_sv = config_model.reference.get("cancer_somatic_sv_observations")
 somatic_sv = somatic_sv.file.as_posix() if somatic_sv else None
 
-swegen_sv = config.reference.get("swegen_sv_frequency")
+swegen_sv = config_model.reference.get("swegen_sv_frequency")
 swegen_sv = swegen_sv.file.as_posix() if swegen_sv else None
 
 
