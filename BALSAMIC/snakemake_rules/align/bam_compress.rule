@@ -4,7 +4,7 @@
 rule bam_compress_tumor:
     input:
         bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample),
-        fasta = config_model.reference.reference_genome.file.as_posix()
+        fasta = config["reference"]["reference_genome"]
     output:
         cram = Path(bam_dir + "tumor.{sample}.cram").as_posix()
     benchmark:
@@ -25,7 +25,7 @@ samtools index {output.cram};
 rule bam_compress_normal:
     input:
         bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample),
-        fasta = config_model.reference.reference_genome.file.as_posix()
+        fasta = config["reference"]["reference_genome"]
     output:
         cram = Path(bam_dir, "normal.{sample}.cram").as_posix()
     benchmark:
