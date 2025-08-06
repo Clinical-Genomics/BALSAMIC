@@ -37,7 +37,7 @@ rule picard_collecthsmetrics_umi:
         bam = umi_dir + "{sample_type}.{sample}_consensusfiltered_umi.bam",
         bed = config["panel"]["capture_kit"],
         fa = reference_genome,
-        fadict = (reference_genome.file.as_posix().replace(".fasta",".dict"))
+        fadict = reference_genome.replace(".fasta",".dict")
     output:
         mrkdup = umi_qc_dir + "{sample_type}.{sample}.umi.collect_hsmetric.txt"
     benchmark:
