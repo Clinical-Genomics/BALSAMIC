@@ -165,9 +165,7 @@ ascat_gc_correction = config_model.reference["ascat_gc_correction"].file.as_posi
 delly_exclusion_converted = config_model.reference["delly_exclusion_converted"].file.as_posix()
 delly_mappability = config_model.reference["delly_mappability"].file.as_posix()
 access_regions = config_model.reference["access_regions"].file.as_posix()
-
-if config_model.analysis.sequencing_type == SequencingType.WGS:
-    gnomad_min_af5 = config_model.reference["gnomad_min_af5"].file.as_posix()
+gnomad_min_af5 = config_model.reference["gnomad_min_af5"].file.as_posix()
 
 # vcfanno annotations
 
