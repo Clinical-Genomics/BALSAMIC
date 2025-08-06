@@ -6,7 +6,7 @@ from glob import glob
 from pathlib import Path
 from typing import Annotated, Dict, List, Optional, Literal
 
-from pydantic import AfterValidator, BaseModel, field_validator, model_validator
+from pydantic import AfterValidator, BaseModel, field_validator, model_validator, field_serializer
 
 from BALSAMIC import __version__ as balsamic_version
 from BALSAMIC.constants.cluster import QOS
@@ -209,7 +209,7 @@ class ReferenceModel(BaseModel):
     names: Optional[List[str]] = None
     columns: Optional[List[int]] = None
     category: Optional[AnnotationCategory] = None
-    
+
     @field_serializer("file")
     def _ser_file(self, v: Path, _info):
         return v.as_posix()
