@@ -8,7 +8,7 @@ else:
 
 rule picard_CollectHsMetrics:
     input:
-        fadict = (reference_genome.replace(".fasta",".dict")),
+        fadict = reference_genome.replace(".fasta",".dict"),
         bed = config["panel"]["capture_kit"],
         bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample),
         fa = reference_genome
