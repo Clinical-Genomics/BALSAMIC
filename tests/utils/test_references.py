@@ -1,6 +1,7 @@
 from BALSAMIC.utils.references import merge_reference_metadata
 from pathlib import Path
 
+
 def test_seeds_from_existing_and_adds_metadata():
     # GIVEN reference dictionary with one reference matching variant observation metadata and one not
     existing = {
