@@ -3,7 +3,7 @@
 
 rule sentieon_align_sort_umireads_umi:
     input:
-        ref = reference_genome
+        ref = reference_genome,
         interleaved_fastq = fastq_dir + "{sample_type}.{sample}_umiextract_interleaved.fastq.gz",
         refidx = expand(reference_genome + ".{prefix}", prefix=["amb","ann","bwt","pac","sa"])
     output:

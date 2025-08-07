@@ -38,6 +38,7 @@ from BALSAMIC.utils.cli import (
 )
 from BALSAMIC.utils.io import read_json, write_json
 from BALSAMIC.utils.utils import get_absolute_paths_dict
+from BALSAMIC.utils.references import merge_reference_metadata
 
 LOG = logging.getLogger(__name__)
 
@@ -83,6 +84,8 @@ def pon_config(
                 "Argument: genome_interval is required for GENS PON creation."
             )
         references["genome_interval"] = genome_interval
+
+    references = merge_reference_metadata(existing_refs=references)
 
     if pon_workflow == PONWorkflow.CNVKIT and not panel_bed:
         raise click.BadParameter(

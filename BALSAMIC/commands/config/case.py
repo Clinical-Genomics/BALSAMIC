@@ -47,7 +47,6 @@ from BALSAMIC.constants.analysis import (
     AnalysisWorkflow,
     Gender,
     LogFile,
-    VARIANT_OBSERVATION_METAVALUES,
 )
 from BALSAMIC.constants.cache import GenomeVersion
 from BALSAMIC.constants.constants import FileType
@@ -199,7 +198,6 @@ def case_config(
     references = merge_reference_metadata(
         existing_refs=references,
         observation_paths=variants_observations,
-        metadata_lookup=VARIANT_OBSERVATION_METAVALUES,
     )
 
     LOG.info(f"Collected references: {references}")
