@@ -68,7 +68,7 @@ bcftools filter --threads {resources.threads} --include 'INFO/SWEGENAF <= {param
 bcftools filter --threads {resources.threads} --include 'INFO/Frq <= {params.loqusdb_clinical_freq[0]} || INFO/Frq == \".\"' --soft-filter '{params.loqusdb_clinical_freq[1]}' --mode '+' -O z -o {params.tmpdir}/clinical.filtered.pass_before_whitelisted.vcf.gz
 
 if [ "{params.cancer_somatic_panel_frq}" != "None" ] ; then
-  bcftools filter --threads {resources.threads} --include 'INFO/Cancer_Somatic_Panel_Frq <= {params.somatic_snv_panel_freq[0]} || INFO/Cancer_Somatic_Panel_Frq == \".\"' --soft-filter '{params.somatic_snv_panel_freq[1]}' --mode '+' {params.tmpdir}/clinical.filtered.pass_before_whitelisted.vcf.gz -O -z -o {params.tmpdir}/clinical.filtered.pass_before_whitelisted.1.vcf.gz
+  bcftools filter --threads {resources.threads} --include 'INFO/Cancer_Somatic_Panel_Frq <= {params.somatic_snv_panel_freq[0]} || INFO/Cancer_Somatic_Panel_Frq == \".\"' --soft-filter '{params.somatic_snv_panel_freq[1]}' --mode '+' {params.tmpdir}/clinical.filtered.pass_before_whitelisted.vcf.gz -O z -o {params.tmpdir}/clinical.filtered.pass_before_whitelisted.1.vcf.gz
   mv {params.tmpdir}/clinical.filtered.pass_before_whitelisted.1.vcf.gz {params.tmpdir}/clinical.filtered.pass_before_whitelisted.vcf.gz
 fi
 
