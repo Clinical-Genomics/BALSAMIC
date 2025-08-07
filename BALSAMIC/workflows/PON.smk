@@ -80,7 +80,7 @@ else:
 if pon_workflow == PONWorkflow.CNVKIT:
     reference_genome: str = config_model.reference["reference_genome"].file.as_posix()
     refgene_flat: str = config_model.reference["refgene_flat"].file.as_posix()
-    access_5kb_hg19: str = config_model.reference["access_regions"].file.as_posix()
+    access_regions: str = config_model.reference["access_regions"].file.as_posix()
     target_bed: str = config_model.panel.capture_kit
     panel_name = os.path.split(target_bed)[1].replace('.bed','')
 
