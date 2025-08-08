@@ -4,7 +4,7 @@ if config["analysis"]["sequencing_type"] == 'wgs' and config["analysis"]["analys
     rule bcftools_quality_filter_tnscope_tumor_only_wgs:
       input:
         vcf_snv = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.vcf.gz",
-        wgs_calling_file = config["reference"]["wgs_calling_regions"],
+        wgs_calling_file = wgs_calling_regions,
       output:
         vcf_filtered = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.research.pre_process.vcf",
       benchmark:
@@ -45,7 +45,7 @@ elif config["analysis"]["sequencing_type"] == 'wgs' and config["analysis"]["anal
     rule bcftools_quality_filter_tnscope_tumor_normal_wgs:
       input:
         vcf_snv = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.vcf.gz",
-        wgs_calling_file = config["reference"]["wgs_calling_regions"],
+        wgs_calling_file = wgs_calling_regions,
       output:
         vcf_filtered = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.research.pre_process.vcf",
       benchmark:

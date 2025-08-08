@@ -5,7 +5,7 @@ if config["analysis"]["sequencing_type"] == 'wgs':
     rule sentieon_wgs_metrics:
         input:
             bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample),
-            reference = config["reference"]["reference_genome"]
+            reference = reference_genome
         output:
             wgs_metrics = qc_dir + "{sample_type}.{sample}_sentieon_wgs_metrics.txt",
             coverage_metrics_y = qc_dir + "{sample_type}.{sample}_Y_cov_per_base.txt",
@@ -15,7 +15,7 @@ if config["analysis"]["sequencing_type"] == 'wgs':
         params:
             tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
             min_base_qual = params.sentieon_wgs_metrics.min_base_qual,
-            gene_list = config["reference"]["refgene_txt"],
+            gene_list = refgene_txt,
             cov_threshold = params.sentieon_wgs_metrics.cov_threshold,
             sentieon_exec = config_model.sentieon.sentieon_exec,
             sentieon_lic = config_model.sentieon.sentieon_license,
@@ -50,7 +50,7 @@ if config["analysis"]["sequencing_type"] == 'wgs':
 
     rule sentieon_qc_metric_wgs:
         input:
-            ref = config["reference"]["reference_genome"],
+            ref = reference_genome,
             bam_files = lambda wildcards: config_model.get_bam_name_per_lane(bam_dir = bam_dir, sample_name = wildcards.sample)
         output:
             insert_size_metrics = Path(qc_dir,"{sample_type}.{sample}.insert_size_metrics.txt").as_posix(),
@@ -94,7 +94,7 @@ if config["analysis"]["sequencing_type"] == 'wgs':
 else:
     rule sentieon_qc_metrics_tga:
         input:
-            ref=config["reference"]["reference_genome"],
+            ref=reference_genome,
             bam=lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample, specified_suffix="align_sort"),
         output:
             insert_size_metrics=Path(qc_dir,"{sample_type}.{sample}.insert_size_metrics.txt").as_posix(),

@@ -139,19 +139,29 @@ def test_wes_tga_read_depth_snv_filter():
     assert isclose(tga_dp_filter[0], 50)
 
 
-def test_filter_criteria_soft_normals_exclusion():
-    """Test soft_filter_normals excludes matched normal filters."""
+def test_get_bcftools_filter_string_soft_normals_exclusion():
+    """Test soft_filter_normals excludes matched normal filters from filter string."""
+
+    # GIVEN matched normal filters
+    normal_filters = BaseSNVFilters.MATCHED_NORMAL_FILTER_NAMES
 
     # GIVEN all quality SNV filters excluding the matched normal filters
-    filters = TgaSNVFilters.filter_criteria(
-        category="quality", soft_filter_normals=True
+    filter_string_soft_filter_normals = TgaSNVFilters.get_bcftools_filter_string(
+        category="quality", analysis_type=AnalysisType.PAIRED, soft_filter_normals=True
     )
 
-    # WHEN comparing against the list of matched normal filter names
-    excluded = BaseSNVFilters.MATCHED_NORMAL_FILTER_NAMES
+    # THEN normal_filters should not exist in the filter string
+    for normal_filter in normal_filters:
+        assert normal_filter not in filter_string_soft_filter_normals
 
-    # THEN no filter names should be overlapping between the two lists
-    assert all(f.filter_name not in excluded for f in filters)
+    # GIVEN all quality SNV filters including the matched normal filters
+    filter_string = TgaSNVFilters.get_bcftools_filter_string(
+        category="quality", analysis_type=AnalysisType.PAIRED, soft_filter_normals=False
+    )
+
+    # THEN normal_filters should exist in the filter string
+    for normal_filter in normal_filters:
+        assert normal_filter in filter_string
 
 
 def test_get_bcftools_filter_string():

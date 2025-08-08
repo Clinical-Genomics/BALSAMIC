@@ -18,6 +18,7 @@ from BALSAMIC.commands.options import (
     OPTION_CADD_ANNOTATIONS,
     OPTION_CANCER_GERMLINE_SNV_OBSERVATIONS,
     OPTION_CANCER_SOMATIC_SNV_OBSERVATIONS,
+    OPTION_CANCER_SOMATIC_SNV_PANEL_OBSERVATIONS,
     OPTION_CANCER_SOMATIC_SV_OBSERVATIONS,
     OPTION_CASE_ID,
     OPTION_CLINICAL_SNV_OBSERVATIONS,
@@ -39,6 +40,7 @@ from BALSAMIC.commands.options import (
     OPTION_SWEGEN_SV,
     OPTION_TUMOR_SAMPLE_NAME,
     OPTION_UMI_MIN_READS,
+    OPTION_WHITELIST_SNVS,
 )
 from BALSAMIC.constants.analysis import (
     BIOINFO_TOOL_ENV,
@@ -66,6 +68,7 @@ from BALSAMIC.utils.cli import (
 from BALSAMIC.utils.io import read_json, write_json
 from BALSAMIC.utils.utils import get_absolute_paths_dict
 from BALSAMIC.utils.logging import add_file_logging
+from BALSAMIC.utils.references import merge_reference_metadata
 
 LOG = logging.getLogger(__name__)
 
@@ -80,6 +83,7 @@ LOG = logging.getLogger(__name__)
 @OPTION_CADD_ANNOTATIONS
 @OPTION_CANCER_GERMLINE_SNV_OBSERVATIONS
 @OPTION_CANCER_SOMATIC_SNV_OBSERVATIONS
+@OPTION_CANCER_SOMATIC_SNV_PANEL_OBSERVATIONS
 @OPTION_CANCER_SOMATIC_SV_OBSERVATIONS
 @OPTION_CASE_ID
 @OPTION_CLINICAL_SNV_OBSERVATIONS
@@ -101,6 +105,7 @@ LOG = logging.getLogger(__name__)
 @OPTION_SWEGEN_SV
 @OPTION_TUMOR_SAMPLE_NAME
 @OPTION_UMI_MIN_READS
+@OPTION_WHITELIST_SNVS
 @click.pass_context
 def case_config(
     context: click.Context,
@@ -113,6 +118,7 @@ def case_config(
     cadd_annotations: Path,
     cancer_germline_snv_observations: Path,
     cancer_somatic_snv_observations: Path,
+    cancer_somatic_snv_panel_observations: Path,
     cancer_somatic_sv_observations: Path,
     case_id: str,
     clinical_snv_observations: Path,
@@ -134,6 +140,7 @@ def case_config(
     swegen_sv: Path,
     tumor_sample_name: str,
     umi_min_reads: str | None,
+    whitelist_snvs: Path,
 ):
     """Configure BALSAMIC workflow based on input arguments."""
 
@@ -175,23 +182,24 @@ def case_config(
                     if path is not None
                 }
             )
+
     variants_observations = {
         "artefact_snv_observations": artefact_snv_observations,
         "clinical_snv_observations": clinical_snv_observations,
         "clinical_sv_observations": clinical_sv_observations,
         "cancer_germline_snv_observations": cancer_germline_snv_observations,
         "cancer_somatic_snv_observations": cancer_somatic_snv_observations,
+        "cancer_somatic_snv_panel_observations": cancer_somatic_snv_panel_observations,
         "cancer_somatic_sv_observations": cancer_somatic_sv_observations,
         "swegen_snv_frequency": swegen_snv,
         "swegen_sv_frequency": swegen_sv,
     }
-    references.update(
-        {
-            observations: path
-            for observations, path in variants_observations.items()
-            if path is not None
-        }
+
+    references = merge_reference_metadata(
+        existing_refs=references,
+        observation_paths=variants_observations,
     )
+
     LOG.info(f"Collected references: {references}")
 
     analysis_fastq_dir: str = get_analysis_fastq_files_directory(
@@ -234,6 +242,7 @@ def case_config(
             "sequencing_type": "targeted" if panel_bed else "wgs",
             "analysis_workflow": analysis_workflow,
             "config_creation_date": datetime.now().strftime("%Y-%m-%d %H:%M"),
+            "whitelist_snvs": whitelist_snvs,
         },
         custom_filters={"umi_min_reads": umi_min_reads if umi_min_reads else None},
         reference=references,

@@ -81,9 +81,9 @@ if sequencing_type != "wgs":
 if len(cluster_config.keys()) == 0:
     cluster_config = config
 
-if "hg38" in config["reference"]["reference_genome"]:
+if "hg38" in config["reference"]["reference_genome"]["file"]:
     config["reference"]["genome_version"] = "hg38"
-elif "canfam3" in config["reference"]["reference_genome"]:
+elif "canfam3" in config["reference"]["reference_genome"]["file"]:
     config["reference"]["genome_version"] = "canfam3"
 else:
     config["reference"]["genome_version"] = "hg19"
@@ -104,7 +104,7 @@ rules_to_include = [rule for rule in rules_to_include if "umi" not in rule and "
 
 
 # Somalier only implemented for hg38 and hg19
-if "canfam3" in config["reference"]["reference_genome"]:
+if "canfam3" in config["reference"]["reference_genome"]["file"]:
     rules_to_include.remove("snakemake_rules/quality_control/somalier.rule")
 
 for r in rules_to_include:

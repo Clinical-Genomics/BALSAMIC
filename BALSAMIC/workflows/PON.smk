@@ -78,9 +78,12 @@ else:
     rules_to_include.append("snakemake_rules/align/wgs_bam_postprocess.rule")
 
 if pon_workflow == PONWorkflow.CNVKIT:
-    reffasta: str = config_model.reference["reference_genome"]
-    refgene_flat: str = config_model.reference["refgene_flat"]
-    access_5kb_hg19: str = config_model.reference["access_regions"]
+    reference_genome: str = config_model.reference["reference_genome"].file.as_posix()
+    refgene_flat: str = config_model.reference["refgene_flat"].file.as_posix()
+    access_regions: str = config_model.reference["access_regions"].file.as_posix()
+    dbsnp = config_model.reference["dbsnp"].file.as_posix()
+    mills_1kg = config_model.reference["mills_1kg"].file.as_posix()
+    known_indel_1kg = config_model.reference["known_indel_1kg"].file.as_posix()
     target_bed: str = config_model.panel.capture_kit
     panel_name = os.path.split(target_bed)[1].replace('.bed','')
 
