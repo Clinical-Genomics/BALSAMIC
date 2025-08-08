@@ -2,7 +2,7 @@
 Tools and software
 =================================
 
-BALSAMIC ( **version** = 17.0.0 ) uses myriad of tools and softwares to analyze fastq files. This section covers why each
+BALSAMIC ( **version** = 17.0.1 ) uses myriad of tools and softwares to analyze fastq files. This section covers why each
 one is included: usage and parameters, and relevant external links.
 
 ascatNgs
@@ -57,7 +57,7 @@ ensembl-vep
 ~~~~~~~~~~~
 :Source code: `GitHub` `<https://github.com/Ensembl/ensembl-vep>`_
 :Article: `Genome Biology` `<https://genomebiology.biomedcentral.com/articles/10.1186/s13059-016-0974-4>`_
-:Version: `104.3`
+:Version: `113.4`
 
 fastp
 ~~~~~

@@ -1,4 +1,43 @@
 
+[X.X.X]
+--------
+
+Added:
+^^^^^^
+
+Changed:
+^^^^^^^^
+
+* Updated ensembl vep to version 113.4 https://github.com/Clinical-Genomics/BALSAMIC/pull/1567
+* Updated rank model to use GNOMADAF_popmax instead of deprecated gnomAD_AF https://github.com/Clinical-Genomics/BALSAMIC/pull/1567
+
+Removed:
+^^^^^^^^
+
+Fixed:
+^^^^^^
+
+* Fixed varcall_py27 container for Manta https://github.com/Clinical-Genomics/BALSAMIC/pull/1567
+
+
+[17.0.1]
+--------
+
+Added:
+^^^^^^
+
+Changed:
+^^^^^^^^
+
+Removed:
+^^^^^^^^
+
+Fixed:
+^^^^^^
+
+* fixed bug in panel sex-prediction script when no targets in y-chromosome exists in panel https://github.com/Clinical-Genomics/BALSAMIC/pull/1563
+
+
 [17.0.0]
 -------
 
