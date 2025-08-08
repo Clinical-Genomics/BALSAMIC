@@ -56,6 +56,7 @@ ANALYSIS_WORKFLOWS: List[AnalysisWorkflow] = [workflow for workflow in AnalysisW
 class AnnotationCategory(StrEnum):
     CLINICAL: str = "clinical"
     RESEARCH: str = "research"
+    POST_QUALITY: str = "post_quality"
 
 
 VARIANT_OBSERVATION_METAVALUES = {
@@ -63,7 +64,7 @@ VARIANT_OBSERVATION_METAVALUES = {
         "fields": ["AF", "AF_popmax"],
         "ops": ["self", "self"],
         "names": ["GNOMADAF", "GNOMADAF_popmax"],
-        "category": AnnotationCategory.RESEARCH,
+        "category": AnnotationCategory.POST_QUALITY,
     },
     "clinvar": {
         "fields": [
