@@ -3,15 +3,22 @@
 
 Added:
 ^^^^^^
+* sbatch script for snakemake sequential job submission https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
+* logfile for balsamic wrapper https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
+* analysis status text file for easier prodbioinfo handling https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
+* requested memory to each rule https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
 
 Changed:
 ^^^^^^^^
 * Updated ensembl vep to version 113.4 https://github.com/Clinical-Genomics/BALSAMIC/pull/1567
 * Updated rank model to use GNOMADAF_popmax instead of deprecated gnomAD_AF https://github.com/Clinical-Genomics/BALSAMIC/pull/1567
-
+* changed snakemake from running immediate submit to submitting snakemake job to cluster https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
 
 Removed:
 ^^^^^^^^
+* removed immediate submit functionality https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
+* removed unused code for benchmark plotting https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
+* removed functionality to disable variant callers https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
 
 Fixed:
 ^^^^^^
@@ -23,16 +30,20 @@ Fixed:
 Added:
 ^^^^^^
 
+
 Changed:
 ^^^^^^^^
+
 * removing strand balance requirement of ref-allele in WGS TO strand bias filter https://github.com/Clinical-Genomics/BALSAMIC/pull/1594
 * lowered rare-disease germline loqusdb observation frequency for WGS SNVs to 0.007 from 0.01 https://github.com/Clinical-Genomics/BALSAMIC/pull/1594
+
 
 Removed:
 ^^^^^^^^
 
 Fixed:
 ^^^^^^
+
 
 
 [17.0.1]
