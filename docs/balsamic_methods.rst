@@ -5,7 +5,7 @@ Method description
 Target Genome Analysis
 ~~~~~~~~~~~~~~~~~~~~~~
 
-BALSAMIC :superscript:`1` (**version** = 17.0.1) was used to analyze the data from raw FASTQ files.
+BALSAMIC :superscript:`1` (**version** = 17.1.0) was used to analyze the data from raw FASTQ files.
 We first quality controlled FASTQ files using FastQC v0.11.9 :superscript:`2`.
 Adapter sequences are trimmed using fastp v0.23.2 :superscript:`3` and then UMI sequences are extracted using the UMI extract tool from sentieon-tools (version 202308.03) :superscript:`15` and finally low-quality bases were trimmed using fastp v0.23.2 :superscript:`3`.
 Trimmed reads were mapped to the reference genome hg19 using sentieon-tools :superscript:`15`.
@@ -25,7 +25,7 @@ to annotate somatic variants for their population allele frequency from gnomAD v
 Whole Genome Analysis
 ~~~~~~~~~~~~~~~~~~~~~
 
-BALSAMIC :superscript:`1` (**version** = 17.0.1) was used to analyze the data from raw FASTQ files.
+BALSAMIC :superscript:`1` (**version** = 17.1.0) was used to analyze the data from raw FASTQ files.
 We first quality controlled FASTQ files using FastQC v0.11.9 :superscript:`2`.
 Adapter sequences and low-quality bases were trimmed using fastp v0.23.2 :superscript:`3`.
 Trimmed reads were mapped to the reference genome hg19 using sentieon-tools 202308.03 :superscript:`15`.
@@ -45,7 +45,7 @@ to annotate somatic single nucleotide variants for their population allele frequ
 UMI workflow
 ~~~~~~~~~~~~~~~~~~~~~
 
-BALSAMIC :superscript:`1` (**version** = 17.0.1) was used to analyze the data from raw FASTQ files.
+BALSAMIC :superscript:`1` (**version** = 17.1.0) was used to analyze the data from raw FASTQ files.
 We first quality controlled FASTQ files using FastQC v0.11.9 :superscript:`2`.
 Adapter sequences were trimmed using fastp v0.23.2 :superscript:`3`.
 UMI tag extraction and alignment and consensus-calling of UMI groups were performed using Sentieon tools 202308.03 :superscript:`15`.
