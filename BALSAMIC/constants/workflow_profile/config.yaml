@@ -217,7 +217,7 @@ set-resources:
         threads: 16
     sentieon_DNAscope_tga:
         runtime: 1440
-        mem_mb: 25000
+        mem_mb: 30000
         threads: 36
     finalize_gens_outputfiles:
         runtime: 60
@@ -229,7 +229,7 @@ set-resources:
         threads: 1
     sentieon_DNAscope_gnomad_tga:
         runtime: 1440
-        mem_mb: 20000
+        mem_mb: 27000
         threads: 12
     gens_preprocess_wgs:
         runtime: 60
