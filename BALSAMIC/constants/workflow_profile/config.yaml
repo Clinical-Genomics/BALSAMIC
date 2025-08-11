@@ -217,7 +217,7 @@ set-resources:
         threads: 16
     sentieon_DNAscope_tga:
         runtime: 1440
-        mem_mb: 25000
+        mem_mb: 30000
         threads: 36
     finalize_gens_outputfiles:
         runtime: 60
@@ -229,7 +229,7 @@ set-resources:
         threads: 1
     sentieon_DNAscope_gnomad_tga:
         runtime: 1440
-        mem_mb: 20000
+        mem_mb: 27000
         threads: 12
     gens_preprocess_wgs:
         runtime: 60
@@ -533,7 +533,7 @@ set-resources:
         threads: 8
     svdb_annotate_somatic_research_sv:
         runtime: 720
-        mem_mb: 15000
+        mem_mb: 25000
         threads: 36
     vep_somatic_research_sv:
         runtime: 720
@@ -631,7 +631,7 @@ set-resources:
         runtime: 350
         threads: 12
     fastp_adapter_trim_tga:
-        mem_mb: 6000
+        mem_mb: 16000
         runtime: 400
         threads: 4
     fastp_quality_trim_tga:
@@ -639,6 +639,6 @@ set-resources:
         runtime: 350
         threads: 8
     sentieon_umiextract_tga:
-        mem_mb: 15000
+        mem_mb: 16000
         runtime: 350
         threads: 8
