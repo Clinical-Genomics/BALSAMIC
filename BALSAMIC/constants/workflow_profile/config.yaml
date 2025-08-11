@@ -533,7 +533,7 @@ set-resources:
         threads: 8
     svdb_annotate_somatic_research_sv:
         runtime: 720
-        mem_mb: 15000
+        mem_mb: 25000
         threads: 36
     vep_somatic_research_sv:
         runtime: 720
