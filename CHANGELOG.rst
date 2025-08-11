@@ -8,7 +8,7 @@ Changed:
 ^^^^^^^^
 * Updated ensembl vep to version 113.4 https://github.com/Clinical-Genomics/BALSAMIC/pull/1567
 * Updated rank model to use GNOMADAF_popmax instead of deprecated gnomAD_AF https://github.com/Clinical-Genomics/BALSAMIC/pull/1567
-* Updated balsamic installation instructions 
+* Updated balsamic installation instructions https://github.com/Clinical-Genomics/BALSAMIC/pull/1599
 
 Removed:
 ^^^^^^^^
