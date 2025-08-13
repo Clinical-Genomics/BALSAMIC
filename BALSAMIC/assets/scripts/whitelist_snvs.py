@@ -37,13 +37,20 @@ def onc_clnsig(info: str) -> bool:
     ) or ("ONC" in info_fields and "oncogenic" in info_fields["ONC"].lower())
 
 
-def matches_whitelist(variant, white):
-    """Check if a variant matches a whitelist entry (with '...' support)."""
-    if variant["chrom"] != white["chrom"] or variant["pos"] != white["pos"]:
-        return False
-    return partial_match(white["ref"], variant["ref"]) and partial_match(
-        white["alt"], variant["alt"]
-    )
+def matches_whitelist(variant, whitelist):
+    """Check if a variant is in the whitelist (with '...' support)."""
+    key = (variant["chrom"], variant["pos"], variant["ref"], variant["alt"])
+    if key in whitelist:
+        return True
+
+    # Fallback for partial matches with '...'
+    for white in whitelist.values():
+        if partial_match(white["ref"], variant["ref"]) and partial_match(
+            white["alt"], variant["alt"]
+        ):
+            if variant["chrom"] == white["chrom"] and variant["pos"] == white["pos"]:
+                return True
+    return False
 
 
 def whitelist_variants(variants, whitelist: dict = {}):
@@ -54,10 +61,8 @@ def whitelist_variants(variants, whitelist: dict = {}):
         if onc_clnsig(v["info"]):
             whitelist_reasons.append("ClinvarPathogenicOncogenic")
 
-        for white in whitelist.values():
-            if matches_whitelist(v, white):
-                whitelist_reasons.append("ClinicalList")
-                break
+        if whitelist and matches_whitelist(v, whitelist):
+            whitelist_reasons.append("ClinicalList")
 
         if whitelist_reasons:
             v["info"] += f";WhitelistStatus={','.join(whitelist_reasons)}"
@@ -115,12 +120,13 @@ def read_variants(vcf: str) -> Dict[Tuple[str, str, str, str], Dict[str, str]]:
 
 
 def read_whitelist(csv_path):
-    """Load whitelist CSV into dictionary indexed by ID."""
+    """Load whitelist CSV into dictionary keyed by (chrom, pos, ref, alt)."""
     whitelist = {}
     with open(csv_path, newline="") as f:
         reader = csv.DictReader(f)
         for row in reader:
-            whitelist[int(row["id"])] = row
+            key = (row["chrom"], row["pos"], row["ref"], row["alt"])
+            whitelist[key] = row
     return whitelist
 
 

@@ -12,7 +12,7 @@ rule sentieon_DNAscope_tga:
     benchmark:
         Path(benchmark_dir, "sentieon_dnascope_{sample_type}.tsv").as_posix()
     resources:
-        mem_mb=lambda wc, input: max(2.7 * input.size_mb,5000)
+        mem_mb=lambda wc, input: max(3.5 * input.size_mb,5000)
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         sentieon_exec = config_model.sentieon.sentieon_exec,
