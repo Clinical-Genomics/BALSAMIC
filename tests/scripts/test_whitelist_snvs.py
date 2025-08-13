@@ -52,26 +52,37 @@ def test_onc_clnsig_negative():
     assert onc_clnsig(info) is False
 
 
-# --- matches_whitelist ---
 def test_matches_whitelist_exact_match():
     variant = {"chrom": "1", "pos": "100", "ref": "A", "alt": "T"}
-    white = {"chrom": "1", "pos": "100", "ref": "A", "alt": "T"}
-    assert matches_whitelist(variant, white)
+    whitelist = {
+        ("1", "100", "A", "T"): {"chrom": "1", "pos": "100", "ref": "A", "alt": "T"}
+    }
+    assert matches_whitelist(variant, whitelist)
 
 
 def test_matches_whitelist_partial_match():
     variant = {"chrom": "1", "pos": "200", "ref": "GCT", "alt": "A"}
-    white = {"chrom": "1", "pos": "200", "ref": "...T", "alt": "A"}
-    assert matches_whitelist(variant, white)
+    # Store the whitelist entry; key won't match exactly (because of '...'),
+    # but the implementation will fall back to checking values for partial match.
+    whitelist = {
+        ("1", "200", "...T", "A"): {
+            "chrom": "1",
+            "pos": "200",
+            "ref": "...T",
+            "alt": "A",
+        }
+    }
+    assert matches_whitelist(variant, whitelist)
 
 
 def test_matches_whitelist_mismatch():
     variant = {"chrom": "2", "pos": "100", "ref": "G", "alt": "C"}
-    white = {"chrom": "1", "pos": "100", "ref": "G", "alt": "C"}
-    assert not matches_whitelist(variant, white)
+    whitelist = {
+        ("1", "100", "G", "C"): {"chrom": "1", "pos": "100", "ref": "G", "alt": "C"}
+    }
+    assert not matches_whitelist(variant, whitelist)
 
 
-# --- whitelist_variants ---
 def test_whitelist_variants_onc_clnsig():
     variants = {
         ("1", "100", "A", "T"): {
@@ -110,6 +121,32 @@ def test_whitelist_variants_with_list_match():
         }
     }
     whitelist = {1: {"chrom": "1", "pos": "123", "ref": "G", "alt": "A"}}
+    result = whitelist_variants(variants.copy(), whitelist)
+    v = result[("1", "123", "G", "A")]
+    assert "WhitelistStatus=ClinicalList" in v["info"]
+    assert "WhitelistedFilters=TriallelicSite" in v["info"]
+    assert v["filter"] == "PASS"
+
+
+def test_whitelist_variants_with_list_match():
+    variants = {
+        ("1", "123", "G", "A"): {
+            "chrom": "1",
+            "pos": "123",
+            "id": ".",
+            "ref": "G",
+            "alt": "A",
+            "qual": ".",
+            "filter": "TriallelicSite",
+            "info": "DP=30",
+            "format": "GT",
+            "samples": ["0/1"],
+        }
+    }
+    # Key by (chrom, pos, ref, alt) — no numeric id anymore
+    whitelist = {
+        ("1", "123", "G", "A"): {"chrom": "1", "pos": "123", "ref": "G", "alt": "A"}
+    }
     result = whitelist_variants(variants.copy(), whitelist)
     v = result[("1", "123", "G", "A")]
     assert "WhitelistStatus=ClinicalList" in v["info"]
