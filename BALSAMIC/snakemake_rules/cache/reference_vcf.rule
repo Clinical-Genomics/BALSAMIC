@@ -83,5 +83,5 @@ rule index_postprocessed_clinvar_vcf:
         f"{cache_config.references.clinvar.file_path}.tabix_postprocess_clinvar.{FileType.LOG}",
     shell:
         """
-        tabix -p vcf {output.clinvar}
+        tabix -p vcf {input.clinvar}
         """

@@ -1,4 +1,5 @@
 """Balsamic reference cache models."""
+import re
 import logging
 from pathlib import Path
 from typing import Dict, Optional, List, Union
@@ -149,14 +150,10 @@ class ReferencesHg(References):
         return [self.cadd_snv.file_path, f"{self.cadd_snv.file_path}.{FileType.TBI}"]
 
     def get_processed_clinvar_file_path(self) -> str:
-        return self.clinvar.file_path.replace(
-            f"{FileType.GZ}", f"_processed.{FileType.GZ}"
-        )
+        return re.sub(r"\.vcf\.gz$", "_processed.vcf.gz", self.clinvar.file_path)
 
     def get_processed_clinvar_index_path(self) -> str:
-        return self.clinvar.file_path.replace(
-            f"{FileType.GZ}", f"_processed.{FileType.GZ}.{FileType.TBI}"
-        )
+        return re.sub(r"\.vcf\.gz$", "_processed.vcf.gz.tbi", self.clinvar.file_path)
 
     def get_delly_file_paths(self) -> List[str]:
         """Return Delly associated output files."""
