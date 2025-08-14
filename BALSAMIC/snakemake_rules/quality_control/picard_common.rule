@@ -4,7 +4,7 @@
 if config["analysis"]["sequencing_type"] == "wgs":
     rule picard_CollectAlignmentSummaryMetrics_WGS:
         input:
-            bam = Path(bam_dir + "{sample_type}.{sample}.{fastq_pattern}.align_sort.bam").as_posix(),
+            bam = Path(bam_dir, "{sample_type}.{sample}.merged.bam").as_posix(),
             fa = config["reference"]["reference_genome"]
         output:
             alignment_metrics = qc_dir + "{sample_type}.{sample}.{fastq_pattern}.alignment_summary_metrics.txt"

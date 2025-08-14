@@ -607,6 +607,10 @@ set-resources:
         runtime: 1440
         mem_mb: 80000
         threads: 36
+    samtools_merge_bamfiles:
+        runtime: 1440
+        mem_mb: 80000
+        threads: 36
     sentieon_dedup_consensus:
         runtime: 1440
         mem_mb: 60000
