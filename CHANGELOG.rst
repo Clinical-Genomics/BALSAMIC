@@ -13,6 +13,7 @@ Changed:
 * Updated ensembl vep to version 113.4 https://github.com/Clinical-Genomics/BALSAMIC/pull/1567
 * Updated rank model to use GNOMADAF_popmax instead of deprecated gnomAD_AF https://github.com/Clinical-Genomics/BALSAMIC/pull/1567
 * changed snakemake from running immediate submit to submitting snakemake job to cluster https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
+* increased threads to CADD indel annotation https://github.com/Clinical-Genomics/BALSAMIC/pull/1602
 
 Removed:
 ^^^^^^^^
