@@ -7,19 +7,18 @@ if config["analysis"]["sequencing_type"] == "wgs":
             bam = Path(bam_dir, "{sample_type}.{sample}.merged.bam").as_posix(),
             fa = config["reference"]["reference_genome"]
         output:
-            alignment_metrics = qc_dir + "{sample_type}.{sample}.{fastq_pattern}.alignment_summary_metrics.txt"
+            alignment_metrics= qc_dir + "{sample_type}.{sample}.alignment_summary_metrics.txt"
         benchmark:
-            Path(benchmark_dir, "CollectAlignmentSummaryMetrics.{sample_type}.{sample}.{fastq_pattern}.tsv").as_posix()
+            Path(benchmark_dir, "CollectAlignmentSummaryMetrics.{sample_type}.{sample}.tsv").as_posix()
         singularity:
             Path(singularity_image,config["bioinfo_tools"].get("picard") + ".sif").as_posix()
         params:
-            mem = "16g",
+            mem = "30g",
             tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
             adapter = config["QC"]["adapter"],
             sample = "{sample}",
-            fastqpattern = "{fastq_pattern}"
         message:
-            "Calculating picard alignment summary metrics for {params.sample} {params.fastqpattern}"
+            "Calculating picard alignment summary metrics for {params.sample}"
         shell:
             """
     export TMPDIR={params.tmpdir};
@@ -44,7 +43,7 @@ else:
         singularity:
             Path(singularity_image,config["bioinfo_tools"].get("picard") + ".sif").as_posix()
         params:
-            mem = "25g",
+            mem = "30g",
             tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
             adapter = config["QC"]["adapter"],
             sample = "{sample}"

@@ -32,6 +32,11 @@ if config["analysis"]["sequencing_type"] == 'targeted':
                                  "umi_collapsed.samtools.idxstats.txt",
                                  "umi_collapsed.samtools.stats.txt"])
 
+# alignment summary metrics
+multiqc_input.extend(expand(qc_dir + "{sample_type}.{sample}.alignment_summary_metrics.txt",sample_type="tumor",sample=tumor_sample))
+if config['analysis']['analysis_type'] == "paired":
+    multiqc_input.extend(expand(qc_dir + "{sample_type}.{sample}.alignment_summary_metrics.txt",sample_type="normal",sample=normal_sample))
+
 multiqc_input.extend(expand(qc_dir + "tumor.{sample}.{metrics_wc}", sample=tumor_sample ,metrics_wc=qc_metrics_wildcards))
 if config['analysis']['analysis_type'] == "paired":
     multiqc_input.extend(expand(qc_dir + "normal.{sample}.{metrics_wc}", sample=normal_sample ,metrics_wc=qc_metrics_wildcards))
@@ -49,11 +54,6 @@ if config["analysis"]["sequencing_type"] == 'wgs':
     if config['analysis']['analysis_type'] == "paired":
         multiqc_input.extend(expand(qc_dir + "fastp/{sample_type}.{sample}.{fastq_pattern}_fastp.json",sample_type="normal",sample=normal_sample,fastq_pattern=config_model.get_fastq_patterns_by_sample(sample_names=[normal_sample])))
         multiqc_input.extend(expand(qc_dir + "fastp/{sample_type}.{sample}.{fastq_pattern}_fastp.html", sample_type="normal", sample=normal_sample,fastq_pattern=config_model.get_fastq_patterns_by_sample(sample_names = [normal_sample])))
-
-    # alignment summary metrics
-    multiqc_input.extend(expand(qc_dir + "{sample_type}.{sample}.{fastq_pattern}.alignment_summary_metrics.txt",  sample_type="tumor", sample=tumor_sample, fastq_pattern=config_model.get_fastq_patterns_by_sample(sample_names=[tumor_sample])))
-    if config['analysis']['analysis_type'] == "paired":
-        multiqc_input.extend(expand(qc_dir + "{sample_type}.{sample}.{fastq_pattern}.alignment_summary_metrics.txt", sample_type="normal", sample=normal_sample,fastq_pattern=config_model.get_fastq_patterns_by_sample(sample_names=[normal_sample])))
 
     # get duplicate stats
     multiqc_input.extend(expand(qc_dir + "tumor.{sample}.dedup.metrics",sample=tumor_sample))
@@ -93,11 +93,6 @@ else:
         multiqc_input.extend(expand(qc_dir + "fastp/normal.{sample}_adaptertrim_fastp.html",sample=normal_sample))
         multiqc_input.extend(expand(qc_dir + "fastp/normal.{sample}_qualitytrim_fastp.json",sample=normal_sample))
         multiqc_input.extend(expand(qc_dir + "fastp/normal.{sample}_qualitytrim_fastp.html",sample=normal_sample))
-
-    # alignment summary metrics
-    multiqc_input.extend(expand(qc_dir + "{sample_type}.{sample}.alignment_summary_metrics.txt", sample_type="tumor", sample=tumor_sample))
-    if config['analysis']['analysis_type'] == "paired":
-        multiqc_input.extend(expand(qc_dir + "{sample_type}.{sample}.alignment_summary_metrics.txt", sample_type="normal", sample=normal_sample))
 
     # sambamba metrics
     multiqc_input.extend(expand(qc_dir + "tumor.{sample}.cov.bed", sample=tumor_sample))
