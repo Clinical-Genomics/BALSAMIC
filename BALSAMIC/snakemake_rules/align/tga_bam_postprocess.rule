@@ -12,6 +12,8 @@ rule sentieon_dedup_consensus:
         dedup_metrics = Path(qc_dir, "{sample_type}.{sample}.dedup_conensus.metrics").as_posix()
     benchmark:
         Path(benchmark_dir, "sentieon_dedup_{sample_type}.{sample}.tsv").as_posix()
+    resources:
+        mem_mb = lambda wc, input: max(5.1 * input.size_mb, 5000)
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         sentieon_exec = config_model.sentieon.sentieon_exec,
