@@ -286,7 +286,7 @@ class BaseSNVFilters:
 
 class WgsSNVFilters(BaseSNVFilters):
     post_quality = [
-        VCFFilter(tag_value=0.01, filter_name="gnomad_hard_threshold", field="INFO"),
+        VCFFilter(tag_value=0.1, filter_name="gnomad_hard_threshold", field="INFO"),
     ]
     research = [
         VCFFilter(tag_value=0.01, filter_name="SWEGENAF", field="INFO"),
@@ -335,7 +335,7 @@ class WgsSNVFilters(BaseSNVFilters):
 
 class TgaSNVFilters(BaseSNVFilters):
     post_quality = [
-        VCFFilter(tag_value=0.01, filter_name="gnomad_hard_threshold", field="INFO"),
+        VCFFilter(tag_value=0.1, filter_name="gnomad_hard_threshold", field="INFO"),
     ]
     research = [
         VCFFilter(
