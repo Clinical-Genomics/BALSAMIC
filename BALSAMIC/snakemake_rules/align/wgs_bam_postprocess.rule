@@ -8,6 +8,8 @@ rule samtools_merge_bamfiles:
         bai = Path(bam_dir,"{sample_type}.{sample}.merged.bam.bai").as_posix(),
     benchmark:
         Path(benchmark_dir, "samtools_merge_bamfiles_{sample_type}.{sample}.tsv").as_posix()
+    singularity:
+        Path(singularity_image,config["bioinfo_tools"].get("samtools") + ".sif").as_posix()
     params:
         sample_id = "{sample}"
     message:
