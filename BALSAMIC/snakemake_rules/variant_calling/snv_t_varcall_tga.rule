@@ -16,6 +16,8 @@ rule sentieon_tnscope_tga_tumor_only:
         namemap_snv = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.sample_name_map",
     benchmark:
         Path(benchmark_dir, "sentieon_tnscope_" + config["analysis"]["case_id"] + ".tsv").as_posix()
+    resources:
+        mem_mb=lambda wc, input: max(2.1 * input.size_mb, 5000)
     params:
         algo = params.tnscope_tga.algo,
         error_rate = params.tnscope_tga.error_rate,
