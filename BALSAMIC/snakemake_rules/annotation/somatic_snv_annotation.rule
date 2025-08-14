@@ -36,7 +36,7 @@ rule cadd_annotate_somaticINDEL_research:
     "Running cadd annotation for INDELs on {params.message_text}"
   shell:
         """
-CADD.sh -g GRCh37 -o {output.cadd_indel_research} {input.vcf_indel_research}
+CADD.sh -c {resources.threads} -g GRCh37 -o {output.cadd_indel_research} {input.vcf_indel_research}
 
         """
 
