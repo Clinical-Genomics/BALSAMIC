@@ -141,7 +141,6 @@ set-resources:
         threads: 16
     sentieon_tnscope_tga_tumor_normal:
         runtime: 280
-        mem_mb: 10000
         threads: 16
     post_process_vardict:
         runtime: 280
@@ -153,7 +152,6 @@ set-resources:
         threads: 16
     sentieon_tnscope_tga_tumor_only:
         runtime: 280
-        mem_mb: 10000
         threads: 16
     bcftools_quality_filter_TNscope_umi_tumor_only:
         runtime: 100
@@ -193,7 +191,7 @@ set-resources:
         threads: 36
     sentieon_tnscope_wgs_tumor_only:
         runtime: 1440
-        mem_mb: 30000
+        mem_mb: 45000
         threads: 36
     merge_snv_vcfs:
         runtime: 120
@@ -209,7 +207,7 @@ set-resources:
         threads: 36
     sentieon_DNAscope_wgs:
         runtime: 1440
-        mem_mb: 30000
+        mem_mb: 50000
         threads: 36
     manta_germline_tga:
         runtime: 300
@@ -217,8 +215,7 @@ set-resources:
         threads: 16
     sentieon_DNAscope_tga:
         runtime: 1440
-        mem_mb: 25000
-        threads: 36
+        threads: 12
     finalize_gens_outputfiles:
         runtime: 60
         mem_mb: 2000
@@ -229,7 +226,6 @@ set-resources:
         threads: 1
     sentieon_DNAscope_gnomad_tga:
         runtime: 1440
-        mem_mb: 10000
         threads: 12
     gens_preprocess_wgs:
         runtime: 60
@@ -381,11 +377,11 @@ set-resources:
         threads: 8
     sentieon_wgs_metrics:
         runtime: 280
-        mem_mb: 20000
+        mem_mb: 30000
         threads: 8
     picard_CollectWgsMetrics:
-        runtime: 600
-        mem_mb: 20000
+        runtime: 900
+        mem_mb: 30000
         threads: 8
     samtools_qc_umi_collapsed:
         runtime: 280
@@ -420,8 +416,8 @@ set-resources:
         mem_mb: 25000
         threads: 8
     picard_CollectAlignmentSummaryMetrics:
-        runtime: 500
-        mem_mb: 25000
+        runtime: 900
+        mem_mb: 30000
         threads: 8
     picard_CollectHsMetrics:
         runtime: 360
@@ -477,11 +473,11 @@ set-resources:
         threads: 8
     bcftools_filter_tnscope_clinical_tumor_only:
         runtime: 280
-        mem_mb: 15000
+        mem_mb: 20000
         threads: 8
     bcftools_filter_tnscope_research_tumor_only:
         runtime: 280
-        mem_mb: 15000
+        mem_mb: 20000
         threads: 8
     bcftools_filter_TNscope_umi_clinical_tumor_only:
         runtime: 280
@@ -533,11 +529,11 @@ set-resources:
         threads: 8
     svdb_annotate_somatic_research_sv:
         runtime: 720
-        mem_mb: 15000
+        mem_mb: 25000
         threads: 36
     vep_somatic_research_sv:
         runtime: 720
-        mem_mb: 120000
+        mem_mb: 140000
         threads: 36
     vcfanno_annotate_somaticSNV_clinical:
         runtime: 1080
@@ -605,7 +601,6 @@ set-resources:
         threads: 36
     sentieon_dedup_consensus:
         runtime: 1440
-        mem_mb: 60000
         threads: 36
     sentieon_base_calibration:
         mem_mb: 25000
@@ -632,7 +627,7 @@ set-resources:
         runtime: 350
         threads: 12
     fastp_adapter_trim_tga:
-        mem_mb: 6000
+        mem_mb: 16000
         runtime: 400
         threads: 4
     fastp_quality_trim_tga:
@@ -640,6 +635,6 @@ set-resources:
         runtime: 350
         threads: 8
     sentieon_umiextract_tga:
-        mem_mb: 15000
+        mem_mb: 16000
         runtime: 350
         threads: 8
