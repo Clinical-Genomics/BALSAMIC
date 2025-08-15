@@ -1,48 +1,22 @@
 FROM continuumio/miniconda3:4.10.3-alpine
 
-LABEL base.image="continuumio/miniconda3:4.10.3-alpine" \
-      about.home="https://github.com/Clinical-Genomics/BALSAMIC" \
-      about.documentation="https://balsamic.readthedocs.io/" \
-      about.license="MIT License (MIT)" \
-      about.description="Bioinformatic analysis pipeline for somatic mutations in cancer"
+LABEL base.image="continuumio/miniconda3:4.10.3-alpine"
+LABEL about.home="https://github.com/Clinical-Genomics/BALSAMIC"
+LABEL about.documentation="https://balsamic.readthedocs.io/"
+LABEL about.license="MIT License (MIT)"
+LABEL about.description="Bioinformatic analysis pipeline for somatic mutations in cancer"
 
 ENV PATH="/opt/conda/bin/:${PATH}"
 
-# Install necessary packages
-RUN apk add --no-cache bash gcc git musl-dev
+RUN apk add --no-cache bash gcc git
 
+ARG WORK_DIR=project
 ARG CONTAINER_NAME
 
-# Copy the container folder into the image
-COPY BALSAMIC/containers/${CONTAINER_NAME}/ /project/BALSAMIC/containers/${CONTAINER_NAME}/
+# Copy all project files
+COPY . /${WORK_DIR}
 
-# Set the working directory to the container directory
-WORKDIR /project/BALSAMIC/containers/${CONTAINER_NAME}
+RUN cd /${WORK_DIR}/BALSAMIC/containers/${CONTAINER_NAME}/ && /bin/sh ${CONTAINER_NAME}.sh ${CONTAINER_NAME}
 
-# Run the package installation script
-RUN sh ${CONTAINER_NAME}.sh ${CONTAINER_NAME}
-
-RUN apk add --no-cache bash git build-base zlib-dev
-
-# Install TIDDIT
-WORKDIR /project
-RUN python -m pip install --no-cache-dir --upgrade cython joblib pip requests && \
-    git clone --depth 1 --branch TIDDIT-3.9.3 https://github.com/SciLifeLab/TIDDIT.git && \
-    cd TIDDIT && \
-    pip install .
-
-# Install fermi2
-WORKDIR /project
-RUN git clone https://github.com/lh3/fermi2.git && \
-    cd fermi2 && \
-    make
-
-# Install bwa (includes ropebwt2)
-WORKDIR /project
-RUN git clone https://github.com/lh3/bwa.git && \
-    cd bwa && \
-    make
-
-# Clean up work environment
-WORKDIR /
-RUN rm -rf /project && conda clean --all --yes
+# Clean work environment
+RUN rm -rf /${WORK_DIR:?} && conda clean --all --yes
