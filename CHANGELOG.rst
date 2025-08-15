@@ -1,6 +1,5 @@
-
 [X.X.X]
---------
+=======
 
 Added:
 ^^^^^^
@@ -11,11 +10,13 @@ Added:
 
 Changed:
 ^^^^^^^^
-* changed snakemake from running immediate submit to submitting snakemake job to cluster https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
 * Updated ensembl vep to version 113.4 https://github.com/Clinical-Genomics/BALSAMIC/pull/1567
 * Updated rank model to use GNOMADAF_popmax instead of deprecated gnomAD_AF https://github.com/Clinical-Genomics/BALSAMIC/pull/1567
+* changed snakemake from running immediate submit to submitting snakemake job to cluster https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
 * given vs predicted sex check changed to warning https://github.com/Clinical-Genomics/BALSAMIC/pull/1581
 * using predicted sex in CNV analysis if assigned sex is unknown https://github.com/Clinical-Genomics/BALSAMIC/pull/1581
+* separated balsamic wrapper logfile into run and config https://github.com/Clinical-Genomics/BALSAMIC/pull/1581
+
 
 Removed:
 ^^^^^^^^
@@ -24,9 +25,31 @@ Removed:
 * removed functionality to disable variant callers https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
 * removed balsamic status check functionality https://github.com/Clinical-Genomics/BALSAMIC/pull/1581
 
+
 Fixed:
 ^^^^^^
 * Fixed varcall_py27 container for Manta https://github.com/Clinical-Genomics/BALSAMIC/pull/1567
+
+[17.1.0]
+--------
+
+Added:
+^^^^^^
+
+
+Changed:
+^^^^^^^^
+
+* removing strand balance requirement of ref-allele in WGS TO strand bias filter https://github.com/Clinical-Genomics/BALSAMIC/pull/1594
+* lowered rare-disease germline loqusdb observation frequency for WGS SNVs to 0.007 from 0.01 https://github.com/Clinical-Genomics/BALSAMIC/pull/1594
+
+
+Removed:
+^^^^^^^^
+
+Fixed:
+^^^^^^
+
 
 
 [17.0.1]
