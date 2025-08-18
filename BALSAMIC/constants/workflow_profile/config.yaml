@@ -537,7 +537,7 @@ set-resources:
         threads: 36
     vep_somatic_research_sv:
         runtime: 720
-        mem_mb: 120000
+        mem_mb: 140000
         threads: 36
     vcfanno_annotate_somaticSNV_clinical:
         runtime: 1080
