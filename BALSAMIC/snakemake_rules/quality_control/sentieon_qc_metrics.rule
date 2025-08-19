@@ -80,7 +80,7 @@ if config["analysis"]["sequencing_type"] == 'wgs':
     shell_bam_files=$(echo {input.bam_files} | sed 's/ / -i /g') ;
     
     {params.sentieon_exec} driver \
-    -t {resources.threads} \
+    -t {threads} \
     -r {input.ref} \
     -i $shell_bam_files \
     --algo InsertSizeMetricAlgo --min_read_ratio {params.min_read_ratio} {output.insert_size_metrics} \
@@ -120,7 +120,7 @@ else:
     export SENTIEON_LICENSE={params.sentieon_lic};
 
     {params.sentieon_exec} driver \
-    -t {resources.threads} \
+    -t {threads} \
     -r {input.ref} \
     -i {input.bam} \
     --algo InsertSizeMetricAlgo --min_read_ratio {params.min_read_ratio} {output.insert_size_metrics} \
