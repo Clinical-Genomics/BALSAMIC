@@ -6,8 +6,6 @@ max-status-checks-per-second: 2
 max-jobs-per-second: 1
 restart-times: 2
 
-jobname: "BALSAMIC.{config[analysis][case_id]}.{rulename}.{jobid}.sh"
-
 default-resources:
     runtime: 120
     mem_mb: 4000
@@ -492,6 +490,7 @@ set-resources:
   sentieon_umiextract_tga:
     mem_mb: 16000
     runtime: 350
+
 set-threads:
   post_process_tnscope_info_fields_wgs: 1
   post_process_tnscope_info_fields_tga: 1
