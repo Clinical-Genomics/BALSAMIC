@@ -286,7 +286,7 @@ class WgsSNVFilters(BaseSNVFilters):
         VCFFilter(tag_value=0.001, filter_name="balsamic_high_pop_freq", field="INFO"),
     ]
     clinical = research + [
-        VCFFilter(tag_value=0.01, filter_name="Frq", field="INFO"),
+        VCFFilter(tag_value=0.007, filter_name="Frq", field="INFO"),
         VCFFilter(tag_value=0.1, filter_name="ArtefactFrq", field="INFO"),
     ]
     quality = [
