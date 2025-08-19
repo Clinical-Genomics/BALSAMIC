@@ -11,6 +11,8 @@ rule sentieon_DNAscope_tga:
         vcf = vcf_dir + "SNV.germline.{sample_type}.dnascope.vcf.gz",
     benchmark:
         Path(benchmark_dir, "sentieon_dnascope_{sample_type}.tsv").as_posix()
+    resources:
+        mem_mb=lambda wc, input: max(3.1 * input.size_mb, 5000)
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         sentieon_exec = config_model.sentieon.sentieon_exec,
