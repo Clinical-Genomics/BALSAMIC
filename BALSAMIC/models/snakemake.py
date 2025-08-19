@@ -132,9 +132,10 @@ class SnakemakeExecutable(BaseModel):
             f"{self.get_singularity_bind_paths_option()} "
             f"{self.get_quiet_flag()} "
             f"{self.get_force_flag()} "
+            f"--slurm-logdir {self.log_dir} "
             f"{self.get_run_analysis_flag()} "
             f"{self.get_snakemake_cluster_options()} "
-            "--executor slurm"
+            "--executor slurm "
             f"{self.get_snakemake_options_command()}"
         )
         return remove_unnecessary_spaces(snakemake_command)
@@ -144,7 +145,7 @@ class SnakemakeExecutable(BaseModel):
         if self.run_mode == RunMode.CLUSTER:
             snakemake_cluster_options: str = (
                 f"-j {MAX_JOBS} "
-                f"--profile {self.workflow_profile}"
+                f"--profile {self.workflow_profile} --set-resources __default__:slurm_account={self.account} --set-resources __default__:slurm_qos={self.qos}"
             )
             return remove_unnecessary_spaces(snakemake_cluster_options)
         return "--default-resources mem_mb=32000 threads=8"
