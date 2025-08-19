@@ -68,7 +68,7 @@ requirements: List[str] = [
     "numpy==2.0.0",
     "oauth2client==4.1.3",
     "packaging==24.1",
-    "pandas==2.0.3",
+    "pandas==2.3.0",
     "pdfkit==1.0.0",
     "Pillow==10.0.0",
     "plac==1.3.5",
