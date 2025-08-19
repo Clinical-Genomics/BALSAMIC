@@ -7,13 +7,13 @@ max-jobs-per-second: 1
 restart-times: 2
 
 
+slurm-logdir: "{config[analysis][log]}"
 
 jobname: "BALSAMIC.{config[analysis][case_id]}.{rulename}.{jobid}.sh"
 
 default-resources:
     runtime: 120
     mem_mb: 4000
-    slurm-logdir: "{config[analysis][log]}"
     slurm_account: "{config[account]}"
     slurm_partition: "core"
     slurm_qos: "{config[qos]}"
