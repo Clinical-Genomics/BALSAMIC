@@ -134,7 +134,7 @@ class SnakemakeExecutable(BaseModel):
             f"{self.get_force_flag()} "
             f"{self.get_run_analysis_flag()} "
             f"{self.get_snakemake_cluster_options()} "
-            f"{self.get_cluster_status_script()} "
+            "--executor slurm"
             f"{self.get_snakemake_options_command()}"
         )
         return remove_unnecessary_spaces(snakemake_command)

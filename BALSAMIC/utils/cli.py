@@ -13,6 +13,7 @@ import graphviz
 import snakemake
 import yaml
 from colorclass import Color
+import shlex
 
 from BALSAMIC import __version__ as balsamic_version
 from BALSAMIC.constants.analysis import FASTQ_SUFFIXES, FastqName, PonParams, SampleType
@@ -403,7 +404,7 @@ def get_pon_sample_list(fastq_path: str) -> List[SampleInstanceModel]:
     return sample_list
 
 
-def generate_graph(config_collection_dict, config_path):
+def generate_graph_BACKUP(config_collection_dict, config_path):
     """Generate DAG graph using snakemake stdout output."""
 
     with CaptureStdout() as graph_dot:
@@ -436,6 +437,36 @@ def generate_graph(config_collection_dict, config_path):
         engine="dot",
     )
     graph_obj.render(cleanup=True)
+
+
+def generate_graph(config_collection_dict, config_path):
+    """Generate rule graph (DOT) via the Snakemake CLI and render to PDF."""
+    snakefile = get_snakefile(
+        analysis_type=config_collection_dict["analysis"]["analysis_type"],
+        analysis_workflow=config_collection_dict["analysis"]["analysis_workflow"],
+    )
+
+    # Build CLI: dry-run + rulegraph, quiet output except the DOT
+    cmd = f'snakemake -n --rulegraph --configfile {shlex.quote(config_path)} -s {shlex.quote(snakefile)}'
+    dot = subprocess.check_output(cmd, shell=True, text=True)
+
+    graph_title = "_".join(["BALSAMIC", balsamic_version, config_collection_dict["analysis"]["case_id"]])
+
+    # Title injection (handles both "snakemake_dag {" and "digraph snakemake_dag {")
+    if "snakemake_dag {" in dot:
+        dot = dot.replace(
+            "snakemake_dag {",
+            f'BALSAMIC {{ label="{graph_title}";labelloc="t";'
+        )
+    else:
+        dot = dot.replace(
+            "digraph snakemake_dag {",
+            f'digraph BALSAMIC {{ label="{graph_title}";labelloc="t";'
+        )
+
+    outstem = ".".join(config_collection_dict["analysis"]["dag"].split(".")[:-1]) or "dag"
+    graphviz.Source(dot, filename=outstem, format="pdf", engine="dot").render(cleanup=True)
+
 
 
 def convert_deliverables_tags(
