@@ -65,7 +65,7 @@ requirements: List[str] = [
     "monotonic==1.6",
     "multidict==6.0.4",
     "nbformat==5.9.2",
-    "numpy==1.25.2",
+    "numpy==2.0.0",
     "oauth2client==4.1.3",
     "packaging==24.1",
     "pandas==2.0.3",
