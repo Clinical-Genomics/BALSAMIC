@@ -67,7 +67,7 @@ requirements: List[str] = [
     "nbformat==5.9.2",
     "numpy==1.25.2",
     "oauth2client==4.1.3",
-    "packaging==23.1",
+    "packaging==24.1",
     "pandas==2.0.3",
     "pdfkit==1.0.0",
     "Pillow==10.0.0",
