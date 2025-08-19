@@ -124,7 +124,7 @@ class SnakemakeExecutable(BaseModel):
     def get_command(self) -> str:
         """Return Snakemake command to be submitted."""
         snakemake_command: str = (
-            f"snakemake --notemp -p --rerun-trigger mtime "
+            f"snakemake --notemp -p --rerun-triggers mtime "
             f"--directory {self.working_dir.as_posix()} "
             f"--snakefile {self.snakefile.as_posix()} "
             f"{self.get_config_file_option()} "
@@ -144,8 +144,7 @@ class SnakemakeExecutable(BaseModel):
         if self.run_mode == RunMode.CLUSTER:
             snakemake_cluster_options: str = (
                 f"-j {MAX_JOBS} "
-                f"--jobname BALSAMIC.{self.case_id}.{{rulename}}.{{jobid}}.sh "
-                f"--profile {self.cluster_profile} --workflow-profile {self.workflow_profile}"
+                f"--profile {self.workflow_profile}"
             )
             return remove_unnecessary_spaces(snakemake_cluster_options)
         return "--default-resources mem_mb=32000 threads=8"

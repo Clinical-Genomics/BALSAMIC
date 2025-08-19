@@ -1,3 +1,23 @@
+executor: slurm
+
+jobs: 999
+local-cores: 1
+max-status-checks-per-second: 2
+max-jobs-per-second: 1
+restart-times: 2
+
+
+slurm-logdir: "{config[analysis][log]}"
+slurm_account: "{config[account]}"
+slurm_partition: "core"
+slurm_qos: "{config[qos]}"
+
+jobname: "BALSAMIC.{config[analysis][case_id]}.{rulename}.{jobid}.sh"
+
+default-resources:
+    runtime: 120
+    mem_mb: 4000
+
 set-resources:
   post_process_tnscope_info_fields_wgs:
     runtime: 60
