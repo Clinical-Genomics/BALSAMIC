@@ -90,7 +90,7 @@ def write_results(
             out_f.write("\n")
 
         if not failed and not cancelled:
-            out_f.write("SUCCESS\n\n")
+            out_f.write("SUCCESSFUL\n\n")
 
     LOG.info(
         f"Appended results to {output_file} (failed={len(failed)}, cancelled={len(cancelled)})"
@@ -109,7 +109,7 @@ def write_results(
 )
 @click.option(
     "--log-level",
-    default="DEBUG",
+    default="INFO",
     show_default=True,
     type=click.Choice(["CRITICAL", "ERROR", "WARNING", "INFO", "DEBUG"], case_sensitive=False),
     help="Logging verbosity.",

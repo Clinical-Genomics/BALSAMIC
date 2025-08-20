@@ -776,7 +776,8 @@ rule all:
         import shutil
         from BALSAMIC.utils.metrics import validate_qc_metrics
 
-        status = "SUCCESS"
+        status = "SUCCESSFUL"
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
         error_message = ""
         try:
@@ -797,7 +798,8 @@ rule all:
             print("Error: %s - %s." % (e.filename, e.strerror))
 
         # Write status to file
-        with open(params.status_file,"w") as status_fh:
+        with open(params.status_file, "w") as status_fh:
+            status_fh.write(f"=== QC metrics check at {timestamp} ===\n")
             status_fh.write(status + "\n")
             status_fh.write(error_message + "\n")
 
@@ -805,5 +807,5 @@ rule all:
         write_finish_file(file_path=output.finish_file)
 
         # Raise to trigger rule failure if needed
-        if status != "SUCCESS":
+        if status != "SUCCESSFUL":
             raise ValueError(f"Final rule failed with status: {status}")
