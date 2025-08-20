@@ -153,7 +153,7 @@ OPTION_WORKFLOW_PARTITION = click.option(
     "--workflow-partition",
     show_default=True,
     type=click.STRING,
-    default=Partition,
+    default=Partition.CORE,
     help="Cluster node partition to run snakemake jobs",
 )
 
