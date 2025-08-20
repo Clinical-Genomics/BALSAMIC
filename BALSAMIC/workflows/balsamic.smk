@@ -772,7 +772,7 @@ rule all:
     message:
         "Finalizing analysis for {params.case_name}"
     run:
-        import datetime
+        from datetime import datetime
         import shutil
         from BALSAMIC.utils.metrics import validate_qc_metrics
 
