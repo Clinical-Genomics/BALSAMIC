@@ -145,7 +145,10 @@ class SnakemakeExecutable(BaseModel):
         if self.run_mode == RunMode.CLUSTER:
             snakemake_cluster_options: str = (
                 f"-j {MAX_JOBS} "
-                f"--profile {self.workflow_profile} --default-resources slurm_qos={self.qos} slurm_partition=core slurm_account={self.account} --slurm-keep-successful-logs"
+                f"--profile {self.workflow_profile} "
+                f"--default-resources slurm_extra=\"--qos={self.qos}\" "
+                f"slurm_partition=core slurm_account={self.account} "
+                f"--slurm-keep-successful-logs"
             )
             return remove_unnecessary_spaces(snakemake_cluster_options)
         return "--default-resources mem_mb=32000 threads=8"
