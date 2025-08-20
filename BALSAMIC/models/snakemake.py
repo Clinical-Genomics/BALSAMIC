@@ -103,9 +103,6 @@ class SnakemakeExecutable(BaseModel):
     def get_slurm_logdir(self) -> str:
         return f"--slurm-logdir {self.log_dir}"
 
-    def get_slurm_job_arguments(self) -> str:
-        return f"--default-resources slurm_extra=\"--qos={self.qos} slurm_partition={self.workflow_partition} slurm_account={self.account}\""
-
     def get_run_analysis_flag(self) -> str:
         """Return string representation of the run_analysis flag."""
         if not self.run_analysis:
@@ -147,6 +144,8 @@ class SnakemakeExecutable(BaseModel):
         )
         return remove_unnecessary_spaces(snakemake_command)
 
+    def get_slurm_job_arguments(self) -> str:
+        return f"--default-resources slurm_extra=\"--qos={self.qos}\" slurm_partition={self.workflow_partition} slurm_account={self.account}"
     def get_snakemake_cluster_options(self) -> str:
         """Return Snakemake cluster options to be submitted."""
         if self.run_mode == RunMode.CLUSTER:
