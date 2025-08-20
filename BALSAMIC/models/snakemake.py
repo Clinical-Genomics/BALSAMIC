@@ -145,7 +145,7 @@ class SnakemakeExecutable(BaseModel):
         if self.run_mode == RunMode.CLUSTER:
             snakemake_cluster_options: str = (
                 f"-j {MAX_JOBS} "
-                f"--profile {self.workflow_profile} --set-resources __default__:slurm_account={self.account} --set-resources __default__:slurm_qos={self.qos}"  
+                f"--profile {self.workflow_profile} --set-resources __default__:slurm_account={self.account} --set-resources __default__:slurm_qos={self.qos} --slurm-keep-successful-logs True"  
                 f"--jobname BALSAMIC.{self.case_id}.{rulename}.{jobid}"
             )
             return remove_unnecessary_spaces(snakemake_cluster_options)
