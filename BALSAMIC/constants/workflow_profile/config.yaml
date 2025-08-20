@@ -2,7 +2,7 @@ executor: slurm
 
 jobs: 999
 local-cores: 1
-max-status-checks-per-second: 2
+max-status-checks-per-second: 1
 max-jobs-per-second: 1
 restart-times: 2
 

@@ -14,6 +14,7 @@ from BALSAMIC.constants.analysis import (
 )
 from BALSAMIC.constants.cache import GENOME_VERSIONS, CacheVersion, GenomeVersion
 from BALSAMIC.constants.cluster import (
+    Partition,
     QOS,
     QOS_OPTIONS,
 )
@@ -146,6 +147,22 @@ OPTION_CLUSTER_PROFILE = click.option(
     type=click.Path(exists=True, resolve_path=True),
     default=CONSTANTS_DIR,
     help="Directory containing snakemake cluster profile",
+)
+
+OPTION_WORKFLOW_PARTITION = click.option(
+    "--workflow-partition",
+    show_default=True,
+    type=click.STRING,
+    default=Partition,
+    help="Cluster node partition to run snakemake jobs",
+)
+
+OPTION_HEADJOB_PARTITION = click.option(
+    "--headjob-partition",
+    type=str,
+    required=False,
+    default=None,
+    help="Cluster node partition to run Snakemake head-job",
 )
 
 OPTION_MAX_RUN_HOURS = click.option(

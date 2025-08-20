@@ -10,6 +10,10 @@ class ClusterAccount(StrEnum):
 
     DEVELOPMENT: str = "development"
 
+class Partition(StrEnum):
+    """Cluster quality of service."""
+
+    CORE: str = "core"
 
 class QOS(StrEnum):
     """Cluster quality of service."""

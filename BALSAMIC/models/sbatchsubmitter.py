@@ -18,6 +18,7 @@ class SbatchSubmitter:
         log_path (Path)               : Directory where SLURM output and error logs will be written.
         account (str)                 : SLURM account to charge for the job.
         qos (str)                     : SLURM quality of service level.
+        headjob_partition: Optional(str): Cluster partition for the headjob
         max_run_hours (int)          : Maximum allowed run time for the job, in hours.
         snakemake_executable         : Object representing the Snakemake command to be executed.
         logger                        : Logger instance for capturing logs.
@@ -34,6 +35,7 @@ class SbatchSubmitter:
         log_path: Path,
         account: str,
         qos: str,
+        headjob_partition: Optional[str],
         max_run_hours: int,
         snakemake_executable,
         logger,
@@ -45,6 +47,7 @@ class SbatchSubmitter:
         self.log_path = log_path
         self.account = account
         self.qos = qos
+        self.headjob_partition = headjob_partition
         self.max_run_hours = max_run_hours
         self.snakemake_executable = snakemake_executable
         self.log = logger
@@ -56,20 +59,22 @@ class SbatchSubmitter:
         self.log.info("Creating sbatch script to submit jobs.")
         self.log.info(f"Using conda environment: {self.conda_env_path}")
 
-        sbatch_header = textwrap.dedent(
-            f"""\
-            #!/bin/bash -l
-            #SBATCH --account={self.account}
-            #SBATCH --job-name=BALSAMIC_snakemake_submit.{self.case_id}.%j
-            #SBATCH --output={self.log_path}/BALSAMIC_snakemake_submit.{self.case_id}.%j.out
-            #SBATCH --error={self.log_path}/BALSAMIC_snakemake_submit.{self.case_id}.%j.err
-            #SBATCH --ntasks=1
-            #SBATCH --mem=5G
-            #SBATCH --time={self.max_run_hours}:00:00
-            #SBATCH --qos={self.qos}
-            #SBATCH --cpus-per-task=1
-        """
-        )
+        # Create sbatch header
+        sbatch_header = [
+            "#!/bin/bash -l",
+            f"#SBATCH --account={self.account}",
+            f"#SBATCH --job-name=BALSAMIC_snakemake_submit.{self.case_id}.%j",
+            f"#SBATCH --output={self.log_path}/BALSAMIC_snakemake_submit.{self.case_id}.%j.out",
+            f"#SBATCH --error={self.log_path}/BALSAMIC_snakemake_submit.{self.case_id}.%j.err",
+            "#SBATCH --ntasks=1",
+            "#SBATCH --mem=5G",
+            f"#SBATCH --time={self.max_run_hours}:00:00",
+            f"#SBATCH --qos={self.qos}",
+            "#SBATCH --cpus-per-task=1",
+        ]
+
+        if self.headjob_partition:
+            sbatch_header.insert(2, f"#SBATCH --partition={self.headjob_partition}")
 
         # Run snakemake workflow
         sbatch_command = f"\nconda run -p {self.conda_env_path} {self.snakemake_executable.get_command()}\n"

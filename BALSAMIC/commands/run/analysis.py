@@ -14,6 +14,8 @@ import click
 from BALSAMIC import __version__ as balsamic_version
 
 from BALSAMIC.commands.options import (
+    OPTION_WORKFLOW_PARTITION,
+    OPTION_HEADJOB_PARTITION,
     OPTION_CLUSTER_ACCOUNT,
     OPTION_WORKFLOW_PROFILE,
     OPTION_CLUSTER_PROFILE,
@@ -46,6 +48,8 @@ LOG = logging.getLogger(__name__)
 
 
 @click.command("analysis", short_help="Run the analysis on a sample config-file")
+@OPTION_WORKFLOW_PARTITION
+@OPTION_HEADJOB_PARTITION
 @OPTION_CLUSTER_ACCOUNT
 @OPTION_CLUSTER_PROFILE
 @OPTION_MAX_RUN_HOURS
@@ -76,6 +80,8 @@ def analysis(
     force_all: bool,
     snakemake_opt: List[str],
     account: str,
+    workflow_partition: str,
+    headjob_partition: str,
     quiet: bool,
 ):
     """Run BALSAMIC workflow on the provided sample's config file."""
@@ -150,6 +156,7 @@ def analysis(
         config_path=sample_config_path,
         dragen=dragen,
         force=force_all,
+        workflow_partition=workflow_partition,
         log_dir=log_path.as_posix(),
         cluster_profile=cluster_profile,
         cluster_job_status_script=get_script_path("cluster_job_status.py"),
@@ -175,6 +182,7 @@ def analysis(
             log_path=Path(log_path),
             account=account,
             qos=qos,
+            headjob_partition=headjob_partition,
             max_run_hours=max_run_hours,
             snakemake_executable=snakemake_executable,
             logger=LOG,
