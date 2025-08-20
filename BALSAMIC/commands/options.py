@@ -154,7 +154,7 @@ OPTION_WORKFLOW_PARTITION = click.option(
     show_default=True,
     type=click.STRING,
     default=Partition.CORE,
-    help="Cluster node partition to run snakemake jobs",
+    help="Cluster node partition to run Snakemake jobs",
 )
 
 OPTION_HEADJOB_PARTITION = click.option(

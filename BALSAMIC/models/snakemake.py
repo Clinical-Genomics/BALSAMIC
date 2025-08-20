@@ -104,7 +104,7 @@ class SnakemakeExecutable(BaseModel):
         return f"--slurm-logdir {self.log_dir}"
 
     def get_slurm_job_arguments(self) -> str:
-        return f"--default-resources slurm_extra=\"--qos={self.qos} slurm_partition={self.job_partition} slurm_account={self.account}"
+        return f"--default-resources slurm_extra=\"--qos={self.qos} slurm_partition={self.workflow_partition} slurm_account={self.account}"
 
     def get_run_analysis_flag(self) -> str:
         """Return string representation of the run_analysis flag."""
