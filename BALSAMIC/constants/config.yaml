@@ -4,7 +4,7 @@ default-resources:
     runtime: 120
     mem_mb: 4000
     threads: 2
-max-status-checks-per-second: 2
+max-status-checks-per-second: 1
 max-jobs-per-second: 1
 local-cores: 1
 restart-times: 2
