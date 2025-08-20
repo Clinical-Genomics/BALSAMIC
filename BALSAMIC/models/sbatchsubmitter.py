@@ -59,8 +59,8 @@ class SbatchSubmitter:
         self.log.info("Creating sbatch script to submit jobs.")
         self.log.info(f"Using conda environment: {self.conda_env_path}")
 
-        # Create sbatch header
-        sbatch_header = [
+        # Create sbatch header (list of lines)
+        sbatch_lines = [
             "#!/bin/bash -l",
             f"#SBATCH --account={self.account}",
             f"#SBATCH --job-name=BALSAMIC_snakemake_submit.{self.case_id}.%j",
@@ -74,17 +74,18 @@ class SbatchSubmitter:
         ]
 
         if self.headjob_partition:
-            sbatch_header.insert(2, f"#SBATCH --partition={self.headjob_partition}")
+            sbatch_lines.insert(2, f"#SBATCH --partition={self.headjob_partition}")
 
-        # Run snakemake workflow
-        sbatch_command = f"\nconda run -p {self.conda_env_path} {self.snakemake_executable.get_command()}\n"
+        sbatch_header = "\n".join(sbatch_lines)
 
-        # Check the status of submitted jobs
-        job_status_check = f"\nconda run -p {self.conda_env_path} python {self.scan_finished_jobid_status} {self.log_path} --output {self.result_path}/analysis_status.txt\n"
+        # Commands
+        sbatch_command = f"conda run -p {self.conda_env_path} {self.snakemake_executable.get_command()}"
+        job_status_check = (
+            f'conda run -p {self.conda_env_path} python {self.scan_finished_jobid_status} '
+            f'{self.log_path} --output {self.result_path}/analysis_status.txt'
+        )
 
-        # Check the final success status of the workflow
-        success_status_check = textwrap.dedent(
-            f"""\n
+        success_status_check = textwrap.dedent(f"""
             if [[ -f "{self.result_path}/analysis_status.txt" ]]; then
                 STATUS=$(cat "{self.result_path}/analysis_status.txt")
                 echo "Snakemake analysis status: $STATUS"
@@ -95,16 +96,21 @@ class SbatchSubmitter:
             else
                 echo "No status file found; assuming failure"
                 exit 2
-            fi \n
-        """
-        )
+            fi
+        """).strip()
 
-        full_script = (
-            sbatch_header + sbatch_command + job_status_check + success_status_check
-        )
+        # Build full script as a single string
+        full_script = "\n\n".join([
+            sbatch_header,
+            sbatch_command,
+            job_status_check,
+            success_status_check,
+            ""  # ensures trailing newline
+        ])
 
-        with open(self.sbatch_script_path, "w") as f:
-            f.write(full_script)
+        # Write and make executable
+        sbatch_path = Path(self.sbatch_script_path)
+        sbatch_path.write_text(full_script)
 
         self.log.info(f"Sbatch script written to: {self.sbatch_script_path}")
 
