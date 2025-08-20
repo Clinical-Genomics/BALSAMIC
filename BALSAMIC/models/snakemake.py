@@ -146,7 +146,7 @@ class SnakemakeExecutable(BaseModel):
             snakemake_cluster_options: str = (
                 f"-j {MAX_JOBS} "
                 f"--profile {self.workflow_profile} "
-                f"--default-resources slurm_extra=\"--qos={self.qos}\" "
+                f"--default-resources slurm_extra=\"--qos={self.qos} --output {self.log_dir}/%x.%j.out --error {self.log_dir}/%x.%j.err\""
                 f"slurm_partition=core slurm_account={self.account} "
                 f"--slurm-keep-successful-logs"
             )
