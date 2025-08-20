@@ -6,7 +6,7 @@ import re
 import subprocess
 from pathlib import Path
 from typing import Dict, List, Tuple, Optional
-
+from datetime import datetime
 import click
 
 
@@ -23,30 +23,30 @@ def find_job_logs(log_root: Path) -> Dict[str, Path]:
         if p.stem.isdigit():  # e.g. "9727982.log" -> "9727982"
             job_logs[p.stem] = p
         else:
-            LOG.debug("Skipping non-job log file: %s", p)
-    LOG.info("Discovered %d job logs under %s", len(job_logs), log_root)
+            LOG.debug(f"Skipping non-job log file: {p}")
+    LOG.info(f"Discovered {len(job_logs)} job logs under {log_root}")
     return job_logs
 
 
-def get_job_state(jobid: str, scontrol: str = "scontrol") -> Optional[str]:
+def get_job_state(jobid: str) -> Optional[str]:
     """
     Return raw output of `scontrol show job JOBID`, or None if the query fails.
     """
     try:
-        LOG.debug("Running %s show job %s", scontrol, jobid)
+        LOG.debug(f"Running %s show job scontrol {jobid}")
         result = subprocess.run(
-            [scontrol, "show", "job", jobid],
+            ["scontrol", "show", "job", jobid],
             capture_output=True,
             text=True,
             check=True,
         )
         return result.stdout
     except FileNotFoundError:
-        LOG.error("scontrol executable not found: %s", scontrol)
+        LOG.error("scontrol executable not found: scontrol")
         return None
     except subprocess.CalledProcessError as e:
-        LOG.warning("Could not check job %s (may not exist). rc=%s", jobid, e.returncode)
-        LOG.debug("scontrol stderr for %s: %s", jobid, e.stderr)
+        LOG.warning(f"Could not check job {jobid} (may not exist). rc={e.returncode}")
+        LOG.debug(f"scontrol stderr for {jobid} {e.stderr}")
         return None
 
 
@@ -61,18 +61,22 @@ def parse_state(scontrol_output: str) -> Optional[str]:
         LOG.debug("JobState not found in scontrol output")
     return state
 
-
 def write_results(
     output_file: Path,
     failed: List[Tuple[str, Path]],
     cancelled: List[Tuple[str, Path]],
 ) -> None:
     """
-    Write both failed and cancelled sections (if any). If neither exist, write SUCCESS.
+    Append job results to output_file.
+    Each run is prefixed with a timestamp header.
     """
     output_file.parent.mkdir(parents=True, exist_ok=True)
 
-    with output_file.open("w") as out_f:
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    with output_file.open("a") as out_f:
+        out_f.write(f"=== Job status check at {timestamp} ===\n")
+
         if failed:
             out_f.write("Failed jobs:\n")
             for jobid, log_path in failed:
@@ -86,12 +90,12 @@ def write_results(
             out_f.write("\n")
 
         if not failed and not cancelled:
-            out_f.write("SUCCESS\n")
+            out_f.write("SUCCESS\n\n")
 
     LOG.info(
-        "Results written to %s (failed=%d, cancelled=%d)",
-        output_file, len(failed), len(cancelled)
+        f"Appended results to {output_file} (failed={len(failed)}, cancelled={len(cancelled)})"
     )
+
 
 
 @click.command()
@@ -104,19 +108,13 @@ def write_results(
     help="Path to output file for results (FAILED/CANCELLED or SUCCESS).",
 )
 @click.option(
-    "--scontrol",
-    default="scontrol",
-    show_default=True,
-    help="Path to the scontrol executable.",
-)
-@click.option(
     "--log-level",
     default="DEBUG",
     show_default=True,
     type=click.Choice(["CRITICAL", "ERROR", "WARNING", "INFO", "DEBUG"], case_sensitive=False),
     help="Logging verbosity.",
 )
-def check_failed_jobs(log_dir: Path, output: Path, scontrol: str, log_level: str) -> None:
+def check_failed_jobs(log_dir: Path, output: Path, log_level: str) -> None:
     """
     Recursively scan LOG_DIR for SLURM *.log files (stdout+stderr combined),
     extract job IDs from filenames, and check their states via `scontrol show job JOBID`.
@@ -137,10 +135,10 @@ def check_failed_jobs(log_dir: Path, output: Path, scontrol: str, log_level: str
         return
 
     for jobid in sorted(job_logs.keys(), key=int):
-        out_text = get_job_state(jobid, scontrol=scontrol)
+        out_text = get_job_state(jobid)
         if not out_text:
             # Can't classify without job info; skip but note it.
-            LOG.debug("Skipping job %s due to missing scontrol output", jobid)
+            LOG.warning("Skipping job {jobid} due to missing scontrol output")
             continue
 
         state = parse_state(out_text)
@@ -149,7 +147,7 @@ def check_failed_jobs(log_dir: Path, output: Path, scontrol: str, log_level: str
         elif state == "CANCELLED":
             cancelled.append((jobid, job_logs[jobid]))
         else:
-            LOG.debug("Job %s state is %s", jobid, state)
+            LOG.debug(f"Job {jobid} state is {state}")
 
     write_results(output, failed, cancelled)
 
