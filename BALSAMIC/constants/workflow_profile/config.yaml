@@ -14,481 +14,481 @@ default-resources:
 set-resources:
   post_process_tnscope_info_fields_wgs:
     runtime: 60
-    mem: 5000MB
+    mem_mb: 5000
   post_process_tnscope_info_fields_tga:
     runtime: 60
-    mem: 5000MB
+    mem_mb: 5000
   tnscope_sort:
     runtime: 60
-    mem: 10000MB
+    mem_mb: 10000
   merge_tnscope_to_mnvs:
     runtime: 60
-    mem: 10000MB
+    mem_mb: 10000
   cnvpytor_tumor_only_wgs:
     runtime: 600
-    mem: 60000MB
+    mem_mb: 60000
   igh_dux4_detection_tumor_only_wgs:
     runtime: 120
-    mem: 5000MB
+    mem_mb: 5000
   igh_dux4_detection_tumor_normal_wgs:
     runtime: 120
-    mem: 5000MB
+    mem_mb: 5000
   tiddit_sv_tumor_only_wgs:
     runtime: 600
-    mem: 30000MB
+    mem_mb: 30000
   tiddit_sv_tumor_normal_wgs:
     runtime: 600
-    mem: 40000MB
+    mem_mb: 40000
   ascat_tumor_normal_wgs:
     runtime: 600
-    mem: 60000MB
+    mem_mb: 60000
   delly_cnv_tumor_only:
     runtime: 340
-    mem: 20000MB
+    mem_mb: 20000
   delly_cnv_tumor_normal:
     runtime: 340
-    mem: 20000MB
+    mem_mb: 20000
   delly_cnv_tumor_only_wgs:
     runtime: 600
-    mem: 30000MB
+    mem_mb: 30000
   delly_cnv_tumor_normal_wgs:
     runtime: 600
-    mem: 30000MB
+    mem_mb: 30000
   delly_sv_tumor_only_wgs:
     runtime: 600
-    mem: 30000MB
+    mem_mb: 30000
   delly_sv_tumor_normal_wgs:
     runtime: 600
-    mem: 30000MB
+    mem_mb: 30000
   manta_tumor_only_wgs:
     runtime: 600
-    mem: 10000MB
+    mem_mb: 10000
   manta_tumor_normal_wgs:
     runtime: 600
-    mem: 15000MB
+    mem_mb: 15000
   delly_sv_tumor_only_tga:
     runtime: 340
-    mem: 10000MB
+    mem_mb: 10000
   delly_sv_tumor_normal_tga:
     runtime: 340
-    mem: 10000MB
+    mem_mb: 10000
   manta_tumor_only_tga:
     runtime: 340
-    mem: 10000MB
+    mem_mb: 10000
   manta_tumor_normal_tga:
     runtime: 340
-    mem: 15000MB
+    mem_mb: 15000
   bcftools_quality_filter_svdb:
     runtime: 60
-    mem: 10000MB
+    mem_mb: 10000
   svdb_merge_tumor_only:
     runtime: 60
-    mem: 10000MB
+    mem_mb: 10000
   svdb_merge_tumor_normal:
     runtime: 60
-    mem: 10000MB
+    mem_mb: 10000
   bcftools_process_SV_CNV:
     runtime: 60
-    mem: 10000MB
+    mem_mb: 10000
   bcftools_sort_cnvkitCNV_research:
     runtime: 60
-    mem: 10000MB
+    mem_mb: 10000
   cnvkit_call_CNV_research:
-    mem: 5000MB
+    mem_mb: 5000
     runtime: 360
   purecn_call_CNV_research:
-    mem: 20000MB
+    mem_mb: 20000
     runtime: 360
   bedtools_pad_bedfile:
-    mem: 1000MB
+    mem_mb: 1000
     runtime: 20
   vardict_sort:
-    mem: 20000MB
+    mem_mb: 20000
     runtime: 30
   gatk_update_vcf_sequence_dictionary:
     runtime: 600
-    mem: 10000MB
+    mem_mb: 10000
   cnvkit_segment_CNV_research:
     runtime: 360
-    mem: 5000MB
+    mem_mb: 5000
   bcftools_merge_germlineSNV_research:
     runtime: 280
-    mem: 10000MB
+    mem_mb: 10000
   vardict_tumor_normal:
     runtime: 280
-    mem: 40000MB
+    mem_mb: 40000
   sentieon_tnscope_tga_tumor_normal:
     runtime: 280
   post_process_vardict:
     runtime: 280
-    mem: 5000MB
+    mem_mb: 5000
   vardict_tumor_only:
     runtime: 280
-    mem: 40000MB
+    mem_mb: 40000
   sentieon_tnscope_tga_tumor_only:
     runtime: 280
   bcftools_quality_filter_TNscope_umi_tumor_only:
     runtime: 100
-    mem: 10000MB
+    mem_mb: 10000
   bcftools_quality_filter_TNscope_umi_tumor_normal:
     runtime: 100
-    mem: 10000MB
+    mem_mb: 10000
   bcftools_quality_filter_vardict_tumor_normal:
     runtime: 100
-    mem: 10000MB
+    mem_mb: 10000
   bcftools_quality_filter_tnscope_tumor_normal_tga:
     runtime: 100
-    mem: 10000MB
+    mem_mb: 10000
   bcftools_quality_filter_vardict_tumor_only:
     runtime: 100
-    mem: 10000MB
+    mem_mb: 10000
   bcftools_quality_filter_tnscope_tumor_only_tga:
     runtime: 100
-    mem: 10000MB
+    mem_mb: 10000
   bcftools_quality_filter_tnscope_tumor_normal_wgs:
     runtime: 100
-    mem: 10000MB
+    mem_mb: 10000
   bcftools_quality_filter_tnscope_tumor_only_wgs:
     runtime: 100
-    mem: 10000MB
+    mem_mb: 10000
   sentieon_tnscope_wgs_tumor_normal:
     runtime: 1440
-    mem: 40000MB
+    mem_mb: 40000
   sentieon_tnscope_wgs_tumor_only:
     runtime: 1440
-    mem: 45000MB
+    mem_mb: 45000
   merge_snv_vcfs:
     runtime: 120
-    mem: 20000MB
+    mem_mb: 20000
   bcftools_normalise_vcfs:
     runtime: 120
-    mem: 4000MB
+    mem_mb: 4000
   manta_germline_wgs:
     runtime: 1440
-    mem: 60000MB
+    mem_mb: 60000
   sentieon_DNAscope_wgs:
     runtime: 1440
-    mem: 50000MB
+    mem_mb: 50000
   manta_germline_tga:
     runtime: 300
-    mem: 40000MB
+    mem_mb: 40000
   sentieon_DNAscope_tga:
     runtime: 1440
   finalize_gens_outputfiles:
     runtime: 60
-    mem: 2000MB
+    mem_mb: 2000
   gens_preprocess_tga:
     runtime: 60
-    mem: 10000MB
+    mem_mb: 10000
   sentieon_DNAscope_gnomad_tga:
     runtime: 1440
   gens_preprocess_wgs:
     runtime: 60
-    mem: 10000MB
+    mem_mb: 10000
   gatk_denoise_read_counts:
     runtime: 600
-    mem: 70000MB
+    mem_mb: 70000
   sentieon_DNAscope_gnomad:
     runtime: 1440
-    mem: 60000MB
+    mem_mb: 60000
   gatk_collectreadcounts:
     runtime: 350
-    mem: 40000MB
+    mem_mb: 40000
   bedtools_sort_and_merge:
     runtime: 20
-    mem: 400MB
+    mem_mb: 400
   extend_short_bedregions:
     runtime: 20
-    mem: 400MB
+    mem_mb: 400
   create_coverage:
     runtime: 360
-    mem: 30000MB
+    mem_mb: 30000
   create_target:
     runtime: 360
-    mem: 5000MB
+    mem_mb: 5000
   sentieon_align_sort_umireads_umi:
     runtime: 1440
-    mem: 26000MB
+    mem_mb: 26000
   sentieon_tnscope_umi_tn:
     runtime: 280
-    mem: 10000MB
+    mem_mb: 10000
   sentieon_tnscope_umi:
     runtime: 280
-    mem: 10000MB
+    mem_mb: 10000
   bam_compress_normal_umi:
     runtime: 280
-    mem: 16000MB
+    mem_mb: 16000
   bam_compress_tumor_umi:
     runtime: 280
-    mem: 16000MB
+    mem_mb: 16000
   sentieon_consensusfilter_umi:
     runtime: 280
-    mem: 16000MB
+    mem_mb: 16000
   sentieon_bwa_umiconsensus:
     runtime: 480
-    mem: 30000MB
+    mem_mb: 30000
   sentieon_consensuscall_umi:
     runtime: 360
-    mem: 16000MB
+    mem_mb: 16000
   samtools_view_calculatemeanfamilydepth_umi:
     runtime: 280
-    mem: 16000MB
+    mem_mb: 16000
   picard_collecthsmetrics_umi:
     runtime: 280
-    mem: 16000MB
+    mem_mb: 16000
   picard_umiaware:
     runtime: 280
-    mem: 16000MB
+    mem_mb: 16000
   modify_tnscope_infofield_umi:
     runtime: 60
-    mem: 10000MB
+    mem_mb: 10000
   bcftools_query_generatebackgroundaf_umitable:
     runtime: 60
-    mem: 10000MB
+    mem_mb: 10000
   merge_cnv_pdf_reports:
     runtime: 60
-    mem: 5000MB
+    mem_mb: 5000
   image_to_pdf:
     runtime: 60
-    mem: 5000MB
+    mem_mb: 5000
   msi_to_pdf:
     runtime: 60
-    mem: 5000MB
+    mem_mb: 5000
   txt_to_pdf:
     runtime: 60
-    mem: 5000MB
+    mem_mb: 5000
   csv_to_pdf:
     runtime: 60
-    mem: 5000MB
+    mem_mb: 5000
   somalier_relate:
     runtime: 60
-    mem: 5000MB
+    mem_mb: 5000
   somalier_extract_tumor:
     runtime: 60
-    mem: 5000MB
+    mem_mb: 5000
   somalier_extract_normal:
     runtime: 60
-    mem: 5000MB
+    mem_mb: 5000
   sex_prediction_tga_tumor_only:
     runtime: 60
-    mem: 5000MB
+    mem_mb: 5000
   sex_prediction_tga_tumor_normal:
     runtime: 60
-    mem: 5000MB
+    mem_mb: 5000
   sex_prediction_wgs_tumor_only:
     runtime: 60
-    mem: 5000MB
+    mem_mb: 5000
   sex_prediction_wgs_tumor_normal:
     runtime: 60
-    mem: 5000MB
+    mem_mb: 5000
   sentieon_plot_qc_metrics_tga:
     runtime: 30
-    mem: 2000MB
+    mem_mb: 2000
   sentieon_plot_qc_metrics_wgs:
     runtime: 30
-    mem: 5000MB
+    mem_mb: 5000
   sentieon_qc_metrics_tga:
     runtime: 280
-    mem: 30000MB
+    mem_mb: 30000
   sentieon_qc_metric_wgs:
     runtime: 280
-    mem: 25000MB
+    mem_mb: 25000
   sentieon_wgs_metrics:
     runtime: 280
-    mem: 30000MB
+    mem_mb: 30000
   picard_CollectWgsMetrics:
     runtime: 900
-    mem: 30000MB
+    mem_mb: 30000
   samtools_qc_umi_collapsed:
     runtime: 280
-    mem: 8000MB
+    mem_mb: 8000
   samtools_qc_tga:
     runtime: 280
-    mem: 8000MB
+    mem_mb: 8000
   samtools_qc_wgs:
     runtime: 280
-    mem: 8000MB
+    mem_mb: 8000
   sambamba_exon_depth:
     runtime: 150
-    mem: 12000MB
+    mem_mb: 12000
   sambamba_panel_depth:
     runtime: 150
-    mem: 8000MB
+    mem_mb: 8000
   cnv_report:
     runtime: 20
-    mem: 100MB
+    mem_mb: 100
   collect_custom_qc_metrics:
     runtime: 20
-    mem: 1000MB
+    mem_mb: 1000
   picard_CollectHsMetrics_WGS:
     runtime: 360
-    mem: 25000MB
+    mem_mb: 25000
   picard_CollectAlignmentSummaryMetrics:
     runtime: 900
-    mem: 30000MB
+    mem_mb: 30000
   picard_CollectHsMetrics:
     runtime: 360
-    mem: 25000MB
+    mem_mb: 25000
   multiqc:
     runtime: 60
-    mem: 5000MB
+    mem_mb: 5000
   mosdepth_coverage:
     runtime: 280
-    mem: 5000MB
+    mem_mb: 5000
   gatk_create_readcount_pon:
     runtime: 3600
-    mem: 170000MB
+    mem_mb: 170000
   create_reference:
     runtime: 120
-    mem: 15000MB
+    mem_mb: 15000
   dragen_align_call_tumor_only:
     runtime: 1200
-    mem: 120000MB
+    mem_mb: 120000
   concatenate_fastqs:
     runtime: 60
-    mem: 5000MB
+    mem_mb: 5000
   vcfheader_rename_germline:
     runtime: 120
-    mem: 1000MB
+    mem_mb: 1000
   vcf2cytosure_convert_tumor_normal:
     runtime: 120
-    mem: 10000MB
+    mem_mb: 10000
   vcf2cytosure_convert_tumor_only:
     runtime: 120
-    mem: 10000MB
+    mem_mb: 10000
   vcf2cytosure_convert:
     runtime: 120
-    mem: 10000MB
+    mem_mb: 10000
   bcftools_filter_sv_research:
     runtime: 120
-    mem: 10000MB
+    mem_mb: 10000
   bcftools_filter_sv_clinical:
     runtime: 120
-    mem: 10000MB
+    mem_mb: 10000
   bcftools_filter_tnscope_clinical_tumor_only:
     runtime: 280
-    mem: 20000MB
+    mem_mb: 20000
   bcftools_filter_tnscope_research_tumor_only:
     runtime: 280
-    mem: 20000MB
+    mem_mb: 20000
   bcftools_filter_TNscope_umi_clinical_tumor_only:
     runtime: 280
-    mem: 5000MB
+    mem_mb: 5000
   bcftools_filter_TNscope_umi_research_tumor_only:
     runtime: 280
-    mem: 5000MB
+    mem_mb: 5000
   bcftools_filter_merged_clinical_tumor_only:
     runtime: 280
-    mem: 15000MB
+    mem_mb: 15000
   bcftools_filter_merged_research_tumor_only:
     runtime: 280
-    mem: 15000MB
+    mem_mb: 15000
   bcftools_filter_tnscope_clinical_tumor_normal:
     runtime: 280
-    mem: 10000MB
+    mem_mb: 10000
   bcftools_filter_tnscope_research_tumor_normal:
     runtime: 280
-    mem: 10000MB
+    mem_mb: 10000
   bcftools_filter_TNscope_umi_clinical_tumor_normal:
     runtime: 280
-    mem: 5000MB
+    mem_mb: 5000
   bcftools_filter_TNscope_umi_research_tumor_normal:
     runtime: 280
-    mem: 5000MB
+    mem_mb: 5000
   bcftools_filter_merged_clinical_tumor_normal:
     runtime: 280
-    mem: 10000MB
+    mem_mb: 10000
   bcftools_filter_merged_research_tumor_normal:
     runtime: 280
-    mem: 10000MB
+    mem_mb: 10000
   svdb_annotate_clinical_obs_somatic_clinical_sv:
     runtime: 600
-    mem: 15000MB
+    mem_mb: 15000
   svdb_annotate_somatic_obs_somatic_clinical_sv:
     runtime: 600
-    mem: 15000MB
+    mem_mb: 15000
   svdb_annotate_somatic_research_sv:
     runtime: 720
-    mem: 25000MB
+    mem_mb: 25000
   vep_somatic_research_sv:
     runtime: 720
-    mem: 140000MB
+    mem_mb: 140000
   vcfanno_annotate_somaticSNV_clinical:
     runtime: 1080
-    mem: 10000MB
+    mem_mb: 10000
   vep_annotate_somaticSNV_research:
     runtime: 1080
-    mem: 50000MB
+    mem_mb: 50000
   bcftools_annotate_somaticINDEL_research:
     runtime: 60
-    mem: 4000MB
+    mem_mb: 4000
   cadd_annotate_somaticINDEL_research:
     runtime: 1080
-    mem: 20000MB
+    mem_mb: 20000
   bcftools_get_somaticINDEL_research:
     runtime: 60
-    mem: 5000MB
+    mem_mb: 5000
   tmb_calculation:
     runtime: 280
-    mem: 5000MB
+    mem_mb: 5000
   genmod_score_snvs:
     runtime: 280
-    mem: 5000MB
+    mem_mb: 5000
   msisensorpro_msi_tumor_normal:
     runtime: 280
-    mem: 10000MB
+    mem_mb: 10000
   msisensorpro_scan_reference:
     runtime: 280
-    mem: 1000MB
+    mem_mb: 1000
   vep_annotate_germlineVAR_normal:
     runtime: 360
-    mem: 30000MB
+    mem_mb: 30000
   vep_annotate_germlineVAR_tumor:
     runtime: 360
-    mem: 30000MB
+    mem_mb: 30000
   sentieon_align_sort:
     runtime: 1440
-    mem: 40000MB
+    mem_mb: 40000
   sentieon_realign:
     runtime: 1440
-    mem: 80000MB
+    mem_mb: 80000
   sentieon_align_sort_umireads:
     runtime: 1440
-    mem: 40000MB
+    mem_mb: 40000
   cap_base_quality:
-    mem: 10000MB
+    mem_mb: 10000
     runtime: 300
   sentieon_dedup:
     runtime: 1440
-    mem: 80000MB
+    mem_mb: 80000
   sentieon_dedup_consensus:
     runtime: 1440
   sentieon_base_calibration:
-    mem: 25000MB
+    mem_mb: 25000
     runtime: 1440
   samtools_fixmate:
-    mem: 80000MB
+    mem_mb: 80000
     runtime: 560
   bam_compress_tumor:
-    mem: 8000MB
+    mem_mb: 8000
     runtime: 280
   bam_compress_normal:
-    mem: 8000MB
+    mem_mb: 8000
     runtime: 280
   fastqc:
-    mem: 6000MB
+    mem_mb: 6000
     runtime: 280
   fastp_quality_and_adapter_trim_wgs:
-    mem: 6000MB
+    mem_mb: 6000
     runtime: 350
   fastp_adapter_trim_tga:
-    mem: 16000MB
+    mem_mb: 16000
     runtime: 400
   fastp_quality_trim_tga:
-    mem: 16000MB
+    mem_mb: 16000
     runtime: 350
   sentieon_umiextract_tga:
-    mem: 16000MB
+    mem_mb: 16000
     runtime: 350
 
 set-threads:
