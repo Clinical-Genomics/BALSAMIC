@@ -98,6 +98,8 @@ class SbatchSubmitter:
                 echo "No status file found; assuming failure"
                 exit 2
             fi
+            echo "FROM ANALYSIS STATUS: {self.result_path}/analysis_status.txt"
+            echo $STATUS >&2
         """
         ).strip()
 
