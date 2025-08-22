@@ -6,7 +6,7 @@ import sys
 from distutils.spawn import find_executable
 from io import StringIO
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Final
 
 import click
 import graphviz
@@ -17,6 +17,7 @@ import shlex
 
 from BALSAMIC import __version__ as balsamic_version
 from BALSAMIC.constants.analysis import FASTQ_SUFFIXES, FastqName, PonParams, SampleType
+from BALSAMIC.constants.analysis import SnakemakeDAG as SD
 from BALSAMIC.constants.cache import CacheVersion
 from BALSAMIC.constants.constants import FileType
 from BALSAMIC.models.config import FastqInfoModel, SampleInstanceModel
@@ -403,40 +404,69 @@ def get_pon_sample_list(fastq_path: str) -> List[SampleInstanceModel]:
 
     return sample_list
 
+def _extract_dot(text: str) -> str:
+    # Snakemake emits DOT that starts with either of these
+    start = -1
+    for s in SD.DOT_STARTS:
+        start = text.find(s)
+        if start != -1:
+            break
+    if start == -1:
+        raise ValueError(SD.ERR_NO_DOT_START)
+    # Heuristic: take everything from start to the last closing brace
+    end = text.rfind("}")
+    if end == -1 or end < start:
+        raise ValueError(SD.ERR_NO_DOT_END)
+    return text[start:end + 1]
 
-def generate_graph_BACKUP(config_collection_dict, config_path):
-    """Generate DAG graph using snakemake stdout output."""
 
-    with CaptureStdout() as graph_dot:
-        snakemake.snakemake(
-            snakefile=get_snakefile(
-                analysis_type=config_collection_dict["analysis"]["analysis_type"],
-                analysis_workflow=config_collection_dict["analysis"][
-                    "analysis_workflow"
-                ],
-            ),
-            dryrun=True,
-            configfiles=[config_path],
-            printrulegraph=True,
+def generate_graph(config_collection_dict, config_path):
+    """Generate rule graph (DOT) via the Snakemake CLI and render to PDF."""
+    snakefile = get_snakefile(
+        analysis_type=config_collection_dict["analysis"]["analysis_type"],
+        analysis_workflow=config_collection_dict["analysis"]["analysis_workflow"],
+    )
+
+    # Build CLI: dry-run + rulegraph; --quiet to minimize extra stdout
+    cmd = (
+        f"snakemake -n --rulegraph "
+        f"--configfile {shlex.quote(config_path)} "
+        f"-s {shlex.quote(snakefile)} "
+        f"--quiet"
+    )
+    proc = subprocess.run(cmd, shell=True, text=True, capture_output=True)
+    # Prefer stdout; some messages may land in stderr—keep both for debugging
+    raw = (proc.stdout or "") + ("\n" + proc.stderr if proc.stderr else "")
+    if proc.returncode not in (0,):
+        raise RuntimeError(f"snakemake exited with {proc.returncode}.\n{raw}")
+
+    # Strip any chatter and keep just the DOT
+    dot = _extract_dot(raw)
+
+    # Title injection
+    graph_title = "_".join([SD.GRAPH_NAME, balsamic_version, config_collection_dict["analysis"]["case_id"]])
+    if SD.SNAKEMAKE_HEADER in dot and not dot.startswith("digraph"):
+        dot = dot.replace(
+            SD.SNAKEMAKE_HEADER,
+            f'{SD.GRAPH_NAME} {{ label="{graph_title}";labelloc="{SD.GRAPH_LABEL_LOC}";'
+        )
+    else:
+        dot = dot.replace(
+            SD.SNAKEMAKE_DIGRAPH_HEADER,
+            f'digraph {SD.GRAPH_NAME} {{ label="{graph_title}";labelloc="{SD.GRAPH_LABEL_LOC}";'
         )
 
-    graph_title = "_".join(
-        [
-            "BALSAMIC",
-            balsamic_version,
-            config_collection_dict["analysis"]["case_id"],
-        ]
-    )
-    graph_dot = "".join(graph_dot).replace(
-        "snakemake_dag {", 'BALSAMIC { label="' + graph_title + '";labelloc="t";'
-    )
-    graph_obj = graphviz.Source(
-        graph_dot,
-        filename=".".join(config_collection_dict["analysis"]["dag"].split(".")[:-1]),
-        format="pdf",
-        engine="dot",
-    )
-    graph_obj.render(cleanup=True)
+    outstem = ".".join(config_collection_dict["analysis"]["dag"].split(".")[:-1]) or "dag"
+    try:
+        graphviz.Source(dot, filename=outstem, format=SD.GRAPHVIZ_FORMAT, engine=SD.GRAPHVIZ_ENGINE).render(cleanup=True)
+    except Exception:
+        # Dump raw output to help debugging if Graphviz still fails
+        with open(f"{outstem}.raw.txt", "w") as fh:
+            fh.write(raw)
+        with open(f"{outstem}.dot", "w") as fh:
+            fh.write(dot)
+        raise
+
 
 
 def _extract_dot(text: str) -> str:

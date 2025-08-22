@@ -16,6 +16,22 @@ class SubmitSnakemake:
 
     MAX_RUN_HOURS: int = 120
 
+class SnakemakeDAG:
+    """Constants for Snakemake DAG parsing and rendering."""
+
+    DIGRAPH_HEADER: str = "digraph snakemake_dag {"
+    HEADER: str = "snakemake_dag {"
+    STARTS: tuple[str, str] = (DIGRAPH_HEADER, HEADER)
+
+    ERR_NO_START: str = "Could not find start of DOT graph in Snakemake output."
+    ERR_NO_END: str = "Could not find end of DOT graph in Snakemake output."
+
+    GRAPH_NAME: str = "BALSAMIC"
+    GRAPH_LABEL_LOC: str = "t"
+
+    GRAPHVIZ_FORMAT: str = "pdf"
+    GRAPHVIZ_ENGINE: str = "dot"
+
 
 class RunMode(StrEnum):
     """Balsamic workflow run mode."""

@@ -33,7 +33,7 @@ def get_job_state(jobid: str) -> Optional[str]:
     Return raw output of `scontrol show job JOBID`, or None if the query fails.
     """
     try:
-        LOG.debug(f"Running %s show job scontrol {jobid}")
+        LOG.debug(f"Running show job scontrol {jobid}")
         result = subprocess.run(
             ["scontrol", "show", "job", jobid],
             capture_output=True,
