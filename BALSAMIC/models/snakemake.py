@@ -33,7 +33,6 @@ class SnakemakeExecutable(BaseModel):
         force (bool)                                                 : Force snakemake execution.
         workflow_partition (str)                                     : Cluster partition to use for snakemake workflow
         log_dir (Optional[DirectoryPath])                            : Logging directory.
-        cluster_profile: Path                                        : Directory containing snakemake cluster profile
         workflow_profile: Path                                       : Directory contianing snakemake workflow profile specifying rule resources
         qos (Optional[QOS])                                          : QOS for sbatch jobs.
         quiet (Optional[bool])                                       : Quiet mode for snakemake.
@@ -54,7 +53,6 @@ class SnakemakeExecutable(BaseModel):
     force: bool = False
     workflow_partition: str
     log_dir: Optional[DirectoryPath] = None
-    cluster_profile: Path
     workflow_profile: Path
     qos: Optional[QOS] = None
     quiet: bool = False
@@ -148,7 +146,6 @@ class SnakemakeExecutable(BaseModel):
         """Return Snakemake cluster options to be submitted."""
         if self.run_mode == RunMode.CLUSTER:
             snakemake_cluster_options: str = (
-                f"-j {MAX_JOBS} "
                 f"--profile {self.workflow_profile} "
                 f"{self.get_slurm_job_arguments()} "
                 f"--slurm-keep-successful-logs"
