@@ -16,6 +16,7 @@ class SubmitSnakemake:
 
     MAX_RUN_HOURS: int = 120
 
+
 class SnakemakeDAG:
     """Constants for Snakemake DAG parsing and rendering."""
 

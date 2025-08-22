@@ -404,6 +404,7 @@ def get_pon_sample_list(fastq_path: str) -> List[SampleInstanceModel]:
 
     return sample_list
 
+
 def _extract_dot(text: str) -> str:
     # Snakemake emits DOT that starts with either of these
     start = -1
@@ -417,7 +418,7 @@ def _extract_dot(text: str) -> str:
     end = text.rfind("}")
     if end == -1 or end < start:
         raise ValueError(SD.ERR_NO_DOT_END)
-    return text[start:end + 1]
+    return text[start : end + 1]
 
 
 def generate_graph(config_collection_dict, config_path):
@@ -444,21 +445,27 @@ def generate_graph(config_collection_dict, config_path):
     dot = _extract_dot(raw)
 
     # Title injection
-    graph_title = "_".join([SD.GRAPH_NAME, balsamic_version, config_collection_dict["analysis"]["case_id"]])
+    graph_title = "_".join(
+        [SD.GRAPH_NAME, balsamic_version, config_collection_dict["analysis"]["case_id"]]
+    )
     if SD.SNAKEMAKE_HEADER in dot and not dot.startswith("digraph"):
         dot = dot.replace(
             SD.SNAKEMAKE_HEADER,
-            f'{SD.GRAPH_NAME} {{ label="{graph_title}";labelloc="{SD.GRAPH_LABEL_LOC}";'
+            f'{SD.GRAPH_NAME} {{ label="{graph_title}";labelloc="{SD.GRAPH_LABEL_LOC}";',
         )
     else:
         dot = dot.replace(
             SD.SNAKEMAKE_DIGRAPH_HEADER,
-            f'digraph {SD.GRAPH_NAME} {{ label="{graph_title}";labelloc="{SD.GRAPH_LABEL_LOC}";'
+            f'digraph {SD.GRAPH_NAME} {{ label="{graph_title}";labelloc="{SD.GRAPH_LABEL_LOC}";',
         )
 
-    outstem = ".".join(config_collection_dict["analysis"]["dag"].split(".")[:-1]) or "dag"
+    outstem = (
+        ".".join(config_collection_dict["analysis"]["dag"].split(".")[:-1]) or "dag"
+    )
     try:
-        graphviz.Source(dot, filename=outstem, format=SD.GRAPHVIZ_FORMAT, engine=SD.GRAPHVIZ_ENGINE).render(cleanup=True)
+        graphviz.Source(
+            dot, filename=outstem, format=SD.GRAPHVIZ_FORMAT, engine=SD.GRAPHVIZ_ENGINE
+        ).render(cleanup=True)
     except Exception:
         # Dump raw output to help debugging if Graphviz still fails
         with open(f"{outstem}.raw.txt", "w") as fh:
@@ -466,7 +473,6 @@ def generate_graph(config_collection_dict, config_path):
         with open(f"{outstem}.dot", "w") as fh:
             fh.write(dot)
         raise
-
 
 
 def _extract_dot(text: str) -> str:
@@ -485,7 +491,8 @@ def _extract_dot(text: str) -> str:
     end = text.rfind("}")
     if end == -1 or end < start:
         raise ValueError("Could not find end of DOT graph in Snakemake output.")
-    return text[start:end + 1]
+    return text[start : end + 1]
+
 
 def generate_graph(config_collection_dict, config_path):
     """Generate rule graph (DOT) via the Snakemake CLI and render to PDF."""
@@ -511,15 +518,26 @@ def generate_graph(config_collection_dict, config_path):
     dot = _extract_dot(raw)
 
     # Title injection
-    graph_title = "_".join(["BALSAMIC", balsamic_version, config_collection_dict["analysis"]["case_id"]])
+    graph_title = "_".join(
+        ["BALSAMIC", balsamic_version, config_collection_dict["analysis"]["case_id"]]
+    )
     if "snakemake_dag {" in dot and not dot.startswith("digraph"):
-        dot = dot.replace("snakemake_dag {", f'BALSAMIC {{ label="{graph_title}";labelloc="t";')
+        dot = dot.replace(
+            "snakemake_dag {", f'BALSAMIC {{ label="{graph_title}";labelloc="t";'
+        )
     else:
-        dot = dot.replace("digraph snakemake_dag {", f'digraph BALSAMIC {{ label="{graph_title}";labelloc="t";')
+        dot = dot.replace(
+            "digraph snakemake_dag {",
+            f'digraph BALSAMIC {{ label="{graph_title}";labelloc="t";',
+        )
 
-    outstem = ".".join(config_collection_dict["analysis"]["dag"].split(".")[:-1]) or "dag"
+    outstem = (
+        ".".join(config_collection_dict["analysis"]["dag"].split(".")[:-1]) or "dag"
+    )
     try:
-        graphviz.Source(dot, filename=outstem, format="pdf", engine="dot").render(cleanup=True)
+        graphviz.Source(dot, filename=outstem, format="pdf", engine="dot").render(
+            cleanup=True
+        )
     except Exception as e:
         # Dump raw output to help debugging if Graphviz still fails
         with open(f"{outstem}.raw.txt", "w") as fh:
@@ -527,7 +545,6 @@ def generate_graph(config_collection_dict, config_path):
         with open(f"{outstem}.dot", "w") as fh:
             fh.write(dot)
         raise
-
 
 
 def convert_deliverables_tags(

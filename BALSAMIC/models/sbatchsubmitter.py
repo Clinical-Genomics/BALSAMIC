@@ -81,11 +81,12 @@ class SbatchSubmitter:
         # Commands
         sbatch_command = f"conda run -p {self.conda_env_path} {self.snakemake_executable.get_command()}"
         job_status_check = (
-            f'conda run -p {self.conda_env_path} python {self.scan_finished_jobid_status} '
-            f'{self.log_path} --output {self.result_path}/analysis_status.txt'
+            f"conda run -p {self.conda_env_path} python {self.scan_finished_jobid_status} "
+            f"{self.log_path} --output {self.result_path}/analysis_status.txt"
         )
 
-        success_status_check = textwrap.dedent(f"""
+        success_status_check = textwrap.dedent(
+            f"""
             if [[ -f "{self.result_path}/analysis_status.txt" ]]; then
                 STATUS=$(cat "{self.result_path}/analysis_status.txt")
                 echo "Snakemake analysis status: $STATUS"
@@ -97,16 +98,19 @@ class SbatchSubmitter:
                 echo "No status file found; assuming failure"
                 exit 2
             fi
-        """).strip()
+        """
+        ).strip()
 
         # Build full script as a single string
-        full_script = "\n\n".join([
-            sbatch_header,
-            sbatch_command,
-            job_status_check,
-            success_status_check,
-            ""  # ensures trailing newline
-        ])
+        full_script = "\n\n".join(
+            [
+                sbatch_header,
+                sbatch_command,
+                job_status_check,
+                success_status_check,
+                "",  # ensures trailing newline
+            ]
+        )
 
         # Write and make executable
         sbatch_path = Path(self.sbatch_script_path)

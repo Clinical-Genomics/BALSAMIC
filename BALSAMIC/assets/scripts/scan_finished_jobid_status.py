@@ -61,6 +61,7 @@ def parse_state(scontrol_output: str) -> Optional[str]:
         LOG.debug("JobState not found in scontrol output")
     return state
 
+
 def write_results(
     output_file: Path,
     failed: List[Tuple[str, Path]],
@@ -97,9 +98,10 @@ def write_results(
     )
 
 
-
 @click.command()
-@click.argument("log_dir", type=click.Path(exists=True, file_okay=False, path_type=Path))
+@click.argument(
+    "log_dir", type=click.Path(exists=True, file_okay=False, path_type=Path)
+)
 @click.option(
     "--output",
     "-o",
@@ -111,7 +113,9 @@ def write_results(
     "--log-level",
     default="INFO",
     show_default=True,
-    type=click.Choice(["CRITICAL", "ERROR", "WARNING", "INFO", "DEBUG"], case_sensitive=False),
+    type=click.Choice(
+        ["CRITICAL", "ERROR", "WARNING", "INFO", "DEBUG"], case_sensitive=False
+    ),
     help="Logging verbosity.",
 )
 def check_failed_jobs(log_dir: Path, output: Path, log_level: str) -> None:
