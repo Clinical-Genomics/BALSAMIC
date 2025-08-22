@@ -447,14 +447,14 @@ def generate_graph(config_collection_dict, config_path):
     graph_title = "_".join(
         [SD.GRAPH_NAME, balsamic_version, config_collection_dict["analysis"]["case_id"]]
     )
-    if SD.SNAKEMAKE_HEADER in dot and not dot.startswith("digraph"):
+    if SD.HEADER in dot and not dot.startswith("digraph"):
         dot = dot.replace(
-            SD.SNAKEMAKE_HEADER,
+            SD.HEADER,
             f'{SD.GRAPH_NAME} {{ label="{graph_title}";labelloc="{SD.GRAPH_LABEL_LOC}";',
         )
     else:
         dot = dot.replace(
-            SD.SNAKEMAKE_DIGRAPH_HEADER,
+            SD.DIGRAPH_HEADER,
             f'digraph {SD.GRAPH_NAME} {{ label="{graph_title}";labelloc="{SD.GRAPH_LABEL_LOC}";',
         )
 

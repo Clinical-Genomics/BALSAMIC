@@ -23,7 +23,7 @@ from BALSAMIC.constants.analysis import (
     RunMode,
 )
 from BALSAMIC.constants.cache import REFERENCE_FILES, DockerContainers, GenomeVersion
-from BALSAMIC.constants.cluster import QOS, ClusterAccount
+from BALSAMIC.constants.cluster import QOS, ClusterAccount, Partition
 from BALSAMIC.constants.constants import FileType
 from BALSAMIC.constants.paths import (
     FASTQ_TEST_INFO,
@@ -331,6 +331,7 @@ def submitter(tmp_path):
         log_path=tmp_path,
         account="dummy_account",
         qos="low",
+        headjob_partition=None,
         max_run_hours=2,
         snakemake_executable=MagicMock(
             get_command=lambda: "snakemake --snakefile Snakefile"
@@ -2543,6 +2544,7 @@ def fixture_snakemake_executable_data(
         "snakefile": reference_file,
         "snakemake_options": snakemake_options_command,
         "working_dir": session_tmp_path,
+        "workflow_partition": Partition.CORE,
     }
 
 
@@ -2583,6 +2585,7 @@ def fixture_snakemake_executable_validated_data(
         "snakefile": reference_file,
         "snakemake_options": snakemake_options_command,
         "working_dir": session_tmp_path,
+        "workflow_partition": Partition.CORE,
     }
 
 

@@ -145,7 +145,10 @@ class SnakemakeExecutable(BaseModel):
         return remove_unnecessary_spaces(snakemake_command)
 
     def get_slurm_job_arguments(self) -> str:
-        return f'--default-resources slurm_extra="--qos={self.qos}" slurm_partition={self.workflow_partition} slurm_account={self.account}'
+        return (
+            f'--default-resources slurm_extra="--qos={self.qos}" '
+            f"slurm_partition={self.workflow_partition} slurm_account={self.account}"
+        )
 
     def get_snakemake_cluster_options(self) -> str:
         """Return Snakemake cluster options to be submitted."""

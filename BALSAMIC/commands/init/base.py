@@ -10,6 +10,7 @@ from typing import List, Optional, Union
 import click
 
 from BALSAMIC.commands.options import (
+    OPTION_WORKFLOW_PARTITION,
     OPTION_CACHE_VERSION,
     OPTION_CLUSTER_ACCOUNT,
     OPTION_CACHE_PROFILE,
@@ -45,6 +46,7 @@ LOG = logging.getLogger(__name__)
     "init", short_help="Download singularity containers and build the reference cache"
 )
 @OPTION_OUT_DIR
+@OPTION_WORKFLOW_PARTITION
 @OPTION_CACHE_VERSION
 @OPTION_CLUSTER_ACCOUNT
 @OPTION_CLUSTER_PROFILE
@@ -75,6 +77,7 @@ def initialize(
     run_mode: RunMode,
     snakefile: Path,
     snakemake_opt: List[str],
+    workflow_partition: str,
 ) -> None:
     """Validate inputs and download reference caches and containers."""
     LOG.info(f"BALSAMIC started with log level {context.obj['log_level']}")
@@ -143,6 +146,7 @@ def initialize(
         case_id=cache_config.analysis.case_id,
         config_path=config_path,
         force=force_all,
+        workflow_partition=workflow_partition,
         log_dir=log_dir,
         cluster_profile=cluster_profile,
         cluster_job_status_script=get_script_path("cluster_job_status.py"),

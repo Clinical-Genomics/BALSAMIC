@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Any, Dict
 
 import pytest
-from BALSAMIC.constants.cluster import MAX_JOBS, QOS, ClusterAccount
+from BALSAMIC.constants.cluster import MAX_JOBS, QOS, ClusterAccount, Partition
 from BALSAMIC.models.snakemake import SingularityBindPath, SnakemakeExecutable
 from pydantic import ValidationError
 
@@ -188,10 +188,10 @@ def test_get_snakemake_cluster_options(
     )
 
     # THEN the expected format should be returned
-    assert (
-        snakemake_cluster_options
-        == f"-j {MAX_JOBS} --jobname BALSAMIC.{case_id_tumor_only}.{{rulename}}.{{jobid}}.sh "
-        f"--profile {reference_file.as_posix()} --workflow-profile {reference_file.as_posix()}"
+    assert snakemake_cluster_options == (
+        f"-j 999 --profile {reference_file.as_posix()} --default-resources "
+        f'slurm_extra="--qos={QOS.HIGH}" slurm_partition={Partition.CORE} slurm_account={ClusterAccount.DEVELOPMENT} '
+        "--slurm-keep-successful-logs"
     )
 
 
