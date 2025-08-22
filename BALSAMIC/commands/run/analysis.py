@@ -18,7 +18,6 @@ from BALSAMIC.commands.options import (
     OPTION_HEADJOB_PARTITION,
     OPTION_CLUSTER_ACCOUNT,
     OPTION_WORKFLOW_PROFILE,
-    OPTION_CLUSTER_PROFILE,
     OPTION_MAX_RUN_HOURS,
     OPTION_CLUSTER_QOS,
     OPTION_DRAGEN,
@@ -51,7 +50,6 @@ LOG = logging.getLogger(__name__)
 @OPTION_WORKFLOW_PARTITION
 @OPTION_HEADJOB_PARTITION
 @OPTION_CLUSTER_ACCOUNT
-@OPTION_CLUSTER_PROFILE
 @OPTION_MAX_RUN_HOURS
 @OPTION_WORKFLOW_PROFILE
 @OPTION_CLUSTER_QOS
@@ -71,7 +69,6 @@ def analysis(
     sample_config: Path,
     run_mode: RunMode,
     dragen: bool,
-    cluster_profile: Path,
     max_run_hours: int,
     workflow_profile: Path,
     run_analysis: bool,
@@ -101,7 +98,6 @@ def analysis(
     add_file_logging(log_file, logger_name=__name__)
 
     LOG.info(f"Running BALSAMIC version {balsamic_version} -- RUN ANALYSIS")
-    LOG.info(f"BALSAMIC started with log level {context.obj['log_level']}.")
     LOG.info(f"Using case config file: {sample_config_path}")
     LOG.info(f"Starting analysis on: {case_id}.")
 

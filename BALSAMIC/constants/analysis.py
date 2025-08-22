@@ -41,7 +41,7 @@ RUN_MODES: List[RunMode] = [mode for mode in RunMode]
 
 
 class Gender(StrEnum):
-    """Sex options."""
+    """Gender options."""
 
     FEMALE: str = "female"
     MALE: str = "male"

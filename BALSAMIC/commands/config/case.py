@@ -147,9 +147,7 @@ def case_config(
     add_file_logging(log_file, logger_name=__name__)
 
     LOG.info(f"Running BALSAMIC version {balsamic_version} -- CONFIG CASE")
-    LOG.info(f"BALSAMIC started with log level {context.obj['log_level']}.")
 
-    LOG.info("Collecting reference and annotation file paths.")
     references_path: Path = Path(balsamic_cache, cache_version, genome_version)
     references: Dict[str, Path] = get_absolute_paths_dict(
         base_path=references_path,
@@ -192,7 +190,6 @@ def case_config(
             if path is not None
         }
     )
-    LOG.info(f"Collected references: {references}")
 
     analysis_fastq_dir: str = get_analysis_fastq_files_directory(
         case_dir=Path(analysis_dir, case_id).as_posix(), fastq_path=fastq_path
