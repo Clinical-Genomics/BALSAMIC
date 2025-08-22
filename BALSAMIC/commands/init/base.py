@@ -37,7 +37,6 @@ from BALSAMIC.utils.analysis import get_cache_singularity_bind_paths
 from BALSAMIC.utils.cache import get_containers
 from BALSAMIC.utils.cli import get_snakefile
 from BALSAMIC.utils.io import generate_workflow_graph, write_json
-from BALSAMIC.utils.rule import get_script_path
 
 LOG = logging.getLogger(__name__)
 
@@ -149,7 +148,6 @@ def initialize(
         workflow_partition=workflow_partition,
         log_dir=log_dir,
         cluster_profile=cluster_profile,
-        cluster_job_status_script=get_script_path("cluster_job_status.py"),
         workflow_profile=cache_profile,
         qos=qos,
         quiet=quiet,

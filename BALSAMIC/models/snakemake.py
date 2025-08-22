@@ -34,7 +34,6 @@ class SnakemakeExecutable(BaseModel):
         workflow_partition (str)                                     : Cluster partition to use for snakemake workflow
         log_dir (Optional[DirectoryPath])                            : Logging directory.
         cluster_profile: Path                                        : Directory containing snakemake cluster profile
-        cluster_job_status_script (FilePath)                         : Path to script for snakemake to parse more slurm job-statuses
         workflow_profile: Path                                       : Directory contianing snakemake workflow profile specifying rule resources
         qos (Optional[QOS])                                          : QOS for sbatch jobs.
         quiet (Optional[bool])                                       : Quiet mode for snakemake.
@@ -56,7 +55,6 @@ class SnakemakeExecutable(BaseModel):
     workflow_partition: str
     log_dir: Optional[DirectoryPath] = None
     cluster_profile: Path
-    cluster_job_status_script: FilePath
     workflow_profile: Path
     qos: Optional[QOS] = None
     quiet: bool = False
@@ -77,10 +75,6 @@ class SnakemakeExecutable(BaseModel):
         return remove_unnecessary_spaces(
             f"{f'--config {self.get_dragen_flag()}' if self.get_dragen_flag() else ''} "
         )
-
-    def get_cluster_status_script(self) -> str:
-        """Return cluster-status argument."""
-        return f'--cluster-status "python {self.cluster_job_status_script.as_posix()}"'
 
     def get_dragen_flag(self) -> str:
         """Return string representation of the dragen flag."""

@@ -211,10 +211,12 @@ def test_get_snakemake_command(
     # THEN the expected format should be returned
     assert (
         snakemake_command
-        == f"snakemake --notemp -p --rerun-trigger mtime --directory {session_tmp_path.as_posix()} "
+        == f"snakemake --notemp -p --rerun-triggers mtime --directory {session_tmp_path.as_posix()} "
         f"--snakefile {reference_file.as_posix()} "
         f"--configfile {reference_file.as_posix()} --config dragen=True "
         f"--use-singularity --singularity-args '--cleanenv --bind {session_tmp_path.as_posix()}:/' --quiet "
-        f"-j {MAX_JOBS} --jobname BALSAMIC.{case_id_tumor_only}.{{rulename}}.{{jobid}}.sh "
-        f'--profile {reference_file.as_posix()} --workflow-profile {reference_file.as_posix()} --cluster-status "python {reference_file.as_posix()}" --cores 36'
+        f"--slurm-logdir {session_tmp_path} "
+        f"-j 999 --profile {reference_file.as_posix()} "
+        f'--default-resources slurm_extra="--qos={QOS.HIGH}" slurm_partition={Partition.CORE} slurm_account={ClusterAccount.DEVELOPMENT} --slurm-keep-successful-logs '
+        "--cores 36"
     )
