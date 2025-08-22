@@ -24,7 +24,7 @@ Step 1. Installing BALSAMIC
 
 ::
 
-    conda create -c conda-forge -c defaults --name S_balsamic python==3.11 pip pygraphviz wkhtmltopdf
+    conda create --name S_balsamic -c bioconda -c conda-forge python=3.11 pip "cython<3" pygraphviz wkhtmltopdf snakemake-executor-plugin-slurm
 
 
 2. Activate environment:

@@ -7,12 +7,14 @@ Added:
 * logfile for balsamic wrapper https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
 * analysis status text file for easier prodbioinfo handling https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
 * requested memory to each rule https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
+* snakemake executor plugin installation instructions https://github.com/Clinical-Genomics/BALSAMIC/pull/1604
 
 Changed:
 ^^^^^^^^
 * Updated ensembl vep to version 113.4 https://github.com/Clinical-Genomics/BALSAMIC/pull/1567
 * Updated rank model to use GNOMADAF_popmax instead of deprecated gnomAD_AF https://github.com/Clinical-Genomics/BALSAMIC/pull/1567
 * changed snakemake from running immediate submit to submitting snakemake job to cluster https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
+* update snakemake version to 9.9.0 https://github.com/Clinical-Genomics/BALSAMIC/pull/1604
 
 Removed:
 ^^^^^^^^
