@@ -1,3 +1,5 @@
+from typing import List
+
 import vcfpy
 from pandas import read_csv, DataFrame
 import itertools
@@ -93,22 +95,20 @@ class ClinicalAnnotation:
         self.all = set(self.gene_panel["gene"])
 
     def load_fusion_data(self) -> None:
-        fusion_df = read_csv(self.fusion_file, sep="\t")
-        fusion_pairs = fusion_df.dropna(subset=["FiveGene", "ThreeGene"])
-        self.fusion_pairs = set(
-            zip(fusion_pairs["FiveGene"], fusion_pairs["ThreeGene"])
-        )
+        self.fusion_pairs: set(tuple(str, str)) = set()
+        self.promiscuous_fusion_genes: set(str) = set()
+        self.genes_in_fusion_pairs: set(str) = set()
 
-        self.promiscuous_5 = set(
-            fusion_df[fusion_df["FiveGene"].notna() & fusion_df["ThreeGene"].isna()][
-                "FiveGene"
-            ]
-        )
-        self.promiscuous_3 = set(
-            fusion_df[fusion_df["FiveGene"].isna() & fusion_df["ThreeGene"].notna()][
-                "ThreeGene"
-            ]
-        )
+        with open(self.fusion_file, "r", encoding="utf-8") as file:
+            for line in file:
+                genes: list[str] = line.strip().split("\t")
+                if len(genes) == 2:
+                    self.fusion_pairs.update(
+                        [(genes[0], genes[1]), (genes[1], genes[0])]
+                    )
+                    self.genes_in_fusion_pairs.update([(genes[0], genes[1])])
+                elif len(genes) == 1:
+                    self.promiscuous_fusion_genes.add(genes[0])
 
 
 def parse_csq_format(vcf_reader) -> list[str]:
@@ -117,58 +117,35 @@ def parse_csq_format(vcf_reader) -> list[str]:
     return csq_fields
 
 
-def get_breakend_side(alt: str) -> int | None:
-    """
-    Determines if a breakend allele is a 3' or 5' breakend.
-    """
-    # Check and categorize based on bracket positions
-    if alt.startswith("]") and "]" in alt[1:]:
-        return 3  # ]chr:pos]X → 3' breakend
-    elif alt.startswith("[") and "[" in alt[1:]:
-        return 5  # [chr:pos[X → 5' breakend
-    elif alt.endswith("[") and "[" in alt[:-1]:
-        return 3  # X[chr:pos[ → 3' breakend
-    elif alt.endswith("]") and "]" in alt[:-1]:
-        return 5  # X]chr:pos] → 5' breakend
-    else:
-        return None
-
-
-def switch_breakend(breakend: int | None) -> int | None:
-    if breakend == 3:
-        return 5
-    elif breakend == 5:
-        return 3
-    else:
-        return None
-
-
 def parse_csq_entry(csq_entry, csq_fields) -> dict:
     return dict(zip(csq_fields, csq_entry.split("|")))
 
 
 def include_fusion_partner_info(record, parsed_csq_entries):
+    "Add GENE A and GENE B in the info field, with information about fusion partners per allele."
     alt = record.ALT[0].serialize()
-    alt_breakend = get_breakend_side(alt)
-    ref_breakend = switch_breakend(alt_breakend)
 
     if record.INFO["SVTYPE"] != "BND":
         return record
 
-    genes3, genes5 = set(), set()
+    genes_a = []
+    genes_b = []
     for csq_dict in parsed_csq_entries:
-        csq_dict["Breakend"] = (
-            alt_breakend if csq_dict["Allele"] == alt else ref_breakend
-        )
-        # print(f"{csq_dict['Allele']}, {csq_dict['Breakend']}, {csq_dict['SYMBOL']}")
-        if csq_dict["Breakend"] == 3 and csq_dict["SYMBOL"]:
-            genes3.add(csq_dict["SYMBOL"])
-        elif csq_dict["Breakend"] == 5 and csq_dict["SYMBOL"]:
-            genes5.add(csq_dict["SYMBOL"])
-    if genes3:
-        record.INFO["GENE3"] = list(genes3)
-    if genes5:
-        record.INFO["GENE5"] = list(genes5)
+        gene_symbol = csq_dict["SYMBOL"]
+        # Gene has to have a symbol
+        if not gene_symbol:
+            continue
+        # RefSeq and Ensemble are available and somewhat redundant, we want to keep the latter (also more complete)
+        if csq_dict["SOURCE"] != "Ensembl":
+            continue
+        if csq_dict["Allele"] == alt:
+            genes_a.append(gene_symbol)
+        else:
+            genes_b.append(gene_symbol)
+    if genes_a:
+        record.INFO["GENEA"] = list(set(genes_a))
+    if genes_b:
+        record.INFO["GENEB"] = list(set(genes_b))
     return record
 
 
@@ -195,56 +172,43 @@ def include_clinical_aberrations_info(
     if genes and genes.intersection(annotation_set):
         record.INFO[info_id] = ",".join(list(genes.intersection(annotation_set)))
         record.INFO["CLINICAL_SCORE"] = clinical_score
-        record.INFO["CLINICAL_ABERRATION"] = (
-            record.INFO.get("CLINICAL_ABERRATION", "") + "," + aberration_type
-        )
+        record.INFO["CLINICAL_ABERRATION"] = record.INFO.get(
+            "CLINICAL_ABERRATION", []
+        ).append(aberration_type)
     return record
 
 
-def include_clinical_fusions_info(record, annotation) -> set:
-    genes5 = set(record.INFO.get("GENE5", []))
-    genes3 = set(record.INFO.get("GENE3", []))
-    fusions = ""
-    aberration_type = record.INFO.get("CLINICAL_ABERRATION", "")
-    if genes5 and genes3:
+def include_clinical_fusion_type_info(record, annotation) -> set:
+    # sourcery skip: use-named-expression
+    genes_a = set(record.INFO.get("GENEA", []))
+    genes_b = set(record.INFO.get("GENEB", []))
+    genes_all = set.union(genes_a, genes_b)
+    fusions = []
+    aberration_type = record.INFO.get("CLINICAL_ABERRATION", [])
+    if genes_a and genes_b:
         # Fusions with two hits should match known pairs or promiscuous fusions
-        gene_pairs = set(itertools.product(genes5, genes3))
+        gene_pairs = set(itertools.product(genes_a, genes_b))
         detected_fusion_pairs = list(gene_pairs.intersection(annotation.fusion_pairs))
         if detected_fusion_pairs:
-            fusions += ",".join([f"{g5}--{g3}" for g5, g3 in detected_fusion_pairs])
-            aberration_type += ",known_fusion"
-        detected_promiscuous5 = list(genes5.intersection(annotation.promiscuous_5))
-        if genes5 and detected_promiscuous5:
-            fusions += ",".join([f"{g5}--?" for g5 in detected_promiscuous5])
-            aberration_type += ",promiscuous_fusion"
-        detected_promiscuous3 = list(genes3.intersection(annotation.promiscuous_3))
-        if genes3 and detected_promiscuous3:
-            fusions += ",".join([f"?--{g3}" for g3 in detected_promiscuous3])
-            aberration_type += ",promiscuous_fusion"
-        if fusions:
-            clinical_score = 15
-            record.INFO["CLINICAL_FUSION"] = fusions
-            record.INFO["CLINICAL_SCORE"] = clinical_score
-            record.INFO["CLINICAL_ABERRATION"] = aberration_type
-            return record
-    else:
-        # For fusion with only one hit, if that hit is within the fusion list
-        if genes5 or genes3:
-            annotation_fusion = {
-                gene for fusion in annotation.fusion_pairs for gene in fusion
-            }
-            annotation_fusion = annotation_fusion.union(
-                annotation.promiscuous_3, annotation.promiscuous_5
-            )
-            detected_1hit = list(genes5.union(genes3).intersection(annotation_fusion))
-            if detected_1hit:
-                aberration_type += ",single_hit_fusion"
-                fusions += ",".join(detected_1hit)
-                clinical_score = 10
-                record.INFO["CLINICAL_FUSION"] = fusions
-                record.INFO["CLINICAL_SCORE"] = clinical_score
-                record.INFO["CLINICAL_ABERRATION"] = aberration_type
-                return record
+            fusions.extend([f"{ga}--{gb}" for ga, gb in detected_fusion_pairs])
+            aberration_type.append("known_fusion")
+    elif genes_a or genes_b:
+        # For fusion with only one annotated hit (either 5 or 3), when that hit is within the fusion list
+        detected_1hit = list(genes_all.intersection(annotation.genes_in_fusion_pairs))
+        if detected_1hit:
+            fusions.extend([f"{g}--?" for g in detected_1hit])
+            aberration_type.append("single_hit_fusion")
+    # Promiscuous fusions, regardless of being two hits or one hit
+    detected_promiscuous = list(
+        genes_all.intersection(annotation.promiscuous_fusion_genes)
+    )
+    if detected_promiscuous:
+        fusions.extend([f"{g}--?" for g in detected_promiscuous])
+        aberration_type.append("promiscuous_fusion")
+    if fusions:
+        record.INFO["CLINICAL_FUSION"] = fusions
+        record.INFO["CLINICAL_ABERRATION"] = aberration_type
+    return record
 
 
 def include_svlen(record):
@@ -316,7 +280,7 @@ def include_rank(record):
 def include_clinical_info(record, parsed_csq_entries, annotation):
     svtype = record.INFO["SVTYPE"]
     if svtype == "BND":
-        include_clinical_fusions_info(record, annotation)
+        include_clinical_fusion_type_info(record, annotation)
     elif svtype == "DUP":
         include_clinical_aberrations_info(
             record, annotation.deletions, "CLINICAL_DUPLICATION", 15, "duplication"
@@ -443,8 +407,8 @@ info_fields_to_retrieve = [
     "CLINICAL_SCORE",
     "RANK",
     "CLINICAL_FUSION",
-    "GENE3",
-    "GENE5",
+    "GENEA",
+    "GENEB",
     "NGENES",
     "CLINICAL_ABERRATION",
 ]
@@ -500,8 +464,8 @@ def update_header(reader):
         ("CLINICAL_DUPLICATION", "1", "String", "Reported duplications"),
         ("CLINICAL_GENE_PANEL", "1", "String", "Detected gene panel match"),
         ("GENE", "1", "String", "Annotated genes"),
-        ("GENE3", "1", "String", "3' fusion genes"),
-        ("GENE5", "1", "String", "5' fusion genes"),
+        ("GENEA", "1", "String", "3' fusion genes"),
+        ("GENEB", "1", "String", "5' fusion genes"),
         ("NGENES", "1", "Integer", "Number of genes"),
         ("BIOTYPE", "1", "String", " "),
         ("IMPACT", "1", "String", ""),
