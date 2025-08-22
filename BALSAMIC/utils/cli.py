@@ -407,17 +407,16 @@ def get_pon_sample_list(fastq_path: str) -> List[SampleInstanceModel]:
 
 def _extract_dot(text: str) -> str:
     # Snakemake emits DOT that starts with either of these
-    start = -1
-    for s in SD.DOT_STARTS:
+    for s in [SD.DIGRAPH_HEADER, SD.HEADER]:
         start = text.find(s)
         if start != -1:
             break
     if start == -1:
-        raise ValueError(SD.ERR_NO_DOT_START)
+        raise ValueError("Could not find start of DOT graph in Snakemake output.")
     # Heuristic: take everything from start to the last closing brace
     end = text.rfind("}")
     if end == -1 or end < start:
-        raise ValueError(SD.ERR_NO_DOT_END)
+        raise ValueError("Could not find end of DOT graph in Snakemake output.")
     return text[start : end + 1]
 
 
