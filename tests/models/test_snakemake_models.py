@@ -189,7 +189,7 @@ def test_get_snakemake_cluster_options(
 
     # THEN the expected format should be returned
     assert snakemake_cluster_options == (
-        f"-j 999 --profile {reference_file.as_posix()} --default-resources "
+        f"--profile {reference_file.as_posix()} --default-resources "
         f'slurm_extra="--qos={QOS.HIGH}" slurm_partition={Partition.CORE} slurm_account={ClusterAccount.DEVELOPMENT} '
         "--slurm-keep-successful-logs"
     )
@@ -216,7 +216,7 @@ def test_get_snakemake_command(
         f"--configfile {reference_file.as_posix()} --config dragen=True "
         f"--use-singularity --singularity-args '--cleanenv --bind {session_tmp_path.as_posix()}:/' --quiet "
         f"--slurm-logdir {session_tmp_path} "
-        f"-j 999 --profile {reference_file.as_posix()} "
+        f"--profile {reference_file.as_posix()} "
         f'--default-resources slurm_extra="--qos={QOS.HIGH}" slurm_partition={Partition.CORE} slurm_account={ClusterAccount.DEVELOPMENT} --slurm-keep-successful-logs '
         "--cores 36"
     )
