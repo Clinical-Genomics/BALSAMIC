@@ -474,6 +474,7 @@ def generate_graph(config_collection_dict, config_path):
             fh.write(dot)
         raise
 
+
 def convert_deliverables_tags(
     delivery_json: List[Dict[str, Any]], sample_config_dict: dict
 ) -> List[Dict[str, Any]]:
