@@ -805,7 +805,3 @@ rule all:
 
         # Always write finish file if we've reached here
         write_finish_file(file_path=output.finish_file)
-
-        # Raise to trigger rule failure if needed
-        if status != "SUCCESSFUL":
-            raise ValueError(f"Final rule failed with status: {status}")
