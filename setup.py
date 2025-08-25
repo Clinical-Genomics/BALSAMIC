@@ -32,7 +32,7 @@ requirements: List[str] = [
     "crcmod==1.7",
     "cryptography==41.0.3",
     "cycler==0.11.0",
-    "cyvcf2==0.30.22",
+    "cyvcf2==0.31.1",
     "datrie==0.8.2",
     "defusedxml==0.7.1",
     "dpath==2.1.6",
@@ -118,7 +118,7 @@ requirements: List[str] = [
 
 # The C libraries required to build numpy are not available on RTD
 if not os.getenv("READTHEDOCS"):
-    requirements.extend(["cyvcf2==0.30.22"])
+    requirements.extend(["cyvcf2==0.31.1"])
 
 setup(
     name=NAME,

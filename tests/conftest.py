@@ -11,7 +11,7 @@ from _pytest.tmpdir import TempPathFactory
 from click.testing import CliRunner
 from pydantic_core import Url
 from unittest.mock import MagicMock
-from snakemake.resources import DefaultResources
+import subprocess
 
 from BALSAMIC import __version__ as balsamic_version
 from BALSAMIC.assets.scripts.preprocess_gens import cli as gens_preprocessing_cli
@@ -341,9 +341,9 @@ def submitter(tmp_path):
 
 
 @pytest.fixture(scope="session")
-def default_snakemake_resources() -> DefaultResources:
-    """Return snakemake default resource."""
-    return DefaultResources(["threads=1", "mem_mb=4000", "runtime=60"])
+def default_snakemake_resources() -> List:
+    """Return snakemake default resources."""
+    return ["threads=1", "mem_mb=4000", "runtime=60"]
 
 
 @pytest.fixture(scope="session")
@@ -2589,3 +2589,45 @@ def fixture_snakemake_executable_validated_data(
 def job_id() -> str:
     """Return cluster job identifier."""
     return "12345"
+
+
+@pytest.fixture
+def snakemake_runner():
+    def run(
+        *,
+        snakefile,
+        configfile,
+        targets=None,
+        extra_args=None,
+        dryrun=True,
+        cores=8,
+        default_resources=("mem_mb=32000", "threads=8"),
+    ):
+        cmd = [
+            "snakemake",
+            "-p",
+            "--snakefile",
+            os.fspath(snakefile),
+            "--configfile",
+            os.fspath(configfile),
+        ]
+
+        if dryrun:
+            cmd.append("--dry-run")  # or "-n"
+
+        cmd += ["--cores", str(cores)]
+
+        if default_resources:
+            # iterable of "k=v" strings
+            cmd += ["--default-resources", *list(default_resources)]
+
+        if targets:
+            cmd += list(targets)
+
+        if extra_args:
+            cmd += list(extra_args)
+
+        res = subprocess.run(cmd, text=True, capture_output=True, env=os.environ.copy())
+        return res.returncode, (res.stdout or ""), (res.stderr or ""), cmd
+
+    return run
