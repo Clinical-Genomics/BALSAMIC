@@ -30,18 +30,19 @@ jobs:
       - name: Install the HTML to PDF renderer
         run: sudo apt-get update && sudo apt-get install -y wkhtmltopdf
       # Install BALSAMIC
-      - name: Install BALSAMIC (no deps; keep conda's numpy/cyvcf2)
+      - name: Install BALSAMIC
         id: install_balsamic
         shell: bash -l {0}
         run: |
           conda activate balsamic
-          python -m pip install --no-deps --no-cache-dir .
+          pip install --no-cache-dir .
       # Install pytest coveralls dependencies
       - name: Install PyTest and Coveralls
+        id: install_pytest
         shell: bash -l {0}
         run: |
           conda activate balsamic
-          python -m pip install --no-cache-dir -r requirements-dev.txt
+          pip install --no-cache-dir -r requirements-dev.txt
       # Run PyTest
       - name: Run PyTest
         id: pytest
