@@ -34,8 +34,8 @@ from BALSAMIC.models.cache import CacheConfig, ReferencesCanFam, ReferencesHg
 from BALSAMIC.models.snakemake import SnakemakeExecutable
 from BALSAMIC.utils.analysis import get_cache_singularity_bind_paths
 from BALSAMIC.utils.cache import get_containers
-from BALSAMIC.utils.cli import get_snakefile
-from BALSAMIC.utils.io import generate_workflow_graph, write_json
+from BALSAMIC.utils.cli import get_snakefile, generate_init_graph
+from BALSAMIC.utils.io import write_json
 
 LOG = logging.getLogger(__name__)
 
@@ -129,7 +129,7 @@ def initialize(
         snakefile if snakefile else get_snakefile("generate_ref", "balsamic")
     )
 
-    generate_workflow_graph(
+    generate_init_graph(
         config_path=config_path,
         directory_path=references_dir,
         snakefile=snakefile,

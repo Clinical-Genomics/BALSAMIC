@@ -37,6 +37,7 @@ def test_init_hg(
             cosmic_key,
         ]
     )
+    print(result)
 
     # THEN the human reference generation workflow should have successfully started
     assert Path(tmp_path, balsamic_version, GenomeVersion.HG19, config_json).exists()
