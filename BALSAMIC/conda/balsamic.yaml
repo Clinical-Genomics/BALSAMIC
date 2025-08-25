@@ -1,10 +1,12 @@
 channels:
   - conda-forge
+  - bioconda
+
 dependencies:
   - python=3.11
   - pip
   - pygraphviz
   - numpy=1.26.*
-  - cyvcf2=0.30.22
+  - cyvcf2=0.31.1
   - pytest=7.4
   - pytest-cov=4.1
