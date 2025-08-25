@@ -406,6 +406,13 @@ def get_pon_sample_list(fastq_path: str) -> List[SampleInstanceModel]:
 
 
 def _extract_dot(text: str) -> str:
+    """
+    Extract the DOT graph definition from Snakemake CLI output.
+
+    This function searches for the beginning of a DOT graph emitted by Snakemake,
+    identified by either ``SD.DIGRAPH_HEADER`` or ``SD.HEADER``, and returns the
+    substring from that point up to the last closing brace ``}``.
+    """
     # Snakemake emits DOT that starts with either of these
     for s in [SD.DIGRAPH_HEADER, SD.HEADER]:
         start = text.find(s)
