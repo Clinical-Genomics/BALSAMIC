@@ -450,9 +450,7 @@ def _run_rulegraph_cli(
     Invoke `snakemake -n --rulegraph` and return (raw_output, dot).
     """
     if not shutil.which("snakemake"):
-        raise RuntimeError(
-            "Failed to execute 'snakemake': binary not found on PATH."
-        )
+        raise RuntimeError("Failed to execute 'snakemake': binary not found on PATH.")
 
     cmd = [
         "snakemake",
@@ -535,7 +533,6 @@ def _render_rulegraph_cli(
         raise BalsamicError() from e
 
 
-
 def generate_init_graph(
     config_path: Path, directory_path: Path, snakefile: Path, title: str
 ) -> None:
@@ -576,6 +573,7 @@ def generate_workflow_graph(config_collection_dict, config_path: Path) -> None:
         outstem=outstem,
         graph_title=graph_title,
     )
+
 
 def convert_deliverables_tags(
     delivery_json: List[Dict[str, Any]], sample_config_dict: dict
