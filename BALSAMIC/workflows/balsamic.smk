@@ -80,7 +80,6 @@ tmp_dir: str = Path(result_dir, "tmp").as_posix() + "/"
 Path.mkdir(Path(tmp_dir), parents=True, exist_ok=True)
 
 # Directories
-input_fastq_dir: str = config_model.analysis.fastq_path + "/"
 benchmark_dir: str = config_model.analysis.benchmark + "/"
 fastq_dir: str = Path(result_dir, "fastq").as_posix() + "/"
 bam_dir: str = Path(result_dir, "bam").as_posix() + "/"
@@ -118,6 +117,10 @@ sequencing_type = config_model.analysis.sequencing_type
 
 if analysis_type == AnalysisType.PAIRED:
     normal_sample: str = config_model.get_sample_name_by_type(SampleType.NORMAL)
+
+tumor_fastq_dir: str = config_model.analysis.tumor_fastq_path + "/"
+if analysis_type == AnalysisType.PAIRED:
+    normal_fastq_dir: str =  config_model.analysis.normal_fastq_path + "/"
 
 # Sample status to sampleID namemap
 if analysis_type == AnalysisType.PAIRED:

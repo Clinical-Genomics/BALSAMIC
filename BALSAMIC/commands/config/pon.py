@@ -12,7 +12,7 @@ from BALSAMIC.commands.options import (
     OPTION_BALSAMIC_CACHE,
     OPTION_CACHE_VERSION,
     OPTION_CASE_ID,
-    OPTION_FASTQ_PATH,
+    OPTION_NORMAL_FASTQ_PATH,
     OPTION_GENOME_INTERVAL,
     OPTION_GENOME_VERSION,
     OPTION_SENTIEON_INSTALL_DIR,
@@ -47,7 +47,7 @@ LOG = logging.getLogger(__name__)
 @OPTION_BALSAMIC_CACHE
 @OPTION_CACHE_VERSION
 @OPTION_CASE_ID
-@OPTION_FASTQ_PATH
+@OPTION_NORMAL_FASTQ_PATH
 @OPTION_GENOME_VERSION
 @OPTION_GENOME_INTERVAL
 @OPTION_SENTIEON_INSTALL_DIR
@@ -62,7 +62,7 @@ def pon_config(
     balsamic_cache: Path,
     cache_version: str,
     case_id: str,
-    fastq_path: Path,
+    normal_fastq_path: Path,
     genome_version: GenomeVersion,
     genome_interval: Path,
     sentieon_install_dir: Path,
@@ -89,9 +89,6 @@ def pon_config(
             "Argument: panel_bed is required for CNVkit PON creation."
         )
 
-    fastq_path: str = get_analysis_fastq_files_directory(
-        case_dir=Path(analysis_dir, case_id).as_posix(), fastq_path=fastq_path
-    )
     result_dir: Path = Path(analysis_dir, case_id, "analysis")
     log_dir: Path = Path(analysis_dir, case_id, "logs")
     script_dir: Path = Path(analysis_dir, case_id, "scripts")
@@ -126,7 +123,7 @@ def pon_config(
             "sequencing_type": "targeted" if panel_bed else "wgs",
             "config_creation_date": datetime.now().strftime("%Y-%m-%d %H:%M"),
         },
-        samples=get_pon_sample_list(fastq_path),
+        samples=get_pon_sample_list(normal_fastq_path),
         reference=references,
         singularity={
             "image": Path(balsamic_cache, cache_version, "containers").as_posix()

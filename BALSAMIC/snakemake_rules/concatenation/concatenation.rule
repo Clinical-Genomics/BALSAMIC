@@ -15,7 +15,6 @@ rule concatenate_fastqs:
     benchmark:
         Path(benchmark_dir, "concatenate_fastqs_{sample_type}_{sample}.tsv").as_posix()
     params:
-        fastq_dir=config["analysis"]["fastq_path"],
         sample="{sample}",
     message:
         "Sample {params.sample} FASTQ concatenation per read-direction, before UMI extraction"
