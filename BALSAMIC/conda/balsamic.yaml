@@ -1,8 +1,15 @@
 channels:
   - conda-forge
-  - defaults
+  - bioconda
 
 dependencies:
-  - conda-forge::python=3.11
-  - conda-forge::pip
-  - conda-forge::pygraphviz
+  - python=3.11
+  - pip
+  - pygraphviz
+  - wkhtmltopdf
+  - "cython<3"
+  - snakemake-executor-plugin-slurm
+  - numpy=1.26.*
+  - cyvcf2=0.31.*
+  - pytest=7.4
+  - pytest-cov=4.1
