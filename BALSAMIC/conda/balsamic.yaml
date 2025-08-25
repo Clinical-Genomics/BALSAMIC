@@ -11,5 +11,3 @@ dependencies:
   - snakemake-executor-plugin-slurm
   - numpy=1.26.*
   - cyvcf2=0.31.*
-  - pytest=7.4
-  - pytest-cov=4.1
