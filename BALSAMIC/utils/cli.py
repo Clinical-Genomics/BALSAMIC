@@ -427,17 +427,25 @@ def generate_graph(config_collection_dict, config_path):
         analysis_workflow=config_collection_dict["analysis"]["analysis_workflow"],
     )
 
-    # Build CLI: dry-run + rulegraph; --quiet to minimize extra stdout
-    cmd = (
-        f"snakemake -n --rulegraph "
-        f"--configfile {shlex.quote(config_path)} "
-        f"-s {shlex.quote(snakefile)} "
-        f"--quiet"
-    )
-    proc = subprocess.run(cmd, shell=True, text=True, capture_output=True)
+    cmd = [
+        "snakemake",
+        "-n",
+        "--rulegraph",
+        "--configfile",
+        str(config_path),
+        "-s",
+        str(snakefile),
+        "--quiet",
+    ]
+
+    try:
+        proc = subprocess.run(cmd, text=True, capture_output=True)
+    except FileNotFoundError as e:
+        raise RuntimeError("Failed to execute 'snakemake'") from e
+
     # Prefer stdout; some messages may land in stderr—keep both for debugging
     raw = (proc.stdout or "") + ("\n" + proc.stderr if proc.stderr else "")
-    if proc.returncode not in (0,):
+    if proc.returncode != 0:
         raise RuntimeError(f"snakemake exited with {proc.returncode}.\n{raw}")
 
     # Strip any chatter and keep just the DOT
