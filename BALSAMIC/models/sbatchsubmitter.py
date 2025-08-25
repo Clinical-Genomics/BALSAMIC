@@ -87,7 +87,7 @@ class SbatchSubmitter:
 
         success_status_check = textwrap.dedent(
             f"""
-            if [[ ! -f "{self.result_path}/analysis_finish" ]]; then
+            if [[ ! -f "{self.result_path}/analysis_finished_successfully" ]]; then
                 if [[ -f "{self.result_path}/analysis_status.txt" ]]; then
                     STATUS=$(cat "{self.result_path}/analysis_status.txt")
                     echo "FROM ANALYSIS STATUS: {self.result_path}/analysis_status.txt" >&2

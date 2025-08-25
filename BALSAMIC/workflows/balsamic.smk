@@ -764,7 +764,7 @@ rule all:
     input:
         quality_control_results + analysis_specific_results,
     output:
-        finish_file=Path(get_result_dir(config), "analysis_finish").as_posix(),
+        finish_file=Path(get_result_dir(config), "analysis_finished_successfully").as_posix(),
     params:
         tmp_dir=tmp_dir,
         case_name=config["analysis"]["case_id"],
@@ -803,5 +803,8 @@ rule all:
             status_fh.write(status + "\n")
             status_fh.write(error_message + "\n")
 
-        # Always write finish file if we've reached here
-        write_finish_file(file_path=output.finish_file)
+        # Raise to trigger rule failure if needed
+        if status != "SUCCESSFUL":
+            raise ValueError(f"Final rule failed with status: {status}")
+        else:
+            write_finish_file(file_path=output.finish_file)
