@@ -59,7 +59,7 @@ def deliver(
         "--snakefile",
         snakefile,
         "--config",
-        f"delivery=True",
+        "delivery=True",
         f"rules_to_deliver={','.join(rules_to_deliver)}",
         "--configfile",
         sample_config,
