@@ -134,7 +134,6 @@ def initialize(
         directory_path=references_dir,
         snakefile=snakefile,
         init_workflow=True,
-        reference_dir=references_dir.as_posix(),
     )
 
     LOG.info("Starting reference generation workflow...")

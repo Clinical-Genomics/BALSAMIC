@@ -499,7 +499,6 @@ def generate_graph(
     config_path: Path,
     snakefile: Path,
     init_workflow: bool = False,
-    references_dir: Optional[Path] = None,
 ) -> Path:
     """
     Generate DAG for snakemake workflows.
@@ -509,11 +508,9 @@ def generate_graph(
     Returns the rendered Path.
     """
     if init_workflow:
-        ref_dir = Path(
-            references_dir or config_collection_dict.get("references_dir", ".")
-        )
         graph_title = "_".join([SD.GRAPH_NAME, balsamic_version, "reference"])
-        dag_filename = ref_dir / f"{graph_title}_graph.pdf"
+        ref_dir = Path(config_collection_dict.get("references_dir", "."))
+        dag_filename = ref_dir / "reference_graph.pdf"
     else:
         graph_title = "_".join(
             [
