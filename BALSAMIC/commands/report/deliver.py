@@ -66,16 +66,19 @@ def deliver(
         "--cores",
         "1",
         "--dryrun",
+        "--verbose",
     ]
 
     result = subprocess.run(cmd, capture_output=True, text=True)
 
-    if result.returncode == 0:
-        LOG.info("Snakemake executed successfully.")
-        LOG.info(result.stdout)
-    else:
-        LOG.error("Snakemake failed:")
-        LOG.error(result.stderr)
+    if result.stdout.strip():
+        LOG.info("snakemake stdout:\n%s", result.stdout)
+    if result.stderr.strip():
+        LOG.info("snakemake stderr:\n%s", result.stderr)
+
+    if result.returncode != 0:
+        LOG.error("Snakemake failed with code %s", result.returncode)
+        raise SystemExit(result.returncode)
 
     hk_deliverables: List[Dict[str, Any]] = read_json(delivery_ready_file.as_posix())
     hk_deliverables: List[Dict[str, Any]] = convert_deliverables_tags(
