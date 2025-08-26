@@ -426,19 +426,20 @@ def _inject_title(dot: str, graph_name: str, graph_title: str, label_loc: str) -
     Inject a custom title into a DOT graph while normalizing the header.
     """
     dot = dot.strip()
-    if dot.startswith("digraph"):
-        return dot.replace(
+    return dot.replace(
             SD.DIGRAPH_HEADER,
             f'digraph {graph_name} {{ label="{graph_title}";labelloc="{label_loc}";',
             1,
-        )
+    )
+
+"""
     else:
         return dot.replace(
             SD.HEADER,
             f'{graph_name} {{ label="{graph_title}";labelloc="{label_loc}";',
             1,
         )
-
+"""
 
 def _run_rulegraph_cli(
     snakefile: Path,
