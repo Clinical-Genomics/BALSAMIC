@@ -56,12 +56,13 @@ from BALSAMIC.constants.paths import (
 from BALSAMIC.constants.workflow_params import VCF_DICT
 from BALSAMIC.models.config import ConfigModel
 from BALSAMIC.utils.cli import (
-    generate_workflow_graph,
+    generate_graph,
     get_analysis_fastq_files_directory,
     get_bioinfo_tools_version,
     get_panel_chrom,
     get_sample_list,
     get_gens_references,
+    get_snakefile,
 )
 from BALSAMIC.utils.io import read_json, write_json
 from BALSAMIC.utils.utils import get_absolute_paths_dict
@@ -266,5 +267,10 @@ def case_config(
     write_json(json_obj=config_collection_dict, path=config_path)
     LOG.info(f"Config file saved successfully - {config_path}")
 
-    generate_workflow_graph(config_collection_dict, config_path)
+    snakefile = get_snakefile(
+        analysis_type=config_collection_dict["analysis"]["analysis_type"],
+        analysis_workflow=config_collection_dict["analysis"]["analysis_workflow"],
+    )
+
+    generate_graph(config_collection_dict, config_path, snakefile)
     LOG.info(f"BALSAMIC Workflow has been configured successfully!")

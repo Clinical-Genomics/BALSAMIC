@@ -443,15 +443,10 @@ def _inject_title(dot: str, graph_name: str, graph_title: str, label_loc: str) -
 def _run_rulegraph_cli(
     snakefile: Path,
     config_path: Path,
-    extra_args: list[str] | None = None,
-    cwd: Path | None = None,
 ) -> tuple[str, str]:
     """
     Invoke `snakemake -n --rulegraph` and return (raw_output, dot).
     """
-    if not shutil.which("snakemake"):
-        raise RuntimeError("Failed to execute 'snakemake': binary not found on PATH.")
-
     cmd = [
         "snakemake",
         "-n",
@@ -462,19 +457,9 @@ def _run_rulegraph_cli(
         str(snakefile),
         "--quiet",
     ]
-    if extra_args:
-        cmd.extend(extra_args)
-
-    try:
-        proc = subprocess.run(
-            cmd, text=True, capture_output=True, cwd=str(cwd) if cwd else None
-        )
-    except FileNotFoundError as e:
-        raise RuntimeError("Failed to execute 'snakemake'") from e
+    proc = subprocess.run(cmd, text=True, capture_output=True)
 
     raw = (proc.stdout or "") + ("\n" + proc.stderr if proc.stderr else "")
-    if proc.returncode != 0:
-        raise RuntimeError(f"snakemake exited with {proc.returncode}.\n{raw}")
 
     dot = _extract_dot(raw)
     return raw, dot
@@ -483,95 +468,65 @@ def _run_rulegraph_cli(
 def _render_rulegraph_cli(
     config_path: Path,
     snakefile: Path,
-    outdir: Path,
-    outstem: str,
     graph_title: str,
-    *,
-    graph_name: str = SD.GRAPH_NAME,
-    label_loc: str = SD.GRAPH_LABEL_LOC,
-    fmt: str = SD.GRAPHVIZ_FORMAT,
-    engine: str = SD.GRAPHVIZ_ENGINE,
-    extra_cli_args: list[str] | None = None,
-    cwd: Path | None = None,
+    dag_filename: str,
 ) -> Path:
     """
     Run Snakemake via CLI to get DOT, inject title, and render with Graphviz.
     """
-    outdir.mkdir(parents=True, exist_ok=True)
+    raw, dot = _run_rulegraph_cli(
+        snakefile=snakefile,
+        config_path=config_path,
+    )
+    dot = _inject_title(dot, SD.GRAPH_NAME, graph_title, SD.GRAPH_LABEL_LOC)
 
-    try:
-        raw, dot = _run_rulegraph_cli(
-            snakefile=snakefile,
-            config_path=config_path,
-            extra_args=extra_cli_args,
-            cwd=cwd,
-        )
-        dot = _inject_title(dot, graph_name, graph_title, label_loc)
+    # Normalize and split the output path
+    dag_filename = Path(dag_filename)
+    outdir: Path = dag_filename.parent
+    outstem: str = dag_filename.stem
 
-        src = graphviz.Source(
-            dot,
-            directory=outdir.as_posix(),
-            filename=outstem,
-            format=fmt,
-            engine=engine,
-        )
-        rendered = Path(src.render(cleanup=True))
-        LOG.info("Workflow graph generated successfully (%s)", rendered.as_posix())
-        return rendered
-
-    except Exception as e:
-        # Best-effort dumps for debugging
-        try:
-            (outdir / f"{outstem}.raw.txt").write_text(raw)  # type: ignore[name-defined]
-        except Exception:
-            pass
-        try:
-            (outdir / f"{outstem}.dot").write_text(dot)  # type: ignore[name-defined]
-        except Exception:
-            pass
-        LOG.error("Workflow graph generation failed: %s", e)
-        raise BalsamicError() from e
+    src = graphviz.Source(
+        dot,
+        directory=outdir.as_posix(),
+        filename=outstem,
+        format=SD.GRAPHVIZ_FORMAT,
+        engine=SD.GRAPHVIZ_ENGINE,
+    )
+    rendered = Path(src.render(cleanup=True))
+    LOG.info("Workflow graph generated successfully (%s)", rendered.as_posix())
+    return rendered
 
 
-def generate_init_graph(
-    config_path: Path, directory_path: Path, snakefile: Path, title: str
+def generate_graph(
+    config_collection_dict: Dict,
+    config_path: Path,
+    snakefile: Path,
+    title: Optional[str] = None,
 ) -> None:
     """
-    Generate DAG for init workflow
+    Generate DAG for snakemake workflows
     """
-    graph_title = "_".join(["BALSAMIC", balsamic_version, title])
-    outstem = f"{title}_graph"
-    _render_rulegraph_cli(
-        config_path=config_path,
-        snakefile=snakefile,
-        outdir=directory_path,
-        outstem=outstem,
-        graph_title=graph_title,
-    )
 
-
-def generate_workflow_graph(config_collection_dict, config_path: Path) -> None:
-    """
-    Generate DAG for balsamic config workflow
-    """
-    snakefile = get_snakefile(
-        analysis_type=config_collection_dict["analysis"]["analysis_type"],
-        analysis_workflow=config_collection_dict["analysis"]["analysis_workflow"],
-    )
-
-    graph_title = "_".join(
-        [SD.GRAPH_NAME, balsamic_version, config_collection_dict["analysis"]["case_id"]]
-    )
-    outstem = (
-        ".".join(config_collection_dict["analysis"]["dag"].split(".")[:-1]) or "dag"
-    )
+    if title:
+        graph_title = "_".join([SD.GRAPH_NAME, balsamic_version, title])
+        dag_filename = (
+            config_collection_dict["references_dir"] + graph_title + "_graph.pdf"
+        )
+    else:
+        graph_title = "_".join(
+            [
+                SD.GRAPH_NAME,
+                balsamic_version,
+                config_collection_dict["analysis"]["case_id"],
+            ]
+        )
+        dag_filename = config_collection_dict["analysis"]["dag"]
 
     _render_rulegraph_cli(
         config_path=config_path,
         snakefile=snakefile,
-        outdir=Path("."),  # preserve current behavior; change if desired
-        outstem=outstem,
         graph_title=graph_title,
+        dag_filename=dag_filename,
     )
 
 
