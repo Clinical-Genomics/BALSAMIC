@@ -31,10 +31,11 @@ from BALSAMIC.constants.paths import (
 )
 from BALSAMIC.models.config import ConfigModel
 from BALSAMIC.utils.cli import (
-    generate_workflow_graph,
+    generate_graph,
     get_analysis_fastq_files_directory,
     get_bioinfo_tools_version,
     get_pon_sample_list,
+    get_snakefile,
 )
 from BALSAMIC.utils.io import read_json, write_json
 from BALSAMIC.utils.utils import get_absolute_paths_dict
@@ -144,5 +145,9 @@ def pon_config(
     write_json(json_obj=config_collection_dict, path=config_path)
     LOG.info(f"PON config file saved successfully - {config_path}")
 
-    generate_workflow_graph(config_collection_dict, config_path)
+    snakefile = get_snakefile(
+        analysis_type=config_collection_dict["analysis"]["analysis_type"],
+        analysis_workflow=config_collection_dict["analysis"]["analysis_workflow"],
+    )
+    generate_graph(config_collection_dict, config_path, snakefile)
     LOG.info(f"BALSAMIC PON workflow has been configured successfully!")

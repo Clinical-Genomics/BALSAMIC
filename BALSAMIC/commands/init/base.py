@@ -133,7 +133,7 @@ def initialize(
         config_path=config_path,
         directory_path=references_dir,
         snakefile=snakefile,
-        title="reference",
+        init_workflow=True,
     )
 
     LOG.info("Starting reference generation workflow...")

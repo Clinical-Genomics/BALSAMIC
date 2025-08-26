@@ -501,14 +501,14 @@ def generate_graph(
     config_collection_dict: Dict,
     config_path: Path,
     snakefile: Path,
-    title: Optional[str] = None,
+    init_workflow: Optional[bool] = False,
 ) -> None:
     """
     Generate DAG for snakemake workflows
     """
 
-    if title:
-        graph_title = "_".join([SD.GRAPH_NAME, balsamic_version, title])
+    if init_workflow:
+        graph_title = "_".join([SD.GRAPH_NAME, balsamic_version, "reference"])
         dag_filename = (
             config_collection_dict["references_dir"] + graph_title + "_graph.pdf"
         )
