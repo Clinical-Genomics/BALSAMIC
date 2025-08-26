@@ -65,13 +65,12 @@ config_model = ConfigModel.model_validate(config)
 shell.executable("/bin/bash")
 shell.prefix("set -eo pipefail; ")
 
-try:
-    from snakemake.logging import logger as LOG
-except Exception:
-    # fallback if Snakefile is imported outside snakemake
-    import logging
-    logging.basicConfig(level=logging.INFO)
-    LOG = logging.getLogger("snakefile")
+LOG = logging.getLogger(__name__)
+if not LOG.handlers:
+    h = logging.StreamHandler()
+    h.setFormatter(logging.Formatter("%(levelname)s: %(message)s"))
+    LOG.addHandler(h)
+LOG.setLevel(logging.INFO)
 
 # Get case id/name
 case_id: str = config_model.analysis.case_id
