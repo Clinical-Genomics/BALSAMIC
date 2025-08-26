@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Any, Dict, List
 
 import click
+import subprocess
 import snakemake
 from BALSAMIC.constants.constants import FileType
 
@@ -52,13 +53,30 @@ def deliver(
     delivery_ready_file: Path = Path(
         output_dir, f"{config_model.analysis.case_id}_delivery_ready.hk"
     )
-    snakemake.snakemake(
-        snakefile=snakefile,
-        config={"delivery": "True", "rules_to_deliver": ",".join(rules_to_deliver)},
-        dryrun=True,
-        configfiles=[sample_config],
-        quiet=True,
-    )
+
+    cmd = [
+        "snakemake",
+        "--snakefile",
+        snakefile,
+        "--config",
+        f"delivery=True",
+        f"rules_to_deliver={','.join(rules_to_deliver)}",
+        "--configfile",
+        sample_config,
+        "--cores",
+        "1",
+        "--dryrun",
+    ]
+
+    result = subprocess.run(cmd, capture_output=True, text=True)
+
+    if result.returncode == 0:
+        LOG.info("Snakemake executed successfully.")
+        LOG.info(result.stdout)
+    else:
+        LOG.error("Snakemake failed:")
+        LOG.error(result.stderr)
+
     hk_deliverables: List[Dict[str, Any]] = read_json(delivery_ready_file.as_posix())
     hk_deliverables: List[Dict[str, Any]] = convert_deliverables_tags(
         delivery_json=hk_deliverables, sample_config_dict=config

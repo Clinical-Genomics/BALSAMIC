@@ -736,7 +736,7 @@ if "delivery" in config:
         try:
             housekeeper_id = getattr(rules, my_rule).params.housekeeper_id
         except (ValueError, AttributeError, RuleException, WorkflowError) as e:
-            LOG.warning("Cannot deliver step (rule) {}: {}".format(my_rule, e))
+            LOG.warning(f"Cannot deliver step (rule) {my_rule}")
             continue
 
         LOG.info("Delivering step (rule) {} {}.".format(my_rule, housekeeper_id))
