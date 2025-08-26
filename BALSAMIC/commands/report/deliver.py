@@ -66,7 +66,7 @@ def deliver(
         "--cores",
         "1",
         "--dryrun",
-        "--quiet"
+        "--quiet",
     ]
 
     result = subprocess.run(cmd, capture_output=True, text=True)
