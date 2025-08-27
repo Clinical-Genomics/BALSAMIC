@@ -443,9 +443,9 @@ def _run_rulegraph_cli(
         "-n",
         "--rulegraph",
         "--configfile",
-        str(config_path),
+        config_path.as_posix(),
         "-s",
-        str(snakefile),
+        snakefile.as_posix(),
         "--quiet",
     ]
     try:

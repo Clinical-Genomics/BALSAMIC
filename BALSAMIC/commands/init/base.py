@@ -130,8 +130,8 @@ def initialize(
     )
 
     generate_graph(
+        config_collection_dict=cache_config,
         config_path=config_path,
-        directory_path=references_dir,
         snakefile=snakefile,
         init_workflow=True,
     )
