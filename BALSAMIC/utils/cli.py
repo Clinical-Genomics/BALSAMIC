@@ -509,7 +509,7 @@ def generate_graph(
     """
     if init_workflow:
         graph_title = "_".join([SD.GRAPH_NAME, balsamic_version, "reference"])
-        ref_dir = Path(config_collection_dict.get("references_dir", "."))
+        ref_dir = config_collection_dict["references_dir"]
         dag_filename = ref_dir / "reference_graph.pdf"
     else:
         graph_title = "_".join(
