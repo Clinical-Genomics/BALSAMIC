@@ -41,7 +41,7 @@ rule all:
         cache_config.get_container_output_paths(),
         cache_config.get_reference_output_paths(),
     output:
-        finish_file=f"{cache_config.references_dir.as_posix()}/reference.finish",
+        finish_file=f"{cache_config.references_dir.as_posix()}/analysis_finished_successfully",
     run:
         analysis_references: Dict[str, str] = get_relative_paths_dict(
             base_path=cache_config.references_dir,
