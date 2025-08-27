@@ -129,7 +129,6 @@ class SnakemakeExecutable(BaseModel):
             f"{self.get_singularity_bind_paths_option()} "
             f"{self.get_quiet_flag()} "
             f"{self.get_force_flag()} "
-            f"{self.get_slurm_logdir()} "
             f"{self.get_run_analysis_flag()} "
             f"{self.get_snakemake_cluster_options()} "
             f"{self.get_snakemake_options_command()}"
@@ -146,6 +145,7 @@ class SnakemakeExecutable(BaseModel):
         """Return Snakemake cluster options to be submitted."""
         if self.run_mode == RunMode.CLUSTER:
             snakemake_cluster_options: str = (
+                f"{self.get_slurm_logdir()} "
                 f"--profile {self.workflow_profile} "
                 f"{self.get_slurm_job_arguments()} "
                 f"--slurm-keep-successful-logs"

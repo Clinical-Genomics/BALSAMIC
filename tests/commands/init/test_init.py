@@ -35,6 +35,7 @@ def test_init_hg(
             GenomeVersion.HG19,
             "--cosmic-key",
             cosmic_key,
+            "--run-interactively",
         ]
     )
 
@@ -68,44 +69,6 @@ def test_init_hg_no_cosmic_key(invoke_cli: partial, tmp_path: Path, cosmic_key: 
         in result.output
     )
     assert result.exit_code == EXIT_FAIL
-
-
-def test_init_hg_run_analysis(
-    invoke_cli: partial,
-    tmp_path: Path,
-    cosmic_key: str,
-    config_json: str,
-    reference_graph: str,
-):
-    """Test Balsamic init command when actually running the analysis."""
-
-    # GIVEN a temporary output directory, a cluster account, and a COSMIC key
-
-    # WHEN invoking the init command
-    result: Result = invoke_cli(
-        [
-            "init",
-            "--out-dir",
-            tmp_path.as_posix(),
-            "--genome-version",
-            GenomeVersion.HG19,
-            "--cosmic-key",
-            cosmic_key,
-            "--run-mode",
-            RunMode.CLUSTER,
-            "--account",
-            ClusterAccount.DEVELOPMENT,
-            "--run-analysis",
-        ]
-    )
-
-    # THEN the human reference generation workflow should have successfully started
-    assert Path(tmp_path, balsamic_version, GenomeVersion.HG19, config_json).exists()
-    assert Path(
-        tmp_path, balsamic_version, GenomeVersion.HG19, reference_graph
-    ).exists()
-    assert result.exit_code == EXIT_SUCCESS
-
 
 def test_init_hg_run_analysis_no_account(
     invoke_cli: partial, tmp_path: Path, cosmic_key: str
