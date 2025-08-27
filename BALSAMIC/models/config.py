@@ -147,6 +147,7 @@ class AnalysisModel(BaseModel):
         dag : Field(optional); Path where DAG graph of workflow will be stored
         BALSAMIC_version  : Field(optional); Current version of BALSAMIC
         config_creation_date  : Field(optional); Timestamp when config was created
+        allowlist_snvs: Field(optional); Path to file with list of variants to be allowed through filters
 
     Raises:
         ValueError:
@@ -173,7 +174,7 @@ class AnalysisModel(BaseModel):
     config_creation_date: str
     pon_version: Optional[str] = None
     pon_workflow: Optional[PONWorkflow] = None
-    whitelist_snvs: Optional[Annotated[str, AfterValidator(is_file)]] = None
+    allowlist_snvs: Optional[Annotated[str, AfterValidator(is_file)]] = None
 
     @field_validator("pon_version")
     def validate_pon_version(cls, pon_version: Optional[str]):

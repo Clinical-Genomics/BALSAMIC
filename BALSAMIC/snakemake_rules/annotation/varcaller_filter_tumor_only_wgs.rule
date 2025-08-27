@@ -72,14 +72,14 @@ bcftools filter --threads {resources.threads} --include 'INFO/SWEGENAF <= {param
 bcftools filter --threads {resources.threads} --include 'INFO/Frq <= {params.loqusdb_clinical_freq[0]} || INFO/Frq == \".\"' --soft-filter '{params.loqusdb_clinical_freq[1]}' --mode '+' -O z -o {params.tmpdir}/clinical.filtered.pass_before_whitelisted.vcf.gz
 
 if [[ -f "{params.whitelist_snvs}" ]]; then
-  python {params.whitelist_script} {params.tmpdir}/clinical.filtered.pass_before_whitelisted.vcf.gz --whitelist-path {params.whitelist_snvs} {params.tmpdir}/clinical.filtered.pass_after_whitelisted.vcf ;
+  python {params.whitelist_script} {params.tmpdir}/clinical.filtered.pass_before_allowlisted.vcf.gz --allowlist-path {params.whitelist_snvs} {params.tmpdir}/clinical.filtered.pass_after_allowlisted.vcf ;
 else
-  python {params.whitelist_script} {params.tmpdir}/clinical.filtered.pass_before_whitelisted.vcf.gz {params.tmpdir}/clinical.filtered.pass_after_whitelisted.vcf ;
+  python {params.whitelist_script} {params.tmpdir}/clinical.filtered.pass_before_allowlisted.vcf.gz {params.tmpdir}/clinical.filtered.pass_after_allowlisted.vcf ;
 fi
 
-bcftools view --threads {resources.threads} --exclude '{params.hard_filters}' -O z -o {params.tmpdir}/clinical.filtered.whitelist_filtered.vcf.gz {params.tmpdir}/clinical.filtered.pass_after_whitelisted.vcf;
+bcftools view --threads {resources.threads} --exclude '{params.hard_filters}' -O z -o {params.tmpdir}/clinical.filtered.allowlist_filtered.vcf.gz {params.tmpdir}/clinical.filtered.pass_after_allowlisted.vcf;
 
-mv {params.tmpdir}/clinical.filtered.whitelist_filtered.vcf.gz {output.vcf_pass_tnscope} ;
+mv {params.tmpdir}/clinical.filtered.allowlist_filtered.vcf.gz {output.vcf_pass_tnscope} ;
 
 tabix -p vcf -f {output.vcf_pass_tnscope};
 

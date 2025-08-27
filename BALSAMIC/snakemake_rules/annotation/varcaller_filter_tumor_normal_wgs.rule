@@ -51,7 +51,7 @@ rule bcftools_filter_tnscope_clinical_tumor_normal:
     loqusdb_clinical_freq = get_tag_and_filtername(snv_clinical_filters, "Frq"),
     hard_filters = WgsSNVFilters.get_bcftools_filter_string(category="clinical", analysis_type=analysis_type, soft_filter_normals=soft_filter_normal),
     housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "clinical"},
-    whitelist_script= get_script_path("whitelist_snvs.py"),
+    whitelist_script= get_script_path("allowlist_snvs.py"),
     whitelist_snvs= config_model.analysis.whitelist_snvs,
     tmpdir= tempfile.mkdtemp(prefix=tmp_dir),
     case_name = '{case_name}',

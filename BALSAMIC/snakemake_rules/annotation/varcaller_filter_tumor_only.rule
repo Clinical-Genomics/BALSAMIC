@@ -53,7 +53,7 @@ rule bcftools_filter_merged_clinical_tumor_only:
     loqusdb_clinical_freq = get_tag_and_filtername(snv_clinical_filters, "Frq"),
     hard_filters = TgaSNVFilters.get_bcftools_filter_string(category="clinical", analysis_type=analysis_type, soft_filter_normals=soft_filter_normal),
     housekeeper_id= {"id": config["analysis"]["case_id"],"tags": "clinical"},
-    whitelist_script= get_script_path("whitelist_snvs.py"),
+    whitelist_script= get_script_path("allowlist_snvs.py"),
     whitelist_snvs= config_model.analysis.whitelist_snvs,
     cancer_somatic_panel_frq = config_model.reference.get("cancer_somatic_snv_panel_observations"),
     tmpdir= tempfile.mkdtemp(prefix=tmp_dir),

@@ -68,7 +68,7 @@ rule bcftools_filter_TNscope_umi_clinical_tumor_only:
     hard_filters = TgaUmiSNVFilters.get_bcftools_filter_string(category="clinical", analysis_type=analysis_type, soft_filter_normals=soft_filter_normal),
     case_name='{case_name}',
     edit_vcf_script=get_script_path("edit_vcf_info.py"),
-    whitelist_script= get_script_path("whitelist_snvs.py"),
+    whitelist_script= get_script_path("allowlist_snvs.py"),
     whitelist_snvs= config_model.analysis.whitelist_snvs,
     cancer_somatic_panel_frq = config_model.reference.get("cancer_somatic_snv_panel_observations"),
     tmpdir= tempfile.mkdtemp(prefix=tmp_dir),

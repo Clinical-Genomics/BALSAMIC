@@ -435,8 +435,8 @@ OPTION_UMI_MIN_READS = click.option(
     help="Minimum raw reads supporting each UMI group. Format: 'x,y,z'.",
 )
 
-OPTION_WHITELIST_SNVS = click.option(
-    "--whitelist-snvs",
+OPTION_ALLOWLIST_SNVS = click.option(
+    "--allowlist-snvs",
     type=click.Path(exists=True, resolve_path=True),
-    help="Path to whitelist file for SNVs, see read-the-docs for format.",
+    help="Path to allowlist file for SNVs, see read-the-docs for format.",
 )
