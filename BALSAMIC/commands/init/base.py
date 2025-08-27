@@ -130,7 +130,7 @@ def initialize(
     )
 
     generate_graph(
-        config_collection_dict=cache_config.model_dump_json(exclude_none=True),
+        config_collection_dict=cache_config.model_dump(by_alias=True, exclude_none=True),
         config_path=config_path,
         snakefile=snakefile,
         init_workflow=True,
