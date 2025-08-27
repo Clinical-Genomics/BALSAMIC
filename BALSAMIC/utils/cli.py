@@ -458,7 +458,7 @@ def _run_rulegraph_cli(
         raise RuntimeError(f"snakemake exited with {proc.returncode}.\n{raw}")
 
     dot = _extract_dot(raw)
-    return raw, dot
+    return dot
 
 
 def _render_rulegraph_cli(
@@ -468,7 +468,7 @@ def _render_rulegraph_cli(
     dag_filename: str | Path,
 ) -> Path:
     """Run Snakemake via CLI to get DOT, inject title, and render with Graphviz."""
-    raw, dot = _run_rulegraph_cli(
+    dot = _run_rulegraph_cli(
         snakefile=snakefile,
         config_path=config_path,
     )
