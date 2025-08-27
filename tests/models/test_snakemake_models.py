@@ -189,7 +189,7 @@ def test_get_snakemake_cluster_options(
 
     # THEN the expected format should be returned
     assert snakemake_cluster_options == (
-        f"--profile {reference_file.as_posix()} --default-resources "
+        f"--slurm-logdir {session_tmp_path} --profile {reference_file.as_posix()} --default-resources "
         f'slurm_extra="--qos={QOS.HIGH}" slurm_partition={Partition.CORE} slurm_account={ClusterAccount.DEVELOPMENT} '
         "--slurm-keep-successful-logs"
     )
