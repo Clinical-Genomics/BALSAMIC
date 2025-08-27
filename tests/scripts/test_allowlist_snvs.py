@@ -1,9 +1,9 @@
-from BALSAMIC.assets.scripts.whitelist_snvs import (
+from BALSAMIC.assets.scripts.allowlist_snvs import (
     parse_info,
     partial_match,
     onc_clnsig,
-    matches_whitelist,
-    whitelist_variants,
+    matches_allowlist,
+    allowlist_variants,
 )
 import pytest
 from io import StringIO
@@ -54,17 +54,17 @@ def test_onc_clnsig_negative():
 
 def test_matches_whitelist_exact_match():
     variant = {"chrom": "1", "pos": "100", "ref": "A", "alt": "T"}
-    whitelist = {
+    allowlist = {
         ("1", "100", "A", "T"): {"chrom": "1", "pos": "100", "ref": "A", "alt": "T"}
     }
-    assert matches_whitelist(variant, whitelist)
+    assert matches_allowlist(variant, allowlist)
 
 
 def test_matches_whitelist_partial_match():
     variant = {"chrom": "1", "pos": "200", "ref": "GCT", "alt": "A"}
     # Store the whitelist entry; key won't match exactly (because of '...'),
     # but the implementation will fall back to checking values for partial match.
-    whitelist = {
+    allowlist = {
         ("1", "200", "...T", "A"): {
             "chrom": "1",
             "pos": "200",
@@ -72,7 +72,7 @@ def test_matches_whitelist_partial_match():
             "alt": "A",
         }
     }
-    assert matches_whitelist(variant, whitelist)
+    assert matches_allowlist(variant, allowlist)
 
 
 def test_matches_whitelist_mismatch():
