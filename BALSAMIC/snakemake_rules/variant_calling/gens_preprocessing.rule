@@ -28,7 +28,7 @@ if config["analysis"]["sequencing_type"] == SequencingType.WGS:
     export SENTIEON_DNASCOPE={params.sentieon_ml_dnascope};
     
     {params.sentieon_exec} driver \
-    -t {resources.threads} \
+    -t {threads} \
     -r {input.ref} \
     -i {input.bam} \
     --algo DNAscope \
@@ -97,6 +97,8 @@ else:
             bam=lambda wildcards: config_model.get_final_bam_name(bam_dir=bam_dir,sample_name=wildcards.sample)
         output:
             gnomad_af5_vcf=cnv_dir + "SNV.germline.{sample}.dnascope_gnomad_af5.vcf.gz",
+        resources:
+            mem_mb=lambda wc, input: max(2.1 * input.size_mb, 5000)
         params:
             tmpdir=tempfile.mkdtemp(prefix=tmp_dir),
             pcr_model=params.common.pcr_model,
@@ -114,7 +116,7 @@ else:
     export SENTIEON_LICENSE={params.sentieon_lic};
   
      {params.sentieon_exec} driver \
-    -t {resources.threads} \
+    -t {threads} \
     -r {input.ref} \
     -i {input.bam} \
     --interval {input.bed} \

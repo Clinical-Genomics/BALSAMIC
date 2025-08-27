@@ -10,10 +10,10 @@ from typing import List, Optional, Union
 import click
 
 from BALSAMIC.commands.options import (
+    OPTION_WORKFLOW_PARTITION,
     OPTION_CACHE_VERSION,
     OPTION_CLUSTER_ACCOUNT,
     OPTION_CACHE_PROFILE,
-    OPTION_CLUSTER_PROFILE,
     OPTION_CLUSTER_QOS,
     OPTION_COSMIC_KEY,
     OPTION_FORCE_ALL,
@@ -34,9 +34,8 @@ from BALSAMIC.models.cache import CacheConfig, ReferencesCanFam, ReferencesHg
 from BALSAMIC.models.snakemake import SnakemakeExecutable
 from BALSAMIC.utils.analysis import get_cache_singularity_bind_paths
 from BALSAMIC.utils.cache import get_containers
-from BALSAMIC.utils.cli import get_snakefile
-from BALSAMIC.utils.io import generate_workflow_graph, write_json
-from BALSAMIC.utils.rule import get_script_path
+from BALSAMIC.utils.cli import get_snakefile, generate_graph
+from BALSAMIC.utils.io import write_json
 
 LOG = logging.getLogger(__name__)
 
@@ -45,9 +44,9 @@ LOG = logging.getLogger(__name__)
     "init", short_help="Download singularity containers and build the reference cache"
 )
 @OPTION_OUT_DIR
+@OPTION_WORKFLOW_PARTITION
 @OPTION_CACHE_VERSION
 @OPTION_CLUSTER_ACCOUNT
-@OPTION_CLUSTER_PROFILE
 @OPTION_CACHE_PROFILE
 @OPTION_CLUSTER_QOS
 @OPTION_COSMIC_KEY
@@ -67,7 +66,6 @@ def initialize(
     force_all: bool,
     genome_version: GenomeVersion,
     out_dir: str,
-    cluster_profile: Path,
     cache_profile: Path,
     qos: QOS,
     quiet: bool,
@@ -75,6 +73,7 @@ def initialize(
     run_mode: RunMode,
     snakefile: Path,
     snakemake_opt: List[str],
+    workflow_partition: str,
 ) -> None:
     """Validate inputs and download reference caches and containers."""
     LOG.info(f"BALSAMIC started with log level {context.obj['log_level']}")
@@ -130,11 +129,11 @@ def initialize(
         snakefile if snakefile else get_snakefile("generate_ref", "balsamic")
     )
 
-    generate_workflow_graph(
+    generate_graph(
+        config_collection_dict=cache_config,
         config_path=config_path,
-        directory_path=references_dir,
         snakefile=snakefile,
-        title="reference",
+        init_workflow=True,
     )
 
     LOG.info("Starting reference generation workflow...")
@@ -143,9 +142,8 @@ def initialize(
         case_id=cache_config.analysis.case_id,
         config_path=config_path,
         force=force_all,
+        workflow_partition=workflow_partition,
         log_dir=log_dir,
-        cluster_profile=cluster_profile,
-        cluster_job_status_script=get_script_path("cluster_job_status.py"),
         workflow_profile=cache_profile,
         qos=qos,
         quiet=quiet,

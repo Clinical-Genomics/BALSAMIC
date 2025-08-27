@@ -12,6 +12,8 @@ rule sentieon_dedup_consensus:
         dedup_metrics = Path(qc_dir, "{sample_type}.{sample}.dedup_conensus.metrics").as_posix()
     benchmark:
         Path(benchmark_dir, "sentieon_dedup_{sample_type}.{sample}.tsv").as_posix()
+    resources:
+        mem_mb = lambda wc, input: max(5.1 * input.size_mb, 5000)
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         sentieon_exec = config_model.sentieon.sentieon_exec,
@@ -27,7 +29,7 @@ export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
 
 {params.sentieon_exec} driver \
--t {resources.threads} \
+-t {threads} \
 -r {input.ref} \
 -i {input.bam} \
 --algo LocusCollector \
@@ -35,7 +37,7 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 --consensus --umi_tag XR --fun score_info {output.score} ;
 
 {params.sentieon_exec} driver \
--t {resources.threads} \
+-t {threads} \
 -r {input.ref} \
 -i {input.bam} \
 --algo Dedup \
@@ -75,11 +77,11 @@ export TMPDIR={params.tmpdir} ;
 mkdir -p {params.tmpdir}/collate ;
 mkdir -p {params.tmpdir}/sort ; 
 
-samtools collate -@ {resources.threads} -O -u {input.bam} {params.tmpdir}/collate/{wildcards.sample}_collate_tmp | \
-samtools fixmate -O SAM --reference {input.ref} -@ {resources.threads} - - | \
+samtools collate -@ {threads} -O -u {input.bam} {params.tmpdir}/collate/{wildcards.sample}_collate_tmp | \
+samtools fixmate -O SAM --reference {input.ref} -@ {threads} - - | \
 awk -f {params.postprocess_fixmate_script} - | \
-samtools sort -@ {resources.threads} -m 4G -O BAM -T {params.tmpdir}/sort/{wildcards.sample}_sort_tmp - | \
-samtools calmd -@ {resources.threads} -b - {input.ref} > {output.bam} ;
+samtools sort -@ {threads} -m 4G -O BAM -T {params.tmpdir}/sort/{wildcards.sample}_sort_tmp - | \
+samtools calmd -@ {threads} -b - {input.ref} > {output.bam} ;
 samtools index {output.bam} ;
 
 rm -rf {params.tmpdir}
@@ -103,5 +105,5 @@ rule cap_base_quality:
     shell:
         """
 python {params.cap_base_qualities} --max-quality {params.max_quality} {input.bam} {output.bam} ; 
-samtools index -@ {resources.threads} {output.bam}
+samtools index -@ {threads} {output.bam}
         """
