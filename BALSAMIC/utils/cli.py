@@ -431,8 +431,8 @@ def _inject_title(dot: str, graph_name: str, graph_title: str, label_loc: str) -
 
 
 def _run_rulegraph_cli(
-    snakefile: Path,
-    config_path: Path,
+    snakefile: str,
+    config_path: str,
 ) -> tuple[str, str]:
     """Invoke `snakemake -n --rulegraph` and return (raw_output, dot)."""
     if not shutil.which("snakemake"):
@@ -443,9 +443,9 @@ def _run_rulegraph_cli(
         "-n",
         "--rulegraph",
         "--configfile",
-        config_path.as_posix(),
+        str(config_path),
         "-s",
-        snakefile.as_posix(),
+        str(snakefile),
         "--quiet",
     ]
     try:
@@ -462,8 +462,8 @@ def _run_rulegraph_cli(
 
 
 def _render_rulegraph_cli(
-    config_path: Path,
-    snakefile: Path,
+    config_path: str,
+    snakefile: str,
     graph_title: str,
     dag_filename: str | Path,
 ) -> Path:
@@ -496,8 +496,8 @@ def _render_rulegraph_cli(
 
 def generate_graph(
     config_collection_dict: Dict,
-    config_path: Path,
-    snakefile: Path,
+    config_path: str,
+    snakefile: str,
     init_workflow: bool = False,
 ) -> Path:
     """
