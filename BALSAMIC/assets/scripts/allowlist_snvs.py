@@ -6,8 +6,8 @@ import csv
 
 # --- Constants ---
 INFO_HEADERS = {
-    "WhitelistStatus": "Variant whitelisted based on CLNSIG/ONC or manually curated clinical list",
-    "WhitelistedFilters": "Original filters for whitelisted variants that were overridden",
+    "AllowlistStatus": "Variant allowlisted based on CLNSIG/ONC or manually curated clinical list",
+    "AllowlistedFilters": "Original filters for allowlisted variants that were overridden",
 }
 VCF_FIELDS = ["chrom", "pos", "id", "ref", "alt", "qual", "filter", "info", "format"]
 
@@ -37,37 +37,37 @@ def onc_clnsig(info: str) -> bool:
     ) or ("ONC" in info_fields and "oncogenic" in info_fields["ONC"].lower())
 
 
-def matches_whitelist(variant, whitelist):
-    """Check if a variant is in the whitelist (with '...' support)."""
+def matches_allowlist(variant, allowlist):
+    """Check if a variant is in the allowlist (with '...' support)."""
     key = (variant["chrom"], variant["pos"], variant["ref"], variant["alt"])
-    if key in whitelist:
+    if key in allowlist:
         return True
 
     # Fallback for partial matches with '...'
-    for white in whitelist.values():
-        if partial_match(white["ref"], variant["ref"]) and partial_match(
-            white["alt"], variant["alt"]
+    for allow in allowlist.values():
+        if partial_match(allow["ref"], variant["ref"]) and partial_match(
+            allow["alt"], variant["alt"]
         ):
-            if variant["chrom"] == white["chrom"] and variant["pos"] == white["pos"]:
+            if variant["chrom"] == allow["chrom"] and variant["pos"] == allow["pos"]:
                 return True
     return False
 
 
-def whitelist_variants(variants, whitelist: dict = {}):
-    """Annotate and optionally rescue variants using whitelist info."""
+def allowlist_variants(variants, allowlist: dict = {}):
+    """Annotate and optionally rescue variants using allowlist info."""
     for key, v in variants.items():
-        whitelist_reasons = []
+        allowlist_reasons = []
 
         if onc_clnsig(v["info"]):
-            whitelist_reasons.append("ClinvarPathogenicOncogenic")
+            allowlist_reasons.append("ClinvarPathogenicOncogenic")
 
-        if whitelist and matches_whitelist(v, whitelist):
-            whitelist_reasons.append("ClinicalList")
+        if allowlist and matches_allowlist(v, allowlist):
+            allowlist_reasons.append("ClinicalList")
 
-        if whitelist_reasons:
-            v["info"] += f";WhitelistStatus={','.join(whitelist_reasons)}"
+        if allowlist_reasons:
+            v["info"] += f";AllowlistStatus={','.join(allowlist_reasons)}"
             if v["filter"] != "PASS":
-                v["info"] += f";WhitelistedFilters={v['filter']}"
+                v["info"] += f";AllowlistedFilters={v['filter']}"
                 v["filter"] = "PASS"
 
     return variants
@@ -82,7 +82,7 @@ def write_info_headers(out_vcf):
 
 
 def write_vcf(output_path, input_path, variants):
-    """Write updated VCF with whitelist annotations."""
+    """Write updated VCF with allowlist annotations."""
     with gzip.open(input_path, "rt") as input_vcf, open(output_path, "w") as out_vcf:
         for line in input_vcf:
             if line.startswith("#CHROM"):
@@ -119,36 +119,36 @@ def read_variants(vcf: str) -> Dict[Tuple[str, str, str, str], Dict[str, str]]:
     return variants
 
 
-def read_whitelist(csv_path):
-    """Load whitelist CSV into dictionary keyed by (chrom, pos, ref, alt)."""
-    whitelist = {}
+def read_allowlist(csv_path):
+    """Load allowlist CSV into dictionary keyed by (chrom, pos, ref, alt)."""
+    allowlist = {}
     with open(csv_path, newline="") as f:
         reader = csv.DictReader(f)
         for row in reader:
             key = (row["chrom"], row["pos"], row["ref"], row["alt"])
-            whitelist[key] = row
-    return whitelist
+            allowlist[key] = row
+    return allowlist
 
 
 # --- CLI Entry Point ---
 @click.command()
 @click.argument("vcf_path", type=click.Path(exists=True))
 @click.option(
-    "--whitelist-path",
+    "--allowlist-path",
     type=click.Path(exists=True),
     default=None,
-    help="Optional path to whitelist file.",
+    help="Optional path to allowlist file.",
 )
 @click.argument("output_file", type=click.Path())
-def main(vcf_path: str, whitelist_path: str, output_file: str) -> None:
-    """VCF processor with whitelist annotation support."""
+def main(vcf_path: str, allowlist_path: str, output_file: str) -> None:
+    """VCF processor with allowlist annotation support."""
     variants = read_variants(vcf_path)
 
-    if whitelist_path:
-        whitelist = read_whitelist(whitelist_path)
-        variants = whitelist_variants(variants, whitelist)
+    if allowlist_path:
+        allowlist = read_allowlist(allowlist_path)
+        variants = allowlist_variants(variants, allowlist)
     else:
-        variants = whitelist_variants(variants)
+        variants = allowlist_variants(variants)
 
     write_vcf(output_file, vcf_path, variants)
 
