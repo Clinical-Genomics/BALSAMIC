@@ -3,6 +3,7 @@ import json
 import logging
 import subprocess
 import sys
+import shlex
 from datetime import datetime
 from pathlib import Path
 from typing import List, Optional, Union
@@ -198,8 +199,3 @@ def initialize(
             f"{sys.executable} -m {snakemake_executable.get_command()}",
             shell=True,
         )
-
-    subprocess.run(
-        f"{sys.executable} -m {snakemake_executable.get_command()}",
-        shell=True,
-    )
