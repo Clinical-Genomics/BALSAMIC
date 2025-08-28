@@ -198,12 +198,9 @@ def include_vep_info(record, parsed_csq_entries):
 
 
 def include_clinical_aberrations_info(
-    record,
-    annotation_set,
-    info_id,
-    clinical_score,
+    record, annotation_set, info_id, clinical_score, aberration_type
 ) -> bool:
-    aberration_type = record.INFO.get("CLINICAL_ABERRATION", [])
+    aberration_types = set(record.INFO.get("CLINICAL_ABERRATION") or {})
     clinical_genes = set(record.INFO.get("CLINICAL_GENES") or {})
     genes = set(record.INFO.get("GENE", []))
     if genes and genes.intersection(annotation_set):
@@ -211,9 +208,9 @@ def include_clinical_aberrations_info(
         record.INFO["CLINICAL_GENES"] = list(clinical_genes.union(detected_genes))
         record.INFO[info_id] = ",".join(list(detected_genes))  ## TO BE REMOVED
         record.INFO["CLINICAL_SCORE"] = clinical_score
-        record.INFO["CLINICAL_ABERRATION"] = record.INFO.get(
-            "CLINICAL_ABERRATION", []
-        ).append(aberration_type)
+        record.INFO["CLINICAL_ABERRATION"] = list(
+            aberration_types.union({aberration_type})
+        )
     return record
 
 
@@ -224,7 +221,7 @@ def include_clinical_fusion_type_info(record, annotation) -> set:
     clinical_genes = record.INFO.get("CLINICAL_GENES", [])
     genes_all = set.union(genes_a, genes_b)
     fusions = []
-    aberration_type = record.INFO.get("CLINICAL_ABERRATION", [])
+    aberration_type = record.INFO.get("CLINICAL_ABERRATION") or []
     if genes_a and genes_b:
         # Fusions with two hits should match known pairs or promiscuous fusions
         gene_pairs = set(itertools.product(genes_a, genes_b))
@@ -268,6 +265,20 @@ def include_svlen(record):
     elif "END" in record.INFO:
         svlen = abs(record.POS - record.INFO["END"])
     record.INFO["SVLEN"] = svlen
+    return record
+
+
+def include_exonic_intronic_flag(record):
+    clinical_genes = record.INFO.get("CLINICAL_GENES")
+    canonical = record.INFO.get("CANONICAL")
+    if clinical_genes and canonical:
+        for gene in record.INFO["CLINICAL_GENES"]:
+            for canonical in record.INFO["CANONICAL"]:
+                fields = canonical.split("|")
+                if gene == fields[0]:
+                    if fields[1] != "" or fields[2] != "":
+                        record.INFO["EXONINTRON"] = "YES"
+                        break
     return record
 
 
@@ -350,6 +361,7 @@ def process_record(record, parsed_csq_entries, annotation):
     include_canonical_gene_info(record, parsed_csq_entries)
     include_svlen(record)
     include_clinical_info(record, parsed_csq_entries, annotation)
+    include_exonic_intronic_flag(record)
     include_rank(record)
     return record
 
@@ -517,6 +529,7 @@ def update_header(reader):
         ("BIOTYPE", "1", "String", " "),
         ("IMPACT", "1", "String", ""),
         ("CANONICAL", "1", "String", ""),
+        ("EXONINTRON", "1", "String", ""),
     ]
     for id, number, type, desc in headers:
         reader.header.add_info_line(
