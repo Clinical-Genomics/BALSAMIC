@@ -7,7 +7,8 @@ Added:
 * logfile for balsamic wrapper https://github.com/Clinical-Genomics/BALSAMIC/pull/1604
 * analysis status text file for easier prodbioinfo handling https://github.com/Clinical-Genomics/BALSAMIC/pull/1604
 * requested memory to each rule https://github.com/Clinical-Genomics/BALSAMIC/pull/1604
-* snakemake executor plugin installation instructionshttps://github.com/Clinical-Genomics/BALSAMIC/pull/1604
+* snakemake executor plugin installation instructions https://github.com/Clinical-Genomics/BALSAMIC/pull/1604
+* argument for headjob slurm partition  https://github.com/Clinical-Genomics/BALSAMIC/pull/1604
 
 Changed:
 ^^^^^^^^
@@ -20,9 +21,9 @@ Changed:
 
 Removed:
 ^^^^^^^^
-* removed immediate submit functionality https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
-* removed unused code for benchmark plotting https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
-* removed functionality to disable variant callers https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
+* removed immediate submit functionality https://github.com/Clinical-Genomics/BALSAMIC/pull/1604
+* removed unused code for benchmark plotting https://github.com/Clinical-Genomics/BALSAMIC/pull/1604
+* removed functionality to disable variant callers https://github.com/Clinical-Genomics/BALSAMIC/pull/1604
 
 Fixed:
 ^^^^^^
