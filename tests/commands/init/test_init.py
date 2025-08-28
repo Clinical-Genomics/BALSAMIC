@@ -70,6 +70,7 @@ def test_init_hg_no_cosmic_key(invoke_cli: partial, tmp_path: Path, cosmic_key: 
     )
     assert result.exit_code == EXIT_FAIL
 
+
 def test_init_hg_run_analysis_no_account(
     invoke_cli: partial, tmp_path: Path, cosmic_key: str
 ):
@@ -96,4 +97,3 @@ def test_init_hg_run_analysis_no_account(
     # THEN an exception should have been raised
     assert "A cluster account is required for cluster run mode" in result.output
     assert result.exit_code == EXIT_FAIL
-
