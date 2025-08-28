@@ -21,7 +21,7 @@ rule bcftools_merge_germlineSNV_research:
         """
 # merge the tumor and normal VCF 
 bcftools merge \
---threads {resources.threads} \
+--threads {threads} \
 -O z -o {params.tmpdir}/SNV.merged.vcf.gz \
 {input.snv_vcf_tumor} {input.snv_vcf_normal};
 
@@ -105,7 +105,7 @@ cnvkit.py segment {output.cnr} \
 --output {output.cns_initial} \
 --method cbs \
 --drop-low-coverage \
---processes {resources.threads};
+--processes {threads};
 
 # Convert copy number segments (initial.cns) to standard SEG format to be used in PureCN
 cnvkit.py export seg {output.cns_initial} \

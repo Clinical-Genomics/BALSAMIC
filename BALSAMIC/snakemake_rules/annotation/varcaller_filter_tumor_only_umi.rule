@@ -25,17 +25,17 @@ rule bcftools_filter_TNscope_umi_research_tumor_only:
     "adding FOUND_IN tags to the output VCF for {params.case_name}"
   shell:
     """
-bcftools view  --threads {resources.threads} {input.vcf_snv_research} | \
+bcftools view  --threads {threads} {input.vcf_snv_research} | \
 bcftools filter --include 'INFO/GNOMADAF_popmax <= {params.pop_freq[0]} || INFO/GNOMADAF_popmax == \".\"' --soft-filter '{params.pop_freq[1]}' --mode '+' | \
-bcftools filter --threads {resources.threads} --include 'INFO/SWEGENAF <= {params.swegen_freq[0]} || INFO/SWEGENAF == \".\"' --soft-filter '{params.swegen_freq[1]}' --mode '+' |\
-bcftools view --threads {resources.threads} --exclude '{params.hard_filters}' -o {output.vcf_pass_tnscope_umi}.temp1 -O z;
+bcftools filter --threads {threads} --include 'INFO/SWEGENAF <= {params.swegen_freq[0]} || INFO/SWEGENAF == \".\"' --soft-filter '{params.swegen_freq[1]}' --mode '+' |\
+bcftools view --threads {threads} --exclude '{params.hard_filters}' -o {output.vcf_pass_tnscope_umi}.temp1 -O z;
 
 python {params.edit_vcf_script} \
 --input_vcf {output.vcf_pass_tnscope_umi}.temp1 \
 --output_vcf {output.vcf_pass_tnscope_umi}.temp2 \
 --variant_caller {params.variant_caller};
 
-bgzip -@ {resources.threads} -l 9 -c {output.vcf_pass_tnscope_umi}.temp2 > {output.vcf_pass_tnscope_umi}
+bgzip -@ {threads} -l 9 -c {output.vcf_pass_tnscope_umi}.temp2 > {output.vcf_pass_tnscope_umi}
 
 tabix -p vcf -f {output.vcf_pass_tnscope_umi};
 
@@ -78,14 +78,14 @@ rule bcftools_filter_TNscope_umi_clinical_tumor_only:
     "adding FOUND_IN tags to the output VCF for {params.case_name}"
   shell:
     """
-bcftools reheader --threads {resources.threads} -s {input.namemap} {input.vcf_snv_clinical} |\
-bcftools filter --threads {resources.threads} --include 'INFO/ArtefactFrq <= {params.artefact_freq[0]} || INFO/ArtefactFrq == \".\"' --soft-filter '{params.artefact_freq[1]}' --mode '+' |\
-bcftools filter --threads {resources.threads} --include 'INFO/GNOMADAF_popmax <= {params.pop_freq[0]} || INFO/GNOMADAF_popmax == \".\"' --soft-filter '{params.pop_freq[1]}' --mode '+' | \
-bcftools filter --threads {resources.threads} --include 'INFO/SWEGENAF <= {params.swegen_freq[0]} || INFO/SWEGENAF == \".\"' --soft-filter '{params.swegen_freq[1]}' --mode '+' |\
-bcftools filter --threads {resources.threads} --include 'INFO/Frq <= {params.loqusdb_clinical_freq[0]} || INFO/Frq == \".\"' --soft-filter '{params.loqusdb_clinical_freq[1]}' --mode '+' --mode '+' -O z -o {params.tmpdir}/clinical.filtered.pass_before_allowlisted.vcf.gz
+bcftools reheader --threads {threads} -s {input.namemap} {input.vcf_snv_clinical} |\
+bcftools filter --threads {threads} --include 'INFO/ArtefactFrq <= {params.artefact_freq[0]} || INFO/ArtefactFrq == \".\"' --soft-filter '{params.artefact_freq[1]}' --mode '+' |\
+bcftools filter --threads {threads} --include 'INFO/GNOMADAF_popmax <= {params.pop_freq[0]} || INFO/GNOMADAF_popmax == \".\"' --soft-filter '{params.pop_freq[1]}' --mode '+' | \
+bcftools filter --threads {threads} --include 'INFO/SWEGENAF <= {params.swegen_freq[0]} || INFO/SWEGENAF == \".\"' --soft-filter '{params.swegen_freq[1]}' --mode '+' |\
+bcftools filter --threads {threads} --include 'INFO/Frq <= {params.loqusdb_clinical_freq[0]} || INFO/Frq == \".\"' --soft-filter '{params.loqusdb_clinical_freq[1]}' --mode '+' --mode '+' -O z -o {params.tmpdir}/clinical.filtered.pass_before_allowlisted.vcf.gz
 
 if [ "{params.cancer_somatic_panel_frq}" != "None" ] ; then
-  bcftools filter --threads {resources.threads} --include 'INFO/Cancer_Somatic_Panel_Frq <= {params.somatic_snv_panel_freq[0]} || INFO/Cancer_Somatic_Panel_Frq == \".\"' --soft-filter '{params.somatic_snv_panel_freq[1]}' --mode '+' {params.tmpdir}/clinical.filtered.pass_before_allowlisted.vcf.gz -O z -o {params.tmpdir}/clinical.filtered.pass_before_allowlisted.1.vcf.gz
+  bcftools filter --threads {threads} --include 'INFO/Cancer_Somatic_Panel_Frq <= {params.somatic_snv_panel_freq[0]} || INFO/Cancer_Somatic_Panel_Frq == \".\"' --soft-filter '{params.somatic_snv_panel_freq[1]}' --mode '+' {params.tmpdir}/clinical.filtered.pass_before_allowlisted.vcf.gz -O z -o {params.tmpdir}/clinical.filtered.pass_before_allowlisted.1.vcf.gz
   mv {params.tmpdir}/clinical.filtered.pass_before_allowlisted.1.vcf.gz {params.tmpdir}/clinical.filtered.pass_before_allowlisted.vcf.gz
 fi
 
@@ -96,14 +96,13 @@ python {params.edit_vcf_script} \
 
 bgzip {params.tmpdir}/clinical.filtered.pass_before_allowlisted.1.vcf ;
 
-
 if [[ -f "{params.allowlist_snvs}" ]]; then
   python {params.allowlist_script} {params.tmpdir}/clinical.filtered.pass_before_allowlisted.1.vcf.gz --allowlist-path {params.allowlist_snvs} {params.tmpdir}/clinical.filtered.pass_after_allowlisted.vcf ;
 else
   python {params.allowlist_script} {params.tmpdir}/clinical.filtered.pass_before_allowlisted.1.vcf.gz {params.tmpdir}/clinical.filtered.pass_after_allowlisted.vcf ;
 fi
 
-bcftools view --threads {resources.threads} --exclude '{params.hard_filters}' -O z -o {params.tmpdir}/clinical.filtered.allowlist_filtered.vcf.gz {params.tmpdir}/clinical.filtered.pass_after_allowlisted.vcf ;
+bcftools view --threads {threads} --exclude '{params.hard_filters}' -O z -o {params.tmpdir}/clinical.filtered.allowlist_filtered.vcf.gz {params.tmpdir}/clinical.filtered.pass_after_allowlisted.vcf ;
 
 mv {params.tmpdir}/clinical.filtered.allowlist_filtered.vcf.gz {output.vcf_pass_tnscope_umi} ;
 

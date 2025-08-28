@@ -26,13 +26,13 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 shell_bam_files=$(echo {input.bam_files} | sed 's/ / -i /g') ;
 
 {params.sentieon_exec} driver \
--t {resources.threads} \
+-t {threads} \
 -i $shell_bam_files \
 --algo LocusCollector \
 --fun score_info {output.score} ;
 
 {params.sentieon_exec} driver \
--t {resources.threads} \
+-t {threads} \
 -i $shell_bam_files \
 --algo Dedup \
 --score_info {output.score} \
@@ -67,7 +67,7 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 
 {params.sentieon_exec} driver \
 -r {input.ref} \
--t {resources.threads} \
+-t {threads} \
 -i {input.bam} \
 --algo Realigner \
 -k {input.mills} \
@@ -105,7 +105,7 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 
 {params.sentieon_exec} driver \
 -r {input.ref} \
--t {resources.threads} \
+-t {threads} \
 -i {input.bam} \
 --algo QualCal \
 -k {input.dbsnp} \
@@ -114,7 +114,7 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 
 {params.sentieon_exec} driver \
 -r {input.ref} \
--t {resources.threads} \
+-t {threads} \
 -i {input.bam} \
 -q {output.recal_data_table} \
 --algo QualCal \
@@ -123,7 +123,7 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 -k {input.indel_1kg} {output.recal_data_table}.post;
 
 {params.sentieon_exec} driver \
--t {resources.threads} \
+-t {threads} \
 --algo QualCal \
 --plot --before {output.recal_data_table} \
 --after {output.recal_data_table}.post {output.qual_recal};

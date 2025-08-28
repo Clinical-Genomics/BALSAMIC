@@ -42,7 +42,7 @@ rule msisensorpro_msi_tumor_normal:
     "Analysing MSI using msisensor-pro for {params.case_id}"
   shell:
     """
-msisensor-pro msi -b {resources.threads} -z 1 -d {input.msi_list} -t {input.bamT} -n {input.bamN} -o  {params.tmpdir}/msi_{params.case_id};
+msisensor-pro msi -b {threads} -z 1 -d {input.msi_list} -t {input.bamT} -n {input.bamN} -o  {params.tmpdir}/msi_{params.case_id};
 
 sed 's/\%/MSI/g' {params.tmpdir}/msi_{params.case_id} > {output.msi_result}; 
 

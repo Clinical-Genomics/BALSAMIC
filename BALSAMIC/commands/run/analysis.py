@@ -2,9 +2,7 @@
 import json
 import logging
 import os
-import re
 import subprocess
-import textwrap
 import sys
 from pathlib import Path
 from typing import List
@@ -14,9 +12,10 @@ import click
 from BALSAMIC import __version__ as balsamic_version
 
 from BALSAMIC.commands.options import (
+    OPTION_WORKFLOW_PARTITION,
+    OPTION_HEADJOB_PARTITION,
     OPTION_CLUSTER_ACCOUNT,
     OPTION_WORKFLOW_PROFILE,
-    OPTION_CLUSTER_PROFILE,
     OPTION_MAX_RUN_HOURS,
     OPTION_CLUSTER_QOS,
     OPTION_DRAGEN,
@@ -46,8 +45,9 @@ LOG = logging.getLogger(__name__)
 
 
 @click.command("analysis", short_help="Run the analysis on a sample config-file")
+@OPTION_WORKFLOW_PARTITION
+@OPTION_HEADJOB_PARTITION
 @OPTION_CLUSTER_ACCOUNT
-@OPTION_CLUSTER_PROFILE
 @OPTION_MAX_RUN_HOURS
 @OPTION_WORKFLOW_PROFILE
 @OPTION_CLUSTER_QOS
@@ -67,7 +67,6 @@ def analysis(
     sample_config: Path,
     run_mode: RunMode,
     dragen: bool,
-    cluster_profile: Path,
     max_run_hours: int,
     workflow_profile: Path,
     run_analysis: bool,
@@ -76,6 +75,8 @@ def analysis(
     force_all: bool,
     snakemake_opt: List[str],
     account: str,
+    workflow_partition: str,
+    headjob_partition: str,
     quiet: bool,
 ):
     """Run BALSAMIC workflow on the provided sample's config file."""
@@ -95,7 +96,6 @@ def analysis(
     add_file_logging(log_file, logger_name=__name__)
 
     LOG.info(f"Running BALSAMIC version {balsamic_version} -- RUN ANALYSIS")
-    LOG.info(f"BALSAMIC started with log level {context.obj['log_level']}.")
     LOG.info(f"Using case config file: {sample_config_path}")
     LOG.info(f"Starting analysis on: {case_id}.")
 
@@ -150,8 +150,8 @@ def analysis(
         config_path=sample_config_path,
         dragen=dragen,
         force=force_all,
+        workflow_partition=workflow_partition,
         log_dir=log_path.as_posix(),
-        cluster_profile=cluster_profile,
         cluster_job_status_script=get_script_path("cluster_job_status.py"),
         workflow_profile=workflow_profile,
         qos=qos,
@@ -175,6 +175,7 @@ def analysis(
             log_path=Path(log_path),
             account=account,
             qos=qos,
+            headjob_partition=headjob_partition,
             max_run_hours=max_run_hours,
             snakemake_executable=snakemake_executable,
             logger=LOG,

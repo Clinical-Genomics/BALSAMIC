@@ -34,7 +34,7 @@ configManta.py \
 --referenceFasta={input.fa} \
 --runDir={params.tmpdir};
 
-python {params.tmpdir}/runWorkflow.py -m {params.runmode} -j {resources.threads};
+python {params.tmpdir}/runWorkflow.py -m {params.runmode} -j {threads};
 
 convertInversion.py \
   $samtools_path \
@@ -43,7 +43,7 @@ convertInversion.py \
 
 bgzip -l 9 {params.tmpdir}/results/variants/tumorSV_converted.vcf;
 
-bcftools filter --threads {resources.threads} --exclude 'SUM(FORMAT/PR[0:1]+FORMAT/SR[0:1]) < {params.low_pr_sr_count[0]}' --soft-filter '{params.low_pr_sr_count[1]}' --mode '+' -o {output.final} -O z {params.tmpdir}/results/variants/tumorSV_converted.vcf.gz
+bcftools filter --threads {threads} --exclude 'SUM(FORMAT/PR[0:1]+FORMAT/SR[0:1]) < {params.low_pr_sr_count[0]}' --soft-filter '{params.low_pr_sr_count[1]}' --mode '+' -o {output.final} -O z {params.tmpdir}/results/variants/tumorSV_converted.vcf.gz
 
 tabix -p vcf -f {output.final};
 

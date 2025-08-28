@@ -3,10 +3,12 @@
 
 Added:
 ^^^^^^
-* sbatch script for snakemake sequential job submission https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
-* logfile for balsamic wrapper https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
-* analysis status text file for easier prodbioinfo handling https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
-* requested memory to each rule https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
+* sbatch script for snakemake sequential job submission https://github.com/Clinical-Genomics/BALSAMIC/pull/1604
+* logfile for balsamic wrapper https://github.com/Clinical-Genomics/BALSAMIC/pull/1604
+* analysis status text file for easier prodbioinfo handling https://github.com/Clinical-Genomics/BALSAMIC/pull/1604
+* requested memory to each rule https://github.com/Clinical-Genomics/BALSAMIC/pull/1604
+* snakemake executor plugin installation instructions https://github.com/Clinical-Genomics/BALSAMIC/pull/1604
+* argument for headjob slurm partition  https://github.com/Clinical-Genomics/BALSAMIC/pull/1604
 * soft-filter for somatic cancer variants from panels https://github.com/Clinical-Genomics/BALSAMIC/pull/1570
 * whitelist script for setting PASS to soft-filtered clinically relevant variants https://github.com/Clinical-Genomics/BALSAMIC/pull/1570
 
@@ -14,13 +16,16 @@ Changed:
 ^^^^^^^^
 * Updated ensembl vep to version 113.4 https://github.com/Clinical-Genomics/BALSAMIC/pull/1567
 * Updated rank model to use GNOMADAF_popmax instead of deprecated gnomAD_AF https://github.com/Clinical-Genomics/BALSAMIC/pull/1567
-* changed snakemake from running immediate submit to submitting snakemake job to cluster https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
+* changed snakemake from running immediate submit to submitting snakemake job to cluster https://github.com/Clinical-Genomics/BALSAMIC/pull/1604
+* update snakemake version to 9.9.0 https://github.com/Clinical-Genomics/BALSAMIC/pull/1604
+* Updated balsamic installation instructions https://github.com/Clinical-Genomics/BALSAMIC/pull/1599
+
 
 Removed:
 ^^^^^^^^
-* removed immediate submit functionality https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
-* removed unused code for benchmark plotting https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
-* removed functionality to disable variant callers https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
+* removed immediate submit functionality https://github.com/Clinical-Genomics/BALSAMIC/pull/1604
+* removed unused code for benchmark plotting https://github.com/Clinical-Genomics/BALSAMIC/pull/1604
+* removed functionality to disable variant callers https://github.com/Clinical-Genomics/BALSAMIC/pull/1604
 
 Fixed:
 ^^^^^^

@@ -11,7 +11,7 @@ from _pytest.tmpdir import TempPathFactory
 from click.testing import CliRunner
 from pydantic_core import Url
 from unittest.mock import MagicMock
-from snakemake.resources import DefaultResources
+import subprocess
 
 from BALSAMIC import __version__ as balsamic_version
 from BALSAMIC.assets.scripts.preprocess_gens import cli as gens_preprocessing_cli
@@ -23,7 +23,7 @@ from BALSAMIC.constants.analysis import (
     RunMode,
 )
 from BALSAMIC.constants.cache import REFERENCE_FILES, DockerContainers, GenomeVersion
-from BALSAMIC.constants.cluster import QOS, ClusterAccount
+from BALSAMIC.constants.cluster import QOS, ClusterAccount, Partition
 from BALSAMIC.constants.constants import FileType
 from BALSAMIC.constants.paths import (
     FASTQ_TEST_INFO,
@@ -331,6 +331,7 @@ def submitter(tmp_path):
         log_path=tmp_path,
         account="dummy_account",
         qos="low",
+        headjob_partition=None,
         max_run_hours=2,
         snakemake_executable=MagicMock(
             get_command=lambda: "snakemake --snakefile Snakefile"
@@ -340,9 +341,9 @@ def submitter(tmp_path):
 
 
 @pytest.fixture(scope="session")
-def default_snakemake_resources() -> DefaultResources:
-    """Return snakemake default resource."""
-    return DefaultResources(["threads=1", "mem_mb=4000", "runtime=60"])
+def default_snakemake_resources() -> List:
+    """Return snakemake default resources."""
+    return ["threads=1", "mem_mb=4000", "runtime=60"]
 
 
 @pytest.fixture(scope="session")
@@ -2538,8 +2539,6 @@ def fixture_snakemake_executable_data(
         "case_id": case_id_tumor_only,
         "config_path": reference_file,
         "log_dir": session_tmp_path,
-        "cluster_profile": reference_file,
-        "cluster_job_status_script": reference_file,
         "workflow_profile": reference_file,
         "qos": QOS.HIGH,
         "dragen": True,
@@ -2551,6 +2550,7 @@ def fixture_snakemake_executable_data(
         "snakefile": reference_file,
         "snakemake_options": snakemake_options_command,
         "working_dir": session_tmp_path,
+        "workflow_partition": Partition.CORE,
     }
 
 
@@ -2579,8 +2579,6 @@ def fixture_snakemake_executable_validated_data(
         "dragen": True,
         "force": False,
         "log_dir": session_tmp_path,
-        "cluster_profile": reference_file,
-        "cluster_job_status_script": reference_file,
         "workflow_profile": reference_file,
         "qos": QOS.HIGH,
         "quiet": True,
@@ -2591,6 +2589,7 @@ def fixture_snakemake_executable_validated_data(
         "snakefile": reference_file,
         "snakemake_options": snakemake_options_command,
         "working_dir": session_tmp_path,
+        "workflow_partition": Partition.CORE,
     }
 
 
@@ -2598,3 +2597,45 @@ def fixture_snakemake_executable_validated_data(
 def job_id() -> str:
     """Return cluster job identifier."""
     return "12345"
+
+
+@pytest.fixture
+def snakemake_runner():
+    def run(
+        *,
+        snakefile,
+        configfile,
+        targets=None,
+        extra_args=None,
+        dryrun=True,
+        cores=8,
+        default_resources=("mem_mb=32000", "threads=8"),
+    ):
+        cmd = [
+            "snakemake",
+            "-p",
+            "--snakefile",
+            os.fspath(snakefile),
+            "--configfile",
+            os.fspath(configfile),
+        ]
+
+        if dryrun:
+            cmd.append("--dry-run")  # or "-n"
+
+        cmd += ["--cores", str(cores)]
+
+        if default_resources:
+            # iterable of "k=v" strings
+            cmd += ["--default-resources", *list(default_resources)]
+
+        if targets:
+            cmd += list(targets)
+
+        if extra_args:
+            cmd += list(extra_args)
+
+        res = subprocess.run(cmd, text=True, capture_output=True, env=os.environ.copy())
+        return res.returncode, (res.stdout or ""), (res.stderr or ""), cmd
+
+    return run

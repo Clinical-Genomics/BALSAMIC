@@ -19,9 +19,9 @@ rule samtools_qc_tga:
         "Calculating alignment stats for sample: {params.sample_id}"
     shell:
         """
-samtools flagstats --threads {resources.threads} {input.bam} > {output.flagstats};
-samtools stats --threads {resources.threads} {input.bam} > {output.stats};
-samtools idxstats --threads {resources.threads} {input.bam} > {output.idxstats};
+samtools flagstats --threads {threads} {input.bam} > {output.flagstats};
+samtools stats --threads {threads} {input.bam} > {output.stats};
+samtools idxstats --threads {threads} {input.bam} > {output.idxstats};
         """
 
 rule samtools_qc_umi_collapsed:
@@ -41,7 +41,7 @@ rule samtools_qc_umi_collapsed:
         "Calculating alignment stats for sample after UMI collapse: {params.sample_id}"
     shell:
         """
-samtools flagstats --threads {resources.threads} {input.bam} > {output.flagstats};
-samtools stats --threads {resources.threads} {input.bam} > {output.stats};
-samtools idxstats --threads {resources.threads} {input.bam} > {output.idxstats};
+samtools flagstats --threads {threads} {input.bam} > {output.flagstats};
+samtools stats --threads {threads} {input.bam} > {output.stats};
+samtools idxstats --threads {threads} {input.bam} > {output.idxstats};
         """
