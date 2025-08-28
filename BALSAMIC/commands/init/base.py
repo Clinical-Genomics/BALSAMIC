@@ -141,7 +141,9 @@ def initialize(
     )
 
     generate_graph(
-        config_collection_dict=cache_config.model_dump(by_alias=True, exclude_none=True),
+        config_collection_dict=cache_config.model_dump(
+            by_alias=True, exclude_none=True
+        ),
         config_path=config_path,
         snakefile=snakefile,
         init_workflow=True,
@@ -191,7 +193,7 @@ def initialize(
             LOG.warning("Could not retrieve job id from SLURM.")
 
     else:
-        LOG.info(f"Starting reference workflow interactively.")
+        LOG.info("Starting reference workflow interactively.")
         subprocess.run(
             f"{sys.executable} -m {snakemake_executable.get_command()}",
             shell=True,
