@@ -24,7 +24,7 @@ Step 1. Installing BALSAMIC
 
 ::
 
-    conda create --name S_balsamic -c bioconda -c conda-forge python=3.11 pip "cython<3" pygraphviz wkhtmltopdf snakemake-executor-plugin-slurm
+    conda create --name S_balsamic -c conda-forge python=3.11 pip "cython<3" pygraphviz wkhtmltopdf snakemake-executor-plugin-slurm
 
 
 
