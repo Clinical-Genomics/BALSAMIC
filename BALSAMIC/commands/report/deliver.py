@@ -76,10 +76,6 @@ def deliver(
     if result.stderr.strip():
         LOG.info("snakemake stderr:\n%s", result.stderr)
 
-    if result.returncode != 0:
-        LOG.error("Snakemake failed with code %s", result.returncode)
-        raise SystemExit(result.returncode)
-
     hk_deliverables: List[Dict[str, Any]] = read_json(delivery_ready_file.as_posix())
     hk_deliverables: List[Dict[str, Any]] = convert_deliverables_tags(
         delivery_json=hk_deliverables, sample_config_dict=config
