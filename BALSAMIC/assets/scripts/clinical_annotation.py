@@ -197,16 +197,13 @@ def include_vep_info(record, parsed_csq_entries):
     return record
 
 
-def include_clinical_aberrations_info(
-    record, annotation_set, clinical_score, aberration_type
-) -> bool:
+def include_clinical_aberrations_info(record, annotation_set, aberration_type) -> bool:
     aberration_types = set(record.INFO.get("CLINICAL_ABERRATION") or {})
     clinical_genes = set(record.INFO.get("CLINICAL_GENES") or {})
     genes = set(record.INFO.get("GENE", []))
     if genes and genes.intersection(annotation_set):
         detected_genes = genes.intersection(annotation_set)
         record.INFO["CLINICAL_GENES"] = list(clinical_genes.union(detected_genes))
-        record.INFO["CLINICAL_SCORE"] = clinical_score
         record.INFO["CLINICAL_ABERRATION"] = list(
             aberration_types.union({aberration_type})
         )
@@ -310,30 +307,45 @@ def include_rank(record):
         )
         else 0
     )
-    clinical_priority = record.INFO.get("CLINICAL_RANK", 0)
+    # Aberration priority:
+    clinical_priority_scores = {
+        "known_fusion": 15,
+        "promiscuous_fusion": 15,
+        "single_hit_fusion": 10,
+        "duplication": 15,
+        "deletion": 15,
+        "in_gene_list": 10,
+    }
+    max_aberration_score = 0
+    aberration_score = []
+    for aberration_type in record.INFO.get("CLINICAL_ABERRATION") or []:
+        aberration_score.append(clinical_priority_scores[aberration_type])
+    if aberration_score:
+        max_aberration_score = max(aberration_score)
 
     if "CSQ" in record.INFO:
         csq_biotype = set(record.INFO.get("BIOTYPE") or {})
         csq_impact = set(record.INFO.get("IMPACT") or {})
-        biotype = 5 if "protein_coding" in csq_biotype else 0
+        biotype = 1 if "protein_coding" in csq_biotype else 0
         exonintron = 10 if record.INFO.get("BIOTYPE", "") == "YES" else 0
 
         if "HIGH" in csq_impact:
-            impact = 15
+            impact = 3
         elif "MODERATE" in csq_impact:
-            impact = 10
+            impact = 1
         else:
             impact = 0
-    rank = (
-        number_tools
-        + reliable_tools
-        + population_dbs
-        + clinical_priority
-        + biotype
-        + impact
-        + exonintron
-    )
-    record.INFO["RANK"] = rank
+    rank = [
+        max_aberration_score,
+        exonintron,
+        biotype,
+        impact,
+        number_tools,
+        reliable_tools,
+        population_dbs,
+    ]
+    record.INFO["CLINICAL_SCORE"] = ",".join(map(str, rank))
+    record.INFO["RANK"] = sum(rank)
     return record
 
 
@@ -342,14 +354,11 @@ def include_clinical_info(record, parsed_csq_entries, annotation):
     if svtype == "BND":
         include_clinical_fusion_type_info(record, annotation)
     elif svtype == "DUP":
-        include_clinical_aberrations_info(
-            record, annotation.deletions, 15, "duplication"
-        )
+        include_clinical_aberrations_info(record, annotation.deletions, "duplication")
     elif svtype == "DEL":
-        include_clinical_aberrations_info(record, annotation.deletions, 15, "deletion")
-    if "CLINICAL_SCORE" not in record.INFO:
-        # Any other in the gene panel file
-        include_clinical_aberrations_info(record, annotation.all, 5, "other")
+        include_clinical_aberrations_info(record, annotation.deletions, "deletion")
+    # Any other in the gene panel file
+    include_clinical_aberrations_info(record, annotation.all, "in_gene_list")
     return record
 
 
