@@ -327,7 +327,7 @@ def include_rank(record):
         csq_biotype = set(record.INFO.get("BIOTYPE") or {})
         csq_impact = set(record.INFO.get("IMPACT") or {})
         biotype = 1 if "protein_coding" in csq_biotype else 0
-        exonintron = 10 if record.INFO.get("BIOTYPE", "") == "YES" else 0
+        exonintron = 10 if record.INFO.get("EXONINTRON", "") == "YES" else 0
 
         if "HIGH" in csq_impact:
             impact = 3
@@ -497,25 +497,11 @@ colnames = (
 )
 
 
-def collect_relevant_information(record, parsed_csq_entries, annotation) -> list[str]:
+def collect_relevant_information(record) -> list[str]:
     general_info = [record.CHROM, record.POS, record.REF, record.ALT[0].serialize()]
     info_fields = [record.INFO.get(field, "") for field in info_fields_to_retrieve]
-    info_fields = [",".join(i) if isinstance(i, list) else i for i in info_fields]
-
-    relevant_info = []
-    for csq_dict in parsed_csq_entries:
-        csq_info = [csq_dict.get(field, "") for field in csq_fields_to_retrieve]
-        # Only retrieve information for canonical genes in Ensembl
-        if (
-            csq_dict.get("CANONICAL", "") == "YES"
-            and csq_dict.get("SOURCE", "") == "Ensembl"
-            and csq_dict.get("SYMBOL") in annotation.all
-        ):
-            relevant_info.append(general_info + info_fields + csq_info)
-    # If there is no canonical ensembl gene, just report one random entry (last one)
-    if not relevant_info:
-        relevant_info.append(general_info + info_fields + csq_info)
-    return relevant_info
+    info_fields = [",".join(i) if isinstance(i, list) else str(i) for i in info_fields]
+    return general_info + info_fields
 
 
 def update_header(reader):
@@ -562,9 +548,7 @@ def annotate_clinical_aberrations(vcf_path, annotation, output_vcf, output_tsv):
                     parse_csq_entry(entry, csq_fields) for entry in record.INFO["CSQ"]
                 ]
                 process_record(record, parsed_csq_entries, annotation)
-                tsv_lines.extend(
-                    collect_relevant_information(record, parsed_csq_entries, annotation)
-                )
+                tsv_lines.append(collect_relevant_information(record))
             writer.write_record(record)
     with open(output_tsv, "w", encoding="utf-8") as f:
         f.write("\t".join(colnames) + "\n")
