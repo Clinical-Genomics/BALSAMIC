@@ -17,8 +17,8 @@ rule samtools_merge_bamfiles:
          "Current sample: {params.sample_id}")
     shell:
         """
-samtools merge -@ {resources.threads} {output.bam} {input.bam_files};
-samtools index -@ {resources.threads} {output.bam};
+samtools merge -@ {threads} {output.bam} {input.bam_files};
+samtools index -@ {threads} {output.bam};
         """
 
 rule sentieon_dedup:
@@ -45,13 +45,13 @@ export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
 
 {params.sentieon_exec} driver \
--t {resources.threads} \
+-t {threads} \
 -i {input.bam} \
 --algo LocusCollector \
 --fun score_info {output.score} ;
 
 {params.sentieon_exec} driver \
--t {resources.threads} \
+-t {threads} \
 -i {input.bam} \
 --algo Dedup \
 --score_info {output.score} \
@@ -86,7 +86,7 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 
 {params.sentieon_exec} driver \
 -r {input.ref} \
--t {resources.threads} \
+-t {threads} \
 -i {input.bam} \
 --algo Realigner \
 -k {input.mills} \
@@ -124,7 +124,7 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 
 {params.sentieon_exec} driver \
 -r {input.ref} \
--t {resources.threads} \
+-t {threads} \
 -i {input.bam} \
 --algo QualCal \
 -k {input.dbsnp} \
@@ -133,7 +133,7 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 
 {params.sentieon_exec} driver \
 -r {input.ref} \
--t {resources.threads} \
+-t {threads} \
 -i {input.bam} \
 -q {output.recal_data_table} \
 --algo QualCal \
@@ -142,7 +142,7 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 -k {input.indel_1kg} {output.recal_data_table}.post;
 
 {params.sentieon_exec} driver \
--t {resources.threads} \
+-t {threads} \
 --algo QualCal \
 --plot --before {output.recal_data_table} \
 --after {output.recal_data_table}.post {output.qual_recal};

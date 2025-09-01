@@ -25,7 +25,7 @@ rule fastp_adapter_trim_tga:
 export TMPDIR={params.tmpdir};
 
 fastp \
---thread {resources.threads} \
+--thread {threads} \
 --in1 {input.fastq_r1} \
 --in2 {input.fastq_r2} \
 --out1 {output.fastq_r1} \
@@ -96,7 +96,7 @@ rule fastp_quality_trim_tga:
 export TMPDIR={params.tmpdir};
 
 fastp \
---thread {resources.threads} \
+--thread {threads} \
 --in1 {input.interleaved_fastq} \
 --interleaved_in \
 --out1 {output.fastq_r1} \

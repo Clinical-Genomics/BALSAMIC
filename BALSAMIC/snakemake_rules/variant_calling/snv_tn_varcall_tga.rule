@@ -45,7 +45,7 @@ export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
 
 {params.sentieon_exec} driver \
--t {resources.threads} \
+-t {threads} \
 -r {input.ref_fa} \
 -i {input.bamT} \
 -i {input.bamN} \
@@ -98,7 +98,7 @@ export VAR_DICT_OPTS='\"-Xms10G\" \"-Xmx25G\" \"-XX:+UseG1GC\" \"-XX:MaxHeapFree
 
 vardict-java -I 600 -G {input.fa} -f {params.af} -N {params.case_name} \
 -b \"{input.bamT}|{input.bamN}\" \
--th {resources.threads} \
+-th {threads} \
 {params.col_info} {input.bed} \
 | testsomatic.R \
 | var2vcf_paired.pl -P {params.max_pval} \
