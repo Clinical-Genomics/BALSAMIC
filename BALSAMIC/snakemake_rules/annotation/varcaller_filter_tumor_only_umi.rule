@@ -20,8 +20,6 @@ rule bcftools_filter_TNscope_umi_research_tumor_only:
     case_name =  '{case_name}',
     edit_vcf_script = get_script_path("edit_vcf_info.py"),
     variant_caller = "tnscope_umi"
-  threads:
-    get_threads(cluster_config, 'bcftools_filter_tnscope_umi_research_tumor_only')
   message:
     "Filtering tnscope_umi tumor-only annotated research variants using bcftools and  "
     "adding FOUND_IN tags to the output VCF for {params.case_name}"
@@ -70,8 +68,6 @@ rule bcftools_filter_TNscope_umi_clinical_tumor_only:
     case_name='{case_name}',
     edit_vcf_script=get_script_path("edit_vcf_info.py"),
     variant_caller="tnscope_umi"
-  threads:
-    get_threads(cluster_config,'bcftools_filter_tnscope_umi_tumor_only')
   message:
     "Filtering tnscope_umi tumor-only annotated clinical variants using bcftools and  "
     "adding FOUND_IN tags to the output VCF for {params.case_name}"

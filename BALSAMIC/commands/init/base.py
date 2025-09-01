@@ -10,12 +10,12 @@ from typing import List, Optional, Union
 import click
 
 from BALSAMIC.commands.options import (
+    OPTION_WORKFLOW_PARTITION,
+    OPTION_HEADJOB_PARTITION,
     OPTION_CACHE_VERSION,
     OPTION_CLUSTER_ACCOUNT,
-    OPTION_CLUSTER_CONFIG,
-    OPTION_CLUSTER_MAIL,
-    OPTION_CLUSTER_MAIL_TYPE,
-    OPTION_CLUSTER_PROFILE,
+    OPTION_MAX_RUN_HOURS,
+    OPTION_CACHE_PROFILE,
     OPTION_CLUSTER_QOS,
     OPTION_COSMIC_KEY,
     OPTION_FORCE_ALL,
@@ -24,6 +24,7 @@ from BALSAMIC.commands.options import (
     OPTION_QUIET,
     OPTION_RUN_ANALYSIS,
     OPTION_RUN_MODE,
+    OPTION_RUN_INTERACTIVELY,
     OPTION_SNAKEFILE,
     OPTION_SNAKEMAKE_OPT,
 )
@@ -31,16 +32,15 @@ from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV, RunMode
 from BALSAMIC.constants.cache import REFERENCE_FILES, GenomeVersion
 from BALSAMIC.constants.cluster import (
     QOS,
-    ClusterConfigType,
-    ClusterMailType,
-    ClusterProfile,
 )
 from BALSAMIC.models.cache import CacheConfig, ReferencesCanFam, ReferencesHg
 from BALSAMIC.models.snakemake import SnakemakeExecutable
+from BALSAMIC.models.sbatchsubmitter import SbatchSubmitter
 from BALSAMIC.utils.analysis import get_cache_singularity_bind_paths
+from BALSAMIC.utils.rule import get_script_path
 from BALSAMIC.utils.cache import get_containers
-from BALSAMIC.utils.cli import get_config_path, get_snakefile
-from BALSAMIC.utils.io import generate_workflow_graph, write_json
+from BALSAMIC.utils.cli import get_snakefile, generate_graph
+from BALSAMIC.utils.io import write_json
 
 LOG = logging.getLogger(__name__)
 
@@ -49,12 +49,12 @@ LOG = logging.getLogger(__name__)
     "init", short_help="Download singularity containers and build the reference cache"
 )
 @OPTION_OUT_DIR
+@OPTION_WORKFLOW_PARTITION
+@OPTION_HEADJOB_PARTITION
 @OPTION_CACHE_VERSION
 @OPTION_CLUSTER_ACCOUNT
-@OPTION_CLUSTER_CONFIG
-@OPTION_CLUSTER_MAIL
-@OPTION_CLUSTER_MAIL_TYPE
-@OPTION_CLUSTER_PROFILE
+@OPTION_MAX_RUN_HOURS
+@OPTION_CACHE_PROFILE
 @OPTION_CLUSTER_QOS
 @OPTION_COSMIC_KEY
 @OPTION_FORCE_ALL
@@ -62,6 +62,7 @@ LOG = logging.getLogger(__name__)
 @OPTION_QUIET
 @OPTION_RUN_ANALYSIS
 @OPTION_RUN_MODE
+@OPTION_RUN_INTERACTIVELY
 @OPTION_SNAKEFILE
 @OPTION_SNAKEMAKE_OPT
 @click.pass_context
@@ -69,20 +70,21 @@ def initialize(
     context: click.Context,
     account: Optional[str],
     cache_version: str,
-    cluster_config: Path,
     cosmic_key: str,
     force_all: bool,
     genome_version: GenomeVersion,
-    mail_type: Optional[ClusterMailType],
-    mail_user: Optional[str],
     out_dir: str,
-    profile: ClusterProfile,
+    cache_profile: Path,
     qos: QOS,
     quiet: bool,
     run_analysis: bool,
+    run_interactively: bool,
     run_mode: RunMode,
     snakefile: Path,
     snakemake_opt: List[str],
+    workflow_partition: str,
+    headjob_partition: str,
+    max_run_hours: int,
 ) -> None:
     """Validate inputs and download reference caches and containers."""
     LOG.info(f"BALSAMIC started with log level {context.obj['log_level']}")
@@ -138,26 +140,24 @@ def initialize(
         snakefile if snakefile else get_snakefile("generate_ref", "balsamic")
     )
 
-    generate_workflow_graph(
+    generate_graph(
+        config_collection_dict=cache_config.model_dump(
+            by_alias=True, exclude_none=True
+        ),
         config_path=config_path,
-        directory_path=references_dir,
         snakefile=snakefile,
-        title="reference",
+        init_workflow=True,
     )
 
     LOG.info("Starting reference generation workflow...")
     snakemake_executable: SnakemakeExecutable = SnakemakeExecutable(
         account=account,
         case_id=cache_config.analysis.case_id,
-        cluster_config_path=cluster_config
-        if cluster_config
-        else get_config_path(ClusterConfigType.CACHE),
         config_path=config_path,
         force=force_all,
+        workflow_partition=workflow_partition,
         log_dir=log_dir,
-        mail_type=mail_type,
-        mail_user=mail_user,
-        profile=profile,
+        workflow_profile=cache_profile,
         qos=qos,
         quiet=quiet,
         run_analysis=run_analysis,
@@ -168,7 +168,33 @@ def initialize(
         snakefile=snakefile,
         working_dir=references_dir,
     )
-    subprocess.run(
-        f"{sys.executable} -m {snakemake_executable.get_command()}",
-        shell=True,
-    )
+
+    if not run_interactively:
+        LOG.info("Submitting balsamic reference workflow to cluster.")
+        submitter = SbatchSubmitter(
+            case_id=cache_config.analysis.case_id,
+            script_path=Path(script_dir),
+            result_path=Path(references_dir),
+            scan_finished_jobid_status=get_script_path("scan_finished_jobid_status.py"),
+            log_path=Path(log_dir),
+            account=account,
+            qos=qos,
+            headjob_partition=headjob_partition,
+            max_run_hours=max_run_hours,
+            snakemake_executable=snakemake_executable,
+            logger=LOG,
+        )
+        submitter.create_sbatch_script()
+        job_id = submitter.submit_job()
+
+        if job_id:
+            submitter.write_job_id_yaml(job_id)
+        else:
+            LOG.warning("Could not retrieve job id from SLURM.")
+
+    else:
+        LOG.info("Starting reference workflow interactively.")
+        subprocess.run(
+            f"{sys.executable} -m {snakemake_executable.get_command()}",
+            shell=True,
+        )

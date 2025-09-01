@@ -5,26 +5,16 @@ from typing import List
 MAX_JOBS: int = 999
 
 
-class ClusterConfigType(StrEnum):
-    """Analysis workflow config type."""
-
-    ANALYSIS: str = "cluster_analysis"
-    CACHE: str = "cluster_cache"
-
-
-class ClusterProfile(StrEnum):
-    """Profile to submit jobs to the cluster."""
-
-    SLURM: str = "slurm"
-
-
-CLUSTER_PROFILES: List[ClusterProfile] = [profile for profile in ClusterProfile]
-
-
 class ClusterAccount(StrEnum):
     """Cluster job submission account."""
 
     DEVELOPMENT: str = "development"
+
+
+class Partition(StrEnum):
+    """Cluster quality of service."""
+
+    CORE: str = "core"
 
 
 class QOS(StrEnum):
@@ -37,18 +27,3 @@ class QOS(StrEnum):
 
 
 QOS_OPTIONS: List[QOS] = [qos for qos in QOS]
-
-
-class ClusterMailType(StrEnum):
-    """Cluster job mail type notification."""
-
-    ALL: str = "ALL"
-    BEGIN: str = "BEGIN"
-    END: str = "END"
-    FAIL: str = "FAIL"
-    NONE: str = "NONE"
-    REQUEUE: str = "REQUEUE"
-    TIME_LIMIT: str = "TIME_LIMIT"
-
-
-CLUSTER_MAIL_TYPES: List[ClusterMailType] = [mail_type for mail_type in ClusterMailType]
