@@ -63,8 +63,6 @@ def deliver(
         f"rules_to_deliver={','.join(rules_to_deliver)}",
         "--configfile",
         sample_config,
-        "--cores",
-        "1",
         "--dryrun",
         "--quiet",
     ]
