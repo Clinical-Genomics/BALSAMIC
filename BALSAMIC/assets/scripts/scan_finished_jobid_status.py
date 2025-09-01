@@ -66,6 +66,7 @@ def write_results(
     output_file: Path,
     failed: List[Tuple[str, Path]],
     cancelled: List[Tuple[str, Path]],
+    unknown: List[str],
 ) -> None:
     """
     Append job results to output_file.
@@ -90,11 +91,17 @@ def write_results(
                 out_f.write(f"{jobid}\t{log_path}\n")
             out_f.write("\n")
 
+        if unknown:
+            out_f.write("Unknown status jobs:\n")
+            for jobid in unknown:
+                out_f.write(f"{jobid}\tNA\n")
+            out_f.write("\n")
+
         if not failed and not cancelled:
             out_f.write("SUCCESSFUL\n\n")
 
     LOG.info(
-        f"Appended results to {output_file} (failed={len(failed)}, cancelled={len(cancelled)})"
+        f"Appended results to {output_file} (failed={len(failed)}, cancelled={len(cancelled)} unknown={len(unknown)})"
     )
 
 
@@ -133,6 +140,7 @@ def check_failed_jobs(log_dir: Path, output: Path, log_level: str) -> None:
 
     failed: List[Tuple[str, Path]] = []
     cancelled: List[Tuple[str, Path]] = []
+    unknown: List[str] = []
 
     if not job_logs:
         LOG.warning("No job logs found (no files matching '*.log')")
@@ -142,7 +150,10 @@ def check_failed_jobs(log_dir: Path, output: Path, log_level: str) -> None:
         out_text = get_job_state(jobid)
         if not out_text:
             # Can't classify without job info; skip but note it.
-            LOG.warning("Skipping job {jobid} due to missing scontrol output")
+            LOG.warning(
+                f"Missing scontrol output for job {jobid} -- setting status UNKNOWN"
+            )
+            unknown.append(jobid)
             continue
 
         state = parse_state(out_text)
@@ -153,7 +164,7 @@ def check_failed_jobs(log_dir: Path, output: Path, log_level: str) -> None:
         else:
             LOG.debug(f"Job {jobid} state is {state}")
 
-    write_results(output, failed, cancelled)
+    write_results(output, failed, cancelled, unknown)
 
 
 if __name__ == "__main__":
