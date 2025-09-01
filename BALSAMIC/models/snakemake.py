@@ -31,9 +31,8 @@ class SnakemakeExecutable(BaseModel):
         config_path (FilePath)                                       : Sample configuration file.
         dragen (Optional[bool])                                      : Flag for enabling or disabling Dragen suite.
         force (bool)                                                 : Force snakemake execution.
+        workflow_partition (str)                                     : Cluster partition to use for snakemake workflow
         log_dir (Optional[DirectoryPath])                            : Logging directory.
-        cluster_profile: Path                                        : Directory containing snakemake cluster profile
-        cluster_job_status_script (FilePath)                         : Path to script for snakemake to parse more slurm job-statuses
         workflow_profile: Path                                       : Directory contianing snakemake workflow profile specifying rule resources
         qos (Optional[QOS])                                          : QOS for sbatch jobs.
         quiet (Optional[bool])                                       : Quiet mode for snakemake.
@@ -52,9 +51,8 @@ class SnakemakeExecutable(BaseModel):
     config_path: FilePath
     dragen: bool = False
     force: bool = False
+    workflow_partition: str
     log_dir: Optional[DirectoryPath] = None
-    cluster_profile: Path
-    cluster_job_status_script: FilePath
     workflow_profile: Path
     qos: Optional[QOS] = None
     quiet: bool = False
@@ -98,6 +96,9 @@ class SnakemakeExecutable(BaseModel):
             return "--quiet"
         return ""
 
+    def get_slurm_logdir(self) -> str:
+        return f"--slurm-logdir {self.log_dir}"
+
     def get_run_analysis_flag(self) -> str:
         """Return string representation of the run_analysis flag."""
         if not self.run_analysis:
@@ -124,7 +125,7 @@ class SnakemakeExecutable(BaseModel):
     def get_command(self) -> str:
         """Return Snakemake command to be submitted."""
         snakemake_command: str = (
-            f"snakemake --notemp -p --rerun-trigger mtime "
+            f"snakemake --notemp -p --rerun-triggers mtime "
             f"--directory {self.working_dir.as_posix()} "
             f"--snakefile {self.snakefile.as_posix()} "
             f"{self.get_config_file_option()} "
@@ -134,18 +135,24 @@ class SnakemakeExecutable(BaseModel):
             f"{self.get_force_flag()} "
             f"{self.get_run_analysis_flag()} "
             f"{self.get_snakemake_cluster_options()} "
-            f"{self.get_cluster_status_script()} "
             f"{self.get_snakemake_options_command()}"
         )
         return remove_unnecessary_spaces(snakemake_command)
+
+    def get_slurm_job_arguments(self) -> str:
+        return (
+            f'--default-resources slurm_extra="--qos={self.qos}" '
+            f"slurm_partition={self.workflow_partition} slurm_account={self.account}"
+        )
 
     def get_snakemake_cluster_options(self) -> str:
         """Return Snakemake cluster options to be submitted."""
         if self.run_mode == RunMode.CLUSTER:
             snakemake_cluster_options: str = (
-                f"-j {MAX_JOBS} "
-                f"--jobname BALSAMIC.{self.case_id}.{{rulename}}.{{jobid}}.sh "
-                f"--profile {self.cluster_profile} --workflow-profile {self.workflow_profile}"
+                f"{self.get_slurm_logdir()} "
+                f"--profile {self.workflow_profile} "
+                f"{self.get_slurm_job_arguments()} "
+                f"--slurm-keep-successful-logs"
             )
             return remove_unnecessary_spaces(snakemake_cluster_options)
-        return "--default-resources mem_mb=32000 threads=8"
+        return ""
