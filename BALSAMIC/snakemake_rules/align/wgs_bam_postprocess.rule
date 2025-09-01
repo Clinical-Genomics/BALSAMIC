@@ -4,8 +4,8 @@ rule samtools_merge_bamfiles:
     input:
         bam_files = lambda wildcards: config_model.get_bam_name_per_lane(bam_dir = bam_dir, sample_name = wildcards.sample)
     output:
-        bam = Path(bam_dir, "{sample_type}.{sample}.merged.bam").as_posix(),
-        bai = Path(bam_dir,"{sample_type}.{sample}.merged.bam.bai").as_posix(),
+        bam = Path(bam_dir, "{sample_type}.{sample}.align_sort.bam").as_posix(),
+        bai = Path(bam_dir,"{sample_type}.{sample}.align_sort.bam.bai").as_posix(),
     benchmark:
         Path(benchmark_dir, "samtools_merge_bamfiles_{sample_type}.{sample}.tsv").as_posix()
     singularity:
@@ -23,7 +23,7 @@ samtools index -@ {threads} {output.bam};
 
 rule sentieon_dedup:
     input:
-        bam = Path(bam_dir, "{sample_type}.{sample}.merged.bam").as_posix(),
+        bam = Path(bam_dir, "{sample_type}.{sample}.align_sort.bam").as_posix(),
     output:
         bam = Path(bam_dir, "{sample_type}.{sample}.dedup.bam").as_posix(),
         score = Path(bam_dir, "{sample_type}.{sample}.dedup.score").as_posix(),
