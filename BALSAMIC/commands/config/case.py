@@ -40,7 +40,12 @@ from BALSAMIC.commands.options import (
     OPTION_TUMOR_SAMPLE_NAME,
     OPTION_UMI_MIN_READS,
 )
-from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV, AnalysisWorkflow, Gender
+from BALSAMIC.constants.analysis import (
+    BIOINFO_TOOL_ENV,
+    AnalysisWorkflow,
+    Gender,
+    LogFile,
+)
 from BALSAMIC.constants.cache import GenomeVersion
 from BALSAMIC.constants.constants import FileType
 from BALSAMIC.constants.paths import (
@@ -57,9 +62,11 @@ from BALSAMIC.utils.cli import (
     get_panel_chrom,
     get_sample_list,
     get_gens_references,
+    get_snakefile,
 )
 from BALSAMIC.utils.io import read_json, write_json
 from BALSAMIC.utils.utils import get_absolute_paths_dict
+from BALSAMIC.utils.logging import add_file_logging
 
 LOG = logging.getLogger(__name__)
 
@@ -129,6 +136,19 @@ def case_config(
     tumor_sample_name: str,
     umi_min_reads: str | None,
 ):
+    """Configure BALSAMIC workflow based on input arguments."""
+
+    LOG.info(f"Starting configuring analysis case: {case_id}.")
+
+    LOG.info(f"Creating case analysis directory: {analysis_dir}/{case_id}.")
+    Path(analysis_dir, case_id).mkdir(exist_ok=True)
+
+    log_file = Path(analysis_dir, case_id, LogFile.LOGNAME).as_posix()
+    LOG.info(f"Setting BALSAMIC logfile path to: {log_file}.")
+    add_file_logging(log_file, logger_name=__name__)
+
+    LOG.info(f"Running BALSAMIC version {balsamic_version} -- CONFIG CASE")
+
     references_path: Path = Path(balsamic_cache, cache_version, genome_version)
     references: Dict[str, Path] = get_absolute_paths_dict(
         base_path=references_path,
@@ -154,7 +174,6 @@ def case_config(
                     if path is not None
                 }
             )
-
     variants_observations = {
         "artefact_snv_observations": artefact_snv_observations,
         "clinical_snv_observations": clinical_snv_observations,
@@ -176,6 +195,8 @@ def case_config(
     analysis_fastq_dir: str = get_analysis_fastq_files_directory(
         case_dir=Path(analysis_dir, case_id).as_posix(), fastq_path=fastq_path
     )
+    LOG.info(f"Prepared analysis fastq-dir: {analysis_fastq_dir}")
+
     result_dir: Path = Path(analysis_dir, case_id, "analysis")
     log_dir: Path = Path(analysis_dir, case_id, "logs")
     script_dir: Path = Path(analysis_dir, case_id, "scripts")
@@ -186,6 +207,8 @@ def case_config(
     for directory in [result_dir, log_dir, script_dir, benchmark_dir]:
         directory.mkdir(exist_ok=True)
 
+    LOG.info("Created analysis and log directories.")
+    LOG.info("Validating configuration data in pydantic model.")
     config_collection_dict = ConfigModel(
         sentieon={
             "sentieon_install_dir": sentieon_install_dir,
@@ -244,5 +267,10 @@ def case_config(
     write_json(json_obj=config_collection_dict, path=config_path)
     LOG.info(f"Config file saved successfully - {config_path}")
 
-    generate_graph(config_collection_dict, config_path)
+    snakefile = get_snakefile(
+        analysis_type=config_collection_dict["analysis"]["analysis_type"],
+        analysis_workflow=config_collection_dict["analysis"]["analysis_workflow"],
+    )
+
+    generate_graph(config_collection_dict, config_path, snakefile)
     LOG.info(f"BALSAMIC Workflow has been configured successfully!")

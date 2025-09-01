@@ -9,7 +9,7 @@ from typing import Dict, List
 from BALSAMIC.constants.analysis import AnalysisType, FastqName, SampleType
 from BALSAMIC.constants.paths import BALSAMIC_DIR
 from BALSAMIC.constants.rules import SNAKEMAKE_RULES
-from BALSAMIC.constants.workflow_params import WORKFLOW_PARAMS, SLEEP_BEFORE_START
+from BALSAMIC.constants.workflow_params import WORKFLOW_PARAMS
 from BALSAMIC.models.config import ConfigModel
 from BALSAMIC.models.params import BalsamicWorkflowConfig
 from BALSAMIC.utils.cli import check_executable, generate_h5
@@ -76,10 +76,6 @@ sequencing_type = config_model.analysis.sequencing_type
 # Capture kit name
 if sequencing_type != "wgs":
     capture_kit = os.path.split(config["panel"]["capture_kit"])[1]
-
-# explicitly check if cluster_config dict has zero keys.
-if len(cluster_config.keys()) == 0:
-    cluster_config = config
 
 if "hg38" in config["reference"]["reference_genome"]:
     config["reference"]["genome_version"] = "hg38"
