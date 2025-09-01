@@ -291,7 +291,7 @@ def test_write_job_id_yaml_calls_helper_with_expected_payload(
         submitter.write_job_id_yaml(job_id)
 
     mock_write_yaml.assert_called_once()
-    args, kwargs = mock_write_yaml.call_args
+    args, _ = mock_write_yaml.call_args
     assert args[0] == expected_payload
     assert Path(args[1]) == expected_yaml_path
     assert f"Job ID written to {expected_yaml_path}" in caplog.text
