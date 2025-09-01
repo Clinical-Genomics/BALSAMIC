@@ -13,7 +13,7 @@ rule sentieon_dedup_consensus:
     benchmark:
         Path(benchmark_dir, "sentieon_dedup_{sample_type}.{sample}.tsv").as_posix()
     resources:
-        mem_mb = lambda wc, input: min(max(5.1 * input.size_mb, 5000), 500000) # Cap at 500GB. Scale memory with input size (min 5GB) to handle large TGA cases without over-allocating for typical inputs (e.g. myeloid). 5.1 factor chosen after testing
+        mem_mb = lambda wc, input: min(max(5.1 * input.size_mb, 5000), 250000) # Cap at 250GB. Scale memory with input size (min 5GB) to handle large TGA cases without over-allocating for typical inputs (e.g. myeloid). 5.1 factor chosen after testing
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         sentieon_exec = config_model.sentieon.sentieon_exec,
