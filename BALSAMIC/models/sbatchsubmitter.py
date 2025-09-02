@@ -1,5 +1,6 @@
 import os
 import re
+import shlex
 import textwrap
 import subprocess
 from pathlib import Path
@@ -18,6 +19,7 @@ class SbatchSubmitter:
         log_path (Path)               : Directory where SLURM output and error logs will be written.
         account (str)                 : SLURM account to charge for the job.
         qos (str)                     : SLURM quality of service level.
+        headjob_partition: Optional(str): Cluster partition for the headjob
         max_run_hours (int)          : Maximum allowed run time for the job, in hours.
         snakemake_executable         : Object representing the Snakemake command to be executed.
         logger                        : Logger instance for capturing logs.
@@ -34,6 +36,7 @@ class SbatchSubmitter:
         log_path: Path,
         account: str,
         qos: str,
+        headjob_partition: Optional[str],
         max_run_hours: int,
         snakemake_executable,
         logger,
@@ -45,6 +48,7 @@ class SbatchSubmitter:
         self.log_path = log_path
         self.account = account
         self.qos = qos
+        self.headjob_partition = headjob_partition
         self.max_run_hours = max_run_hours
         self.snakemake_executable = snakemake_executable
         self.log = logger
@@ -52,55 +56,106 @@ class SbatchSubmitter:
         self.conda_env_path = os.environ.get("CONDA_PREFIX", "")
         self.sbatch_script_path = self.script_path / "BALSAMIC_snakemake_submit.sh"
 
+    def _build_sbatch_header(self) -> str:
+        """
+        Construct the SBATCH header lines and return as a single string.
+
+        Includes:
+          - account, job-name, output/error paths, ntasks, mem, time, qos, cpus-per-task
+          - optional partition if `self.headjob_partition` is set
+        """
+        lines = [
+            "#!/bin/bash -l",
+            f"#SBATCH --account={self.account}",
+            f"#SBATCH --job-name=BALSAMIC_snakemake_submit.{self.case_id}.%j",
+            f"#SBATCH --output={self.log_path}/BALSAMIC_snakemake_submit.{self.case_id}.%j.out",
+            f"#SBATCH --error={self.log_path}/BALSAMIC_snakemake_submit.{self.case_id}.%j.err",
+            "#SBATCH --ntasks=1",
+            "#SBATCH --mem=5G",
+            f"#SBATCH --time={self.max_run_hours}:00:00",
+            f"#SBATCH --qos={self.qos}",
+            "#SBATCH --cpus-per-task=1",
+        ]
+        if self.headjob_partition:
+            lines.insert(2, f"#SBATCH --partition={self.headjob_partition}")
+        return "\n".join(lines)
+
+    def _build_snakemake_command(self) -> str:
+        """
+        Return the line that invokes Snakemake via conda.
+        Uses shlex.quote for CONDA_PREFIX safety.
+        """
+        return (
+            f"conda run -p {shlex.quote(self.conda_env_path)} "
+            f"{self.snakemake_executable.get_command()}"
+        )
+
+    def _build_job_status_check(self) -> str:
+        """
+        Return the line that runs the job status checker via conda.
+        Quotes all paths to be shell-safe.
+        """
+        return (
+            f"conda run -p {shlex.quote(self.conda_env_path)} "
+            f"python {shlex.quote(self.scan_finished_jobid_status)} "
+            f"{shlex.quote(str(self.log_path))} --output "
+            f"{shlex.quote(str(self.result_path / 'analysis_status.txt'))}"
+        )
+
+    def _build_success_status_check(
+        self,
+        success_marker: str = "analysis_finished_successfully",
+        status_filename: str = "analysis_status.txt",
+    ) -> str:
+        """
+        Build the bash snippet that verifies analysis success.
+
+        Logic:
+          - If <result_dir>/<success_marker> does NOT exist:
+              - If <result_dir>/<status_filename> exists:
+                  - Print a tag line and its contents to stderr, then exit 1
+              - Else: print a generic error message and exit 2
+
+        Returns:
+            A dedented, stripped bash script fragment as a string.
+        """
+        # Quote paths for safe shell interpolation (handles spaces etc.)
+        q_success = shlex.quote(str(Path(self.result_path, success_marker)))
+        q_status = shlex.quote(str(Path(self.result_path, status_filename)))
+
+        return textwrap.dedent(
+            f"""
+            if [[ ! -f {q_success} ]]; then
+                if [[ -f {q_status} ]]; then
+                    STATUS=$(cat {q_status})
+                    echo "FROM ANALYSIS STATUS: {q_status}" >&2
+                    echo "$STATUS" >&2
+                    exit 1
+                else
+                    echo "No status file found; assuming error" >&2
+                    exit 2
+                fi
+            fi
+            """
+        ).strip()
+
     def create_sbatch_script(self) -> None:
+        """
+        Generate and write an `sbatch` submission script for running a Snakemake workflow.
+        """
         self.log.info("Creating sbatch script to submit jobs.")
         self.log.info(f"Using conda environment: {self.conda_env_path}")
 
-        sbatch_header = textwrap.dedent(
-            f"""\
-            #!/bin/bash -l
-            #SBATCH --account={self.account}
-            #SBATCH --job-name=BALSAMIC_snakemake_submit.{self.case_id}.%j
-            #SBATCH --output={self.log_path}/BALSAMIC_snakemake_submit.{self.case_id}.%j.out
-            #SBATCH --error={self.log_path}/BALSAMIC_snakemake_submit.{self.case_id}.%j.err
-            #SBATCH --ntasks=1
-            #SBATCH --mem=5G
-            #SBATCH --time={self.max_run_hours}:00:00
-            #SBATCH --qos={self.qos}
-            #SBATCH --cpus-per-task=1
-        """
+        sbatch_header = self._build_sbatch_header()
+        snakemake_cmd = self._build_snakemake_command()
+        job_status_check = self._build_job_status_check()
+        success_status_check = self._build_success_status_check()
+
+        full_script = "\n\n".join(
+            [sbatch_header, snakemake_cmd, job_status_check, success_status_check, ""]
         )
 
-        # Run snakemake workflow
-        sbatch_command = f"\nconda run -p {self.conda_env_path} {self.snakemake_executable.get_command()}\n"
-
-        # Check the status of submitted jobs
-        job_status_check = f"\nconda run -p {self.conda_env_path} python {self.scan_finished_jobid_status} {self.log_path} --output {self.result_path}/analysis_status.txt\n"
-
-        # Check the final success status of the workflow
-        success_status_check = textwrap.dedent(
-            f"""\n
-            if [[ -f "{self.result_path}/analysis_status.txt" ]]; then
-                STATUS=$(cat "{self.result_path}/analysis_status.txt")
-                echo "Snakemake analysis status: $STATUS"
-                if [[ "$STATUS" != "SUCCESS" ]]; then
-                    echo "Analysis failed: $STATUS"
-                    exit 1
-                fi
-            else
-                echo "No status file found; assuming failure"
-                exit 2
-            fi \n
-        """
-        )
-
-        full_script = (
-            sbatch_header + sbatch_command + job_status_check + success_status_check
-        )
-
-        with open(self.sbatch_script_path, "w") as f:
-            f.write(full_script)
-
+        Path(self.sbatch_script_path).write_text(full_script)
         self.log.info(f"Sbatch script written to: {self.sbatch_script_path}")
 
     def submit_job(self) -> Optional[str]:

@@ -11,6 +11,8 @@ rule sentieon_DNAscope_tga:
         vcf = vcf_dir + "SNV.germline.{sample_type}.dnascope.vcf.gz",
     benchmark:
         Path(benchmark_dir, "sentieon_dnascope_{sample_type}.tsv").as_posix()
+    resources:
+        mem_mb=lambda wc, input: min(max(3.1 * input.size_mb, 5000), 250000) # Cap at 250GB. Scale memory with input size (min 5GB) to handle large TGA cases without over-allocating for typical inputs (e.g. myeloid). 3.1 factor chosen after testing
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         sentieon_exec = config_model.sentieon.sentieon_exec,
