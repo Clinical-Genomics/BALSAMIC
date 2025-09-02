@@ -47,7 +47,7 @@ rule vardict_sort:
 mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
 
-awk -f {params.sort_vcf} {input.vcf} > {output.vcf_sorted}
+awk -f {params.sort_vcf} {input.vcf} > {output.vcf_sorted} ;
 
 rm -rf {params.tmpdir} ;
     """
@@ -76,7 +76,7 @@ ref=$(echo {input.ref} | sed 's/.fasta/.dict/g') ;
 gatk UpdateVCFSequenceDictionary -V {input.vcf} --source-dictionary $ref --replace --output {output.vcf_vardict} ;
 
 rm -rf {params.tmpdir}
-            """
+        """
 
 rule vardict_move_svs:
     input:
@@ -97,10 +97,10 @@ rule vardict_move_svs:
         """
 export TMPDIR={params.tmpdir};  
     
-bcftools view -i 'INFO/SVTYPE!=""' -Oz -o {output.vcf_vardict_sv} {input.vcf_vardict}
-tabix -p vcf -f {output.vcf_vardict_sv}
-bcftools view -e 'INFO/SVTYPE!=""' -Oz -o {output.vcf_vardict} {input.vcf_vardict}
-tabix -p vcf -f {output.vcf_vardict}
+bcftools view -i 'INFO/SVTYPE!=""' -Oz -o {output.vcf_vardict_sv} {input.vcf_vardict} ;
+tabix -p vcf -f {output.vcf_vardict_sv} ;
+bcftools view -e 'INFO/SVTYPE!=""' -Oz -o {output.vcf_vardict} {input.vcf_vardict} ;
+tabix -p vcf -f {output.vcf_vardict} ;
     
 rm -rf {params.tmpdir}
         """
