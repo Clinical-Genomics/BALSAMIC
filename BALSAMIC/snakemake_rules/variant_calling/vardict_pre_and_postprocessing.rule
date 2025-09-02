@@ -103,4 +103,4 @@ bcftools view -e 'INFO/SVTYPE!=""' -Oz -o {output.vcf_vardict} {input.vcf_vardic
 tabix -p vcf -f {output.vcf_vardict}
     
 rm -rf {params.tmpdir}
-            """
+        """
