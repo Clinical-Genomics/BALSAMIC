@@ -191,7 +191,6 @@ def case_config(
             if path is not None
         }
     )
-    LOG.info(f"Collected references: {references}")
 
     analysis_fastq_dir: str = get_analysis_fastq_files_directory(
         case_dir=Path(analysis_dir, case_id).as_posix(), fastq_path=fastq_path
