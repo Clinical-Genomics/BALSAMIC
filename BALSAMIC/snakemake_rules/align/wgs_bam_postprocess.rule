@@ -14,8 +14,6 @@ rule sentieon_dedup:
         sentieon_exec = config_model.sentieon.sentieon_exec,
         sentieon_lic = config_model.sentieon.sentieon_license,
         sample_id = "{sample}"
-    threads:
-        get_threads(cluster_config, 'sentieon_dedup')
     message:
         ("Collects read information using sentieon LocusCollector and mark duplicated reads. "
          "Current sample: {params.sample_id}")
@@ -59,8 +57,6 @@ rule sentieon_realign:
         sentieon_exec = config_model.sentieon.sentieon_exec,
         sentieon_lic = config_model.sentieon.sentieon_license,
         sample_id = "{sample}"
-    threads:
-        get_threads(cluster_config, 'sentieon_realign')
     message:
         "INDEL realignment using sentieon realigner for sample: {params.sample_id}"
     shell:
@@ -99,8 +95,6 @@ rule sentieon_base_calibration:
         sentieon_exec = config_model.sentieon.sentieon_exec,
         sentieon_lic = config_model.sentieon.sentieon_license,
         sample = "{sample_type}"
-    threads:
-        get_threads(cluster_config, 'sentieon_base_calibration')
     message:
         "Base recalibration using Sentieon tools for {params.sample}"
     shell:

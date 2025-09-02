@@ -17,8 +17,6 @@ rule sentieon_align_sort:
         sample_id = "{sample}",
         sample_type = lambda wildcards: config_model.get_sample_type_by_name(wildcards.sample, uppercase=True),
         fastq_pattern = "{fastq_pattern}"
-    threads:
-        get_threads(cluster_config, 'sentieon_align_sort')
     message:
         ("Align fastq reads using sentieon bwa-mem and sort reads using samtools for sample type: "
         "{params.sample_type} : {params.sample_id}, {params.fastq_pattern}")
