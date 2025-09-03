@@ -17,6 +17,9 @@ Changed:
 * changed snakemake from running immediate submit to submitting snakemake job to cluster https://github.com/Clinical-Genomics/BALSAMIC/pull/1604
 * update snakemake version to 9.9.0 https://github.com/Clinical-Genomics/BALSAMIC/pull/1604
 * Updated balsamic installation instructions https://github.com/Clinical-Genomics/BALSAMIC/pull/1599
+* merge wgs per lane alignments before dedup https://github.com/Clinical-Genomics/BALSAMIC/pull/1587
+* run alignment summary metrics on raw alignment file https://github.com/Clinical-Genomics/BALSAMIC/pull/1587
+* use median_target_coverage as threshold for wgs normals coverage instead of median coverage https://github.com/Clinical-Genomics/BALSAMIC/pull/1587
 
 
 Removed:

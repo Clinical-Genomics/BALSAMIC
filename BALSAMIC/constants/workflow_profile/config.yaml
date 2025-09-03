@@ -490,6 +490,9 @@ set-resources:
   sentieon_umiextract_tga:
     mem_mb: 16000
     runtime: 350
+  samtools_merge_bamfiles:
+    mem_mb: 80000
+    runtime: 800
 
 set-threads:
   post_process_tnscope_info_fields_wgs: 1
@@ -653,3 +656,4 @@ set-threads:
   fastp_adapter_trim_tga: 4
   fastp_quality_trim_tga: 8
   sentieon_umiextract_tga: 8
+  samtools_merge_bamfiles: 36
