@@ -26,15 +26,13 @@ def get_vcf(config, var_caller, sample):
     """
     input: BALSAMIC config file
     output: retrieve list of vcf files
-    Handles cases where mutation_type is a list of strings.
     """
     vcf = []
     for v in var_caller:
         for s in sample:
-            mutation_types = config["vcf"][v]["mutation_type"]
+            mutation_type = config["vcf"][v]["mutation_type"]
             mutation = config["vcf"][v]["mutation"]
-            for m_type in mutation_types:
-                vcf.append(f"{m_type}.{mutation}.{s}.{v}")
+            vcf.append(f"{mutation_type}.{mutation}.{s}.{v}")
     return vcf
 
 

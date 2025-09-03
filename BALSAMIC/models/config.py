@@ -72,7 +72,7 @@ class VarcallerAttribute(BaseModel):
     """Holds variables for variant caller software
     Attributes:
         mutation: str of mutation class
-        mutation_type: str of mutation type
+        mutation_type: str for mutation type
         analysis_type: list of str for analysis types
         workflow_solution: list of str for workflows
         sequencing_type: list of str for workflows
@@ -85,7 +85,7 @@ class VarcallerAttribute(BaseModel):
     """
 
     mutation: MutationOrigin
-    mutation_type: List[MutationType]
+    mutation_type: MutationType
     analysis_type: Optional[List[AnalysisType]] = None
     sequencing_type: Optional[List[SequencingType]] = None
     workflow_solution: Optional[List[WorkflowSolution]] = None
