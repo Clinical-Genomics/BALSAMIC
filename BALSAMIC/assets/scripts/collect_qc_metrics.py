@@ -14,6 +14,7 @@ from BALSAMIC.utils.rule import (
     get_analysis_type,
     get_capture_kit,
     get_sample_type_from_sample_name,
+    get_sample_name_from_sample_type,
     get_sequencing_type,
 )
 
@@ -123,7 +124,6 @@ def get_multiqc_data_source(multiqc_data: dict, sample: str, tool: str) -> str:
 def get_sex_check_metrics(sex_prediction_path: str, config: dict) -> list:
     """Retrieves the sex check metrics and returns them as a Metric list."""
     metric = "compare_predicted_to_given_sex"
-    case_id: str = config["analysis"]["case_id"]
     sex_prediction: dict = read_json(sex_prediction_path)
 
     given_sex: str = config["analysis"]["gender"]
@@ -133,8 +133,9 @@ def get_sex_check_metrics(sex_prediction_path: str, config: dict) -> list:
     for sample_type in ["tumor", "normal"]:
         if sample_type in sex_prediction:
             predicted_sex = sex_prediction[sample_type]["predicted_sex"]
+            sample_name = get_sample_name_from_sample_type(config, sample_type)
             sex_prediction_metrics = Metric(
-                id=f"{case_id}_{sample_type}",
+                id=sample_name,
                 input=os.path.basename(sex_prediction_path),
                 name=metric.upper(),
                 step="sex_check",

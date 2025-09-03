@@ -14,6 +14,7 @@ from BALSAMIC.constants.analysis import (
     MutationType,
     SequencingType,
     WorkflowSolution,
+    SampleType,
 )
 from BALSAMIC.models.config import ConfigModel
 from BALSAMIC.utils.cli import find_file_index, get_file_extension
@@ -127,6 +128,16 @@ def get_sample_type_from_sample_name(config, sample_name):
     for sample in config["samples"]:
         if sample_name == sample["name"]:
             return sample["type"]
+
+
+def get_sample_name_from_sample_type(config: dict, sample_type: SampleType):
+    """
+    input: case config file from BALSAMIC, and sample_name
+    output: sample name
+    """
+    for sample in config["samples"]:
+        if sample_type == sample["type"]:
+            return sample["name"]
 
 
 def get_result_dir(config):
