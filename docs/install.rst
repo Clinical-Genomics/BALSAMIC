@@ -13,6 +13,7 @@ Software Requirements
 - Singularity >=version 3.0.0: BALSAMIC uses singularity to run various parts of the workflow.
 - Python 3.11
 - BALSAMIC is dependent on third-party bioinformatics software ``Sentieon-tools`` for all workflows.
+- The BALSAMIC wrapper is hard-coded to the SLURM workload manager and requires scontrol
 
 ``Note: To run Balsamic you need to supply the --sentieon-install-dir and --sentieon-license arguments during the config``
 

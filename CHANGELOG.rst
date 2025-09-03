@@ -37,6 +37,10 @@ Fixed:
 
 Added:
 ^^^^^^
+* sbatch script for snakemake sequential job submission https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
+* logfile for balsamic wrapper https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
+* analysis status text file for easier prodbioinfo handling https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
+* requested memory to each rule https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
 
 
 Changed:
@@ -48,6 +52,10 @@ Changed:
 
 Removed:
 ^^^^^^^^
+* removed immediate submit functionality https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
+* removed unused code for benchmark plotting https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
+* removed functionality to disable variant callers https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
+
 
 Fixed:
 ^^^^^^

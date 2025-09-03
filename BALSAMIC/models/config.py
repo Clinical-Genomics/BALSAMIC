@@ -72,7 +72,7 @@ class VarcallerAttribute(BaseModel):
     """Holds variables for variant caller software
     Attributes:
         mutation: str of mutation class
-        mutation_type: str of mutation type
+        mutation_type: str for mutation type
         analysis_type: list of str for analysis types
         workflow_solution: list of str for workflows
         sequencing_type: list of str for workflows
@@ -101,6 +101,7 @@ class VCFModel(BaseModel):
     merged: VarcallerAttribute
     manta: VarcallerAttribute
     vardict: VarcallerAttribute
+    vardictsv: VarcallerAttribute
     dellysv: VarcallerAttribute
     cnvkit: VarcallerAttribute
     ascat: VarcallerAttribute
