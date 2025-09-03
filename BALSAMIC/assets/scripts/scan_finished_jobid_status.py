@@ -159,7 +159,7 @@ def check_failed_jobs(log_dir: Path, output: Path, log_level: str) -> None:
         state = parse_state(out_text)
         if state == "FAILED":
             failed.append((jobid, job_logs[jobid]))
-        elif state == "CANCELLED":
+        elif state in ["CANCELLED", "TIMEOUT", "OUT_OF_MEMORY"]:
             cancelled.append((jobid, job_logs[jobid]))
         else:
             LOG.debug(f"Job {jobid} state is {state}")
