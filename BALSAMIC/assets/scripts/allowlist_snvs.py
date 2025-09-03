@@ -1,27 +1,51 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 from __future__ import annotations
 
+import gzip
+import io
 import sys
-from typing import Dict, Iterable, List, Optional, Set, Tuple
+from pathlib import Path
+from typing import Dict, List, Optional, Set, Tuple
 
 import click
 
-# --- Constants ---
-INFO_HEADERS = {
-    "AllowlistStatus": "Variant allowlisted based on CLNSIG/ONC or manually curated clinical list",
-    "AllowlistedFilters": "Original filters for allowlisted variants that were overridden",
-}
-VCF_FIELDS = ["chrom", "pos", "id", "ref", "alt", "qual", "filter", "info", "format"]  # (format unused here)
+# --- Constants & headers ------------------------------------------------------
 
-AllowKey = Tuple[str, int, str, str]  # (CHROM, POS, REF, ALT)
+INFO_ALLOWLISTED_FILTERS_HDR = '##INFO=<ID=AllowlistedFilters,Number=1,Type=String,Description="Original FILTER value moved here because this variant was allow-listed">'
+INFO_ALLOWLIST_STATUS_HDR = '##INFO=<ID=AllowlistStatus,Number=1,Type=String,Description="Reason(s) for allow-listing; pipe-separated (e.g., ManuallyCuratedList|ClinvarOnc|ClinvarPathogenic)">'
+
+CLNSIG_PATHOGENIC = "Pathogenic"
+CLNSIG_LIKELY_PATHOGENIC = "Likely_pathogenic"
+CLINVAR_REASON_ONC = "ClinvarOnc"
+CLINVAR_REASON_PATH = "ClinvarPathogenic"
+CLINVAR_REASON_LIKELY_PATH = "ClinvarLikelyPathogenic"
+MANUAL_REASON = "ManuallyCuratedList"
 
 
-def parse_info(info_str: str) -> Dict[str, Optional[str]]:
-    """Parse a VCF INFO string into a dict. Flags get value None. '.' -> {}."""
-    if not info_str or info_str == ".":
+# --- IO helpers ---------------------------------------------------------------
+
+
+def open_maybe_gzip(path: str | Path) -> io.TextIOBase:
+    p = str(path)
+    if p.endswith(".gz"):
+        return io.TextIOWrapper(gzip.open(p, "rb"), encoding="utf-8", newline="")
+    return open(p, "r", encoding="utf-8", newline="")
+
+
+def open_out_text(path: str | Path | None) -> io.TextIOBase:
+    if path is None or str(path) == "-":
+        return sys.stdout
+    return open(path, "w", encoding="utf-8", newline="")
+
+
+# --- VCF parsing utilities ----------------------------------------------------
+
+
+def parse_info(info_field: str) -> Dict[str, Optional[str]]:
+    if info_field == "." or not info_field:
         return {}
     out: Dict[str, Optional[str]] = {}
-    for entry in info_str.split(";"):
+    for entry in info_field.split(";"):
         if not entry:
             continue
         if "=" in entry:
@@ -33,175 +57,180 @@ def parse_info(info_str: str) -> Dict[str, Optional[str]]:
 
 
 def format_info(info: Dict[str, Optional[str]]) -> str:
-    """Format INFO dict back into a VCF INFO string (sorted by key for stability)."""
     if not info:
         return "."
     parts: List[str] = []
     for k in sorted(info.keys()):
         v = info[k]
-        parts.append(k if v is None else f"{k}={v}")
+        parts.append(f"{k}={v}" if v is not None else k)
     return ";".join(parts)
 
 
-def load_allowlist(allowlist_path: Optional[str]) -> Set[AllowKey]:
-    """Read an allowlist VCF and return set of (chrom, pos, ref, alt) tuples."""
-    allow: Set[AllowKey] = set()
-    if not allowlist_path:
-        return allow
-    with open(allowlist_path, "r", encoding="utf-8") as fh:
+# --- Allow-list building & reasons -------------------------------------------
+
+
+def build_allowlist_keyset(
+    allow_vcf_path: str | Path,
+) -> Set[Tuple[str, int, str, str]]:
+    keyset: Set[Tuple[str, int, str, str]] = set()
+    with open_maybe_gzip(allow_vcf_path) as fh:
         for line in fh:
             if not line or line.startswith("#"):
                 continue
             cols = line.rstrip("\n").split("\t")
             if len(cols) < 5:
                 continue
-            chrom, pos_str, _id, ref, alt_field = cols[:5]
+            chrom, pos_str, _id, ref, alt = cols[0], cols[1], cols[2], cols[3], cols[4]
             try:
                 pos = int(pos_str)
             except ValueError:
                 continue
-            # ALT can have multiple alleles comma-separated
-            for alt in alt_field.split(","):
-                allow.add((chrom, pos, ref, alt))
-    return allow
+            for a in alt.split(","):
+                keyset.add((chrom, pos, ref, a))
+    return keyset
 
 
-def needs_headers_injection(existing_header_lines: Iterable[str]) -> Dict[str, bool]:
-    existing = "\n".join(existing_header_lines)
-    return {k: (f"##INFO=<ID={k}," not in existing) for k in INFO_HEADERS.keys()}
-
-
-def clinical_whitelist(info: Dict[str, Optional[str]]) -> Tuple[bool, List[str]]:
+def determine_clinvar_reasons(info: Dict[str, Optional[str]]) -> List[str]:
+    """
+    Return ClinVar allow-list reasons as separate labels (no merging):
+      - ONC present -> ClinvarOnc
+      - CLNSIG contains 'Pathogenic' (case-sensitive) -> ClinvarPathogenic
+      - CLNSIG contains 'Likely_pathogenic' (case-sensitive) -> ClinvarLikelyPathogenic
+    """
     reasons: List[str] = []
-    onc_val = info.get("ONC")
-    cln_val = info.get("CLNSIG")
-    if onc_val and "oncogenic" in onc_val.lower():
-        reasons.append("ONC=oncogenic")
-    if cln_val and "pathogenic" in cln_val.lower():
-        reasons.append("CLNSIG=pathogenic")
-    return (len(reasons) > 0, reasons)
+    if "ONC" in info:
+        reasons.append(CLINVAR_REASON_ONC)
+    clnsig = info.get("CLNSIG") or ""
+    if CLNSIG_PATHOGENIC in clnsig:
+        reasons.append(CLINVAR_REASON_PATH)
+    if CLNSIG_LIKELY_PATHOGENIC in clnsig:
+        reasons.append(CLINVAR_REASON_LIKELY_PATH)
+    return reasons
 
 
-@click.command()
-@click.argument("vcf_path", type=click.Path(exists=True))
-@click.option(
-    "--allowlist-path",
-    type=click.Path(exists=True),
-    default=None,
-    help="Optional path to allowlist VCF.",
-)
-@click.argument("output_file", type=click.Path())
-def main(vcf_path: str, allowlist_path: Optional[str], output_file: str) -> None:
-    """VCF processor with allowlist annotation support."""
-    allow = load_allowlist(allowlist_path)
+def ensure_info_headers(headers: List[str]) -> List[str]:
+    has_filters = any(h.startswith("##INFO=<ID=AllowlistedFilters,") for h in headers)
+    has_status = any(h.startswith("##INFO=<ID=AllowlistStatus,") for h in headers)
+    if has_filters and has_status:
+        return headers
+    try:
+        chrom_idx = next(i for i, h in enumerate(headers) if h.startswith("#CHROM"))
+    except StopIteration:
+        chrom_idx = len(headers)
+    insertion: List[str] = []
+    if not has_filters:
+        insertion.append(INFO_ALLOWLISTED_FILTERS_HDR)
+    if not has_status:
+        insertion.append(INFO_ALLOWLIST_STATUS_HDR)
+    return headers[:chrom_idx] + insertion + headers[chrom_idx:]
 
-    header_lines: List[str] = []
-    chrom_header: Optional[str] = None
 
-    with open(vcf_path, "r", encoding="utf-8") as inp, open(output_file, "w", encoding="utf-8") as out:
-        # First, buffer headers to decide what to inject
-        data_lines: List[str] = []
-        for raw in inp:
-            if raw.startswith("##"):
-                header_lines.append(raw.rstrip("\n"))
-            elif raw.startswith("#CHROM"):
-                chrom_header = raw.rstrip("\n")
-                break
-            else:
-                # Malformed VCF with no #CHROM yet, treat as data
-                data_lines.append(raw.rstrip("\n"))
-                break
+# --- Core processing ----------------------------------------------------------
 
-        if chrom_header is None:
-            # Continue reading to find #CHROM if not yet found
-            for raw in inp:
-                if raw.startswith("##"):
-                    header_lines.append(raw.rstrip("\n"))
-                elif raw.startswith("#CHROM"):
-                    chrom_header = raw.rstrip("\n")
-                    break
-                else:
-                    data_lines.append(raw.rstrip("\n"))
-                    break
 
-        if chrom_header is None:
-            click.echo("ERROR: No #CHROM header line found in VCF.", err=True)
-            sys.exit(1)
+def process_vcf(
+    allow_keys: Set[Tuple[str, int, str, str]],
+    in_vcf_path: str | Path,
+    out_fh: io.TextIOBase,
+) -> None:
+    headers: List[str] = []
+    header_done = False
 
-        # Inject INFO headers if missing
-        inject_flags = needs_headers_injection(header_lines)
-        for h in header_lines:
-            out.write(h + "\n")
-        for key, missing in inject_flags.items():
-            if missing:
-                desc = INFO_HEADERS[key].replace('"', '\\"')
-                out.write(f'##INFO=<ID={key},Number=1,Type=String,Description="{desc}">\n')
-
-        # Write the #CHROM header
-        out.write(chrom_header + "\n")
-
-        # If we buffered any early data lines (edge-case), process them plus the rest
-        def yield_data_lines() -> Iterable[str]:
-            if data_lines:
-                for dl in data_lines:
-                    yield dl + "\n"
-            for rest in inp:
-                yield rest
-
-        # Process variants
-        for raw in yield_data_lines():
-            if not raw or raw.startswith("#"):
-                out.write(raw)
-                continue
-
+    with open_maybe_gzip(in_vcf_path) as fh:
+        for raw in fh:
             line = raw.rstrip("\n")
+
+            if not header_done:
+                if line.startswith("#"):
+                    headers.append(line)
+                    continue
+                headers = ensure_info_headers(headers)
+                for h in headers:
+                    out_fh.write(h + "\n")
+                header_done = True  # fall through
+
             cols = line.split("\t")
-            # Ensure we have at least 8 columns for VCF
             if len(cols) < 8:
-                out.write(line + "\n")
+                out_fh.write(line + "\n")
                 continue
 
-            chrom, pos_str, vid, ref, alt_field, qual, filt, info_str = cols[:8]
-
+            chrom = cols[0]
             try:
-                pos = int(pos_str)
+                pos = int(cols[1])
             except ValueError:
-                out.write(line + "\n")
+                out_fh.write(line + "\n")
                 continue
+            ref = cols[3]
+            alts = cols[4].split(",") if cols[4] else ["."]
+            filt = cols[6]
+            info = parse_info(cols[7])
 
-            alts = alt_field.split(",")
-            # Allowlist match?
-            is_allow = any((chrom, pos, ref, alt) in allow for alt in alts)
+            # Reasons
+            reasons: List[str] = []
+            if any((chrom, pos, ref, a) in allow_keys for a in alts):
+                reasons.append(MANUAL_REASON)
+            reasons.extend(determine_clinvar_reasons(info))
 
-            info = parse_info(info_str)
-            has_clinical, clinical_reasons = clinical_whitelist(info)
+            if reasons:
+                if filt not in ("PASS", ".", ""):
+                    info["AllowlistedFilters"] = filt
+                    cols[6] = "PASS"
+                info["AllowlistStatus"] = "|".join(reasons)
+                cols[7] = format_info(info)
 
-            whitelisted = is_allow or has_clinical
+            out_fh.write("\t".join(cols) + "\n")
 
-            if whitelisted:
-                reasons = []
-                if is_allow:
-                    reasons.append("allowlist")
-                if has_clinical:
-                    reasons.append("clinical(" + ",".join(clinical_reasons) + ")")
-                # Move overridden filters (if any) to INFO
-                if filt and filt != "PASS" and filt != ".":
-                    # If AllowlistedFilters already exists, append unique values
-                    prev = info.get("AllowlistedFilters")
-                    merged = filt if not prev else ",".join(sorted(set((prev + "," + filt).split(","))))
-                    info["AllowlistedFilters"] = merged
-                # Add/overwrite status
-                info["AllowlistStatus"] = "|".join(reasons) if reasons else "true"
-                # Force PASS
-                filt = "PASS"
+    if not header_done and headers:
+        headers = ensure_info_headers(headers)
+        for h in headers:
+            out_fh.write(h + "\n")
 
-            # Rebuild INFO and write line
-            new_info = format_info(info)
-            new_cols = cols[:]  # copy
-            new_cols[6] = filt
-            new_cols[7] = new_info
-            out.write("\t".join(new_cols) + "\n")
+
+# --- CLI ----------------------------------------------------------------------
+
+
+@click.command(context_settings=dict(help_option_names=["-h", "--help"]))
+@click.option(
+    "--allow-list",
+    "allow_list",
+    type=click.Path(exists=True, dir_okay=False, readable=True, path_type=Path),
+    required=True,
+    help="VCF (.vcf or .vcf.gz) of allow-listed variants (matched on CHROM, POS, REF, ALT).",
+)
+@click.option(
+    "--vcf",
+    "vcf_path",
+    type=click.Path(exists=True, dir_okay=False, readable=True, path_type=Path),
+    required=True,
+    help="Input VCF (.vcf or .vcf.gz) to process.",
+)
+@click.option(
+    "-o",
+    "--out",
+    "out_path",
+    type=click.Path(dir_okay=False, writable=True, allow_dash=True, path_type=Path),
+    default="-",
+    show_default=True,
+    help="Output VCF path (use '-' for stdout).",
+)
+def cli(allow_list: Path, vcf_path: Path, out_path: Path | None) -> None:
+    """
+    Keep ONC as its own allow-list reason (ClinvarOnc) alongside Pathogenic/Likely_pathogenic:
+      AllowlistStatus example: ManuallyCuratedList|ClinvarOnc|ClinvarPathogenic
+    """
+    try:
+        allow_keys = build_allowlist_keyset(allow_list)
+        with open_out_text(out_path) as out_fh:
+            process_vcf(allow_keys, vcf_path, out_fh)
+    except BrokenPipeError:
+        try:
+            sys.stdout.close()
+        finally:
+            sys.exit(0)
+    except Exception as e:
+        click.echo(f"[error] {e}", err=True)
+        sys.exit(1)
 
 
 if __name__ == "__main__":
-    main()
+    cli()
