@@ -19,7 +19,6 @@ from BALSAMIC.constants.cache import CacheVersion
 from BALSAMIC.constants.constants import FileType
 from BALSAMIC.models.config import FastqInfoModel, SampleInstanceModel
 from BALSAMIC.utils.exc import BalsamicError
-from BALSAMIC.utils.io import CaptureStdout
 
 LOG = logging.getLogger(__name__)
 
