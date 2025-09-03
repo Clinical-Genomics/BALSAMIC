@@ -762,7 +762,9 @@ if "delivery" in config:
 
 
 wildcard_constraints:
-    sample="|".join(sample_names),
+    sample="[^.]+",
+    sample_type="(?:normal|tumor)",
+    fastq_pattern="[^/]+"
 
 
 rule all:
