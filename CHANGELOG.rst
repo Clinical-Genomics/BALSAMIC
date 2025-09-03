@@ -7,6 +7,7 @@ Added:
 * logfile for balsamic wrapper https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
 * analysis status text file for easier prodbioinfo handling https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
 * requested memory to each rule https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
+* added d4file to all workflows for use in chanjo2 https://github.com/Clinical-Genomics/BALSAMIC/pull/1592
 
 Changed:
 ^^^^^^^^

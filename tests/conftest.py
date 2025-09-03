@@ -2190,6 +2190,7 @@ def fixture_develop_containers() -> Dict[str, str]:
         DockerContainers.CNVKIT: "docker://clinicalgenomics/balsamic:develop-cnvkit",
         DockerContainers.COVERAGE_QC: "docker://clinicalgenomics/balsamic:develop-coverage_qc",
         DockerContainers.DELLY: "docker://clinicalgenomics/balsamic:develop-delly",
+        DockerContainers.D4TOOLS: "docker://clinicalgenomics/balsamic:develop-d4tools",
         DockerContainers.CADD: "docker://clinicalgenomics/balsamic:develop-cadd",
         DockerContainers.HTSLIB: "docker://clinicalgenomics/balsamic:develop-htslib",
         DockerContainers.PURECN: "docker://clinicalgenomics/balsamic:develop-purecn",
