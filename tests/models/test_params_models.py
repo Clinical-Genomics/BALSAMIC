@@ -159,11 +159,11 @@ def test_structuralvariantfilters():
 
 def test_varcaller_attribute():
     # GIVEN valid input arguments
-    valid_args = {"mutation": "somatic", "mutation_type": ["SNV"]}
+    valid_args = {"mutation": "somatic", "mutation_type": "SNV"}
     # THEN we can successully create a config dict
     assert VarcallerAttribute.model_validate(valid_args)
     # GIVEN invalid input arguments
-    invalid_args = {"mutation": "strange", "mutation_type": ["unacceptable"]}
+    invalid_args = {"mutation": "strange", "mutation_type": "unacceptable"}
     # THEN should trigger ValueError
     with pytest.raises(ValidationError) as excinfo:
         VarcallerAttribute.model_validate(invalid_args)
