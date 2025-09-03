@@ -14,12 +14,13 @@ from BALSAMIC.constants.analysis import (
 )
 from BALSAMIC.constants.cache import GENOME_VERSIONS, CacheVersion, GenomeVersion
 from BALSAMIC.constants.cluster import (
+    Partition,
     QOS,
     QOS_OPTIONS,
 )
 from BALSAMIC.constants.constants import LOG_LEVELS, LogLevel
 from BALSAMIC.constants.rules import DELIVERY_RULES
-from BALSAMIC.constants.paths import CONSTANTS_DIR, WORKFLOW_PROFILE, CACHE_PROFILE
+from BALSAMIC.constants.paths import WORKFLOW_PROFILE, CACHE_PROFILE
 from BALSAMIC.utils.cli import (
     validate_cache_version,
     validate_exome_option,
@@ -139,13 +140,20 @@ OPTION_SOFT_FILTER_NORMAL = click.option(
     help="Flag to disable hard-filtering on presence of variants in matched normal sample",
 )
 
-OPTION_CLUSTER_PROFILE = click.option(
-    "-p",
-    "--cluster-profile",
+OPTION_WORKFLOW_PARTITION = click.option(
+    "--workflow-partition",
     show_default=True,
-    type=click.Path(exists=True, resolve_path=True),
-    default=CONSTANTS_DIR,
-    help="Directory containing snakemake cluster profile",
+    type=click.STRING,
+    default=Partition.CORE,
+    help="Cluster node partition to run Snakemake jobs",
+)
+
+OPTION_HEADJOB_PARTITION = click.option(
+    "--headjob-partition",
+    type=str,
+    required=False,
+    default=None,
+    help="Cluster node partition to run Snakemake head-job",
 )
 
 OPTION_MAX_RUN_HOURS = click.option(
@@ -225,7 +233,7 @@ OPTION_GENDER = click.option(
     type=click.Choice([Gender.FEMALE, Gender.MALE, Gender.UNKNOWN]),
     default=Gender.UNKNOWN,
     show_default=True,
-    help="Sample associated gender",
+    help="Case associated Gender",
 )
 
 OPTION_GENOME_VERSION = click.option(

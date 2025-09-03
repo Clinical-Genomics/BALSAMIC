@@ -13,6 +13,7 @@ Software Requirements
 - Singularity >=version 3.0.0: BALSAMIC uses singularity to run various parts of the workflow.
 - Python 3.11
 - BALSAMIC is dependent on third-party bioinformatics software ``Sentieon-tools`` for all workflows.
+- The BALSAMIC wrapper is hard-coded to the SLURM workload manager and requires scontrol
 
 ``Note: To run Balsamic you need to supply the --sentieon-install-dir and --sentieon-license arguments during the config``
 
@@ -24,7 +25,8 @@ Step 1. Installing BALSAMIC
 
 ::
 
-    conda create -c conda-forge -c defaults --name S_balsamic python==3.11 pip pygraphviz wkhtmltopdf
+    conda create --name S_balsamic -c conda-forge python=3.11 pip "cython<3" pygraphviz wkhtmltopdf snakemake-executor-plugin-slurm
+
 
 
 2. Activate environment:
@@ -39,7 +41,7 @@ Step 1. Installing BALSAMIC
 
 ::
 
-  pip install --no-cache-dir -U git+https://github.com/Clinical-Genomics/BALSAMIC
+  pip install --no-build-isolation --no-cache-dir -U git+https://github.com/Clinical-Genomics/BALSAMIC
 
 
 Or if you have repository cloned and want it in editable mode:

@@ -14,9 +14,10 @@ import click
 from BALSAMIC import __version__ as balsamic_version
 
 from BALSAMIC.commands.options import (
+    OPTION_WORKFLOW_PARTITION,
+    OPTION_HEADJOB_PARTITION,
     OPTION_CLUSTER_ACCOUNT,
     OPTION_WORKFLOW_PROFILE,
-    OPTION_CLUSTER_PROFILE,
     OPTION_MAX_RUN_HOURS,
     OPTION_CLUSTER_QOS,
     OPTION_DRAGEN,
@@ -29,7 +30,7 @@ from BALSAMIC.commands.options import (
     OPTION_SNAKEFILE,
     OPTION_SNAKEMAKE_OPT,
 )
-from BALSAMIC.constants.analysis import RunMode
+from BALSAMIC.constants.analysis import RunMode, LogFile
 from BALSAMIC.constants.cluster import (
     QOS,
 )
@@ -39,15 +40,16 @@ from BALSAMIC.models.snakemake import SnakemakeExecutable
 from BALSAMIC.utils.analysis import get_singularity_bind_paths
 from BALSAMIC.utils.cli import createDir, get_snakefile
 from BALSAMIC.utils.io import write_json
-from BALSAMIC.utils.logging import add_file_logging, set_log_filename
+from BALSAMIC.utils.logging import add_file_logging
 from BALSAMIC.utils.rule import get_script_path
 
 LOG = logging.getLogger(__name__)
 
 
 @click.command("analysis", short_help="Run the analysis on a sample config-file")
+@OPTION_WORKFLOW_PARTITION
+@OPTION_HEADJOB_PARTITION
 @OPTION_CLUSTER_ACCOUNT
-@OPTION_CLUSTER_PROFILE
 @OPTION_MAX_RUN_HOURS
 @OPTION_WORKFLOW_PROFILE
 @OPTION_CLUSTER_QOS
@@ -67,7 +69,6 @@ def analysis(
     sample_config: Path,
     run_mode: RunMode,
     dragen: bool,
-    cluster_profile: Path,
     max_run_hours: int,
     workflow_profile: Path,
     run_analysis: bool,
@@ -76,6 +77,8 @@ def analysis(
     force_all: bool,
     snakemake_opt: List[str],
     account: str,
+    workflow_partition: str,
+    headjob_partition: str,
     quiet: bool,
 ):
     """Run BALSAMIC workflow on the provided sample's config file."""
@@ -87,18 +90,14 @@ def analysis(
 
     config_model = ConfigModel.model_validate(sample_config)
     case_id = config_model.analysis.case_id
-    analysis_dir = config_model.analysis.analysis_dir
 
-    case_dir = f"{analysis_dir}/{case_id}"
-    LOG.info(f"Creating case analysis directory: {case_dir}.")
-    Path(case_dir).mkdir(exist_ok=True)
-
-    log_file = set_log_filename(case_dir, run_start=True)
+    log_file = Path(
+        config_model.analysis.analysis_dir, case_id, LogFile.LOGNAME
+    ).as_posix()
     LOG.info(f"Setting BALSAMIC logfile path to: {log_file}.")
     add_file_logging(log_file, logger_name=__name__)
 
     LOG.info(f"Running BALSAMIC version {balsamic_version} -- RUN ANALYSIS")
-    LOG.info(f"BALSAMIC started with log level {context.obj['log_level']}.")
     LOG.info(f"Using case config file: {sample_config_path}")
     LOG.info(f"Starting analysis on: {case_id}.")
 
@@ -153,8 +152,8 @@ def analysis(
         config_path=sample_config_path,
         dragen=dragen,
         force=force_all,
+        workflow_partition=workflow_partition,
         log_dir=log_path.as_posix(),
-        cluster_profile=cluster_profile,
         cluster_job_status_script=get_script_path("cluster_job_status.py"),
         workflow_profile=workflow_profile,
         qos=qos,
@@ -178,6 +177,7 @@ def analysis(
             log_path=Path(log_path),
             account=account,
             qos=qos,
+            headjob_partition=headjob_partition,
             max_run_hours=max_run_hours,
             snakemake_executable=snakemake_executable,
             logger=LOG,

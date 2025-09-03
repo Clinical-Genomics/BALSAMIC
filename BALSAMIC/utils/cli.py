@@ -4,16 +4,17 @@ import re
 import subprocess
 from distutils.spawn import find_executable
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Final
 
 import click
 import graphviz
-import snakemake
 import yaml
 from colorclass import Color
+import shutil
 
 from BALSAMIC import __version__ as balsamic_version
 from BALSAMIC.constants.analysis import FASTQ_SUFFIXES, FastqName, PonParams, SampleType
+from BALSAMIC.constants.analysis import SnakemakeDAG as SD
 from BALSAMIC.constants.cache import CacheVersion
 from BALSAMIC.constants.constants import FileType
 from BALSAMIC.models.config import FastqInfoModel, SampleInstanceModel
@@ -386,39 +387,118 @@ def get_pon_sample_list(fastq_path: str) -> List[SampleInstanceModel]:
     return sample_list
 
 
-def generate_graph(config_collection_dict, config_path):
-    """Generate DAG graph using snakemake stdout output."""
+def _extract_dot(text: str) -> str:
+    """Extract the DOT graph definition from Snakemake CLI output."""
+    start = -1
+    for s in (SD.DIGRAPH_HEADER, SD.HEADER):
+        start = text.find(s)
+        if start != -1:
+            break
+    end = text.rfind("}")
+    return text[start : end + 1]
 
-    with CaptureStdout() as graph_dot:
-        snakemake.snakemake(
-            snakefile=get_snakefile(
-                analysis_type=config_collection_dict["analysis"]["analysis_type"],
-                analysis_workflow=config_collection_dict["analysis"][
-                    "analysis_workflow"
-                ],
-            ),
-            dryrun=True,
-            configfiles=[config_path],
-            printrulegraph=True,
+
+def _inject_title(dot: str, graph_name: str, graph_title: str, label_loc: str) -> str:
+    """Inject a custom title into a DOT graph while normalizing the header."""
+    dot = dot.strip()
+    if dot.startswith("digraph"):
+        return dot.replace(
+            SD.DIGRAPH_HEADER,
+            f'digraph {graph_name} {{ label="{graph_title}";labelloc="{label_loc}";',
+            1,
         )
 
-    graph_title = "_".join(
-        [
-            "BALSAMIC",
-            balsamic_version,
-            config_collection_dict["analysis"]["case_id"],
-        ]
+
+def _run_rulegraph_cli(
+    snakefile: str,
+    config_path: str,
+) -> tuple[str, str]:
+    """Invoke `snakemake -n --rulegraph` and return (raw_output, dot)."""
+    if not shutil.which("snakemake"):
+        raise RuntimeError("Failed to execute 'snakemake': binary not found on PATH.")
+
+    cmd = [
+        "snakemake",
+        "-n",
+        "--rulegraph",
+        "--configfile",
+        str(config_path),
+        "-s",
+        str(snakefile),
+        "--quiet",
+    ]
+    proc = subprocess.run(cmd, text=True, capture_output=True)
+    raw = (proc.stdout or "") + ("\n" + proc.stderr if proc.stderr else "")
+    dot = _extract_dot(raw)
+    return dot
+
+
+def _render_rulegraph_cli(
+    config_path: str,
+    snakefile: str,
+    graph_title: str,
+    dag_filename: str | Path,
+) -> Path:
+    """Run Snakemake via CLI to get DOT, inject title, and render with Graphviz."""
+    dot = _run_rulegraph_cli(
+        snakefile=snakefile,
+        config_path=config_path,
     )
-    graph_dot = "".join(graph_dot).replace(
-        "snakemake_dag {", 'BALSAMIC { label="' + graph_title + '";labelloc="t";'
+    dot = _inject_title(dot, SD.GRAPH_NAME, graph_title, SD.GRAPH_LABEL_LOC)
+
+    # Normalize and split the output path
+    dag_path = Path(dag_filename)
+    outdir: Path = dag_path.parent
+    outstem: str = dag_path.stem
+    fmt: str = dag_path.suffix.lstrip(".") or SD.GRAPHVIZ_FORMAT
+
+    outdir.mkdir(parents=True, exist_ok=True)
+
+    src = graphviz.Source(
+        dot,
+        directory=outdir.as_posix(),
+        filename=outstem,
+        format=fmt,
+        engine=SD.GRAPHVIZ_ENGINE,
     )
-    graph_obj = graphviz.Source(
-        graph_dot,
-        filename=".".join(config_collection_dict["analysis"]["dag"].split(".")[:-1]),
-        format="pdf",
-        engine="dot",
+    rendered = Path(src.render(cleanup=True))
+    LOG.info("Workflow graph generated successfully (%s)", rendered.as_posix())
+    return rendered
+
+
+def generate_graph(
+    config_collection_dict: Dict,
+    config_path: str,
+    snakefile: str,
+    init_workflow: bool = False,
+) -> Path:
+    """
+    Generate DAG for snakemake workflows.
+    - For init workflow: output is `<references_dir>/<GRAPH_NAME>_<version>_reference_graph.pdf`
+      (if references_dir is omitted, falls back to config_collection_dict["references_dir"])
+    - Otherwise: uses `analysis.dag` as the output filename.
+    Returns the rendered Path.
+    """
+    if init_workflow:
+        graph_title = "_".join([SD.GRAPH_NAME, balsamic_version, "reference"])
+        ref_dir = config_collection_dict["references_dir"]
+        dag_filename = ref_dir / "reference_graph.pdf"
+    else:
+        graph_title = "_".join(
+            [
+                SD.GRAPH_NAME,
+                balsamic_version,
+                config_collection_dict["analysis"]["case_id"],
+            ]
+        )
+        dag_filename = Path(config_collection_dict["analysis"]["dag"])
+
+    return _render_rulegraph_cli(
+        config_path=config_path,
+        snakefile=snakefile,
+        graph_title=graph_title,
+        dag_filename=dag_filename,
     )
-    graph_obj.render(cleanup=True)
 
 
 def convert_deliverables_tags(

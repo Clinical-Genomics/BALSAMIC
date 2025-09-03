@@ -20,52 +20,6 @@ from BALSAMIC.utils.exc import BalsamicError
 LOG = logging.getLogger(__name__)
 
 
-class CaptureStdout(list):
-    """
-    Captures stdout.
-    """
-
-    def __enter__(self):
-        self._stdout = sys.stdout
-        sys.stdout = self._stringio = StringIO()
-        return self
-
-    def __exit__(self, *args):
-        self.extend(self._stringio.getvalue().splitlines())
-        del self._stringio  # free up some memory
-        sys.stdout = self._stdout
-
-
-def generate_workflow_graph(
-    config_path: Path, directory_path: Path, snakefile: Path, title: str
-) -> None:
-    """Generate snakemake workflow graph and save it in a PDF file."""
-    with CaptureStdout() as graph_dot:
-        snakemake.snakemake(
-            snakefile=snakefile,
-            dryrun=True,
-            configfiles=[config_path.as_posix()],
-            printrulegraph=True,
-        )
-    graph_title: str = "_".join(["BALSAMIC", balsamic_version, title])
-    graph_dot: str = "".join(graph_dot).replace(
-        "snakemake_dag {", 'BALSAMIC { label="' + graph_title + '";labelloc="t";'
-    )
-    graph: Source = Source(
-        graph_dot,
-        directory=directory_path.as_posix(),
-        filename=f"{title}_graph",
-        format="pdf",
-        engine="dot",
-    )
-    try:
-        graph_pdf: Path = Path(graph.render())
-        LOG.info(f"Workflow graph generated successfully ({graph_pdf.as_posix()}) ")
-    except Exception:
-        LOG.error("Workflow graph generation failed")
-        raise BalsamicError()
-
-
 def read_json(json_path: str) -> dict:
     """Read JSON file and return a dictionary."""
     if Path(json_path).exists():

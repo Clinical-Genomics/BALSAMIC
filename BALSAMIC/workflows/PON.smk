@@ -103,6 +103,11 @@ pon_finish = Path(result_dir + "analysis_PON_finish").as_posix()
 for r in rules_to_include:
     include: Path(BALSAMIC_DIR, r).as_posix()
 
+wildcard_constraints:
+    sample="[^.]+",
+    sample_type="(?:normal|tumor)",
+    fastq_pattern="[^/]+"
+
 rule all:
     input:
         ref_cnn = pon_reference

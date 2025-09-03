@@ -67,6 +67,12 @@ config_model = ConfigModel.model_validate(config)
 shell.executable("/bin/bash")
 shell.prefix("set -eo pipefail; ")
 
+LOG = logging.getLogger(__name__)
+if not LOG.handlers:
+    h = logging.StreamHandler()
+    h.setFormatter(logging.Formatter("%(levelname)s: %(message)s"))
+    LOG.addHandler(h)
+LOG.setLevel(logging.INFO)
 
 # Get case id/name
 case_id: str = config_model.analysis.case_id
@@ -742,7 +748,7 @@ if "delivery" in config:
         try:
             housekeeper_id = getattr(rules, my_rule).params.housekeeper_id
         except (ValueError, AttributeError, RuleException, WorkflowError) as e:
-            LOG.warning("Cannot deliver step (rule) {}: {}".format(my_rule, e))
+            LOG.warning(f"Cannot deliver step (rule) {my_rule}")
             continue
 
         LOG.info("Delivering step (rule) {} {}.".format(my_rule, housekeeper_id))
@@ -763,14 +769,16 @@ if "delivery" in config:
 
 
 wildcard_constraints:
-    sample="|".join(sample_names),
+    sample="[^.]+",
+    sample_type="(?:normal|tumor)",
+    fastq_pattern="[^/]+"
 
 
 rule all:
     input:
         quality_control_results + analysis_specific_results,
     output:
-        finish_file=Path(get_result_dir(config), "analysis_finish").as_posix(),
+        finish_file=Path(get_result_dir(config), "analysis_finished_successfully").as_posix(),
     params:
         tmp_dir=tmp_dir,
         case_name=config["analysis"]["case_id"],
@@ -778,19 +786,22 @@ rule all:
     message:
         "Finalizing analysis for {params.case_name}"
     run:
-        import datetime
+        from datetime import datetime
         import shutil
         from BALSAMIC.utils.metrics import validate_qc_metrics
 
-        status = "SUCCESS"
+        status = "SUCCESSFUL"
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
         error_message = ""
         try:
             validate_qc_metrics(read_yaml(input[0]))
         except ValueError as val_exc:
+            LOG.error(val_exc)
             error_message = str(val_exc)
             status = "QC_VALIDATION_FAILED"
         except Exception as exc:
+            LOG.error(exc)
             error_message = str(exc)
             status = "UNKNOWN_ERROR"
 
@@ -800,19 +811,14 @@ rule all:
         except OSError as e:
             print("Error: %s - %s." % (e.filename, e.strerror))
 
-        # Log status in balsamic.log
-
-        LOG.info(f"BALSAMIC completed with status: {status}" + "\n")
-        LOG.info(error_message + "\n")
-
         # Write status to file
-        with open(params.status_file,"w") as status_fh:
+        with open(params.status_file, "w") as status_fh:
+            status_fh.write(f"=== QC metrics check at {timestamp} ===\n")
             status_fh.write(status + "\n")
             status_fh.write(error_message + "\n")
 
-        # Always write finish file if we've reached here
-        write_finish_file(file_path=output.finish_file)
-
         # Raise to trigger rule failure if needed
-        if status != "SUCCESS":
+        if status != "SUCCESSFUL":
             raise ValueError(f"Final rule failed with status: {status}")
+        else:
+            write_finish_file(file_path=output.finish_file)

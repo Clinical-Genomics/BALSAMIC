@@ -34,7 +34,6 @@ rule fasta_index_reference_genome:
         indexed_reference_genome=f"{cache_config.references.reference_genome.file_path}.{FileType.FAI}",
     singularity:
         f"{config['containers_dir']}/{config['bioinfo_tools']['samtools']}.{FileType.SIF}"
-
     message:
         "FASTA format indexing of the reference genome file {input.reference_genome}"
     benchmark:

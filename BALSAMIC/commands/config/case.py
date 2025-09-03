@@ -44,6 +44,7 @@ from BALSAMIC.constants.analysis import (
     BIOINFO_TOOL_ENV,
     AnalysisWorkflow,
     Gender,
+    LogFile,
 )
 from BALSAMIC.constants.cache import GenomeVersion
 from BALSAMIC.constants.constants import FileType
@@ -61,10 +62,11 @@ from BALSAMIC.utils.cli import (
     get_panel_chrom,
     get_sample_list,
     get_gens_references,
+    get_snakefile,
 )
 from BALSAMIC.utils.io import read_json, write_json
 from BALSAMIC.utils.utils import get_absolute_paths_dict
-from BALSAMIC.utils.logging import add_file_logging, set_log_filename
+from BALSAMIC.utils.logging import add_file_logging
 
 LOG = logging.getLogger(__name__)
 
@@ -138,18 +140,15 @@ def case_config(
 
     LOG.info(f"Starting configuring analysis case: {case_id}.")
 
-    case_dir = f"{analysis_dir}/{case_id}"
-    LOG.info(f"Creating case analysis directory: {case_dir}.")
-    Path(case_dir).mkdir(exist_ok=True)
+    LOG.info(f"Creating case analysis directory: {analysis_dir}/{case_id}.")
+    Path(analysis_dir, case_id).mkdir(exist_ok=True)
 
-    log_file = set_log_filename(case_dir, run_start=True, config_case=True)
+    log_file = Path(analysis_dir, case_id, LogFile.LOGNAME).as_posix()
     LOG.info(f"Setting BALSAMIC logfile path to: {log_file}.")
     add_file_logging(log_file, logger_name=__name__)
 
     LOG.info(f"Running BALSAMIC version {balsamic_version} -- CONFIG CASE")
-    LOG.info(f"BALSAMIC started with log level {context.obj['log_level']}.")
 
-    LOG.info("Collecting reference and annotation file paths.")
     references_path: Path = Path(balsamic_cache, cache_version, genome_version)
     references: Dict[str, Path] = get_absolute_paths_dict(
         base_path=references_path,
@@ -269,5 +268,10 @@ def case_config(
     write_json(json_obj=config_collection_dict, path=config_path)
     LOG.info(f"Config file saved successfully - {config_path}")
 
-    generate_graph(config_collection_dict, config_path)
+    snakefile = get_snakefile(
+        analysis_type=config_collection_dict["analysis"]["analysis_type"],
+        analysis_workflow=config_collection_dict["analysis"]["analysis_workflow"],
+    )
+
+    generate_graph(config_collection_dict, config_path, snakefile)
     LOG.info(f"BALSAMIC Workflow has been configured successfully!")
