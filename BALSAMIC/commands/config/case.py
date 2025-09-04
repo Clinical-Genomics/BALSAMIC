@@ -42,12 +42,7 @@ from BALSAMIC.commands.options import (
     OPTION_UMI_MIN_READS,
     OPTION_ALLOWLIST_SNVS,
 )
-from BALSAMIC.constants.analysis import (
-    BIOINFO_TOOL_ENV,
-    AnalysisWorkflow,
-    Gender,
-    LogFile,
-)
+from BALSAMIC.utils.references import merge_reference_metadata
 from BALSAMIC.constants.analysis import (
     BIOINFO_TOOL_ENV,
     AnalysisWorkflow,
