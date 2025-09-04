@@ -280,12 +280,6 @@ class ConfigModel(BaseModel):
     qos: Optional[QOS] = None
     account: Optional[str] = None
 
-    @field_validator("reference")
-    def abspath_as_str(cls, reference: Dict[str, Path]):
-        for k, v in reference.items():
-            reference[k] = Path(v).resolve().as_posix()
-        return reference
-
     @field_validator("singularity")
     def transform_path_to_dict(cls, singularity: Dict[str, str]):
         for k, v in singularity.items():
