@@ -152,7 +152,7 @@ rm -rf {params.tmpdir} ;
 
 rule gatk_update_vcf_sequence_dictionary:
     input:
-        ref = config["reference"]["reference_genome"],
+        ref = reference_genome,
         vcf = vcf_dir + "vardict/all.somatic." + config["analysis"]["case_id"] + ".vardict.vcf.gz",
     output:
         vcf_vardict = vcf_dir + "all.somatic." + config["analysis"]["case_id"] + ".vardict.vcf.gz",
