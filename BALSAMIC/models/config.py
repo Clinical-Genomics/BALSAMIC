@@ -80,7 +80,7 @@ class VarcallerAttribute(BaseModel):
     """Holds variables for variant caller software
     Attributes:
         mutation: str of mutation class
-        mutation_type: str of mutation type
+        mutation_type: str for mutation type
         analysis_type: list of str for analysis types
         workflow_solution: list of str for workflows
         sequencing_type: list of str for workflows
@@ -109,6 +109,7 @@ class VCFModel(BaseModel):
     merged: VarcallerAttribute
     manta: VarcallerAttribute
     vardict: VarcallerAttribute
+    vardictsv: VarcallerAttribute
     dellysv: VarcallerAttribute
     cnvkit: VarcallerAttribute
     ascat: VarcallerAttribute
@@ -278,6 +279,12 @@ class ConfigModel(BaseModel):
     sentieon: Sentieon
     qos: Optional[QOS] = None
     account: Optional[str] = None
+
+    @field_validator("reference")
+    def abspath_as_str(cls, reference: Dict[str, Path]):
+        for k, v in reference.items():
+            reference[k] = Path(v).resolve().as_posix()
+        return reference
 
     @field_validator("singularity")
     def transform_path_to_dict(cls, singularity: Dict[str, str]):

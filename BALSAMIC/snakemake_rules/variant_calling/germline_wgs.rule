@@ -11,7 +11,7 @@ rule sentieon_DNAscope_wgs:
     output:
         vcf = vcf_dir + "SNV.germline.{sample_type}.dnascope.vcf.gz",
     resources:
-        mem_mb = lambda wc, input: min(max(1.1 * input.size_mb, 10000), 500000) # Cap at 500GB
+        mem_mb = lambda wc, input: min(max(1.1 * input.size_mb, 10000), 250000) # Cap at 250GB. Scale memory with input size (min 10GB)
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         pcr_model = params.common.pcr_model,

@@ -151,4 +151,4 @@ class SnakemakeExecutable(BaseModel):
                 f"--slurm-keep-successful-logs"
             )
             return remove_unnecessary_spaces(snakemake_cluster_options)
-        return "--default-resources mem_mb=32000 threads=8"
+        return ""

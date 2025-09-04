@@ -48,6 +48,12 @@ from BALSAMIC.constants.analysis import (
     Gender,
     LogFile,
 )
+from BALSAMIC.constants.analysis import (
+    BIOINFO_TOOL_ENV,
+    AnalysisWorkflow,
+    Gender,
+    LogFile,
+)
 from BALSAMIC.constants.cache import GenomeVersion
 from BALSAMIC.constants.constants import FileType
 from BALSAMIC.constants.paths import (
@@ -69,7 +75,6 @@ from BALSAMIC.utils.cli import (
 from BALSAMIC.utils.io import read_json, write_json
 from BALSAMIC.utils.utils import get_absolute_paths_dict
 from BALSAMIC.utils.logging import add_file_logging
-from BALSAMIC.utils.references import merge_reference_metadata
 
 LOG = logging.getLogger(__name__)
 
@@ -181,7 +186,6 @@ def case_config(
                     if path is not None
                 }
             )
-
     variants_observations = {
         "artefact_snv_observations": artefact_snv_observations,
         "clinical_snv_observations": clinical_snv_observations,
@@ -198,6 +202,7 @@ def case_config(
         existing_refs=references,
         observation_paths=variants_observations,
     )
+    LOG.info(f"Collected references: {references}")
 
     analysis_fastq_dir: str = get_analysis_fastq_files_directory(
         case_dir=Path(analysis_dir, case_id).as_posix(), fastq_path=fastq_path
