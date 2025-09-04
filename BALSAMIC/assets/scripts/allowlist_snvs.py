@@ -26,6 +26,13 @@ MANUAL_REASON = "ManuallyCuratedList"
 
 
 def open_maybe_gzip(path: str | Path) -> io.TextIOBase:
+    """
+    Open a text file that may optionally be gzip-compressed.
+
+    - If the file ends with ".gz", it is opened with gzip in binary mode
+      and wrapped with a TextIOWrapper for UTF-8 text decoding.
+    - Otherwise, the file is opened normally in text mode.
+    """
     p = str(path)
     if p.endswith(".gz"):
         return io.TextIOWrapper(gzip.open(p, "rb"), encoding="utf-8", newline="")
@@ -33,6 +40,13 @@ def open_maybe_gzip(path: str | Path) -> io.TextIOBase:
 
 
 def open_out_text(path: str | Path | None) -> io.TextIOBase:
+    """
+    Open a writable text stream for output.
+
+    - If path is None or "-", return sys.stdout (for writing to console).
+    - Otherwise, open the file at the given path in write mode ("w"),
+      with UTF-8 encoding.
+    """
     if path is None or str(path) == "-":
         return sys.stdout
     return open(path, "w", encoding="utf-8", newline="")
@@ -42,6 +56,15 @@ def open_out_text(path: str | Path | None) -> io.TextIOBase:
 
 
 def parse_info(info_field: str) -> Dict[str, Optional[str]]:
+    """
+    Parse a VCF INFO field into a dictionary.
+
+    - Splits on semicolons (";") to get entries.
+    - Each entry is either:
+      * "KEY=VALUE" → stored as {KEY: VALUE}
+      * "FLAG" (no "=") → stored as {FLAG: None}
+    - Special case: if the field is "." or empty, returns an empty dict.
+    """
     if info_field == "." or not info_field:
         return {}
     out: Dict[str, Optional[str]] = {}
@@ -57,6 +80,14 @@ def parse_info(info_field: str) -> Dict[str, Optional[str]]:
 
 
 def format_info(info: Dict[str, Optional[str]]) -> str:
+    """
+    Format a dictionary back into a VCF INFO field string.
+
+    - Keys are sorted alphabetically.
+    - Each item is rendered as "KEY=VALUE" if a value is present,
+      or just "KEY" if the value is None.
+    - If the dictionary is empty, returns ".".
+    """
     if not info:
         return "."
     parts: List[str] = []
@@ -72,6 +103,13 @@ def format_info(info: Dict[str, Optional[str]]) -> str:
 def build_allowlist_keyset(
     allow_vcf_path: str | Path,
 ) -> Set[Tuple[str, int, str, str]]:
+    """
+    Build a set of (CHROM, POS, REF, ALT) keys from a VCF file.
+
+    - Reads through the VCF, skipping headers and malformed lines.
+    - For each valid record, extracts chrom, pos, ref, and each alt allele.
+    - Adds one tuple per allele to the returned set.
+    """
     keyset: Set[Tuple[str, int, str, str]] = set()
     with open_maybe_gzip(allow_vcf_path) as fh:
         for line in fh:
@@ -91,6 +129,14 @@ def build_allowlist_keyset(
 
 
 def determine_clinvar_reasons(info: Dict[str, Optional[str]]) -> List[str]:
+    """
+    Determine allow-list reasons based on ClinVar annotations.
+
+    - If INFO contains "ONC" (oncogenic flag), adds `CLINVAR_REASON_ONC`.
+    - If INFO["CLNSIG"] contains "pathogenic", adds `CLINVAR_REASON_PATH`.
+    - If INFO["CLNSIG"] contains "likely_pathogenic", adds
+      `CLINVAR_REASON_LIKELY_PATH`.
+    """
     reasons: List[str] = []
     if "ONC" in info:
         reasons.append(CLINVAR_REASON_ONC)
@@ -103,6 +149,21 @@ def determine_clinvar_reasons(info: Dict[str, Optional[str]]) -> List[str]:
 
 
 def ensure_info_headers(headers: List[str]) -> List[str]:
+    """
+    Ensure VCF headers include Allowlist INFO field definitions.
+
+    - Looks for existing INFO headers for `AllowlistedFilters`
+      and `AllowlistStatus`.
+    - If missing, inserts them before the `#CHROM` line (or at the end if
+      no `#CHROM` is found).
+    - Returns a new list of headers (does not mutate in place).
+
+    Args:
+        headers: List of VCF header lines (including "##" and "#CHROM").
+
+    Returns:
+        Updated header list with required INFO definitions present.
+    """
     has_filters = any(h.startswith("##INFO=<ID=AllowlistedFilters,") for h in headers)
     has_status = any(h.startswith("##INFO=<ID=AllowlistStatus,") for h in headers)
     if has_filters and has_status:
@@ -123,64 +184,92 @@ def ensure_info_headers(headers: List[str]) -> List[str]:
 
 
 def process_vcf(
-    allow_keys: Set[Tuple[str, int, str, str]] | None,
+    allow_keys: Optional[Set[Tuple[str, int, str, str]]],
     in_vcf_path: str | Path,
     out_fh: io.TextIOBase,
 ) -> None:
-    headers: List[str] = []
-    header_done = False
+    """
+    Stream a VCF, optionally allow-listing variants and normalizing FILTER/INFO.
+
+    Writes headers once (after reading them) and then writes each processed record.
+    If the file contains only headers, they’re written at the end (same as before).
+    """
+    headers: Optional[List[str]] = []
 
     with open_maybe_gzip(in_vcf_path) as fh:
         for raw in fh:
             line = raw.rstrip("\n")
 
-            if not header_done:
-                if line.startswith("#"):
-                    headers.append(line)
-                    continue
-                headers = ensure_info_headers(headers)
-                for h in headers:
+            if line.startswith("#"):
+                # Still in the header section.
+                assert headers is not None
+                headers.append(line)
+                continue
+
+            # First non-header line: flush headers once.
+            if headers is not None:
+                for h in ensure_info_headers(headers):
                     out_fh.write(h + "\n")
-                header_done = True
+                headers = None  # mark as flushed
 
-            cols = line.split("\t")
-            if len(cols) < 8:
-                out_fh.write(line + "\n")
-                continue
+            out_fh.write(_process_record_line(line, allow_keys))
 
-            chrom = cols[0]
-            try:
-                pos = int(cols[1])
-            except ValueError:
-                out_fh.write(line + "\n")
-                continue
-            ref = cols[3]
-            alts = cols[4].split(",") if cols[4] else ["."]
-            filt = cols[6]
-            info = parse_info(cols[7])
-
-            reasons: List[str] = []
-
-            # Manual allow-list (only if provided)
-            if allow_keys and any((chrom, pos, ref, a) in allow_keys for a in alts):
-                reasons.append(MANUAL_REASON)
-
-            # ClinVar allow-list
-            reasons.extend(determine_clinvar_reasons(info))
-
-            if reasons:
-                if filt not in ("PASS", ".", ""):
-                    info["AllowlistedFilters"] = filt
-                    cols[6] = "PASS"
-                info["AllowlistStatus"] = "|".join(reasons)
-                cols[7] = format_info(info)
-
-            out_fh.write("\t".join(cols) + "\n")
-
-    if not header_done and headers:
-        headers = ensure_info_headers(headers)
-        for h in headers:
+    # File had only headers (no records): write them now.
+    if headers is not None:
+        for h in ensure_info_headers(headers):
             out_fh.write(h + "\n")
+
+
+def _process_record_line(
+    line: str,
+    allow_keys: Optional[Set[Tuple[str, int, str, str]]],
+) -> str:
+    """Return the (possibly modified) VCF record line with trailing newline."""
+    cols = line.split("\t")
+    if len(cols) < 8:
+        return line + "\n"
+
+    chrom = cols[0]
+    try:
+        pos = int(cols[1])
+    except ValueError:
+        return line + "\n"
+
+    ref = cols[3]
+    alts = cols[4].split(",") if cols[4] else ["."]
+    filt = cols[6]
+    info = parse_info(cols[7])
+
+    reasons: List[str] = []
+
+    # Manual allow-list (only if provided).
+    if allow_keys and _any_alt_in_allowlist(allow_keys, chrom, pos, ref, alts):
+        reasons.append(MANUAL_REASON)
+
+    # ClinVar allow-list.
+    reasons.extend(determine_clinvar_reasons(info))
+
+    if not reasons:
+        return line + "\n"
+
+    # Update FILTER/INFO when allow-listed.
+    if filt not in ("PASS", ".", ""):
+        info["AllowlistedFilters"] = filt
+        cols[6] = "PASS"
+    info["AllowlistStatus"] = "|".join(reasons)
+    cols[7] = format_info(info)
+
+    return "\t".join(cols) + "\n"
+
+
+def _any_alt_in_allowlist(
+    allow_keys: Set[Tuple[str, int, str, str]],
+    chrom: str,
+    pos: int,
+    ref: str,
+    alts: List[str],
+) -> bool:
+    return any((chrom, pos, ref, alt) in allow_keys for alt in alts)
 
 
 # --- CLI ----------------------------------------------------------------------
