@@ -189,7 +189,7 @@ swegen_sv = swegen_sv.file.as_posix() if swegen_sv else None
 if config["analysis"]["sequencing_type"] != "wgs":
     capture_kit = os.path.split(config["panel"]["capture_kit"])[1]
 
-if "hg38" in config["reference"]["reference_genome"]:
+if "hg38" in config["reference"]["reference_genome"]["file"]:
     config["reference"]["genome_version"] = "hg38"
 elif "canfam3" in config["reference"]["reference_genome"]["file"]:
     config["reference"]["genome_version"] = "canfam3"
