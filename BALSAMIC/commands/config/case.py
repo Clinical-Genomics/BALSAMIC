@@ -197,7 +197,6 @@ def case_config(
         existing_refs=references,
         observation_paths=variants_observations,
     )
-    LOG.info(f"Collected references: {references}")
 
     analysis_fastq_dir: str = get_analysis_fastq_files_directory(
         case_dir=Path(analysis_dir, case_id).as_posix(), fastq_path=fastq_path

@@ -11,12 +11,8 @@ import click
 
 # --- Constants & headers ------------------------------------------------------
 
-INFO_ALLOWLISTED_FILTERS_HDR = (
-    '##INFO=<ID=AllowlistedFilters,Number=1,Type=String,Description="Original FILTER value moved here because this variant was allow-listed">'
-)
-INFO_ALLOWLIST_STATUS_HDR = (
-    '##INFO=<ID=AllowlistStatus,Number=1,Type=String,Description="Reason(s) for allow-listing; pipe-separated (e.g., ClinvarOnc|ClinvarPathogenic)">'
-)
+INFO_ALLOWLISTED_FILTERS_HDR = '##INFO=<ID=AllowlistedFilters,Number=1,Type=String,Description="Original FILTER value moved here because this variant was allow-listed">'
+INFO_ALLOWLIST_STATUS_HDR = '##INFO=<ID=AllowlistStatus,Number=1,Type=String,Description="Reason(s) for allow-listing; pipe-separated (e.g., ClinvarOnc|ClinvarPathogenic)">'
 
 CLNSIG_PATHOGENIC = "Pathogenic"
 CLNSIG_LIKELY_PATHOGENIC = "Likely_pathogenic"
@@ -27,6 +23,7 @@ MANUAL_REASON = "ManuallyCuratedList"
 
 
 # --- IO helpers ---------------------------------------------------------------
+
 
 def open_maybe_gzip(path: str | Path) -> io.TextIOBase:
     p = str(path)
@@ -42,6 +39,7 @@ def open_out_text(path: str | Path | None) -> io.TextIOBase:
 
 
 # --- VCF parsing utilities ----------------------------------------------------
+
 
 def parse_info(info_field: str) -> Dict[str, Optional[str]]:
     if info_field == "." or not info_field:
@@ -70,7 +68,10 @@ def format_info(info: Dict[str, Optional[str]]) -> str:
 
 # --- Allow-list building & reasons -------------------------------------------
 
-def build_allowlist_keyset(allow_vcf_path: str | Path) -> Set[Tuple[str, int, str, str]]:
+
+def build_allowlist_keyset(
+    allow_vcf_path: str | Path,
+) -> Set[Tuple[str, int, str, str]]:
     keyset: Set[Tuple[str, int, str, str]] = set()
     with open_maybe_gzip(allow_vcf_path) as fh:
         for line in fh:
@@ -103,7 +104,7 @@ def determine_clinvar_reasons(info: Dict[str, Optional[str]]) -> List[str]:
 
 def ensure_info_headers(headers: List[str]) -> List[str]:
     has_filters = any(h.startswith("##INFO=<ID=AllowlistedFilters,") for h in headers)
-    has_status  = any(h.startswith("##INFO=<ID=AllowlistStatus,") for h in headers)
+    has_status = any(h.startswith("##INFO=<ID=AllowlistStatus,") for h in headers)
     if has_filters and has_status:
         return headers
     try:
@@ -119,6 +120,7 @@ def ensure_info_headers(headers: List[str]) -> List[str]:
 
 
 # --- Core processing ----------------------------------------------------------
+
 
 def process_vcf(
     allow_keys: Set[Tuple[str, int, str, str]] | None,
@@ -152,7 +154,7 @@ def process_vcf(
             except ValueError:
                 out_fh.write(line + "\n")
                 continue
-            ref  = cols[3]
+            ref = cols[3]
             alts = cols[4].split(",") if cols[4] else ["."]
             filt = cols[6]
             info = parse_info(cols[7])
@@ -182,6 +184,7 @@ def process_vcf(
 
 
 # --- CLI ----------------------------------------------------------------------
+
 
 @click.command(context_settings=dict(help_option_names=["-h", "--help"]))
 @click.option(
