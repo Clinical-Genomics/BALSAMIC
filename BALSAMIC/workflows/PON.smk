@@ -65,17 +65,6 @@ sequencing_type = config_model.analysis.sequencing_type
 
 # reference file paths
 
-reference_genome = config_model.reference["reference_genome"].file.as_posix()
-dbsnp = config_model.reference["dbsnp"].file.as_posix()
-mills_1kg = config_model.reference["mills_1kg"].file.as_posix()
-known_indel_1kg = config_model.reference["known_indel_1kg"].file.as_posix()
-refgene_bed = config_model.reference["refgene_bed"].file.as_posix()
-refgene_txt = config_model.reference["refgene_txt"].file.as_posix()
-refgene_flat = config_model.reference["refgene_flat"].file.as_posix()
-access_regions = config_model.reference["access_regions"].file.as_posix()
-gnomad_min_af5 = config_model.reference["gnomad_min_af5"].file.as_posix()
-genome_chrom_size = config_model.reference["genome_chrom_size"].file.as_posix()
-
 rules_to_include = []
 if sequencing_type == SequencingType.TARGETED:
     rules_to_include.append("snakemake_rules/concatenation/concatenation.rule")
