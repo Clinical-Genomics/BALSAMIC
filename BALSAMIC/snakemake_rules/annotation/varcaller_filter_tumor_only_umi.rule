@@ -97,9 +97,9 @@ python {params.edit_vcf_script} \
 bgzip {params.tmpdir}/clinical.filtered.pass_before_allowlisted.1.vcf ;
 
 if [[ -f "{params.allowlist_snvs}" ]]; then
-  python {params.allowlist_script} {params.tmpdir}/clinical.filtered.pass_before_allowlisted.1.vcf.gz --allowlist-path {params.allowlist_snvs} {params.tmpdir}/clinical.filtered.pass_after_allowlisted.vcf ;
+  python {params.allowlist_script} --vcf {params.tmpdir}/clinical.filtered.pass_before_allowlisted.1.vcf.gz --allow-list {params.allowlist_snvs} --out {params.tmpdir}/clinical.filtered.pass_after_allowlisted.vcf ;
 else
-  python {params.allowlist_script} {params.tmpdir}/clinical.filtered.pass_before_allowlisted.1.vcf.gz {params.tmpdir}/clinical.filtered.pass_after_allowlisted.vcf ;
+  python {params.allowlist_script} --vcf {params.tmpdir}/clinical.filtered.pass_before_allowlisted.1.vcf.gz --out {params.tmpdir}/clinical.filtered.pass_after_allowlisted.vcf ;
 fi
 
 bcftools view --threads {threads} --exclude '{params.hard_filters}' -O z -o {params.tmpdir}/clinical.filtered.allowlist_filtered.vcf.gz {params.tmpdir}/clinical.filtered.pass_after_allowlisted.vcf ;

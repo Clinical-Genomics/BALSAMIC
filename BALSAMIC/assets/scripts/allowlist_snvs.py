@@ -11,8 +11,12 @@ import click
 
 # --- Constants & headers ------------------------------------------------------
 
-INFO_ALLOWLISTED_FILTERS_HDR = '##INFO=<ID=AllowlistedFilters,Number=1,Type=String,Description="Original FILTER value moved here because this variant was allow-listed">'
-INFO_ALLOWLIST_STATUS_HDR = '##INFO=<ID=AllowlistStatus,Number=1,Type=String,Description="Reason(s) for allow-listing; pipe-separated (e.g., ManuallyCuratedList|ClinvarOnc|ClinvarPathogenic)">'
+INFO_ALLOWLISTED_FILTERS_HDR = (
+    '##INFO=<ID=AllowlistedFilters,Number=1,Type=String,Description="Original FILTER value moved here because this variant was allow-listed">'
+)
+INFO_ALLOWLIST_STATUS_HDR = (
+    '##INFO=<ID=AllowlistStatus,Number=1,Type=String,Description="Reason(s) for allow-listing; pipe-separated (e.g., ClinvarOnc|ClinvarPathogenic)">'
+)
 
 CLNSIG_PATHOGENIC = "Pathogenic"
 CLNSIG_LIKELY_PATHOGENIC = "Likely_pathogenic"
@@ -23,7 +27,6 @@ MANUAL_REASON = "ManuallyCuratedList"
 
 
 # --- IO helpers ---------------------------------------------------------------
-
 
 def open_maybe_gzip(path: str | Path) -> io.TextIOBase:
     p = str(path)
@@ -39,7 +42,6 @@ def open_out_text(path: str | Path | None) -> io.TextIOBase:
 
 
 # --- VCF parsing utilities ----------------------------------------------------
-
 
 def parse_info(info_field: str) -> Dict[str, Optional[str]]:
     if info_field == "." or not info_field:
@@ -68,10 +70,7 @@ def format_info(info: Dict[str, Optional[str]]) -> str:
 
 # --- Allow-list building & reasons -------------------------------------------
 
-
-def build_allowlist_keyset(
-    allow_vcf_path: str | Path,
-) -> Set[Tuple[str, int, str, str]]:
+def build_allowlist_keyset(allow_vcf_path: str | Path) -> Set[Tuple[str, int, str, str]]:
     keyset: Set[Tuple[str, int, str, str]] = set()
     with open_maybe_gzip(allow_vcf_path) as fh:
         for line in fh:
@@ -91,12 +90,6 @@ def build_allowlist_keyset(
 
 
 def determine_clinvar_reasons(info: Dict[str, Optional[str]]) -> List[str]:
-    """
-    Return ClinVar allow-list reasons as separate labels (no merging):
-      - ONC present -> ClinvarOnc
-      - CLNSIG contains 'Pathogenic' (case-sensitive) -> ClinvarPathogenic
-      - CLNSIG contains 'Likely_pathogenic' (case-sensitive) -> ClinvarLikelyPathogenic
-    """
     reasons: List[str] = []
     if "ONC" in info:
         reasons.append(CLINVAR_REASON_ONC)
@@ -110,7 +103,7 @@ def determine_clinvar_reasons(info: Dict[str, Optional[str]]) -> List[str]:
 
 def ensure_info_headers(headers: List[str]) -> List[str]:
     has_filters = any(h.startswith("##INFO=<ID=AllowlistedFilters,") for h in headers)
-    has_status = any(h.startswith("##INFO=<ID=AllowlistStatus,") for h in headers)
+    has_status  = any(h.startswith("##INFO=<ID=AllowlistStatus,") for h in headers)
     if has_filters and has_status:
         return headers
     try:
@@ -127,9 +120,8 @@ def ensure_info_headers(headers: List[str]) -> List[str]:
 
 # --- Core processing ----------------------------------------------------------
 
-
 def process_vcf(
-    allow_keys: Set[Tuple[str, int, str, str]],
+    allow_keys: Set[Tuple[str, int, str, str]] | None,
     in_vcf_path: str | Path,
     out_fh: io.TextIOBase,
 ) -> None:
@@ -147,7 +139,7 @@ def process_vcf(
                 headers = ensure_info_headers(headers)
                 for h in headers:
                     out_fh.write(h + "\n")
-                header_done = True  # fall through
+                header_done = True
 
             cols = line.split("\t")
             if len(cols) < 8:
@@ -160,15 +152,18 @@ def process_vcf(
             except ValueError:
                 out_fh.write(line + "\n")
                 continue
-            ref = cols[3]
+            ref  = cols[3]
             alts = cols[4].split(",") if cols[4] else ["."]
             filt = cols[6]
             info = parse_info(cols[7])
 
-            # Reasons
             reasons: List[str] = []
-            if any((chrom, pos, ref, a) in allow_keys for a in alts):
+
+            # Manual allow-list (only if provided)
+            if allow_keys and any((chrom, pos, ref, a) in allow_keys for a in alts):
                 reasons.append(MANUAL_REASON)
+
+            # ClinVar allow-list
             reasons.extend(determine_clinvar_reasons(info))
 
             if reasons:
@@ -188,14 +183,13 @@ def process_vcf(
 
 # --- CLI ----------------------------------------------------------------------
 
-
 @click.command(context_settings=dict(help_option_names=["-h", "--help"]))
 @click.option(
     "--allow-list",
     "allow_list",
     type=click.Path(exists=True, dir_okay=False, readable=True, path_type=Path),
-    required=True,
-    help="VCF (.vcf or .vcf.gz) of allow-listed variants (matched on CHROM, POS, REF, ALT).",
+    required=False,
+    help="Optional: VCF (.vcf or .vcf.gz) of allow-listed variants (matched on CHROM, POS, REF, ALT).",
 )
 @click.option(
     "--vcf",
@@ -213,13 +207,18 @@ def process_vcf(
     show_default=True,
     help="Output VCF path (use '-' for stdout).",
 )
-def cli(allow_list: Path, vcf_path: Path, out_path: Path | None) -> None:
+def cli(allow_list: Path | None, vcf_path: Path, out_path: Path | None) -> None:
     """
-    Keep ONC as its own allow-list reason (ClinvarOnc) alongside Pathogenic/Likely_pathogenic:
-      AllowlistStatus example: ManuallyCuratedList|ClinvarOnc|ClinvarPathogenic
+    Annotate variants with INFO/AllowlistStatus and optionally INFO/AllowlistedFilters.
+
+    Allow-listing criteria:
+      - If --allow-list is provided: manual allow-list match (CHROM, POS, REF, ALT).
+      - ClinVar: ONC present -> ClinvarOnc; CLNSIG contains 'Pathogenic' or 'Likely_pathogenic'.
     """
     try:
-        allow_keys = build_allowlist_keyset(allow_list)
+        allow_keys: Set[Tuple[str, int, str, str]] | None = None
+        if allow_list:
+            allow_keys = build_allowlist_keyset(allow_list)
         with open_out_text(out_path) as out_fh:
             process_vcf(allow_keys, vcf_path, out_fh)
     except BrokenPipeError:
