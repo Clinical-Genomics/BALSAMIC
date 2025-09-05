@@ -413,9 +413,6 @@ def _run_rulegraph_cli(
     config_path: str,
 ) -> tuple[str, str]:
     """Invoke `snakemake -n --rulegraph` and return (raw_output, dot)."""
-    if not shutil.which("snakemake"):
-        raise RuntimeError("Failed to execute 'snakemake': binary not found on PATH.")
-
     cmd = [
         "snakemake",
         "-n",
