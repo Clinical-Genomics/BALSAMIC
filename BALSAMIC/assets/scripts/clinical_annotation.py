@@ -20,13 +20,6 @@ import click
     help="Output annotated VCF file",
 )
 @click.option(
-    "--output-tsv",
-    "output_tsv",
-    required=True,
-    type=click.Path(),
-    help="Output TSV summary file",
-)
-@click.option(
     "--genes",
     "clinical_genes_file",
     required=True,
@@ -40,12 +33,12 @@ import click
     type=click.Path(),
     help="",
 )
-def main(input_vcf, output_vcf, output_tsv, clinical_genes_file, known_fusions_file):
+def main(input_vcf, output_vcf, clinical_genes_file, known_fusions_file):
     """
     Annotate clinical gene aberrations and fusions in VCF and write a TSV file including clinical summary file.
     """
     annotation = ClinicalAnnotation(clinical_genes_file, known_fusions_file)
-    annotate_clinical_aberrations(input_vcf, annotation, output_vcf, output_tsv)
+    annotate_clinical_aberrations(input_vcf, annotation, output_vcf)
 
 
 class ClinicalAnnotation:
@@ -143,38 +136,6 @@ def include_fusion_partner_info(record, parsed_csq_entries):
     return record
 
 
-def include_canonical_gene_info(record, parsed_csq_entries):
-    gene_info = {}
-    for csq_dict in parsed_csq_entries:
-        symbol = csq_dict["SYMBOL"]
-        # Only use annotation from Ensemble
-        if (
-            symbol
-            and csq_dict["SOURCE"] == "Ensembl"
-            and csq_dict["CANONICAL"] == "YES"
-        ):
-            gene_annot = "|".join(
-                [
-                    symbol,
-                    csq_dict["EXON"],
-                    csq_dict["INTRON"],
-                    csq_dict["DISTANCE"],
-                    csq_dict["Gene"],
-                    csq_dict["Feature"],
-                    csq_dict["Feature_type"],
-                    csq_dict["BIOTYPE"],
-                    csq_dict["IMPACT"],
-                    csq_dict["Consequence"],
-                ]
-            )
-            if symbol not in gene_info:
-                gene_info[symbol] = []
-            gene_info[symbol].append(gene_annot)
-    if gene_info:
-        record.INFO["canonical_transcript_annotation"] = gene_info.get(symbol)
-    return record
-
-
 def include_vep_info(record, parsed_csq_entries):
     genes, csq_biotype, csq_impact = set(), set(), set()
 
@@ -245,119 +206,17 @@ def include_clinical_fusion_type_info(record, annotation) -> set:
     return record
 
 
-## TODO: REMOVE
-def include_svlen(record):
-    # FIX: ADD IF CHR1 == CHR2
-    svlen = ""
-    if "SVLEN" in record.INFO:
-        if type(record.INFO["SVLEN"]) == list:
-            if len(record.INFO["SVLEN"]) == 1:
-                svlen = abs(record.INFO["SVLEN"][0])
-        return abs(record.INFO["SVLEN"])
-    elif "END" in record.INFO:
-        svlen = abs(record.POS - record.INFO["END"])
-    record.INFO["SVLEN"] = svlen
-    return record
-
-
-def include_intragenic_flag(record):
-    clinical_genes = record.INFO.get("CLINICAL_GENES")
-    canonical = record.INFO.get("canonical_transcript_annotation")
-    if clinical_genes and canonical:
-        for gene in record.INFO["CLINICAL_GENES"]:
-            for canonical in record.INFO["canonical_transcript_annotation"]:
-                fields = canonical.split("|")
-                if gene == fields[0]:
-                    if fields[1] != "" or fields[2] != "":
-                        record.INFO["INTRAGENIC"] = "YES"
-                        break
-    return record
-
-
-## TODO: REMOVE
-
-
-def include_rank(record):
-    # POPULATION DATABASES
-    # SWEGENAF >= 0.005 or clin_obs >= 0.001 : -10
-
-    # TECHNICAL EVIDENCE
-    # MULTIPLE TOOLS: svdb_origin contains 'manta': +3
-    # RELIABLE TOOLS: FOUNDBY > 1 : +5
-
-    # VEP ANNOTATION
-    # IMPACT == HIGH: +15
-    # IMPACT == MODERATE: +10
-    # CONSEQUENCE: ??
-
-    # canonical
-    # BIOTYPE: protein coding +5
-    # INTRAGENIC: + 10
-    biotype = 0
-    impact = 0
-    intragenic = 0
-    number_tools = 1 if record.INFO.get("FOUNDBY", 0) > 1 else 0
-    reliable_tools = 1 if "manta" in record.INFO.get("svdb_origin", "") else 0
-    population_dbs = (
-        -10
-        if (
-            record.INFO.get("SWEGENAF", 0) > 0.005
-            or record.INFO.get("clin_obs", 0) > 0.001
-        )
-        else 0
-    )
-    # Aberration priority:
-    clinical_priority_scores = {
-        "known_fusion": 15,
-        "promiscuous_fusion": 15,
-        "single_hit_fusion": 10,
-        "duplication": 15,
-        "deletion": 15,
-        "in_gene_list": 10,
-    }
-    max_aberration_score = 0
-    aberration_score = []
-    for aberration_type in record.INFO.get("CLINICAL_ABERRATION") or []:
-        aberration_score.append(clinical_priority_scores[aberration_type])
-    if aberration_score:
-        max_aberration_score = max(aberration_score)
-
-    if "CSQ" in record.INFO:
-        csq_biotype = set(record.INFO.get("BIOTYPE") or {})
-        csq_impact = set(record.INFO.get("IMPACT") or {})
-        biotype = 1 if "protein_coding" in csq_biotype else 0
-        intragenic = 10 if record.INFO.get("INTRAGENIC", "") == "YES" else 0
-
-        if "HIGH" in csq_impact:
-            impact = 3
-        elif "MODERATE" in csq_impact:
-            impact = 1
-        else:
-            impact = 0
-    rank = [
-        max_aberration_score,
-        intragenic,
-        biotype,
-        impact,
-        number_tools,
-        reliable_tools,
-        population_dbs,
-    ]
-    record.INFO["CLINICAL_SCORE"] = ",".join(map(str, rank))
-    record.INFO["RANK"] = sum(rank)
-    return record
-
-
 def include_clinical_info(record, parsed_csq_entries, annotation):
     svtype = record.INFO["SVTYPE"]
     if svtype == "BND":
         include_clinical_fusion_type_info(record, annotation)
-    elif svtype == "DUP":
-        include_clinical_aberrations_info(record, annotation.deletions, "duplication")
-    elif svtype == "DEL":
-        include_clinical_aberrations_info(record, annotation.deletions, "deletion")
-    # Any other in the gene panel file
-    include_clinical_aberrations_info(record, annotation.all, "in_gene_list")
+    # elif svtype == "DUP":
+    #     include_clinical_aberrations_info(record, annotation.deletions, "duplication")
+    # elif svtype == "DEL":
+    #     include_clinical_aberrations_info(record, annotation.deletions, "deletion")
+    else:
+        # Any other in the gene panel file
+        include_clinical_aberrations_info(record, annotation.all, "in_gene_list")
     return record
 
 
@@ -371,143 +230,9 @@ def process_record(record, parsed_csq_entries, annotation):
         return record
     include_vep_info(record, parsed_csq_entries)
     include_fusion_partner_info(record, parsed_csq_entries)
-    include_canonical_gene_info(record, parsed_csq_entries)
-    include_svlen(record)
     include_clinical_info(record, parsed_csq_entries, annotation)
-    include_intragenic_flag(record)
-    include_rank(record)
     soft_filter_off_panel(record)
     return record
-
-
-csq_fields_to_retrieve = [
-    "Allele",
-    "SYMBOL",
-    "HGNC_ID",
-    "IMPACT",
-    "Consequence",
-    "VARIANT_CLASS",
-    "Gene",
-    "Feature",
-    "Feature_type",
-    "EXON",
-    "Codons",
-    "Amino_acids",
-    "BIOTYPE",
-    "CANONICAL",
-    "SOURCE",
-    "Protein_position",
-    "GENE_PHENO",
-]
-csq_fields_to_retrieve = [
-    "Allele",
-    "Consequence",
-    "IMPACT",
-    "SYMBOL",
-    "Gene",
-    "Feature_type",
-    "Feature",
-    "BIOTYPE",
-    "EXON",
-    "INTRON",
-    "HGVSc",
-    "HGVSp",
-    "cDNA_position",
-    "CDS_position",
-    "Protein_position",
-    "Amino_acids",
-    "Codons",
-    "Existing_variation",
-    "DISTANCE",
-    "STRAND",
-    "FLAGS",
-    "VARIANT_CLASS",
-    "SYMBOL_SOURCE",
-    "HGNC_ID",
-    "CANONICAL",
-    "MANE",
-    "MANE_SELECT",
-    "MANE_PLUS_CLINICAL",
-    "TSL",
-    "APPRIS",
-    "CCDS",
-    "ENSP",
-    "SWISSPROT",
-    "TREMBL",
-    "UNIPARC",
-    "UNIPROT_ISOFORM",
-    "REFSEQ_MATCH",
-    "SOURCE",
-    "REFSEQ_OFFSET",
-    "GIVEN_REF",
-    "USED_REF",
-    "BAM_EDIT",
-    "GENE_PHENO",
-    "SIFT",
-    "PolyPhen",
-    "DOMAINS",
-    "miRNA",
-    "HGVS_OFFSET",
-    "HGVSg",
-    "AF",
-    "MAX_AF",
-    "MAX_AF_POPS",
-    "CLIN_SIG",
-    "SOMATIC",
-    "PHENO",
-    "PUBMED",
-    "CHECK_REF",
-    "MOTIF_NAME",
-    "MOTIF_POS",
-    "HIGH_INF_POS",
-    "MOTIF_SCORE_CHANGE",
-    "TRANSCRIPTION_FACTORS",
-]
-
-info_fields_to_retrieve = [
-    "SVTYPE",
-    "FOUNDBY",
-    "svdb_origin",
-    "Cancer_Somatic_Obs",
-    "Cancer_Somatic_Frq",
-    "swegen_obs",
-    "SWEGENAF",
-    "clin_obs",
-    "Frq",
-    "SVLEN",
-    "MAPQ",
-    "CLINICAL_SCORE",
-    "RANK",
-    "CLINICAL_FUSION",
-    "GENEA",
-    "GENEB",
-    "NGENES",
-    "CLINICAL_ABERRATION",
-    "CLINICAL_GENES",
-    "CANONICAL",
-]
-#    "GENE",
-# "CLINICAL_DELETION",
-# "CLINICAL_DUPLICATION",
-# "CLINICAL_GENE_PANEL",
-colnames = (
-    [
-        "CHROM",
-        "POS",
-        "REF",
-        "ALT",
-    ]
-    + info_fields_to_retrieve
-    + csq_fields_to_retrieve
-)
-
-
-## TODO: REMOVE
-def collect_relevant_information(record) -> list[str]:
-    general_info = [record.CHROM, record.POS, record.REF, record.ALT[0].serialize()]
-    info_fields = [record.INFO.get(field, "") for field in info_fields_to_retrieve]
-    info_fields = [",".join(i) if isinstance(i, list) else str(i) for i in info_fields]
-    return general_info + info_fields
 
 
 def update_header(reader):
@@ -519,12 +244,6 @@ def update_header(reader):
             "String",
             "fusion_pair,promiscuous_fusion,deletion,duplication,other",
         ),
-        ("CLINICAL_SCORE", "1", "Integer", "Clinical priority score."),
-        ("RANK", "1", "Integer", "Ranking"),
-        ("CLINICAL_FUSION", "1", "String", "Clinical fusions detected"),
-        ("CLINICAL_DELETION", "1", "String", "Reported deletions"),
-        ("CLINICAL_DUPLICATION", "1", "String", "Reported duplications"),
-        ("CLINICAL_GENE_PANEL", "1", "String", "Detected gene panel match"),
         ("GENE", "1", "String", "Annotated genes"),
         ("GENEA", "1", "String", "3' fusion genes"),
         ("GENEB", "1", "String", "5' fusion genes"),
@@ -532,7 +251,6 @@ def update_header(reader):
         ("CLINICAL_GENES", "1", "Integer", "Clinical genes"),
         ("BIOTYPE", "1", "String", " "),
         ("IMPACT", "1", "String", ""),
-        ("canonical_transcript_annotation", "1", "String", ""),
         ("INTRAGENIC", "1", "String", ""),
     ]
     for id, number, type, desc in headers:
@@ -556,11 +274,10 @@ def update_header(reader):
     )
 
 
-def annotate_clinical_aberrations(vcf_path, annotation, output_vcf, output_tsv):
+def annotate_clinical_aberrations(vcf_path, annotation, output_vcf):
     reader = vcfpy.Reader.from_path(vcf_path)
     csq_fields = parse_csq_format(reader)
     update_header(reader)
-    tsv_lines = []
     with vcfpy.Writer.from_path(output_vcf, reader.header) as writer:
         for record in reader:
             if "CSQ" in record.INFO:
@@ -568,13 +285,7 @@ def annotate_clinical_aberrations(vcf_path, annotation, output_vcf, output_tsv):
                     parse_csq_entry(entry, csq_fields) for entry in record.INFO["CSQ"]
                 ]
                 process_record(record, parsed_csq_entries, annotation)
-                tsv_lines.append(collect_relevant_information(record))
             writer.write_record(record)
-    with open(output_tsv, "w", encoding="utf-8") as f:
-        f.write("\t".join(colnames) + "\n")
-        for line in tsv_lines:
-            line = "\t".join(map(str, line))
-            f.write(line + "\n")
 
 
 if __name__ == "__main__":
