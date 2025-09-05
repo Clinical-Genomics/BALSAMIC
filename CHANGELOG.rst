@@ -43,6 +43,7 @@ Added:
 * requested memory to each rule https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
 
 
+
 Changed:
 ^^^^^^^^
 

@@ -230,8 +230,8 @@ OPTION_FORCE_ALL = click.option(
 OPTION_GENDER = click.option(
     "--gender",
     required=False,
-    type=click.Choice([Gender.FEMALE, Gender.MALE]),
-    default=Gender.FEMALE,
+    type=click.Choice([Gender.FEMALE, Gender.MALE, Gender.UNKNOWN]),
+    default=Gender.UNKNOWN,
     show_default=True,
     help="Case associated Gender",
 )

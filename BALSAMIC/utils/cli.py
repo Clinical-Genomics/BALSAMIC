@@ -2,9 +2,7 @@ import logging
 import os
 import re
 import subprocess
-import sys
 from distutils.spawn import find_executable
-from io import StringIO
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Final
 
@@ -23,22 +21,6 @@ from BALSAMIC.models.config import FastqInfoModel, SampleInstanceModel
 from BALSAMIC.utils.exc import BalsamicError
 
 LOG = logging.getLogger(__name__)
-
-
-class CaptureStdout(list):
-    """
-    Captures stdout.
-    """
-
-    def __enter__(self):
-        self._stdout = sys.stdout
-        sys.stdout = self._stringio = StringIO()
-        return self
-
-    def __exit__(self, *args):
-        self.extend(self._stringio.getvalue().splitlines())
-        del self._stringio  # free up some memory
-        sys.stdout = self._stdout
 
 
 def add_doc(docstring):
@@ -431,9 +413,6 @@ def _run_rulegraph_cli(
     config_path: str,
 ) -> tuple[str, str]:
     """Invoke `snakemake -n --rulegraph` and return (raw_output, dot)."""
-    if not shutil.which("snakemake"):
-        raise RuntimeError("Failed to execute 'snakemake': binary not found on PATH.")
-
     cmd = [
         "snakemake",
         "-n",
