@@ -54,7 +54,6 @@ from BALSAMIC.utils.rule import (
     get_somatic_sv_observations,
     get_swegen_snv,
     get_swegen_sv,
-    get_threads,
     get_variant_callers,
     get_vcf,
 )

@@ -22,7 +22,6 @@ from BALSAMIC.utils.rule import (
     get_rule_output,
     get_script_path,
     get_sequencing_type,
-    get_threads,
 )
 from snakemake.exceptions import RuleException, WorkflowError
 from yapf.yapflib.yapf_api import FormatFile

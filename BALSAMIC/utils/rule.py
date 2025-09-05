@@ -154,14 +154,6 @@ def get_script_path(script_name: str) -> str:
     return Path(SCRIPT_DIR, script_name).as_posix()
 
 
-def get_threads(cluster_config, rule_name="__default__"):
-    """
-    To retrieve threads from cluster config or return default value of 8
-    """
-
-    return cluster_config[rule_name]["n"] if rule_name in cluster_config else 8
-
-
 def get_rule_output(rules, rule_name, output_file_wildcards):
     """get list of existing output files from a given workflow
 
