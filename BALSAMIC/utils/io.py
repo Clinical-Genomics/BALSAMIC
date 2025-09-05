@@ -1,10 +1,12 @@
 """Input/Output utility methods."""
 
 import csv
+import sys
 import gzip
 import json
 import logging
 from datetime import datetime
+from io import StringIO
 from pathlib import Path
 from typing import List, Any
 
@@ -13,7 +15,6 @@ import yaml
 from graphviz import Source
 
 from BALSAMIC import __version__ as balsamic_version
-from BALSAMIC.utils.cli import CaptureStdout
 from BALSAMIC.utils.exc import BalsamicError
 
 LOG = logging.getLogger(__name__)

@@ -45,6 +45,7 @@ class Gender(StrEnum):
 
     FEMALE: str = "female"
     MALE: str = "male"
+    UNKNOWN: str = "unknown"
 
 
 class AnalysisType(StrEnum):

@@ -2,9 +2,10 @@
 
 import re
 import toml
+import os
 from glob import glob
 from pathlib import Path
-from typing import Annotated, Dict, List, Optional, Literal
+from typing import Annotated, Dict, List, Optional
 
 from pydantic import (
     AfterValidator,
@@ -31,6 +32,7 @@ from BALSAMIC.constants.analysis import (
 )
 from BALSAMIC.models.params import QCModel
 from BALSAMIC.models.validators import is_dir, is_file
+from BALSAMIC.utils.io import read_json
 
 
 class FastqInfoModel(BaseModel):
@@ -152,7 +154,7 @@ class AnalysisModel(BaseModel):
 
     Raises:
         ValueError:
-            When gender is set to any other than [female, male]
+            When gender is set to any other than [female, male, unknown]
             When analysis_type is set to any value other than [single, paired, pon]
             When sequencing_type is set to any value other than [wgs, targeted]
             When analysis_workflow is set to any other than [balsamic, balsamic-qc, balsamic-umi]
@@ -524,3 +526,30 @@ class ConfigModel(BaseModel):
             f"CNV.somatic.{self.analysis.case_id}.ascat.germline.png",
             f"CNV.somatic.{self.analysis.case_id}.ascat.sunrise.png",
         ]
+
+    def get_gender(self, wildcards, input):
+        """Return the bioinformatically predicted sex of the case if the given sex is unknown."""
+
+        if self.analysis.gender != Gender.UNKNOWN:
+            return self.analysis.gender  # Default to using assigned gender
+
+        if not os.path.exists(input.sex_prediction_json):
+            return Gender.FEMALE  # Only necessary for snakemake dry-run
+
+        sex_prediction = read_json(input.sex_prediction_json)
+
+        gender = Gender.UNKNOWN
+        if self.analysis.analysis_type == AnalysisType.PAIRED:
+            # Prioritise normal gender if available
+            gender = sex_prediction[SampleType.NORMAL]["predicted_sex"]
+
+        if gender == Gender.UNKNOWN:
+            # Fall back to use tumor gender
+            gender = sex_prediction[SampleType.TUMOR]["predicted_sex"]
+
+        if gender == Gender.UNKNOWN:
+            # If gender is unknown, default to using female gender
+            return Gender.FEMALE
+        else:
+            # Return predicted gender
+            return gender
