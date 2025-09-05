@@ -73,12 +73,12 @@ class ClinicalAnnotation:
 
     def load_clinical_genes(self) -> None:
         self.gene_panel = read_csv(self.clinical_genes_file, header=0, sep="\t")
-        self.deletions = set(
-            self.gene_panel[self.gene_panel["reportDeletion"].astype(bool)]["gene"]
-        )
-        self.duplications = set(
-            self.gene_panel[self.gene_panel["reportAmplification"].astype(bool)]["gene"]
-        )
+        # self.deletions = set(
+        #     self.gene_panel[self.gene_panel["reportDeletion"].astype(bool)]["gene"]
+        # )
+        # self.duplications = set(
+        #     self.gene_panel[self.gene_panel["reportAmplification"].astype(bool)]["gene"]
+        # )
         self.all = set(self.gene_panel["gene"])
 
     def load_fusion_data(self) -> None:
@@ -206,7 +206,7 @@ def include_clinical_fusion_type_info(record, annotation) -> set:
     return record
 
 
-def include_clinical_info(record, parsed_csq_entries, annotation):
+def include_clinical_info(record, annotation):
     svtype = record.INFO["SVTYPE"]
     if svtype == "BND":
         include_clinical_fusion_type_info(record, annotation)
@@ -230,7 +230,7 @@ def process_record(record, parsed_csq_entries, annotation):
         return record
     include_vep_info(record, parsed_csq_entries)
     include_fusion_partner_info(record, parsed_csq_entries)
-    include_clinical_info(record, parsed_csq_entries, annotation)
+    include_clinical_info(record, annotation)
     soft_filter_off_panel(record)
     return record
 
