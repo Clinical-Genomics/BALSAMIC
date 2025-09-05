@@ -740,15 +740,15 @@ This section contains population database frequency filters.
     Frq <= 0.007  (or) Frq == "."
 
 
-Whitelisting and final filtration of variants
+Rescue and final filtration of variants
 ********************************************
 
-Since **BALSAMIC <= v18.0.0** Post-call database filters are initially applied as soft-filters. After this step the variants have a chance to be whitelisted if they meet either of the following criteria:
+Since **BALSAMIC <= v18.0.0** Post-call database filters are initially applied as soft-filters. After this step the variants have a chance to be allowlisted if they meet either of the following criteria:
 
-1. The variant is marked with CLNSIG=Pathogenic or ONC=Oncogenic in the INFO-field coming from Clinvar.
-2. The variant exists in the optionally supplied whitelist CSV-file.
+1. The variant is marked with CLNSIG=Pathogenic and/or CLNSIG=Likely_pathogenic and/or ONC=Oncogenic in the INFO-field coming from Clinvar.
+2. The variant exists in the optionally supplied whitelist VCF-file. The file in BALSAMIC/analysis_metadata/marked_causative.vcf will be used by default, but can be replaced by the --allowlist-snvs option.
 
-If either of those criteria are met the filters will be moved to a new INFO field called WhitelistedFilters and the variant will be set to PASS.
+If either of those criteria are met the filters will be moved to a new INFO field called AllowlistedFilters and the variant will be set to PASS, in addition the reason for the variant rescue will be given in the new AllowlistStatus INFO-field.
 
 Finally the soft-filters will be applied as only variants marked as `PASS` or any of the allowed soft-filters will remain in the final vcf file (`SNV.somatic.<CASE_ID>.<merged/tnscope>.<research/clinical>.filtered.pass.vcf.gz`).
 

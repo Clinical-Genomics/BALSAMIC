@@ -9,7 +9,8 @@ Added:
 * requested memory to each rule https://github.com/Clinical-Genomics/BALSAMIC/pull/1604
 * snakemake executor plugin installation instructions https://github.com/Clinical-Genomics/BALSAMIC/pull/1604
 * argument for headjob slurm partition  https://github.com/Clinical-Genomics/BALSAMIC/pull/1604
-
+* whitelisting of variants based on pathogenic / oncogenic clinvar-tag and optional manually curated clinical list added to all workflows https://github.com/Clinical-Genomics/BALSAMIC/pull/1570
+* soft-filter HighOccurrenceFrq, added to SNVs in panels based on being present in over 30% of cases https://github.com/Clinical-Genomics/BALSAMIC/pull/1570
 
 Changed:
 ^^^^^^^^
@@ -21,6 +22,8 @@ Changed:
 * merge wgs per lane alignments before dedup https://github.com/Clinical-Genomics/BALSAMIC/pull/1587
 * run alignment summary metrics on raw alignment file https://github.com/Clinical-Genomics/BALSAMIC/pull/1587
 * use median_target_coverage as threshold for wgs normals coverage instead of median coverage https://github.com/Clinical-Genomics/BALSAMIC/pull/1587
+* refactored reference subdict in balsamic config https://github.com/Clinical-Genomics/BALSAMIC/pull/1570
+* refactored variant observations metadata fields into constants instead of snakemake file https://github.com/Clinical-Genomics/BALSAMIC/pull/1570
 
 
 Removed:
@@ -50,7 +53,6 @@ Changed:
 
 Removed:
 ^^^^^^^^
-
 
 
 Fixed:
