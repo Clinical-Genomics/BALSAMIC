@@ -157,6 +157,13 @@ def test_get_singularity_bind_paths_option(
         f"--bind {reference_file.as_posix()}:{reference_file.as_posix()}'"
     )
 
+def test_get_singularity_bind_paths_option_no_paths_returns_empty(
+    snakemake_executable,
+):
+    """If no singularity bind paths are set, the option string should be empty."""
+    model = copy.deepcopy(snakemake_executable)
+    model.singularity_bind_paths = []  # ensure it's empty
+    assert model.get_singularity_bind_paths_option() == ""
 
 def test_get_snakemake_options_command(snakemake_executable: SnakemakeExecutable):
     """Test formatting of the snakemake options command."""
