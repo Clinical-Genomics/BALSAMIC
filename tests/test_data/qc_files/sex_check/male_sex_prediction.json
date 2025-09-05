@@ -4,7 +4,7 @@
         "predicted_sex_score": 10,
         "prediction_confidence": "high",
         "target_predicted_sex": {
-            "sample_name": "ACC9362A4",
+            "sample_name": "ACC1",
             "cnn_type": "target",
             "sex_prediction": {
                 "by_mean": {
@@ -35,7 +35,7 @@
             }
         },
         "antitarget_predicted_sex": {
-            "sample_name": "ACC9362A4",
+            "sample_name": "ACC1",
             "cnn_type": "antitarget",
             "sex_prediction": {
                 "by_mean": {

@@ -8,7 +8,7 @@ import tempfile
 from pathlib import Path
 from typing import Dict, List
 
-from BALSAMIC.constants.analysis import FastqName, Gender, PONWorkflow, SampleType, SequencingType
+from BALSAMIC.constants.analysis import FastqName, Gender, PONWorkflow, SampleType, SequencingType, LogFile
 from BALSAMIC.constants.paths import BALSAMIC_DIR
 from BALSAMIC.constants.workflow_params import WORKFLOW_PARAMS
 from BALSAMIC.models.config import ConfigModel
@@ -16,7 +16,7 @@ from BALSAMIC.models.params import BalsamicWorkflowConfig
 from BALSAMIC.utils.exc import BalsamicError
 from BALSAMIC.utils.io import write_finish_file
 from BALSAMIC.utils.rule import get_fastp_parameters, get_result_dir, get_threads, get_script_path
-from BALSAMIC.utils.logging import add_file_logging, set_log_filename
+from BALSAMIC.utils.logging import add_file_logging
 
 # Initialize ConfigModel
 config_model = ConfigModel.model_validate(config)
@@ -25,7 +25,6 @@ shell.prefix("set -eo pipefail; ")
 
 localrules: all
 
-LOG = logging.getLogger(__name__)
 
 # parse parameters as constants to workflows
 params = BalsamicWorkflowConfig.model_validate(WORKFLOW_PARAMS)
@@ -37,7 +36,11 @@ case_dir: str = Path(config_model.analysis.analysis_dir, case_id).as_posix()
 # Get result dir
 result_dir: str = Path(config_model.analysis.result).as_posix() + "/"
 
-log_file = set_log_filename(case_dir)
+# Set logging
+
+LOG = logging.getLogger(__name__)
+
+log_file = Path(case_dir, LogFile.LOGNAME).as_posix()
 add_file_logging(log_file, logger_name=__name__)
 
 LOG.info("Running BALSAMIC: PON.smk.")

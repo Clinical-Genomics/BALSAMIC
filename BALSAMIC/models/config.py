@@ -24,6 +24,7 @@ from BALSAMIC.constants.analysis import (
 )
 from BALSAMIC.models.params import QCModel
 from BALSAMIC.models.validators import is_dir, is_file
+from BALSAMIC.utils.io import read_json
 
 
 class FastqInfoModel(BaseModel):

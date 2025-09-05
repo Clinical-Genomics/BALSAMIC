@@ -337,7 +337,7 @@ def test_get_sex_check_metrics(tga_male_sex_prediction, config_dict):
     expected_sex_check_metric = [
         {
             "header": None,
-            "id": "id1_tumor",
+            "id": "ACC1",
             "input": "male_sex_prediction.json",
             "name": "COMPARE_PREDICTED_TO_GIVEN_SEX",
             "step": "sex_check",

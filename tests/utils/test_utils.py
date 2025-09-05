@@ -58,6 +58,7 @@ from BALSAMIC.utils.rule import (
     get_result_dir,
     get_rule_output,
     get_sample_type_from_sample_name,
+    get_sample_name_from_sample_type,
     get_script_path,
     get_variant_callers,
     get_vcf,
@@ -753,7 +754,7 @@ def test_get_sample_name_from_sample_type(config_dict: Dict):
     sample_type = "tumor"
 
     # WHEN calling the function
-    sample_name = get_sample_type_from_sample_name(config_dict, sample_type)
+    sample_name = get_sample_name_from_sample_type(config_dict, sample_type)
 
     # THEN the retrieved sample name should match the expected one
     assert sample_name == "ACC1"
