@@ -264,7 +264,7 @@ def include_svlen(record):
     return record
 
 
-def include_exonic_intronic_flag(record):
+def include_intragenic_flag(record):
     clinical_genes = record.INFO.get("CLINICAL_GENES")
     canonical = record.INFO.get("CANONICAL")
     if clinical_genes and canonical:
@@ -273,7 +273,7 @@ def include_exonic_intronic_flag(record):
                 fields = canonical.split("|")
                 if gene == fields[0]:
                     if fields[1] != "" or fields[2] != "":
-                        record.INFO["EXONINTRON"] = "YES"
+                        record.INFO["INTRAGENIC"] = "YES"
                         break
     return record
 
@@ -293,10 +293,10 @@ def include_rank(record):
 
     # canonical
     # BIOTYPE: protein coding +5
-    # EXONINTRON: + 10
+    # INTRAGENIC: + 10
     biotype = 0
     impact = 0
-    exonintron = 0
+    intragenic = 0
     number_tools = 1 if record.INFO.get("FOUNDBY", 0) > 1 else 0
     reliable_tools = 1 if "manta" in record.INFO.get("svdb_origin", "") else 0
     population_dbs = (
@@ -327,7 +327,7 @@ def include_rank(record):
         csq_biotype = set(record.INFO.get("BIOTYPE") or {})
         csq_impact = set(record.INFO.get("IMPACT") or {})
         biotype = 1 if "protein_coding" in csq_biotype else 0
-        exonintron = 10 if record.INFO.get("EXONINTRON", "") == "YES" else 0
+        intragenic = 10 if record.INFO.get("INTRAGENIC", "") == "YES" else 0
 
         if "HIGH" in csq_impact:
             impact = 3
@@ -337,7 +337,7 @@ def include_rank(record):
             impact = 0
     rank = [
         max_aberration_score,
-        exonintron,
+        intragenic,
         biotype,
         impact,
         number_tools,
@@ -526,7 +526,7 @@ def update_header(reader):
         ("BIOTYPE", "1", "String", " "),
         ("IMPACT", "1", "String", ""),
         ("CANONICAL", "1", "String", ""),
-        ("EXONINTRON", "1", "String", ""),
+        ("INTRAGENIC", "1", "String", ""),
     ]
     for id, number, type, desc in headers:
         reader.header.add_info_line(
