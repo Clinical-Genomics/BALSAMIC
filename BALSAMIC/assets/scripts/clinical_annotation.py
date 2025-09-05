@@ -245,7 +245,9 @@ def include_clinical_fusion_type_info(record, annotation) -> set:
     return record
 
 
+## TODO: REMOVE
 def include_svlen(record):
+    # FIX: ADD IF CHR1 == CHR2
     svlen = ""
     if "SVLEN" in record.INFO:
         if type(record.INFO["SVLEN"]) == list:
@@ -270,6 +272,9 @@ def include_intragenic_flag(record):
                         record.INFO["INTRAGENIC"] = "YES"
                         break
     return record
+
+
+## TODO: REMOVE
 
 
 def include_rank(record):
@@ -356,6 +361,11 @@ def include_clinical_info(record, parsed_csq_entries, annotation):
     return record
 
 
+def soft_filter_off_panel(record):
+    if not "CLINICAL_ABERRATION" in record.INFO:
+        record.add_filter("off_panel")
+
+
 def process_record(record, parsed_csq_entries, annotation):
     if "CSQ" not in record.INFO:
         return record
@@ -366,6 +376,7 @@ def process_record(record, parsed_csq_entries, annotation):
     include_clinical_info(record, parsed_csq_entries, annotation)
     include_intragenic_flag(record)
     include_rank(record)
+    soft_filter_off_panel(record)
     return record
 
 
@@ -491,6 +502,7 @@ colnames = (
 )
 
 
+## TODO: REMOVE
 def collect_relevant_information(record) -> list[str]:
     general_info = [record.CHROM, record.POS, record.REF, record.ALT[0].serialize()]
     info_fields = [record.INFO.get(field, "") for field in info_fields_to_retrieve]
@@ -499,6 +511,7 @@ def collect_relevant_information(record) -> list[str]:
 
 
 def update_header(reader):
+    # Add info fields to header
     headers = [
         (
             "CLINICAL_ABERRATION",
@@ -519,7 +532,7 @@ def update_header(reader):
         ("CLINICAL_GENES", "1", "Integer", "Clinical genes"),
         ("BIOTYPE", "1", "String", " "),
         ("IMPACT", "1", "String", ""),
-        ("CANONICAL", "1", "String", ""),
+        ("canonical_transcript_annotation", "1", "String", ""),
         ("INTRAGENIC", "1", "String", ""),
     ]
     for id, number, type, desc in headers:
@@ -528,6 +541,19 @@ def update_header(reader):
                 [("ID", id), ("Number", number), ("Type", type), ("Description", desc)]
             )
         )
+
+    # Add filter to header
+    reader.header.add_filter_line(
+        vcfpy.OrderedDict(
+            [
+                ("ID", "off_panel"),
+                (
+                    "Description",
+                    "Variant does not involve genes from the gene or fusion lists",
+                ),
+            ]
+        )
+    )
 
 
 def annotate_clinical_aberrations(vcf_path, annotation, output_vcf, output_tsv):
