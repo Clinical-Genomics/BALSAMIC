@@ -55,6 +55,7 @@ from BALSAMIC.constants.paths import (
     CONTAINERS_DIR,
     SENTIEON_DNASCOPE_MODEL,
     SENTIEON_TNSCOPE_MODEL,
+    ALLOWLIST_SNVS,
 )
 from BALSAMIC.constants.workflow_params import VCF_DICT
 from BALSAMIC.models.config import ConfigModel
@@ -238,7 +239,9 @@ def case_config(
             "sequencing_type": "targeted" if panel_bed else "wgs",
             "analysis_workflow": analysis_workflow,
             "config_creation_date": datetime.now().strftime("%Y-%m-%d %H:%M"),
-            "allowlist_snvs": allowlist_snvs,
+            "allowlist_snvs": allowlist_snvs
+            if allowlist_snvs
+            else ALLOWLIST_SNVS.as_posix(),
         },
         custom_filters={"umi_min_reads": umi_min_reads if umi_min_reads else None},
         reference=references,

@@ -10,7 +10,11 @@ CACHE_PROFILE: Path = Path(CONSTANTS_DIR, "cache_profile")
 CONTAINERS_DIR: Path = Path(BALSAMIC_DIR, "containers")
 ASSETS_DIR: Path = Path(BALSAMIC_DIR, "assets")
 SCRIPT_DIR: Path = Path(ASSETS_DIR, "scripts")
+METADATA_DIR: Path = Path(ASSETS_DIR, "analysis_metadata")
 REFSEQ_SCRIPT_PATH: Path = Path(SCRIPT_DIR, "refseq_sql.awk")
+
+# Metadata resources
+ALLOWLIST_SNVS = Path(METADATA_DIR, "allowlist_snvs.vcf")
 
 # Sentieon specific constants
 SENTIEON_MODELS_DIR: Path = Path(BALSAMIC_DIR, "assets", "sentieon_models")
