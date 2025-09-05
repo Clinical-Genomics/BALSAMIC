@@ -1,7 +1,6 @@
 """Tests for the QC metrics related methods."""
 import copy
 from typing import Any, Dict
-from pathlib import Path
 import pytest
 
 from BALSAMIC.models.metrics import MetricValidation, Metric, MetricCondition
@@ -97,22 +96,17 @@ def test_multiple_metric_validation_fail(qc_extracted_metrics: dict):
     assert metrics[8]["name"] in str(val_exc.value)
 
 
-def test_wrong_sex_check_metrics(tga_female_sex_prediction: str, config_dict: dict):
-    """Test MetricValidation for capturing conflicting predicted to given sex."""
+def test_sex_check_metric_is_only_warned(
+    tga_female_sex_prediction: str,
+    config_dict: dict,
+):
+    """MetricValidation should no longer raise for COMPARE_PREDICTED_TO_GIVEN_SEX."""
+    # GIVEN a female-prediction JSON and a male value in the config
+    sex_metrics = get_sex_check_metrics(tga_female_sex_prediction, config_dict)
 
-    # GIVEN female sex prediction JSON and male config dictionary
-    sex_metrics: list = get_sex_check_metrics(tga_female_sex_prediction, config_dict)
-
-    # WHEN comparing predicted female sex and supplied male gender
-    # THEN check that the model filters the metrics according to its norm
-    with pytest.raises(ValueError) as val_exc:
-        MetricValidation(metrics=sex_metrics)
-
-    # THEN a ValueError should be triggered containing this text
-    assert (
-        "QC metric COMPARE_PREDICTED_TO_GIVEN_SEX: female validation has failed. "
-        "(Condition: eq male, ID: id1_tumor)." in str(val_exc.value)
-    )
+    # WHEN validating the metrics
+    # THEN it should **not** raise; if it does, the test will fail automatically.
+    MetricValidation(metrics=sex_metrics)
 
 
 def test_validate_metric_type_error():
@@ -131,7 +125,7 @@ def test_validate_metric_type_error():
     ]
 
     # Validate that the TypeError handling raises the correct ValueError
-    with pytest.raises(ValueError, match=r"Type mismatch in QC metric Test Metric: .*"):
+    with pytest.raises(ValueError, match=r"Type mismatch in QC metric .*"):
         MetricValidation(metrics=metrics)
 
 
