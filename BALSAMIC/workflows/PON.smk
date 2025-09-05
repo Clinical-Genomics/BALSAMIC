@@ -97,7 +97,6 @@ if pon_workflow == PONWorkflow.CNVKIT:
 
 if pon_workflow in [PONWorkflow.GENS_MALE, PONWorkflow.GENS_FEMALE]:
 
-    gnomad_min_af5 = config_model.reference["gnomad_min_af5"].file.as_posix()
     gender = Gender.MALE if pon_workflow == PONWorkflow.GENS_MALE else Gender.FEMALE
 
     pon_reference = expand(cnv_dir + "gens_pon_100bp.{gender}.{version}.hdf5", gender=gender, version=version)
