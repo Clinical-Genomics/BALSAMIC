@@ -214,7 +214,7 @@ def test__process_record_line_no_change():
     assert out.strip() == line  # unchanged
 
 
-def test__process_record_line_manual_allowlist_sets_PASS_and_moves_filters():
+def test__allowlist_sets_pass_and_moves_filters():
     # FILTER is LowQ -> should be moved to INFO AllowlistedFilters, FILTER set to PASS
     allow = {("1", 200, "G", "C")}
     line = "1\t200\trs2\tG\tC\t.\ttriallelic_site\tCLNSIG=Benign"
