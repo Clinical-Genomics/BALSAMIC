@@ -275,7 +275,7 @@ def _any_alt_in_allowlist(
 # --- CLI ----------------------------------------------------------------------
 
 
-@click.command(context_settings=dict(help_option_names=["-h", "--help"]))
+@click.command(context_settings={"help_option_names": ["-h", "--help"]})
 @click.option(
     "--allow-list",
     "allow_list",
