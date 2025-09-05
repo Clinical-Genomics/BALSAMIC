@@ -10,6 +10,7 @@ Added:
 * snakemake executor plugin installation instructions https://github.com/Clinical-Genomics/BALSAMIC/pull/1604
 * argument for headjob slurm partition  https://github.com/Clinical-Genomics/BALSAMIC/pull/1604
 
+
 Changed:
 ^^^^^^^^
 * Updated ensembl vep to version 113.4 https://github.com/Clinical-Genomics/BALSAMIC/pull/1567
@@ -22,7 +23,6 @@ Changed:
 * use median_target_coverage as threshold for wgs normals coverage instead of median coverage https://github.com/Clinical-Genomics/BALSAMIC/pull/1587
 
 
-
 Removed:
 ^^^^^^^^
 * removed immediate submit functionality https://github.com/Clinical-Genomics/BALSAMIC/pull/1604
@@ -33,16 +33,12 @@ Fixed:
 ^^^^^^
 * Fixed varcall_py27 container for Manta https://github.com/Clinical-Genomics/BALSAMIC/pull/1567
 
+
 [17.1.0]
 --------
 
 Added:
 ^^^^^^
-* sbatch script for snakemake sequential job submission https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
-* logfile for balsamic wrapper https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
-* analysis status text file for easier prodbioinfo handling https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
-* requested memory to each rule https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
-
 
 
 Changed:
@@ -54,14 +50,11 @@ Changed:
 
 Removed:
 ^^^^^^^^
-* removed immediate submit functionality https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
-* removed unused code for benchmark plotting https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
-* removed functionality to disable variant callers https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
+
 
 
 Fixed:
 ^^^^^^
-
 
 
 [17.0.1]
