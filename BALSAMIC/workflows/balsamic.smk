@@ -36,7 +36,7 @@ from BALSAMIC.models.config import ConfigModel
 from BALSAMIC.models.params import BalsamicWorkflowConfig, StructuralVariantFilters
 from BALSAMIC.utils.cli import check_executable, generate_h5
 from BALSAMIC.utils.exc import BalsamicError
-from BALSAMIC.utils.logging import add_file_logging, set_log_filename
+from BALSAMIC.utils.logging import add_file_logging
 from BALSAMIC.utils.io import read_yaml, write_finish_file, write_json
 from BALSAMIC.utils.rule import (
     dump_toml,
@@ -67,13 +67,6 @@ config_model = ConfigModel.model_validate(config)
 shell.executable("/bin/bash")
 shell.prefix("set -eo pipefail; ")
 
-LOG = logging.getLogger(__name__)
-if not LOG.handlers:
-    h = logging.StreamHandler()
-    h.setFormatter(logging.Formatter("%(levelname)s: %(message)s"))
-    LOG.addHandler(h)
-LOG.setLevel(logging.INFO)
-
 # Get case id/name
 case_id: str = config_model.analysis.case_id
 # Get case-dir
@@ -81,8 +74,16 @@ case_dir: str = Path(config_model.analysis.analysis_dir, case_id).as_posix()
 # Get result dir
 result_dir: str = Path(config_model.analysis.result).as_posix() + "/"
 
+# Set logging
+
 LOG = logging.getLogger(__name__)
-log_file = set_log_filename(case_dir)
+if not LOG.handlers:
+    h = logging.StreamHandler()
+    h.setFormatter(logging.Formatter("%(levelname)s: %(message)s"))
+    LOG.addHandler(h)
+LOG.setLevel(logging.INFO)
+
+log_file = Path(case_dir, LogFile.LOGNAME).as_posix()
 add_file_logging(log_file, logger_name=__name__)
 
 LOG.info("Running BALSAMIC: balsamic.smk.")
