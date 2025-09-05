@@ -1,13 +1,7 @@
-from typing import List
-
 import vcfpy
 from pandas import read_csv, DataFrame
 import itertools
 import click
-
-SCORE_HIGH = 15
-SCORE_MEDIUM = 10
-SCORE_LOW = 5
 
 
 @click.command()
@@ -177,7 +171,7 @@ def include_canonical_gene_info(record, parsed_csq_entries):
                 gene_info[symbol] = []
             gene_info[symbol].append(gene_annot)
     if gene_info:
-        record.INFO["CANONICAL"] = gene_info.get(symbol)
+        record.INFO["canonical_transcript_annotation"] = gene_info.get(symbol)
     return record
 
 
@@ -266,10 +260,10 @@ def include_svlen(record):
 
 def include_intragenic_flag(record):
     clinical_genes = record.INFO.get("CLINICAL_GENES")
-    canonical = record.INFO.get("CANONICAL")
+    canonical = record.INFO.get("canonical_transcript_annotation")
     if clinical_genes and canonical:
         for gene in record.INFO["CLINICAL_GENES"]:
-            for canonical in record.INFO["CANONICAL"]:
+            for canonical in record.INFO["canonical_transcript_annotation"]:
                 fields = canonical.split("|")
                 if gene == fields[0]:
                     if fields[1] != "" or fields[2] != "":
@@ -370,7 +364,7 @@ def process_record(record, parsed_csq_entries, annotation):
     include_canonical_gene_info(record, parsed_csq_entries)
     include_svlen(record)
     include_clinical_info(record, parsed_csq_entries, annotation)
-    include_exonic_intronic_flag(record)
+    include_intragenic_flag(record)
     include_rank(record)
     return record
 
