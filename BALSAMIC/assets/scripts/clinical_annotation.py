@@ -35,7 +35,19 @@ import click
 )
 def main(input_vcf, output_vcf, clinical_genes_file, known_fusions_file):
     """
-    Annotate clinical gene aberrations and fusions in VCF and write a TSV file including clinical summary file.
+    Soft-filters a SV vcf file with a list of clinical genes and a fusion list.
+    Aberrations outside the provided lists get soft-filtered with 'off_panel'.
+    Additional information is added in the info field:
+      - CANNO for clinical annotation: fusion_pair,promiscuous_fusion,single_hit_fusion,in_panel
+      - CGENES: Clinical genes detected
+      - CFUS: Clinical fusions detected
+      - GENEA and GENEB, fusion gene partners
+
+    Clinical information:
+    - known_fusions_file: The fusion list file contains two columns with two gene symbols. If value in column 2 is missing
+    that fusion is considered promiscuous.
+    - clinical_genes_file: The gene file is a TSV file. Where the first column is the gene symbol. Only the first column
+    is used at the moment.
     """
     annotation = ClinicalAnnotation(clinical_genes_file, known_fusions_file)
     annotate_clinical_aberrations(input_vcf, annotation, output_vcf)
@@ -44,49 +56,29 @@ def main(input_vcf, output_vcf, clinical_genes_file, known_fusions_file):
 class ClinicalAnnotation:
     """
     Loads and stores clinical gene annotations and known gene fusion data.
-
-    Attributes:
-        clinical_genes_file (str): Path to the file containing clinical gene panel.
-        fusion_file (str): Path to the file containing known fusion gene pairs.
-        gene_panel (pd.DataFrame): DataFrame of clinical genes.
-        fusion_pairs (Set[tuple[str, str]]): Set of (FiveGene, ThreeGene) fusion gene pairs.
-        promiscuous_5 (Set[str]): Genes with only Five' partners.
-        promiscuous_3 (Set[str]): Genes with only Three' partners.
     """
 
     def __init__(self, clinical_genes_file, known_fusions_file):
-        self.clinical_genes_file = clinical_genes_file
-        self.fusion_file = known_fusions_file
-
-        self.gene_panel: DataFrame
+        self.gene_panel: set[str]
         self.fusion_pairs: set[tuple[str, str]]
-        self.promiscuous_5: set[str]
-        self.promiscuous_3: set[str]
-        self.deletions: set[str]
-        self.duplications: set[str]
+        self.promiscuous_fusion_genes: set[str]
+        self.genes_in_fusion_pairs: set(str)
+        self._load_annotations(clinical_genes_file, known_fusions_file)
 
-        self.load_annotations()
+    def _load_annotations(self, clinical_genes_file, known_fusions_file) -> None:
+        self._load_clinical_genes(clinical_genes_file)
+        self._load_fusion_data(known_fusions_file)
 
-    def load_annotations(self) -> None:
-        self.load_clinical_genes()
-        self.load_fusion_data()
+    def _load_clinical_genes(self, clinical_genes_file) -> None:
+        gene_panel = read_csv(clinical_genes_file, header=0, sep="\t")
+        self.gene_panel = set(gene_panel["gene_symbol"])
 
-    def load_clinical_genes(self) -> None:
-        self.gene_panel = read_csv(self.clinical_genes_file, header=0, sep="\t")
-        # self.deletions = set(
-        #     self.gene_panel[self.gene_panel["reportDeletion"].astype(bool)]["gene"]
-        # )
-        # self.duplications = set(
-        #     self.gene_panel[self.gene_panel["reportAmplification"].astype(bool)]["gene"]
-        # )
-        self.all = set(self.gene_panel["gene"])
-
-    def load_fusion_data(self) -> None:
+    def _load_fusion_data(self, known_fusions_file) -> None:
         self.fusion_pairs: set(tuple(str, str)) = set()
         self.promiscuous_fusion_genes: set(str) = set()
         self.genes_in_fusion_pairs: set(str) = set()
 
-        with open(self.fusion_file, "r", encoding="utf-8") as file:
+        with open(known_fusions_file, "r", encoding="utf-8") as file:
             for line in file:
                 genes: list[str] = line.strip().split("\t")
                 if len(genes) == 2:
@@ -99,16 +91,17 @@ class ClinicalAnnotation:
 
 
 def parse_csq_format(vcf_reader) -> list[str]:
+    """Parse csq format and return an list of the fields included."""
     csq_header = vcf_reader.header.get_info_field_info("CSQ")
-    csq_fields = csq_header.description.split("Format: ")[-1].split("|")
-    return csq_fields
+    return csq_header.description.split("Format: ")[-1].split("|")
 
 
 def parse_csq_entry(csq_entry, csq_fields) -> dict:
+    """Parse a csq entry and return a dictionary."""
     return dict(zip(csq_fields, csq_entry.split("|")))
 
 
-def include_fusion_partner_info(record, parsed_csq_entries):
+def include_fusion_partner_info(record, parsed_csq_entries) -> vcfpy.Record:
     "Add GENE A and GENE B in the info field, with information about fusion partners per allele."
     alt = record.ALT[0].serialize()
 
@@ -136,43 +129,37 @@ def include_fusion_partner_info(record, parsed_csq_entries):
     return record
 
 
-def include_vep_info(record, parsed_csq_entries):
-    genes, csq_biotype, csq_impact = set(), set(), set()
-
+def include_vep_info(record, parsed_csq_entries) -> vcfpy.Record:
+    genes = set()
     for csq_dict in parsed_csq_entries:
-        csq_biotype.add(csq_dict.get("BIOTYPE", ""))
-        csq_impact.add(csq_dict.get("IMPACT", ""))
         if csq_dict["SYMBOL"] and csq_dict["SYMBOL"] != "":
             genes.add(csq_dict["SYMBOL"])
-    record.INFO["BIOTYPE"] = list(csq_biotype)
-    record.INFO["IMPACT"] = list(csq_impact)
     if genes:
-        record.INFO["GENE"] = list(genes)
-        record.INFO["NGENES"] = str(len(genes))
+        record.INFO["GENES"] = list(genes)
     return record
 
 
-def include_clinical_aberrations_info(record, annotation_set, aberration_type) -> bool:
-    aberration_types = set(record.INFO.get("CLINICAL_ABERRATION") or {})
-    clinical_genes = set(record.INFO.get("CLINICAL_GENES") or {})
-    genes = set(record.INFO.get("GENE", []))
+def include_clinical_aberrations_info(
+    record, annotation_set, aberration_type
+) -> vcfpy.Record:
+    aberration_types = set(record.INFO.get("CANNO") or {})
+    clinical_genes = set(record.INFO.get("CGENES") or {})
+    genes = set(record.INFO.get("GENES", []))
     if genes and genes.intersection(annotation_set):
         detected_genes = genes.intersection(annotation_set)
-        record.INFO["CLINICAL_GENES"] = list(clinical_genes.union(detected_genes))
-        record.INFO["CLINICAL_ABERRATION"] = list(
-            aberration_types.union({aberration_type})
-        )
+        record.INFO["CGENES"] = list(clinical_genes.union(detected_genes))
+        record.INFO["CANNO"] = list(aberration_types.union({aberration_type}))
     return record
 
 
-def include_clinical_fusion_type_info(record, annotation) -> set:
+def include_clinical_fusion_type_info(record, annotation) -> vcfpy.Record:
     # sourcery skip: use-named-expression
     genes_a = set(record.INFO.get("GENEA", []))
     genes_b = set(record.INFO.get("GENEB", []))
-    clinical_genes = record.INFO.get("CLINICAL_GENES", [])
+    clinical_genes = record.INFO.get("CGENES", [])
     genes_all = set.union(genes_a, genes_b)
     fusions = []
-    aberration_type = record.INFO.get("CLINICAL_ABERRATION") or []
+    aberration_type = record.INFO.get("CANNO") or []
     if genes_a and genes_b:
         # Fusions with two hits should match known pairs or promiscuous fusions
         gene_pairs = set(itertools.product(genes_a, genes_b))
@@ -200,58 +187,56 @@ def include_clinical_fusion_type_info(record, annotation) -> set:
             fusions.append(f"{g}--?")
         aberration_type.append("promiscuous_fusion")
     if fusions:
-        record.INFO["CLINICAL_GENES"] = clinical_genes
-        record.INFO["CLINICAL_FUSION"] = fusions
-        record.INFO["CLINICAL_ABERRATION"] = aberration_type
+        record.INFO["CGENES"] = clinical_genes
+        record.INFO["CFUS"] = fusions
+        record.INFO["CANNO"] = aberration_type
     return record
 
 
-def include_clinical_info(record, annotation):
+def include_clinical_info(record, annotation) -> vcfpy.Record:
     svtype = record.INFO["SVTYPE"]
     if svtype == "BND":
         include_clinical_fusion_type_info(record, annotation)
-    # elif svtype == "DUP":
-    #     include_clinical_aberrations_info(record, annotation.deletions, "duplication")
-    # elif svtype == "DEL":
-    #     include_clinical_aberrations_info(record, annotation.deletions, "deletion")
     else:
-        # Any other in the gene panel file
-        include_clinical_aberrations_info(record, annotation.all, "in_gene_list")
+        # Any other type of abberation in the gene panel file
+        include_clinical_aberrations_info(record, annotation.gene_panel, "in_panel")
     return record
 
 
-def soft_filter_off_panel(record):
-    if not "CLINICAL_ABERRATION" in record.INFO:
+def soft_filter_off_panel(record) -> None:
+    if "CANNO" not in record.INFO:
         record.add_filter("off_panel")
 
 
-def process_record(record, parsed_csq_entries, annotation):
+def clean_record_info_fields(record) -> None:
+    """Exclude irrelevant information from vcf record after parsing."""
+    record.INFO.pop("GENES", None)
+
+
+def process_record(record, parsed_csq_entries, annotation) -> vcfpy.Record:
     if "CSQ" not in record.INFO:
         return record
     include_vep_info(record, parsed_csq_entries)
     include_fusion_partner_info(record, parsed_csq_entries)
     include_clinical_info(record, annotation)
     soft_filter_off_panel(record)
+    clean_record_info_fields(record)
     return record
 
 
-def update_header(reader):
+def update_header(reader) -> None:
     # Add info fields to header
     headers = [
         (
-            "CLINICAL_ABERRATION",
+            "CANNO",
             "1",
             "String",
-            "fusion_pair,promiscuous_fusion,deletion,duplication,other",
+            "Clinical annotation: fusion_pair,promiscuous_fusion,single_hit_fusion,in_panel",
         ),
-        ("GENE", "1", "String", "Annotated genes"),
         ("GENEA", "1", "String", "3' fusion genes"),
         ("GENEB", "1", "String", "5' fusion genes"),
-        ("NGENES", "1", "Integer", "Number of genes"),
-        ("CLINICAL_GENES", "1", "Integer", "Clinical genes"),
-        ("BIOTYPE", "1", "String", " "),
-        ("IMPACT", "1", "String", ""),
-        ("INTRAGENIC", "1", "String", ""),
+        ("CGENES", "1", "Integer", "Clinical genes detected"),
+        ("CFUS", "1", "Integer", "Clinical fusions detected"),
     ]
     for id, number, type, desc in headers:
         reader.header.add_info_line(
@@ -274,7 +259,7 @@ def update_header(reader):
     )
 
 
-def annotate_clinical_aberrations(vcf_path, annotation, output_vcf):
+def annotate_clinical_aberrations(vcf_path, annotation, output_vcf) -> None:
     reader = vcfpy.Reader.from_path(vcf_path)
     csq_fields = parse_csq_format(reader)
     update_header(reader)

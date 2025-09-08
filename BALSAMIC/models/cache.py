@@ -117,6 +117,8 @@ class ReferencesHg(References):
         known_indel_1kg (ReferenceUrl)          : 1000 Genome known InDels VCF.
         mills_1kg (ReferenceUrl)                : Mills' high confidence InDels VCF.
         rank_score (ReferenceUrl)               : Rank score model.
+        clinical_genes (ReferenceUrl)           : Rank score model.
+        clinical_fusions (ReferenceUrl)         : Rank score model.
         somalier_sites (ReferenceUrl)           : Somalier sites VCF.
         vcf_1kg (ReferenceUrl)                  : 1000 Genome all SNPs.
         wgs_calling_regions (ReferenceUrl)      : WGS calling intervals.
@@ -140,6 +142,8 @@ class ReferencesHg(References):
     known_indel_1kg: ReferenceUrl
     mills_1kg: ReferenceUrl
     rank_score: ReferenceUrl
+    clinical_genes: ReferenceUrl
+    clnical_fusions: ReferenceUrl
     somalier_sites: ReferenceUrl
     vcf_1kg: ReferenceUrl
     wgs_calling_regions: ReferenceUrl
@@ -222,6 +226,8 @@ class AnalysisReferencesHg(AnalysisReferences):
         known_indel_1kg (FilePath)           : 1000 Genome known InDels VCF.
         mills_1kg (FilePath)                 : Mills' high confidence InDels VCF.
         rank_score (FilePath)                : Rank score model.
+        clinical_genes (FilePath)            : Clinical genes of interest.
+        clinical_fusions (FilePath)          : Clinical fusion pairs and promiscuous fusions.
         somalier_sites (FilePath)            : Somalier sites VCF.
         vcf_1kg (FilePath)                   : 1000 Genome all SNPs.
         vep_dir (DirectoryPath)              : VEP annotations output directory.
@@ -244,6 +250,8 @@ class AnalysisReferencesHg(AnalysisReferences):
     known_indel_1kg: FilePath
     mills_1kg: FilePath
     rank_score: FilePath
+    clinical_genes: FilePath
+    clinical_fusions: FilePath
     somalier_sites: FilePath
     vcf_1kg: FilePath
     vep_dir: DirectoryPath
@@ -404,6 +412,8 @@ class CacheConfig(BaseModel):
             f"{self.references.cosmic.file_path}.{FileType.GZ}",
             f"{self.references.dbsnp.file_path}.{FileType.GZ}",
             self.references.rank_score.file_path,
+            self.references.clinical_genes.file_path,
+            self.references.clinical_fusions.file_path,
             f"{self.references.somalier_sites.file_path}.{FileType.GZ}",
             self.references.wgs_calling_regions.file_path,
             *self.get_compressed_indexed_vcf_paths(),
@@ -446,6 +456,8 @@ class CacheConfig(BaseModel):
             known_indel_1kg=f"{self.references.known_indel_1kg.file_path}.{FileType.GZ}",
             mills_1kg=f"{self.references.mills_1kg.file_path}.{FileType.GZ}",
             rank_score=self.references.rank_score.file_path,
+            clinical_genes=self.references.clinical_genes.file_path,
+            clnical_fusions=self.references.clinical_fusions.file_path,
             reference_genome=self.references.reference_genome.file_path,
             refgene_bed=self.references.get_refgene_bed_file_path(),
             refgene_flat=self.references.get_refgene_flat_file_path(),

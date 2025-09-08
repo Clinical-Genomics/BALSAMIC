@@ -160,6 +160,20 @@ REFERENCE_FILES: Dict[GenomeVersion, Dict[str, dict]] = {
             "file_name": "cancer_rank_model_-v0.2-.ini",
             "dir_name": "genome",
         },
+        "clinical_genes": {
+            "url": "ADDURL",
+            "file_type": FileType.TXT,
+            "gzip": False,
+            "file_name": "clinical_genes_v0.1",
+            "dir_name": "genome",
+        },
+        "clinical_fusions": {
+            "url": "ADDURL",
+            "file_type": FileType.TXT,
+            "gzip": False,
+            "file_name": "clinical_fusions_v0.1",
+            "dir_name": "genome",
+        },
         "access_regions": {
             "url": "https://raw.githubusercontent.com/etal/cnvkit/master/data/access-5k-mappable.hg19.bed",
             "file_type": FileType.TXT,
@@ -334,21 +348,21 @@ REFERENCE_FILES: Dict[GenomeVersion, Dict[str, dict]] = {
             "url": "https://raw.githubusercontent.com/Clinical-Genomics/reference-files/master/cancer/rank_model/cancer_rank_model_-v0.2-.ini",
             "file_type": FileType.TXT,
             "gzip": False,
-            "file_name": "cancer_rank_model_-v0.1-.ini",
+            "file_name": "cancer_rank_model_-v0.2-.ini",
             "dir_name": "genome",
         },
-        "access_regions": {
-            "url": "https://raw.githubusercontent.com/etal/cnvkit/master/data/access-5k-mappable.hg19.bed",
+        "clinical_genes": {
+            "url": "ADDURL",
             "file_type": FileType.TXT,
             "gzip": False,
-            "file_name": "access_5kb_hg38.txt",
+            "file_name": "clinical_genes_v0.1",
             "dir_name": "genome",
         },
-        "delly_exclusion": {
-            "url": "https://raw.githubusercontent.com/dellytools/delly/master/excludeTemplates/human.hg38.excl.tsv",
-            "file_type": FileType.TSV,
+        "clinical_fusions": {
+            "url": "ADDURL",
+            "file_type": FileType.TXT,
             "gzip": False,
-            "file_name": "delly_exclusion.tsv",
+            "file_name": "clinical_fusions_v0.1",
             "dir_name": "genome",
         },
         "delly_mappability": {
