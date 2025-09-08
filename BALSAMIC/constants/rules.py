@@ -207,7 +207,7 @@ DELIVERY_RULES: List[str] = [
     "svdb_merge_tumor_only",
     "svdb_merge_tumor_normal",
     "bcftools_filter_sv_research",
-    "bcftools_filter_sv_clinical",
+    "clinical_soft_filter_sv",
     "tiddit_sv_tumor_only",
     "tiddit_sv_tumor_normal",
     # CNVs

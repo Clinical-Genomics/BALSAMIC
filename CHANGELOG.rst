@@ -9,6 +9,7 @@ Added:
 * requested memory to each rule https://github.com/Clinical-Genomics/BALSAMIC/pull/1604
 * snakemake executor plugin installation instructions https://github.com/Clinical-Genomics/BALSAMIC/pull/1604
 * argument for headjob slurm partition  https://github.com/Clinical-Genomics/BALSAMIC/pull/1604
+* soft filter for off-panel clinical SV calls https://github.com/Clinical-Genomics/BALSAMIC/pull/1605
 
 Changed:
 ^^^^^^^^
