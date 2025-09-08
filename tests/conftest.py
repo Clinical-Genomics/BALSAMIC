@@ -5,15 +5,15 @@ from datetime import datetime
 from functools import partial
 from pathlib import Path
 from typing import Any, Dict, List
-from unittest import mock
 
 import pytest
 from _pytest.tmpdir import TempPathFactory
 from click.testing import CliRunner
 from pydantic_core import Url
+from unittest.mock import MagicMock
+import subprocess
 
 from BALSAMIC import __version__ as balsamic_version
-from BALSAMIC.assets.scripts.sex_prediction_tga import predict_sex_main
 from BALSAMIC.assets.scripts.preprocess_gens import cli as gens_preprocessing_cli
 from BALSAMIC.commands.base import cli
 from BALSAMIC.constants.analysis import (
@@ -23,16 +23,9 @@ from BALSAMIC.constants.analysis import (
     RunMode,
 )
 from BALSAMIC.constants.cache import REFERENCE_FILES, DockerContainers, GenomeVersion
-from BALSAMIC.constants.cluster import (
-    QOS,
-    ClusterAccount,
-    ClusterConfigType,
-    ClusterProfile,
-    ClusterMailType,
-)
+from BALSAMIC.constants.cluster import QOS, ClusterAccount, Partition
 from BALSAMIC.constants.constants import FileType
 from BALSAMIC.constants.paths import (
-    CONSTANTS_DIR,
     FASTQ_TEST_INFO,
     TEST_DATA_DIR,
     SENTIEON_TNSCOPE_MODEL,
@@ -46,8 +39,8 @@ from BALSAMIC.models.cache import (
     References,
     ReferencesHg,
 )
+from BALSAMIC.models.sbatchsubmitter import SbatchSubmitter
 from BALSAMIC.models.config import ConfigModel
-from BALSAMIC.models.scheduler import Scheduler
 from BALSAMIC.models.snakemake import SingularityBindPath, SnakemakeExecutable
 from BALSAMIC.utils.io import read_json, read_yaml, write_json
 from .helpers import ConfigHelper, Map
@@ -328,12 +321,29 @@ def environ():
     return "os.environ"
 
 
+@pytest.fixture
+def submitter(tmp_path):
+    return SbatchSubmitter(
+        case_id="test_case",
+        script_path=tmp_path,
+        result_path=tmp_path,
+        scan_finished_jobid_status=tmp_path,
+        log_path=tmp_path,
+        account="dummy_account",
+        qos="low",
+        headjob_partition=None,
+        max_run_hours=2,
+        snakemake_executable=MagicMock(
+            get_command=lambda: "snakemake --snakefile Snakefile"
+        ),
+        logger=MagicMock(),
+    )
+
+
 @pytest.fixture(scope="session")
-def cluster_analysis_config_path() -> str:
-    """Return cluster analysis configuration file."""
-    return Path(
-        CONSTANTS_DIR, f"{ClusterConfigType.ANALYSIS}.{FileType.JSON}"
-    ).as_posix()
+def default_snakemake_resources() -> List:
+    """Return snakemake default resources."""
+    return ["threads=1", "mem_mb=4000", "runtime=60"]
 
 
 @pytest.fixture(scope="session")
@@ -2500,7 +2510,7 @@ def fixture_singularity_bind_path(
 
 @pytest.fixture(scope="session", name="snakemake_options_command")
 def fixture_snakemake_options_command() -> List[str]:
-    """Return mocked singularity bind path model."""
+    """Return mocked snakemake options."""
     return ["--cores", "36"]
 
 
@@ -2523,13 +2533,11 @@ def fixture_snakemake_executable_data(
     return {
         "account": ClusterAccount.DEVELOPMENT.value,
         "case_id": case_id_tumor_only,
-        "cluster_config_path": reference_file,
         "config_path": reference_file,
-        "disable_variant_caller": "tnscope",
         "log_dir": session_tmp_path,
-        "mail_user": mail_user_option,
-        "profile": ClusterProfile.SLURM,
+        "workflow_profile": reference_file,
         "qos": QOS.HIGH,
+        "dragen": True,
         "quiet": True,
         "run_analysis": True,
         "run_mode": RunMode.CLUSTER,
@@ -2538,6 +2546,7 @@ def fixture_snakemake_executable_data(
         "snakefile": reference_file,
         "snakemake_options": snakemake_options_command,
         "working_dir": session_tmp_path,
+        "workflow_partition": Partition.CORE,
     }
 
 
@@ -2561,17 +2570,12 @@ def fixture_snakemake_executable_validated_data(
     """Return snakemake model expected data."""
     return {
         "account": ClusterAccount.DEVELOPMENT.value,
-        "benchmark": False,
         "case_id": case_id_tumor_only,
-        "cluster_config_path": reference_file,
         "config_path": reference_file,
-        "disable_variant_caller": "disable_variant_caller=tnscope",
-        "dragen": False,
+        "dragen": True,
         "force": False,
         "log_dir": session_tmp_path,
-        "mail_type": None,
-        "mail_user": mail_user_option,
-        "profile": ClusterProfile.SLURM,
+        "workflow_profile": reference_file,
         "qos": QOS.HIGH,
         "quiet": True,
         "run_analysis": True,
@@ -2581,6 +2585,7 @@ def fixture_snakemake_executable_validated_data(
         "snakefile": reference_file,
         "snakemake_options": snakemake_options_command,
         "working_dir": session_tmp_path,
+        "workflow_partition": Partition.CORE,
     }
 
 
@@ -2590,70 +2595,43 @@ def job_id() -> str:
     return "12345"
 
 
-@pytest.fixture(scope="session")
-def job_properties() -> Dict[str, Any]:
-    """Cluster job properties."""
-    return {
-        "cluster": {
-            "partition": "core",
-            "n": "1",
-            "time": "10:00:00",
-            "mem": "1000",
-            "mail_type": ClusterMailType.ALL.value,
-        }
-    }
+@pytest.fixture
+def snakemake_runner():
+    def run(
+        *,
+        snakefile,
+        configfile,
+        targets=None,
+        extra_args=None,
+        dryrun=True,
+        cores=8,
+        default_resources=("mem_mb=32000", "threads=8"),
+    ):
+        cmd = [
+            "snakemake",
+            "-p",
+            "--snakefile",
+            os.fspath(snakefile),
+            "--configfile",
+            os.fspath(configfile),
+        ]
 
+        if dryrun:
+            cmd.append("--dry-run")  # or "-n"
 
-@pytest.fixture(scope="session")
-def scheduler_data(
-    case_id_tumor_only: str,
-    job_properties: Dict[str, Any],
-    empty_file: Path,
-    empty_dir: Path,
-    mail_user_option: str,
-) -> Dict[str, Any]:
-    """Return raw scheduler model data."""
-    return {
-        "account": ClusterAccount.DEVELOPMENT.value,
-        "case_id": case_id_tumor_only,
-        "dependencies": ["1", "2", "3"],
-        "job_properties": job_properties,
-        "job_script": empty_file.as_posix(),
-        "log_dir": empty_dir.as_posix(),
-        "mail_user": mail_user_option,
-        "mail_type": ClusterMailType.FAIL.value,
-        "profile": ClusterProfile.SLURM.value,
-        "qos": QOS.HIGH,
-    }
+        cmd += ["--cores", str(cores)]
 
+        if default_resources:
+            # iterable of "k=v" strings
+            cmd += ["--default-resources", *list(default_resources)]
 
-@pytest.fixture(scope="session")
-def scheduler_validated_data(
-    case_id_tumor_only: str,
-    job_properties: Dict[str, Any],
-    empty_file: Path,
-    empty_dir: Path,
-    mail_user_option: str,
-) -> Dict[str, Any]:
-    """Return scheduler model validated data."""
-    return {
-        "account": f"--account {ClusterAccount.DEVELOPMENT}",
-        "benchmark": False,
-        "case_id": case_id_tumor_only,
-        "dependencies": ["1", "2", "3"],
-        "job_properties": job_properties,
-        "job_script": empty_file,
-        "log_dir": empty_dir,
-        "mail_type": "--mail-type FAIL",
-        "mail_user": f"--mail-user {mail_user_option}",
-        "profile": ClusterProfile.SLURM,
-        "profiling_interval": 10,
-        "profiling_type": "task",
-        "qos": "--qos high",
-    }
+        if targets:
+            cmd += list(targets)
 
+        if extra_args:
+            cmd += list(extra_args)
 
-@pytest.fixture(scope="session")
-def scheduler_model(scheduler_data: Dict[str, Any]) -> Scheduler:
-    """Return scheduler pydantic model."""
-    return Scheduler(**scheduler_data)
+        res = subprocess.run(cmd, text=True, capture_output=True, env=os.environ.copy())
+        return res.returncode, (res.stdout or ""), (res.stderr or ""), cmd
+
+    return run

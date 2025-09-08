@@ -1,0 +1,63 @@
+executor: slurm
+
+jobs: 999
+local-cores: 1
+max-status-checks-per-second: 1
+max-jobs-per-second: 1
+
+default-resources:
+    runtime: 120
+    mem_mb: 4000
+    slurm_partition: "core"
+
+set-resources:
+    all:
+        runtime: 15
+        mem_mb: 5000
+    index_cadd:
+        runtime: 120
+        mem_mb: 15000
+    convert_delly_exclusion_file:
+        runtime: 60
+        mem_mb: 2000
+    download_references:
+        runtime: 6000
+        mem_mb: 50000
+    picard_dict_reference_genome:
+        runtime: 60
+        mem_mb: 15000
+    fasta_index_reference_genome:
+        runtime: 60
+        mem_mb: 15000
+    bwa_index_reference_genome:
+        runtime: 60
+        mem_mb: 15000
+    compress_vcfs:
+        runtime: 60
+        mem_mb: 15000
+    index_vcfs:
+        threads: 12
+        runtime: 60
+        mem_mb: 15000
+    preprocess_refseq:
+        runtime: 60
+        mem_mb: 15000
+    download_containers:
+        runtime: 60
+        mem_mb: 15000
+    download_vep:
+        runtime: 120
+        mem_mb: 30000
+set-threads:
+    all: 1
+    index_cadd: 12
+    convert_delly_exclusion_file: 2
+    download_references: 24
+    picard_dict_reference_genome: 12
+    fasta_index_reference_genome: 24
+    bwa_index_reference_genome: 24
+    compress_vcfs: 12
+    index_vcfs: 12
+    preprocess_refseq: 12
+    download_containers: 12
+    download_vep: 24

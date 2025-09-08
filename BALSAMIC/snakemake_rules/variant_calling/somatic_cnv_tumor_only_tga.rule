@@ -16,8 +16,6 @@ rule cnvkit_segment_CNV_research:
         Path(f"{benchmark_dir}/cnvkit_segment_{config['analysis']['case_id']}.tsv").as_posix()
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("cnvkit") + ".sif").as_posix()
-    threads:
-        get_threads(cluster_config,"cnvkit_segment_CNV_research")
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "cnv"},
@@ -83,8 +81,6 @@ rule purecn_call_CNV_research:
         Path(f"{benchmark_dir}/purecn_call_{config['analysis']['case_id']}.tsv").as_posix()
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("purecn") + ".sif").as_posix()
-    threads:
-        get_threads(cluster_config, "purecn_call_CNV_research")
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         cnv_dir = cnv_dir,
@@ -164,6 +160,7 @@ rule cnvkit_call_CNV_research:
         cnr = cnv_dir + "tumor.merged.cnr",
         snv_vcf = vcf_dir + "SNV.germline.tumor.dnascope.vcf.gz",
         bamT = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
+        sex_prediction_json = qc_dir + "sex_prediction.json"
     output:
         cns = cnv_dir + "tumor.merged.cns",
         gene_breaks = cnv_dir + config["analysis"]["case_id"] + ".gene_breaks",
@@ -175,15 +172,13 @@ rule cnvkit_call_CNV_research:
         Path(f"{benchmark_dir}/cnvkit_call_{config['analysis']['case_id']}.tsv").as_posix()
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("cnvkit") + ".sif").as_posix()
-    threads:
-        get_threads(cluster_config, "cnvkit_call_CNV_research")
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "cnv"},
         cnv_dir = cnv_dir,
         cnsr = lambda wc: "tumor.merged.cn{s,r}",
         case_name = config["analysis"]["case_id"],
-        gender = config["analysis"]["gender"],
+        gender = config_model.get_gender,
         sample_id = "TUMOR",
         genome_version = config["reference"]["genome_version"],
     message:
@@ -254,8 +249,6 @@ rule delly_cnv_tumor_only:
         housekeeper_id={"id": config["analysis"]["case_id"], "tags": "clinical"},
         tumor="TUMOR",
         case_name=config["analysis"]["case_id"]
-    threads:
-        get_threads(cluster_config,"delly_tumor_only")
     message:
         ("Calling copy number variants using delly for {params.case_name}")
     shell:
@@ -281,8 +274,6 @@ rule bcftools_sort_cnvkitCNV_research:
         Path(f"{benchmark_dir}/bcftools_sort_cnvkitCNV_research_{config['analysis']['case_id']}.tsv").as_posix()
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
-    threads:
-        get_threads(cluster_config, "bcftools_sort_cnvkitCNV_research")
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         cnv_dir = cnv_dir,

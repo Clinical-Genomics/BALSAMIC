@@ -4,7 +4,6 @@
 rule fastp_quality_and_adapter_trim_wgs:
     """Fastq data pre-processing for WGS."""
     input:
-        wake_up = result_dir + "start_analysis",
         fastq_r1 = lambda wildcards: config_model.get_fastq_by_fastq_pattern(wildcards.fastq_pattern, FastqName.FWD),
         fastq_r2 = lambda wildcards: config_model.get_fastq_by_fastq_pattern(wildcards.fastq_pattern, FastqName.REV)
     output:
@@ -21,8 +20,6 @@ rule fastp_quality_and_adapter_trim_wgs:
         quality_trim = " ".join(fastp_parameters["fastp_trim_qual"]),
         adapter_trim = " ".join(fastp_parameters["fastp_trim_adapter"]),
         fastq_pattern = "{fastq_pattern}"
-    threads:
-        get_threads(cluster_config, 'fastp')
     message:
         "Quality control and trimming of UMI-removed fastqs for fastq pattern: {params.fastq_pattern}"
     shell:

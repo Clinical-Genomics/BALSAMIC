@@ -17,8 +17,6 @@ rule bcftools_filter_sv_research:
     case_name = "{case_name}",
     swegen_freq = [SVDB_FILTERS.swegen_sv_freq.tag_value, SVDB_FILTERS.swegen_sv_freq.filter_name],
     housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "research"},
-  threads:
-    get_threads(cluster_config, "bcftools_filter_svdb_research")
   message:
     "Filtering merged research structural and copy number variants using bcftools for {params.case_name}"
   shell:
@@ -47,8 +45,6 @@ rule bcftools_filter_sv_clinical:
     case_name = "{case_name}",
     swegen_freq = [SVDB_FILTERS.swegen_sv_freq.tag_value, SVDB_FILTERS.swegen_sv_freq.filter_name],
     loqusdb_clinical_freq = [SVDB_FILTERS.loqusdb_clinical_sv_freq.tag_value, SVDB_FILTERS.loqusdb_clinical_sv_freq.filter_name],
-  threads:
-    get_threads(cluster_config, "bcftools_filter_svdb_clinical")
   message:
     "Filtering merged clinical structural and copy number variants using bcftools for {params.case_name}"
   shell:
@@ -79,8 +75,6 @@ rule clinical_soft_filter_sv:
         case_name = "{case_name}",
         script = get_script_path("clinical_annotation.py"),
         housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "clinical"},
-    threads:
-        get_threads(cluster_config, "clinical_soft_filter_sv")
     message:
         "Soft-filter structural and copy number variants outside clinical panel {params.case_name}",
     shell:
