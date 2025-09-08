@@ -276,8 +276,8 @@ def test_process_vcf_headers_written_once_and_records(tmp_path: Path):
     out = out_path.read_text().splitlines()
     # Headers present once + inserted INFO lines
     assert out[0].startswith("##fileformat")
-    assert any(l == m.INFO_ALLOWLISTED_FILTERS_HDR for l in out[:5])
-    assert any(l == m.INFO_ALLOWLIST_STATUS_HDR for l in out[:5])
+    assert any(line == m.INFO_ALLOWLISTED_FILTERS_HDR for line in out[:5])
+    assert any(line == m.INFO_ALLOWLIST_STATUS_HDR for line in out[:5])
     # Two records
     rec1 = out[-2].split("\t")
     rec2 = out[-1].split("\t")
@@ -302,8 +302,8 @@ def test_process_vcf_file_with_only_headers(tmp_path: Path):
         m.process_vcf(None, input_vcf, out_fh)
     out = out_path.read_text().splitlines()
     # Headers should be present (plus inserted INFO lines)
-    assert any(l == m.INFO_ALLOWLISTED_FILTERS_HDR for l in out)
-    assert any(l == m.INFO_ALLOWLIST_STATUS_HDR for l in out)
+    assert any(line == m.INFO_ALLOWLISTED_FILTERS_HDR for line in out)
+    assert any(line == m.INFO_ALLOWLIST_STATUS_HDR for line in out)
 
 
 # ---------------------------
