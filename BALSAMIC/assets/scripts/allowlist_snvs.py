@@ -10,14 +10,14 @@ import click
 import vcfpy
 
 
-INFO_ALLOWLISTED_FILTERS_ID = "AllowlistedFilters"
-INFO_ALLOWLIST_STATUS_ID = "AllowlistStatus"
+INFO_ALLOWLISTED_FILTERS_ID = "RescueedFilters"
+INFO_ALLOWLIST_STATUS_ID = "RescueStatus"
 
 INFO_ALLOWLISTED_FILTERS_DESC = (
-    "Original FILTER value moved here because this variant was allow-listed"
+    "Original FILTER value moved here because this variant was rescue-listed"
 )
 INFO_ALLOWLIST_STATUS_DESC = (
-    "Reason(s) for allow-listing; pipe-separated (e.g., ClinvarOnc|ClinvarPathogenic)"
+    "Reason(s) for rescue-listing; pipe-separated (e.g., ClinvarOnc|ClinvarPathogenic)"
 )
 
 CLNSIG_PATHOGENIC = "Pathogenic"
@@ -141,8 +141,8 @@ def process_vcf(
     Policy change implemented here:
       - We consider ONLY literal 'PASS' as pass.
       - '.' (no filters applied) is treated as *not PASS*.
-      - When a record is allow-listed and its FILTER != 'PASS',
-        we move the original FILTER string ('.' or 'f1;f2;...') to INFO/AllowlistedFilters
+      - When a record is rescue-listed and its FILTER != 'PASS',
+        we move the original FILTER string ('.' or 'f1;f2;...') to INFO/RescueedFilters
         and set FILTER to 'PASS'.
     """
     with vcfpy.Reader.from_path(str(in_vcf)) as reader:
@@ -178,11 +178,11 @@ def process_vcf(
 
 @click.command(context_settings={"help_option_names": ["-h", "--help"]})
 @click.option(
-    "--allow-list",
+    "--rescue-list",
     "allow_list",
     type=click.Path(exists=True, dir_okay=False, readable=True, path_type=Path),
     required=False,
-    help="Optional: VCF (.vcf or .vcf.gz) of allow-listed variants (match on CHROM, POS, REF, ALT).",
+    help="Optional: VCF (.vcf or .vcf.gz) of rescue-listed variants (match on CHROM, POS, REF, ALT).",
 )
 @click.option(
     "--vcf",
@@ -201,7 +201,7 @@ def process_vcf(
     help="Output VCF path (use '-' for stdout).",
 )
 def cli(allow_list: Path | None, vcf_path: Path, out_path: Path | None) -> None:
-    """Annotate variants with INFO/AllowlistStatus and move any non-PASS FILTER into INFO when allow-listed."""
+    """Annotate variants with INFO/RescueStatus and move any non-PASS FILTER into INFO when rescue-listed."""
     try:
         allow_keys: Optional[Set[Tuple[str, int, str, str]]] = None
         if allow_list:
