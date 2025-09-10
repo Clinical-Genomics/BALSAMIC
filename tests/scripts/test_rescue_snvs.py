@@ -13,11 +13,6 @@ from click.testing import CliRunner
 import BALSAMIC.assets.scripts.rescue_snvs as m
 
 
-# ---------------------------
-# Fixtures / small utilities
-# ---------------------------
-
-
 @pytest.fixture
 def tmp_text_vcf(tmp_path: Path) -> Path:
     p = tmp_path / "a.vcf"
@@ -100,9 +95,8 @@ def test_open_out_text_stdout_and_file(tmp_path: Path, monkeypatch):
     assert p.read_text() == "x\n"
 
 
-
-def test_build_allowlist_keyset_plain(tmp_text_vcf: Path):
-    keys = m.build_allowlist_keyset(tmp_text_vcf)
+def test_build_rescuelist_keyset_plain(tmp_text_vcf: Path):
+    keys = m.build_rescue_keyset(tmp_text_vcf)
     # expect tuples for each ALT allele
     assert ("1", 100, "A", "T") in keys
     assert ("1", 200, "G", "C") in keys
@@ -110,8 +104,8 @@ def test_build_allowlist_keyset_plain(tmp_text_vcf: Path):
     assert ("2", 300, "T", "G") in keys
 
 
-def test_build_allowlist_keyset_gz(tmp_gz_vcf: Path):
-    keys = m.build_allowlist_keyset(tmp_gz_vcf)
+def test_build_rescuelist_keyset_gz(tmp_gz_vcf: Path):
+    keys = m.build_rescue_keyset(tmp_gz_vcf)
     assert ("3", 400, "C", "A") in keys
     assert ("4", 500, "G", "T") in keys
 
@@ -132,6 +126,7 @@ def test_build_allowlist_keyset_gz(tmp_gz_vcf: Path):
 def test_determine_clinvar_reasons(info, expected):
     assert m.determine_clinvar_reasons(info) == expected
 
+
 def test_ensure_info_headers_inserts_before_chrom():
     headers = [
         "##fileformat=VCFv4.3",
@@ -141,15 +136,15 @@ def test_ensure_info_headers_inserts_before_chrom():
     out = m.ensure_info_headers(headers)
     # Two extra lines inserted before #CHROM
     idx = out.index("#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO")
-    assert out[idx - 2] == m.INFO_ALLOWLISTED_FILTERS_HDR
-    assert out[idx - 1] == m.INFO_ALLOWLIST_STATUS_HDR
+    assert out[idx - 2] == m.INFO_RESCUE_FILTERS_HDR
+    assert out[idx - 1] == m.INFO_RESCUE_STATUS_HDR
 
 
 def test_ensure_info_headers_noop_if_present():
     headers = [
         "##fileformat=VCFv4.3",
-        m.INFO_ALLOWLISTED_FILTERS_HDR,
-        m.INFO_ALLOWLIST_STATUS_HDR,
+        m.INFO_RESCUE_FILTERS_HDR,
+        m.INFO_RESCUE_STATUS_HDR,
         "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO",
     ]
     out = m.ensure_info_headers(headers)
@@ -160,49 +155,49 @@ def test_ensure_info_headers_append_if_no_chrom():
     headers = ["##fileformat=VCFv4.3"]
     out = m.ensure_info_headers(headers)
     # If no #CHROM, insert at end
-    assert out[-2] == m.INFO_ALLOWLISTED_FILTERS_HDR
-    assert out[-1] == m.INFO_ALLOWLIST_STATUS_HDR
+    assert out[-2] == m.INFO_RESCUE_FILTERS_HDR
+    assert out[-1] == m.INFO_RESCUE_STATUS_HDR
 
 
-def test__any_alt_in_allowlist_true_false():
+def test__any_alt_in_rescuelist_true_false():
     keys = {
         ("1", 10, "A", "T"),
         ("1", 10, "A", "G"),
     }
-    assert m._any_alt_in_allowlist(keys, "1", 10, "A", ["C", "G"]) is True
-    assert m._any_alt_in_allowlist(keys, "1", 10, "A", ["C"]) is False
+    assert m._any_alt_in_rescuelist(keys, "1", 10, "A", ["C", "G"]) is True
+    assert m._any_alt_in_rescuelist(keys, "1", 10, "A", ["C"]) is False
 
 
 def test__process_record_line_no_change():
     line = "1\t100\trs1\tA\tT\t.\tPASS\t."
-    out = m._process_record_line(line, allow_keys=None)
+    out = m._process_record_line(line, rescue_keys=None)
     assert out.strip() == line  # unchanged
 
 
-def test__allowlist_sets_pass_and_moves_filters():
-    # FILTER is LowQ -> should be moved to INFO AllowlistedFilters, FILTER set to PASS
-    allow = {("1", 200, "G", "C")}
+def test__rescuelist_sets_pass_and_moves_filters():
+    # FILTER is LowQ -> should be moved to INFO RescueFilters, FILTER set to PASS
+    rescue = {("1", 200, "G", "C")}
     line = "1\t200\trs2\tG\tC\t.\ttriallelic_site\tCLNSIG=Benign"
-    out = m._process_record_line(line, allow_keys=allow).rstrip("\n")
+    out = m._process_record_line(line, rescue_keys=rescue).rstrip("\n")
 
     cols = out.split("\t")
     assert cols[6] == "PASS"
     info = m.parse_info(cols[7])
-    assert info["AllowlistedFilters"] == "triallelic_site"
-    # AllowlistStatus must include manual reason
-    assert m.MANUAL_REASON in info["AllowlistStatus"]
+    assert info["RescueFilters"] == "triallelic_site"
+    # RescueFilters must include manual reason
+    assert m.MANUAL_REASON in info["RescueStatus"]
 
 
 def test__process_record_line_clinvar_reasons_only():
     # ONC + Likely_pathogenic
     line = "2\t300\trs3\tT\tC\t.\tHighOccurrenceFrq\tONC;CLNSIG=Likely_pathogenic"
-    out = m._process_record_line(line, allow_keys=None).rstrip("\n")
+    out = m._process_record_line(line, rescue_keys=None).rstrip("\n")
     cols = out.split("\t")
     # FILTER should be set to PASS and original moved
     assert cols[6] == "PASS"
     info = m.parse_info(cols[7])
-    assert info["AllowlistedFilters"] == "HighOccurrenceFrq"
-    status = info["AllowlistStatus"].split("|")
+    assert info["RescueFilters"] == "HighOccurrenceFrq"
+    status = info["RescueStatus"].split("|")
     assert m.CLINVAR_REASON_ONC in status
     assert m.CLINVAR_REASON_LIKELY_PATH in status
 
@@ -228,28 +223,28 @@ def test_process_vcf_headers_written_once_and_records(tmp_path: Path):
         "1\t100\t.\tA\tT\t.\tPASS\t.\n"
         "1\t200\t.\tG\tC\t.\tLowQ\tCLNSIG=Pathogenic\n"
     )
-    allow = {("1", 100, "A", "T")}
+    rescue = {("1", 100, "A", "T")}
     out_path = tmp_path / "out.vcf"
     with out_path.open("w", encoding="utf-8", newline="") as out_fh:
-        m.process_vcf(allow, input_vcf, out_fh)
+        m.process_vcf(rescue, input_vcf, out_fh)
 
     out = out_path.read_text().splitlines()
     # Headers present once + inserted INFO lines
     assert out[0].startswith("##fileformat")
-    assert any(line == m.INFO_ALLOWLISTED_FILTERS_HDR for line in out[:5])
-    assert any(line == m.INFO_ALLOWLIST_STATUS_HDR for line in out[:5])
+    assert any(line == m.INFO_RESCUE_FILTERS_HDR for line in out[:5])
+    assert any(line == m.INFO_RESCUE_STATUS_HDR for line in out[:5])
     # Two records
     rec1 = out[-2].split("\t")
     rec2 = out[-1].split("\t")
 
-    # rec1 was manually allow-listed, FILTER may remain PASS, but AllowlistStatus must exist
+    # rec1 was manually rescued, FILTER may remain PASS, but RescueStatus must exist
     info1 = m.parse_info(rec1[7])
-    assert "AllowlistStatus" in info1
+    assert "RescueStatus" in info1
     # rec2 had CLNSIG=Pathogenic and FILTER=LowQ -> FILTER becomes PASS and moved
     assert rec2[6] == "PASS"
     info2 = m.parse_info(rec2[7])
-    assert info2["AllowlistedFilters"] == "LowQ"
-    assert m.CLINVAR_REASON_PATH in (info2["AllowlistStatus"] or "")
+    assert info2["RescueFilters"] == "LowQ"
+    assert m.CLINVAR_REASON_PATH in (info2["RescueStatus"] or "")
 
 
 def test_process_vcf_file_with_only_headers(tmp_path: Path):
@@ -262,7 +257,5 @@ def test_process_vcf_file_with_only_headers(tmp_path: Path):
         m.process_vcf(None, input_vcf, out_fh)
     out = out_path.read_text().splitlines()
     # Headers should be present (plus inserted INFO lines)
-    assert any(line == m.INFO_ALLOWLISTED_FILTERS_HDR for line in out)
-    assert any(line == m.INFO_ALLOWLIST_STATUS_HDR for line in out)
-
-
+    assert any(line == m.INFO_RESCUE_FILTERS_HDR for line in out)
+    assert any(line == m.INFO_RESCUE_STATUS_HDR for line in out)

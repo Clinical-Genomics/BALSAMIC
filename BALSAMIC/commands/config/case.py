@@ -239,9 +239,7 @@ def case_config(
             "sequencing_type": "targeted" if panel_bed else "wgs",
             "analysis_workflow": analysis_workflow,
             "config_creation_date": datetime.now().strftime("%Y-%m-%d %H:%M"),
-            "rescue_snvs": rescue_snvs
-            if rescue_snvs
-            else RESCUE_SNVS.as_posix(),
+            "rescue_snvs": rescue_snvs if rescue_snvs else RESCUE_SNVS.as_posix(),
         },
         custom_filters={"umi_min_reads": umi_min_reads if umi_min_reads else None},
         reference=references,

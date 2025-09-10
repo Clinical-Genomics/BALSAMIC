@@ -231,7 +231,7 @@ def _process_record_line(
     reasons: List[str] = []
 
     # Manual rescue (only if provided).
-    if rescue_keys and _any_alt_in_rescue(rescue_keys, chrom, pos, ref, alts):
+    if rescue_keys and _any_alt_in_rescuelist(rescue_keys, chrom, pos, ref, alts):
         reasons.append(MANUAL_REASON)
 
     # ClinVar rescue.
