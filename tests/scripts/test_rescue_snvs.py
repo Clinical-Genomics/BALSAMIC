@@ -109,33 +109,33 @@ def test_determine_clinvar_reasons(info, expected):
     assert m.determine_clinvar_reasons(info) == expected
 
 
-def test_ensure_info_headers_inserts_before_chrom():
+def test_update_header_inserts_before_chrom():
     headers = [
         "##fileformat=VCFv4.3",
         "##source=test",
         "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO",
     ]
-    out = m.ensure_info_headers(headers)
+    out = m.update_header(headers)
     # Two extra lines inserted before #CHROM
     idx = out.index("#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO")
     assert out[idx - 2] == m.INFO_RESCUE_FILTERS_HDR
     assert out[idx - 1] == m.INFO_RESCUE_STATUS_HDR
 
 
-def test_ensure_info_headers_noop_if_present():
+def test_update_header_if_present():
     headers = [
         "##fileformat=VCFv4.3",
         m.INFO_RESCUE_FILTERS_HDR,
         m.INFO_RESCUE_STATUS_HDR,
         "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO",
     ]
-    out = m.ensure_info_headers(headers)
+    out = m.update_header(headers)
     assert out == headers
 
 
-def test_ensure_info_headers_append_if_no_chrom():
+def test_update_header_append_if_no_chrom():
     headers = ["##fileformat=VCFv4.3"]
-    out = m.ensure_info_headers(headers)
+    out = m.update_header(headers)
     # If no #CHROM, insert at end
     assert out[-2] == m.INFO_RESCUE_FILTERS_HDR
     assert out[-1] == m.INFO_RESCUE_STATUS_HDR

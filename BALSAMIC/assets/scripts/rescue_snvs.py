@@ -9,8 +9,6 @@ from typing import Dict, List, Optional, Set, Tuple
 
 import click
 
-# --- Constants & headers ------------------------------------------------------
-
 INFO_RESCUE_FILTERS_HDR = '##INFO=<ID=RescueFilters,Number=1,Type=String,Description="Original FILTER value moved here because this variant was rescued">'
 INFO_RESCUE_STATUS_HDR = '##INFO=<ID=RescueStatus,Number=1,Type=String,Description="Reason(s) for rescuing variant; pipe-separated (e.g., ClinvarOnc|ClinvarPathogenic)">'
 
@@ -130,7 +128,7 @@ def determine_clinvar_reasons(info: Dict[str, Optional[str]]) -> List[str]:
     return reasons
 
 
-def ensure_info_headers(headers: List[str]) -> List[str]:
+def update_header(headers: List[str]) -> List[str]:
     """
     Ensure VCF headers include Rescue INFO field definitions.
 
@@ -187,7 +185,7 @@ def process_vcf(
 
             # First non-header line: flush headers once.
             if headers is not None:
-                for h in ensure_info_headers(headers):
+                for h in update_header(headers):
                     out_fh.write(h + "\n")
                 headers = None  # mark as flushed
 
@@ -195,7 +193,7 @@ def process_vcf(
 
     # File had only headers (no records): write them now.
     if headers is not None:
-        for h in ensure_info_headers(headers):
+        for h in update_header(headers):
             out_fh.write(h + "\n")
 
 
