@@ -4,34 +4,22 @@ from BALSAMIC.constants.analysis import VARIANT_OBSERVATION_METAVALUES
 from typing import Dict, Any
 
 
-def merge_reference_metadata(
-    existing_refs: dict[str, str],
-    observation_paths: dict[str, str] | None = None,
+def add_reference_metadata(
+    references: dict[str, str],
 ) -> dict[str, dict]:
     """
-    Restructure reference dictionary and merge with variant observations with static metadata.
+    Build a rich reference map by attaching file Paths and static metadata.
 
-    - existing_refs: baseline paths; each becomes {"file": Path(...)} plus static metadata if available.
-    - observation_paths: optional overrides/additions applied after existing_refs; None values are ignored.
+    For each input entry {key: filepath}, returns:
+        { key: {"file": Path(filepath), **VARIANT_OBSERVATION_METAVALUES.get(key, {})} }
 
-    Returns:
-        { key: {"file": Path(...), **static_meta_if_any} }
+    The input dict is not modified.
     """
-    merged: Dict[str, Dict[str, Any]] = {}
+    references_metadata: Dict[str, Dict[str, Any]] = {}
 
-    # 1) Seed with existing references
-    for key, fp in existing_refs.items():
+    for key, fp in references.items():
         entry: Dict[str, Any] = {"file": Path(fp)}
         entry.update(VARIANT_OBSERVATION_METAVALUES.get(key, {}))
-        merged[key] = entry
+        references_metadata[key] = entry
 
-    # 2) Apply observation overrides/additions
-    if observation_paths:
-        for key, fp in observation_paths.items():
-            if fp is None:
-                continue
-            entry: Dict[str, Any] = {"file": Path(fp)}
-            entry.update(VARIANT_OBSERVATION_METAVALUES.get(key, {}))
-            merged[key] = entry  # override or add
-
-    return merged
+    return references_metadata

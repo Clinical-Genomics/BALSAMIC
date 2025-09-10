@@ -42,7 +42,7 @@ from BALSAMIC.commands.options import (
     OPTION_UMI_MIN_READS,
     OPTION_RESCUE_SNVS,
 )
-from BALSAMIC.utils.references import merge_reference_metadata
+from BALSAMIC.utils.references import add_reference_metadata
 from BALSAMIC.constants.analysis import (
     BIOINFO_TOOL_ENV,
     AnalysisWorkflow,
@@ -193,10 +193,17 @@ def case_config(
         "swegen_snv_frequency": swegen_snv,
         "swegen_sv_frequency": swegen_sv,
     }
+    references.update(
+        {
+            variant_observation_file: path
+            for variant_observation_file, path in variants_observations.items()
+            if path is not None
+        }
+    )
 
-    references = merge_reference_metadata(
-        existing_refs=references,
-        observation_paths=variants_observations,
+    # Re-organises references into a subdict and adds metadata when available
+    references = add_reference_metadata(
+        references=references,
     )
 
     analysis_fastq_dir: str = get_analysis_fastq_files_directory(

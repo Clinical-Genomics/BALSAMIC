@@ -232,6 +232,7 @@ class ReferenceModel(BaseModel):
         is_annotated: Returns True if this reference source has fields, ops, and names defined.
         as_path: Returns the file path for this reference source.
     """
+
     file: Path
     fields: Optional[List[str]] = None
     ops: Optional[List[str]] = None
