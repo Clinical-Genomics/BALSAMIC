@@ -9,7 +9,7 @@ def merge_reference_metadata(
     observation_paths: dict[str, str] | None = None,
 ) -> dict[str, dict]:
     """
-    Build a merged references dict from simple {key: filepath} inputs.
+    Restructure reference dictionary and merge with variant observations with static metadata.
 
     - existing_refs: baseline paths; each becomes {"file": Path(...)} plus static metadata if available.
     - observation_paths: optional overrides/additions applied after existing_refs; None values are ignored.
