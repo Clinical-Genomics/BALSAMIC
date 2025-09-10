@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 from __future__ import annotations
 
 import sys
@@ -9,6 +8,7 @@ from collections import OrderedDict
 
 import click
 import vcfpy
+
 
 INFO_ALLOWLISTED_FILTERS_ID = "AllowlistedFilters"
 INFO_ALLOWLIST_STATUS_ID = "AllowlistStatus"
@@ -27,26 +27,17 @@ CLINVAR_REASON_PATH = "ClinvarPathogenic"
 CLINVAR_REASON_LIKELY_PATH = "ClinvarLikelyPathogenic"
 MANUAL_REASON = "ManuallyCuratedList"
 
-
 def _alt_to_str(alt) -> str:
-    """
-    Convert a vcfpy ALT object to its string representation.
-    Handles Substitution, Breakend, Symbolic, and SV.
-    """
-    # Substitution: e.g., 'T'
-    if hasattr(alt, "value"):
+    """Convert a vcfpy ALT object to a string (handles Substitution, Symbolic/SV, Breakend)."""
+    if hasattr(alt, "value"):           # Substitution
         return alt.value
-    # Symbolic/SV/Breakend: e.g., '<DEL>' or 'N[chr1:123[' etc.
-    if hasattr(alt, "to_string"):
+    if hasattr(alt, "to_string"):       # Symbolic/SV/Breakend
         return alt.to_string()
     return str(alt)
 
 
-def _normalize_info_value_to_str(value) -> str:
-    """
-    vcfpy will parse INFO values as scalars or lists depending on Number.
-    This normalizes to a comma-joined string for searching substrings.
-    """
+def _info_value_as_str(value) -> str:
+    """Normalize scalar/list INFO values to a comma-joined string for substring checks."""
     if value is None:
         return ""
     if isinstance(value, list):
@@ -54,111 +45,88 @@ def _normalize_info_value_to_str(value) -> str:
     return str(value)
 
 
+def _filter_as_string(rec: vcfpy.Record) -> str:
+    """
+    Render FILTER as it *originally means* in VCF:
+    - PASS           -> "PASS"      (vcfpy: usually ['PASS'])
+    - no filters '.' -> "."         (vcfpy: usually [])
+    - named filters  -> "f1;f2"     (vcfpy: ['f1','f2'])
+    """
+    flt = rec.FILTER or []
+    if flt == ["PASS"]:
+        return "PASS"
+    if len(flt) == 0:
+        return "."
+    return ";".join(flt)
+
+
+def _set_pass(rec: vcfpy.Record) -> None:
+    """Force FILTER to PASS."""
+    rec.FILTER = ["PASS"]
+
+
 def build_allowlist_keyset(allow_vcf: Path) -> Set[Tuple[str, int, str, str]]:
-    """
-    Read a VCF (gz ok) via vcfpy and return a set of (CHROM, POS, REF, ALT).
-    One entry per ALT allele in multi-allelic records.
-    """
+    """Read a VCF and return a set of (CHROM, POS, REF, ALT) tuples (per ALT)."""
     keys: Set[Tuple[str, int, str, str]] = set()
     with vcfpy.Reader.from_path(str(allow_vcf)) as rdr:
         for rec in rdr:
-            chrom = rec.CHROM
-            pos = rec.POS
-            ref = rec.REF
             for alt in rec.ALT:
-                keys.add((chrom, pos, ref, _alt_to_str(alt)))
+                keys.add((rec.CHROM, rec.POS, rec.REF, _alt_to_str(alt)))
     return keys
-
-
-def ensure_info_headers(header: vcfpy.Header) -> None:
-    """
-    Ensure the custom INFO headers exist; add if missing.
-    """
-    info_ids = {line.id for line in header.get_lines("INFO")}
-    if INFO_ALLOWLISTED_FILTERS_ID not in info_ids:
-        header.add_info_line(
-            OrderedDict(
-                [
-                    ("ID", INFO_ALLOWLISTED_FILTERS_ID),
-                    ("Number", "1"),
-                    ("Type", "String"),
-                    ("Description", INFO_ALLOWLISTED_FILTERS_DESC),
-                ]
-            )
-        )
-    if INFO_ALLOWLIST_STATUS_ID not in info_ids:
-        header.add_info_line(
-            OrderedDict(
-                [
-                    ("ID", INFO_ALLOWLIST_STATUS_ID),
-                    ("Number", "1"),
-                    ("Type", "String"),
-                    ("Description", INFO_ALLOWLIST_STATUS_DESC),
-                ]
-            )
-        )
-
-
-def determine_clinvar_reasons(info: Dict[str, object]) -> List[str]:
-    """
-    Determine allow-list reasons based on ClinVar annotations.
-    - If INFO has ONC flag/present → ClinvarOnc.
-    - If CLNSIG contains 'Pathogenic' → ClinvarPathogenic.
-    - If CLNSIG contains 'Likely_pathogenic' → ClinvarLikelyPathogenic.
-    """
-    reasons: List[str] = []
-
-    # ONC can be a flag (present with True/None) or a value; presence is enough
-    if "ONC" in info:
-        val = info.get("ONC")
-        if val is True or val is None or val == "" or val:  # any presence
-            reasons.append(CLINVAR_REASON_ONC)
-
-    clnsig = _normalize_info_value_to_str(info.get("CLNSIG"))
-    if CLNSIG_PATHOGENIC in clnsig:
-        reasons.append(CLINVAR_REASON_PATH)
-    if CLNSIG_LIKELY_PATHOGENIC in clnsig:
-        reasons.append(CLINVAR_REASON_LIKELY_PATH)
-
-    return reasons
 
 
 def any_alt_in_allowlist(
     allow_keys: Set[Tuple[str, int, str, str]],
     rec: vcfpy.Record,
 ) -> bool:
-    for alt in rec.ALT:
-        if (rec.CHROM, rec.POS, rec.REF, _alt_to_str(alt)) in allow_keys:
-            return True
-    return False
+    return any(
+        (rec.CHROM, rec.POS, rec.REF, _alt_to_str(alt)) in allow_keys
+        for alt in rec.ALT
+    )
 
 
-def record_filter_string(rec: vcfpy.Record) -> str:
+def ensure_info_headers(header: vcfpy.Header) -> None:
+    """Ensure our two INFO headers exist (add if missing)."""
+    info_ids = {line.id for line in header.get_lines("INFO")}
+    if INFO_ALLOWLISTED_FILTERS_ID not in info_ids:
+        header.add_info_line(
+            OrderedDict(
+                ID=INFO_ALLOWLISTED_FILTERS_ID,
+                Number="1",
+                Type="String",
+                Description=INFO_ALLOWLISTED_FILTERS_DESC,
+            )
+        )
+    if INFO_ALLOWLIST_STATUS_ID not in info_ids:
+        header.add_info_line(
+            OrderedDict(
+                ID=INFO_ALLOWLIST_STATUS_ID,
+                Number="1",
+                Type="String",
+                Description=INFO_ALLOWLIST_STATUS_DESC,
+            )
+        )
+
+def determine_clinvar_reasons(info: Dict[str, object]) -> List[str]:
     """
-    Turn the record's FILTER field into a VCF string representation.
-    - PASS → "PASS"
-    - no filters ('.') → "."
-    - otherwise semicolon-joined filters.
+    Return ClinVar-based reasons:
+      - ONC present → ClinvarOnc
+      - CLNSIG contains 'Pathogenic' → ClinvarPathogenic
+      - CLNSIG contains 'Likely_pathogenic' → ClinvarLikelyPathogenic
     """
-    filt = rec.FILTER or []
-    if not filt:
-        # vcfpy uses [] to mean PASS in writing, but for our logic we
-        # need to distinguish '.' (no filters applied) from 'PASS'.
-        # We check if original raw was '.' is not directly available here.
-        # Practical approach: treat empty list as PASS for writing,
-        # and rely on rec.INFO.get('AllowlistedFilters') existence when we set it.
-        return "PASS"
-    if filt == ["PASS"]:
-        return "PASS"
-    return ";".join(filt)
+    reasons: List[str] = []
 
+    if "ONC" in info:
+        # treat presence of ONC (flag or any value) as true
+        reasons.append(CLINVAR_REASON_ONC)
 
-def set_record_pass(rec: vcfpy.Record) -> None:
-    """
-    Force FILTER to PASS in a way vcfpy will serialize as 'PASS'.
-    """
-    rec.FILTER = ["PASS"]
+    clnsig = _info_value_as_str(info.get("CLNSIG"))
+    if CLNSIG_PATHOGENIC in clnsig:
+        reasons.append(CLINVAR_REASON_PATH)
+    if CLNSIG_LIKELY_PATHOGENIC in clnsig:
+        reasons.append(CLINVAR_REASON_LIKELY_PATH)
 
+    return reasons
 
 def process_vcf(
     allow_keys: Optional[Set[Tuple[str, int, str, str]]],
@@ -167,43 +135,43 @@ def process_vcf(
 ) -> None:
     """
     Read, annotate, and write VCF using vcfpy.
-    - Adds headers if missing.
-    - Adds INFO/AllowlistStatus when reasons exist.
-    - If original FILTER is not PASS/'.', moves it to INFO/AllowlistedFilters and sets FILTER to PASS.
+
+    Policy change implemented here:
+      - We consider ONLY literal 'PASS' as pass.
+      - '.' (no filters applied) is treated as *not PASS*.
+      - When a record is allow-listed and its FILTER != 'PASS',
+        we move the original FILTER string ('.' or 'f1;f2;...') to INFO/AllowlistedFilters
+        and set FILTER to 'PASS'.
     """
     with vcfpy.Reader.from_path(str(in_vcf)) as reader:
         header = reader.header.copy()
         ensure_info_headers(header)
 
-        # Writer: stdout if '-' else to path (gz supported by vcfpy by extension)
-        if out_path is None or str(out_path) == "-":
-            writer = vcfpy.Writer.from_stream(sys.stdout, header)
-        else:
-            writer = vcfpy.Writer.from_path(str(out_path), header)
+        writer = (
+            vcfpy.Writer.from_stream(sys.stdout, header)
+            if out_path is None or str(out_path) == "-"
+            else vcfpy.Writer.from_path(str(out_path), header)
+        )
 
         with writer:
             for rec in reader:
                 reasons: List[str] = []
 
-                # Manual allow-list
                 if allow_keys and any_alt_in_allowlist(allow_keys, rec):
                     reasons.append(MANUAL_REASON)
 
-                # ClinVar-based
                 reasons.extend(determine_clinvar_reasons(rec.INFO))
 
                 if reasons:
-                    # Move FILTER -> INFO/AllowlistedFilters if filtered
-                    filt_str = record_filter_string(rec)
-                    if filt_str not in ("PASS", ".", ""):
-                        rec.INFO[INFO_ALLOWLISTED_FILTERS_ID] = filt_str
-                        set_record_pass(rec)
+                    # Only 'PASS' is pass; '.' and any named filters are moved.
+                    original_filter = _filter_as_string(rec)
+                    if original_filter != "PASS":
+                        rec.INFO[INFO_ALLOWLISTED_FILTERS_ID] = original_filter
+                        _set_pass(rec)
 
-                    # Set AllowlistStatus
                     rec.INFO[INFO_ALLOWLIST_STATUS_ID] = "|".join(reasons)
 
                 writer.write_record(rec)
-
 
 
 @click.command(context_settings={"help_option_names": ["-h", "--help"]})
@@ -212,7 +180,7 @@ def process_vcf(
     "allow_list",
     type=click.Path(exists=True, dir_okay=False, readable=True, path_type=Path),
     required=False,
-    help="Optional: VCF (.vcf or .vcf.gz) of allow-listed variants (matched on CHROM, POS, REF, ALT).",
+    help="Optional: VCF (.vcf or .vcf.gz) of allow-listed variants (match on CHROM, POS, REF, ALT).",
 )
 @click.option(
     "--vcf",
@@ -231,7 +199,7 @@ def process_vcf(
     help="Output VCF path (use '-' for stdout).",
 )
 def cli(allow_list: Path | None, vcf_path: Path, out_path: Path | None) -> None:
-    """Annotate variants with INFO/AllowlistStatus and optionally INFO/AllowlistedFilters (vcfpy-based)."""
+    """Annotate variants with INFO/AllowlistStatus and move any non-PASS FILTER into INFO when allow-listed."""
     try:
         allow_keys: Optional[Set[Tuple[str, int, str, str]]] = None
         if allow_list:
