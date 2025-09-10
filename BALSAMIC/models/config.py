@@ -213,6 +213,25 @@ class Sentieon(BaseModel):
 
 
 class ReferenceModel(BaseModel):
+    """
+    Model containing balsamic reference values such as genomic reference file and VCF annotations.
+
+    Attributes:
+        file: Path to the reference / annotation file.
+        fields: List of INFO field names to extract from the VCF, used in VCFanno .
+        ops: List of operations describing how to handle the corresponding fields in VCFanno.
+             Common operations include:
+                - "self": copy the field value directly without transformation.
+                - "mean": compute the mean of values (e.g., across multiple columns).
+                - Other reduction/aggregation operations depending on context.
+        names: Output names to assign to the extracted/processed fields using VCFanno.
+        columns: Optional number of columns to add from the query file used by VCFanno
+        category: Annotation category (e.g., RESEARCH, CLINICAL), used to group annotations for selection in VCFanno rules.
+
+    Methods:
+        is_annotated: Returns True if this reference source has fields, ops, and names defined.
+        as_path: Returns the file path for this reference source.
+    """
     file: Path
     fields: Optional[List[str]] = None
     ops: Optional[List[str]] = None
