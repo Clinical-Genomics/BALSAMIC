@@ -66,7 +66,7 @@ bcftools filter --threads {threads} --include 'INFO/SWEGENAF <= {params.swegen_f
 bcftools filter --threads {threads} --include 'INFO/Frq <= {params.loqusdb_clinical_freq[0]} || INFO/Frq == \".\"' --soft-filter '{params.loqusdb_clinical_freq[1]}' --mode '+' -O z -o {params.tmpdir}/clinical.filtered.pass_before_rescue.vcf.gz ;
 
 if [[ -f "{params.rescue_snvs}" ]]; then
-  python {params.rescue_script} --vcf {params.tmpdir}/clinical.filtered.pass_before_rescue.vcf.gz --allow-list {params.rescue_snvs} --out {params.tmpdir}/clinical.filtered.pass_after_rescue.vcf ;
+  python {params.rescue_script} --vcf {params.tmpdir}/clinical.filtered.pass_before_rescue.vcf.gz --rescue-list {params.rescue_snvs} --out {params.tmpdir}/clinical.filtered.pass_after_rescue.vcf ;
 else
   python {params.rescue_script} --vcf {params.tmpdir}/clinical.filtered.pass_before_rescue.vcf.gz --out {params.tmpdir}/clinical.filtered.pass_after_rescue.vcf ;
 fi

@@ -97,7 +97,7 @@ python {params.edit_vcf_script} \
 bgzip {params.tmpdir}/clinical.filtered.pass_before_rescue.1.vcf ;
 
 if [[ -f "{params.rescue_snvs}" ]]; then
-  python {params.rescue_script} --vcf {params.tmpdir}/clinical.filtered.pass_before_rescue.1.vcf.gz --allow-list {params.rescue_snvs} --out {params.tmpdir}/clinical.filtered.pass_after_rescue.vcf ;
+  python {params.rescue_script} --vcf {params.tmpdir}/clinical.filtered.pass_before_rescue.1.vcf.gz --rescue-list {params.rescue_snvs} --out {params.tmpdir}/clinical.filtered.pass_after_rescue.vcf ;
 else
   python {params.rescue_script} --vcf {params.tmpdir}/clinical.filtered.pass_before_rescue.1.vcf.gz --out {params.tmpdir}/clinical.filtered.pass_after_rescue.vcf ;
 fi
