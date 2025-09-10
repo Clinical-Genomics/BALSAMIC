@@ -65,14 +65,8 @@ bcftools filter --threads {threads} --include 'INFO/GNOMADAF_popmax <= {params.p
 bcftools filter --threads {threads} --include 'INFO/SWEGENAF <= {params.swegen_freq[0]} || INFO/SWEGENAF == \".\"' --soft-filter '{params.swegen_freq[1]}' --mode '+' |\
 bcftools filter --threads {threads} --include 'INFO/Frq <= {params.loqusdb_clinical_freq[0]} || INFO/Frq == \".\"' --soft-filter '{params.loqusdb_clinical_freq[1]}' --mode '+' -O z -o {params.tmpdir}/clinical.filtered.pass_before_rescue.vcf.gz ;
 
-<<<<<<< HEAD
-
 if [[ -f "{params.rescue_snvs}" ]]; then
   python {params.rescue_script} --vcf {params.tmpdir}/clinical.filtered.pass_before_rescue.vcf.gz --allow-list {params.rescue_snvs} --out {params.tmpdir}/clinical.filtered.pass_after_rescue.vcf ;
-=======
-if [[ -f "{params.allowlist_snvs}" ]]; then
-  python {params.allowlist_script} --vcf {params.tmpdir}/clinical.filtered.pass_before_allowlisted.vcf.gz --allow-list {params.allowlist_snvs} --out {params.tmpdir}/clinical.filtered.pass_after_allowlisted.vcf ;
->>>>>>> df2e3c00b5fe568a98573008f596eeac60b7b112
 else
   python {params.rescue_script} --vcf {params.tmpdir}/clinical.filtered.pass_before_rescue.vcf.gz --out {params.tmpdir}/clinical.filtered.pass_after_rescue.vcf ;
 fi
