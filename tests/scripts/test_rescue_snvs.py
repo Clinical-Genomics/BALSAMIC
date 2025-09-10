@@ -95,8 +95,8 @@ def test_open_out_text_stdout_and_file(tmp_path: Path, monkeypatch):
     assert p.read_text() == "x\n"
 
 
-def test_build_rescuelist_keyset_plain(tmp_text_vcf: Path):
-    keys = m.build_rescue_keyset(tmp_text_vcf)
+def test_load_rescue_variants_plain(tmp_text_vcf: Path):
+    keys = m.load_rescue_variants(tmp_text_vcf)
     # expect tuples for each ALT allele
     assert ("1", 100, "A", "T") in keys
     assert ("1", 200, "G", "C") in keys
@@ -104,8 +104,8 @@ def test_build_rescuelist_keyset_plain(tmp_text_vcf: Path):
     assert ("2", 300, "T", "G") in keys
 
 
-def test_build_rescuelist_keyset_gz(tmp_gz_vcf: Path):
-    keys = m.build_rescue_keyset(tmp_gz_vcf)
+def test_load_rescue_variants_gz(tmp_gz_vcf: Path):
+    keys = m.load_rescue_variants(tmp_gz_vcf)
     assert ("3", 400, "C", "A") in keys
     assert ("4", 500, "G", "T") in keys
 

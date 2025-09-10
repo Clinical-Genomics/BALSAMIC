@@ -91,7 +91,7 @@ def format_info(info: Dict[str, Optional[str]]) -> str:
     return ";".join(parts)
 
 
-def build_rescue_keyset(
+def load_rescue_variants(
     rescue_vcf_path: str | Path,
 ) -> Set[Tuple[str, int, str, str]]:
     """
@@ -295,7 +295,7 @@ def cli(rescue_list: Path | None, vcf_path: Path, out_path: Path | None) -> None
     try:
         rescue_keys: Set[Tuple[str, int, str, str]] | None = None
         if rescue_list:
-            rescue_keys = build_rescuelist_keyset(rescue_list)
+            rescue_keys = load_rescue_variants(rescue_list)
         with open_out_text(out_path) as out_fh:
             process_vcf(rescue_keys, vcf_path, out_fh)
     except BrokenPipeError:
