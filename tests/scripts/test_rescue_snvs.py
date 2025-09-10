@@ -9,13 +9,13 @@ import vcfpy
 from click.testing import CliRunner
 
 from BALSAMIC.assets.scripts.rescue_snvs import (
-    INFO_ALLOWLISTED_FILTERS_ID,
-    INFO_ALLOWLIST_STATUS_ID,
+    INFO_RESCUE_FILTERS_ID,
+    INFO_RESCUE_STATUS_ID,
     MANUAL_REASON,
     CLINVAR_REASON_ONC,
     CLINVAR_REASON_PATH,
     CLINVAR_REASON_LIKELY_PATH,
-    build_allowlist_keyset,
+    build_rescue_keyset,
     process_vcf,
     cli,
 )
@@ -50,7 +50,7 @@ def tmp_vcf(tmp_path: Path) -> Path:
 
 
 @pytest.fixture
-def tmp_allow_vcf(tmp_path: Path) -> Path:
+def tmp_rescue_vcf(tmp_path: Path) -> Path:
     return tmp_path / "allow.vcf"
 
 
@@ -59,10 +59,10 @@ def out_vcf(tmp_path: Path) -> Path:
     return tmp_path / "out.vcf"
 
 
-def test_build_allowlist_keyset_single_and_multiallelic(tmp_allow_vcf: Path):
+def test_build_rescue_keyset_single_and_multiallelic(tmp_rescue_vcf: Path):
     body = "1\t100\t.\tA\tT\t.\tPASS\t.\n" "1\t200\t.\tG\tA,C\t.\tPASS\t.\n"
-    _write_vcf(tmp_allow_vcf, body)
-    keys = build_allowlist_keyset(tmp_allow_vcf)
+    _write_vcf(tmp_rescue_vcf, body)
+    keys = build_rescue_keyset(tmp_rescue_vcf)
     assert ("1", 100, "A", "T") in keys
     assert ("1", 200, "G", "A") in keys
     assert ("1", 200, "G", "C") in keys
@@ -72,19 +72,19 @@ def test_build_allowlist_keyset_single_and_multiallelic(tmp_allow_vcf: Path):
 def test_headers_are_added_once_even_if_no_reasons(tmp_vcf: Path, out_vcf: Path):
     _write_vcf(tmp_vcf, "1\t300\t.\tA\tT\t.\tPASS\t.\n")
     # No allow-list, no ClinVar → still add header lines
-    process_vcf(allow_keys=None, in_vcf=tmp_vcf, out_path=out_vcf)
+    process_vcf(rescue_keys=None, in_vcf=tmp_vcf, out_path=out_vcf)
     _, header = _read_records_from_path(out_vcf)
 
     info_ids = {line.id for line in header.get_lines("INFO")}
-    assert INFO_ALLOWLISTED_FILTERS_ID in info_ids
-    assert INFO_ALLOWLIST_STATUS_ID in info_ids
+    assert INFO_RESCUE_FILTERS_ID in info_ids
+    assert INFO_RESCUE_STATUS_ID in info_ids
 
     # Ensure not duplicated
     assert (
         sum(
             1
             for line in header.get_lines("INFO")
-            if line.id == INFO_ALLOWLISTED_FILTERS_ID
+            if line.id == INFO_RESCUE_FILTERS_ID
         )
         == 1
     )
@@ -92,32 +92,32 @@ def test_headers_are_added_once_even_if_no_reasons(tmp_vcf: Path, out_vcf: Path)
         sum(
             1
             for line in header.get_lines("INFO")
-            if line.id == INFO_ALLOWLIST_STATUS_ID
+            if line.id == INFO_RESCUE_STATUS_ID
         )
         == 1
     )
 
 
-def test_manual_allowlist_moves_named_filters_and_sets_pass(
+def test_manual_rescue_moves_named_filters_and_sets_pass(
     tmp_vcf: Path, tmp_allow_vcf: Path, out_vcf: Path
 ):
     # Input record is filtered with LowQ → should move to INFO when allow-listed
     _write_vcf(tmp_vcf, "1\t100\t.\tA\tT\t.\tLowQ\t.\n")
     _write_vcf(tmp_allow_vcf, "1\t100\t.\tA\tT\t.\tPASS\t.\n")
 
-    keys = build_allowlist_keyset(tmp_allow_vcf)
+    keys = build_rescue_keyset(tmp_allow_vcf)
     process_vcf(keys, tmp_vcf, out_vcf)
 
     recs, _ = _read_records_from_path(out_vcf)
     rec = recs[0]
     assert rec.FILTER == ["PASS"]
-    assert rec.INFO[INFO_ALLOWLISTED_FILTERS_ID] == "LowQ"
+    assert rec.INFO[INFO_RESCUE_FILTERS_ID] == "LowQ"
     # Manual reason is included
-    status = rec.INFO[INFO_ALLOWLIST_STATUS_ID]
+    status = rec.INFO[INFO_RESCUE_STATUS_ID]
     assert MANUAL_REASON in status.split("|")
 
 
-def test_clinvar_likely_pathogenic_with_pass_filter_does_not_add_allowlistedfilters(
+def test_clinvar_likely_pathogenic_with_pass_filter_does_not_add_rescuefilters(
     tmp_vcf: Path, out_vcf: Path
 ):
     # CLNSIG=Likely_pathogenic, FILTER PASS → no AllowlistedFilters
@@ -129,8 +129,8 @@ def test_clinvar_likely_pathogenic_with_pass_filter_does_not_add_allowlistedfilt
     recs, _ = _read_records_from_path(out_vcf)
     rec = recs[0]
     assert rec.FILTER == ["PASS"]
-    assert INFO_ALLOWLISTED_FILTERS_ID not in rec.INFO
-    assert rec.INFO[INFO_ALLOWLIST_STATUS_ID] == CLINVAR_REASON_LIKELY_PATH
+    assert INFO_RESCUE_FILTERS_ID not in rec.INFO
+    assert rec.INFO[INFO_RESCUE_STATUS_ID] == CLINVAR_REASON_LIKELY_PATH
 
 
 def test_no_reasons_leaves_record_unchanged(tmp_vcf: Path, out_vcf: Path):
@@ -143,5 +143,5 @@ def test_no_reasons_leaves_record_unchanged(tmp_vcf: Path, out_vcf: Path):
     recs, _ = _read_records_from_path(out_vcf)
     rec = recs[0]
     assert rec.FILTER == ["q10", "LowQ"]
-    assert INFO_ALLOWLISTED_FILTERS_ID not in rec.INFO
-    assert INFO_ALLOWLIST_STATUS_ID not in rec.INFO
+    assert INFO_RESCUE_FILTERS_ID not in rec.INFO
+    assert INFO_RESCUE_STATUS_ID not in rec.INFO

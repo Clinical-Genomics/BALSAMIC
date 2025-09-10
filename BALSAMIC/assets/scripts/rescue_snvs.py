@@ -10,7 +10,7 @@ import click
 import vcfpy
 
 
-INFO_RESCUEED_FILTERS_ID = "RescuedFilters"
+INFO_RESCUE_FILTERS_ID = "RescuedFilters"
 INFO_RESCUE_STATUS_ID = "RescueStatus"
 
 INFO_RESCUEED_FILTERS_DESC = (
@@ -88,10 +88,10 @@ def any_alt_in_rescue(
 def ensure_info_headers(header: vcfpy.Header) -> None:
     """Ensure our two INFO headers exist (add if missing)."""
     info_ids = {line.id for line in header.get_lines("INFO")}
-    if INFO_RESCUEED_FILTERS_ID not in info_ids:
+    if INFO_RESCUE_FILTERS_ID not in info_ids:
         header.add_info_line(
             OrderedDict(
-                ID=INFO_RESCUEED_FILTERS_ID,
+                ID=INFO_RESCUE_FILTERS_ID,
                 Number="1",
                 Type="String",
                 Description=INFO_RESCUEED_FILTERS_DESC,
@@ -168,7 +168,7 @@ def process_vcf(
                     # Only 'PASS' is pass; '.' and any named filters are moved.
                     original_filter = _filter_as_string(rec)
                     if original_filter != "PASS":
-                        rec.INFO[INFO_RESCUEED_FILTERS_ID] = original_filter
+                        rec.INFO[INFO_RESCUE_FILTERS_ID] = original_filter
                         _set_pass(rec)
 
                     rec.INFO[INFO_RESCUE_STATUS_ID] = "|".join(reasons)
@@ -195,7 +195,7 @@ def process_vcf(
     "-o",
     "--out",
     "out_path",
-    type=click.Path(dir_okay=False, writable=True, rescue_dash=True, path_type=Path),
+    type=click.Path(dir_okay=False, writable=True, allow_dash=True, path_type=Path),
     default="-",
     show_default=True,
     help="Output VCF path (use '-' for stdout).",
