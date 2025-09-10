@@ -40,9 +40,6 @@ result_dir: str = Path(config_model.analysis.result).as_posix() + "/"
 
 LOG = logging.getLogger(__name__)
 
-log_file = Path(case_dir, LogFile.LOGNAME).as_posix()
-add_file_logging(log_file, logger_name=__name__)
-
 LOG.info("Running BALSAMIC: PON.smk.")
 
 # Create a temporary directory with trailing /

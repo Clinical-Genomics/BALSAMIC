@@ -75,9 +75,6 @@ if not LOG.handlers:
     LOG.addHandler(h)
 LOG.setLevel(logging.INFO)
 
-log_file = Path(case_dir, LogFile.LOGNAME).as_posix()
-add_file_logging(log_file, logger_name=__name__)
-
 LOG.info("Running BALSAMIC: balsamic.smk.")
 
 # Create a temporary directory with trailing /
