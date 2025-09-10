@@ -14,7 +14,7 @@ METADATA_DIR: Path = Path(ASSETS_DIR, "analysis_metadata")
 REFSEQ_SCRIPT_PATH: Path = Path(SCRIPT_DIR, "refseq_sql.awk")
 
 # Metadata resources
-ALLOWLIST_SNVS = Path(METADATA_DIR, "allowlist_snvs.vcf")
+ALLOWLIST_SNVS = Path(METADATA_DIR, "rescue_snvs.vcf")
 
 # Sentieon specific constants
 SENTIEON_MODELS_DIR: Path = Path(BALSAMIC_DIR, "assets", "sentieon_models")

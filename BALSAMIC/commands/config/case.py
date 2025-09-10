@@ -142,7 +142,7 @@ def case_config(
     swegen_sv: Path,
     tumor_sample_name: str,
     umi_min_reads: str | None,
-    allowlist_snvs: Path,
+    rescue_snvs: Path,
 ):
     """Configure BALSAMIC workflow based on input arguments."""
 
@@ -239,8 +239,8 @@ def case_config(
             "sequencing_type": "targeted" if panel_bed else "wgs",
             "analysis_workflow": analysis_workflow,
             "config_creation_date": datetime.now().strftime("%Y-%m-%d %H:%M"),
-            "allowlist_snvs": allowlist_snvs
-            if allowlist_snvs
+            "rescue_snvs": rescue_snvs
+            if rescue_snvs
             else ALLOWLIST_SNVS.as_posix(),
         },
         custom_filters={"umi_min_reads": umi_min_reads if umi_min_reads else None},
