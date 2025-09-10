@@ -77,24 +77,6 @@ def test_open_maybe_gzip_plain_and_gz(tmp_text_vcf: Path, tmp_gz_vcf: Path):
         assert lines[-1].startswith("4\t500")
 
 
-def test_open_out_text_stdout_and_file(tmp_path: Path, monkeypatch):
-    # Redirect stdout to a buffer so we don't close the real stdout
-    buf = io.StringIO()
-    monkeypatch.setattr(sys, "stdout", buf)
-
-    # "-" returns sys.stdout
-    out = m.open_out_text("-")
-    assert out is buf
-    out.write("hello\n")
-    assert "hello" in buf.getvalue()
-
-    # file path opens a real file
-    p = tmp_path / "out.txt"
-    with m.open_out_text(p) as fh:
-        fh.write("x\n")
-    assert p.read_text() == "x\n"
-
-
 def test_load_rescue_variants_plain(tmp_text_vcf: Path):
     keys = m.load_rescue_variants(tmp_text_vcf)
     # expect tuples for each ALT allele

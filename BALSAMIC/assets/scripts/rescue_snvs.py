@@ -36,16 +36,12 @@ def open_maybe_gzip(path: str | Path) -> io.TextIOBase:
     return open(p, "r", encoding="utf-8", newline="")
 
 
-def open_out_text(path: str | Path | None) -> io.TextIOBase:
+def open_out_text(path: str | Path) -> io.TextIOBase:
     """
     Open a writable text stream for output.
 
-    - If path is None or "-", return sys.stdout (for writing to console).
-    - Otherwise, open the file at the given path in write mode ("w"),
-      with UTF-8 encoding.
+    Always writes to a file on disk (stdout is not allowed).
     """
-    if path is None or str(path) == "-":
-        return sys.stdout
     return open(path, "w", encoding="utf-8", newline="")
 
 
@@ -279,12 +275,11 @@ def _any_alt_in_rescuelist(
     "-o",
     "--out",
     "out_path",
-    type=click.Path(dir_okay=False, writable=True, allow_dash=True, path_type=Path),
-    default="-",
-    show_default=True,
-    help="Output VCF path (use '-' for stdout).",
+    type=click.Path(dir_okay=False, writable=True, path_type=Path),
+    required=True,
+    help="Output VCF path (file will be overwritten).",
 )
-def cli(rescue_list: Path | None, vcf_path: Path, out_path: Path | None) -> None:
+def cli(rescue_list: Path | None, vcf_path: Path, out_path: Path) -> None:
     """
     Annotate variants with INFO/RescueStatus and optionally INFO/RescueFilters.
 
