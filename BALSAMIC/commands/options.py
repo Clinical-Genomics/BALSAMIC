@@ -443,7 +443,7 @@ OPTION_UMI_MIN_READS = click.option(
     help="Minimum raw reads supporting each UMI group. Format: 'x,y,z'.",
 )
 
-OPTION_ALLOWLIST_SNVS = click.option(
+OPTION_RESCUE_SNVS = click.option(
     "--rescue-snvs",
     type=click.Path(exists=True, resolve_path=True),
     help="Path to rescue file for SNVs, see read-the-docs for format.",

@@ -40,7 +40,7 @@ from BALSAMIC.commands.options import (
     OPTION_SWEGEN_SV,
     OPTION_TUMOR_SAMPLE_NAME,
     OPTION_UMI_MIN_READS,
-    OPTION_ALLOWLIST_SNVS,
+    OPTION_RESCUE_SNVS,
 )
 from BALSAMIC.utils.references import merge_reference_metadata
 from BALSAMIC.constants.analysis import (
@@ -55,7 +55,7 @@ from BALSAMIC.constants.paths import (
     CONTAINERS_DIR,
     SENTIEON_DNASCOPE_MODEL,
     SENTIEON_TNSCOPE_MODEL,
-    ALLOWLIST_SNVS,
+    RESCUE_SNVS,
 )
 from BALSAMIC.constants.workflow_params import VCF_DICT
 from BALSAMIC.models.config import ConfigModel
@@ -107,7 +107,7 @@ LOG = logging.getLogger(__name__)
 @OPTION_SWEGEN_SV
 @OPTION_TUMOR_SAMPLE_NAME
 @OPTION_UMI_MIN_READS
-@OPTION_ALLOWLIST_SNVS
+@OPTION_RESCUE_SNVS
 @click.pass_context
 def case_config(
     context: click.Context,
@@ -241,7 +241,7 @@ def case_config(
             "config_creation_date": datetime.now().strftime("%Y-%m-%d %H:%M"),
             "rescue_snvs": rescue_snvs
             if rescue_snvs
-            else ALLOWLIST_SNVS.as_posix(),
+            else RESCUE_SNVS.as_posix(),
         },
         custom_filters={"umi_min_reads": umi_min_reads if umi_min_reads else None},
         reference=references,
