@@ -118,11 +118,6 @@ def load_rescue_variants(
 def determine_clinvar_reasons(info: Dict[str, Optional[str]]) -> List[str]:
     """
     Determine rescue reasons based on ClinVar annotations.
-
-    - If INFO contains "ONC" (oncogenic flag), adds `CLINVAR_REASON_ONC`.
-    - If INFO["CLNSIG"] contains "pathogenic", adds `CLINVAR_REASON_PATH`.
-    - If INFO["CLNSIG"] contains "likely_pathogenic", adds
-      `CLINVAR_REASON_LIKELY_PATH`.
     """
     reasons: List[str] = []
     if "ONC" in info:
