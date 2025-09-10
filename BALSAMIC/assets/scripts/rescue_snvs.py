@@ -10,13 +10,13 @@ import click
 import vcfpy
 
 
-INFO_ALLOWLISTED_FILTERS_ID = "RescueedFilters"
-INFO_ALLOWLIST_STATUS_ID = "RescueStatus"
+INFO_RESCUEED_FILTERS_ID = "RescuedFilters"
+INFO_RESCUE_STATUS_ID = "RescueStatus"
 
-INFO_ALLOWLISTED_FILTERS_DESC = (
+INFO_RESCUEED_FILTERS_DESC = (
     "Original FILTER value moved here because this variant was rescue-listed"
 )
-INFO_ALLOWLIST_STATUS_DESC = (
+INFO_RESCUE_STATUS_DESC = (
     "Reason(s) for rescue-listing; pipe-separated (e.g., ClinvarOnc|ClinvarPathogenic)"
 )
 
@@ -66,10 +66,10 @@ def _set_pass(rec: vcfpy.Record) -> None:
     rec.FILTER = ["PASS"]
 
 
-def build_rescue_keyset(allow_vcf: Path) -> Set[Tuple[str, int, str, str]]:
+def build_rescue_keyset(rescue_vcf: Path) -> Set[Tuple[str, int, str, str]]:
     """Read a VCF and return a set of (CHROM, POS, REF, ALT) tuples (per ALT)."""
     keys: Set[Tuple[str, int, str, str]] = set()
-    with vcfpy.Reader.from_path(str(allow_vcf)) as rdr:
+    with vcfpy.Reader.from_path(str(rescue_vcf)) as rdr:
         for rec in rdr:
             for alt in rec.ALT:
                 keys.add((rec.CHROM, rec.POS, rec.REF, _alt_to_str(alt)))
@@ -77,33 +77,33 @@ def build_rescue_keyset(allow_vcf: Path) -> Set[Tuple[str, int, str, str]]:
 
 
 def any_alt_in_rescue(
-    allow_keys: Set[Tuple[str, int, str, str]],
+    rescue_keys: Set[Tuple[str, int, str, str]],
     rec: vcfpy.Record,
 ) -> bool:
     return any(
-        (rec.CHROM, rec.POS, rec.REF, _alt_to_str(alt)) in allow_keys for alt in rec.ALT
+        (rec.CHROM, rec.POS, rec.REF, _alt_to_str(alt)) in rescue_keys for alt in rec.ALT
     )
 
 
 def ensure_info_headers(header: vcfpy.Header) -> None:
     """Ensure our two INFO headers exist (add if missing)."""
     info_ids = {line.id for line in header.get_lines("INFO")}
-    if INFO_ALLOWLISTED_FILTERS_ID not in info_ids:
+    if INFO_RESCUEED_FILTERS_ID not in info_ids:
         header.add_info_line(
             OrderedDict(
-                ID=INFO_ALLOWLISTED_FILTERS_ID,
+                ID=INFO_RESCUEED_FILTERS_ID,
                 Number="1",
                 Type="String",
-                Description=INFO_ALLOWLISTED_FILTERS_DESC,
+                Description=INFO_RESCUEED_FILTERS_DESC,
             )
         )
-    if INFO_ALLOWLIST_STATUS_ID not in info_ids:
+    if INFO_RESCUE_STATUS_ID not in info_ids:
         header.add_info_line(
             OrderedDict(
-                ID=INFO_ALLOWLIST_STATUS_ID,
+                ID=INFO_RESCUE_STATUS_ID,
                 Number="1",
                 Type="String",
-                Description=INFO_ALLOWLIST_STATUS_DESC,
+                Description=INFO_RESCUE_STATUS_DESC,
             )
         )
 
@@ -131,7 +131,7 @@ def determine_clinvar_reasons(info: Dict[str, object]) -> List[str]:
 
 
 def process_vcf(
-    allow_keys: Optional[Set[Tuple[str, int, str, str]]],
+    rescue_keys: Optional[Set[Tuple[str, int, str, str]]],
     in_vcf: Path,
     out_path: Optional[Path],
 ) -> None:
@@ -142,7 +142,7 @@ def process_vcf(
       - We consider ONLY literal 'PASS' as pass.
       - '.' (no filters applied) is treated as *not PASS*.
       - When a record is rescue-listed and its FILTER != 'PASS',
-        we move the original FILTER string ('.' or 'f1;f2;...') to INFO/RescueedFilters
+        we move the original FILTER string ('.' or 'f1;f2;...') to INFO/RescuedFilters
         and set FILTER to 'PASS'.
     """
     with vcfpy.Reader.from_path(str(in_vcf)) as reader:
@@ -159,7 +159,7 @@ def process_vcf(
             for rec in reader:
                 reasons: List[str] = []
 
-                if allow_keys and any_alt_in_rescue(allow_keys, rec):
+                if rescue_keys and any_alt_in_rescue(rescue_keys, rec):
                     reasons.append(MANUAL_REASON)
 
                 reasons.extend(determine_clinvar_reasons(rec.INFO))
@@ -168,10 +168,10 @@ def process_vcf(
                     # Only 'PASS' is pass; '.' and any named filters are moved.
                     original_filter = _filter_as_string(rec)
                     if original_filter != "PASS":
-                        rec.INFO[INFO_ALLOWLISTED_FILTERS_ID] = original_filter
+                        rec.INFO[INFO_RESCUEED_FILTERS_ID] = original_filter
                         _set_pass(rec)
 
-                    rec.INFO[INFO_ALLOWLIST_STATUS_ID] = "|".join(reasons)
+                    rec.INFO[INFO_RESCUE_STATUS_ID] = "|".join(reasons)
 
                 writer.write_record(rec)
 
@@ -179,7 +179,7 @@ def process_vcf(
 @click.command(context_settings={"help_option_names": ["-h", "--help"]})
 @click.option(
     "--rescue-list",
-    "allow_list",
+    "rescue_list",
     type=click.Path(exists=True, dir_okay=False, readable=True, path_type=Path),
     required=False,
     help="Optional: VCF (.vcf or .vcf.gz) of rescue-listed variants (match on CHROM, POS, REF, ALT).",
@@ -195,18 +195,18 @@ def process_vcf(
     "-o",
     "--out",
     "out_path",
-    type=click.Path(dir_okay=False, writable=True, allow_dash=True, path_type=Path),
+    type=click.Path(dir_okay=False, writable=True, rescue_dash=True, path_type=Path),
     default="-",
     show_default=True,
     help="Output VCF path (use '-' for stdout).",
 )
-def cli(allow_list: Path | None, vcf_path: Path, out_path: Path | None) -> None:
+def cli(rescue_list: Path | None, vcf_path: Path, out_path: Path | None) -> None:
     """Annotate variants with INFO/RescueStatus and move any non-PASS FILTER into INFO when rescue-listed."""
     try:
-        allow_keys: Optional[Set[Tuple[str, int, str, str]]] = None
-        if allow_list:
-            allow_keys = build_rescue_keyset(allow_list)
-        process_vcf(allow_keys, vcf_path, out_path)
+        rescue_keys: Optional[Set[Tuple[str, int, str, str]]] = None
+        if rescue_list:
+            rescue_keys = build_rescue_keyset(rescue_list)
+        process_vcf(rescue_keys, vcf_path, out_path)
     except BrokenPipeError:
         try:
             sys.stdout.close()
