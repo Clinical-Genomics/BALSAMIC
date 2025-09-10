@@ -444,7 +444,7 @@ OPTION_UMI_MIN_READS = click.option(
 )
 
 OPTION_ALLOWLIST_SNVS = click.option(
-    "--allowlist-snvs",
+    "--rescue-snvs",
     type=click.Path(exists=True, resolve_path=True),
-    help="Path to allowlist file for SNVs, see read-the-docs for format.",
+    help="Path to rescue file for SNVs, see read-the-docs for format.",
 )

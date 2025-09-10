@@ -65,7 +65,7 @@ def _set_pass(rec: vcfpy.Record) -> None:
     rec.FILTER = ["PASS"]
 
 
-def build_allowlist_keyset(allow_vcf: Path) -> Set[Tuple[str, int, str, str]]:
+def build_rescue_keyset(allow_vcf: Path) -> Set[Tuple[str, int, str, str]]:
     """Read a VCF and return a set of (CHROM, POS, REF, ALT) tuples (per ALT)."""
     keys: Set[Tuple[str, int, str, str]] = set()
     with vcfpy.Reader.from_path(str(allow_vcf)) as rdr:
@@ -75,7 +75,7 @@ def build_allowlist_keyset(allow_vcf: Path) -> Set[Tuple[str, int, str, str]]:
     return keys
 
 
-def any_alt_in_allowlist(
+def any_alt_in_rescue(
     allow_keys: Set[Tuple[str, int, str, str]],
     rec: vcfpy.Record,
 ) -> bool:
@@ -157,7 +157,7 @@ def process_vcf(
             for rec in reader:
                 reasons: List[str] = []
 
-                if allow_keys and any_alt_in_allowlist(allow_keys, rec):
+                if allow_keys and any_alt_in_rescue(allow_keys, rec):
                     reasons.append(MANUAL_REASON)
 
                 reasons.extend(determine_clinvar_reasons(rec.INFO))
@@ -203,7 +203,7 @@ def cli(allow_list: Path | None, vcf_path: Path, out_path: Path | None) -> None:
     try:
         allow_keys: Optional[Set[Tuple[str, int, str, str]]] = None
         if allow_list:
-            allow_keys = build_allowlist_keyset(allow_list)
+            allow_keys = build_rescue_keyset(allow_list)
         process_vcf(allow_keys, vcf_path, out_path)
     except BrokenPipeError:
         try:
