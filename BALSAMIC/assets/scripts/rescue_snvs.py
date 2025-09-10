@@ -1,24 +1,18 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import gzip
+import io
 import sys
 from pathlib import Path
 from typing import Dict, List, Optional, Set, Tuple
-from collections import OrderedDict
 
 import click
-import vcfpy
 
+# --- Constants & headers ------------------------------------------------------
 
-INFO_RESCUE_FILTERS_ID = "RescueFilters"
-INFO_RESCUE_STATUS_ID = "RescueStatus"
-
-INFO_RESCUE_FILTERS_DESC = (
-    "Original FILTER value moved here because this variant was rescue-listed"
-)
-INFO_RESCUE_STATUS_DESC = (
-    "Reason(s) for rescue-listing; pipe-separated (e.g., ClinvarOnc|ClinvarPathogenic)"
-)
+INFO_RESCUE_FILTERS_HDR = '##INFO=<ID=RescueFilters,Number=1,Type=String,Description="Original FILTER value moved here because this variant was rescued">'
+INFO_RESCUE_STATUS_HDR = '##INFO=<ID=RescueStatus,Number=1,Type=String,Description="Reason(s) for rescuing variant; pipe-separated (e.g., ClinvarOnc|ClinvarPathogenic)">'
 
 CLNSIG_PATHOGENIC = "Pathogenic"
 CLNSIG_LIKELY_PATHOGENIC = "Likely_pathogenic"
@@ -28,152 +22,242 @@ CLINVAR_REASON_LIKELY_PATH = "ClinvarLikelyPathogenic"
 MANUAL_REASON = "ManuallyCuratedList"
 
 
-def _alt_to_str(alt) -> str:
-    """Convert a vcfpy ALT object to a string (handles Substitution, Symbolic/SV, Breakend)."""
-    if hasattr(alt, "value"):  # Substitution
-        return alt.value
-    if hasattr(alt, "to_string"):  # Symbolic/SV/Breakend
-        return alt.to_string()
-    return str(alt)
-
-
-def _info_value_as_str(value) -> str:
-    """Normalize scalar/list INFO values to a comma-joined string for substring checks."""
-    if value is None:
-        return ""
-    if isinstance(value, list):
-        return ",".join("" if v is None else str(v) for v in value)
-    return str(value)
-
-
-def _filter_as_string(rec: vcfpy.Record) -> str:
+def open_maybe_gzip(path: str | Path) -> io.TextIOBase:
     """
-    Render FILTER as it *originally means* in VCF:
-    - PASS           -> "PASS"      (vcfpy: usually ['PASS'])
-    - no filters '.' -> "."         (vcfpy: usually [])
-    - named filters  -> "f1;f2"     (vcfpy: ['f1','f2'])
+    Open a text file that may optionally be gzip-compressed.
+
+    - If the file ends with ".gz", it is opened with gzip in binary mode
+      and wrapped with a TextIOWrapper for UTF-8 text decoding.
+    - Otherwise, the file is opened normally in text mode.
     """
-    flt = rec.FILTER or []
-    if flt == ["PASS"]:
-        return "PASS"
-    if len(flt) == 0:
+    p = str(path)
+    if p.endswith(".gz"):
+        return io.TextIOWrapper(gzip.open(p, "rb"), encoding="utf-8", newline="")
+    return open(p, "r", encoding="utf-8", newline="")
+
+
+def open_out_text(path: str | Path | None) -> io.TextIOBase:
+    """
+    Open a writable text stream for output.
+
+    - If path is None or "-", return sys.stdout (for writing to console).
+    - Otherwise, open the file at the given path in write mode ("w"),
+      with UTF-8 encoding.
+    """
+    if path is None or str(path) == "-":
+        return sys.stdout
+    return open(path, "w", encoding="utf-8", newline="")
+
+
+def parse_info(info_field: str) -> Dict[str, Optional[str]]:
+    """
+    Parse a VCF INFO field into a dictionary.
+
+    - Splits on semicolons (";") to get entries.
+    - Each entry is either:
+      * "KEY=VALUE" → stored as {KEY: VALUE}
+      * "FLAG" (no "=") → stored as {FLAG: None}
+    - Special case: if the field is "." or empty, returns an empty dict.
+    """
+    if info_field == "." or not info_field:
+        return {}
+    out: Dict[str, Optional[str]] = {}
+    for entry in info_field.split(";"):
+        if not entry:
+            continue
+        if "=" in entry:
+            k, v = entry.split("=", 1)
+            out[k] = v
+        else:
+            out[entry] = None
+    return out
+
+
+def format_info(info: Dict[str, Optional[str]]) -> str:
+    """
+    Format a dictionary back into a VCF INFO field string.
+
+    - Keys are sorted alphabetically.
+    - Each item is rendered as "KEY=VALUE" if a value is present,
+      or just "KEY" if the value is None.
+    - If the dictionary is empty, returns ".".
+    """
+    if not info:
         return "."
-    return ";".join(flt)
+    parts: List[str] = []
+    for k in sorted(info.keys()):
+        v = info[k]
+        parts.append(f"{k}={v}" if v is not None else k)
+    return ";".join(parts)
 
 
-def _set_pass(rec: vcfpy.Record) -> None:
-    """Force FILTER to PASS."""
-    rec.FILTER = ["PASS"]
-
-
-def build_rescue_keyset(rescue_vcf: Path) -> Set[Tuple[str, int, str, str]]:
-    """Read a VCF and return a set of (CHROM, POS, REF, ALT) tuples (per ALT)."""
-    keys: Set[Tuple[str, int, str, str]] = set()
-    with vcfpy.Reader.from_path(str(rescue_vcf)) as rdr:
-        for rec in rdr:
-            for alt in rec.ALT:
-                keys.add((rec.CHROM, rec.POS, rec.REF, _alt_to_str(alt)))
-    return keys
-
-
-def any_alt_in_rescue(
-    rescue_keys: Set[Tuple[str, int, str, str]],
-    rec: vcfpy.Record,
-) -> bool:
-    return any(
-        (rec.CHROM, rec.POS, rec.REF, _alt_to_str(alt)) in rescue_keys for alt in rec.ALT
-    )
-
-
-def ensure_info_headers(header: vcfpy.Header) -> None:
-    """Ensure our two INFO headers exist (add if missing)."""
-    info_ids = {line.id for line in header.get_lines("INFO")}
-    if INFO_RESCUE_FILTERS_ID not in info_ids:
-        header.add_info_line(
-            OrderedDict(
-                ID=INFO_RESCUE_FILTERS_ID,
-                Number="1",
-                Type="String",
-                Description=INFO_RESCUE_FILTERS_DESC,
-            )
-        )
-    if INFO_RESCUE_STATUS_ID not in info_ids:
-        header.add_info_line(
-            OrderedDict(
-                ID=INFO_RESCUE_STATUS_ID,
-                Number="1",
-                Type="String",
-                Description=INFO_RESCUE_STATUS_DESC,
-            )
-        )
-
-
-def determine_clinvar_reasons(info: Dict[str, object]) -> List[str]:
+def build_rescue_keyset(
+    rescue_vcf_path: str | Path,
+) -> Set[Tuple[str, int, str, str]]:
     """
-    Return ClinVar-based reasons:
-      - ONC present → ClinvarOnc
-      - CLNSIG contains 'Pathogenic' → ClinvarPathogenic
-      - CLNSIG contains 'Likely_pathogenic' → ClinvarLikelyPathogenic
+    Build a set of (CHROM, POS, REF, ALT) keys from a VCF file.
+
+    - Reads through the VCF, skipping headers and malformed lines.
+    - For each valid record, extracts chrom, pos, ref, and each alt allele.
+    - Adds one tuple per allele to the returned set.
+    """
+    keyset: Set[Tuple[str, int, str, str]] = set()
+    with open_maybe_gzip(rescue_vcf_path) as fh:
+        for line in fh:
+            if not line or line.startswith("#"):
+                continue
+            cols = line.rstrip("\n").split("\t")
+            if len(cols) < 5:
+                continue
+            chrom, pos_str, _id, ref, alt = cols[0], cols[1], cols[2], cols[3], cols[4]
+            try:
+                pos = int(pos_str)
+            except ValueError:
+                continue
+            for a in alt.split(","):
+                keyset.add((chrom, pos, ref, a))
+    return keyset
+
+
+def determine_clinvar_reasons(info: Dict[str, Optional[str]]) -> List[str]:
+    """
+    Determine rescue reasons based on ClinVar annotations.
+
+    - If INFO contains "ONC" (oncogenic flag), adds `CLINVAR_REASON_ONC`.
+    - If INFO["CLNSIG"] contains "pathogenic", adds `CLINVAR_REASON_PATH`.
+    - If INFO["CLNSIG"] contains "likely_pathogenic", adds
+      `CLINVAR_REASON_LIKELY_PATH`.
     """
     reasons: List[str] = []
-
     if "ONC" in info:
-        # treat presence of ONC (flag or any value) as true
         reasons.append(CLINVAR_REASON_ONC)
-
-    clnsig = _info_value_as_str(info.get("CLNSIG"))
+    clnsig = info.get("CLNSIG") or ""
     if CLNSIG_PATHOGENIC in clnsig:
         reasons.append(CLINVAR_REASON_PATH)
     if CLNSIG_LIKELY_PATHOGENIC in clnsig:
         reasons.append(CLINVAR_REASON_LIKELY_PATH)
-
     return reasons
+
+
+def ensure_info_headers(headers: List[str]) -> List[str]:
+    """
+    Ensure VCF headers include Rescue INFO field definitions.
+
+    - Looks for existing INFO headers for `RescueFilters`
+      and `RescueStatus`.
+    - If missing, inserts them before the `#CHROM` line (or at the end if
+      no `#CHROM` is found).
+    - Returns a new list of headers (does not mutate in place).
+
+    Args:
+        headers: List of VCF header lines (including "##" and "#CHROM").
+
+    Returns:
+        Updated header list with required INFO definitions present.
+    """
+    has_filters = any(h.startswith("##INFO=<ID=RescueFilters,") for h in headers)
+    has_status = any(h.startswith("##INFO=<ID=RescueStatus,") for h in headers)
+    if has_filters and has_status:
+        return headers
+    try:
+        chrom_idx = next(i for i, h in enumerate(headers) if h.startswith("#CHROM"))
+    except StopIteration:
+        chrom_idx = len(headers)
+    insertion: List[str] = []
+    if not has_filters:
+        insertion.append(INFO_RESCUE_FILTERS_HDR)
+    if not has_status:
+        insertion.append(INFO_RESCUE_STATUS_HDR)
+    return headers[:chrom_idx] + insertion + headers[chrom_idx:]
 
 
 def process_vcf(
     rescue_keys: Optional[Set[Tuple[str, int, str, str]]],
-    in_vcf: Path,
-    out_path: Optional[Path],
+    in_vcf_path: str | Path,
+    out_fh: io.TextIOBase,
 ) -> None:
     """
-    Read, annotate, and write VCF using vcfpy.
+    Stream a VCF, rescue variants and normalizing FILTER/INFO.
 
-    Policy change implemented here:
-      - We consider ONLY literal 'PASS' as pass.
-      - '.' (no filters applied) is treated as *not PASS*.
-      - When a record is rescue-listed and its FILTER != 'PASS',
-        we move the original FILTER string ('.' or 'f1;f2;...') to INFO/RescuedFilters
-        and set FILTER to 'PASS'.
+    Writes headers once (after reading them) and then writes each processed record.
+    If the file contains only headers, they’re written at the end (same as before).
     """
-    with vcfpy.Reader.from_path(str(in_vcf)) as reader:
-        header = reader.header.copy()
-        ensure_info_headers(header)
+    headers: Optional[List[str]] = []
 
-        writer = (
-            vcfpy.Writer.from_stream(sys.stdout, header)
-            if out_path is None or str(out_path) == "-"
-            else vcfpy.Writer.from_path(str(out_path), header)
-        )
+    with open_maybe_gzip(in_vcf_path) as fh:
+        for raw in fh:
+            line = raw.rstrip("\n")
 
-        with writer:
-            for rec in reader:
-                reasons: List[str] = []
+            if line.startswith("#"):
+                # Still in the header section.
+                assert headers is not None
+                headers.append(line)
+                continue
 
-                if rescue_keys and any_alt_in_rescue(rescue_keys, rec):
-                    reasons.append(MANUAL_REASON)
+            # First non-header line: flush headers once.
+            if headers is not None:
+                for h in ensure_info_headers(headers):
+                    out_fh.write(h + "\n")
+                headers = None  # mark as flushed
 
-                reasons.extend(determine_clinvar_reasons(rec.INFO))
+            out_fh.write(_process_record_line(line, rescue_keys))
 
-                if reasons:
-                    # Only 'PASS' is pass; '.' and any named filters are moved.
-                    original_filter = _filter_as_string(rec)
-                    if original_filter != "PASS":
-                        rec.INFO[INFO_RESCUE_FILTERS_ID] = original_filter
-                        _set_pass(rec)
+    # File had only headers (no records): write them now.
+    if headers is not None:
+        for h in ensure_info_headers(headers):
+            out_fh.write(h + "\n")
 
-                    rec.INFO[INFO_RESCUE_STATUS_ID] = "|".join(reasons)
 
-                writer.write_record(rec)
+def _process_record_line(
+    line: str,
+    rescue_keys: Optional[Set[Tuple[str, int, str, str]]],
+) -> str:
+    """Return the (possibly modified) VCF record line with trailing newline."""
+    cols = line.split("\t")
+    if len(cols) < 8:
+        return line + "\n"
+
+    chrom = cols[0]
+    try:
+        pos = int(cols[1])
+    except ValueError:
+        return line + "\n"
+
+    ref = cols[3]
+    alts = cols[4].split(",") if cols[4] else ["."]
+    filt = cols[6]
+    info = parse_info(cols[7])
+
+    reasons: List[str] = []
+
+    # Manual rescue (only if provided).
+    if rescue_keys and _any_alt_in_rescue(rescue_keys, chrom, pos, ref, alts):
+        reasons.append(MANUAL_REASON)
+
+    # ClinVar rescue.
+    reasons.extend(determine_clinvar_reasons(info))
+
+    if not reasons:
+        return line + "\n"
+
+    # Update FILTER/INFO when rescued.
+    if filt not in ("PASS", ".", ""):
+        info["RescueFilters"] = filt
+        cols[6] = "PASS"
+    info["RescueStatus"] = "|".join(reasons)
+    cols[7] = format_info(info)
+
+    return "\t".join(cols) + "\n"
+
+
+def _any_alt_in_rescuelist(
+    rescue_keys: Set[Tuple[str, int, str, str]],
+    chrom: str,
+    pos: int,
+    ref: str,
+    alts: List[str],
+) -> bool:
+    return any((chrom, pos, ref, alt) in rescue_keys for alt in alts)
 
 
 @click.command(context_settings={"help_option_names": ["-h", "--help"]})
@@ -182,7 +266,7 @@ def process_vcf(
     "rescue_list",
     type=click.Path(exists=True, dir_okay=False, readable=True, path_type=Path),
     required=False,
-    help="Optional: VCF (.vcf or .vcf.gz) of rescue-listed variants (match on CHROM, POS, REF, ALT).",
+    help="Optional: VCF (.vcf or .vcf.gz) of variants to rescue (matched on CHROM, POS, REF, ALT).",
 )
 @click.option(
     "--vcf",
@@ -201,12 +285,19 @@ def process_vcf(
     help="Output VCF path (use '-' for stdout).",
 )
 def cli(rescue_list: Path | None, vcf_path: Path, out_path: Path | None) -> None:
-    """Annotate variants with INFO/RescueStatus and move any non-PASS FILTER into INFO when rescue-listed."""
+    """
+    Annotate variants with INFO/RescueStatus and optionally INFO/RescueFilters.
+
+    Rescue criteria:
+      - If --rescue-list is provided: manual rescue variant match (CHROM, POS, REF, ALT).
+      - ClinVar: ONC present -> ClinvarOnc; CLNSIG contains 'Pathogenic' or 'Likely_pathogenic'.
+    """
     try:
-        rescue_keys: Optional[Set[Tuple[str, int, str, str]]] = None
+        rescue_keys: Set[Tuple[str, int, str, str]] | None = None
         if rescue_list:
-            rescue_keys = build_rescue_keyset(rescue_list)
-        process_vcf(rescue_keys, vcf_path, out_path)
+            rescue_keys = build_rescuelist_keyset(rescue_list)
+        with open_out_text(out_path) as out_fh:
+            process_vcf(rescue_keys, vcf_path, out_fh)
     except BrokenPipeError:
         try:
             sys.stdout.close()
