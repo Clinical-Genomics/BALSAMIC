@@ -8,7 +8,7 @@ import pytest
 import vcfpy
 from click.testing import CliRunner
 
-from BALSAMIC.assets.scripts.allowlist_snvs import (
+from BALSAMIC.assets.scripts.rescue_snvs import (
     INFO_ALLOWLISTED_FILTERS_ID,
     INFO_ALLOWLIST_STATUS_ID,
     MANUAL_REASON,
