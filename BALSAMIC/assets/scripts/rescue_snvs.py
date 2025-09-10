@@ -161,7 +161,7 @@ def update_header(headers: List[str]) -> List[str]:
 
 
 def process_vcf(
-    rescue_keys: Optional[Set[Tuple[str, int, str, str]]],
+    rescue_keys: Set[Tuple[str, int, str, str]] | None,
     in_vcf_path: str | Path,
     out_fh: io.TextIOBase,
 ) -> None:
@@ -199,7 +199,7 @@ def process_vcf(
 
 def _process_record_line(
     line: str,
-    rescue_keys: Optional[Set[Tuple[str, int, str, str]]],
+    rescue_keys: Set[Tuple[str, int, str, str]] | None,
 ) -> str:
     """Return the (possibly modified) VCF record line with trailing newline."""
     cols = line.split("\t")
