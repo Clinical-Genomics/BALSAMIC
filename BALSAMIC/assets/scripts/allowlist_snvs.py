@@ -27,11 +27,12 @@ CLINVAR_REASON_PATH = "ClinvarPathogenic"
 CLINVAR_REASON_LIKELY_PATH = "ClinvarLikelyPathogenic"
 MANUAL_REASON = "ManuallyCuratedList"
 
+
 def _alt_to_str(alt) -> str:
     """Convert a vcfpy ALT object to a string (handles Substitution, Symbolic/SV, Breakend)."""
-    if hasattr(alt, "value"):           # Substitution
+    if hasattr(alt, "value"):  # Substitution
         return alt.value
-    if hasattr(alt, "to_string"):       # Symbolic/SV/Breakend
+    if hasattr(alt, "to_string"):  # Symbolic/SV/Breakend
         return alt.to_string()
     return str(alt)
 
@@ -80,8 +81,7 @@ def any_alt_in_allowlist(
     rec: vcfpy.Record,
 ) -> bool:
     return any(
-        (rec.CHROM, rec.POS, rec.REF, _alt_to_str(alt)) in allow_keys
-        for alt in rec.ALT
+        (rec.CHROM, rec.POS, rec.REF, _alt_to_str(alt)) in allow_keys for alt in rec.ALT
     )
 
 
@@ -107,6 +107,7 @@ def ensure_info_headers(header: vcfpy.Header) -> None:
             )
         )
 
+
 def determine_clinvar_reasons(info: Dict[str, object]) -> List[str]:
     """
     Return ClinVar-based reasons:
@@ -127,6 +128,7 @@ def determine_clinvar_reasons(info: Dict[str, object]) -> List[str]:
         reasons.append(CLINVAR_REASON_LIKELY_PATH)
 
     return reasons
+
 
 def process_vcf(
     allow_keys: Optional[Set[Tuple[str, int, str, str]]],

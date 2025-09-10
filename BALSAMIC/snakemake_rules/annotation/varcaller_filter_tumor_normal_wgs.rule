@@ -65,7 +65,6 @@ bcftools filter --threads {threads} --include 'INFO/GNOMADAF_popmax <= {params.p
 bcftools filter --threads {threads} --include 'INFO/SWEGENAF <= {params.swegen_freq[0]} || INFO/SWEGENAF == \".\"' --soft-filter '{params.swegen_freq[1]}' --mode '+' |\
 bcftools filter --threads {threads} --include 'INFO/Frq <= {params.loqusdb_clinical_freq[0]} || INFO/Frq == \".\"' --soft-filter '{params.loqusdb_clinical_freq[1]}' --mode '+' -O z -o {params.tmpdir}/clinical.filtered.pass_before_allowlisted.vcf.gz ;
 
-
 if [[ -f "{params.allowlist_snvs}" ]]; then
   python {params.allowlist_script} --vcf {params.tmpdir}/clinical.filtered.pass_before_allowlisted.vcf.gz --allow-list {params.allowlist_snvs} --out {params.tmpdir}/clinical.filtered.pass_after_allowlisted.vcf ;
 else
