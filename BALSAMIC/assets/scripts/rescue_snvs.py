@@ -10,10 +10,10 @@ import click
 import vcfpy
 
 
-INFO_RESCUE_FILTERS_ID = "RescuedFilters"
+INFO_RESCUE_FILTERS_ID = "RescueFilters"
 INFO_RESCUE_STATUS_ID = "RescueStatus"
 
-INFO_RESCUEED_FILTERS_DESC = (
+INFO_RESCUE_FILTERS_DESC = (
     "Original FILTER value moved here because this variant was rescue-listed"
 )
 INFO_RESCUE_STATUS_DESC = (
@@ -94,7 +94,7 @@ def ensure_info_headers(header: vcfpy.Header) -> None:
                 ID=INFO_RESCUE_FILTERS_ID,
                 Number="1",
                 Type="String",
-                Description=INFO_RESCUEED_FILTERS_DESC,
+                Description=INFO_RESCUE_FILTERS_DESC,
             )
         )
     if INFO_RESCUE_STATUS_ID not in info_ids:
