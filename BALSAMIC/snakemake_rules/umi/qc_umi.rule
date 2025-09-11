@@ -91,7 +91,7 @@ rule samtools_view_calculatemeanfamilydepth_umi:
         """
 export TMPDIR={params.tmpdir};
 
-samtools view -@ {resources.threads} {input.bam} | \
+samtools view -@ {threads} {input.bam} | \
 grep 'RX:Z:' | \
 sed 's/.*RX:Z:\\([ACGT-].*\\).*/\\1/' | \
 cut -f1 | \
