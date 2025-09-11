@@ -9,7 +9,7 @@ Added:
 * requested memory to each rule https://github.com/Clinical-Genomics/BALSAMIC/pull/1604
 * snakemake executor plugin installation instructions https://github.com/Clinical-Genomics/BALSAMIC/pull/1604
 * argument for headjob slurm partition  https://github.com/Clinical-Genomics/BALSAMIC/pull/1604
-* whitelisting of variants based on pathogenic / oncogenic clinvar-tag and optional manually curated clinical list added to all workflows https://github.com/Clinical-Genomics/BALSAMIC/pull/1570
+* rescuing of variants based on pathogenic / oncogenic clinvar information and optional manually curated clinical list added to all workflows https://github.com/Clinical-Genomics/BALSAMIC/pull/1570
 * soft-filter HighOccurrenceFrq, added to SNVs in panels based on being present in over 30% of cases https://github.com/Clinical-Genomics/BALSAMIC/pull/1570
 * gender unknown gender assignment https://github.com/Clinical-Genomics/BALSAMIC/pull/1570
 * using predicted sex for CNV analysis for cases with unknown gender https://github.com/Clinical-Genomics/BALSAMIC/pull/1581
