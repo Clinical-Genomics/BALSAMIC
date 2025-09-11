@@ -45,6 +45,7 @@ rule bcftools_filter_sv_clinical:
     artefact_sv_observations = artefact_sv_obs,
     swegen_freq = [SVDB_FILTERS.swegen_sv_freq.tag_value, SVDB_FILTERS.swegen_sv_freq.filter_name],
     loqusdb_clinical_freq = [SVDB_FILTERS.loqusdb_clinical_sv_freq.tag_value, SVDB_FILTERS.loqusdb_clinical_sv_freq.filter_name],
+    loqusdb_artefact_sv_obs = [SVDB_FILTERS.loqusdb_artefact_sv_obs.tag_value ,SVDB_FILTERS.loqusdb_artefact_sv_obs.filter_name],
     tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
     housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "clinical"},
   message:

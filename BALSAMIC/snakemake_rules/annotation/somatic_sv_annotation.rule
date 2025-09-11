@@ -92,15 +92,15 @@ rule svdb_annotate_clinical_sv:
 if [[ -f "{params.clinical_sv_observations}" ]]; then
     svdb --query --bnd_distance 10000 --overlap 0.80 \
     --in_occ Obs --out_occ clin_obs --in_frq Frq --out_frq Frq \
-    --db {params.clinical_sv_observations} --query_vcf {input.vcf_sv_research} > {params.vcf_intermediate}
+    --db {params.clinical_sv_observations} --query_vcf {input.vcf_research} > {params.vcf_intermediate} ;
     bgzip -l 9 -c {params.vcf_intermediate} > {params.vcf_clinical_obs};
 else
-    cp {input.vcf_sv_research} {params.vcf_clinical_obs};
+    cp {input.vcf_research} {params.vcf_clinical_obs};
 fi
 if [[ -f "{params.somatic_sv_observations}" ]]; then
     svdb --query --bnd_distance 10000 --overlap 0.80 \
     --in_occ Obs --out_occ Cancer_Somatic_Obs --in_frq Frq --out_frq Cancer_Somatic_Frq \
-    --db {params.somatic_sv_observations} --query_vcf {params.vcf_clinical_obs} > {params.vcf_intermediate}
+    --db {params.somatic_sv_observations} --query_vcf {params.vcf_clinical_obs} > {params.vcf_intermediate} ;
     bgzip -l 9 -c {params.vcf_intermediate} > {params.vcf_somatic_obs};
 else
     cp {params.vcf_clinical_obs} {params.vcf_somatic_obs};
@@ -108,12 +108,12 @@ fi
 if [[ -f "{params.artefact_sv_observations}" ]]; then
     svdb --query --bnd_distance 500 --overlap 0.80 \
     --in_occ Obs --out_occ ArtefactObs --in_frq Frq --out_frq ArtefactFrq \
-    --db {params.artefact_sv_observations} --query_vcf {params.vcf_somatic_obs} > {params.vcf_intermediate}
+    --db {params.artefact_sv_observations} --query_vcf {params.vcf_somatic_obs} > {params.vcf_intermediate} ;
     bgzip -l 9 -c {params.vcf_intermediate} > {output.vcf_sv_clinical};
 else
     cp {params.vcf_somatic_obs} {output.vcf_sv_clinical};
 fi
 
-tabix -p vcf -f {output.vcf_sv_artefact_obs};
+tabix -p vcf -f {output.vcf_sv_clinical};
             """
 
