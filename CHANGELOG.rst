@@ -7,9 +7,8 @@ Added:
 * logfile for balsamic wrapper https://github.com/Clinical-Genomics/BALSAMIC/pull/1604
 * analysis status text file for easier prodbioinfo handling https://github.com/Clinical-Genomics/BALSAMIC/pull/1604
 * requested memory to each rule https://github.com/Clinical-Genomics/BALSAMIC/pull/1604
-* snakemake executor plugin installation instructionshttps://github.com/Clinical-Genomics/BALSAMIC/pull/1604
-* added rule and script for adding CLNVID to clinvar during cache installation https://github.com/Clinical-Genomics/BALSAMIC/pull/1576
-
+* snakemake executor plugin installation instructions https://github.com/Clinical-Genomics/BALSAMIC/pull/1604
+* argument for headjob slurm partition  https://github.com/Clinical-Genomics/BALSAMIC/pull/1604
 
 Changed:
 ^^^^^^^^
@@ -18,13 +17,17 @@ Changed:
 * changed snakemake from running immediate submit to submitting snakemake job to cluster https://github.com/Clinical-Genomics/BALSAMIC/pull/1604
 * update snakemake version to 9.9.0 https://github.com/Clinical-Genomics/BALSAMIC/pull/1604
 * Updated balsamic installation instructions https://github.com/Clinical-Genomics/BALSAMIC/pull/1599
+* merge wgs per lane alignments before dedup https://github.com/Clinical-Genomics/BALSAMIC/pull/1587
+* run alignment summary metrics on raw alignment file https://github.com/Clinical-Genomics/BALSAMIC/pull/1587
+* use median_target_coverage as threshold for wgs normals coverage instead of median coverage https://github.com/Clinical-Genomics/BALSAMIC/pull/1587
+
 
 
 Removed:
 ^^^^^^^^
-* removed immediate submit functionality https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
-* removed unused code for benchmark plotting https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
-* removed functionality to disable variant callers https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
+* removed immediate submit functionality https://github.com/Clinical-Genomics/BALSAMIC/pull/1604
+* removed unused code for benchmark plotting https://github.com/Clinical-Genomics/BALSAMIC/pull/1604
+* removed functionality to disable variant callers https://github.com/Clinical-Genomics/BALSAMIC/pull/1604
 
 Fixed:
 ^^^^^^
@@ -35,6 +38,12 @@ Fixed:
 
 Added:
 ^^^^^^
+* sbatch script for snakemake sequential job submission https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
+* logfile for balsamic wrapper https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
+* analysis status text file for easier prodbioinfo handling https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
+* requested memory to each rule https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
+
+
 
 
 Changed:
@@ -46,6 +55,10 @@ Changed:
 
 Removed:
 ^^^^^^^^
+* removed immediate submit functionality https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
+* removed unused code for benchmark plotting https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
+* removed functionality to disable variant callers https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
+
 
 Fixed:
 ^^^^^^
