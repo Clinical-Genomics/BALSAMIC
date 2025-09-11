@@ -4,6 +4,7 @@ import json
 from unittest import mock
 from pathlib import Path
 from unittest.mock import patch, MagicMock
+import logging
 
 
 def test_run_analysis_dragen(invoke_cli, tumor_only_wgs_config):
@@ -75,6 +76,31 @@ def test_run_analysis_tumor_only_dry_run(invoke_cli, tumor_only_config):
         assert "sbatch" in mock_run.call_args[0][0]
     # THEN it should run without any error
     assert result.exit_code == 0
+
+
+def test_run_analysis_warns_when_no_job_id(invoke_cli, tumor_normal_config, caplog):
+    # Capture the WARNING
+    caplog.set_level(logging.WARNING)
+
+    with patch("BALSAMIC.commands.run.analysis.SbatchSubmitter") as MockSubmitter:
+        submitter = MockSubmitter.return_value
+        submitter.create_sbatch_script.return_value = None
+        submitter.submit_job.return_value = None  # <-- forces the warning branch
+
+        result = invoke_cli(["run", "analysis", "-s", tumor_normal_config])
+
+        # CLI exits cleanly
+        assert result.exit_code == 0
+
+        # Ensure submitter methods were called
+        submitter.create_sbatch_script.assert_called_once()
+        submitter.submit_job.assert_called_once()
+
+        # If no job id, we must NOT write the id file
+        submitter.write_job_id_yaml.assert_not_called()
+
+    # The warning is logged
+    assert "Could not retrieve job id from SLURM." in caplog.text
 
 
 def test_run_analysis_click_abort(invoke_cli, tumor_only_config, tumor_normal_config):

@@ -34,6 +34,11 @@ Depending on the sequencing type, BALSAMIC is currently running the following st
      - tumor-normal, tumor-only
      - somatic, germline
      - SV
+   * - VarDict
+     - TGA, WES
+     - tumor-only
+     - somatic
+     - SV
    * - TIDDIT
      - WGS
      - tumor-normal, tumor-only
@@ -53,7 +58,7 @@ Depending on the sequencing type, BALSAMIC is currently running the following st
 
 **Note:** igh_dux4 is not a variant caller itself. This is a custom script that uses samtools to detect read pairs supporting IGH::DUX4 rearrangements.
 
-It is mandatory to provide the gender of the sample from BALSAMIC version >= 10.0.0 For CNV analysis.
+From BALSAMIC version >= 18.0.0, if no gender information is provided to case configuration step, the gender used in CNV analysis will be derived from the predicted sex (see `Sex check <https://balsamic.readthedocs.io/en/latest/balsamic_qc.html>`_ for more information.)
 
 Further details about a specific caller can be found in the links for the repositories containing the documentation for SV and CNV callers along with the links for the articles are listed in `bioinfo softwares <https://balsamic.readthedocs.io/en/latest/bioinfo_softwares.html>`_.
 
@@ -136,13 +141,15 @@ Further information regarding the TIDDIT tumor normal filtration: As translocati
      - WGS
         tumor-only
    * - | 1. manta
-       | 2. dellysv
-       | 3. cnvkit
-       | 4. dellycnv
+       | 2. vardict
+       | 3. dellysv
+       | 4. cnvkit
+       | 5. dellycnv
      - | 1. manta
-       | 2. dellysv
-       | 3. cnvkit
-       | 4. dellycnv
+       | 2. vardict
+       | 3. dellysv
+       | 4. cnvkit
+       | 5. dellycnv
      - | 1. manta
        | 2. dellysv
        | 3. ascat

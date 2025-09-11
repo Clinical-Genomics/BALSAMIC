@@ -17,7 +17,7 @@ rule sentieon_tnscope_tga_tumor_normal:
     benchmark:
         Path(benchmark_dir, "sentieon_tnscope_umi_" + config["analysis"]["case_id"] + ".tsv").as_posix()
     resources:
-        mem_mb=lambda wc, input: max(2.1 * input.size_mb, 5000)
+        mem_mb=lambda wc, input: min(max(2.1 * input.size_mb, 5000), 250000) # Cap at 250GB. Scale memory with input size (min 5GB) to handle large TGA cases without over-allocating for typical inputs (e.g. myeloid). 2.1 factor chosen after testing
     params:
         algo = params.tnscope_tga.algo,
         error_rate = params.tnscope_tga.error_rate,
@@ -149,3 +149,29 @@ echo -e \"nNORMAL\" > {output.namemap}.normal ;
 
 rm -rf {params.tmpdir} ;
     """
+
+rule gatk_update_vcf_sequence_dictionary:
+    input:
+        ref = config["reference"]["reference_genome"],
+        vcf = vcf_dir + "vardict/SNV.somatic." + config["analysis"]["case_id"] + ".vardict.vcf.gz",
+    output:
+        vcf_vardict = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.vcf.gz",
+    params:
+        housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "research"},
+        tmpdir=tempfile.mkdtemp(prefix=tmp_dir),
+    benchmark:
+        Path(benchmark_dir,"gatk_update_vcf_sequence_dictionary" + config["analysis"]["case_id"] + ".tsv").as_posix()
+    singularity:
+        Path(singularity_image,config["bioinfo_tools"].get("gatk") + ".sif").as_posix()
+    message:
+        "Running GATK UpdateVCFSequenceDictionary on VarDict VCF."
+    shell:
+        """
+export TMPDIR={params.tmpdir};  
+
+ref=$(echo {input.ref} | sed 's/.fasta/.dict/g') ;
+
+gatk UpdateVCFSequenceDictionary -V {input.vcf} --source-dictionary $ref --replace --output {output.vcf_vardict} ;
+
+rm -rf {params.tmpdir}
+        """
