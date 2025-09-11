@@ -71,7 +71,9 @@ def record_in_rescue_list(record: vcfpy.Record, rescue_keys: set[tuple] | None) 
     )  # To account for multiple ALT per row (although this shouldn't be the case)
 
 
-def process_record(record: vcfpy.Record, rescue_keys: set[tuple]) -> vcfpy.Record:
+def process_record(
+    record: vcfpy.Record, rescue_keys: set[tuple] | None
+) -> vcfpy.Record:
     """Update record with rescue information and adjusted fiter."""
     reasons: list[str] = []
     if record_in_rescue_list(record, rescue_keys):
@@ -86,7 +88,9 @@ def process_record(record: vcfpy.Record, rescue_keys: set[tuple]) -> vcfpy.Recor
     return record
 
 
-def process_vcf(in_vcf_path: str, out_vcf_path: str, rescue_keys: set[tuple]) -> None:
+def process_vcf(
+    in_vcf_path: str, out_vcf_path: str, rescue_keys: set[tuple] | None
+) -> None:
     """Writes a vcf file with rescued variants and additional info fields."""
     reader = vcfpy.Reader.from_path(in_vcf_path)
     update_headers(reader)
