@@ -13,7 +13,6 @@ from BALSAMIC.models.cache import CacheConfig, AnalysisReferences
 from BALSAMIC.utils.io import write_finish_file, write_json
 from BALSAMIC.utils.utils import get_relative_paths_dict
 from BALSAMIC.utils.rule import (
-    get_threads,
     get_script_path,
 )
 LOG = logging.getLogger(__name__)
