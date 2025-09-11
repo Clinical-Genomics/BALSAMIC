@@ -146,8 +146,6 @@ else:
             case_name=config["analysis"]["case_id"],
             artefact_sv_observations=artefact_sv_obs,
             vcf_artefact_obs=temp(vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.artefact_sv.vcf"),
-        threads:
-            get_threads(cluster_config,"svdb_annotate_artefact_sv")
         message:
             "Annotating structural and copy number variants with artefact observations using SVDB for {params.case_name}",
         shell:
