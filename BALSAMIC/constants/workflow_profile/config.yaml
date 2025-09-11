@@ -401,10 +401,7 @@ set-resources:
   bcftools_filter_merged_research_tumor_normal:
     runtime: 280
     mem_mb: 10000
-  svdb_annotate_clinical_obs_somatic_clinical_sv:
-    runtime: 600
-    mem_mb: 15000
-  svdb_annotate_somatic_obs_somatic_clinical_sv:
+  svdb_annotate_clinical_sv:
     runtime: 600
     mem_mb: 15000
   svdb_annotate_somatic_research_sv:
@@ -626,8 +623,7 @@ set-threads:
   bcftools_filter_TNscope_umi_research_tumor_normal: 4
   bcftools_filter_merged_clinical_tumor_normal: 8
   bcftools_filter_merged_research_tumor_normal: 8
-  svdb_annotate_clinical_obs_somatic_clinical_sv: 8
-  svdb_annotate_somatic_obs_somatic_clinical_sv: 8
+  svdb_annotate_clinical_sv: 8
   svdb_annotate_somatic_research_sv: 36
   vep_somatic_research_sv: 36
   vcfanno_annotate_somaticSNV_clinical: 12

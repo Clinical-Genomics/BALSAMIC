@@ -68,7 +68,7 @@ tabix -p vcf -f {output.vcf_research};
         """
 
 
-rule svdb_annotate_somatic_obs_somatic_clinical_sv:
+rule svdb_annotate_clinical_sv:
     input:
         vcf_research = vep_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.research.vcf.gz",
     output:
