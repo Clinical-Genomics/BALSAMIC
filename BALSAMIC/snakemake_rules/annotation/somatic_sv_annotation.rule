@@ -99,35 +99,101 @@ tabix -p vcf -f {output.vcf_sv_clinical_obs};
 rm {params.vcf_clinical_obs} 
         """
 
+if config["analysis"]["sequencing_type"] == 'panel':
+    rule svdb_annotate_somatic_obs_somatic_clinical_sv:
+        input:
+            vcf_sv_clinical_obs = vep_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.clinical_obs.vcf.gz",
+        output:
+            vcf_sv_clinical = vep_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.clinical.vcf.gz",
+        benchmark:
+            Path(benchmark_dir, 'svdb_annotate_somatic_obs_somatic_clinical_sv.' + config["analysis"]["case_id"] + ".tsv")
+        singularity:
+            Path(singularity_image, config["bioinfo_tools"].get("svdb") + ".sif").as_posix()
+        params:
+            case_name = config["analysis"]["case_id"],
+            somatic_sv_observations = somatic_sv,
+            vcf_somatic_obs = temp(vep_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.somatic_obs.vcf"),
+        message:
+            "Annotating structural and copy number variants with clinical observations using SVDB for {params.case_name}",
+        shell:
+            """
+    if [[ -f "{params.somatic_sv_observations}" ]]; then
+        svdb --query --bnd_distance 10000 --overlap 0.80 \
+        --in_occ Obs --out_occ Cancer_Somatic_Obs --in_frq Frq --out_frq Cancer_Somatic_Frq \
+        --db {params.somatic_sv_observations} --query_vcf {input.vcf_sv_clinical_obs} > {params.vcf_somatic_obs}
+        bgzip -l 9 -c {params.vcf_somatic_obs} > {output.vcf_sv_clinical};
+        rm {params.vcf_somatic_obs};
+    else
+        cp {input.vcf_sv_clinical_obs} {output.vcf_sv_clinical};
+    fi
+    
+    tabix -p vcf -f {output.vcf_sv_clinical};
+    
+    rm {input.vcf_sv_clinical_obs};
+            """
 
-rule svdb_annotate_somatic_obs_somatic_clinical_sv:
-    input:
-        vcf_sv_clinical_obs = vep_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.clinical_obs.vcf.gz",
-    output:
-        vcf_sv_clinical = vep_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.clinical.vcf.gz",
-    benchmark:
-        Path(benchmark_dir, 'svdb_annotate_somatic_obs_somatic_clinical_sv.' + config["analysis"]["case_id"] + ".tsv")
-    singularity:
-        Path(singularity_image, config["bioinfo_tools"].get("svdb") + ".sif").as_posix()
-    params:
-        case_name = config["analysis"]["case_id"],
-        somatic_sv_observations = somatic_sv,
-        vcf_somatic_obs = temp(vep_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.somatic_obs.vcf"),
-    message:
-        "Annotating structural and copy number variants with clinical observations using SVDB for {params.case_name}",
-    shell:
-        """
-if [[ -f "{params.somatic_sv_observations}" ]]; then
-    svdb --query --bnd_distance 10000 --overlap 0.80 \
-    --in_occ Obs --out_occ Cancer_Somatic_Obs --in_frq Frq --out_frq Cancer_Somatic_Frq \
-    --db {params.somatic_sv_observations} --query_vcf {input.vcf_sv_clinical_obs} > {params.vcf_somatic_obs}
-    bgzip -l 9 -c {params.vcf_somatic_obs} > {output.vcf_sv_clinical};
-    rm {params.vcf_somatic_obs};
-else
-    cp {input.vcf_sv_clinical_obs} {output.vcf_sv_clinical};
-fi
+else:
+    rule svdb_annotate_somatic_artefact_sv_wgs:
+        input:
+            vcf_sv_clinical_obs=vep_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.clinical_obs.vcf.gz",
+        output:
+            vcf_sv_artefact_obs=vep_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.artefact_obs.vcf.gz",
+        benchmark:
+            Path(benchmark_dir,'svdb_annotate_artefact_sv_wgs.' + config["analysis"]["case_id"] + ".tsv")
+        singularity:
+            Path(singularity_image,config["bioinfo_tools"].get("svdb") + ".sif").as_posix()
+        params:
+            case_name=config["analysis"]["case_id"],
+            artefact_sv_observations=artefact_sv_obs,
+            vcf_artefact_obs=temp(vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.artefact_sv.vcf"),
+        threads:
+            get_threads(cluster_config,"svdb_annotate_artefact_sv")
+        message:
+            "Annotating structural and copy number variants with artefact observations using SVDB for {params.case_name}",
+        shell:
+            """
+    if [[ -f "{params.artefact_sv_observations}" ]]; then
+        svdb --query --bnd_distance 500 --overlap 0.80 \
+        --in_occ Obs --out_occ ArtefactObs --in_frq Frq --out_frq ArtefactFrq \
+        --db {params.artefact_sv_observations} --query_vcf {input.vcf_sv_clinical_obs} > {params.vcf_artefact_obs}
+        bgzip -l 9 -c {params.vcf_artefact_obs} > {output.vcf_sv_artefact_obs};
+    else
+        cp {input.vcf_sv_clinical_obs} {output.vcf_sv_artefact_obs};
+    fi
 
-tabix -p vcf -f {output.vcf_sv_clinical};
+    tabix -p vcf -f {output.vcf_sv_artefact_obs};
 
-rm {input.vcf_sv_clinical_obs};
-        """
+    rm {params.vcf_artefact_obs} 
+            """
+
+    rule svdb_annotate_somatic_obs_somatic_clinical_sv:
+        input:
+            vcf_sv_clinical_obs = vep_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.artefact_obs.vcf.gz",
+        output:
+            vcf_sv_clinical = vep_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.clinical.vcf.gz",
+        benchmark:
+            Path(benchmark_dir, 'svdb_annotate_somatic_obs_somatic_clinical_sv.' + config["analysis"]["case_id"] + ".tsv")
+        singularity:
+            Path(singularity_image, config["bioinfo_tools"].get("svdb") + ".sif").as_posix()
+        params:
+            case_name = config["analysis"]["case_id"],
+            somatic_sv_observations = somatic_sv,
+            vcf_somatic_obs = temp(vep_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.somatic_obs.vcf"),
+        message:
+            "Annotating structural and copy number variants with clinical observations using SVDB for {params.case_name}",
+        shell:
+            """
+    if [[ -f "{params.somatic_sv_observations}" ]]; then
+        svdb --query --bnd_distance 10000 --overlap 0.80 \
+        --in_occ Obs --out_occ Cancer_Somatic_Obs --in_frq Frq --out_frq Cancer_Somatic_Frq \
+        --db {params.somatic_sv_observations} --query_vcf {input.vcf_sv_clinical_obs} > {params.vcf_somatic_obs}
+        bgzip -l 9 -c {params.vcf_somatic_obs} > {output.vcf_sv_clinical};
+        rm {params.vcf_somatic_obs};
+    else
+        cp {input.vcf_sv_clinical_obs} {output.vcf_sv_clinical};
+    fi
+    
+    tabix -p vcf -f {output.vcf_sv_clinical};
+    
+    rm {input.vcf_sv_clinical_obs};
+            """
