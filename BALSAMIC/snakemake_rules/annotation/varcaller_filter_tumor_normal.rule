@@ -52,7 +52,7 @@ rule bcftools_filter_merged_clinical_tumor_normal:
     loqusdb_clinical_freq = get_tag_and_filtername(snv_clinical_filters, "Frq"),
     hard_filters = TgaSNVFilters.get_bcftools_filter_string(category="clinical", analysis_type=analysis_type, soft_filter_normals=soft_filter_normal),
     rescue_script = get_script_path("rescue_snvs.py"),
-    rescue_snvs = config_model.analysis.rescue_snvs,
+    rescue_flag=lambda wildcards, rescue_snvs=config_model.analysis.rescue_snvs: f"--rescue-list {rescue_snvs}" if rescue_snvs else "",
     cancer_somatic_panel_frq = config_model.reference.get("cancer_somatic_snv_panel_observations"),
     tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
     housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "clinical"},
@@ -72,11 +72,7 @@ if [ "{params.cancer_somatic_panel_frq}" != "None" ] ; then
   mv {params.tmpdir}/clinical.filtered.pass_before_rescue.1.vcf.gz {params.tmpdir}/clinical.filtered.pass_before_rescue.vcf.gz ;
 fi
 
-if [[ -f "{params.rescue_snvs}" ]]; then
-  python {params.rescue_script} --vcf {params.tmpdir}/clinical.filtered.pass_before_rescue.vcf.gz --rescue-list {params.rescue_snvs} --out {params.tmpdir}/clinical.filtered.pass_after_rescue.vcf ;
-else
-  python {params.rescue_script} --vcf {params.tmpdir}/clinical.filtered.pass_before_rescue.vcf.gz --out {params.tmpdir}/clinical.filtered.pass_after_rescue.vcf ;
-fi
+python {params.rescue_script} --vcf {params.tmpdir}/clinical.filtered.pass_before_rescue.vcf.gz --out {params.tmpdir}/clinical.filtered.pass_after_rescue.vcf {params.rescue_flag} ;
 
 bcftools view --threads {threads} --exclude '{params.hard_filters}' -O z -o {output.vcf_pass_merged} {params.tmpdir}/clinical.filtered.pass_after_rescue.vcf;
 
