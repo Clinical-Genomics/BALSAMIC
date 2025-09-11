@@ -743,7 +743,7 @@ This section contains population database frequency filters.
 Rescue and final filtration of variants
 ********************************************
 
-Since **BALSAMIC <= v18.0.0** Post-call database filters are initially applied as soft-filters. After this step the variants have a chance to be allowlisted if they meet either of the following criteria:
+Since **BALSAMIC <= v18.0.0** Post-call database filters are initially applied as soft-filters. After this step the variants have a chance to be rescued if they meet either of the following criteria:
 
 1. The variant is marked with CLNSIG=Pathogenic and/or CLNSIG=Likely_pathogenic and/or ONC=Oncogenic in the INFO-field coming from Clinvar.
 2. The variant exists in the optionally supplied whitelist VCF-file. The file in BALSAMIC/analysis_metadata/marked_causative.vcf will be used by default, but can be replaced by the --allowlist-snvs option.
