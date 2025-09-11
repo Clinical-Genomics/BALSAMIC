@@ -78,9 +78,7 @@ else
   python {params.rescue_script} --vcf {params.tmpdir}/clinical.filtered.pass_before_rescue.vcf.gz --out {params.tmpdir}/clinical.filtered.pass_after_rescue.vcf ;
 fi
 
-bcftools view --threads {threads} --exclude '{params.hard_filters}' -O z -o {params.tmpdir}/clinical.filtered.rescue_filtered.vcf.gz {params.tmpdir}/clinical.filtered.pass_after_rescue.vcf;
-
-mv {params.tmpdir}/clinical.filtered.rescue_filtered.vcf.gz {output.vcf_pass_merged} ;
+bcftools view --threads {threads} --exclude '{params.hard_filters}' -O z -o {output.vcf_pass_merged} {params.tmpdir}/clinical.filtered.pass_after_rescue.vcf;
 
 tabix -p vcf -f {output.vcf_pass_merged};
 

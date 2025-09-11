@@ -213,14 +213,14 @@ def _process_record_line(
         return line + "\n"
 
     ref = cols[3]
-    alts = cols[4].split(",") if cols[4] else ["."]
+    alt = cols[4]
     filt = cols[6]
     info = parse_info(cols[7])
 
     reasons: List[str] = []
 
     # Manual rescue (only if provided).
-    if rescue_keys and _any_alt_in_rescuelist(rescue_keys, chrom, pos, ref, alts):
+    if rescue_keys and _if_alt_in_rescuelist(rescue_keys, chrom, pos, ref, alt):
         reasons.append(MANUAL_REASON)
 
     # ClinVar rescue.
@@ -239,7 +239,7 @@ def _process_record_line(
     return "\t".join(cols) + "\n"
 
 
-def _any_alt_in_rescuelist(
+def _if_alt_in_rescuelist(
     rescue_keys: Set[Tuple[str, int, str, str]],
     chrom: str,
     pos: int,
