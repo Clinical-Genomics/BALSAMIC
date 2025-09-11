@@ -21,7 +21,6 @@ from BALSAMIC.constants.constants import FileType
 from BALSAMIC.constants.paths import CONTAINERS_DIR
 from BALSAMIC.models.config import ConfigModel, FastqInfoModel, SampleInstanceModel
 from BALSAMIC.utils.cli import (
-    CaptureStdout,
     check_executable,
     convert_deliverables_tags,
     createDir,
@@ -59,6 +58,7 @@ from BALSAMIC.utils.rule import (
     get_result_dir,
     get_rule_output,
     get_sample_type_from_sample_name,
+    get_sample_name_from_sample_type,
     get_script_path,
     get_variant_callers,
     get_vcf,
@@ -413,15 +413,6 @@ def test_get_result_dir(sample_config: Dict):
     assert get_result_dir(sample_config) == sample_config["analysis"]["result"]
 
 
-def test_capturestdout():
-    # GIVEN a catpurestdout context
-    test_stdout_message = "Message to stdout"
-    with CaptureStdout() as captured_stdout_message:
-        print(test_stdout_message, file=sys.stdout)
-
-    assert "".join(captured_stdout_message) == test_stdout_message
-
-
 def test_write_json(tmp_path, reference):
     # GIVEN a dict from sample json file
     tmp = tmp_path / "tmp"
@@ -752,6 +743,21 @@ def test_get_sample_type_from_sample_name(config_dict: Dict):
 
     # THEN the retrieved sample type should match the expected one
     assert sample_type == SampleType.TUMOR
+
+
+def test_get_sample_name_from_sample_type(config_dict: Dict):
+    """Test sample type extraction from a extracted config file."""
+
+    # GIVEN a config dictionary
+
+    # GIVEN a sample type
+    sample_type = "tumor"
+
+    # WHEN calling the function
+    sample_name = get_sample_name_from_sample_type(config_dict, sample_type)
+
+    # THEN the retrieved sample name should match the expected one
+    assert sample_name == "ACC1"
 
 
 def test_get_rule_output(snakemake_bcftools_filter_tnscope_research_tumor_only):

@@ -63,6 +63,7 @@ from BALSAMIC.utils.cli import (
     get_panel_chrom,
     get_sample_list,
     get_gens_references,
+    get_snakefile,
 )
 from BALSAMIC.utils.io import read_json, write_json
 from BALSAMIC.utils.utils import get_absolute_paths_dict
@@ -150,9 +151,7 @@ def case_config(
     add_file_logging(log_file, logger_name=__name__)
 
     LOG.info(f"Running BALSAMIC version {balsamic_version} -- CONFIG CASE")
-    LOG.info(f"BALSAMIC started with log level {context.obj['log_level']}.")
 
-    LOG.info("Collecting reference and annotation file paths.")
     references_path: Path = Path(balsamic_cache, cache_version, genome_version)
     references: Dict[str, Path] = get_absolute_paths_dict(
         base_path=references_path,
@@ -273,5 +272,10 @@ def case_config(
     write_json(json_obj=config_collection_dict, path=config_path)
     LOG.info(f"Config file saved successfully - {config_path}")
 
-    generate_graph(config_collection_dict, config_path)
+    snakefile = get_snakefile(
+        analysis_type=config_collection_dict["analysis"]["analysis_type"],
+        analysis_workflow=config_collection_dict["analysis"]["analysis_workflow"],
+    )
+
+    generate_graph(config_collection_dict, config_path, snakefile)
     LOG.info(f"BALSAMIC Workflow has been configured successfully!")

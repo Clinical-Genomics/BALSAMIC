@@ -16,7 +16,8 @@ from BALSAMIC.constants.analysis import (
     SampleType,
     SequencingType,
     AnalysisType,
-    BioinfoTools)
+    BioinfoTools,
+    LogFile)
 from BALSAMIC.constants.paths import BALSAMIC_DIR
 from BALSAMIC.constants.rules import SNAKEMAKE_RULES
 from BALSAMIC.constants.variant_filters import (
@@ -35,6 +36,7 @@ from BALSAMIC.models.config import ConfigModel
 from BALSAMIC.models.params import BalsamicWorkflowConfig, StructuralVariantFilters
 from BALSAMIC.utils.cli import check_executable, generate_h5
 from BALSAMIC.utils.exc import BalsamicError
+from BALSAMIC.utils.logging import add_file_logging
 from BALSAMIC.utils.io import read_yaml, write_finish_file, write_json
 from BALSAMIC.utils.rule import (
     dump_toml,
@@ -52,7 +54,6 @@ from BALSAMIC.utils.rule import (
     get_somatic_sv_observations,
     get_swegen_snv,
     get_swegen_sv,
-    get_threads,
     get_variant_callers,
     get_vcf,
 )
@@ -65,15 +66,26 @@ config_model = ConfigModel.model_validate(config)
 shell.executable("/bin/bash")
 shell.prefix("set -eo pipefail; ")
 
-LOG = logging.getLogger(__name__)
-
 # Get case id/name
 case_id: str = config_model.analysis.case_id
-# Get analysis dir
-analysis_dir_home: str = config_model.analysis.analysis_dir
-analysis_dir: str = Path(analysis_dir_home, "analysis", case_id).as_posix() + "/"
+# Get case-dir
+case_dir: str = Path(config_model.analysis.analysis_dir, case_id).as_posix()
 # Get result dir
 result_dir: str = Path(config_model.analysis.result).as_posix() + "/"
+
+# Set logging
+
+LOG = logging.getLogger(__name__)
+if not LOG.handlers:
+    h = logging.StreamHandler()
+    h.setFormatter(logging.Formatter("%(levelname)s: %(message)s"))
+    LOG.addHandler(h)
+LOG.setLevel(logging.INFO)
+
+log_file = Path(case_dir, LogFile.LOGNAME).as_posix()
+add_file_logging(log_file, logger_name=__name__)
+
+LOG.info("Running BALSAMIC: balsamic.smk.")
 
 # Create a temporary directory with trailing /
 tmp_dir: str = Path(result_dir, "tmp").as_posix() + "/"
@@ -752,7 +764,7 @@ if "delivery" in config:
         try:
             housekeeper_id = getattr(rules, my_rule).params.housekeeper_id
         except (ValueError, AttributeError, RuleException, WorkflowError) as e:
-            LOG.warning("Cannot deliver step (rule) {}: {}".format(my_rule, e))
+            LOG.warning(f"Cannot deliver step (rule) {my_rule}")
             continue
 
         LOG.info("Delivering step (rule) {} {}.".format(my_rule, housekeeper_id))
@@ -773,14 +785,16 @@ if "delivery" in config:
 
 
 wildcard_constraints:
-    sample="|".join(sample_names),
+    sample="[^.]+",
+    sample_type="(?:normal|tumor)",
+    fastq_pattern="[^/]+"
 
 
 rule all:
     input:
         quality_control_results + analysis_specific_results,
     output:
-        finish_file=Path(get_result_dir(config), "analysis_finish").as_posix(),
+        finish_file=Path(get_result_dir(config), "analysis_finished_successfully").as_posix(),
     params:
         tmp_dir=tmp_dir,
         case_name=config["analysis"]["case_id"],
@@ -788,11 +802,12 @@ rule all:
     message:
         "Finalizing analysis for {params.case_name}"
     run:
-        import datetime
+        from datetime import datetime
         import shutil
         from BALSAMIC.utils.metrics import validate_qc_metrics
 
-        status = "SUCCESS"
+        status = "SUCCESSFUL"
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
         error_message = ""
         try:
@@ -813,13 +828,13 @@ rule all:
             print("Error: %s - %s." % (e.filename, e.strerror))
 
         # Write status to file
-        with open(params.status_file,"w") as status_fh:
+        with open(params.status_file, "w") as status_fh:
+            status_fh.write(f"=== QC metrics check at {timestamp} ===\n")
             status_fh.write(status + "\n")
             status_fh.write(error_message + "\n")
 
-        # Always write finish file if we've reached here
-        write_finish_file(file_path=output.finish_file)
-
         # Raise to trigger rule failure if needed
-        if status != "SUCCESS":
+        if status != "SUCCESSFUL":
             raise ValueError(f"Final rule failed with status: {status}")
+        else:
+            write_finish_file(file_path=output.finish_file)

@@ -1,6 +1,6 @@
 """QC metrics constants."""
 import operator
-from typing import Dict, Callable
+from typing import Dict, Callable, List
 
 
 VALID_OPS: Dict[str, Callable] = {
@@ -12,6 +12,7 @@ VALID_OPS: Dict[str, Callable] = {
     "gt": operator.gt,
 }
 
+METRIC_WARNINGS = {"COMPARE_PREDICTED_TO_GIVEN_SEX"}
 
 METRICS: Dict[str, dict] = {
     "targeted": {
@@ -77,7 +78,7 @@ METRICS: Dict[str, dict] = {
     },
     "wgs": {
         "MEAN_INSERT_SIZE": {"condition": None},
-        "MEDIAN_COVERAGE": {
+        "MEDIAN_TARGET_COVERAGE": {
             "condition": {"norm": "gt", "threshold": 26}
         },  # Normal sample
         "PERCENT_DUPLICATION": {"condition": None},
