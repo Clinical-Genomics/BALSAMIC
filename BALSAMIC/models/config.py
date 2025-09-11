@@ -1,6 +1,7 @@
 """Balsamic analysis config case models."""
 
 import re
+import os
 from glob import glob
 from pathlib import Path
 from typing import Annotated, Dict, List, Optional
@@ -8,6 +9,7 @@ from typing import Annotated, Dict, List, Optional
 from pydantic import AfterValidator, BaseModel, field_validator, model_validator
 
 from BALSAMIC import __version__ as balsamic_version
+from BALSAMIC.constants.cluster import QOS
 from BALSAMIC.constants.analysis import (
     AnalysisType,
     AnalysisWorkflow,
@@ -22,6 +24,7 @@ from BALSAMIC.constants.analysis import (
 )
 from BALSAMIC.models.params import QCModel
 from BALSAMIC.models.validators import is_dir, is_file
+from BALSAMIC.utils.io import read_json
 
 
 class FastqInfoModel(BaseModel):
@@ -71,7 +74,7 @@ class VarcallerAttribute(BaseModel):
     """Holds variables for variant caller software
     Attributes:
         mutation: str of mutation class
-        mutation_type: str of mutation type
+        mutation_type: str for mutation type
         analysis_type: list of str for analysis types
         workflow_solution: list of str for workflows
         sequencing_type: list of str for workflows
@@ -100,6 +103,7 @@ class VCFModel(BaseModel):
     merged: VarcallerAttribute
     manta: VarcallerAttribute
     vardict: VarcallerAttribute
+    vardictsv: VarcallerAttribute
     dellysv: VarcallerAttribute
     cnvkit: VarcallerAttribute
     ascat: VarcallerAttribute
@@ -141,7 +145,7 @@ class AnalysisModel(BaseModel):
 
     Raises:
         ValueError:
-            When gender is set to any other than [female, male]
+            When gender is set to any other than [female, male, unknown]
             When analysis_type is set to any value other than [single, paired, pon]
             When sequencing_type is set to any value other than [wgs, targeted]
             When analysis_workflow is set to any other than [balsamic, balsamic-qc, balsamic-umi]
@@ -215,6 +219,8 @@ class ConfigModel(BaseModel):
         analysis: Field(AnalysisModel); Pydantic model containing workflow variables
         custom_filters: Field(CustomFilters); custom parameters for variant filtering
         sentieon: Field(required); Sentieon model attributes
+        qos: Field(QOS);
+        account: Cluster account to run jobs
 
     This class also contains functions that help retrieve sample and file information,
     facilitating BALSAMIC run operations in Snakemake.
@@ -242,6 +248,8 @@ class ConfigModel(BaseModel):
     analysis: AnalysisModel
     custom_filters: CustomFilters | None = None
     sentieon: Sentieon
+    qos: Optional[QOS] = None
+    account: Optional[str] = None
 
     @field_validator("reference")
     def abspath_as_str(cls, reference: Dict[str, Path]):
@@ -467,3 +475,30 @@ class ConfigModel(BaseModel):
             f"CNV.somatic.{self.analysis.case_id}.ascat.germline.png",
             f"CNV.somatic.{self.analysis.case_id}.ascat.sunrise.png",
         ]
+
+    def get_gender(self, wildcards, input):
+        """Return the bioinformatically predicted sex of the case if the given sex is unknown."""
+
+        if self.analysis.gender != Gender.UNKNOWN:
+            return self.analysis.gender  # Default to using assigned gender
+
+        if not os.path.exists(input.sex_prediction_json):
+            return Gender.FEMALE  # Only necessary for snakemake dry-run
+
+        sex_prediction = read_json(input.sex_prediction_json)
+
+        gender = Gender.UNKNOWN
+        if self.analysis.analysis_type == AnalysisType.PAIRED:
+            # Prioritise normal gender if available
+            gender = sex_prediction[SampleType.NORMAL]["predicted_sex"]
+
+        if gender == Gender.UNKNOWN:
+            # Fall back to use tumor gender
+            gender = sex_prediction[SampleType.TUMOR]["predicted_sex"]
+
+        if gender == Gender.UNKNOWN:
+            # If gender is unknown, default to using female gender
+            return Gender.FEMALE
+        else:
+            # Return predicted gender
+            return gender

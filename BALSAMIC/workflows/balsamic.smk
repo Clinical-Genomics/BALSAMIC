@@ -16,7 +16,8 @@ from BALSAMIC.constants.analysis import (
     SampleType,
     SequencingType,
     AnalysisType,
-    BioinfoTools)
+    BioinfoTools,
+    LogFile)
 from BALSAMIC.constants.paths import BALSAMIC_DIR
 from BALSAMIC.constants.rules import SNAKEMAKE_RULES
 from BALSAMIC.constants.variant_filters import (
@@ -30,12 +31,12 @@ from BALSAMIC.constants.variant_filters import (
 )
 from BALSAMIC.constants.workflow_params import (
     WORKFLOW_PARAMS,
-    SLEEP_BEFORE_START,
 )
 from BALSAMIC.models.config import ConfigModel
 from BALSAMIC.models.params import BalsamicWorkflowConfig, StructuralVariantFilters
 from BALSAMIC.utils.cli import check_executable, generate_h5
 from BALSAMIC.utils.exc import BalsamicError
+from BALSAMIC.utils.logging import add_file_logging
 from BALSAMIC.utils.io import read_yaml, write_finish_file, write_json
 from BALSAMIC.utils.rule import (
     dump_toml,
@@ -53,12 +54,9 @@ from BALSAMIC.utils.rule import (
     get_somatic_sv_observations,
     get_swegen_snv,
     get_swegen_sv,
-    get_threads,
     get_variant_callers,
     get_vcf,
 )
-from BALSAMIC.utils.workflowscripts import plot_analysis
-from pypdf import PdfWriter
 from snakemake.exceptions import RuleException, WorkflowError
 from yapf.yapflib.yapf_api import FormatFile
 
@@ -68,15 +66,26 @@ config_model = ConfigModel.model_validate(config)
 shell.executable("/bin/bash")
 shell.prefix("set -eo pipefail; ")
 
-LOG = logging.getLogger(__name__)
-
 # Get case id/name
 case_id: str = config_model.analysis.case_id
-# Get analysis dir
-analysis_dir_home: str = config_model.analysis.analysis_dir
-analysis_dir: str = Path(analysis_dir_home, "analysis", case_id).as_posix() + "/"
+# Get case-dir
+case_dir: str = Path(config_model.analysis.analysis_dir, case_id).as_posix()
 # Get result dir
 result_dir: str = Path(config_model.analysis.result).as_posix() + "/"
+
+# Set logging
+
+LOG = logging.getLogger(__name__)
+if not LOG.handlers:
+    h = logging.StreamHandler()
+    h.setFormatter(logging.Formatter("%(levelname)s: %(message)s"))
+    LOG.addHandler(h)
+LOG.setLevel(logging.INFO)
+
+log_file = Path(case_dir, LogFile.LOGNAME).as_posix()
+add_file_logging(log_file, logger_name=__name__)
+
+LOG.info("Running BALSAMIC: balsamic.smk.")
 
 # Create a temporary directory with trailing /
 tmp_dir: str = Path(result_dir, "tmp").as_posix() + "/"
@@ -333,10 +342,6 @@ if "swegen_sv_frequency" in config["reference"]:
 # Capture kit name
 if config["analysis"]["sequencing_type"] != "wgs":
     capture_kit = os.path.split(config["panel"]["capture_kit"])[1]
-
-# explicitly check if cluster_config dict has zero keys.
-if len(cluster_config.keys()) == 0:
-    cluster_config = config
 
 if "hg38" in config["reference"]["reference_genome"]:
     config["reference"]["genome_version"] = "hg38"
@@ -715,40 +720,6 @@ if (
 
 LOG.info(f"Following outputs will be delivered {analysis_specific_results}")
 
-if "benchmark_plots" in config:
-    log_dir = config["analysis"]["log"]
-    if not check_executable("sh5util"):
-        LOG.warning("sh5util executable does not exist. Won't be able to plot analysis")
-    else:
-        # Make individual plot per job
-        for log_file in Path(log_dir).glob("*.err"):
-            log_file_list = log_file.name.split(".")
-            job_name = ".".join(log_file_list[0:4])
-            job_id = log_file_list[4].split("_")[1]
-            h5_file = generate_h5(job_name, job_id, log_file.parent)
-            benchmark_plot = Path(benchmark_dir, job_name + ".pdf")
-
-            log_file_plot = plot_analysis(log_file, h5_file, benchmark_plot)
-            logging.debug(
-                "Plot file for {} available at: {}".format(
-                    log_file.as_posix(), log_file_plot
-                )
-            )
-
-        # Merge plots into one based on rule name
-        for my_rule in vars(rules).keys():
-            my_rule_pdf = PdfWriter()
-            my_rule_plots = list()
-            for plots in Path(benchmark_dir).glob(f"BALSAMIC*.{my_rule}.*.pdf"):
-                my_rule_pdf.append(plots.as_posix())
-                my_rule_plots.append(plots)
-            my_rule_pdf.write(Path(benchmark_dir, my_rule + ".pdf").as_posix())
-            my_rule_pdf.close()
-
-            # Delete previous plots after merging
-            for plots in my_rule_plots:
-                plots.unlink()
-
 if "delivery" in config:
     wildcard_dict = {
         "sample": sample_names,
@@ -777,7 +748,7 @@ if "delivery" in config:
         try:
             housekeeper_id = getattr(rules, my_rule).params.housekeeper_id
         except (ValueError, AttributeError, RuleException, WorkflowError) as e:
-            LOG.warning("Cannot deliver step (rule) {}: {}".format(my_rule, e))
+            LOG.warning(f"Cannot deliver step (rule) {my_rule}")
             continue
 
         LOG.info("Delivering step (rule) {} {}.".format(my_rule, housekeeper_id))
@@ -798,37 +769,56 @@ if "delivery" in config:
 
 
 wildcard_constraints:
-    sample="|".join(sample_names),
+    sample="[^.]+",
+    sample_type="(?:normal|tumor)",
+    fastq_pattern="[^/]+"
 
 
 rule all:
     input:
         quality_control_results + analysis_specific_results,
     output:
-        finish_file=Path(get_result_dir(config), "analysis_finish").as_posix(),
+        finish_file=Path(get_result_dir(config), "analysis_finished_successfully").as_posix(),
     params:
         tmp_dir=tmp_dir,
         case_name=config["analysis"]["case_id"],
+        status_file=Path(get_result_dir(config), "analysis_status.txt").as_posix(),
     message:
         "Finalizing analysis for {params.case_name}"
     run:
-        import datetime
+        from datetime import datetime
         import shutil
-
         from BALSAMIC.utils.metrics import validate_qc_metrics
 
-        # Perform validation of extracted QC metrics
+        status = "SUCCESSFUL"
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+        error_message = ""
         try:
             validate_qc_metrics(read_yaml(input[0]))
         except ValueError as val_exc:
             LOG.error(val_exc)
-            raise BalsamicError
+            error_message = str(val_exc)
+            status = "QC_VALIDATION_FAILED"
+        except Exception as exc:
+            LOG.error(exc)
+            error_message = str(exc)
+            status = "UNKNOWN_ERROR"
 
-            # Remove temporary directory tree
+        # Clean up tmp
         try:
             shutil.rmtree(params.tmp_dir)
         except OSError as e:
             print("Error: %s - %s." % (e.filename, e.strerror))
 
-            # Finish timestamp file
-        write_finish_file(file_path=output.finish_file)
+        # Write status to file
+        with open(params.status_file, "w") as status_fh:
+            status_fh.write(f"=== QC metrics check at {timestamp} ===\n")
+            status_fh.write(status + "\n")
+            status_fh.write(error_message + "\n")
+
+        # Raise to trigger rule failure if needed
+        if status != "SUCCESSFUL":
+            raise ValueError(f"Final rule failed with status: {status}")
+        else:
+            write_finish_file(file_path=output.finish_file)

@@ -11,7 +11,6 @@ from BALSAMIC.constants.paths import BALSAMIC_DIR, REFSEQ_SCRIPT_PATH
 from BALSAMIC.constants.rules import SNAKEMAKE_RULES
 from BALSAMIC.models.cache import CacheConfig, AnalysisReferences
 from BALSAMIC.utils.io import write_finish_file, write_json
-from BALSAMIC.utils.rule import get_threads
 from BALSAMIC.utils.utils import get_relative_paths_dict
 
 LOG = logging.getLogger(__name__)
@@ -41,8 +40,7 @@ rule all:
         cache_config.get_container_output_paths(),
         cache_config.get_reference_output_paths(),
     output:
-        finish_file=f"{cache_config.references_dir.as_posix()}/reference.finish",
-    threads: get_threads(cluster_config=cluster_config, rule_name="all")
+        finish_file=f"{cache_config.references_dir.as_posix()}/analysis_finished_successfully",
     run:
         analysis_references: Dict[str, str] = get_relative_paths_dict(
             base_path=cache_config.references_dir,

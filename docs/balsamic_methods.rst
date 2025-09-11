@@ -5,7 +5,7 @@ Method description
 Target Genome Analysis
 ~~~~~~~~~~~~~~~~~~~~~~
 
-BALSAMIC :superscript:`1` (**version** = 17.0.1) was used to analyze the data from raw FASTQ files.
+BALSAMIC :superscript:`1` (**version** = 17.1.0) was used to analyze the data from raw FASTQ files.
 We first quality controlled FASTQ files using FastQC v0.11.9 :superscript:`2`.
 Adapter sequences are trimmed using fastp v0.23.2 :superscript:`3` and then UMI sequences are extracted using the UMI extract tool from sentieon-tools (version 202308.03) :superscript:`15` and finally low-quality bases were trimmed using fastp v0.23.2 :superscript:`3`.
 Trimmed reads were mapped to the reference genome hg19 using sentieon-tools :superscript:`15`.
@@ -13,19 +13,19 @@ The resulting BAM is quality controlled using samtools v1.15.1 :superscript:`26`
 Duplicate reads are collapsed using the UMI function in Dedup from sentieon-tools :superscript:`15`, and invalid mates are corrected with tools collate and fixmate from samtools v1.15.1 :superscript:`26`.
 Coverage metrics are collected from the final BAM using Sambamba v0.8.2 :superscript:`27`, Mosdepth v0.3.3 :superscript:`28` and CollectHsMetrics from Picard tools v2.27.1 :superscript:`6`.
 Results of the quality controlled steps were summarized by MultiQC v1.22.3 :superscript:`7`.
-Small somatic mutations (SNVs and INDELs) were called for each sample using VarDict 2019.06.04 :superscript:`8` and Sentieon TNscope :superscript:`16` and normalised using bcftools norm before being filtered using the criteria (*MQ >= 30, DP >= 50 (20 for exome-samples), VD >= 5, Minimum AF >= 0.005, Maximum AF < 1, GNOMADAF_popmax <= 0.005, swegen AF < 0.01*) and then merged using a custom python script.
+Small somatic mutations (SNVs and INDELs) and SVs were called using VarDict 2019.06.04 :superscript:`8` and Sentieon TNscope :superscript:`16` and normalised using bcftools norm before being filtered using the criteria (*MQ >= 30, DP >= 50 (20 for exome-samples), VD >= 5, Minimum AF >= 0.005, Maximum AF < 1, GNOMADAF_popmax <= 0.005, swegen AF < 0.01*) and then merged using a custom python script.
 Only those variants that fulfilled the filtering criteria and scored as `PASS` in the VCF file were reported.
 Structural variants (SV) were called using Manta v1.6.0 :superscript:`9` on a post-processed version of the BAM which was base-quality capped to 70, and Delly v1.0.3 :superscript:`10`.
 Copy number variations (CNV) were called using CNVkit v0.9.10 :superscript:`11`.
-The variant calls from CNVkit, Manta and Delly were merged using SVDB v2.8.1 :superscript:`12`.
+The structural variant calls from CNVkit, Manta, Delly and VarDict were merged using SVDB v2.8.1 :superscript:`12`.
 The clinical set of SNV and SV is also annotated and filtered against loqusDB curated frequency of observed variants (frequency < 0.01) from non-cancer cases and only annotated using frequency of observed variants from cancer cases (somatic and germline).
-All variants were annotated using Ensembl VEP v104.3 :superscript:`13`. We used vcfanno v0.3.3 :superscript:`14`
-to annotate somatic variants for their population allele frequency from gnomAD v2.1.1 :superscript:`18`, CADD v1.6 :superscript:`24`, SweGen :superscript:`22` and frequency of observed variants in normal samples. The MSI (MicroSatellite Instability) score was computed using MSIsensor-pro v1.2.0 :superscript:`25`.
+All variants were annotated using Ensembl VEP v113.4 :superscript:`13`. We used vcfanno v0.3.3 :superscript:`14`
+to annotate somatic variants for their population allele frequency from gnomAD v2.1.1 :superscript:`18`, CADD v1.7 :superscript:`24`, SweGen :superscript:`22` and frequency of observed variants in normal samples. The MSI (MicroSatellite Instability) score was computed using MSIsensor-pro v1.2.0 :superscript:`25`.
 
 Whole Genome Analysis
 ~~~~~~~~~~~~~~~~~~~~~
 
-BALSAMIC :superscript:`1` (**version** = 17.0.1) was used to analyze the data from raw FASTQ files.
+BALSAMIC :superscript:`1` (**version** = 17.1.0) was used to analyze the data from raw FASTQ files.
 We first quality controlled FASTQ files using FastQC v0.11.9 :superscript:`2`.
 Adapter sequences and low-quality bases were trimmed using fastp v0.23.2 :superscript:`3`.
 Trimmed reads were mapped to the reference genome hg19 using sentieon-tools 202308.03 :superscript:`15`.
@@ -39,13 +39,13 @@ Structural variants were called using Manta v1.6.0 :superscript:`9`, Delly v1.0.
 Copy number variations (CNV) were called using ascatNgs v4.5.0 :superscript:`17` (tumor-normal), Delly v1.0.3 :superscript:`10` and CNVpytor v1.3.1 :superscript:`22` (tumor-only) and converted from CNV to deletions (DEL) and duplications (DUP).
 The structural variant (SV) calls from Manta, Delly, TIDDIT, ascatNgs (tumor-normal) and CNVpytor (tumor-only) were merged using SVDB v2.8.1 :superscript:`12`
 The clinical set of SNV and SV is also annotated and filtered against loqusDB curated frequency of observed variants (frequency < 0.01) from non-cancer cases and only annotated using frequency of observed variants from cancer cases (somatic and germline).
-All variants were annotated using Ensembl VEP v104.3 :superscript:`13`. We used vcfanno v0.3.3 :superscript:`14`
-to annotate somatic single nucleotide variants for their population allele frequency from gnomAD v2.1.1 :superscript:`18`, CADD v1.6 :superscript:`24`, SweGen :superscript:`22`  and frequency of observed variants in normal samples. The MSI (MicroSatellite Instability) score was computed using MSIsensor-pro v1.2.0 :superscript:`25`.
+All variants were annotated using Ensembl VEP v113.4 :superscript:`13`. We used vcfanno v0.3.3 :superscript:`14`
+to annotate somatic single nucleotide variants for their population allele frequency from gnomAD v2.1.1 :superscript:`18`, CADD v1.7 :superscript:`24`, SweGen :superscript:`22`  and frequency of observed variants in normal samples. The MSI (MicroSatellite Instability) score was computed using MSIsensor-pro v1.2.0 :superscript:`25`.
 
 UMI workflow
 ~~~~~~~~~~~~~~~~~~~~~
 
-BALSAMIC :superscript:`1` (**version** = 17.0.1) was used to analyze the data from raw FASTQ files.
+BALSAMIC :superscript:`1` (**version** = 17.1.0) was used to analyze the data from raw FASTQ files.
 We first quality controlled FASTQ files using FastQC v0.11.9 :superscript:`2`.
 Adapter sequences were trimmed using fastp v0.23.2 :superscript:`3`.
 UMI tag extraction and alignment and consensus-calling of UMI groups were performed using Sentieon tools 202308.03 :superscript:`15`.
@@ -54,7 +54,7 @@ The filtered consensus reads were quality controlled using Picard CollectHsMetri
 For each sample, somatic mutations were called using Sentieon TNscope :superscript:`16`, with non-default parameters for passing the final list of variants
 (--min_tumor_allele_frac 0.0005, --filter_t_alt_frac 0.0005, --min_init_tumor_lod 0.5, min_tumor_lod 4, --max_error_per_read 5  --pcr_indel_model NONE, GNOMADAF_popmax <= 0.02).
 The clinical sets of SNV and SV are also annotated and filtered against loqusDB curated frequency of observed variants (frequency < 0.01) from non-cancer cases and only annotated using frequency of observed variants from cancer cases (somatic and germline).
-All variants were annotated using Ensembl VEP v104.3 :superscript:`7`. We used vcfanno v0.3.3 :superscript:`8` to annotate somatic variants for their population allele frequency from gnomAD v2.1.1 :superscript:`18`, CADD v1.6 :superscript:`24`, SweGen :superscript:`22` and frequency of observed variants in normal samples.
+All variants were annotated using Ensembl VEP v113.4 :superscript:`7`. We used vcfanno v0.3.3 :superscript:`8` to annotate somatic variants for their population allele frequency from gnomAD v2.1.1 :superscript:`18`, CADD v1.7 :superscript:`24`, SweGen :superscript:`22` and frequency of observed variants in normal samples.
 For exact parameters used for each software, please refer to  https://github.com/Clinical-Genomics/BALSAMIC.
 We used three commercially available products from SeraCare [Material numbers: 0710-067110 :superscript:`19`, 0710-067211 :superscript:`20`, 0710-067312 :superscript:`21`] for validating the efficiency of the UMI workflow in identifying 14 mutation sites at known allelic frequencies.
 

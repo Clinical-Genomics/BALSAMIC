@@ -14,6 +14,7 @@ from BALSAMIC.constants.analysis import (
     MutationType,
     SequencingType,
     WorkflowSolution,
+    SampleType,
 )
 from BALSAMIC.models.config import ConfigModel
 from BALSAMIC.utils.cli import find_file_index, get_file_extension
@@ -27,19 +28,12 @@ def get_vcf(config, var_caller, sample):
     input: BALSAMIC config file
     output: retrieve list of vcf files
     """
-
     vcf = []
     for v in var_caller:
         for s in sample:
-            vcf.append(
-                config["vcf"][v]["mutation_type"]
-                + "."
-                + config["vcf"][v]["mutation"]
-                + "."
-                + s
-                + "."
-                + v
-            )
+            mutation_type = config["vcf"][v]["mutation_type"]
+            mutation = config["vcf"][v]["mutation"]
+            vcf.append(f"{mutation_type}.{mutation}.{s}.{v}")
     return vcf
 
 
@@ -136,6 +130,16 @@ def get_sample_type_from_sample_name(config, sample_name):
             return sample["type"]
 
 
+def get_sample_name_from_sample_type(config: dict, sample_type: SampleType):
+    """
+    input: case config file from BALSAMIC, and sample_name
+    output: sample name
+    """
+    for sample in config["samples"]:
+        if sample_type == sample["type"]:
+            return sample["name"]
+
+
 def get_result_dir(config):
     """
     input: sample config file from BALSAMIC
@@ -148,14 +152,6 @@ def get_result_dir(config):
 def get_script_path(script_name: str) -> str:
     """Return the path to the script matching the file name."""
     return Path(SCRIPT_DIR, script_name).as_posix()
-
-
-def get_threads(cluster_config, rule_name="__default__"):
-    """
-    To retrieve threads from cluster config or return default value of 8
-    """
-
-    return cluster_config[rule_name]["n"] if rule_name in cluster_config else 8
 
 
 def get_rule_output(rules, rule_name, output_file_wildcards):

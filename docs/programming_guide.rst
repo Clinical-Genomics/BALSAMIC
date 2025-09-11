@@ -83,8 +83,6 @@ BALSAMIC. For further description of how Snakemake works, please refer to Snakem
         params:
             <named_param_1> = ...,
             <named_param_1> = ...,
-        threads:
-            get_threads(cluster_config, '<rule_name>')
         message:
             ("Align fastq files with bwa-mem to reference genome and sort using samtools for sample: {sample}"
             "<second line is allowed to cover more description>")

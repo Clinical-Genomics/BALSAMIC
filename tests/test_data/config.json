@@ -5,11 +5,17 @@
     "n_base_limit": "50"
   },
   "vcf": {
-
     "vardict": {
       "mutation": "somatic",
       "mutation_type": "SNV",
       "analysis_type": ["paired", "single"],
+      "sequencing_type": ["targeted"],
+      "workflow_solution": ["BALSAMIC"]
+    },
+    "vardictsv": {
+      "mutation": "somatic",
+      "mutation_type": "SV",
+      "analysis_type": ["single"],
       "sequencing_type": ["targeted"],
       "workflow_solution": ["BALSAMIC"]
     },
@@ -221,7 +227,7 @@
     "picard": ["2.27.1"],
     "mosdepth": ["0.3.3"],
     "sambamba": ["0.8.2"],
-    "ensembl-vep": ["104.3"],
+    "ensembl-vep": ["113.4"],
     "vcfanno": ["0.3.3"],
     "genmod": ["3.7.4"],
     "ascatNgs": ["4.5.0"],
