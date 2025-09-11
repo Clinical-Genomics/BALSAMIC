@@ -52,7 +52,7 @@ OPTION_ARTEFACT_SV_OBSERVATIONS = click.option(
     "--artefact-sv-observations",
     type=click.Path(exists=True, resolve_path=True),
     required=False,
-    help="VCF path of somatic SVs called in high coverage wgs normal samples (used in all workflows)",
+    help="VCF path of somatic SVs called in high coverage wgs normal samples used in WGS",
 )
 OPTION_BACKGROUND_VARIANTS = click.option(
     "-b",
