@@ -7,9 +7,7 @@ def add_clnvid_header(output_handle) -> None:
     Writes the INFO header line for the CLNVID field to the output VCF.
     """
     # Use String to be safe; ID column can contain non-numeric identifiers.
-    header_line = (
-        '##INFO=<ID=CLNVID,Number=1,Type=String,Description="ClinVar Variation ID taken from the VCF ID column">'
-    )
+    header_line = '##INFO=<ID=CLNVID,Number=1,Type=String,Description="ClinVar Variation ID taken from the VCF ID column">'
     output_handle.write(f"{header_line}\n".encode("utf-8"))
 
 
@@ -20,7 +18,9 @@ def process_vcf(input_path: str, output_path: str) -> None:
     """
     saw_clnvid_header = False
 
-    with pysam.BGZFile(input_path, "r") as infile, pysam.BGZFile(output_path, "w") as outfile:
+    with pysam.BGZFile(input_path, "r") as infile, pysam.BGZFile(
+        output_path, "w"
+    ) as outfile:
         for raw_line in infile:
             # Pass through meta headers; track if CLNVID header already exists
             if raw_line.startswith(b"##"):
