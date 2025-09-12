@@ -8,9 +8,9 @@
 rule sentieon_tnscope_umi:
     input:
         bam = expand(umi_dir + "tumor.{sample}_consensusfiltered_umi.bam", sample=tumor_sample),
-        ref_fa = config["reference"]["reference_genome"],
+        ref_fa = reference_genome,
         bed = config["panel"]["capture_kit"],
-        dbsnp = config["reference"]["dbsnp"]
+        dbsnp = dbsnp
     output:
         vcf_tnscope_umi = vcf_dir +  "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope_umi.vcf.gz",
         namemap = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope_umi.sample_name_map"
