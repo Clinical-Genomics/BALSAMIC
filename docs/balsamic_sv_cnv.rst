@@ -169,7 +169,7 @@ The SweGen and frequencies and the frequency of observed structural variants fro
 
 The following filter applies for both tumor-normal and tumor-only samples in addition to caller specific filters.
 
-*ArtefactObs*: Number of observations of the variants from somatic calls on 55 merged WGS normal samples (4 samples, approximately 120X coverage)
+*ArtefactObs*: Number of observations of the variants from somatic calls on high-coverage WGS normal samples (artificially created by mixing several samples)
 
 ::
 
@@ -177,7 +177,7 @@ The following filter applies for both tumor-normal and tumor-only samples in add
 
 .. note:: The above filter ArtefactObs is only active for the WGS workflow.
 
-Above filter is applied for both research and clinical vcf (`SV.somatic.<CASE_ID>.svdb.<research/clinical>.filtered.pass.vcf.gz`).
+Above filter is applied for the clinical vcf (`SV.somatic.<CASE_ID>.svdb.clinical.filtered.pass.vcf.gz`).
 
 
 *SWEGENAF*: SweGen Allele Frequency
