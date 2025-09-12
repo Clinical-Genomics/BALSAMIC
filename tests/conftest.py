@@ -2300,12 +2300,14 @@ def fixture_delly_exclusion_converted_file(session_tmp_path: Path) -> Path:
     return reference_file
 
 
-@pytest.fixture(scope="session", name="clinvar_file")
+@pytest.fixture(scope="session", name="clinvar_processed")
 def fixture_clinvar_file(session_tmp_path: Path) -> Path:
     """Return dummy clinvar file."""
-    clinvar_file: Path = Path(session_tmp_path, "variants", "clinvar.vcf.gz")
-    clinvar_file.touch()
-    return clinvar_file
+    clinvar_processed: Path = Path(
+        session_tmp_path, "variants", "clinvar_processed.vcf.gz"
+    )
+    clinvar_processed.touch()
+    return clinvar_processed
 
 
 @pytest.fixture(scope="session", name="cosmic_file")
@@ -2379,7 +2381,7 @@ def fixture_analysis_references_hg_data(
     cache_config: CacheConfig,
     analysis_references_data: Dict[str, Path],
     delly_exclusion_converted_file: Path,
-    clinvar_file: Path,
+    clinvar_processed: Path,
     cosmic_file: Path,
     dbsnp_file: Path,
     hc_vcf_1kg_file: Path,
@@ -2397,7 +2399,7 @@ def fixture_analysis_references_hg_data(
         ),
         "cadd_snv": Path(cache_config.references.cadd_snv.file_path),
         "simple_repeat": Path(cache_config.references.simple_repeat.file_path),
-        "clinvar": clinvar_file,
+        "clinvar": clinvar_processed,
         "cosmic": cosmic_file,
         "dbsnp": dbsnp_file,
         "delly_exclusion": Path(cache_config.references.delly_exclusion.file_path),

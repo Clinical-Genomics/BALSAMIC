@@ -23,6 +23,7 @@ Changed:
 * use median_target_coverage as threshold for wgs normals coverage instead of median coverage https://github.com/Clinical-Genomics/BALSAMIC/pull/1587
 
 
+
 Removed:
 ^^^^^^^^
 * removed immediate submit functionality https://github.com/Clinical-Genomics/BALSAMIC/pull/1604
