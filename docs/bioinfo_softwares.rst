@@ -165,3 +165,9 @@ vcf2cytosure
 :Source code: `GitHub` `<https://github.com/NBISweden/vcf2cytosure>`_
 :Article: `-`
 :Version: `0.9.1`
+
+gatk4
+~~~~~~~~~~~~~
+:Source code: `GitHub` `<https://github.com/broadinstitute/gatk>`_
+:Article: `Curr Protoc Bioinformatics` `<https://currentprotocols.onlinelibrary.wiley.com/doi/10.1002/0471250953.bi1110s43>`_
+:Version: `4.4`
