@@ -11,7 +11,7 @@ LABEL base.image="continuumio/miniconda3" \
 ARG CONTAINER_NAME
 
 # Set environment variables
-ENV GATK_VERSION=4.6.2
+ENV GATK_VERSION=4.4
 
 # Create a conda environment for GATK4
 # Disable conda auto-updates, which can cause compatibility issues with GATK
