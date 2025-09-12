@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
 from pathlib import Path
+from typing import List, Optional, Set, Tuple
+
 import vcfpy
 import click
 
@@ -12,8 +14,11 @@ class RescueReasons:
     RESCUE_LIST = "RescueList"
 
 
-def load_rescue_variants(vcf_path: str) -> set[tuple]:
-    """Load variants to rescue and return an set of tuples (CHROM, POS, REF, ALT)."""
+RescueKey = Tuple[str, int, str, str]  # (CHROM, POS, REF, ALT)
+
+
+def load_rescue_variants(vcf_path: str) -> Set[RescueKey]:
+    """Load variants to rescue and return a set of tuples (CHROM, POS, REF, ALT)."""
     reader = vcfpy.Reader.from_path(vcf_path)
     return {
         (record.CHROM, record.POS, record.REF, record.ALT[0].serialize())
@@ -22,7 +27,7 @@ def load_rescue_variants(vcf_path: str) -> set[tuple]:
 
 
 def update_headers(reader) -> None:
-    """Update vcf headers."""
+    """Update VCF headers."""
     INFO_HEADERS = [
         (
             "RescueFilters",
@@ -38,26 +43,36 @@ def update_headers(reader) -> None:
         ),
     ]
 
-    for id, number, type, desc in INFO_HEADERS:
+    for id_, number, type_, desc in INFO_HEADERS:
         reader.header.add_info_line(
             vcfpy.OrderedDict(
-                [("ID", id), ("Number", number), ("Type", type), ("Description", desc)]
+                [
+                    ("ID", id_),
+                    ("Number", number),
+                    ("Type", type_),
+                    ("Description", desc),
+                ]
             )
         )
 
 
-def get_clinvar_pathogenicity(record) -> str:
+def get_clinvar_pathogenicity(record: vcfpy.Record) -> str:
     clnsig = record.INFO.get("CLNSIG") or ""
     if isinstance(clnsig, list):
         clnsig = "|".join(clnsig)
     return clnsig.lower()
 
 
-def determine_clinvar_reasons(record: vcfpy.record) -> list[str]:
+def determine_clinvar_reasons(record: vcfpy.Record) -> List[str]:
     """Determine rescue reasons based on ClinVar annotations."""
-    reasons: list[str] = []
+    reasons: List[str] = []
     if "ONC" in record.INFO:
-        onc = "|".join(record.INFO["ONC"]).lower()
+        onc_val = record.INFO["ONC"]
+        onc = (
+            "|".join(onc_val).lower()
+            if isinstance(onc_val, list)
+            else str(onc_val).lower()
+        )
         # Exclude no_classification_for_the_single_variant, Benign and likely benign
         if "oncogenic" in onc or "tier" in onc or "uncertain" in onc:
             reasons.append(RescueReasons.CLINVAR_ONC)
@@ -70,26 +85,31 @@ def determine_clinvar_reasons(record: vcfpy.record) -> list[str]:
     return reasons
 
 
-def record_in_rescue_list(record: vcfpy.Record, rescue_keys: set[tuple] | None) -> bool:
+def record_in_rescue_list(
+    record: vcfpy.Record, rescue_keys: Optional[Set[RescueKey]]
+) -> bool:
     """Returns True if the record is within the variants to rescue."""
     if not rescue_keys:
         return False
+    # Account for multi-ALT (shouldn't happen here but be safe)
     return any(
         (record.CHROM, record.POS, record.REF, alt.serialize()) in rescue_keys
         for alt in record.ALT
-    )  # To account for multiple ALT per row (although this shouldn't be the case)
+    )
 
 
 def process_record(
-    record: vcfpy.Record, rescue_keys: set[tuple] | None
+    record: vcfpy.Record, rescue_keys: Optional[Set[RescueKey]]
 ) -> vcfpy.Record:
-    """Update record with rescue information and adjusted fiter."""
-    reasons: list[str] = []
+    """Update record with rescue information and adjusted filter."""
+    reasons: List[str] = []
     if record_in_rescue_list(record, rescue_keys):
         reasons.append(RescueReasons.RESCUE_LIST)
     reasons.extend(determine_clinvar_reasons(record))
+
     if not reasons:
         return record
+
     if record.FILTER not in ([], ["."], ["PASS"]):
         record.INFO["RescueFilters"] = "|".join(record.FILTER)
         record.FILTER = ["PASS"]
@@ -98,9 +118,9 @@ def process_record(
 
 
 def process_vcf(
-    in_vcf_path: str, out_vcf_path: str, rescue_keys: set[tuple] | None
+    in_vcf_path: str, out_vcf_path: str, rescue_keys: Optional[Set[RescueKey]]
 ) -> None:
-    """Writes a vcf file with rescued variants and additional info fields."""
+    """Writes a VCF file with rescued variants and additional INFO fields."""
     reader = vcfpy.Reader.from_path(in_vcf_path)
     update_headers(reader)
     with vcfpy.Writer.from_path(out_vcf_path, reader.header) as writer:
@@ -131,19 +151,14 @@ def process_vcf(
     required=True,
     help="Output VCF path (file will be overwritten).",
 )
-def cli(rescue_list: Path | None, vcf_path: Path, out_path: Path) -> None:
+def cli(rescue_list: Optional[Path], vcf_path: Path, out_path: Path) -> None:
     """
-    Rescue variants by rescue criteria. If a variant is rescued the filters are set as PASS and
-    two new info fields are added RescueFilters (original filters in input vcf) and RescueStatus
-    (list of reasons to rescue).
-
-    Rescue criteria:
-      - If --rescue-list is provided: rescue variant match (CHROM, POS, REF, ALT).
-      - Clinvar:
-        - CLNSIG contains 'Pathogenic' or 'Likely_pathogenic'.
-        - ClinVar: ONC field is present and partially matches "oncogenic", "tier", "uncertain"
+    Rescue variants by rescue criteria. If a variant is rescued the filters are set to PASS and
+    two new INFO fields are added: RescueFilters (original filters) and RescueStatus (reasons).
     """
-    rescue_keys = load_rescue_variants(str(rescue_list)) if rescue_list else None
+    rescue_keys: Optional[Set[RescueKey]] = (
+        load_rescue_variants(str(rescue_list)) if rescue_list else None
+    )
     process_vcf(str(vcf_path), str(out_path), rescue_keys)
 
 
