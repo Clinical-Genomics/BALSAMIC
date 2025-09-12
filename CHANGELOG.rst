@@ -22,6 +22,7 @@ Changed:
 * use median_target_coverage as threshold for wgs normals coverage instead of median coverage https://github.com/Clinical-Genomics/BALSAMIC/pull/1587
 
 
+
 Removed:
 ^^^^^^^^
 * removed immediate submit functionality https://github.com/Clinical-Genomics/BALSAMIC/pull/1604
@@ -41,6 +42,7 @@ Added:
 * logfile for balsamic wrapper https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
 * analysis status text file for easier prodbioinfo handling https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
 * requested memory to each rule https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
+
 
 
 
