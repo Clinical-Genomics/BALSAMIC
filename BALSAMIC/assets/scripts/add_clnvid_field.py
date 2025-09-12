@@ -6,8 +6,9 @@ def add_clnvid_header(output_handle) -> None:
     """
     Writes the INFO header line for the CLNVID field to the output VCF.
     """
+    # Use String to be safe; ID column can contain non-numeric identifiers.
     header_line = (
-        '##INFO=<ID=CLNVID,Number=1,Type=Integer,Description="ClinVar Variation ID">'
+        '##INFO=<ID=CLNVID,Number=1,Type=String,Description="ClinVar Variation ID taken from the VCF ID column">'
     )
     output_handle.write(f"{header_line}\n".encode("utf-8"))
 
@@ -17,25 +18,49 @@ def process_vcf(input_path: str, output_path: str) -> None:
     Processes a bgzipped VCF file using pysam, adds the CLNVID INFO field based on the ID column,
     and writes to a new bgzipped VCF file in a tabix-compatible format.
     """
-    with pysam.BGZFile(input_path, "r") as infile, pysam.BGZFile(
-        output_path, "w"
-    ) as outfile:
+    saw_clnvid_header = False
+
+    with pysam.BGZFile(input_path, "r") as infile, pysam.BGZFile(output_path, "w") as outfile:
         for raw_line in infile:
-            line = raw_line.decode("utf-8")
-            if line.startswith("##"):
+            # Pass through meta headers; track if CLNVID header already exists
+            if raw_line.startswith(b"##"):
+                if b"##INFO=<ID=CLNVID" in raw_line:
+                    saw_clnvid_header = True
                 outfile.write(raw_line)
-            elif line.startswith("#"):
-                add_clnvid_header(outfile)
+                continue
+
+            # Column header line: add CLNVID header if missing, then write
+            if raw_line.startswith(b"#"):
+                if not saw_clnvid_header:
+                    add_clnvid_header(outfile)
+                    saw_clnvid_header = True
                 outfile.write(raw_line)
-            else:
-                fields = line.strip().split("\t")
-                vcf_id = fields[2]
-                if fields[7] == ".":
-                    fields[7] = f"CLNVID={vcf_id}"
-                else:
-                    fields[7] += f";CLNVID={vcf_id}"
-                modified_line = "\t".join(fields) + "\n"
-                outfile.write(modified_line.encode("utf-8"))
+                continue
+
+            # Variant line
+            line = raw_line.decode("utf-8").rstrip("\n")
+            fields = line.split("\t")
+
+            # Ensure we have at least up to INFO column
+            if len(fields) < 8:
+                # Malformed line, write back unchanged
+                outfile.write((line + "\n").encode("utf-8"))
+                continue
+
+            vcf_id = fields[2]
+            info = fields[7]
+
+            # Only add CLNVID when ID column is not '.'
+            if vcf_id != ".":
+                if info == "." or info == "":
+                    info = f"CLNVID={vcf_id}"
+                elif "CLNVID=" not in info:
+                    info = f"{info};CLNVID={vcf_id}"
+
+            # Write updated INFO back to fields
+            fields[7] = info
+            modified_line = "\t".join(fields) + "\n"
+            outfile.write(modified_line.encode("utf-8"))
 
 
 @click.command()
