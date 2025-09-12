@@ -1,37 +1,38 @@
-FROM python:3.11-slim
+FROM continuumio/miniconda3:25.3.1-1
 
-LABEL base.image="python:3.11-slim"
-LABEL maintainer="Clinical Genomics"
-LABEL about.contact="support@clinicalgenomics.se"
-LABEL software="GATK"
-LABEL software.version="4.4.0.4"
-LABEL about.summary="Variant Discovery in High-Throughput Sequencing Data"
-LABEL about.home="https://github.com/broadinstitute/gatk"
-LABEL about.documentation="https://gatk.broadinstitute.org/hc/en-us"
-LABEL about.license="MIT License (MIT)"
+LABEL base.image="continuumio/miniconda3" \
+    maintainer="Clinical Genomics" \
+    about.contact="support@clinicalgenomics.se" \
+    about.license="MIT License (MIT)" \
+    about.home="https://github.com/Clinical-Genomics/BALSAMIC" \
+    about.documentation="https://balsamic.readthedocs.io/" \
+    about.description="Bioinformatic analysis pipeline for somatic mutations in cancer"
 
-ENV DEBIAN_FRONTEND noninteractive
-RUN apt-get update && apt-get -y upgrade && \
-    apt-get -y install --no-install-recommends wget openjdk-17-jre-headless apt-utils \
-    git r-base-core && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+ARG CONTAINER_NAME
 
-ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+# Set environment variables
+ENV GATK_VERSION=4.6.2
 
-WORKDIR /tmp
-# install GATK4
-ENV GATK_VERSION="4.4.0.0"
-RUN wget --no-verbose https://github.com/broadinstitute/gatk/releases/download/${GATK_VERSION}/gatk-${GATK_VERSION}.zip && \
-    unzip gatk-${GATK_VERSION}.zip -d /opt && \
-    rm gatk-${GATK_VERSION}.zip
+# Create a conda environment for GATK4
+# Disable conda auto-updates, which can cause compatibility issues with GATK
+# Enable the (much) faster libmamba solver
+RUN conda config --set auto_update_conda false && \
+    conda config --set solver libmamba && \
+    conda install -y -c bioconda -c conda-forge gatk4=${GATK_VERSION} && \
+    conda clean -afy
 
-ENV PATH /opt/gatk-${GATK_VERSION}:$PATH
+#ENV PATH="/opt/conda/envs/${CONTAINER_NAME}/bin/:${PATH}"
+ENV PATH="/opt/conda/bin:${PATH}"
 
-RUN adduser --disabled-password --gecos '' ubuntu && \
-    chsh -s /bin/bash && mkdir -p /home/ubuntu
+# Run as a non-root
+RUN useradd -m dockeruser
+USER dockeruser
 
-USER ubuntu
-WORKDIR /home/ubuntu
+# Set the work directory
+WORKDIR /home/dockeruser/
+
+# Set the default shell
+SHELL ["/bin/bash", "-c"]
+
+# Define the default command
 CMD ["/bin/bash"]
-
