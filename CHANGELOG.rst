@@ -29,6 +29,7 @@ Changed:
 * changed sex check to a warning metric instead of qc fail https://github.com/Clinical-Genomics/BALSAMIC/pull/1581
 
 
+
 Removed:
 ^^^^^^^^
 * removed immediate submit functionality https://github.com/Clinical-Genomics/BALSAMIC/pull/1604
@@ -45,6 +46,7 @@ Fixed:
 
 Added:
 ^^^^^^
+
 
 
 
