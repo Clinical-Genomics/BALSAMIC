@@ -5,8 +5,8 @@
 rule somalier_extract_normal:
     input:
         bamN = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = normal_sample),
-        fa = config["reference"]["reference_genome"],
-        ref_sites = config["reference"]["somalier_sites"],
+        fa = reference_genome,
+        ref_sites = somalier_sites,
     output:
         somalierN = qc_dir + "somalier/NORMAL.somalier"
     benchmark:
@@ -27,8 +27,8 @@ rule somalier_extract_normal:
 rule somalier_extract_tumor:
     input:
         bamT = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
-        fa = config["reference"]["reference_genome"],
-        ref_sites = config["reference"]["somalier_sites"],
+        fa = reference_genome,
+        ref_sites = somalier_sites,
     output:
         somalierT = qc_dir + "somalier/TUMOR.somalier"
     benchmark:

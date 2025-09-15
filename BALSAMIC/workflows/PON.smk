@@ -40,9 +40,6 @@ result_dir: str = Path(config_model.analysis.result).as_posix() + "/"
 
 LOG = logging.getLogger(__name__)
 
-log_file = Path(case_dir, LogFile.LOGNAME).as_posix()
-add_file_logging(log_file, logger_name=__name__)
-
 LOG.info("Running BALSAMIC: PON.smk.")
 
 # Create a temporary directory with trailing /
@@ -70,6 +67,7 @@ fastp_parameters: Dict = get_fastp_parameters(config_model)
 analysis_type = config_model.analysis.analysis_type
 sequencing_type = config_model.analysis.sequencing_type
 
+# reference file paths
 
 rules_to_include = []
 if sequencing_type == SequencingType.TARGETED:
@@ -84,10 +82,17 @@ else:
     rules_to_include.append("snakemake_rules/align/wgs_sentieon_alignment.rule")
     rules_to_include.append("snakemake_rules/align/wgs_bam_postprocess.rule")
 
+
+
+reference_genome: str = config_model.reference["reference_genome"].file.as_posix()
+refgene_flat: str = config_model.reference["refgene_flat"].file.as_posix()
+access_regions: str = config_model.reference["access_regions"].file.as_posix()
+dbsnp = config_model.reference["dbsnp"].file.as_posix()
+mills_1kg = config_model.reference["mills_1kg"].file.as_posix()
+known_indel_1kg = config_model.reference["known_indel_1kg"].file.as_posix()
+
 if pon_workflow == PONWorkflow.CNVKIT:
-    reffasta: str = config_model.reference["reference_genome"]
-    refgene_flat: str = config_model.reference["refgene_flat"]
-    access_5kb_hg19: str = config_model.reference["access_regions"]
+
     target_bed: str = config_model.panel.capture_kit
     panel_name = os.path.split(target_bed)[1].replace('.bed','')
 
@@ -95,6 +100,7 @@ if pon_workflow == PONWorkflow.CNVKIT:
     rules_to_include.append("snakemake_rules/pon/cnvkit_create_pon.rule")
 
 if pon_workflow in [PONWorkflow.GENS_MALE, PONWorkflow.GENS_FEMALE]:
+
     gender = Gender.MALE if pon_workflow == PONWorkflow.GENS_MALE else Gender.FEMALE
 
     pon_reference = expand(cnv_dir + "gens_pon_100bp.{gender}.{version}.hdf5", gender=gender, version=version)

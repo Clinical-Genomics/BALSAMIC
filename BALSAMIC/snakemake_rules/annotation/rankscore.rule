@@ -6,7 +6,7 @@
 rule genmod_score_snvs:
   input:
     vcf = vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.clinical.vcf.gz",
-    rank_score = config["reference"]["rank_score"]
+    rank_score = rank_score
   output:
     vcf_clinical = vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.clinical.scored.vcf.gz",
   benchmark:

@@ -99,6 +99,13 @@ OPTION_CANCER_SOMATIC_SNV_OBSERVATIONS = click.option(
     help="VCF path of cancer SNV tumor observations (WGS analysis workflow)",
 )
 
+OPTION_CANCER_SOMATIC_SNV_PANEL_OBSERVATIONS = click.option(
+    "--cancer-somatic-snv-panel-observations",
+    type=click.Path(exists=True, resolve_path=True),
+    required=False,
+    help="VCF path of cancer SNV tumor observations from matching gene panel",
+)
+
 OPTION_CANCER_SOMATIC_SV_OBSERVATIONS = click.option(
     "--cancer-somatic-sv-observations",
     type=click.Path(exists=True, resolve_path=True),
@@ -440,4 +447,10 @@ OPTION_UMI_MIN_READS = click.option(
     type=click.STRING,
     callback=validate_umi_min_reads,
     help="Minimum raw reads supporting each UMI group. Format: 'x,y,z'.",
+)
+
+OPTION_RESCUE_SNVS = click.option(
+    "--rescue-snvs",
+    type=click.Path(exists=True, resolve_path=True),
+    help="Path to rescue file for SNVs, see read-the-docs for format.",
 )

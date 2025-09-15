@@ -72,13 +72,22 @@ fastp_parameters: Dict = get_fastp_parameters(config_model)
 analysis_type = config_model.analysis.analysis_type
 sequencing_type = config_model.analysis.sequencing_type
 
+reference_genome = config_model.reference["reference_genome"].file.as_posix()
+dbsnp = config_model.reference["dbsnp"].file.as_posix()
+mills_1kg = config_model.reference["mills_1kg"].file.as_posix()
+known_indel_1kg = config_model.reference["known_indel_1kg"].file.as_posix()
+refgene_bed = config_model.reference["refgene_bed"].file.as_posix()
+refgene_txt = config_model.reference["refgene_txt"].file.as_posix()
+refgene_flat = config_model.reference["refgene_flat"].file.as_posix()
+somalier_sites = config_model.reference["somalier_sites"].file.as_posix()
+
 # Capture kit name
 if sequencing_type != "wgs":
     capture_kit = os.path.split(config["panel"]["capture_kit"])[1]
 
-if "hg38" in config["reference"]["reference_genome"]:
+if "hg38" in config["reference"]["reference_genome"]["file"]:
     config["reference"]["genome_version"] = "hg38"
-elif "canfam3" in config["reference"]["reference_genome"]:
+elif "canfam3" in config["reference"]["reference_genome"]["file"]:
     config["reference"]["genome_version"] = "canfam3"
 else:
     config["reference"]["genome_version"] = "hg19"
@@ -99,7 +108,7 @@ rules_to_include = [rule for rule in rules_to_include if "umi" not in rule and "
 
 
 # Somalier only implemented for hg38 and hg19
-if "canfam3" in config["reference"]["reference_genome"]:
+if "canfam3" in config["reference"]["reference_genome"]["file"]:
     rules_to_include.remove("snakemake_rules/quality_control/somalier.rule")
 
 for r in rules_to_include:
@@ -113,6 +122,7 @@ quality_control_results = [
     Path(qc_dir, "multiqc_report.html").as_posix(),
     Path(qc_dir, "multiqc_data/multiqc_data.json").as_posix(),
 ]
+
 
 if 'delivery' in config:
     wildcard_dict = {
