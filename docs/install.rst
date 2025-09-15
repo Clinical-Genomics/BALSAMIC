@@ -25,7 +25,7 @@ Step 1. Installing BALSAMIC
 
 ::
 
-    conda create --name S_balsamic -c conda-forge python=3.11 pip "cython<3" pygraphviz wkhtmltopdf snakemake-executor-plugin-slurm
+    conda create -n S_balsamic -y -c conda-forge -c bioconda python=3.11 pip "cython<3" pygraphviz wkhtmltopdf snakemake-executor-plugin-slurm pysam=0.23.3 cyvcf2=0.31.1 htslib samtools
 
 
 
@@ -41,7 +41,7 @@ Step 1. Installing BALSAMIC
 
 ::
 
-  pip install --no-build-isolation --no-cache-dir -U git+https://github.com/Clinical-Genomics/BALSAMIC
+  pip install --no-cache-dir --no-deps -U git+https://github.com/Clinical-Genomics/BALSAMIC
 
 
 Or if you have repository cloned and want it in editable mode:
