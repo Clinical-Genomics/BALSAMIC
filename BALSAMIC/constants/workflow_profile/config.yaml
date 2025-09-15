@@ -420,7 +420,7 @@ set-resources:
     runtime: 60
     mem_mb: 4000
   cadd_annotate_somaticINDEL_research:
-    runtime: 1080
+    runtime: 1580
     mem_mb: 20000
   bcftools_get_somaticINDEL_research:
     runtime: 60
