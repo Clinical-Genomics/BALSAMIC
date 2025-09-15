@@ -11,6 +11,8 @@ rule vep_somatic_research_sv:
         vcf_research_vep = vep_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.research.vep.vcf.gz",
     benchmark:
         Path(benchmark_dir, "vep_somatic_research_sv." + config["analysis"]["case_id"] + ".svdb.tsv").as_posix()
+    resources:
+        mem_mb = lambda wc: (140000 if config_model.analysis.sequencing_type == SequencingType.WGS else 40000)
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix()
     params:
