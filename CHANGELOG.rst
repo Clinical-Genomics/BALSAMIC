@@ -15,7 +15,6 @@ Added:
 * using predicted sex for CNV analysis for cases with unknown gender https://github.com/Clinical-Genomics/BALSAMIC/pull/1581
 * artefact database filter for WGS SVs  https://github.com/Clinical-Genomics/BALSAMIC/pull/1578
 
-
 Changed:
 ^^^^^^^^
 * Updated ensembl vep to version 113.4 https://github.com/Clinical-Genomics/BALSAMIC/pull/1567
@@ -29,8 +28,6 @@ Changed:
 * refactored reference subdict in balsamic config https://github.com/Clinical-Genomics/BALSAMIC/pull/1570
 * refactored variant observations metadata fields into constants instead of snakemake file https://github.com/Clinical-Genomics/BALSAMIC/pull/1570
 * changed sex check to a warning metric instead of qc fail https://github.com/Clinical-Genomics/BALSAMIC/pull/1581
-
-
 
 Removed:
 ^^^^^^^^
