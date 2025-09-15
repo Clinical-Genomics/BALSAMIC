@@ -5,7 +5,7 @@ import toml
 import os
 from glob import glob
 from pathlib import Path
-from typing import Annotated, Dict, List, Optional, Literal
+from typing import Annotated, Dict, List, Optional
 
 from pydantic import (
     AfterValidator,
