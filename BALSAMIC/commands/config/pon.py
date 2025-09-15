@@ -35,10 +35,11 @@ from BALSAMIC.utils.cli import (
     get_analysis_fastq_files_directory,
     get_bioinfo_tools_version,
     get_pon_sample_list,
+    get_snakefile,
 )
 from BALSAMIC.utils.io import read_json, write_json
 from BALSAMIC.utils.utils import get_absolute_paths_dict
-from BALSAMIC.utils.references import merge_reference_metadata
+from BALSAMIC.utils.references import add_reference_metadata
 
 LOG = logging.getLogger(__name__)
 
@@ -85,7 +86,7 @@ def pon_config(
             )
         references["genome_interval"] = genome_interval
 
-    references = merge_reference_metadata(existing_refs=references)
+    references = add_reference_metadata(references=references)
 
     if pon_workflow == PONWorkflow.CNVKIT and not panel_bed:
         raise click.BadParameter(
@@ -147,5 +148,9 @@ def pon_config(
     write_json(json_obj=config_collection_dict, path=config_path)
     LOG.info(f"PON config file saved successfully - {config_path}")
 
-    generate_graph(config_collection_dict, config_path)
+    snakefile = get_snakefile(
+        analysis_type=config_collection_dict["analysis"]["analysis_type"],
+        analysis_workflow=config_collection_dict["analysis"]["analysis_workflow"],
+    )
+    generate_graph(config_collection_dict, config_path, snakefile)
     LOG.info(f"BALSAMIC PON workflow has been configured successfully!")

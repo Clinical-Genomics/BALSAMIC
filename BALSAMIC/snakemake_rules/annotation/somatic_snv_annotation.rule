@@ -165,9 +165,9 @@ rule vcfanno_annotate_somaticSNV_clinical:
   shell:
         """
 if [[ ! -z "{params.vcfanno_clinical_annotations}" ]]; then
-    echo \'{params.vcfanno_clinical_annotations}\' > {params.vcfanno_clinical_toml} ;
-    vcfanno -p {resources.threads} {params.vcfanno_clinical_toml} {input.vcf_snv_research} | \
-    bcftools view --threads {resources.threads} -O z -o {output.vcf_snv_clinical};
+    echo \'{params.vcfanno_clinical_annotations}\' > {params.vcfanno_clinical_toml};
+    vcfanno -p {threads} {params.vcfanno_clinical_toml} {input.vcf_snv_research} | \
+    bcftools view --threads {threads} -O z -o {output.vcf_snv_clinical};
 else
     cp {input.vcf_snv_research} {output.vcf_snv_clinical};
 fi

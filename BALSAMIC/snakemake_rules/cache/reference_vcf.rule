@@ -1,5 +1,6 @@
 """Rules to process VCF reference files."""
 
+from BALSAMIC.utils.rule import get_script_path
 
 wildcard_constraints:
     vcf="|".join(cache_config.get_reference_file_paths_by_file_type(file_type=FileType.VCF)),
@@ -44,4 +45,43 @@ rule index_vcfs:
     shell:
         """
         tabix -p vcf "{input.vcf_gz}" &> "{log}"
+        """
+
+rule postprocess_clinvar:
+    """Add new info-field based on clinvar variant ID: CLNVID"""
+    input:
+        clinvar=f"{cache_config.references.clinvar.file_path}.{FileType.GZ}",
+    output:
+        clinvar=cache_config.references.get_processed_clinvar_file_path(),
+    params:
+        add_clnvid_script=get_script_path("add_clnvid_field.py"),
+    message:
+        "Adding INFO field CLNVID to ClinVar VCF: {input.clinvar}"
+    benchmark:
+        f"{cache_config.references.clinvar.file_path}.postprocess_clinvar.benchmark.{FileType.TSV}"
+    log:
+        f"{cache_config.references.clinvar.file_path}.postprocess_clinvar.{FileType.LOG}",
+    shell:
+        """
+        python {params.add_clnvid_script} {input.clinvar} {output.clinvar}
+        """
+
+rule index_postprocessed_clinvar_vcf:
+    """Index postprocessed clinvar VCF"""
+    input:
+        clinvar=cache_config.references.get_processed_clinvar_file_path(),
+        singularity_image=f"{config['containers_dir']}/{config['bioinfo_tools']['tabix']}.{FileType.SIF}",
+    output:
+        clinvar_tbi=cache_config.references.get_processed_clinvar_index_path(),
+    singularity:
+        f"{config['containers_dir']}/{config['bioinfo_tools']['tabix']}.{FileType.SIF}"
+    message:
+        "Index postprocessed ClinVar VCF: {input.clinvar}"
+    benchmark:
+        f"{cache_config.references.clinvar.file_path}.tabix_postprocess_clinvar.benchmark.{FileType.TSV}"
+    log:
+        f"{cache_config.references.clinvar.file_path}.tabix_postprocess_clinvar.{FileType.LOG}",
+    shell:
+        """
+        tabix -p vcf {input.clinvar}
         """

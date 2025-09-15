@@ -17,6 +17,19 @@ class SubmitSnakemake:
     MAX_RUN_HOURS: int = 120
 
 
+class SnakemakeDAG:
+    """Constants for Snakemake DAG parsing and rendering."""
+
+    DIGRAPH_HEADER: str = "digraph snakemake_dag {"
+    HEADER: str = "snakemake_dag {"
+
+    GRAPH_NAME: str = "BALSAMIC"
+    GRAPH_LABEL_LOC: str = "t"
+
+    GRAPHVIZ_FORMAT: str = "pdf"
+    GRAPHVIZ_ENGINE: str = "dot"
+
+
 class RunMode(StrEnum):
     """Balsamic workflow run mode."""
 
@@ -28,10 +41,11 @@ RUN_MODES: List[RunMode] = [mode for mode in RunMode]
 
 
 class Gender(StrEnum):
-    """Sex options."""
+    """Gender options."""
 
     FEMALE: str = "female"
     MALE: str = "male"
+    UNKNOWN: str = "unknown"
 
 
 class AnalysisType(StrEnum):
@@ -56,7 +70,6 @@ ANALYSIS_WORKFLOWS: List[AnalysisWorkflow] = [workflow for workflow in AnalysisW
 class AnnotationCategory(StrEnum):
     CLINICAL: str = "clinical"
     RESEARCH: str = "research"
-    POST_QUALITY: str = "post_quality"
 
 
 VARIANT_OBSERVATION_METAVALUES = {
@@ -64,7 +77,7 @@ VARIANT_OBSERVATION_METAVALUES = {
         "fields": ["AF", "AF_popmax"],
         "ops": ["self", "self"],
         "names": ["GNOMADAF", "GNOMADAF_popmax"],
-        "category": AnnotationCategory.POST_QUALITY,
+        "category": AnnotationCategory.RESEARCH,
     },
     "clinvar": {
         "fields": [
