@@ -9,6 +9,10 @@ Added:
 * requested memory to each rule https://github.com/Clinical-Genomics/BALSAMIC/pull/1604
 * snakemake executor plugin installation instructions https://github.com/Clinical-Genomics/BALSAMIC/pull/1604
 * argument for headjob slurm partition  https://github.com/Clinical-Genomics/BALSAMIC/pull/1604
+* rescuing of variants based on pathogenic / oncogenic clinvar information and optional manually curated clinical list added to all workflows https://github.com/Clinical-Genomics/BALSAMIC/pull/1570
+* soft-filter HighOccurrenceFrq, added to SNVs in panels based on being present in over 30% of cases https://github.com/Clinical-Genomics/BALSAMIC/pull/1570
+* gender unknown gender assignment https://github.com/Clinical-Genomics/BALSAMIC/pull/1570
+* using predicted sex for CNV analysis for cases with unknown gender https://github.com/Clinical-Genomics/BALSAMIC/pull/1581
 
 Changed:
 ^^^^^^^^
@@ -20,6 +24,9 @@ Changed:
 * merge wgs per lane alignments before dedup https://github.com/Clinical-Genomics/BALSAMIC/pull/1587
 * run alignment summary metrics on raw alignment file https://github.com/Clinical-Genomics/BALSAMIC/pull/1587
 * use median_target_coverage as threshold for wgs normals coverage instead of median coverage https://github.com/Clinical-Genomics/BALSAMIC/pull/1587
+* refactored reference subdict in balsamic config https://github.com/Clinical-Genomics/BALSAMIC/pull/1570
+* refactored variant observations metadata fields into constants instead of snakemake file https://github.com/Clinical-Genomics/BALSAMIC/pull/1570
+* changed sex check to a warning metric instead of qc fail https://github.com/Clinical-Genomics/BALSAMIC/pull/1581
 * updated MultiQC to v1.31 https://github.com/Clinical-Genomics/BALSAMIC/pull/1607
 
 Removed:
@@ -32,15 +39,13 @@ Fixed:
 ^^^^^^
 * Fixed varcall_py27 container for Manta https://github.com/Clinical-Genomics/BALSAMIC/pull/1567
 
+
 [17.1.0]
 --------
 
 Added:
 ^^^^^^
-* sbatch script for snakemake sequential job submission https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
-* logfile for balsamic wrapper https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
-* analysis status text file for easier prodbioinfo handling https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
-* requested memory to each rule https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
+
 
 
 
@@ -53,14 +58,10 @@ Changed:
 
 Removed:
 ^^^^^^^^
-* removed immediate submit functionality https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
-* removed unused code for benchmark plotting https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
-* removed functionality to disable variant callers https://github.com/Clinical-Genomics/BALSAMIC/pull/1558
 
 
 Fixed:
 ^^^^^^
-
 
 
 [17.0.1]
