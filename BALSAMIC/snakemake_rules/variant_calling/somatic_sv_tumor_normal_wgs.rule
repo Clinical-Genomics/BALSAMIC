@@ -38,7 +38,7 @@ configManta.py \
 --referenceFasta={input.fa} \
 --runDir={params.tmpdir};
 
-python {params.tmpdir}/runWorkflow.py -m {params.runmode} -j {resources.threads};
+python {params.tmpdir}/runWorkflow.py -m {params.runmode} -j {threads};
 
 convertInversion.py \
   $samtools_path \
@@ -47,7 +47,7 @@ convertInversion.py \
 
 bgzip -l 9 {params.tmpdir}/results/variants/somaticSV_converted.vcf ;
 
-bcftools filter --threads {resources.threads} --exclude 'SUM(FORMAT/PR[1:1]+FORMAT/SR[1:1]) < {params.low_pr_sr_count_value}' --soft-filter '{params.low_pr_sr_count_filter_name}' --mode '+' -o {output.final} -O z {params.tmpdir}/results/variants/somaticSV_converted.vcf.gz
+bcftools filter --threads {threads} --exclude 'SUM(FORMAT/PR[1:1]+FORMAT/SR[1:1]) < {params.low_pr_sr_count_value}' --soft-filter '{params.low_pr_sr_count_filter_name}' --mode '+' -o {output.final} -O z {params.tmpdir}/results/variants/somaticSV_converted.vcf.gz
 
 tabix -p vcf -f {output.final};
 
@@ -184,7 +184,7 @@ ascat.pl \
   -species human \
   -genderChr Y \
   -assembly {params.genome} \
-  -cpus {resources.threads} \
+  -cpus {threads} \
   -reference {input.fa} \
   -snp_gc {input.gccorrection} \
   -outdir {params.tmpdir} \

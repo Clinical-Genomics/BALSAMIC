@@ -42,7 +42,7 @@ export SENTIEON_TMPDIR={params.tmpdir};
 export SENTIEON_LICENSE={params.sentieon_lic};
 
 {params.sentieon_exec} driver \
--t {resources.threads} \
+-t {threads} \
 -r {input.ref_fa} \
 -i {input.bamT} \
 -i {input.bamN} \

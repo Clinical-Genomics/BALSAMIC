@@ -21,7 +21,7 @@ rule fastqc:
         """
 export TMPDIR={params.tmpdir};
     
-fastqc --threads {resources.threads} {input.fastq} \
+fastqc --threads {threads} {input.fastq} \
 --dir {params.tmpdir} \
 --outdir {params.fastqc_dir};
 
