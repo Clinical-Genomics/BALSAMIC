@@ -4,7 +4,7 @@ LABEL base.image="python:3.11.3-slim" \
     maintainer="Clinical Genomics" \
     about.contact="support@clinicalgenomics.se" \
     about.home="https://github.com/MultiQC/MultiQC" \
-    software.version="1.22.3" \
+    software.version="1.31" \
     about.documentation="https://multiqc.info/" \
     about.license="MIT License (MIT)" \
     about.description="Aggregate bioinformatics results across many samples into a single report"
@@ -19,7 +19,7 @@ WORKDIR "$HOME"
 
 # Install pip and multiqc, create user and home directory
 RUN python -m pip install --upgrade pip && \
-    pip install multiqc==1.22.3 && \
+    pip install multiqc==1.31 && \
     adduser --disabled-password --gecos '' "$USER" && \
     chown -R "$USER:$USER" "$HOME"
 
