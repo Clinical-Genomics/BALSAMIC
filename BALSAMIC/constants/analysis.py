@@ -144,6 +144,12 @@ VARIANT_OBSERVATION_METAVALUES = {
         "names": ["ArtefactFrq", "ArtefactObs", "ArtefactHom"],
         "category": AnnotationCategory.CLINICAL,
     },
+    "artefact_sv_observations": {
+        "fields": ["Frq", "Obs", "Hom"],
+        "ops": ["self", "self", "self"],
+        "names": ["ArtefactFrq", "ArtefactObs", "ArtefactHom"],
+        "category": AnnotationCategory.CLINICAL,
+    },
     "clinical_snv_observations": {
         "fields": ["Frq", "Obs", "Hom"],
         "ops": ["self", "self", "self"],

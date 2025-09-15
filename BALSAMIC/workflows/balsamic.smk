@@ -176,7 +176,7 @@ delly_mappability = config_model.reference["delly_mappability"].file.as_posix()
 access_regions = config_model.reference["access_regions"].file.as_posix()
 genome_chrom_size = config_model.reference["genome_chrom_size"].file.as_posix()
 
-# vcfanno annotations
+# vcfanno SV annotations
 
 clinical_sv = config_model.reference.get("clinical_sv_observations")
 clinical_sv = clinical_sv.file.as_posix() if clinical_sv else None
@@ -187,6 +187,8 @@ somatic_sv = somatic_sv.file.as_posix() if somatic_sv else None
 swegen_sv = config_model.reference.get("swegen_sv_frequency")
 swegen_sv = swegen_sv.file.as_posix() if swegen_sv else None
 
+artefact_sv_obs = config_model.reference.get("artefact_sv_observations")
+artefact_sv_obs = artefact_sv_obs.file.as_posix() if artefact_sv_obs else None
 
 # Capture kit name
 if config["analysis"]["sequencing_type"] != "wgs":

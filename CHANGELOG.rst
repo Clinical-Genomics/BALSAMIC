@@ -13,6 +13,7 @@ Added:
 * soft-filter HighOccurrenceFrq, added to SNVs in panels based on being present in over 30% of cases https://github.com/Clinical-Genomics/BALSAMIC/pull/1570
 * gender unknown gender assignment https://github.com/Clinical-Genomics/BALSAMIC/pull/1570
 * using predicted sex for CNV analysis for cases with unknown gender https://github.com/Clinical-Genomics/BALSAMIC/pull/1581
+* artefact database filter for WGS SVs  https://github.com/Clinical-Genomics/BALSAMIC/pull/1578
 
 Changed:
 ^^^^^^^^

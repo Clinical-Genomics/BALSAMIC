@@ -34,6 +34,7 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
             "snakemake_rules/align/bam_compress.rule",
         ],
         "varcall": [
+            "snakemake_rules/variant_calling/sv_quality_filter.rule",
             "snakemake_rules/variant_calling/snv_quality_filter.rule",
             "snakemake_rules/variant_calling/tnscope_post_process.rule",
         ],

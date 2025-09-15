@@ -164,10 +164,21 @@ Further information regarding the TIDDIT tumor normal filtration: As translocati
        | 6. igh_dux4
 
 
-The merged `SNV.somatic.<CASE_ID>.svdb.vcf.gz` file retains all the information for the variants from the caller in which the variants are identified, which are then annotated using `ensembl-vep`.
+The merged `SV.somatic.<CASE_ID>.svdb.vcf.gz` file retains all the information for the variants from the caller in which the variants are identified, which are then annotated using `ensembl-vep`.
 The SweGen and frequencies and the frequency of observed structural variants from clinical normal samples are annotated using `SVDB`.
 
 The following filter applies for both tumor-normal and tumor-only samples in addition to caller specific filters.
+
+*ArtefactObs*: Number of observations of the variants from somatic calls on high-coverage WGS normal samples (artificially created by mixing several samples)
+
+::
+
+  ArtefactObs <= 4  (or) ArtefactObs == "."
+
+.. note:: The above filter ArtefactObs is only active for the WGS workflow.
+
+Above filter is applied for the clinical vcf (`SV.somatic.<CASE_ID>.svdb.clinical.filtered.pass.vcf.gz`).
+
 
 *SWEGENAF*: SweGen Allele Frequency
 
@@ -175,13 +186,17 @@ The following filter applies for both tumor-normal and tumor-only samples in add
 
     SWEGENAF <= 0.02  (or) SWEGENAF == "."
 
-*Frq*: Frequency of observation of the variants from normal `Clinical` samples
+
+Above filter is applied for both research and clinical vcf (`SV.somatic.<CASE_ID>.svdb.<research/clinical>.filtered.pass.vcf.gz`).
+
+*Frq*: Frequency of observation of the variants from germline calls on normal `Clinical` samples
 
 ::
 
     Frq <= 0.02  (or) Frq == "."
 
-The variants scored as `PASS` are included in the final vcf file (`SNV.somatic.<CASE_ID>.svdb.<research/clinical>.filtered.pass.vcf.gz`).
+
+Above filter is applied for only the clinical vcf (`SV.somatic.<CASE_ID>.svdb.clinical.filtered.pass.vcf.gz`).
 
 The following command can be used to fetch the variants identified by a specific caller from merged structural and copy number variants.
 

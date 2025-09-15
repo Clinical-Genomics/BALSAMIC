@@ -12,6 +12,7 @@ from BALSAMIC.commands.options import (
     OPTION_ANALYSIS_DIR,
     OPTION_ANALYSIS_WORKFLOW,
     OPTION_ARTEFACT_SNV_OBSERVATIONS,
+    OPTION_ARTEFACT_SV_OBSERVATIONS,
     OPTION_BACKGROUND_VARIANTS,
     OPTION_BALSAMIC_CACHE,
     OPTION_CACHE_VERSION,
@@ -79,6 +80,7 @@ LOG = logging.getLogger(__name__)
 @OPTION_ANALYSIS_DIR
 @OPTION_ANALYSIS_WORKFLOW
 @OPTION_ARTEFACT_SNV_OBSERVATIONS
+@OPTION_ARTEFACT_SV_OBSERVATIONS
 @OPTION_BACKGROUND_VARIANTS
 @OPTION_BALSAMIC_CACHE
 @OPTION_CACHE_VERSION
@@ -114,6 +116,7 @@ def case_config(
     analysis_dir: Path,
     analysis_workflow: AnalysisWorkflow,
     artefact_snv_observations: Path,
+    artefact_sv_observations: Path,
     background_variants: Path,
     balsamic_cache: Path,
     cache_version: str,
@@ -184,6 +187,7 @@ def case_config(
             )
     variants_observations = {
         "artefact_snv_observations": artefact_snv_observations,
+        "artefact_sv_observations": artefact_sv_observations,
         "clinical_snv_observations": clinical_snv_observations,
         "clinical_sv_observations": clinical_sv_observations,
         "cancer_germline_snv_observations": cancer_germline_snv_observations,
@@ -200,6 +204,7 @@ def case_config(
             if path is not None
         }
     )
+    LOG.info(f"Collected references: {references}")
 
     # Re-organises references into a subdict and adds metadata when available
     references = add_reference_metadata(
