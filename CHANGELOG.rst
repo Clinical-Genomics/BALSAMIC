@@ -28,6 +28,7 @@ Changed:
 * refactored reference subdict in balsamic config https://github.com/Clinical-Genomics/BALSAMIC/pull/1570
 * refactored variant observations metadata fields into constants instead of snakemake file https://github.com/Clinical-Genomics/BALSAMIC/pull/1570
 * changed sex check to a warning metric instead of qc fail https://github.com/Clinical-Genomics/BALSAMIC/pull/1581
+* updated MultiQC to v1.31 https://github.com/Clinical-Genomics/BALSAMIC/pull/1607
 
 Removed:
 ^^^^^^^^
