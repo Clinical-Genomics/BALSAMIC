@@ -18,6 +18,7 @@ from BALSAMIC.commands.options import (
     OPTION_CADD_ANNOTATIONS,
     OPTION_CANCER_GERMLINE_SNV_OBSERVATIONS,
     OPTION_CANCER_SOMATIC_SNV_OBSERVATIONS,
+    OPTION_CANCER_SOMATIC_SNV_PANEL_OBSERVATIONS,
     OPTION_CANCER_SOMATIC_SV_OBSERVATIONS,
     OPTION_CASE_ID,
     OPTION_CLINICAL_SNV_OBSERVATIONS,
@@ -39,14 +40,22 @@ from BALSAMIC.commands.options import (
     OPTION_SWEGEN_SV,
     OPTION_TUMOR_SAMPLE_NAME,
     OPTION_UMI_MIN_READS,
+    OPTION_RESCUE_SNVS,
 )
-from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV, AnalysisWorkflow, Gender
+from BALSAMIC.utils.references import add_reference_metadata
+from BALSAMIC.constants.analysis import (
+    BIOINFO_TOOL_ENV,
+    AnalysisWorkflow,
+    Gender,
+    LogFile,
+)
 from BALSAMIC.constants.cache import GenomeVersion
 from BALSAMIC.constants.constants import FileType
 from BALSAMIC.constants.paths import (
     CONTAINERS_DIR,
     SENTIEON_DNASCOPE_MODEL,
     SENTIEON_TNSCOPE_MODEL,
+    RESCUE_SNVS,
 )
 from BALSAMIC.constants.workflow_params import VCF_DICT
 from BALSAMIC.models.config import ConfigModel
@@ -57,9 +66,11 @@ from BALSAMIC.utils.cli import (
     get_panel_chrom,
     get_sample_list,
     get_gens_references,
+    get_snakefile,
 )
 from BALSAMIC.utils.io import read_json, write_json
 from BALSAMIC.utils.utils import get_absolute_paths_dict
+from BALSAMIC.utils.logging import add_file_logging
 
 LOG = logging.getLogger(__name__)
 
@@ -74,6 +85,7 @@ LOG = logging.getLogger(__name__)
 @OPTION_CADD_ANNOTATIONS
 @OPTION_CANCER_GERMLINE_SNV_OBSERVATIONS
 @OPTION_CANCER_SOMATIC_SNV_OBSERVATIONS
+@OPTION_CANCER_SOMATIC_SNV_PANEL_OBSERVATIONS
 @OPTION_CANCER_SOMATIC_SV_OBSERVATIONS
 @OPTION_CASE_ID
 @OPTION_CLINICAL_SNV_OBSERVATIONS
@@ -95,6 +107,7 @@ LOG = logging.getLogger(__name__)
 @OPTION_SWEGEN_SV
 @OPTION_TUMOR_SAMPLE_NAME
 @OPTION_UMI_MIN_READS
+@OPTION_RESCUE_SNVS
 @click.pass_context
 def case_config(
     context: click.Context,
@@ -107,6 +120,7 @@ def case_config(
     cadd_annotations: Path,
     cancer_germline_snv_observations: Path,
     cancer_somatic_snv_observations: Path,
+    cancer_somatic_snv_panel_observations: Path,
     cancer_somatic_sv_observations: Path,
     case_id: str,
     clinical_snv_observations: Path,
@@ -128,7 +142,21 @@ def case_config(
     swegen_sv: Path,
     tumor_sample_name: str,
     umi_min_reads: str | None,
+    rescue_snvs: Path,
 ):
+    """Configure BALSAMIC workflow based on input arguments."""
+
+    LOG.info(f"Starting configuring analysis case: {case_id}.")
+
+    LOG.info(f"Creating case analysis directory: {analysis_dir}/{case_id}.")
+    Path(analysis_dir, case_id).mkdir(exist_ok=True)
+
+    log_file = Path(analysis_dir, case_id, LogFile.LOGNAME).as_posix()
+    LOG.info(f"Setting BALSAMIC logfile path to: {log_file}.")
+    add_file_logging(log_file, logger_name=__name__)
+
+    LOG.info(f"Running BALSAMIC version {balsamic_version} -- CONFIG CASE")
+
     references_path: Path = Path(balsamic_cache, cache_version, genome_version)
     references: Dict[str, Path] = get_absolute_paths_dict(
         base_path=references_path,
@@ -154,28 +182,35 @@ def case_config(
                     if path is not None
                 }
             )
-
     variants_observations = {
         "artefact_snv_observations": artefact_snv_observations,
         "clinical_snv_observations": clinical_snv_observations,
         "clinical_sv_observations": clinical_sv_observations,
         "cancer_germline_snv_observations": cancer_germline_snv_observations,
         "cancer_somatic_snv_observations": cancer_somatic_snv_observations,
+        "cancer_somatic_snv_panel_observations": cancer_somatic_snv_panel_observations,
         "cancer_somatic_sv_observations": cancer_somatic_sv_observations,
         "swegen_snv_frequency": swegen_snv,
         "swegen_sv_frequency": swegen_sv,
     }
     references.update(
         {
-            observations: path
-            for observations, path in variants_observations.items()
+            variant_observation_file: path
+            for variant_observation_file, path in variants_observations.items()
             if path is not None
         }
+    )
+
+    # Re-organises references into a subdict and adds metadata when available
+    references = add_reference_metadata(
+        references=references,
     )
 
     analysis_fastq_dir: str = get_analysis_fastq_files_directory(
         case_dir=Path(analysis_dir, case_id).as_posix(), fastq_path=fastq_path
     )
+    LOG.info(f"Prepared analysis fastq-dir: {analysis_fastq_dir}")
+
     result_dir: Path = Path(analysis_dir, case_id, "analysis")
     log_dir: Path = Path(analysis_dir, case_id, "logs")
     script_dir: Path = Path(analysis_dir, case_id, "scripts")
@@ -186,6 +221,8 @@ def case_config(
     for directory in [result_dir, log_dir, script_dir, benchmark_dir]:
         directory.mkdir(exist_ok=True)
 
+    LOG.info("Created analysis and log directories.")
+    LOG.info("Validating configuration data in pydantic model.")
     config_collection_dict = ConfigModel(
         sentieon={
             "sentieon_install_dir": sentieon_install_dir,
@@ -209,6 +246,7 @@ def case_config(
             "sequencing_type": "targeted" if panel_bed else "wgs",
             "analysis_workflow": analysis_workflow,
             "config_creation_date": datetime.now().strftime("%Y-%m-%d %H:%M"),
+            "rescue_snvs": rescue_snvs if rescue_snvs else RESCUE_SNVS.as_posix(),
         },
         custom_filters={"umi_min_reads": umi_min_reads if umi_min_reads else None},
         reference=references,
@@ -244,5 +282,10 @@ def case_config(
     write_json(json_obj=config_collection_dict, path=config_path)
     LOG.info(f"Config file saved successfully - {config_path}")
 
-    generate_graph(config_collection_dict, config_path)
+    snakefile = get_snakefile(
+        analysis_type=config_collection_dict["analysis"]["analysis_type"],
+        analysis_workflow=config_collection_dict["analysis"]["analysis_workflow"],
+    )
+
+    generate_graph(config_collection_dict, config_path, snakefile)
     LOG.info(f"BALSAMIC Workflow has been configured successfully!")

@@ -8,14 +8,16 @@
 rule sentieon_tnscope_tga_tumor_only:
     input:
         bam = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
-        ref_fa = config["reference"]["reference_genome"],
+        ref_fa = reference_genome,
         bed = config["panel"]["capture_kit"],
-        dbsnp = config["reference"]["dbsnp"]
+        dbsnp = dbsnp
     output:
         vcf_tnscope = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.vcf.gz",
         namemap_snv = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".tnscope.sample_name_map",
     benchmark:
         Path(benchmark_dir, "sentieon_tnscope_" + config["analysis"]["case_id"] + ".tsv").as_posix()
+    resources:
+        mem_mb=lambda wc, input: min(max(2.1 * input.size_mb, 5000), 250000) # Cap at 250GB. Scale memory with input size (min 5GB) to handle large TGA cases without over-allocating for typical inputs (e.g. myeloid). 2.1 factor chosen after testing
     params:
         algo = params.tnscope_tga.algo,
         error_rate = params.tnscope_tga.error_rate,
@@ -31,8 +33,6 @@ rule sentieon_tnscope_tga_tumor_only:
         tumor_af = params.tnscope_tga.filter_tumor_af,
         tumor_lod = params.tnscope_tga.min_tumorLOD,
         housekeeper_id= {"id": config["analysis"]["case_id"],"tags": "research"}
-    threads:
-        get_threads(cluster_config, "sentieon_tnscope_tga_t_only")
     message:
         "Calling single nucleotide variants using TNscope for {params.tumor}"
     shell:
@@ -69,7 +69,7 @@ rm -rf {params.tmpdir};
 
 rule vardict_tumor_only:
     input:
-        fa = config["reference"]["reference_genome"],
+        fa = reference_genome,
         bamT = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
         bed = vcf_dir + "pad_bedfile/" + "100bp_padding_" + capture_kit
     output:
@@ -85,8 +85,6 @@ rule vardict_tumor_only:
         max_mm = params.vardict.max_mm,
         col_info = params.vardict.column_info,
         case_name = config["analysis"]["case_id"],
-    threads:
-        get_threads(cluster_config, "vardict_tumor_only")
     message:
         "Calling single nucleotide variants using vardict for {params.case_name}"
     shell:
@@ -115,7 +113,7 @@ rule post_process_vardict:
     input:
         vcf = vcf_dir + "vardict/vardict.sorted.vcf"
     output:
-        vcf_vardict = vcf_dir + "vardict/SNV.somatic." + config["analysis"]["case_id"] + ".vardict.vcf.gz",
+        vcf_vardict = vcf_dir + "vardict/all.somatic." + config["analysis"]["case_id"] + ".vardict.vcf.gz",
         namemap=vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.sample_name_map"
     params:
         tmpdir=tempfile.mkdtemp(prefix=tmp_dir),
@@ -126,8 +124,6 @@ rule post_process_vardict:
         Path(benchmark_dir,'vardict_merge_' + config["analysis"]["case_id"] + ".tsv").as_posix()
     singularity:
         Path(singularity_image,config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
-    threads:
-        get_threads(cluster_config,"post_process_vardict")
     message:
         ("Bgzip, index and reheader merged VarDict vcf and add FOUND_IN for case: {params.case_name}")
     shell:
@@ -153,3 +149,55 @@ echo -e \"tTUMOR\" > {output.namemap}.tumor ;
 
 rm -rf {params.tmpdir} ;
     """
+
+rule gatk_update_vcf_sequence_dictionary:
+    input:
+        ref = reference_genome,
+        vcf = vcf_dir + "vardict/all.somatic." + config["analysis"]["case_id"] + ".vardict.vcf.gz",
+    output:
+        vcf_vardict = vcf_dir + "all.somatic." + config["analysis"]["case_id"] + ".vardict.vcf.gz",
+    params:
+        tmpdir=tempfile.mkdtemp(prefix=tmp_dir),
+    benchmark:
+        Path(benchmark_dir,"gatk_update_vcf_sequence_dictionary" + config["analysis"]["case_id"] + ".tsv").as_posix()
+    singularity:
+        Path(singularity_image,config["bioinfo_tools"].get("gatk") + ".sif").as_posix()
+    message:
+        "Running GATK UpdateVCFSequenceDictionary on VarDict VCF."
+    shell:
+        """
+export TMPDIR={params.tmpdir};  
+
+ref=$(echo {input.ref} | sed 's/.fasta/.dict/g') ;
+
+gatk UpdateVCFSequenceDictionary -V {input.vcf} --source-dictionary $ref --replace --output {output.vcf_vardict} ;
+
+rm -rf {params.tmpdir}
+        """
+
+rule vardict_move_svs:
+    input:
+        vcf_vardict=vcf_dir + "all.somatic." + config["analysis"]["case_id"] + ".vardict.vcf.gz"
+    output:
+        vcf_vardict=vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.vcf.gz",
+        vcf_vardict_sv=vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".vardictsv.vcf.gz",
+    params:
+        housekeeper_id={"id": config["analysis"]["case_id"], "tags": "research"},
+        tmpdir=tempfile.mkdtemp(prefix=tmp_dir),
+    benchmark:
+        Path(benchmark_dir,"vardict_move_svs" + config["analysis"]["case_id"] + ".tsv").as_posix()
+    singularity:
+        Path(singularity_image,config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
+    message:
+        "Moving SVs from VarDict VCF to separate VCF."
+    shell:
+        """
+export TMPDIR={params.tmpdir};  
+
+bcftools view -i 'INFO/SVTYPE!=""' -Oz -o {output.vcf_vardict_sv} {input.vcf_vardict} ;
+tabix -p vcf -f {output.vcf_vardict_sv} ;
+bcftools view -e 'INFO/SVTYPE!=""' -Oz -o {output.vcf_vardict} {input.vcf_vardict} ;
+tabix -p vcf -f {output.vcf_vardict} ;
+
+rm -rf {params.tmpdir}
+        """

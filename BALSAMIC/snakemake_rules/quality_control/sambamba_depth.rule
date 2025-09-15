@@ -20,8 +20,6 @@ rule sambamba_panel_depth:
         cov_step = 50,
         filter_string="'not (unmapped or mate_is_unmapped) and not duplicate and not failed_quality_control and mapping_quality > 10'",
         sample = '{sample}'
-    threads:
-        get_threads(cluster_config, 'sambamba_panel_depth')
     message:
         "Calculate depth statistics using sambamba for sample {params.sample}"
     shell:
@@ -40,7 +38,7 @@ sambamba depth region \
 rule sambamba_exon_depth:
     input:
         bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample),
-        bed = config["reference"]["refgene_bed"]
+        bed = refgene_bed
     output:
         qc_dir + "{sample_type}.{sample}.exon.cov.bed"
     benchmark:
@@ -56,8 +54,6 @@ rule sambamba_exon_depth:
         cov_5 = "250",
         filter_string = "'not (unmapped or mate_is_unmapped) and not duplicate and not failed_quality_control and mapping_quality > 10'",
         sample = '{sample}'
-    threads:
-        get_threads(cluster_config,'sambamba_exon_depth')
     message:
         "Calculate exon depth stastics using sambamba for sample {params.sample}"
     shell:

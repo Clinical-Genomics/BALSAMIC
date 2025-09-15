@@ -50,7 +50,7 @@ indicate that at this site there is little support that the alternative bases co
 
 
 **Note:**
-**In BALSAMIC, this VCF file is often referred to the "raw" VCF because it is the most unfiltered VCF produced, and is named `SNV.somatic.<CASE_ID>.tnscope.vcf.gz`**
+**In BALSAMIC, this VCF file is often referred to as the "raw" VCF because it is the most unfiltered VCF produced, and is named `SNV.somatic.<CASE_ID>.tnscope.vcf.gz`**
 
 ..  figure:: images/filter_status.png
     :width: 500px
@@ -92,6 +92,41 @@ At each step only variants with filters `PASS` and `triallelic_site` are kept an
    * - .clinical.filtered.pass.vcf.gz
      - Annotated VCF file with quality, population and local database filters applied.
      - Yes (Caesar and Scout)
+
+
+**Soft-filters**
+
+These soft-filters are never applied, meaning variants with these filters set will be present in the final filtered VCF.
+
+.. list-table:: SNV and small-Indel callers
+   :widths: 22 27 25 20 20
+   :header-rows: 1
+
+   * - Soft-filters
+     - Sequencing type
+     - Analysis type
+     - Somatic/Germline
+     - Description
+   * - triallelic_site
+     - TGA, WGS
+     - tumor-normal, tumor-only
+     - somatic
+     - internal TNscope filter due to more than 1 alt allele
+   * - germline_risk
+     - TGA, TGA - UMI 3,1,1
+     - tumor-normal
+     - somatic
+     - internal TNscope filter implying risk of germline variant
+   * - in_normal
+     - TGA, TGA - UMI 3,1,1
+     - tumor-normal
+     - somatic
+     - Custom bcftools filter based on high relative normal vs tumor alt allele fractions
+   * - HighOccurrenceFrq
+     - TGA, TGA - UMI 3,1,1 (if optional panel-observation-loqusdb argument is supplied)
+     - tumor-normal
+     - somatic
+     - If presence of variant is high in panel-based observation database
 
 
 **Targeted Genome Analysis**
@@ -355,6 +390,10 @@ Therefore the logic for setting `MNV_CONFLICTING_FILTERS` has been made a bit mo
 Post-call Observation database Filters
 ********************************************
 
+.. note::
+
+    Since **BALSAMIC <= v18.0.0** Post-call database filters are initially applied as soft-filters and can be whitelisted in a subsequent step, whereupon they will be PASS
+
 This section contains post call and quality filtrations, on the TNscope and VarDict merged VCF.
 
 
@@ -383,6 +422,12 @@ This section contains post call and quality filtrations, on the TNscope and VarD
     ArtefactFrq <= 0.1  (or) ArtefactFrq == "."
 
 This above corresponds to at least 4 observations in a database of 29 cases of merged WGS samples.
+
+*Cancer_Somatic_Panel_Frq*: Frequency of observation of the variants from historical cases analysed with the same gene-panel
+
+::
+
+    marks variant with soft-filter `HighOccurrenceFrq` variant unless: Cancer_Somatic_Panel_Frq <= 0.3 (or) Cancer_Somatic_Panel_Frq == "."
 
 **Target Genome Analysis with UMI's into account**
 **************************************************
@@ -461,7 +506,7 @@ It means that at least `3` read-pairs need to support the UMI-group (based on th
 
     min_tumor_allele_frac = 0.0005
 
-*interval_padding*:  Adding an extra 100bp to each end of the target region in the bed file before variant calling.
+*interval_padding*: Adding an extra 100bp to each end of the target region in the bed file before variant calling.
 
 ::
 
@@ -480,10 +525,14 @@ It means that at least `3` read-pairs need to support the UMI-group (based on th
 
 ::
 
-    excludes variant if: AF(normal) / AF(tumor) > 0.3
+    marks variant with soft-filter `in_normal` variant if: AF(normal) / AF(tumor) > 0.3
 
 Post-call Observation database Filters
 ********************************************
+
+.. note::
+
+    Since **BALSAMIC <= v18.0.0** Post-call database filters are initially applied as soft-filters and can be whitelisted in a subsequent step, whereupon they will be PASS
 
 This section contains population database frequency filters.
 
@@ -505,7 +554,12 @@ This section contains population database frequency filters.
 
     Frq <= 0.01  (or) Frq == "."
 
-The variants scored as `PASS` or `triallelic_sites` are included in the final vcf file (`SNV.somatic.<CASE_ID>.tnscope.<research/clinical>.filtered.pass.vcf.gz`).
+*Cancer_Somatic_Panel_Frq*: Frequency of observation of the variants from historical cases analysed with the same gene-panel
+
+::
+
+    marks variant with soft-filter `HighOccurrenceFrq` variant unless: Cancer_Somatic_Panel_Frq <= 0.3 (or) Cancer_Somatic_Panel_Frq == "."
+
 
 **Whole Genome Sequencing (WGS)**
 **********************************
@@ -595,11 +649,8 @@ The `TNscope <https://www.biorxiv.org/content/10.1101/250647v1.abstract>`_ algor
 
 ::
 
-    excludes variant if: AF(normal) / AF(tumor) > 0.3
+   hard filters variants if: AF(normal) / AF(tumor) > 0.3
 
-
-
-The variants scored as `PASS` or `triallelic_sites` are included in the final vcf file (`SNV.somatic.<CASE_ID>.tnscope.<research/clinical>.filtered.pass.vcf.gz`).
 
 
 **TNscope filtering (tumor_only)**
@@ -662,6 +713,11 @@ The somatic variants in TNscope raw VCF file (`SNV.somatic.<CASE_ID>.tnscope.all
 Post-call Observation database Filters
 ********************************************
 
+.. note::
+
+    Since **BALSAMIC <= v18.0.0** Post-call database filters are initially applied as soft-filters and can be whitelisted in a subsequent step, whereupon they will be PASS
+
+
 This section contains population database frequency filters.
 
 *GNOMADAF_POPMAX*: Maximum Allele Frequency across populations
@@ -683,7 +739,19 @@ This section contains population database frequency filters.
 
     Frq <= 0.007  (or) Frq == "."
 
-The variants scored as `PASS` or `triallelic_sites` are included in the final vcf file (`SNV.somatic.<CASE_ID>.tnscope.<research/clinical>.filtered.pass.vcf.gz`).
+
+Rescue and final filtration of variants
+********************************************
+
+Since **BALSAMIC <= v18.0.0** Post-call database filters are initially applied as soft-filters. After this step the variants have a chance to be rescued if they meet either of the following criteria:
+
+1. The variant is marked with CLNSIG=Pathogenic and/or CLNSIG=Likely_pathogenic and/or contains the  ONC field  that partially matches "oncogenic", "tier" or "uncertain" in the INFO-field coming from Clinvar.
+2. The variant exists in the optionally supplied whitelist VCF-file. The file in BALSAMIC/analysis_metadata/marked_causative.vcf will be used by default, but can be replaced by the --rescue-list option.
+
+If either of those criteria are met the filters will be moved to a new INFO field called RescueFilters and the variant will be set to PASS, in addition the reason for the variant rescue will be given in the new RescueStatus INFO-field.
+
+Finally the soft-filters will be applied as only variants marked as `PASS` or any of the allowed soft-filters will remain in the final vcf file (`SNV.somatic.<CASE_ID>.<merged/tnscope>.<research/clinical>.filtered.pass.vcf.gz`).
+
 
 **Attention:**
 **BALSAMIC <= v8.2.10 uses GNOMAD_popmax <= 0.005. From Balsamic v9.0.0, this settings is changed to 0.02, to reduce the stringency.**

@@ -8,15 +8,15 @@ import tempfile
 from pathlib import Path
 from typing import Dict, List
 
-from BALSAMIC.constants.analysis import FastqName, Gender, PONWorkflow, SampleType, SequencingType
+from BALSAMIC.constants.analysis import FastqName, Gender, PONWorkflow, SampleType, SequencingType, LogFile
 from BALSAMIC.constants.paths import BALSAMIC_DIR
-from BALSAMIC.constants.workflow_params import WORKFLOW_PARAMS, SLEEP_BEFORE_START
+from BALSAMIC.constants.workflow_params import WORKFLOW_PARAMS
 from BALSAMIC.models.config import ConfigModel
 from BALSAMIC.models.params import BalsamicWorkflowConfig
 from BALSAMIC.utils.exc import BalsamicError
 from BALSAMIC.utils.io import write_finish_file
-from BALSAMIC.utils.rule import get_fastp_parameters, get_result_dir, get_threads, get_script_path
-
+from BALSAMIC.utils.rule import get_fastp_parameters, get_result_dir, get_script_path
+from BALSAMIC.utils.logging import add_file_logging
 
 # Initialize ConfigModel
 config_model = ConfigModel.model_validate(config)
@@ -25,18 +25,22 @@ shell.prefix("set -eo pipefail; ")
 
 localrules: all
 
-LOG = logging.getLogger(__name__)
 
 # parse parameters as constants to workflows
 params = BalsamicWorkflowConfig.model_validate(WORKFLOW_PARAMS)
 
 # Get case id/name
 case_id: str = config_model.analysis.case_id
-# Get analysis dir
-analysis_dir_home: str = config_model.analysis.analysis_dir
-analysis_dir: str = Path(analysis_dir_home, "analysis", case_id).as_posix() + "/"
+# Get case-dir
+case_dir: str = Path(config_model.analysis.analysis_dir, case_id).as_posix()
 # Get result dir
 result_dir: str = Path(config_model.analysis.result).as_posix() + "/"
+
+# Set logging
+
+LOG = logging.getLogger(__name__)
+
+LOG.info("Running BALSAMIC: PON.smk.")
 
 # Create a temporary directory with trailing /
 tmp_dir: str = Path(result_dir, "tmp").as_posix() + "/"
@@ -63,9 +67,9 @@ fastp_parameters: Dict = get_fastp_parameters(config_model)
 analysis_type = config_model.analysis.analysis_type
 sequencing_type = config_model.analysis.sequencing_type
 
+# reference file paths
 
 rules_to_include = []
-rules_to_include.append("snakemake_rules/misc/sleep.rule")
 if sequencing_type == SequencingType.TARGETED:
     rules_to_include.append("snakemake_rules/concatenation/concatenation.rule")
     rules_to_include.append("snakemake_rules/quality_control/fastp_tga.rule")
@@ -78,10 +82,17 @@ else:
     rules_to_include.append("snakemake_rules/align/wgs_sentieon_alignment.rule")
     rules_to_include.append("snakemake_rules/align/wgs_bam_postprocess.rule")
 
+
+
+reference_genome: str = config_model.reference["reference_genome"].file.as_posix()
+refgene_flat: str = config_model.reference["refgene_flat"].file.as_posix()
+access_regions: str = config_model.reference["access_regions"].file.as_posix()
+dbsnp = config_model.reference["dbsnp"].file.as_posix()
+mills_1kg = config_model.reference["mills_1kg"].file.as_posix()
+known_indel_1kg = config_model.reference["known_indel_1kg"].file.as_posix()
+
 if pon_workflow == PONWorkflow.CNVKIT:
-    reffasta: str = config_model.reference["reference_genome"]
-    refgene_flat: str = config_model.reference["refgene_flat"]
-    access_5kb_hg19: str = config_model.reference["access_regions"]
+
     target_bed: str = config_model.panel.capture_kit
     panel_name = os.path.split(target_bed)[1].replace('.bed','')
 
@@ -89,16 +100,22 @@ if pon_workflow == PONWorkflow.CNVKIT:
     rules_to_include.append("snakemake_rules/pon/cnvkit_create_pon.rule")
 
 if pon_workflow in [PONWorkflow.GENS_MALE, PONWorkflow.GENS_FEMALE]:
+
     gender = Gender.MALE if pon_workflow == PONWorkflow.GENS_MALE else Gender.FEMALE
 
     pon_reference = expand(cnv_dir + "gens_pon_100bp.{gender}.{version}.hdf5", gender=gender, version=version)
     rules_to_include.append("snakemake_rules/variant_calling/gatk_read_counts.rule")
     rules_to_include.append("snakemake_rules/pon/gens_create_pon.rule")
 
-pon_finish = Path(analysis_dir + "analysis_PON_finish").as_posix()
+pon_finish = Path(result_dir + "analysis_PON_finish").as_posix()
 
 for r in rules_to_include:
     include: Path(BALSAMIC_DIR, r).as_posix()
+
+wildcard_constraints:
+    sample="[^.]+",
+    sample_type="(?:normal|tumor)",
+    fastq_pattern="[^/]+"
 
 rule all:
     input:

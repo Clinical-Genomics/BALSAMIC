@@ -4,7 +4,7 @@
 
 rule sentieon_dedup_consensus:
     input:
-        ref = config["reference"]["reference_genome"],
+        ref = reference_genome,
         bam = Path(bam_dir, "{sample_type}.{sample}.align_sort.bam").as_posix(),
     output:
         bam = Path(bam_dir, "{sample_type}.{sample}.dedup.bam").as_posix(),
@@ -12,13 +12,13 @@ rule sentieon_dedup_consensus:
         dedup_metrics = Path(qc_dir, "{sample_type}.{sample}.dedup_conensus.metrics").as_posix()
     benchmark:
         Path(benchmark_dir, "sentieon_dedup_{sample_type}.{sample}.tsv").as_posix()
+    resources:
+        mem_mb = lambda wc, input: min(max(5.1 * input.size_mb, 5000), 250000) # Cap at 250GB. Scale memory with input size (min 5GB) to handle large TGA cases without over-allocating for typical inputs (e.g. myeloid). 5.1 factor chosen after testing
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         sentieon_exec = config_model.sentieon.sentieon_exec,
         sentieon_lic = config_model.sentieon.sentieon_license,
         sample_id = "{sample}"
-    threads:
-        get_threads(cluster_config, 'sentieon_dedup')
     message:
         ("Collects read information using sentieon LocusCollector and collapse duplicate reads based on UMIs. "
          "Current sample: {params.sample_id}")
@@ -57,7 +57,7 @@ rule samtools_fixmate:
     The unaligned mate start position is 10125, should be 0
     """
     input:
-        ref = config["reference"]["reference_genome"],
+        ref = reference_genome,
         bam = Path(bam_dir,"{sample_type}.{sample}.dedup.bam").as_posix(),
     output:
         bam = Path(bam_dir,"{sample_type}.{sample}.dedup.fixmate.bam").as_posix(),
@@ -69,8 +69,6 @@ rule samtools_fixmate:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         postprocess_fixmate_script = get_script_path("postprocess_fixmate_bam.awk"),
         sample_id="{sample}"
-    threads:
-        get_threads(cluster_config,"samtools_fixmate")
     message:
         "Running samtools collate and fixmate for: {params.sample_id}"
     shell:
@@ -102,8 +100,6 @@ rule cap_base_quality:
         sample_id = "{sample}",
         cap_base_qualities = get_script_path("cap_base_quality_in_bam.py"),
         max_quality = params.bam_post_processing.manta_max_base_quality
-    threads:
-        get_threads(cluster_config, "cap_base_quality")
     message:
         "Capping base qualities to {params.max_quality} in bamfile using pysam in sample: {params.sample_id}"
     shell:

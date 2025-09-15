@@ -46,14 +46,6 @@ def test_report_deliver(invoke_cli):
     assert result.exit_code == 0
 
 
-def test_report_status(invoke_cli):
-    # WHEN invoking command with missing options
-    result = invoke_cli(["report", "status", "--help"])
-
-    # THEN It should throw missing option error
-    assert result.exit_code == 0
-
-
 def test_run(invoke_cli):
     # WHEN asking to options for run command
     result = invoke_cli(["run", "--help"])
@@ -71,7 +63,7 @@ def test_run_analysis(invoke_cli):
     assert "--snakefile" in result.output
     assert "--sample-config" in result.output
     assert "--run-mode" in result.output
-    assert "--cluster-config" in result.output
+    assert "--workflow-profile" in result.output
     assert "--run-analysis" in result.output
 
 

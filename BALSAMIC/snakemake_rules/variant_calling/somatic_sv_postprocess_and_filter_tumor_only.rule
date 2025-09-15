@@ -14,8 +14,6 @@ rule bcftools_process_SV_CNV:
     params:
         case_name = config["analysis"]["case_id"],
         process_cnv = get_script_path("process_CNV.py"),
-    threads:
-        get_threads(cluster_config, "bcftools_process_SV_CNV")
     message:
         ("Converting BCF from delly to VCF for {params.case_name}")
     shell:
@@ -33,12 +31,8 @@ rule bcftools_process_SV_CNV:
 
 rule svdb_merge_tumor_only:
     input:
-        vcf = expand(
-                vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".{caller}.vcf.gz",
-                caller=somatic_caller_sv) +
-              expand(
-                vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".{caller}.vcf.gz",
-                caller=somatic_caller_cnv)
+        vcf = expand(vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".{caller}.vcf.gz", caller=somatic_caller_sv) +
+              expand(vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".{caller}.vcf.gz", caller=somatic_caller_cnv)
     output:
         vcf_svdb = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.vcf.gz",
         namemap = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".svdb.sample_name_map",
@@ -52,8 +46,6 @@ rule svdb_merge_tumor_only:
         case_name = config["analysis"]["case_id"],
         vcf= lambda wildcards, input:[input[index] + ":" + svdb_callers_prio[index] for index in range(0,len(input))],
         svdb_priority= ",".join(svdb_callers_prio)
-    threads:
-        get_threads(cluster_config, "svdb_merge_tumor_only")
     message:
         "Merging structural and copy number variants using SVDB for {params.case_name}"
     shell:
@@ -78,8 +70,6 @@ rule bcftools_quality_filter_svdb:
         Path(singularity_image,config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
     params:
         case_name = config["analysis"]["case_id"],
-    threads:
-        get_threads(cluster_config, "bcftools_quality_filter_svdb")
     message:
         "Filtering merged research structural and copy number variants using bcftools for {params.case_name}"
     shell:
