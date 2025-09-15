@@ -1,13 +1,22 @@
 """Balsamic analysis config case models."""
 
 import re
+import toml
+import os
 from glob import glob
 from pathlib import Path
 from typing import Annotated, Dict, List, Optional
 
-from pydantic import AfterValidator, BaseModel, field_validator, model_validator
+from pydantic import (
+    AfterValidator,
+    BaseModel,
+    field_validator,
+    model_validator,
+    field_serializer,
+)
 
 from BALSAMIC import __version__ as balsamic_version
+from BALSAMIC.constants.cluster import QOS
 from BALSAMIC.constants.analysis import (
     AnalysisType,
     AnalysisWorkflow,
@@ -19,9 +28,11 @@ from BALSAMIC.constants.analysis import (
     SampleType,
     SequencingType,
     WorkflowSolution,
+    AnnotationCategory,
 )
 from BALSAMIC.models.params import QCModel
 from BALSAMIC.models.validators import is_dir, is_file
+from BALSAMIC.utils.io import read_json
 
 
 class FastqInfoModel(BaseModel):
@@ -71,7 +82,7 @@ class VarcallerAttribute(BaseModel):
     """Holds variables for variant caller software
     Attributes:
         mutation: str of mutation class
-        mutation_type: str of mutation type
+        mutation_type: str for mutation type
         analysis_type: list of str for analysis types
         workflow_solution: list of str for workflows
         sequencing_type: list of str for workflows
@@ -100,6 +111,7 @@ class VCFModel(BaseModel):
     merged: VarcallerAttribute
     manta: VarcallerAttribute
     vardict: VarcallerAttribute
+    vardictsv: VarcallerAttribute
     dellysv: VarcallerAttribute
     cnvkit: VarcallerAttribute
     ascat: VarcallerAttribute
@@ -138,10 +150,11 @@ class AnalysisModel(BaseModel):
         dag : Field(optional); Path where DAG graph of workflow will be stored
         BALSAMIC_version  : Field(optional); Current version of BALSAMIC
         config_creation_date  : Field(optional); Timestamp when config was created
+        rescue_snvs: Field(optional); Path to file with list of variants to be allowed through filters
 
     Raises:
         ValueError:
-            When gender is set to any other than [female, male]
+            When gender is set to any other than [female, male, unknown]
             When analysis_type is set to any value other than [single, paired, pon]
             When sequencing_type is set to any value other than [wgs, targeted]
             When analysis_workflow is set to any other than [balsamic, balsamic-qc, balsamic-umi]
@@ -164,6 +177,7 @@ class AnalysisModel(BaseModel):
     config_creation_date: str
     pon_version: Optional[str] = None
     pon_workflow: Optional[PONWorkflow] = None
+    rescue_snvs: Optional[Annotated[str, AfterValidator(is_file)]] = None
 
     @field_validator("pon_version")
     def validate_pon_version(cls, pon_version: Optional[str]):
@@ -198,6 +212,47 @@ class Sentieon(BaseModel):
     tnscope_model: Annotated[str, AfterValidator(is_file)]
 
 
+class ReferenceModel(BaseModel):
+    """
+    Model containing balsamic reference values such as genomic reference file and VCF annotations.
+
+    Attributes:
+        file: Path to the reference / annotation file.
+        fields: List of INFO field names to extract from the VCF, used in VCFanno .
+        ops: List of operations describing how to handle the corresponding fields in VCFanno.
+             Common operations include:
+                - "self": copy the field value directly without transformation.
+                - "mean": compute the mean of values (e.g., across multiple columns).
+                - Other reduction/aggregation operations depending on context.
+        names: Output names to assign to the extracted/processed fields using VCFanno.
+        columns: Optional number of columns to add from the query file used by VCFanno
+        category: Annotation category (e.g., RESEARCH, CLINICAL), used to group annotations for selection in VCFanno rules.
+
+    Methods:
+        is_annotated: Returns True if this reference source has fields, ops, and names defined.
+        as_path: Returns the file path for this reference source.
+    """
+
+    file: Path
+    fields: Optional[List[str]] = None
+    ops: Optional[List[str]] = None
+    names: Optional[List[str]] = None
+    columns: Optional[List[int]] = None
+    category: Optional[AnnotationCategory] = None
+
+    @field_serializer("file")
+    def _ser_file(self, v: Path, _info):
+        return v.as_posix()
+
+    def is_annotated(self) -> bool:
+        return (
+            self.fields is not None and self.ops is not None and self.names is not None
+        )
+
+    def as_path(self) -> Path:
+        return self.file
+
+
 class ConfigModel(BaseModel):
     """
     Class providing common functions and variables for different balsamic workflows.
@@ -215,6 +270,8 @@ class ConfigModel(BaseModel):
         analysis: Field(AnalysisModel); Pydantic model containing workflow variables
         custom_filters: Field(CustomFilters); custom parameters for variant filtering
         sentieon: Field(required); Sentieon model attributes
+        qos: Field(QOS);
+        account: Cluster account to run jobs
 
     This class also contains functions that help retrieve sample and file information,
     facilitating BALSAMIC run operations in Snakemake.
@@ -232,7 +289,7 @@ class ConfigModel(BaseModel):
 
     QC: QCModel = QCModel()
     samples: List[SampleInstanceModel]
-    reference: Dict[str, Path]
+    reference: Dict[str, ReferenceModel]
     singularity: Dict[str, str]
     bioinfo_tools: Dict
     bioinfo_tools_version: Dict
@@ -242,12 +299,8 @@ class ConfigModel(BaseModel):
     analysis: AnalysisModel
     custom_filters: CustomFilters | None = None
     sentieon: Sentieon
-
-    @field_validator("reference")
-    def abspath_as_str(cls, reference: Dict[str, Path]):
-        for k, v in reference.items():
-            reference[k] = Path(v).resolve().as_posix()
-        return reference
+    qos: Optional[QOS] = None
+    account: Optional[str] = None
 
     @field_validator("singularity")
     def transform_path_to_dict(cls, singularity: Dict[str, str]):
@@ -320,6 +373,32 @@ class ConfigModel(BaseModel):
             )
 
         return values
+
+    def retrieve_annotations(self, category: Optional[str] = None) -> List[Dict]:
+        """Builds the annotations list, optionally filtered by category."""
+        annotations = []
+        for ref in self.reference.values():
+            if ref.is_annotated() and (category is None or ref.category == category):
+                annotations.append(
+                    {
+                        "annotation": [
+                            {
+                                "file": ref.as_path().as_posix(),
+                                "fields": ref.fields,
+                                "ops": ref.ops,
+                                "names": ref.names,
+                            }
+                        ]
+                    }
+                )
+        return annotations
+
+    def retrieve_annotations_toml(self, category: Optional[str] = None) -> str:
+        """Returns TOML string of clinical annotations, optionally filtered by category."""
+        toml_annotations = ""
+        for annotation in self.retrieve_annotations(category):
+            toml_annotations += toml.dumps(annotation)
+        return toml_annotations
 
     def get_all_sample_names(self) -> List[str]:
         """Return all sample names in the analysis."""
@@ -467,3 +546,30 @@ class ConfigModel(BaseModel):
             f"CNV.somatic.{self.analysis.case_id}.ascat.germline.png",
             f"CNV.somatic.{self.analysis.case_id}.ascat.sunrise.png",
         ]
+
+    def get_gender(self, wildcards, input):
+        """Return the bioinformatically predicted sex of the case if the given sex is unknown."""
+
+        if self.analysis.gender != Gender.UNKNOWN:
+            return self.analysis.gender  # Default to using assigned gender
+
+        if not os.path.exists(input.sex_prediction_json):
+            return Gender.FEMALE  # Only necessary for snakemake dry-run
+
+        sex_prediction = read_json(input.sex_prediction_json)
+
+        gender = Gender.UNKNOWN
+        if self.analysis.analysis_type == AnalysisType.PAIRED:
+            # Prioritise normal gender if available
+            gender = sex_prediction[SampleType.NORMAL]["predicted_sex"]
+
+        if gender == Gender.UNKNOWN:
+            # Fall back to use tumor gender
+            gender = sex_prediction[SampleType.TUMOR]["predicted_sex"]
+
+        if gender == Gender.UNKNOWN:
+            # If gender is unknown, default to using female gender
+            return Gender.FEMALE
+        else:
+            # Return predicted gender
+            return gender

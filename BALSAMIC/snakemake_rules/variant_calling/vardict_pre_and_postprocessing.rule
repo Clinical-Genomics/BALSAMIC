@@ -3,16 +3,13 @@
 rule bedtools_pad_bedfile:
     input:
         bed = config["panel"]["capture_kit"],
-        chrom = config["reference"]["genome_chrom_size"],
-        bam = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample)
+        chrom = genome_chrom_size
     output:
         bed = vcf_dir + "pad_bedfile/" + "100bp_padding_" + capture_kit
     benchmark:
         Path(benchmark_dir, 'bedtools_pad_bedfile.tsv').as_posix()
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("bedtools") + ".sif").as_posix()
-    threads:
-        get_threads(cluster_config, "pad_bedfile")
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         pad_bed_dir = vcf_dir + "pad_bedfile/",
@@ -30,7 +27,6 @@ bedtools slop -b 100 -i {input.bed} -g {params.pad_bed_dir}hg19.chrom.sizes \
 | sort -k1,1 -k2,2n \
 | bedtools merge > {params.pad_bed_dir}100bp_padding_{params.origin_bed} ;
 
-readlink -f {input.bam};
         """
 
 rule vardict_sort:
@@ -44,8 +40,6 @@ rule vardict_sort:
         case_name=config["analysis"]["case_id"],
     benchmark:
         Path(benchmark_dir, 'vardict_sort_' + config["analysis"]["case_id"] + ".tsv").as_posix()
-    threads:
-        get_threads(cluster_config,"vardict_sort")
     message:
         ("Sorting VarDict VCF with awk {params.case_name}")
     shell:
@@ -53,35 +47,7 @@ rule vardict_sort:
 mkdir -p {params.tmpdir};
 export TMPDIR={params.tmpdir};
 
-awk -f {params.sort_vcf} {input.vcf} > {output.vcf_sorted}
+awk -f {params.sort_vcf} {input.vcf} > {output.vcf_sorted} ;
 
 rm -rf {params.tmpdir} ;
     """
-
-rule gatk_update_vcf_sequence_dictionary:
-    input:
-        ref = config["reference"]["reference_genome"],
-        vcf = vcf_dir + "vardict/SNV.somatic." + config["analysis"]["case_id"] + ".vardict.vcf.gz",
-    output:
-        vcf_vardict = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".vardict.vcf.gz",
-    params:
-        housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "research"},
-        tmpdir=tempfile.mkdtemp(prefix=tmp_dir),
-    benchmark:
-        Path(benchmark_dir,"gatk_update_vcf_sequence_dictionary" + config["analysis"]["case_id"] + ".tsv").as_posix()
-    singularity:
-        Path(singularity_image,config["bioinfo_tools"].get("gatk") + ".sif").as_posix()
-    threads:
-        get_threads(cluster_config,"gatk_collectreadcounts")
-    message:
-        "Running GATK UpdateVCFSequenceDictionary on VarDict VCF."
-    shell:
-        """
-export TMPDIR={params.tmpdir};  
-
-ref=$(echo {input.ref} | sed 's/.fasta/.dict/g') ;
-
-gatk UpdateVCFSequenceDictionary -V {input.vcf} --source-dictionary $ref --replace --output {output.vcf_vardict} ;
-      
-rm -rf {params.tmpdir}
-        """

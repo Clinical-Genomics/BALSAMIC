@@ -1,7 +1,7 @@
 
 rule bcftools_normalise_vcfs:
     input:
-        ref = config["reference"]["reference_genome"],
+        ref = reference_genome,
         vcf = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".{caller}.research.vcf.gz",
     output:
         vcf_normalised = vcf_dir + "SNV.somatic." + config["analysis"]["case_id"] + ".{caller}.research.normalised.vcf.gz",
@@ -12,8 +12,6 @@ rule bcftools_normalise_vcfs:
     params:
         case_name = config["analysis"]["case_id"],
         variant_caller = "{caller}",
-    threads:
-        get_threads(cluster_config,'bcftools_normalise_vcfs')
     message:
         "Normalising variants for {params.variant_caller} {params.case_name}"
     shell:
@@ -36,8 +34,6 @@ rule merge_snv_vcfs:
     params:
         modify_tnscope_infofield = get_script_path("merge_snv_variantcallers.py"),
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-    threads:
-        get_threads(cluster_config, "bcftools_concatenate_vcfs")
     message:
         "Merging VCFs with custom python script using vcfpy"
     shell:

@@ -13,8 +13,6 @@ rule bcftools_get_somaticINDEL_research:
     Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
   params:
     message_text = "SNV.somatic.{case_name}.{var_caller}.research.vcf.gz",
-  threads:
-    get_threads(cluster_config, "bcftools_get_somaticINDEL_research")
   message:
     "Running bcftools to get INDELs from {params.message_text}"
   shell:
@@ -34,8 +32,6 @@ rule cadd_annotate_somaticINDEL_research:
     Path(singularity_image, config["bioinfo_tools"].get("cadd") + ".sif").as_posix()
   params:
     message_text = "SNV.somatic.{case_name}.{var_caller}.research.vcf.gz",
-  threads:
-    get_threads(cluster_config, "cadd_annotate_somaticINDEL_research")
   message:
     "Running cadd annotation for INDELs on {params.message_text}"
   shell:
@@ -58,8 +54,6 @@ rule bcftools_annotate_somaticINDEL_research:
   params:
     header_line = temp(f"{vep_dir}cadd_header_line.txt"),
     message_text = "SNV.somatic.{case_name}.{var_caller}.research.vcf.gz",
-  threads:
-    get_threads(cluster_config, "bcftools_annotate_somaticINDEL_research")
   message:
     "Running bcftools to annotate INDELs on {params.message_text}"
   shell:
@@ -83,7 +77,7 @@ tabix -p vcf -f  {output.vcf_indel_research}
 rule vep_annotate_somaticSNV_research:
   input:
     vcf_snv_research = vep_dir + "SNV.somatic.{case_name}.{var_caller}.cadd_indel.research.vcf.gz",
-    cosmic = config["reference"]["cosmic"]
+    cosmic = cosmic
   output:
     vcf_snv_unfiltered = vep_dir + "SNV.somatic.{case_name}.{var_caller}.research.vcf.gz",
     vcfanno_research_toml = vep_dir + "SNV.somatic.{case_name}.{var_caller}_vcfanno_research.toml"
@@ -95,11 +89,9 @@ rule vep_annotate_somaticSNV_research:
     housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "research"},
     message_text = "SNV.somatic.{case_name}.{var_caller}.research.vcf.gz",
     tmp_vcf_research = temp(vep_dir + "SNV.somatic.{case_name}.{var_caller}.tmp.research.vcf.gz"),
-    vcfanno_research_annotations = dump_toml(research_annotations),
-    vep_cache = config["reference"]["vep_dir"],
+    vcfanno_research_annotations = config_model.retrieve_annotations_toml(category=AnnotationCategory.RESEARCH),
+    vep_cache = vep_cache_dir,
     vep_defaults = params.vep.vep_filters
-  threads:
-    get_threads(cluster_config, "vep_annotate_somaticSNV_research")
   message:
     "Running vep annotation on SNVs and INDELs in {params.message_text}"
   shell:
@@ -138,19 +130,13 @@ rule vcfanno_annotate_somaticSNV_clinical:
     Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix()
   params:
     message_text = "SNV.somatic.{case_name}.{var_caller}.clinical.vcf.gz",
-    artefact_snv = artefact_snv_obs,
-    clinical_snv = clinical_snv_obs,
-    cancer_germline_snv = cancer_germline_snv_obs,
-    cancer_somatic_snv = cancer_somatic_snv_obs,
-    vcfanno_clinical_annotations = dump_toml(clinical_annotations),
+    vcfanno_clinical_annotations = config_model.retrieve_annotations_toml(category=AnnotationCategory.CLINICAL),
     vcfanno_clinical_toml = temp(vep_dir + "SNV.somatic.{case_name}.{var_caller}_vcfanno_clinical.toml"),
-  threads:
-    get_threads(cluster_config, "vcfanno_annotate_somaticSNV_clinical")
   message:
     "Running vcfanno annotation for single nuceotide variants on {params.message_text}"
   shell:
         """
-if [[ -f "{params.clinical_snv}" || -f "{params.cancer_germline_snv}" || -f "{params.cancer_somatic_snv}" || -f "{params.artefact_snv}" ]]; then
+if [[ ! -z "{params.vcfanno_clinical_annotations}" ]]; then
     echo \'{params.vcfanno_clinical_annotations}\' > {params.vcfanno_clinical_toml};
     vcfanno -p {threads} {params.vcfanno_clinical_toml} {input.vcf_snv_research} | \
     bcftools view --threads {threads} -O z -o {output.vcf_snv_clinical};

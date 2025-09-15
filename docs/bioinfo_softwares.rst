@@ -2,7 +2,7 @@
 Tools and software
 =================================
 
-BALSAMIC ( **version** = 17.0.1 ) uses myriad of tools and softwares to analyze fastq files. This section covers why each
+BALSAMIC ( **version** = 17.1.0 ) uses myriad of tools and softwares to analyze fastq files. This section covers why each
 one is included: usage and parameters, and relevant external links.
 
 ascatNgs
@@ -57,7 +57,7 @@ ensembl-vep
 ~~~~~~~~~~~
 :Source code: `GitHub` `<https://github.com/Ensembl/ensembl-vep>`_
 :Article: `Genome Biology` `<https://genomebiology.biomedcentral.com/articles/10.1186/s13059-016-0974-4>`_
-:Version: `104.3`
+:Version: `113.4`
 
 fastp
 ~~~~~
@@ -98,7 +98,7 @@ multiqc
 ~~~~~~~
 :Source code: `GitHub` `<https://github.com/ewels/MultiQC>`_
 :Article: `Bioinformatics` `<https://doi.org/10.1093/bioinformatics/btw354>`_
-:Version: `1.22.3`
+:Version: `1.31`
 
 picard
 ~~~~~~
@@ -165,3 +165,9 @@ vcf2cytosure
 :Source code: `GitHub` `<https://github.com/NBISweden/vcf2cytosure>`_
 :Article: `-`
 :Version: `0.9.1`
+
+gatk4
+~~~~~~~~~~~~~
+:Source code: `GitHub` `<https://github.com/broadinstitute/gatk>`_
+:Article: `Curr Protoc Bioinformatics` `<https://currentprotocols.onlinelibrary.wiley.com/doi/10.1002/0471250953.bi1110s43>`_
+:Version: `4.4`

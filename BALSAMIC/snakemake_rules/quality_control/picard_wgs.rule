@@ -3,10 +3,10 @@
 
 rule picard_CollectHsMetrics_WGS:
     input:
-        fadict = config_model.reference["reference_genome"].replace(".fasta",".dict"),
-        bed = config_model.reference["refgene_bed"],
+        fadict = reference_genome.replace(".fasta",".dict"),
+        bed = refgene_bed,
         bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample),
-        fa = config_model.reference["reference_genome"],
+        fa = reference_genome
     output:
         hs_metrics = qc_dir + "{sample_type}.{sample}.hsmetric.txt"
     benchmark:
@@ -16,10 +16,8 @@ rule picard_CollectHsMetrics_WGS:
     params:
         mem = "16g",
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
-        bed_name = Path(config_model.reference["refgene_bed"]).name,
+        bed_name = Path(refgene_bed).name,
         sample = "{sample}"
-    threads:
-        get_threads(cluster_config, "picard_CollectHsMetrics")
     message:
         "Calculating picard HsMetrics for sample {params.sample}"
     shell:
@@ -50,7 +48,7 @@ rm -rf {params.tmpdir}
 rule picard_CollectWgsMetrics:
     input:
         bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample),
-        reference = config["reference"]["reference_genome"]
+        reference = reference_genome
     output:
         qc_dir + "{sample_type}.{sample}_picard_wgs_metrics.txt"
     benchmark:
@@ -61,8 +59,6 @@ rule picard_CollectWgsMetrics:
         mem = "16g",
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         sample = "{sample}"
-    threads:
-        get_threads(cluster_config,"picard_CollectWgsMetrics")
     message:
         "Collecting various picard quality metrics for wgs sample {params.sample}"
     shell:

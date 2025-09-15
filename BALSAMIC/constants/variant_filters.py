@@ -152,6 +152,9 @@ class BaseSNVFilters:
         "germline_risk",
         "in_normal",
     ]
+    DEFAULT_SOFT_FILTERS: List[str] = [
+        "HighOccurrenceFrq",
+    ]
 
     @classmethod
     def filter_criteria(
@@ -159,7 +162,6 @@ class BaseSNVFilters:
         category: Literal["clinical", "research", "quality"],
         analysis_type: Optional[Enum] = None,
         variant_caller: Optional[Enum] = None,
-        soft_filter_normals: Optional[bool] = None,
         exclude_variantcaller_filters: Optional[bool] = False,
         exome: Optional[bool] = False,
     ) -> List[VCFFilter]:
@@ -170,7 +172,6 @@ class BaseSNVFilters:
             category (Literal["clinical", "research", "quality"]): The filter category to use.
             analysis_type (Optional[Enum]): Filter based on analysis type (default: None).
             variant_caller (Optional[Enum]): Filter based on variant caller (default: None).
-            soft_filter_normals (Optional[bool]): If True, excludes filters in MATCHED_NORMAL_FILTER_NAMES.
             exclude_variantcaller_filters (Optional[bool]): If True, excludes the variantcaller filters.
             exome (Optional[bool]): Filter based on exome sequencing (default: False).
         Returns:
@@ -202,14 +203,6 @@ class BaseSNVFilters:
                 f for f in cls.INTERNAL_VARIANT_CALLER_FILTERS if filter_matches(f)
             ]
 
-        # Exclude filters if soft_filter_normals is set
-        if soft_filter_normals:
-            matching_filters = [
-                f
-                for f in matching_filters
-                if f.filter_name not in cls.MATCHED_NORMAL_FILTER_NAMES
-            ]
-
         return matching_filters
 
     @classmethod
@@ -238,9 +231,20 @@ class BaseSNVFilters:
             category=category,
             analysis_type=analysis_type,
             variant_caller=variant_caller,
-            soft_filter_normals=soft_filter_normals,
             exome=exome,
         )
+
+        # Exclude default soft filters
+        filters = [f for f in filters if f.filter_name not in cls.DEFAULT_SOFT_FILTERS]
+
+        # Exclude filters if soft_filter_normals is set
+        if soft_filter_normals:
+            filters = [
+                f
+                for f in filters
+                if f.filter_name not in cls.MATCHED_NORMAL_FILTER_NAMES
+            ]
+
         # Extract filter_names
         filter_names = [f.filter_name for f in filters]
 
@@ -286,7 +290,7 @@ class WgsSNVFilters(BaseSNVFilters):
         VCFFilter(tag_value=0.001, filter_name="balsamic_high_pop_freq", field="INFO"),
     ]
     clinical = research + [
-        VCFFilter(tag_value=0.01, filter_name="Frq", field="INFO"),
+        VCFFilter(tag_value=0.007, filter_name="Frq", field="INFO"),
         VCFFilter(tag_value=0.1, filter_name="ArtefactFrq", field="INFO"),
     ]
     quality = [
@@ -337,6 +341,7 @@ class TgaSNVFilters(BaseSNVFilters):
     clinical = research + [
         VCFFilter(tag_value=0.01, filter_name="Frq", field="INFO"),
         VCFFilter(tag_value=0.1, filter_name="ArtefactFrq", field="INFO"),
+        VCFFilter(tag_value=0.3, filter_name="HighOccurrenceFrq", field="INFO"),
     ]
     quality = [
         VCFFilter(
@@ -465,6 +470,11 @@ SVDB_FILTER_SETTINGS = {
     "loqusdb_clinical_sv_freq": {
         "tag_value": 0.02,
         "filter_name": "Frq",
+        "field": "INFO",
+    },
+    "loqusdb_artefact_sv_obs": {
+        "tag_value": 4,
+        "filter_name": "ArtefactObs",
         "field": "INFO",
     },
     "varcaller_name": "svdb",

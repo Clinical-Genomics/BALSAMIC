@@ -14,6 +14,7 @@ from BALSAMIC.constants.analysis import (
     MutationType,
     SequencingType,
     WorkflowSolution,
+    SampleType,
 )
 from BALSAMIC.models.config import ConfigModel
 from BALSAMIC.utils.cli import find_file_index, get_file_extension
@@ -27,19 +28,12 @@ def get_vcf(config, var_caller, sample):
     input: BALSAMIC config file
     output: retrieve list of vcf files
     """
-
     vcf = []
     for v in var_caller:
         for s in sample:
-            vcf.append(
-                config["vcf"][v]["mutation_type"]
-                + "."
-                + config["vcf"][v]["mutation"]
-                + "."
-                + s
-                + "."
-                + v
-            )
+            mutation_type = config["vcf"][v]["mutation_type"]
+            mutation = config["vcf"][v]["mutation"]
+            vcf.append(f"{mutation_type}.{mutation}.{s}.{v}")
     return vcf
 
 
@@ -136,6 +130,16 @@ def get_sample_type_from_sample_name(config, sample_name):
             return sample["type"]
 
 
+def get_sample_name_from_sample_type(config: dict, sample_type: SampleType):
+    """
+    input: case config file from BALSAMIC, and sample_name
+    output: sample name
+    """
+    for sample in config["samples"]:
+        if sample_type == sample["type"]:
+            return sample["name"]
+
+
 def get_result_dir(config):
     """
     input: sample config file from BALSAMIC
@@ -148,14 +152,6 @@ def get_result_dir(config):
 def get_script_path(script_name: str) -> str:
     """Return the path to the script matching the file name."""
     return Path(SCRIPT_DIR, script_name).as_posix()
-
-
-def get_threads(cluster_config, rule_name="__default__"):
-    """
-    To retrieve threads from cluster config or return default value of 8
-    """
-
-    return cluster_config[rule_name]["n"] if rule_name in cluster_config else 8
 
 
 def get_rule_output(rules, rule_name, output_file_wildcards):
@@ -293,112 +289,6 @@ def get_pon_cnn(config: dict) -> str:
 
     """
     return config["panel"]["pon_cnn"] if "pon_cnn" in config["panel"] else " "
-
-
-def get_clinical_snv_observations(config: dict) -> str:
-    """Returns path for clinical snv observations
-
-    Args:
-        config: a config dictionary
-
-    Returns:
-        Path for clinical_snv_observations vcf file
-
-    """
-    return Path(config["reference"]["clinical_snv_observations"]).as_posix()
-
-
-def get_cancer_germline_snv_observations(config: dict) -> str:
-    """Returns path for cancer germline snv observations
-
-    Args:
-        config: a config dictionary
-
-    Returns:
-        Path for cancer-germline-snv-observations vcf file
-
-    """
-    return Path(config["reference"]["cancer_germline_snv_observations"]).as_posix()
-
-
-def get_cancer_somatic_snv_observations(config: dict) -> str:
-    """Returns path for cancer somatic snv observations
-
-    Args:
-        config: a config dictionary
-
-    Returns:
-        Path for cancer-somatic-snv-observations vcf file
-
-    """
-    return Path(config["reference"]["cancer_somatic_snv_observations"]).as_posix()
-
-
-def get_swegen_snv(config: dict) -> str:
-    """Returns path for swegen snv frequencies
-
-    Args:
-        config: a config dictionary
-
-    Returns:
-        Path for swegen_snv vcf file
-
-    """
-    return Path(config["reference"]["swegen_snv_frequency"]).as_posix()
-
-
-def get_clinical_sv_observations(config: dict) -> str:
-    """Returns path for clinical sv observations
-
-    Args:
-        config: a config dictionary
-
-    Returns:
-        Path for clinical_sv_observations vcf file
-
-    """
-    return Path(config["reference"]["clinical_sv_observations"]).as_posix()
-
-
-def get_somatic_sv_observations(config: dict) -> str:
-    """Returns path for somatic sv observations
-
-    Args:
-        config: a config dictionary
-
-    Returns:
-        Path for cancer_somatic_sv_observations vcf file
-
-    """
-    return Path(config["reference"]["cancer_somatic_sv_observations"]).as_posix()
-
-
-def get_swegen_sv(config: dict) -> str:
-    """Returns path for swegen sv frequencies
-
-    Args:
-        config: a config dictionary
-
-    Returns:
-        Path for swegen_sv vcf file
-
-    """
-    return Path(config["reference"]["swegen_sv_frequency"]).as_posix()
-
-
-def dump_toml(annotations: list) -> str:
-    """Returns list of converted annotation in toml format
-
-    Args:
-        annotations: a list of toml
-
-    Returns:
-        toml_annotation: a string of toml annotation resources
-    """
-    toml_annotations = ""
-    for annotation in annotations:
-        toml_annotations += toml.dumps(annotation)
-    return toml_annotations
 
 
 def get_fastp_parameters(config_model: ConfigModel) -> Dict:
