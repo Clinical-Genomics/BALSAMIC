@@ -4,8 +4,8 @@
 
 rule sentieon_DNAscope_wgs:
     input:
-        ref = config["reference"]["reference_genome"],
-        dbsnp = config["reference"]["dbsnp"],
+        ref = reference_genome,
+        dbsnp = dbsnp,
         bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_type = wildcards.sample_type),
         recal_table = bam_dir + "{sample_type}.recal_data.table"
     output:
@@ -45,7 +45,7 @@ rm -rf {params.tmpdir};
 
 rule manta_germline_wgs:
     input:
-        fa = config["reference"]["reference_genome"],
+        fa = reference_genome,
         bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_type = wildcards.sample_type),
     output:
         final = vcf_dir + "SV.germline.{sample_type}.manta_germline.vcf.gz",

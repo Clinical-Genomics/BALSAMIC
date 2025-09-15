@@ -6,7 +6,7 @@
 rule vep_annotate_germlineVAR_tumor:
   input:
     vcf = vcf_dir + "{var_type}.germline.tumor.{var_caller}.vcf.gz",
-    cosmic = config["reference"]["cosmic"]
+    cosmic = cosmic
   output:
     vcf_tumor = vep_dir + "{var_type}.germline.tumor.{var_caller}.vcf.gz",
   benchmark:
@@ -16,7 +16,7 @@ rule vep_annotate_germlineVAR_tumor:
   params:
     housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "germline"},
     sample = 'tumor',
-    vep_cache = config["reference"]["vep_dir"],
+    vep_cache = vep_cache_dir,
     vep_defaults = params.vep.vep_filters
   message:
     "Running vep annotation on germline variants for {params.sample} sample"
@@ -43,7 +43,7 @@ tabix -p vcf -f {output.vcf_tumor};
 rule vep_annotate_germlineVAR_normal:
   input:
     vcf = vcf_dir + "{var_type}.germline.normal.{var_caller}.vcf.gz",
-    cosmic = config["reference"]["cosmic"]
+    cosmic = cosmic
   output:
     vcf_normal = vep_dir + "{var_type}.germline.normal.{var_caller}.vcf.gz",
   benchmark:
@@ -53,7 +53,7 @@ rule vep_annotate_germlineVAR_normal:
   params:
     housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "germline"},
     sample = 'normal',
-    vep_cache = config["reference"]["vep_dir"],
+    vep_cache = vep_cache_dir,
     vep_defaults = params.vep.vep_filters
   message:
     "Running vep annotation on germline variants for {params.sample} sample"
