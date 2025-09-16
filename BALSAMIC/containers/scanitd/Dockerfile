@@ -15,6 +15,3 @@ USER scanitd
 WORKDIR /home/scanitd
 
 RUN pip install "scanitd==0.9.1"
-
-ENTRYPOINT ["scanitd"]
-CMD ["--help"]
