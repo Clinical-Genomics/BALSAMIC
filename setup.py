@@ -109,7 +109,7 @@ requirements: List[str] = [
     "typing_extensions==4.7.1",
     "tzdata==2023.3",
     "urllib3==1.26.16",
-    "vcfpy==0.13.8",
+    "vcfpy==0.13.4",
     "wrapt==1.15.0",
     "yapf==0.40.1",
     "yarl==1.9.2",
