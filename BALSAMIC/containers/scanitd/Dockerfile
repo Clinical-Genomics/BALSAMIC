@@ -7,12 +7,16 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
       build-essential ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
+# toolchain helpers
 RUN python -m pip install --upgrade pip setuptools wheel cython
 
-# Install as root → CLI ends up in /usr/local/bin (always in PATH)
+# 👇 Pin Click to <8.2 before installing ScanITD
+RUN pip install "click==8.1.7"
+
+# Install ScanITD
 RUN pip install "scanitd==0.9.1"
 
-# Drop to non-root for runtime
+# (optional) drop to non-root at runtime
 RUN useradd -m -u 1000 scanitd
 USER scanitd
 WORKDIR /home/scanitd
