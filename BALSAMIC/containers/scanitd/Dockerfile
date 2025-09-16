@@ -22,4 +22,4 @@ USER scanitd
 WORKDIR /home/scanitd
 
 ENTRYPOINT ["scanitd"]
-CMD ["--help"]
+CMD ["-h"]
