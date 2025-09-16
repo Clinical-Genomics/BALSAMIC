@@ -1,7 +1,7 @@
 #!/bin/bash
 # Test if commands exist
 
-valid_commands=( "scanitd" )
+valid_commands=( "scanitd -h" )
 
 for valid_command in "${valid_commands[@]}"
 do
