@@ -475,16 +475,16 @@ set-resources:
     mem_mb: 8000 * attempt
     runtime: 280
   fastqc:
-    mem_mb: 6000 * attempt
+    mem_mb: 300 * attempt
     runtime: 280
   fastp_quality_and_adapter_trim_wgs:
     mem_mb: 6000 * attempt
     runtime: 350
   fastp_adapter_trim_tga:
-    mem_mb: 16000 * attempt
+    mem_mb: 500 * attempt
     runtime: 400
   fastp_quality_trim_tga:
-    mem_mb: 16000 * attempt
+    mem_mb: 500 * attempt
     runtime: 350
   sentieon_umiextract_tga:
     mem_mb: 16000 * attempt
