@@ -475,7 +475,7 @@ set-resources:
     mem_mb: 8000 * attempt
     runtime: 280
   fastqc:
-    mem_mb: 6000 * attempt
+    mem_mb: min(2000, 6000 * attempt)
     runtime: 280
   fastp_quality_and_adapter_trim_wgs:
     mem_mb: 6000 * attempt
