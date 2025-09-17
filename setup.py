@@ -115,9 +115,6 @@ requirements: List[str] = [
     "zipp==3.16.2",
 ]
 
-if not os.getenv("READTHEDOCS"):
-    pass
-
 extras = {
     "test": [
         "pytest==7.4.0",
