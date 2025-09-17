@@ -483,13 +483,13 @@ set-resources:
     mem_mb: min(230000, 6000 * attempt)
     runtime: 350
   fastp_adapter_trim_tga:
-    mem_mb: min(230000, 16000 * attempt)
+    mem_mb: min(230000, 10000 * attempt)
     runtime: 400
   fastp_quality_trim_tga:
-    mem_mb: min(230000, 16000 * attempt)
+    mem_mb: min(230000, 10000 * attempt)
     runtime: 350
   sentieon_umiextract_tga:
-    mem_mb: min(230000, 16000 * attempt)
+    mem_mb: min(230000, 10000 * attempt)
     runtime: 350
   samtools_merge_bamfiles:
     mem_mb: min(230000, 70000 * attempt)
