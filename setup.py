@@ -139,7 +139,7 @@ setup(
     author=AUTHOR,
     author_email=EMAIL,
     install_requires=requirements,
-    extras_require=extras,  # <--- NEW
+    extras_require=extras,
     python_requires=REQUIRES_PYTHON,
     packages=find_packages(),
     package_data={
