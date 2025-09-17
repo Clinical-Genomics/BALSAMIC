@@ -14,483 +14,485 @@ default-resources:
 set-resources:
   post_process_tnscope_info_fields_wgs:
     runtime: 60
-    mem_mb: 5000 * attempt
+    mem_mb: min(230000, 5000 * attempt
   post_process_tnscope_info_fields_tga:
     runtime: 60
-    mem_mb: 5000 * attempt
+    mem_mb: min(230000, 5000 * attempt
   tnscope_sort:
     runtime: 60
-    mem_mb: 8000 * attempt
+    mem_mb: min(230000, 8000 * attempt
   merge_tnscope_to_mnvs:
     runtime: 60
-    mem_mb: 8000 * attempt
+    mem_mb: min(230000, 8000 * attempt
   cnvpytor_tumor_only_wgs:
     runtime: 600
-    mem_mb: 60000 * attempt
+    mem_mb: min(230000, 60000 * attempt
   igh_dux4_detection_tumor_only_wgs:
     runtime: 120
-    mem_mb: 5000 * attempt
+    mem_mb: min(230000, 5000 * attempt
   igh_dux4_detection_tumor_normal_wgs:
     runtime: 120
-    mem_mb: 5000 * attempt
+    mem_mb: min(230000, 5000 * attempt
   tiddit_sv_tumor_only_wgs:
     runtime: 600
-    mem_mb: 30000  * attempt
+    mem_mb: min(230000, 30000  * attempt
   tiddit_sv_tumor_normal_wgs:
     runtime: 600
-    mem_mb: 40000 * attempt
+    mem_mb: min(230000, 40000 * attempt
   ascat_tumor_normal_wgs:
     runtime: 600
-    mem_mb: 60000 * attempt
+    mem_mb: min(230000, 60000 * attempt
   delly_cnv_tumor_only:
     runtime: 340
-    mem_mb: 20000 * attempt
+    mem_mb: min(230000, 20000 * attempt
   delly_cnv_tumor_normal:
     runtime: 340
-    mem_mb: 20000 * attempt
+    mem_mb: min(230000, 20000 * attempt
   delly_cnv_tumor_only_wgs:
     runtime: 600
-    mem_mb: 30000 * attempt
+    mem_mb: min(230000, 30000 * attempt
   delly_cnv_tumor_normal_wgs:
     runtime: 600
-    mem_mb: 30000 * attempt
+    mem_mb: min(230000, 30000 * attempt
   delly_sv_tumor_only_wgs:
     runtime: 600
-    mem_mb: 30000 * attempt
+    mem_mb: min(230000, 30000 * attempt
   delly_sv_tumor_normal_wgs:
     runtime: 600
-    mem_mb: 30000 * attempt
+    mem_mb: min(230000, 30000 * attempt
   manta_tumor_only_wgs:
     runtime: 600
-    mem_mb: 10000 * attempt
+    mem_mb: min(230000, 10000 * attempt
   manta_tumor_normal_wgs:
     runtime: 600
-    mem_mb: 15000 * attempt
+    mem_mb: min(230000, 15000 * attempt
   delly_sv_tumor_only_tga:
     runtime: 340
-    mem_mb: 10000 * attempt
+    mem_mb: min(230000, 10000 * attempt
   delly_sv_tumor_normal_tga:
     runtime: 340
-    mem_mb: 10000 * attempt
+    mem_mb: min(230000, 10000 * attempt
   manta_tumor_only_tga:
     runtime: 340
-    mem_mb: 10000 * attempt
+    mem_mb: min(230000, 10000 * attempt
   manta_tumor_normal_tga:
     runtime: 340
-    mem_mb: 15000 * attempt
+    mem_mb: min(230000, 15000 * attempt
   bcftools_quality_filter_svdb:
     runtime: 60
-    mem_mb: 10000 * attempt
+    mem_mb: min(230000, 10000 * attempt
   svdb_merge_tumor_only:
     runtime: 60
-    mem_mb: 10000 * attempt
+    mem_mb: min(230000, 10000 * attempt
   svdb_merge_tumor_normal:
     runtime: 60
-    mem_mb: 10000 * attempt
+    mem_mb: min(230000, 10000 * attempt
   bcftools_process_SV_CNV:
     runtime: 60
-    mem_mb: 10000 * attempt
+    mem_mb: min(230000, 10000 * attempt
   bcftools_sort_cnvkitCNV_research:
     runtime: 60
-    mem_mb: 10000 * attempt
+    mem_mb: min(230000, 10000 * attempt
   cnvkit_call_CNV_research:
-    mem_mb: 5000 * attempt
+    mem_mb: min(230000, 5000 * attempt
     runtime: 360
   purecn_call_CNV_research:
-    mem_mb: 20000 * attempt
+    mem_mb: min(230000, 20000 * attempt
     runtime: 360
   bedtools_pad_bedfile:
-    mem_mb: 1000 * attempt
+    mem_mb: min(230000, 1000 * attempt
     runtime: 20
   vardict_sort:
-    mem_mb: 15000 * attempt
+    mem_mb: min(230000, 15000 * attempt
     runtime: 30
   gatk_update_vcf_sequence_dictionary:
     runtime: 600
-    mem_mb: 10000 * attempt
+    mem_mb: min(230000, 10000 * attempt
   cnvkit_segment_CNV_research:
     runtime: 360
-    mem_mb: 5000 * attempt
+    mem_mb: min(230000, 5000 * attempt
   bcftools_merge_germlineSNV_research:
     runtime: 280
-    mem_mb: 10000 * attempt
+    mem_mb: min(230000, 10000 * attempt
   vardict_tumor_normal:
     runtime: 280
-    mem_mb: 40000 * attempt
+    mem_mb: min(230000, 40000 * attempt
   sentieon_tnscope_tga_tumor_normal:
-    mem_mb: 25000 * attempt
+    mem_mb: min(230000, 25000 * attempt
     runtime: 280
   post_process_vardict:
     runtime: 280
-    mem_mb: 5000 * attempt
+    mem_mb: min(230000, 5000 * attempt
   vardict_tumor_only:
     runtime: 280
-    mem_mb: 20000 * attempt
+    mem_mb: min(230000, 20000 * attempt
   sentieon_tnscope_tga_tumor_only:
     runtime: 280
+    mem_mb: min(230000, 20000 * attempt
   bcftools_quality_filter_TNscope_umi_tumor_only:
     runtime: 100
-    mem_mb: 10000 * attempt
+    mem_mb: min(230000, 10000 * attempt
   bcftools_quality_filter_TNscope_umi_tumor_normal:
     runtime: 100
-    mem_mb: 10000 * attempt
+    mem_mb: min(230000, 10000 * attempt
   bcftools_quality_filter_vardict_tumor_normal:
     runtime: 100
-    mem_mb: 10000 * attempt
+    mem_mb: min(230000, 10000 * attempt
   bcftools_quality_filter_tnscope_tumor_normal_tga:
     runtime: 100
-    mem_mb: 10000 * attempt
+    mem_mb: min(230000, 10000 * attempt
   bcftools_quality_filter_vardict_tumor_only:
     runtime: 100
-    mem_mb: 10000 * attempt
+    mem_mb: min(230000, 10000 * attempt
   bcftools_quality_filter_tnscope_tumor_only_tga:
     runtime: 100
-    mem_mb: 10000 * attempt
+    mem_mb: min(230000, 10000 * attempt
   bcftools_quality_filter_tnscope_tumor_normal_wgs:
     runtime: 100
-    mem_mb: 10000 * attempt
+    mem_mb: min(230000, 10000 * attempt
   bcftools_quality_filter_tnscope_tumor_only_wgs:
     runtime: 100
-    mem_mb: 10000 * attempt
+    mem_mb: min(230000, 10000 * attempt
   sentieon_tnscope_wgs_tumor_normal:
     runtime: 1440
-    mem_mb: 40000 * attempt
+    mem_mb: min(230000, 40000 * attempt
   sentieon_tnscope_wgs_tumor_only:
     runtime: 1440
-    mem_mb: 45000 * attempt
+    mem_mb: min(230000, 45000 * attempt
   merge_snv_vcfs:
     runtime: 120
-    mem_mb: 20000 * attempt
+    mem_mb: min(230000, 20000 * attempt
   bcftools_normalise_vcfs:
     runtime: 120
-    mem_mb: 4000 * attempt
+    mem_mb: min(230000, 4000 * attempt
   manta_germline_wgs:
     runtime: 1440
-    mem_mb: 60000 * attempt
+    mem_mb: min(230000, 60000 * attempt
   sentieon_DNAscope_wgs:
     runtime: 1440
-    mem_mb: 50000 * attempt
+    mem_mb: min(230000, 50000 * attempt
   manta_germline_tga:
     runtime: 300
-    mem_mb: 40000 * attempt
+    mem_mb: min(230000, 40000 * attempt
   sentieon_DNAscope_tga:
     runtime: 1440
-    mem_mb: 25000 * attempt
+    mem_mb: min(230000, 25000 * attempt
   finalize_gens_outputfiles:
     runtime: 60
-    mem_mb: 2000 * attempt
+    mem_mb: min(230000, 2000 * attempt
   gens_preprocess_tga:
     runtime: 60
-    mem_mb: 10000 * attempt
+    mem_mb: min(230000, 10000 * attempt
   sentieon_DNAscope_gnomad_tga:
     runtime: 1440
-    mem_mb: 25000 * attempt
+    mem_mb: min(230000, 25000 * attempt
   gens_preprocess_wgs:
     runtime: 60
-    mem_mb: 10000 * attempt
+    mem_mb: min(230000, 10000 * attempt
   gatk_denoise_read_counts:
     runtime: 600
-    mem_mb: 70000 * attempt
+    mem_mb: min(230000, 70000 * attempt
   sentieon_DNAscope_gnomad:
     runtime: 1440
-    mem_mb: 60000 * attempt
+    mem_mb: min(230000, 60000 * attempt
   gatk_collectreadcounts:
     runtime: 350
-    mem_mb: 40000 * attempt
+    mem_mb: min(230000, 40000 * attempt
   bedtools_sort_and_merge:
     runtime: 20
-    mem_mb: 400 * attempt
+    mem_mb: min(230000, 400 * attempt
   extend_short_bedregions:
     runtime: 20
-    mem_mb: 400 * attempt
+    mem_mb: min(230000, 400 * attempt
   create_coverage:
     runtime: 360
-    mem_mb: 30000 * attempt
+    mem_mb: min(230000, 30000 * attempt
   create_target:
     runtime: 360
-    mem_mb: 5000 * attempt
+    mem_mb: min(230000, 5000 * attempt
   sentieon_align_sort_umireads_umi:
     runtime: 1440
-    mem_mb: 26000 * attempt
+    mem_mb: min(230000, 26000 * attempt
   sentieon_tnscope_umi_tn:
     runtime: 280
-    mem_mb: 10000 * attempt
+    mem_mb: min(230000, 10000 * attempt
   sentieon_tnscope_umi:
     runtime: 280
-    mem_mb: 10000 * attempt
+    mem_mb: min(230000, 10000 * attempt
   bam_compress_normal_umi:
     runtime: 280
-    mem_mb: 16000 * attempt
+    mem_mb: min(230000, 16000 * attempt
   bam_compress_tumor_umi:
     runtime: 280
-    mem_mb: 16000 * attempt
+    mem_mb: min(230000, 16000 * attempt
   sentieon_consensusfilter_umi:
     runtime: 280
-    mem_mb: 16000 * attempt
+    mem_mb: min(230000, 16000 * attempt
   sentieon_bwa_umiconsensus:
     runtime: 480
-    mem_mb: 30000 * attempt
+    mem_mb: min(230000, 30000 * attempt
   sentieon_consensuscall_umi:
     runtime: 360
-    mem_mb: 16000 * attempt
+    mem_mb: min(230000, 16000 * attempt
   samtools_view_calculatemeanfamilydepth_umi:
     runtime: 280
-    mem_mb: 16000 * attempt
+    mem_mb: min(230000, 16000 * attempt
   picard_collecthsmetrics_umi:
     runtime: 280
-    mem_mb: 16000 * attempt
+    mem_mb: min(230000, 16000 * attempt
   picard_umiaware:
     runtime: 280
-    mem_mb: 16000 * attempt
+    mem_mb: min(230000, 16000 * attempt
   modify_tnscope_infofield_umi:
     runtime: 60
-    mem_mb: 10000 * attempt
+    mem_mb: min(230000, 10000 * attempt
   bcftools_query_generatebackgroundaf_umitable:
     runtime: 60
-    mem_mb: 10000 * attempt
+    mem_mb: min(230000, 10000 * attempt
   merge_cnv_pdf_reports:
     runtime: 60
-    mem_mb: 5000 * attempt
+    mem_mb: min(230000, 5000 * attempt
   image_to_pdf:
     runtime: 60
-    mem_mb: 5000 * attempt
+    mem_mb: min(230000, 5000 * attempt
   msi_to_pdf:
     runtime: 60
-    mem_mb: 5000 * attempt
+    mem_mb: min(230000, 5000 * attempt
   txt_to_pdf:
     runtime: 60
-    mem_mb: 5000 * attempt
+    mem_mb: min(230000, 5000 * attempt
   csv_to_pdf:
     runtime: 60
-    mem_mb: 5000 * attempt
+    mem_mb: min(230000, 5000 * attempt
   somalier_relate:
     runtime: 60
-    mem_mb: 5000 * attempt
+    mem_mb: min(230000, 5000 * attempt
   somalier_extract_tumor:
     runtime: 60
-    mem_mb: 5000 * attempt
+    mem_mb: min(230000, 5000 * attempt
   somalier_extract_normal:
     runtime: 60
-    mem_mb: 5000 * attempt
+    mem_mb: min(230000, 5000 * attempt
   sex_prediction_tga_tumor_only:
     runtime: 60
-    mem_mb: 5000 * attempt
+    mem_mb: min(230000, 5000 * attempt
   sex_prediction_tga_tumor_normal:
     runtime: 60
-    mem_mb: 5000 * attempt
+    mem_mb: min(230000, 5000 * attempt
   sex_prediction_wgs_tumor_only:
     runtime: 60
-    mem_mb: 5000 * attempt
+    mem_mb: min(230000, 5000 * attempt
   sex_prediction_wgs_tumor_normal:
     runtime: 60
-    mem_mb: 5000 * attempt
+    mem_mb: min(230000, 5000 * attempt
   sentieon_plot_qc_metrics_tga:
     runtime: 30
-    mem_mb: 2000 * attempt
+    mem_mb: min(230000, 2000 * attempt
   sentieon_plot_qc_metrics_wgs:
     runtime: 30
-    mem_mb: 5000 * attempt
+    mem_mb: min(230000, 5000 * attempt
   sentieon_qc_metrics_tga:
     runtime: 280
-    mem_mb: 30000 * attempt
+    mem_mb: min(230000, 30000 * attempt
   sentieon_qc_metric_wgs:
     runtime: 280
-    mem_mb: 25000 * attempt
+    mem_mb: min(230000, 25000 * attempt
   sentieon_wgs_metrics:
     runtime: 280
-    mem_mb: 30000 * attempt
+    mem_mb: min(230000, 30000 * attempt
   picard_CollectWgsMetrics:
     runtime: 900
-    mem_mb: 30000 * attempt
+    mem_mb: min(230000, 30000 * attempt
   samtools_qc_umi_collapsed:
     runtime: 280
-    mem_mb: 8000 * attempt
+    mem_mb: min(230000, 8000 * attempt
   samtools_qc_tga:
     runtime: 280
-    mem_mb: 8000 * attempt
+    mem_mb: min(230000, 8000 * attempt
   samtools_qc_wgs:
     runtime: 280
-    mem_mb: 8000 * attempt
+    mem_mb: min(230000, 8000 * attempt
   sambamba_exon_depth:
     runtime: 150
-    mem_mb: 12000 * attempt
+    mem_mb: min(230000, 12000 * attempt
   sambamba_panel_depth:
     runtime: 150
-    mem_mb: 8000 * attempt
+    mem_mb: min(230000, 8000 * attempt
   cnv_report:
     runtime: 20
-    mem_mb: 100 * attempt
+    mem_mb: min(230000, 100 * attempt
   collect_custom_qc_metrics:
     runtime: 20
-    mem_mb: 1000 * attempt
+    mem_mb: min(230000, 1000 * attempt
   picard_CollectHsMetrics_WGS:
     runtime: 360
-    mem_mb: 25000 * attempt
+    mem_mb: min(230000, 25000 * attempt
   picard_CollectAlignmentSummaryMetrics:
     runtime: 900
-    mem_mb: 30000 * attempt
+    mem_mb: min(230000, 30000 * attempt
   picard_CollectHsMetrics:
     runtime: 360
-    mem_mb: 25000 * attempt
+    mem_mb: min(230000, 25000 * attempt
   multiqc:
     runtime: 60
-    mem_mb: 5000 * attempt
+    mem_mb: min(230000, 5000 * attempt
   mosdepth_coverage:
     runtime: 280
-    mem_mb: 5000 * attempt
+    mem_mb: min(230000, 5000 * attempt
   gatk_create_readcount_pon:
     runtime: 3600
-    mem_mb: 170000 * attempt
+    mem_mb: min(230000, 170000 * attempt
   create_reference:
     runtime: 120
-    mem_mb: 15000 * attempt
+    mem_mb: min(230000, 15000 * attempt
   dragen_align_call_tumor_only:
     runtime: 1200
-    mem_mb: 120000 * attempt
+    mem_mb: min(230000, 120000 * attempt
   concatenate_fastqs:
     runtime: 60
-    mem_mb: 5000 * attempt
+    mem_mb: min(230000, 5000 * attempt
   vcfheader_rename_germline:
     runtime: 120
-    mem_mb: 1000 * attempt
+    mem_mb: min(230000, 1000 * attempt
   vcf2cytosure_convert_tumor_normal:
     runtime: 120
-    mem_mb: 10000 * attempt
+    mem_mb: min(230000, 10000 * attempt
   vcf2cytosure_convert_tumor_only:
     runtime: 120
-    mem_mb: 10000 * attempt
+    mem_mb: min(230000, 10000 * attempt
   vcf2cytosure_convert:
     runtime: 120
-    mem_mb: 10000 * attempt
+    mem_mb: min(230000, 10000 * attempt
   bcftools_filter_sv_research:
     runtime: 120
-    mem_mb: 10000 * attempt
+    mem_mb: min(230000, 10000 * attempt
   bcftools_filter_sv_clinical:
     runtime: 120
-    mem_mb: 10000 * attempt
+    mem_mb: min(230000, 10000 * attempt
   bcftools_filter_tnscope_clinical_tumor_only:
     runtime: 280
-    mem_mb: 20000 * attempt
+    mem_mb: min(230000, 20000 * attempt
   bcftools_filter_tnscope_research_tumor_only:
     runtime: 280
-    mem_mb: 20000 * attempt
+    mem_mb: 2min(230000, 0000 * attempt
   bcftools_filter_TNscope_umi_clinical_tumor_only:
     runtime: 280
-    mem_mb: 5000 * attempt
+    mem_mb: min(230000, 5000 * attempt
   bcftools_filter_TNscope_umi_research_tumor_only:
     runtime: 280
-    mem_mb: 5000 * attempt
+    mem_mb: min(230000, 5000 * attempt
   bcftools_filter_merged_clinical_tumor_only:
     runtime: 280
-    mem_mb: 15000 * attempt
+    mem_mb: min(230000, 15000 * attempt
   bcftools_filter_merged_research_tumor_only:
     runtime: 280
-    mem_mb: 15000 * attempt
+    mem_mb: min(230000, 15000 * attempt
   bcftools_filter_tnscope_clinical_tumor_normal:
     runtime: 280
-    mem_mb: 10000 * attempt
+    mem_mb: min(230000, 10000 * attempt
   bcftools_filter_tnscope_research_tumor_normal:
     runtime: 280
-    mem_mb: 10000 * attempt
+    mem_mb: min(230000, 10000 * attempt
   bcftools_filter_TNscope_umi_clinical_tumor_normal:
     runtime: 280
-    mem_mb: 5000 * attempt
+    mem_mb: min(230000, 5000 * attempt
   bcftools_filter_TNscope_umi_research_tumor_normal:
     runtime: 280
-    mem_mb: 5000 * attempt
+    mem_mb: min(230000, 5000 * attempt
   bcftools_filter_merged_clinical_tumor_normal:
     runtime: 280
-    mem_mb: 10000 * attempt
+    mem_mb: min(230000, 10000 * attempt
   bcftools_filter_merged_research_tumor_normal:
     runtime: 280
-    mem_mb: 10000 * attempt
+    mem_mb: min(230000, 10000 * attempt
   svdb_annotate_clinical_sv:
     runtime: 600
-    mem_mb: 15000 * attempt
+    mem_mb: min(230000, 15000 * attempt
   svdb_annotate_somatic_research_sv:
     runtime: 720
-    mem_mb: 25000 * attempt
+    mem_mb: min(230000, 25000 * attempt
   vep_somatic_research_sv:
     runtime: 720
   vcfanno_annotate_somaticSNV_clinical:
     runtime: 1080
-    mem_mb: 10000 * attempt
+    mem_mb: min(230000, 10000 * attempt
   vep_annotate_somaticSNV_research:
     runtime: 1080
-    mem_mb: 50000 * attempt
+    mem_mb: min(230000, 50000 * attempt
   bcftools_annotate_somaticINDEL_research:
     runtime: 60
-    mem_mb: 4000 * attempt
+    mem_mb: min(230000, 4000 * attempt
   cadd_annotate_somaticINDEL_research:
     runtime: 1580
-    mem_mb: 20000 * attempt
+    mem_mb: min(230000, 20000 * attempt
   bcftools_get_somaticINDEL_research:
     runtime: 60
-    mem_mb: 5000 * attempt
+    mem_mb: min(230000, 5000 * attempt
   tmb_calculation:
     runtime: 280
-    mem_mb: 5000 * attempt
+    mem_mb: min(230000, 5000 * attempt
   genmod_score_snvs:
     runtime: 280
-    mem_mb: 5000 * attempt
+    mem_mb: min(230000, 5000 * attempt
   msisensorpro_msi_tumor_normal:
     runtime: 280
-    mem_mb: 10000 * attempt
+    mem_mb: min(230000, 10000 * attempt
   msisensorpro_scan_reference:
     runtime: 280
-    mem_mb: 1000 * attempt
+    mem_mb: min(230000, 1000 * attempt
   vep_annotate_germlineVAR_normal:
     runtime: 360
-    mem_mb: 30000 * attempt
+    mem_mb: min(230000, 30000 * attempt
   vep_annotate_germlineVAR_tumor:
     runtime: 360
-    mem_mb: 30000 * attempt
+    mem_mb: min(230000, 30000 * attempt
   sentieon_align_sort:
     runtime: 1440
-    mem_mb: 15000 * attempt
+    mem_mb: min(230000, 15000 * attempt
   sentieon_realign:
     runtime: 1440
-    mem_mb: 80000 * attempt
+    mem_mb: min(230000, 80000 * attempt
   sentieon_align_sort_umireads:
     runtime: 1440
-    mem_mb: 15000 * attempt
+    mem_mb: min(230000, 15000 * attempt
   cap_base_quality:
-    mem_mb: 10000 * attempt
+    mem_mb: min(230000, 10000 * attempt
     runtime: 300
   sentieon_dedup:
     runtime: 1440
-    mem_mb: 80000 * attempt
+    mem_mb: min(230000, 80000 * attempt
   sentieon_dedup_consensus:
     runtime: 1440
+    mem_mb: min(230000, 20000 * attempt)
   sentieon_base_calibration:
-    mem_mb: 25000 * attempt
+    mem_mb: min(230000, 25000 * attempt
     runtime: 1440
   samtools_fixmate:
-    mem_mb: 40000 * attempt
+    mem_mb: min(230000, 40000 * attempt
     runtime: 560
   bam_compress_tumor:
-    mem_mb: 8000 * attempt
+    mem_mb: min(230000, 8000 * attempt
     runtime: 280
   bam_compress_normal:
-    mem_mb: 8000 * attempt
+    mem_mb: min(230000, 8000 * attempt
     runtime: 280
   fastqc:
-    mem_mb: min(2000, 6000 * attempt)
+    mem_mb: min(230000, 6000 * attempt)
     runtime: 280
   fastp_quality_and_adapter_trim_wgs:
-    mem_mb: 6000 * attempt
+    mem_mb: min(230000, 6000 * attempt
     runtime: 350
   fastp_adapter_trim_tga:
-    mem_mb: 16000 * attempt
+    mem_mb: min(230000, 16000 * attempt
     runtime: 400
   fastp_quality_trim_tga:
-    mem_mb: 16000 * attempt
+    mem_mb: min(230000, 16000 * attempt
     runtime: 350
   sentieon_umiextract_tga:
-    mem_mb: 16000 * attempt
+    mem_mb: min(230000, 16000 * attempt
     runtime: 350
   samtools_merge_bamfiles:
-    mem_mb: 70000 * attempt
+    mem_mb: min(230000, 70000 * attempt
     runtime: 800
 
 set-threads:
