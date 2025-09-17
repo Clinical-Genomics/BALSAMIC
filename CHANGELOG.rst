@@ -14,6 +14,7 @@ Added:
 * gender unknown gender assignment https://github.com/Clinical-Genomics/BALSAMIC/pull/1570
 * using predicted sex for CNV analysis for cases with unknown gender https://github.com/Clinical-Genomics/BALSAMIC/pull/1581
 * artefact database filter for WGS SVs  https://github.com/Clinical-Genomics/BALSAMIC/pull/1578
+* attempts increases mem on restart https://github.com/Clinical-Genomics/BALSAMIC/pull/1610
 
 Changed:
 ^^^^^^^^
