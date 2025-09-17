@@ -10,7 +10,7 @@ URL: str = "https://github.com/Clinical-Genomics/BALSAMIC"
 EMAIL: str = "support@clinicalgenomics.se"
 REQUIRES_PYTHON: str = ">=3.11.0"
 
-# Requirements
+# Requirements (runtime only — no pytest, no vcfpy here)
 requirements: List[str] = [
     "aiohttp==3.8.5",
     "aiosignal==1.3.1",
@@ -84,7 +84,6 @@ requirements: List[str] = [
     "pyOpenSSL==23.2.0",
     "pyparsing==3.0.9",
     "pypdf==3.17.1",
-    "pytest==7.4.0",
     "python-dateutil==2.8.2",
     "pytz==2023.3",
     "pyu2f==0.1.5",
@@ -109,7 +108,6 @@ requirements: List[str] = [
     "typing_extensions==4.7.1",
     "tzdata==2023.3",
     "urllib3==1.26.16",
-    "vcfpy==0.13.4",
     "wrapt==1.15.0",
     "yapf==0.40.1",
     "yarl==1.9.2",
@@ -117,9 +115,25 @@ requirements: List[str] = [
     "zipp==3.16.2",
 ]
 
-# The C libraries required to build numpy are not available on RTD
 if not os.getenv("READTHEDOCS"):
-    requirements.extend(["cyvcf2==0.31.1"])
+    pass
+
+extras = {
+    "test": [
+        "pytest==7.4.0",
+        "pytest-cov==4.1.0",
+        "pysam==0.23.0",
+        "vcfpy==0.13.4",
+    ],
+    "dev": [
+        "black==23.7.0",
+        "bump2version==1.0.1",
+        "coveralls==3.3.1",
+        "pytest==7.4.0",
+        "pytest-cov==4.1.0",
+        "vcfpy==0.13.4",
+    ],
+}
 
 setup(
     name=NAME,
@@ -128,6 +142,7 @@ setup(
     author=AUTHOR,
     author_email=EMAIL,
     install_requires=requirements,
+    extras_require=extras,  # <--- NEW
     python_requires=REQUIRES_PYTHON,
     packages=find_packages(),
     package_data={
