@@ -12,7 +12,7 @@ rule vep_somatic_research_sv:
     benchmark:
         Path(benchmark_dir, "vep_somatic_research_sv." + config["analysis"]["case_id"] + ".svdb.tsv").as_posix()
     resources:
-        mem_mb = lambda wc: (140000 if config_model.analysis.sequencing_type == SequencingType.WGS else 25000)
+        mem_mb = lambda wc: (140000 if config_model.analysis.sequencing_type == SequencingType.WGS else 35000)
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix()
     params:
