@@ -38,6 +38,7 @@ METRICS: Dict[str, dict] = {
             "PCT_TARGET_BASES_250X": {"condition": {"norm": "gt", "threshold": 0.95}},
         },
         "gmslymphoid": {
+            "GC_DROPOUT": {"condition": {"norm": "lt", "threshold": 2.00}},
             "PCT_TARGET_BASES_500X": {"condition": {"norm": "gt", "threshold": 0.95}},
         },
         "gmsmyeloid": {
@@ -59,6 +60,9 @@ METRICS: Dict[str, dict] = {
             "PCT_TARGET_BASES_1000X": {"condition": {"norm": "gt", "threshold": 0.95}},
         },
         "probio": {
+            "PCT_TARGET_BASES_250X": {"condition": {"norm": "gt", "threshold": 0.95}},
+        },
+        "probioC4": {
             "PCT_TARGET_BASES_250X": {"condition": {"norm": "gt", "threshold": 0.95}},
         },
         "swep53cfDNA": {
