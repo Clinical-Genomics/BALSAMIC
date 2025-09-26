@@ -15,6 +15,7 @@ Added:
 * using predicted sex for CNV analysis for cases with unknown gender https://github.com/Clinical-Genomics/BALSAMIC/pull/1581
 * artefact database filter for WGS SVs  https://github.com/Clinical-Genomics/BALSAMIC/pull/1578
 * attempts increases mem on restart https://github.com/Clinical-Genomics/BALSAMIC/pull/1610
+* ProbioC4 coverage QC threshold https://github.com/Clinical-Genomics/BALSAMIC/pull/1613
 
 Changed:
 ^^^^^^^^
@@ -30,6 +31,7 @@ Changed:
 * refactored variant observations metadata fields into constants instead of snakemake file https://github.com/Clinical-Genomics/BALSAMIC/pull/1570
 * changed sex check to a warning metric instead of qc fail https://github.com/Clinical-Genomics/BALSAMIC/pull/1581
 * updated MultiQC to v1.31 https://github.com/Clinical-Genomics/BALSAMIC/pull/1607
+* lowered lymphoid panel GC_dropout threshold to 2 https://github.com/Clinical-Genomics/BALSAMIC/pull/1613
 
 Removed:
 ^^^^^^^^
