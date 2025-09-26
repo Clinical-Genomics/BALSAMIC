@@ -155,7 +155,7 @@ setup(
             "*.awk",
             "*.html",
             "*.md",
-            "*.vcf"
+            "*.vcf",
         ],
     },
     include_package_data=True,
