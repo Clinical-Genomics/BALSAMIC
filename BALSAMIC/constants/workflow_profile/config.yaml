@@ -466,7 +466,7 @@ set-resources:
     mem_mb: min(230000, 80000 * attempt)
   sentieon_dedup_consensus:
     runtime: 1440
-    mem_mb: min(230000, 20000 * attempt)
+    mem_mb: min(230000, 30000 * attempt)
   sentieon_base_calibration:
     mem_mb: min(230000, 25000 * attempt)
     runtime: 1440
