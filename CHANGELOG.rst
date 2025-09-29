@@ -42,6 +42,7 @@ Removed:
 Fixed:
 ^^^^^^
 * Fixed varcall_py27 container for Manta https://github.com/Clinical-Genomics/BALSAMIC/pull/1567
+* qc metrics script bug 
 
 
 [17.1.0]
