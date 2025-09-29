@@ -451,7 +451,7 @@ set-resources:
     mem_mb: min(230000, 30000 * attempt)
   sentieon_align_sort:
     runtime: 1440
-    mem_mb: min(230000, 15000 * attempt)
+    mem_mb: min(230000, 30000 * attempt)
   sentieon_realign:
     runtime: 1440
     mem_mb: min(230000, 80000 * attempt)
