@@ -126,6 +126,9 @@ set-resources:
   vardict_tumor_only:
     runtime: 280
     mem_mb: min(230000, 20000 * attempt)
+  vardict_move_svs:
+    runtime: 280
+    mem_mb: min(230000, 5000 * attempt)
   sentieon_tnscope_tga_tumor_only:
     runtime: 280
     mem_mb: min(230000, 20000 * attempt)
@@ -454,7 +457,7 @@ set-resources:
     mem_mb: min(230000, 80000 * attempt)
   sentieon_align_sort_umireads:
     runtime: 1440
-    mem_mb: min(230000, 15000 * attempt)
+    mem_mb: min(230000, 22000 * attempt)
   cap_base_quality:
     mem_mb: min(230000, 10000 * attempt)
     runtime: 300
@@ -468,7 +471,7 @@ set-resources:
     mem_mb: min(230000, 25000 * attempt)
     runtime: 1440
   samtools_fixmate:
-    mem_mb: min(230000, 40000 * attempt)
+    mem_mb: min(230000, 50000 * attempt)
     runtime: 560
   bam_compress_tumor:
     mem_mb: min(230000, 8000 * attempt)
@@ -534,6 +537,7 @@ set-threads:
   sentieon_tnscope_tga_tumor_normal: 16
   post_process_vardict: 2
   vardict_tumor_only: 16
+  vardict_move_svs: 2
   sentieon_tnscope_tga_tumor_only: 16
   bcftools_quality_filter_TNscope_umi_tumor_only: 8
   bcftools_quality_filter_TNscope_umi_tumor_normal: 8
