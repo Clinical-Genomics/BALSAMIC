@@ -252,6 +252,7 @@ def case_config(
             "analysis_workflow": analysis_workflow,
             "config_creation_date": datetime.now().strftime("%Y-%m-%d %H:%M"),
             "rescue_snvs": rescue_snvs if rescue_snvs else RESCUE_SNVS.as_posix(),
+            "genome_version": genome_version
         },
         custom_filters={"umi_min_reads": umi_min_reads if umi_min_reads else None},
         reference=references,
