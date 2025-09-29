@@ -497,8 +497,12 @@ set-resources:
   samtools_merge_bamfiles:
     mem_mb: min(230000, 70000 * attempt)
     runtime: 800
+  create_final_vcf_namemap:
+    mem_mb: min(230000, 2000 * attempt)
+    runtime: 800
 
 set-threads:
+  create_final_vcf_namemap: 2
   post_process_tnscope_info_fields_wgs: 1
   post_process_tnscope_info_fields_tga: 1
   tnscope_sort: 1
