@@ -193,6 +193,7 @@ DELIVERY_RULES: List[str] = [
     "sentieon_tnscope_tga_tumor_only",
     "sentieon_tnscope_wgs_tumor_only",
     "sentieon_tnscope_wgs_tumor_normal",
+    "vardict_move_svs",
     "gatk_update_vcf_sequence_dictionary",
     "bcftools_filter_tnscope_clinical_tumor_only",
     "bcftools_filter_tnscope_clinical_tumor_normal",
