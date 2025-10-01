@@ -1,76 +1,37 @@
-# ---- builder ----
-FROM python:3.11-slim AS builder
+FROM continuumio/miniconda3:25.1.1-2
 
-ENV WORK_DIR=/opt
-ENV VENV=${WORK_DIR}/venv
-ENV PATH="${VENV}/bin:${PATH}"
+LABEL base.image="continuumio/miniconda3" \
+    maintainer="Clinical Genomics" \
+    about.contact="support@clinicalgenomics.se" \
+    about.license="MIT License (MIT)" \
+    about.home="https://github.com/Clinical-Genomics/BALSAMIC" \
+    about.documentation="https://balsamic.readthedocs.io/" \
+    about.description="Bioinformatic analysis pipeline for somatic mutations in cancer"
 
-RUN apt-get update && \
-    apt-get -y upgrade && \
-    apt-get -y install --no-install-recommends git && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+ARG CONTAINER_NAME
 
-RUN python -m pip install --upgrade --no-cache-dir pip && \
-    python -m venv "${VENV}"
+# Copy enviroment file
+COPY BALSAMIC/containers/${CONTAINER_NAME}/${CONTAINER_NAME}.yaml /tmp/environment.yaml
 
-# constraints file
-RUN printf '%s\n' \
-    'numpy==1.23.5' \
-    'seaborn==0.12.2' \
-    > "${WORK_DIR}/constraints.txt"
+# Create conda environment
+RUN conda env create -n ${CONTAINER_NAME} -f /tmp/environment.yaml && \
+    conda clean -afy && \
+    rm -f /tmp/environment.yaml
 
-RUN pip install --no-cache-dir -c "${WORK_DIR}/constraints.txt" seaborn==0.12.2 numpy==1.23.5
+ENV PATH="/opt/conda/envs/${CONTAINER_NAME}/bin/:${PATH}"
 
-# Clone CNVpytor
-WORKDIR ${WORK_DIR}
-RUN git clone https://github.com/abyzovlab/CNVpytor.git
-WORKDIR ${WORK_DIR}/CNVpytor
-RUN git checkout v1.3.1 && \
-    pip install --no-cache-dir -c "${WORK_DIR}/constraints.txt" .
-
-# Optional: download CNVpytor resources during build
+# Download resources during build
 RUN cnvpytor -download
 
-# sanity check
-RUN python - <<'PY'
-import numpy, sys
-print("Python:", sys.version.split()[0])
-print("NumPy :", numpy.__version__)
-assert numpy.__version__ == "1.23.5", "NumPy version drifted!"
-PY
+# Run as a non-root
+RUN useradd -m dockeruser
+USER dockeruser
 
+# Set the work directory
+WORKDIR /home/dockeruser/
 
-# ---- final ----
-FROM python:3.11-slim
+# Set the default shell
+SHELL ["/bin/bash", "-c"]
 
-LABEL base.image="python:3.11-slim" \
-      maintainer="Clinical Genomics" \
-      about.contact="support@clinicalgenomics.se" \
-      software="cnvpytor" \
-      software.version="1.3.1" \
-      about.summary="A tool for CNV discovery and genotyping from depth-of-coverage by mapped reads" \
-      about.home="https://github.com/abyzovlab/CNVpytor" \
-      about.documentation="https://github.com/abyzovlab/CNVpytor/wiki" \
-      about.license="MIT License (MIT)"
-
-RUN apt-get update && \
-    apt-get -y upgrade && \
-    apt-get -y install --no-install-recommends tabix && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
-
-ENV WORK_DIR=/opt
-ENV VENV=${WORK_DIR}/venv
-ENV PATH="${VENV}/bin:${PATH}"
-
-COPY --from=builder ${WORK_DIR} ${WORK_DIR}
-
-# Set user env
-RUN adduser --disabled-password --gecos '' ubuntu && \
-    chsh -s /bin/bash ubuntu && \
-    mkdir -p /home/ubuntu
-
-USER ubuntu
-WORKDIR /home/ubuntu
+# Define the default command
 CMD ["/bin/bash"]
