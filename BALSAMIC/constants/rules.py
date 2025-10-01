@@ -210,8 +210,6 @@ DELIVERY_RULES: List[str] = [
     "svdb_merge_tumor_normal",
     "bcftools_filter_sv_research",
     "bcftools_filter_sv_clinical",
-    "tiddit_sv_tumor_only",
-    "tiddit_sv_tumor_normal",
     "tiddit_sv_tumor_normal_wgs",
     "tiddit_sv_tumor_only_wgs",
     # CNVs
