@@ -42,6 +42,7 @@ Removed:
 Fixed:
 ^^^^^^
 * Fixed varcall_py27 container for Manta https://github.com/Clinical-Genomics/BALSAMIC/pull/1567
+* pinned numpy version to 1.23.5 for cnvpytor container https://github.com/Clinical-Genomics/BALSAMIC/pull/1617
 * qc metrics script bug https://github.com/Clinical-Genomics/BALSAMIC/pull/1615
 
 

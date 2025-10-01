@@ -1,1 +1,10 @@
-- cnvpytor=1.3.1
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+
+dependencies:
+  - cnvpytor=1.3.1
+  - numpy=1.23.5
+  - seaborn=0.12.2
+  - htslib=1.21.*
