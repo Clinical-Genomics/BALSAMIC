@@ -1,3 +1,4 @@
+# ---- builder ----
 FROM python:3.11-slim AS builder
 
 ENV WORK_DIR=/opt
@@ -10,30 +11,28 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Create venv + upgrade pip
 RUN python -m pip install --upgrade --no-cache-dir pip && \
     python -m venv "${VENV}"
 
-# Constraints keep numpy (and seaborn) pinned
+# constraints file
 RUN printf '%s\n' \
     'numpy==1.23.5' \
     'seaborn==0.12.2' \
     > "${WORK_DIR}/constraints.txt"
 
-# Install your pinned deps under constraints
 RUN pip install --no-cache-dir -c "${WORK_DIR}/constraints.txt" seaborn==0.12.2 numpy==1.23.5
 
-# Clone and install CNVpytor with the same constraints
-RUN cd "${WORK_DIR}" && \
-    git clone https://github.com/abyzovlab/CNVpytor.git && \
-    cd CNVpytor && \
-    git checkout v1.3.1 && \
+# Clone CNVpytor
+WORKDIR ${WORK_DIR}
+RUN git clone https://github.com/abyzovlab/CNVpytor.git
+WORKDIR ${WORK_DIR}/CNVpytor
+RUN git checkout v1.3.1 && \
     pip install --no-cache-dir -c "${WORK_DIR}/constraints.txt" .
 
 # Optional: download CNVpytor resources during build
 RUN cnvpytor -download
 
-# Sanity check: ensure numpy stays pinned
+# sanity check
 RUN python - <<'PY'
 import numpy, sys
 print("Python:", sys.version.split()[0])
@@ -41,6 +40,8 @@ print("NumPy :", numpy.__version__)
 assert numpy.__version__ == "1.23.5", "NumPy version drifted!"
 PY
 
+
+# ---- final ----
 FROM python:3.11-slim
 
 LABEL base.image="python:3.11-slim" \
@@ -63,10 +64,9 @@ ENV WORK_DIR=/opt
 ENV VENV=${WORK_DIR}/venv
 ENV PATH="${VENV}/bin:${PATH}"
 
-# Bring the venv + app from builder (includes constraints.txt, CNVpytor, etc.)
 COPY --from=builder ${WORK_DIR} ${WORK_DIR}
 
-# Create a non-root user
+# Set user env
 RUN adduser --disabled-password --gecos '' ubuntu && \
     chsh -s /bin/bash ubuntu && \
     mkdir -p /home/ubuntu
