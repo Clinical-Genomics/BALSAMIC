@@ -291,7 +291,7 @@ rule delly_cnv_tumor_normal:
         rd_delly = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".dellycnv.cov.gz",
         namemap= vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".dellycnv.sample_name_map",
     benchmark:
-        benchmark_dir + 'delly_cnv_tumor_only_' + config["analysis"]["case_id"] + ".tsv"
+        benchmark_dir + 'delly_cnv_tumor_normal_' + config["analysis"]["case_id"] + ".tsv"
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("delly") + ".sif").as_posix(),
     params:
