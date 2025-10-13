@@ -78,7 +78,7 @@ def determine_clinvar_reasons(record: vcfpy.Record) -> List[str]:
             reasons.append(RescueReasons.CLINVAR_ONC)
 
     clnsig = get_clinvar_pathogenicity(record)
-    if "Conflicting_classifications_of_pathogenicity" in clnsig:
+    if "conflicting_classifications_of_pathogenicity" in clnsig:
         return reasons
     if "likely_pathogenic" in clnsig:
         reasons.append(RescueReasons.CLINVAR_LIKELY_PATH)
