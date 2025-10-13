@@ -246,7 +246,7 @@ class ReferenceModel(BaseModel):
 
     def is_annotated(self) -> bool:
         return (
-            self.fields is not None and self.ops is not None and self.names is not None
+            self.ops is not None and self.names is not None
         )
 
     def as_path(self) -> Path:
