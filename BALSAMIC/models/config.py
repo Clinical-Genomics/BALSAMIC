@@ -387,6 +387,7 @@ class ConfigModel(BaseModel):
                                 "fields": ref.fields,
                                 "ops": ref.ops,
                                 "names": ref.names,
+                                "columns": ref.columns,
                             }
                         ]
                     }
