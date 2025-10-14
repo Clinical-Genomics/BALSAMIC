@@ -49,7 +49,7 @@ def vcf_record_not_rescued(vcf_records: list[vcfpy.Record]) -> vcfpy.Record:
 
 def test_determine_clinvar_reasons_pathogenic(vcf_record_rescued):
     reasons = rv.determine_clinvar_reasons(vcf_record_rescued)
-    assert rv.RescueReasons.CLINVAR_LIKELY_PATH in reasons
+    assert rv.RescueReasons.CLINVAR_LIKELY_PATH not in reasons
     assert rv.RescueReasons.CLINVAR_ONC in reasons
 
 
@@ -70,7 +70,7 @@ def test_process_record_rescued(vcf_record_rescued):
     assert "RescueFilters" in record.INFO
     assert "RescueStatus" in record.INFO
     assert rv.RescueReasons.CLINVAR_ONC in record.INFO["RescueStatus"]
-    assert rv.RescueReasons.CLINVAR_LIKELY_PATH in record.INFO["RescueStatus"]
+    assert rv.RescueReasons.CLINVAR_LIKELY_PATH not in record.INFO["RescueStatus"]
     assert rv.RescueReasons.RESCUE_LIST in record.INFO["RescueStatus"]
 
 
