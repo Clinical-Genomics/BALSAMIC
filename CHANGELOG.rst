@@ -32,6 +32,7 @@ Changed:
 * changed sex check to a warning metric instead of qc fail https://github.com/Clinical-Genomics/BALSAMIC/pull/1581
 * updated MultiQC to v1.31 https://github.com/Clinical-Genomics/BALSAMIC/pull/1607
 * lowered lymphoid panel GC_dropout threshold to 2 https://github.com/Clinical-Genomics/BALSAMIC/pull/1613
+* rescue only on clinvar ONC status and rescue list https://github.com/Clinical-Genomics/BALSAMIC/pull/1623
 
 Removed:
 ^^^^^^^^
@@ -44,7 +45,7 @@ Fixed:
 * Fixed varcall_py27 container for Manta https://github.com/Clinical-Genomics/BALSAMIC/pull/1567
 * pinned numpy version to 1.23.5 for cnvpytor container https://github.com/Clinical-Genomics/BALSAMIC/pull/1617
 * qc metrics script bug https://github.com/Clinical-Genomics/BALSAMIC/pull/1615
-
+* fixed snv cadd annotation https://github.com/Clinical-Genomics/BALSAMIC/pull/1623
 
 [17.1.0]
 --------
