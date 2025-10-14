@@ -245,9 +245,7 @@ class ReferenceModel(BaseModel):
         return v.as_posix()
 
     def is_annotated(self) -> bool:
-        return (
-            self.fields is not None and self.ops is not None and self.names is not None
-        )
+        return self.ops is not None and self.names is not None
 
     def as_path(self) -> Path:
         return self.file
@@ -387,6 +385,7 @@ class ConfigModel(BaseModel):
                                 "fields": ref.fields,
                                 "ops": ref.ops,
                                 "names": ref.names,
+                                "columns": ref.columns,
                             }
                         ]
                     }
