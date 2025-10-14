@@ -37,9 +37,9 @@ multiqc_input.extend(expand(qc_dir + "{sample_type}.{sample}.alignment_summary_m
 if config['analysis']['analysis_type'] == "paired":
     multiqc_input.extend(expand(qc_dir + "{sample_type}.{sample}.alignment_summary_metrics.txt",sample_type="normal",sample=normal_sample))
 
-multiqc_input.extend(expand(qc_dir + "tumor.{sample}.{metrics_wc}", sample=tumor_sample ,metrics_wc=qc_metrics_wildcards))
+multiqc_input.extend(expand(qc_dir + "tumor.{sample}.{metrics_wc}", sample=tumor_sample, metrics_wc=qc_metrics_wildcards))
 if config['analysis']['analysis_type'] == "paired":
-    multiqc_input.extend(expand(qc_dir + "normal.{sample}.{metrics_wc}", sample=normal_sample ,metrics_wc=qc_metrics_wildcards))
+    multiqc_input.extend(expand(qc_dir + "normal.{sample}.{metrics_wc}", sample=normal_sample, metrics_wc=qc_metrics_wildcards))
 
 # pair check output
 if config['analysis']['analysis_type'] == "paired":

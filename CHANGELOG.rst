@@ -16,6 +16,8 @@ Added:
 * artefact database filter for WGS SVs  https://github.com/Clinical-Genomics/BALSAMIC/pull/1578
 * attempts increases mem on restart https://github.com/Clinical-Genomics/BALSAMIC/pull/1610
 * ProbioC4 coverage QC threshold https://github.com/Clinical-Genomics/BALSAMIC/pull/1613
+* normal coverage GENS preprocessing https://github.com/Clinical-Genomics/BALSAMIC/pull/1621
+* normal coverage normalisation in CNVkit for tumor normal panel cases https://github.com/Clinical-Genomics/BALSAMIC/pull/1621
 
 Changed:
 ^^^^^^^^
