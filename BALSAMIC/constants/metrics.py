@@ -83,7 +83,7 @@ METRICS: Dict[str, dict] = {
     "wgs": {
         "MEAN_INSERT_SIZE": {"condition": None},
         "MEDIAN_TARGET_COVERAGE": {
-            "condition": {"norm": "gt", "threshold": 26}
+            "condition": {"norm": "gt", "threshold": 25}
         },  # Normal sample
         "PERCENT_DUPLICATION": {"condition": None},
         "PCT_15X": {"condition": None},
