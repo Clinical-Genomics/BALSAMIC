@@ -1,6 +1,6 @@
 """QC metrics constants."""
 import operator
-from typing import Dict, Callable
+from typing import Dict, Callable, List
 
 
 VALID_OPS: Dict[str, Callable] = {
@@ -12,6 +12,7 @@ VALID_OPS: Dict[str, Callable] = {
     "gt": operator.gt,
 }
 
+METRIC_WARNINGS = {"COMPARE_PREDICTED_TO_GIVEN_SEX"}
 
 METRICS: Dict[str, dict] = {
     "targeted": {
@@ -37,6 +38,7 @@ METRICS: Dict[str, dict] = {
             "PCT_TARGET_BASES_250X": {"condition": {"norm": "gt", "threshold": 0.95}},
         },
         "gmslymphoid": {
+            "GC_DROPOUT": {"condition": {"norm": "lt", "threshold": 2.00}},
             "PCT_TARGET_BASES_500X": {"condition": {"norm": "gt", "threshold": 0.95}},
         },
         "gmsmyeloid": {
@@ -60,6 +62,9 @@ METRICS: Dict[str, dict] = {
         "probio": {
             "PCT_TARGET_BASES_250X": {"condition": {"norm": "gt", "threshold": 0.95}},
         },
+        "probioC4": {
+            "PCT_TARGET_BASES_250X": {"condition": {"norm": "gt", "threshold": 0.95}},
+        },
         "swep53cfDNA": {
             "PCT_TARGET_BASES_1000X": {"condition": {"norm": "gt", "threshold": 0.95}},
         },
@@ -77,8 +82,8 @@ METRICS: Dict[str, dict] = {
     },
     "wgs": {
         "MEAN_INSERT_SIZE": {"condition": None},
-        "MEDIAN_COVERAGE": {
-            "condition": {"norm": "gt", "threshold": 26}
+        "MEDIAN_TARGET_COVERAGE": {
+            "condition": {"norm": "gt", "threshold": 25}
         },  # Normal sample
         "PERCENT_DUPLICATION": {"condition": None},
         "PCT_15X": {"condition": None},

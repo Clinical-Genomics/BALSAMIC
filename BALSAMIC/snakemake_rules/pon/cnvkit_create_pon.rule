@@ -3,7 +3,7 @@
 rule create_reference:
     input:
         cnn = expand(cnv_dir + "{sample}.{prefix}coverage.cnn", sample=config_model.get_all_sample_names(), prefix=["target", "antitarget"]),
-        ref = reffasta
+        ref = reference_genome
     output:
         ref_cnn = pon_reference
     singularity:

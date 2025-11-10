@@ -587,12 +587,11 @@ def test_get_reference_output_paths(cache_config: CacheConfig):
     reference_output_paths: List[str] = cache_config.get_reference_output_paths()
 
     # THEN all the reference paths should be returned
-    assert len(reference_output_paths) == 45
+    assert len(reference_output_paths) == 46
 
 
 def test_get_analysis_references_hg(
     cache_config: CacheConfig,
-    analysis_references_hg_data: Dict[str, Path],
     analysis_references_hg: AnalysisReferences,
 ):
     """Test analysis references retrieval to be used for Balsamic human genome analyses."""
@@ -602,7 +601,6 @@ def test_get_analysis_references_hg(
 
     # WHEN getting the analysis references
     analysis_references: AnalysisReferencesHg = cache_config.get_analysis_references()
-
     # THEN the retrieved analysis references should match the mocked one
     assert type(analysis_references) is AnalysisReferencesHg
     assert analysis_references == analysis_references_hg
