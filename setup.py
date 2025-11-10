@@ -134,7 +134,7 @@ extras = {
 
 setup(
     name=NAME,
-    version="17.1.0",
+    version="18.0.0",
     url=URL,
     author=AUTHOR,
     author_email=EMAIL,
