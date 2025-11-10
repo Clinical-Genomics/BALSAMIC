@@ -158,6 +158,7 @@ rule ascat_tumor_normal_wgs:
         plot_germline = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.germline.png",
         plot_sunrise = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.sunrise.png",
         namemap = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.sample_name_map",
+        ascat_tmp = vcf_dir + "ascat_tmp_dir"
     benchmark:
         benchmark_dir + 'ascat_tumor_normal_' + config["analysis"]["case_id"] + "_ascat.tsv"
     singularity:
@@ -214,7 +215,7 @@ tabix -p vcf -f {output.final_vcf};
 
 echo -e \"{params.tumor}\\tTUMOR\\n{params.normal}\\tNORMAL\" > {output.namemap};
 
-rm -rf {params.tmpdir};
+mv {params.tmpdir} {output.ascat_tmp};
         """
 
 rule tiddit_sv_tumor_normal_wgs:
