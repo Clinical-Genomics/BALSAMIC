@@ -14,6 +14,7 @@ from BALSAMIC.utils.rule import (
     get_analysis_type,
     get_capture_kit,
     get_sample_type_from_sample_name,
+    get_sample_name_from_sample_type,
     get_sequencing_type,
 )
 
@@ -35,8 +36,8 @@ def collect_qc_metrics(
     config_path: Path,
     output_path: Path,
     multiqc_data_path: Path,
-    sex_prediction_path: Path,
     counts_path: List[Path],
+    sex_prediction_path: Path,
 ):
     """Extracts the requested metrics from a JSON multiqc file and saves them to a YAML file
 
@@ -44,8 +45,8 @@ def collect_qc_metrics(
         config_path: Path; case config file path
         output_path: Path; destination path for the extracted YAML formatted metrics
         multiqc_data_path: Path; multiqc JSON path from which the metrics will be extracted
-        sex_prediction_path: Path; sex prediction JSON path from which sex prediction info will be extracted
         counts_path: Path; list of variant caller specific files containing the number of variants
+        sex_prediction_path: Path; sex prediction JSON path from which sex prediction info will be extracted
     """
 
     config = read_json(config_path)
@@ -76,7 +77,7 @@ def collect_qc_metrics(
         )
 
 
-def get_multiqc_data_source(multiqc_data: dict, sample: str, tool: str) -> str:
+def get_multiqc_data_source(multiqc_data: dict, sampleid: str, tool: str) -> str:
     """Extracts the metrics data source associated with a specific sample and tool
 
     Args:
@@ -104,26 +105,18 @@ def get_multiqc_data_source(multiqc_data: dict, sample: str, tool: str) -> str:
                 subtool_name[1].lower() in source_tool.lower()
                 and subtool_name[2].lower() in source_subtool.lower()
             ):
-                try:
-                    return os.path.basename(
-                        multiqc_data["report_data_sources"][source_tool][
-                            source_subtool
-                        ][sample]
-                    )
-                except KeyError:
-                    # Deletes pair orientation information from the sample name (insertSize metrics)
-                    sample = sample.rsplit("_", 1)[0]
-                    return os.path.basename(
-                        multiqc_data["report_data_sources"][source_tool][
-                            source_subtool
-                        ][sample]
-                    )
+                source_dict = multiqc_data["report_data_sources"][source_tool][
+                    source_subtool
+                ]
+                metric_file = next(
+                    (v for k, v in source_dict.items() if sampleid in k), None
+                )
+                return os.path.basename(metric_file)
 
 
 def get_sex_check_metrics(sex_prediction_path: str, config: dict) -> list:
     """Retrieves the sex check metrics and returns them as a Metric list."""
     metric = "compare_predicted_to_given_sex"
-    case_id: str = config["analysis"]["case_id"]
     sex_prediction: dict = read_json(sex_prediction_path)
 
     given_sex: str = config["analysis"]["gender"]
@@ -133,8 +126,9 @@ def get_sex_check_metrics(sex_prediction_path: str, config: dict) -> list:
     for sample_type in ["tumor", "normal"]:
         if sample_type in sex_prediction:
             predicted_sex = sex_prediction[sample_type]["predicted_sex"]
+            sample_name = get_sample_name_from_sample_type(config, sample_type)
             sex_prediction_metrics = Metric(
-                id=f"{case_id}_{sample_type}",
+                id=sample_name,
                 input=os.path.basename(sex_prediction_path),
                 name=metric.upper(),
                 step="sex_check",
@@ -224,7 +218,7 @@ def get_metric_condition(
     req_metrics = requested_metrics[metric]["condition"]
     if sequencing_type == "wgs" and (
         (metric == "PCT_60X" and sample_type == "normal")
-        or (metric == "MEDIAN_COVERAGE" and sample_type == "tumor")
+        or (metric == "MEDIAN_TARGET_COVERAGE" and sample_type == "tumor")
     ):
         req_metrics = None
 
@@ -264,7 +258,7 @@ def get_multiqc_metrics(config: dict, multiqc_data: dict) -> list:
                             Metric(
                                 id=get_sample_id(multiqc_key),
                                 input=get_multiqc_data_source(
-                                    multiqc_data, multiqc_key, source
+                                    multiqc_data, get_sample_id(multiqc_key), source
                                 ),
                                 name=k,
                                 step=source,

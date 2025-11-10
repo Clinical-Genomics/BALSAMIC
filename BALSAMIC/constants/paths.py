@@ -5,11 +5,16 @@ from pathlib import Path
 # Balsamic working directory constants
 BALSAMIC_DIR: Path = Path(sys.modules["BALSAMIC"].__file__).parent.resolve()
 CONSTANTS_DIR: Path = Path(BALSAMIC_DIR, "constants")
+WORKFLOW_PROFILE: Path = Path(CONSTANTS_DIR, "workflow_profile")
+CACHE_PROFILE: Path = Path(CONSTANTS_DIR, "cache_profile")
 CONTAINERS_DIR: Path = Path(BALSAMIC_DIR, "containers")
 ASSETS_DIR: Path = Path(BALSAMIC_DIR, "assets")
 SCRIPT_DIR: Path = Path(ASSETS_DIR, "scripts")
+METADATA_DIR: Path = Path(ASSETS_DIR, "analysis_metadata")
 REFSEQ_SCRIPT_PATH: Path = Path(SCRIPT_DIR, "refseq_sql.awk")
-IMMEDIATE_SUBMIT_PATH: Path = Path(SCRIPT_DIR, "immediate_submit.py")
+
+# Metadata resources
+RESCUE_SNVS = Path(METADATA_DIR, "rescue_snvs.vcf")
 
 # Sentieon specific constants
 SENTIEON_MODELS_DIR: Path = Path(BALSAMIC_DIR, "assets", "sentieon_models")

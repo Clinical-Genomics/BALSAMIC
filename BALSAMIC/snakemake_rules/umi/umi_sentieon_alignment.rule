@@ -3,9 +3,9 @@
 
 rule sentieon_align_sort_umireads_umi:
     input:
-        ref = config["reference"]["reference_genome"],
+        ref = reference_genome,
         interleaved_fastq = fastq_dir + "{sample_type}.{sample}_umiextract_interleaved.fastq.gz",
-        refidx = expand(config["reference"]["reference_genome"] + ".{prefix}", prefix=["amb","ann","bwt","pac","sa"])
+        refidx = expand(reference_genome + ".{prefix}", prefix=["amb","ann","bwt","pac","sa"])
     output:
         bam_out = Path(bam_dir, "{sample_type}.{sample}.umi_align_sort.bam").as_posix()
     benchmark:
@@ -18,8 +18,6 @@ rule sentieon_align_sort_umireads_umi:
         sample_id = "{sample}",
         sample_type = lambda wildcards: config_model.get_sample_type_by_name(wildcards.sample, uppercase=True),
         ip_bases = params.umicommon.align_intbases,
-    threads:
-        get_threads(cluster_config, 'sentieon_align_sort')
     message:
         ("Align fastq reads using sentieon bwa-mem and sort reads using samtools for sample type: "
         "{params.sample_type} : {params.sample_id}")

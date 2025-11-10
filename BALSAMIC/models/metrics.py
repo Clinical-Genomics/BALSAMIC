@@ -1,10 +1,10 @@
 """QC validation metrics model."""
 import logging
-from typing import Optional, Any, List, Annotated
+from typing import Optional, Any, List, Annotated, Callable
 
 from pydantic import BaseModel, AfterValidator
 
-from BALSAMIC.constants.metrics import VALID_OPS
+from BALSAMIC.constants.metrics import VALID_OPS, METRIC_WARNINGS
 
 LOG = logging.getLogger(__name__)
 
@@ -50,6 +50,10 @@ def validate_metric(metric: Metric):
         threshold: Optional[Any] = metric.condition.threshold
         value: Any = metric.value
 
+        # Ignore warning metrics from failing
+        if metric.name in METRIC_WARNINGS:
+            return metric
+
         # Validate the norm operator
         if norm not in VALID_OPS:
             raise ValueError(f"Unsupported operation: {norm}")
@@ -67,7 +71,6 @@ def validate_metric(metric: Metric):
                 f"are not compatible with operator {norm}. (ID: {metric.id})."
             )
 
-    LOG.info(f"QC metric {metric.name}: {metric.value} meets its condition.")
     return metric
 
 

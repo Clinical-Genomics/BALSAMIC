@@ -3,11 +3,10 @@ import sys
 from pathlib import Path
 from typing import List, Optional
 
-from pydantic import BaseModel, DirectoryPath, Field, FilePath, field_validator
+from pydantic import BaseModel, DirectoryPath, FilePath
 
 from BALSAMIC.constants.analysis import RunMode
-from BALSAMIC.constants.cluster import MAX_JOBS, QOS, ClusterMailType, ClusterProfile
-from BALSAMIC.constants.paths import IMMEDIATE_SUBMIT_PATH
+from BALSAMIC.constants.cluster import MAX_JOBS, QOS
 from BALSAMIC.utils.utils import remove_unnecessary_spaces
 
 
@@ -28,17 +27,13 @@ class SnakemakeExecutable(BaseModel):
 
     Attributes:
         account (Optional[str])                                      : Scheduler account.
-        benchmark (Optional[bool])                                   : Slurm jobs profiling option.
         case_id (str)                                                : Analysis case name.
-        cluster_config_path (Optional[FilePath])                     : Cluster configuration file path.
         config_path (FilePath)                                       : Sample configuration file.
-        disable_variant_caller (Optional[str])                       : Disable variant caller.
-        dragen (Optional[bool])                                      : FLag for enabling or disabling Dragen suite.
+        dragen (Optional[bool])                                      : Flag for enabling or disabling Dragen suite.
         force (bool)                                                 : Force snakemake execution.
+        workflow_partition (str)                                     : Cluster partition to use for snakemake workflow
         log_dir (Optional[DirectoryPath])                            : Logging directory.
-        mail_type (Optional[ClusterMailType])                        : Email type triggering job status notifications.
-        mail_user (Optional[str])                                    : User email to receive job status notifications.
-        profile (Optional[ClusterProfile])                           : Cluster profile to submit jobs.
+        workflow_profile: Path                                       : Directory contianing snakemake workflow profile specifying rule resources
         qos (Optional[QOS])                                          : QOS for sbatch jobs.
         quiet (Optional[bool])                                       : Quiet mode for snakemake.
         run_analysis (bool)                                          : Flag to run the actual analysis.
@@ -52,17 +47,13 @@ class SnakemakeExecutable(BaseModel):
     """
 
     account: Optional[str] = None
-    benchmark: bool = False
     case_id: str
-    cluster_config_path: Optional[FilePath] = None
     config_path: FilePath
-    disable_variant_caller: Optional[str] = Field(default=None, validate_default=True)
     dragen: bool = False
     force: bool = False
+    workflow_partition: str
     log_dir: Optional[DirectoryPath] = None
-    mail_type: Optional[ClusterMailType] = None
-    mail_user: Optional[str] = None
-    profile: Optional[ClusterProfile] = None
+    workflow_profile: Path
     qos: Optional[QOS] = None
     quiet: bool = False
     run_analysis: bool = False
@@ -73,24 +64,14 @@ class SnakemakeExecutable(BaseModel):
     snakemake_options: Optional[List[str]] = None
     working_dir: Path
 
-    @field_validator("disable_variant_caller")
-    def get_disable_variant_caller_option(cls, disable_variant_caller: str) -> str:
-        """Return string representation of the disable_variant_caller option."""
-        if disable_variant_caller:
-            return f"disable_variant_caller={disable_variant_caller}"
-        return ""
-
-    def get_config_files_option(self) -> str:
-        """Return string representation of the config files."""
-        config_files_option: str = f"--configfiles {self.config_path.as_posix()}"
-        if self.cluster_config_path:
-            config_files_option += f" {self.cluster_config_path.as_posix()}"
-        return config_files_option
+    def get_config_file_option(self) -> str:
+        """Return string representation of the config file."""
+        return f"--configfile {self.config_path.as_posix()}"
 
     def get_config_options(self) -> str:
         """Return Snakemake config options to be submitted."""
         return remove_unnecessary_spaces(
-            f"--config {self.disable_variant_caller} {self.get_dragen_flag()}"
+            f"{f'--config {self.get_dragen_flag()}' if self.get_dragen_flag() else ''} "
         )
 
     def get_dragen_flag(self) -> str:
@@ -110,6 +91,9 @@ class SnakemakeExecutable(BaseModel):
         if self.quiet:
             return "--quiet"
         return ""
+
+    def get_slurm_logdir(self) -> str:
+        return f"--slurm-logdir {self.log_dir}"
 
     def get_run_analysis_flag(self) -> str:
         """Return string representation of the run_analysis flag."""
@@ -137,45 +121,34 @@ class SnakemakeExecutable(BaseModel):
     def get_command(self) -> str:
         """Return Snakemake command to be submitted."""
         snakemake_command: str = (
-            f"snakemake --notemp -p --rerun-trigger mtime "
+            f"snakemake --notemp -p --rerun-triggers mtime "
             f"--directory {self.working_dir.as_posix()} "
             f"--snakefile {self.snakefile.as_posix()} "
-            f"{self.get_config_files_option()} "
+            f"{self.get_config_file_option()} "
+            f"{self.get_config_options()} "
             f"{self.get_singularity_bind_paths_option()} "
             f"{self.get_quiet_flag()} "
             f"{self.get_force_flag()} "
             f"{self.get_run_analysis_flag()} "
             f"{self.get_snakemake_cluster_options()} "
-            f"{self.get_config_options()} "
             f"{self.get_snakemake_options_command()}"
         )
         return remove_unnecessary_spaces(snakemake_command)
+
+    def get_slurm_job_arguments(self) -> str:
+        return (
+            f'--default-resources slurm_extra="--qos={self.qos}" '
+            f"slurm_partition={self.workflow_partition} slurm_account={self.account}"
+        )
 
     def get_snakemake_cluster_options(self) -> str:
         """Return Snakemake cluster options to be submitted."""
         if self.run_mode == RunMode.CLUSTER:
             snakemake_cluster_options: str = (
-                f"--immediate-submit -j {MAX_JOBS} "
-                f"--jobname BALSAMIC.{self.case_id}.{{rulename}}.{{jobid}}.sh "
-                f"--cluster-config {self.cluster_config_path.as_posix()} "
-                f"--cluster {self.get_cluster_submit_command()}"
+                f"{self.get_slurm_logdir()} "
+                f"--profile {self.workflow_profile} "
+                f"{self.get_slurm_job_arguments()} "
+                f"--slurm-keep-successful-logs"
             )
             return remove_unnecessary_spaces(snakemake_cluster_options)
         return ""
-
-    def get_cluster_submit_command(self) -> str:
-        """Get cluster command to be submitted by Snakemake."""
-        cluster_submit_command: str = (
-            f"'{sys.executable} {IMMEDIATE_SUBMIT_PATH.as_posix()} "
-            f"--account {self.account} "
-            f"{'--benchmark' if self.benchmark else ''} "
-            f"--log-dir {self.log_dir.as_posix()} "
-            f"{f'--mail-type {self.mail_type}' if self.mail_type else ''} "
-            f"{f'--mail-user {self.mail_user}' if self.mail_user else ''} "
-            f"--profile {self.profile} "
-            f"--qos {self.qos} "
-            f"--script-dir {self.script_dir.as_posix()} "
-            f"{self.case_id} "
-            "{dependencies}'"
-        )
-        return remove_unnecessary_spaces(cluster_submit_command)

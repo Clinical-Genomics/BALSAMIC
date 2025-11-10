@@ -4,9 +4,9 @@
 
 rule sentieon_tnscope_wgs_tumor_normal:
     input:
-        ref = config["reference"]["reference_genome"],
-        dbsnp = config["reference"]["dbsnp"],
-        cosmic = config["reference"]["cosmic"],
+        ref = reference_genome,
+        dbsnp = dbsnp,
+        cosmic = cosmic,
         bamT = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
         bamN = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = normal_sample),
         recalT = expand(bam_dir + "tumor.recal_data.table"),
@@ -31,8 +31,6 @@ rule sentieon_tnscope_wgs_tumor_normal:
         disable_detect = params.tnscope_wgs.disable_detect,
         case_name = config["analysis"]["case_id"],
         housekeeper_id= {"id": config["analysis"]["case_id"],"tags": "research"}
-    threads:
-        get_threads(cluster_config, 'sentieon_tnscope_wgs_tumor_normal')
     message:
         ("Calling SNVs using Sentieon TNscope for sample {params.case_name}")
     shell:

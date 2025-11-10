@@ -34,6 +34,11 @@ Depending on the sequencing type, BALSAMIC is currently running the following st
      - tumor-normal, tumor-only
      - somatic, germline
      - SV
+   * - VarDict
+     - TGA, WES
+     - tumor-only
+     - somatic
+     - SV
    * - TIDDIT
      - WGS
      - tumor-normal, tumor-only
@@ -53,7 +58,7 @@ Depending on the sequencing type, BALSAMIC is currently running the following st
 
 **Note:** igh_dux4 is not a variant caller itself. This is a custom script that uses samtools to detect read pairs supporting IGH::DUX4 rearrangements.
 
-It is mandatory to provide the gender of the sample from BALSAMIC version >= 10.0.0 For CNV analysis.
+From BALSAMIC version >= 18.0.0, if no gender information is provided to case configuration step, the gender used in CNV analysis will be derived from the predicted sex (see `Sex check <https://balsamic.readthedocs.io/en/latest/balsamic_qc.html>`_ for more information.)
 
 Further details about a specific caller can be found in the links for the repositories containing the documentation for SV and CNV callers along with the links for the articles are listed in `bioinfo softwares <https://balsamic.readthedocs.io/en/latest/bioinfo_softwares.html>`_.
 
@@ -136,13 +141,15 @@ Further information regarding the TIDDIT tumor normal filtration: As translocati
      - WGS
         tumor-only
    * - | 1. manta
-       | 2. dellysv
-       | 3. cnvkit
-       | 4. dellycnv
+       | 2. vardict
+       | 3. dellysv
+       | 4. cnvkit
+       | 5. dellycnv
      - | 1. manta
-       | 2. dellysv
-       | 3. cnvkit
-       | 4. dellycnv
+       | 2. vardict
+       | 3. dellysv
+       | 4. cnvkit
+       | 5. dellycnv
      - | 1. manta
        | 2. dellysv
        | 3. ascat
@@ -157,10 +164,21 @@ Further information regarding the TIDDIT tumor normal filtration: As translocati
        | 6. igh_dux4
 
 
-The merged `SNV.somatic.<CASE_ID>.svdb.vcf.gz` file retains all the information for the variants from the caller in which the variants are identified, which are then annotated using `ensembl-vep`.
+The merged `SV.somatic.<CASE_ID>.svdb.vcf.gz` file retains all the information for the variants from the caller in which the variants are identified, which are then annotated using `ensembl-vep`.
 The SweGen and frequencies and the frequency of observed structural variants from clinical normal samples are annotated using `SVDB`.
 
 The following filter applies for both tumor-normal and tumor-only samples in addition to caller specific filters.
+
+*ArtefactObs*: Number of observations of the variants from somatic calls on high-coverage WGS normal samples (artificially created by mixing several samples)
+
+::
+
+  ArtefactObs <= 4  (or) ArtefactObs == "."
+
+.. note:: The above filter ArtefactObs is only active for the WGS workflow.
+
+Above filter is applied for the clinical vcf (`SV.somatic.<CASE_ID>.svdb.clinical.filtered.pass.vcf.gz`).
+
 
 *SWEGENAF*: SweGen Allele Frequency
 
@@ -168,13 +186,17 @@ The following filter applies for both tumor-normal and tumor-only samples in add
 
     SWEGENAF <= 0.02  (or) SWEGENAF == "."
 
-*Frq*: Frequency of observation of the variants from normal `Clinical` samples
+
+Above filter is applied for both research and clinical vcf (`SV.somatic.<CASE_ID>.svdb.<research/clinical>.filtered.pass.vcf.gz`).
+
+*Frq*: Frequency of observation of the variants from germline calls on normal `Clinical` samples
 
 ::
 
     Frq <= 0.02  (or) Frq == "."
 
-The variants scored as `PASS` are included in the final vcf file (`SNV.somatic.<CASE_ID>.svdb.<research/clinical>.filtered.pass.vcf.gz`).
+
+Above filter is applied for only the clinical vcf (`SV.somatic.<CASE_ID>.svdb.clinical.filtered.pass.vcf.gz`).
 
 The following command can be used to fetch the variants identified by a specific caller from merged structural and copy number variants.
 

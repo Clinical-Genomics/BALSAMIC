@@ -2,9 +2,9 @@
 # coding: utf-8
 
 
-rule manta_tumor_normal:
+rule manta_tumor_normal_tga:
     input:
-        fa = config["reference"]["reference_genome"],
+        fa = reference_genome,
         bamN = config_model.get_final_bam_name(bam_dir=bam_dir, sample_name=normal_sample, specified_suffix="dedup.fixmate.qualcapped"),
         bamT = config_model.get_final_bam_name(bam_dir=bam_dir, sample_name=tumor_sample, specified_suffix="dedup.fixmate.qualcapped"),
     output:
@@ -21,11 +21,8 @@ rule manta_tumor_normal:
         tumor = config_model.get_sample_name_by_type(SampleType.TUMOR),
         normal = config_model.get_sample_name_by_type(SampleType.NORMAL),
         case_name = case_id,
-        manta_install_path = "/opt/conda/share/manta-1.6.0-3",
         low_pr_sr_count_value = MANTA_FILTERS.low_pr_sr_count.tag_value,
         low_pr_sr_count_filter_name = MANTA_FILTERS.low_pr_sr_count.filter_name,
-    threads:
-        get_threads(cluster_config, "manta_tumor_normal")
     message:
         ("Calling structural variants using manta for {params.case_name} and "
         "index the compressed vcf file")
@@ -43,7 +40,7 @@ configManta.py \
 
 python {params.tmpdir}/runWorkflow.py -m {params.runmode} -j {threads};
 
-{params.manta_install_path}/libexec/convertInversion.py \
+convertInversion.py \
   $samtools_path \
   {input.fa} \
   {params.tmpdir}/results/variants/somaticSV.vcf.gz > {params.tmpdir}/results/variants/somaticSV_converted.vcf;
@@ -59,12 +56,12 @@ echo -e \"{params.normal}\\tNORMAL\\n{params.tumor}\\tTUMOR\" > {output.namemap}
 rm -rf {params.tmpdir};
         """
 
-rule delly_sv_tumor_normal:
+rule delly_sv_tumor_normal_tga:
     input:
-        fa = config["reference"]["reference_genome"],
+        fa = reference_genome,
         bamN = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = normal_sample),
         bamT = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
-        excl = config["reference"]["delly_exclusion_converted"],
+        excl = delly_exclusion_converted,
     output:
         final = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".delly.bcf",
         namemap = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".dellysv.sample_name_map",
@@ -77,8 +74,6 @@ rule delly_sv_tumor_normal:
         tumor = "TUMOR",
         normal = "NORMAL",
         case_name = config["analysis"]["case_id"]
-    threads:
-        get_threads(cluster_config, "delly_tumor_normal")
     message:
         ("Calling structural variants using delly for {params.case_name},"
         "filter somatic variants and finally convert from bcf to compressed vcf file")
