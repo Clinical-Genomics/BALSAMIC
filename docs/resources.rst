@@ -125,7 +125,7 @@ Methods and tools
 #. **Manta**: Structural variant caller https://github.com/Illumina/manta
 #. **PurBayes**: estimate tumor purity and clonality
 #. **VarDict**: variant caller for both single and paired sample variant calling from BAM files https://github.com/AstraZeneca-NGS/VarDict
-#. **SNPeff/SNPSift**: Genomic variant annotations and functional effect prediction toolbox. http://snpeff.sourceforge.net/ and http://snpeff.sourceforge.net/SnpSift.html
+#. **SNPeff/SNPSift**: Genomic variant annotations and functional effect prediction toolbox. https://pmc.ncbi.nlm.nih.gov/articles/PMC3679285/
 #. **IGV**: visualization tool for interactive exploration http://software.broadinstitute.org/software/igv/
 #. **SVDetect**: a tool to detect genomic structural variations http://svdetect.sourceforge.net/Site/Home.html
 #. **GenomeSTRiP**: A suite of tools for discovering and genotyping structural variations using sequencing data http://software.broadinstitute.org/software/genomestrip/
