@@ -1,5 +1,21 @@
+[X.X.X]
+--------
+
+Added:
+^^^^^^
+
+Changed:
+^^^^^^^^
+
+Removed:
+^^^^^^^^
+
+Fixed:
+^^^^^^
+
+
 [18.0.0]
-=======
+--------
 
 Added:
 ^^^^^^
@@ -18,6 +34,7 @@ Added:
 * ProbioC4 coverage QC threshold https://github.com/Clinical-Genomics/BALSAMIC/pull/1613
 * normal coverage GENS preprocessing https://github.com/Clinical-Genomics/BALSAMIC/pull/1621
 * normal coverage normalisation in CNVkit for tumor normal panel cases https://github.com/Clinical-Genomics/BALSAMIC/pull/1621
+
 
 Changed:
 ^^^^^^^^
