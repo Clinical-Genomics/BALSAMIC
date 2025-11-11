@@ -51,6 +51,7 @@ rule cnvkit_segment_CNV_research:
         cns_initial = cnv_dir + "tumor.initial.cns",
         cnr = cnv_dir + "tumor.merged.cnr",
         segment = cnv_dir + "tumor.seg",
+        cnr_normal = cnv_dir + "normal.merged.cnr",
     benchmark:
         Path(f"{benchmark_dir}/cnvkit_segment_{config['analysis']['case_id']}.tsv").as_posix()
     singularity:
@@ -86,6 +87,11 @@ cnvkit.py fix {input.tumor_target_cnn} \
 {params.normal_reference_cnn} \
 --output {output.cnr};
 
+cnvkit.py fix {input.normal_target_cnn} \
+{input.normal_antitarget_cnn} \
+{params.normal_reference_cnn} \
+--output {output.cnr_normal};
+
 else
 
 echo "PON reference exists- Using it for coverage correction" 
@@ -93,6 +99,11 @@ cnvkit.py fix {input.tumor_target_cnn} \
 {input.tumor_antitarget_cnn} \
 {params.pon} \
 --output {output.cnr};
+
+cnvkit.py fix {input.normal_target_cnn} \
+{input.normal_antitarget_cnn} \
+{params.pon} \
+--output {output.cnr_normal};
 
 fi
 
@@ -291,7 +302,7 @@ rule delly_cnv_tumor_normal:
         rd_delly = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".dellycnv.cov.gz",
         namemap= vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".dellycnv.sample_name_map",
     benchmark:
-        benchmark_dir + 'delly_cnv_tumor_only_' + config["analysis"]["case_id"] + ".tsv"
+        benchmark_dir + 'delly_cnv_tumor_normal_' + config["analysis"]["case_id"] + ".tsv"
     singularity:
         Path(singularity_image, config["bioinfo_tools"].get("delly") + ".sif").as_posix(),
     params:

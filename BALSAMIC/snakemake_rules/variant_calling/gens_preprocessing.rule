@@ -128,7 +128,7 @@ else:
 
     rule gens_preprocess_tga:
         input:
-            cnvkit_cnr = cnv_dir + "tumor.merged.cnr",
+            cnvkit_cnr = lambda wildcards: Path(cnv_dir, f"{config_model.get_sample_type_by_name(sample_name=wildcards.sample)}.merged.cnr"),
             gnomad_af5_vcf = cnv_dir + "SNV.germline.{sample}.dnascope_gnomad_af5.vcf.gz",
             purecn_purity_csv = cnv_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".purecn.purity.csv",
         output:

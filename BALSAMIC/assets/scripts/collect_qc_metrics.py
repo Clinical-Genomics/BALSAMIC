@@ -77,7 +77,7 @@ def collect_qc_metrics(
         )
 
 
-def get_multiqc_data_source(multiqc_data: dict, sample: str, tool: str) -> str:
+def get_multiqc_data_source(multiqc_data: dict, sampleid: str, tool: str) -> str:
     """Extracts the metrics data source associated with a specific sample and tool
 
     Args:
@@ -105,20 +105,13 @@ def get_multiqc_data_source(multiqc_data: dict, sample: str, tool: str) -> str:
                 subtool_name[1].lower() in source_tool.lower()
                 and subtool_name[2].lower() in source_subtool.lower()
             ):
-                try:
-                    return os.path.basename(
-                        multiqc_data["report_data_sources"][source_tool][
-                            source_subtool
-                        ][sample]
-                    )
-                except KeyError:
-                    # Deletes pair orientation information from the sample name (insertSize metrics)
-                    sample = sample.rsplit("_", 1)[0]
-                    return os.path.basename(
-                        multiqc_data["report_data_sources"][source_tool][
-                            source_subtool
-                        ][sample]
-                    )
+                source_dict = multiqc_data["report_data_sources"][source_tool][
+                    source_subtool
+                ]
+                metric_file = next(
+                    (v for k, v in source_dict.items() if sampleid in k), None
+                )
+                return os.path.basename(metric_file)
 
 
 def get_sex_check_metrics(sex_prediction_path: str, config: dict) -> list:
@@ -265,7 +258,7 @@ def get_multiqc_metrics(config: dict, multiqc_data: dict) -> list:
                             Metric(
                                 id=get_sample_id(multiqc_key),
                                 input=get_multiqc_data_source(
-                                    multiqc_data, multiqc_key, source
+                                    multiqc_data, get_sample_id(multiqc_key), source
                                 ),
                                 name=k,
                                 step=source,
