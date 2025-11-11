@@ -6,7 +6,7 @@
 rule genmod_score_snvs:
   input:
     vcf = vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.clinical.vcf.gz",
-    rank_score = config["reference"]["rank_score"]
+    rank_score = rank_score
   output:
     vcf_clinical = vep_dir + "{var_type}.somatic.{case_name}.{var_caller}.clinical.scored.vcf.gz",
   benchmark:
@@ -16,8 +16,6 @@ rule genmod_score_snvs:
   params:
     case_name = "{case_name}",
     housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "scored"}
-  threads:
-    get_threads(cluster_config, 'genmod_score_snvs')
   message:
     ("Scoring annotated SNV variants using genmod for {params.case_name}")
   shell:

@@ -10,7 +10,7 @@ URL: str = "https://github.com/Clinical-Genomics/BALSAMIC"
 EMAIL: str = "support@clinicalgenomics.se"
 REQUIRES_PYTHON: str = ">=3.11.0"
 
-# Requirements
+# Requirements (runtime only — no pytest, no vcfpy here)
 requirements: List[str] = [
     "aiohttp==3.8.5",
     "aiosignal==1.3.1",
@@ -32,7 +32,7 @@ requirements: List[str] = [
     "crcmod==1.7",
     "cryptography==41.0.3",
     "cycler==0.11.0",
-    "cyvcf2==0.30.22",
+    "cyvcf2==0.31.1",
     "datrie==0.8.2",
     "defusedxml==0.7.1",
     "dpath==2.1.6",
@@ -65,10 +65,10 @@ requirements: List[str] = [
     "monotonic==1.6",
     "multidict==6.0.4",
     "nbformat==5.9.2",
-    "numpy==1.25.2",
+    "numpy==2.0.0",
     "oauth2client==4.1.3",
-    "packaging==23.1",
-    "pandas==2.0.3",
+    "packaging==24.1",
+    "pandas==2.3.0",
     "pdfkit==1.0.0",
     "Pillow==10.0.0",
     "plac==1.3.5",
@@ -84,7 +84,6 @@ requirements: List[str] = [
     "pyOpenSSL==23.2.0",
     "pyparsing==3.0.9",
     "pypdf==3.17.1",
-    "pytest==7.4.0",
     "python-dateutil==2.8.2",
     "pytz==2023.3",
     "pyu2f==0.1.5",
@@ -98,7 +97,7 @@ requirements: List[str] = [
     "six==1.16.0",
     "smart-open==6.3.0",
     "smmap==5.0.0",
-    "snakemake==7.32.4",
+    "snakemake==9.9.0",
     "stopit==1.1.2",
     "tabulate==0.9.0",
     "throttler==1.2.2",
@@ -112,13 +111,26 @@ requirements: List[str] = [
     "wrapt==1.15.0",
     "yapf==0.40.1",
     "yarl==1.9.2",
-    "yte==1.5.1",
+    "yte==1.5.5",
     "zipp==3.16.2",
 ]
 
-# The C libraries required to build numpy are not available on RTD
-if not os.getenv("READTHEDOCS"):
-    requirements.extend(["cyvcf2==0.30.22"])
+extras = {
+    "test": [
+        "pytest==7.4.0",
+        "pytest-cov==4.1.0",
+        "pysam==0.23.0",
+        "vcfpy==0.13.4",
+    ],
+    "dev": [
+        "black==23.7.0",
+        "bump2version==1.0.1",
+        "coveralls==3.3.1",
+        "pytest==7.4.0",
+        "pytest-cov==4.1.0",
+        "vcfpy==0.13.4",
+    ],
+}
 
 setup(
     name=NAME,
@@ -127,6 +139,7 @@ setup(
     author=AUTHOR,
     author_email=EMAIL,
     install_requires=requirements,
+    extras_require=extras,
     python_requires=REQUIRES_PYTHON,
     packages=find_packages(),
     package_data={

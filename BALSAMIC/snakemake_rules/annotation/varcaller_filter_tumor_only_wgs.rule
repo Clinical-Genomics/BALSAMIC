@@ -6,7 +6,7 @@
 rule bcftools_filter_tnscope_research_tumor_only:
   input:
     vcf_snv_research = vep_dir + "{var_type}.somatic.{case_name}.tnscope.research.vcf.gz",
-    wgs_calling_file = config["reference"]["wgs_calling_regions"]
+    wgs_calling_file = wgs_calling_regions
   output:
     vcf_pass_tnscope = vep_dir + "{var_type}.somatic.{case_name}.tnscope.research.filtered.pass.vcf.gz",
     bcftools_counts_research = vep_dir + "{var_type}.somatic.{case_name}.tnscope.research.filtered.pass.stats"
@@ -19,8 +19,6 @@ rule bcftools_filter_tnscope_research_tumor_only:
     swegen_freq = get_tag_and_filtername(snv_research_filters, "SWEGENAF"),
     hard_filters = WgsSNVFilters.get_bcftools_filter_string(category="research", analysis_type=analysis_type, soft_filter_normals=soft_filter_normal),
     case_name = '{case_name}'
-  threads:
-    get_threads(cluster_config, 'bcftools_filter_tnscope_research_tumor_only')
   message:
     "Filtering WGS tumor-only tnscope annotated research variants using bcftools for {params.case_name}"
   shell:
@@ -40,7 +38,7 @@ bcftools +counts {output.vcf_pass_tnscope} > {output.bcftools_counts_research};
 rule bcftools_filter_tnscope_clinical_tumor_only:
   input:
     vcf_snv_clinical = vep_dir + "{var_type}.somatic.{case_name}.tnscope.clinical.vcf.gz",
-    wgs_calling_file = config["reference"]["wgs_calling_regions"],
+    wgs_calling_file = wgs_calling_regions,
     namemap = vep_dir + "status_to_sample_id_namemap"
   output:
     vcf_pass_tnscope = vep_dir + "{var_type}.somatic.{case_name}.tnscope.clinical.filtered.pass.vcf.gz",
@@ -56,9 +54,10 @@ rule bcftools_filter_tnscope_clinical_tumor_only:
     loqusdb_clinical_freq = get_tag_and_filtername(snv_clinical_filters, "Frq"),
     hard_filters = WgsSNVFilters.get_bcftools_filter_string(category="clinical", analysis_type=analysis_type, soft_filter_normals=soft_filter_normal),
     housekeeper_id= {"id": config["analysis"]["case_id"],"tags": "clinical"},
+    rescue_script= get_script_path("rescue_snvs.py"),
+    rescue_flag=lambda wildcards, rescue_snvs=config_model.analysis.rescue_snvs: f"--rescue-list {rescue_snvs}" if rescue_snvs else "",
+    tmpdir= tempfile.mkdtemp(prefix=tmp_dir),
     case_name = '{case_name}'
-  threads:
-    get_threads(cluster_config, 'bcftools_filter_tnscope_clinical_tumor_only')
   message:
     "Filtering WGS tumor-only tnscope annotated clinical variants using bcftools for {params.case_name}"
   shell:
@@ -70,8 +69,11 @@ bcftools reheader --threads {threads} -s {input.namemap} | \
 bcftools filter --threads {threads} --include 'INFO/ArtefactFrq <= {params.artefact_freq[0]} || INFO/ArtefactFrq == \".\"' --soft-filter '{params.artefact_freq[1]}' --mode '+' |\
 bcftools filter --threads {threads} --include 'INFO/GNOMADAF_popmax <= {params.pop_freq[0]} || INFO/GNOMADAF_popmax == \".\"' --soft-filter '{params.pop_freq[1]}' --mode '+' | \
 bcftools filter --threads {threads} --include 'INFO/SWEGENAF <= {params.swegen_freq[0]} || INFO/SWEGENAF == \".\"' --soft-filter '{params.swegen_freq[1]}' --mode '+' | \
-bcftools filter --threads {threads} --include 'INFO/Frq <= {params.loqusdb_clinical_freq[0]} || INFO/Frq == \".\"' --soft-filter '{params.loqusdb_clinical_freq[1]}' --mode '+' | \
-bcftools view --threads {threads} --exclude '{params.hard_filters}' -o {output.vcf_pass_tnscope} -O z;
+bcftools filter --threads {threads} --include 'INFO/Frq <= {params.loqusdb_clinical_freq[0]} || INFO/Frq == \".\"' --soft-filter '{params.loqusdb_clinical_freq[1]}' --mode '+' -O z -o {params.tmpdir}/clinical.filtered.pass_before_rescue.vcf.gz ;
+
+python {params.rescue_script} --vcf {params.tmpdir}/clinical.filtered.pass_before_rescue.vcf.gz --out {params.tmpdir}/clinical.filtered.pass_after_rescue.vcf {params.rescue_flag} ;
+
+bcftools view --threads {threads} --exclude '{params.hard_filters}' -O z -o{output.vcf_pass_tnscope} {params.tmpdir}/clinical.filtered.pass_after_rescue.vcf;
 
 tabix -p vcf -f {output.vcf_pass_tnscope};
 

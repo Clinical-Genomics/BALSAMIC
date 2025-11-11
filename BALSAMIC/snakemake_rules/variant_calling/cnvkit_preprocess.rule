@@ -1,16 +1,13 @@
 rule create_target:
     input:
         bed_expanded_merged = Path(cnv_dir + "capture_kit_expanded_merged.bed").as_posix(),
-        refgene_flat = config_model.reference["refgene_flat"],
-        access_bed = config_model.reference["access_regions"],
-        wake_up = result_dir + "start_analysis",
+        refgene_flat = refgene_flat,
+        access_bed = access_regions,
     output:
         targets = cnv_dir + "targets.bed",
         antitargets = cnv_dir + "antitarget.bed",
     singularity:
         Path(singularity_image, "cnvkit.sif").as_posix()
-    threads:
-        get_threads(cluster_config, "cnvkit_create_targets")
     benchmark:
         Path(benchmark_dir, "cnvkit.targets.tsv").as_posix()
     shell:
@@ -35,8 +32,6 @@ rule create_coverage:
         min_mapq = params.common.min_mapq,
     singularity:
         Path(singularity_image, "cnvkit.sif").as_posix()
-    threads:
-        get_threads(cluster_config, "cnvkit_create_coverage")
     message:
         "Segmenting genomic regions using CNVkit for {params.case_name}"
     shell:
