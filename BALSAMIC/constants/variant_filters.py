@@ -159,7 +159,7 @@ class BaseSNVFilters:
     @classmethod
     def filter_criteria(
         cls,
-        category: Literal["clinical", "research", "quality"],
+        category: Literal["clinical", "research", "post_quality", "quality"],
         analysis_type: Optional[Enum] = None,
         variant_caller: Optional[Enum] = None,
         exclude_variantcaller_filters: Optional[bool] = False,
@@ -169,7 +169,7 @@ class BaseSNVFilters:
         Shared filtering logic to get filters based on criteria.
 
         Args:
-            category (Literal["clinical", "research", "quality"]): The filter category to use.
+            category (Literal["clinical", "research", "post_quality", "quality"]): The filter category to use.
             analysis_type (Optional[Enum]): Filter based on analysis type (default: None).
             variant_caller (Optional[Enum]): Filter based on variant caller (default: None).
             exclude_variantcaller_filters (Optional[bool]): If True, excludes the variantcaller filters.
@@ -208,7 +208,7 @@ class BaseSNVFilters:
     @classmethod
     def get_bcftools_filter_string(
         cls,
-        category: Literal["clinical", "research", "quality"],
+        category: Literal["clinical", "research", "post_quality", "quality"],
         analysis_type: Optional[Enum] = None,
         variant_caller: Optional[Enum] = None,
         soft_filter_normals: Optional[bool] = None,
@@ -218,7 +218,7 @@ class BaseSNVFilters:
         Get a set of filter names based on various attributes.
 
         Args:
-            category (Literal["clinical", "research", "quality"]): The filter category to use.
+            category (Literal["clinical", "research", "post_quality", "quality"]): The filter category to use.
             analysis_type (Optional[Enum]): Filter based on analysis type (default: None).
             variant_caller (Optional[Enum]): Filter based on variant caller (default: None).
             soft_filter_normals (Optional[bool]): If True, removes filters in MATCHED_NORMAL_FILTER_NAMES.
@@ -256,7 +256,7 @@ class BaseSNVFilters:
     @classmethod
     def get_filters(
         cls,
-        category: Literal["clinical", "research", "quality"],
+        category: Literal["clinical", "research", "post_quality", "quality"],
         analysis_type: Optional[Enum] = None,
         variant_caller: Optional[Enum] = None,
         exclude_variantcaller_filters: Optional[bool] = True,
@@ -266,7 +266,7 @@ class BaseSNVFilters:
         Get a list of filters matching the specified attributes.
 
         Args:
-            category (Literal["clinical", "research", "quality"]): The filter category to use.
+            category (Literal["clinical", "research",, "post_quality", "quality"]): The filter category to use.
             analysis_type (Optional[Enum]): Filter based on analysis type (default: None).
             variant_caller (Optional[Enum]): Filter based on variant caller (default: None).
             exclude_variantcaller_filters (Optional[bool]): If True, excludes the variantcaller filters.
@@ -285,12 +285,15 @@ class BaseSNVFilters:
 
 
 class WgsSNVFilters(BaseSNVFilters):
+    post_quality = [
+        VCFFilter(tag_value=0.1, filter_name="gnomad_hard_threshold", field="INFO"),
+    ]
     research = [
         VCFFilter(tag_value=0.01, filter_name="SWEGENAF", field="INFO"),
         VCFFilter(tag_value=0.001, filter_name="balsamic_high_pop_freq", field="INFO"),
     ]
     clinical = research + [
-        VCFFilter(tag_value=0.007, filter_name="Frq", field="INFO"),
+        VCFFilter(tag_value=0.005, filter_name="Frq", field="INFO"),
         VCFFilter(tag_value=0.1, filter_name="ArtefactFrq", field="INFO"),
     ]
     quality = [
@@ -331,15 +334,18 @@ class WgsSNVFilters(BaseSNVFilters):
 
 
 class TgaSNVFilters(BaseSNVFilters):
+    post_quality = [
+        VCFFilter(tag_value=0.1, filter_name="gnomad_hard_threshold", field="INFO"),
+    ]
     research = [
         VCFFilter(
             filter_name="MERGED", Description="SNV Merged with neighboring variants"
         ),
         VCFFilter(tag_value=0.01, filter_name="SWEGENAF", field="INFO"),
-        VCFFilter(tag_value=0.005, filter_name="balsamic_high_pop_freq", field="INFO"),
+        VCFFilter(tag_value=0.001, filter_name="balsamic_high_pop_freq", field="INFO"),
     ]
     clinical = research + [
-        VCFFilter(tag_value=0.01, filter_name="Frq", field="INFO"),
+        VCFFilter(tag_value=0.005, filter_name="Frq", field="INFO"),
         VCFFilter(tag_value=0.1, filter_name="ArtefactFrq", field="INFO"),
         VCFFilter(tag_value=0.3, filter_name="HighOccurrenceFrq", field="INFO"),
     ]
@@ -403,10 +409,10 @@ class TgaSNVFilters(BaseSNVFilters):
 class TgaUmiSNVFilters(BaseSNVFilters):
     research = [
         VCFFilter(tag_value=0.01, filter_name="SWEGENAF", field="INFO"),
-        VCFFilter(tag_value=0.02, filter_name="balsamic_high_pop_freq", field="INFO"),
+        VCFFilter(tag_value=0.001, filter_name="balsamic_high_pop_freq", field="INFO"),
     ]
     clinical = research + [
-        VCFFilter(tag_value=0.01, filter_name="Frq", field="INFO"),
+        VCFFilter(tag_value=0.005, filter_name="Frq", field="INFO"),
         VCFFilter(tag_value=0.1, filter_name="ArtefactFrq", field="INFO"),
     ]
     quality = [
