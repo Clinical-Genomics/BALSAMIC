@@ -137,7 +137,7 @@ class SnakemakeExecutable(BaseModel):
 
     def get_slurm_job_arguments(self) -> str:
         return (
-            f'--default-resources --slurm-qos {self.qos}" '
+            f'--default-resources slurm_qos={self.qos} runtime=120 mem_mb=4000'
             f"slurm_partition={self.workflow_partition} slurm_account={self.account}"
         )
 
