@@ -6,9 +6,15 @@ Added:
 
 Changed:
 ^^^^^^^^
+* changed slurm extra qos with slurm_qos argument https://github.com/Clinical-Genomics/BALSAMIC/pull/1632
+* moved default resource allocation to snakemake command https://github.com/Clinical-Genomics/BALSAMIC/pull/1632
+* increased memory of samtools fixmate https://github.com/Clinical-Genomics/BALSAMIC/pull/1632
+
 
 Removed:
 ^^^^^^^^
+* exome argument panel bed callback function https://github.com/Clinical-Genomics/BALSAMIC/pull/1632
+* removed -l flag in head-job sbatch script https://github.com/Clinical-Genomics/BALSAMIC/pull/1632
 
 Fixed:
 ^^^^^^
