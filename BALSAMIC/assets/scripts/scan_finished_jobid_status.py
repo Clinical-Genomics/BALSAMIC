@@ -99,7 +99,7 @@ def write_results(
             out_f.write(
                 "NOTE:\n"
                 "Some jobs failed but succeeded on retry:\n"
-                "(jobid\tlog_path\toriginal_state\n"
+                "(jobid\tlog_path\toriginal_state)\n"
             )
             for jobid, log_path, state, rule_key in resolved_failures:
                 out_f.write(f"{jobid}\t{log_path}\t{state}\n")
@@ -113,7 +113,7 @@ def write_results(
 
         # If there are no *unresolved* failures/cancellations, consider run successful.
         if not failed and not cancelled:
-            out_f.write("SUCCESSFUL (no unresolved failed/cancelled jobs)\n\n")
+            out_f.write("SUCCESSFUL\n\n")
 
     LOG.info(
         "Appended results to %s (failed=%d, cancelled=%d, resolved_failures=%d, unknown=%d)",

@@ -106,36 +106,64 @@ def test_get_job_state_calledprocesserror(monkeypatch, m, caplog):
 
 def test_write_results_all_sections(tmp_path: Path, m):
     out = tmp_path / "result.txt"
-    failed = [("101", Path("/logs/101.log")), ("202", Path("/logs/202.log"))]
-    cancelled = [("303", Path("/logs/303.log"))]
+
+    failed = [
+        ("101", Path("/logs/101.log")),
+        ("202", Path("/logs/202.log")),
+    ]
+    cancelled = [
+        ("303", Path("/logs/303.log")),
+    ]
     unknown = ["404", "505"]
 
-    m.write_results(out, failed, cancelled, unknown)
+    # New section in write_results: jobs that failed but later succeeded
+    resolved_failures = [
+        ("909", Path("/logs/909.log"), "FAILED", "rule_x"),
+    ]
+
+    m.write_results(out, failed, cancelled, unknown, resolved_failures)
     txt = out.read_text()
 
     # Timestamp header present (we don't assert the exact time)
     assert "=== Job status check at " in txt
 
-    # Failed block
-    assert "Failed jobs:" in txt
+    # Failed block (note: new heading text)
+    assert "FAILED JOBS (no successful retry):" in txt
     assert "101\t/logs/101.log" in txt
     assert "202\t/logs/202.log" in txt
 
-    # Cancelled block
-    assert "Cancelled jobs:" in txt
+    # Cancelled block (note: new heading text)
+    assert ("CANCELLED JOBS (no successful retry)") in txt
     assert "303\t/logs/303.log" in txt
 
-    # Unknown block
-    assert "Unknown status jobs:" in txt
-    assert "404\tNA" in txt and "505\tNA" in txt
+    # Resolved failures block
+    assert "Some jobs failed but succeeded on retry" in txt
+    # Column header line
+    assert "(jobid\tlog_path\toriginal_state)" in txt
+    # Example job
+    assert "909\t/logs/909.log\tFAILED" in txt
 
-    # No SUCCESSFUL marker because there are failures/cancellations
-    assert "SUCCESSFUL" not in txt
+    # Unknown block (unchanged)
+    assert "Unknown status jobs:" in txt
+    assert "404\tNA" in txt
+    assert "505\tNA" in txt
+
+    # No SUCCESSFUL marker because there are unresolved failures/cancellations
+    assert "SUCCESSFUL (no unresolved failed/cancelled jobs)" not in txt
 
 
 def test_write_results_success_only(tmp_path: Path, m):
     out = tmp_path / "ok.txt"
-    m.write_results(out, failed=[], cancelled=[], unknown=[])
+
+    # All lists empty — means everything succeeded
+    m.write_results(
+        output_file=out,
+        failed=[],
+        cancelled=[],
+        unknown=[],
+        resolved_failures=[],
+    )
+
     txt = out.read_text()
     assert "SUCCESSFUL" in txt
 
@@ -192,15 +220,19 @@ def test_cli_classifies_and_writes(monkeypatch, m, tmp_path: Path, caplog):
     assert result.exit_code == 0
     txt = out.read_text()
 
-    # Present sections
-    assert "Failed jobs:" in txt
-    assert "100\t/fake/100.log" in txt
+    # We now expect the "resolved failures" section, because the rule dir /fake
+    # has at least one COMPLETED job (300), and 100/200 are failure-like states.
+    assert "Some jobs failed but succeeded on retry:" in txt
+    assert "(jobid\tlog_path\toriginal_state)" in txt
+    assert "100\t/fake/100.log\tFAILED" in txt
+    assert "200\t/fake/200.log\tCANCELLED" in txt
 
-    assert "Cancelled jobs:" in txt
-    assert "200\t/fake/200.log" in txt
-
+    # Unknown section and job 400
     assert "Unknown status jobs:" in txt
     assert "400\tNA" in txt
 
-    # Completed job should not appear in any section
-    assert "300" not in re.findall(r"^(?:Failed|Cancelled|Unknown).*$", txt, flags=re.M)
+    # No unresolved failed/cancelled jobs -> SUCCESS marker present
+    assert "SUCCESSFUL" in txt
+
+    # Completed job should not appear at all in error/resolution sections
+    assert "300" not in txt
