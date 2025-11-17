@@ -12,6 +12,9 @@ import click
 
 LOG = logging.getLogger(__name__)
 
+FAILURE_LIKE_STATES = {"FAILED", "CANCELLED", "TIMEOUT", "OUT_OF_MEMORY"}
+SUCCESS_STATES = {"COMPLETED"}
+
 
 def find_job_logs(log_root: Path) -> Dict[str, Path]:
     """
@@ -125,6 +128,87 @@ def write_results(
     )
 
 
+def derive_rule_key(log_root: Path, log_path: Path) -> str:
+    """
+    Derive a "rule key" from the log path.
+
+    Prefer path relative to log_root; fall back to absolute parent directory.
+    """
+    try:
+        return str(log_path.parent.relative_to(log_root))
+    except ValueError:
+        return str(log_path.parent)
+
+
+def group_jobs_by_rule(
+    log_dir: Path, job_logs: Dict[str, Path]
+) -> Tuple[Dict[str, List[Tuple[str, Path, Optional[str]]]], List[str]]:
+    """
+    Query scontrol for each job and group them per rule directory.
+
+    Returns:
+        rule_to_jobs: {rule_key -> [(jobid, log_path, state), ...]}
+        unknown: list of jobids with missing scontrol info
+    """
+    rule_to_jobs: Dict[str, List[Tuple[str, Path, Optional[str]]]] = {}
+    unknown: List[str] = []
+
+    for jobid in sorted(job_logs.keys(), key=int):
+        log_path = job_logs[jobid]
+
+        out_text = get_job_state(jobid)
+        if not out_text:
+            LOG.warning(
+                "Missing scontrol output for job %s -- setting status UNKNOWN", jobid
+            )
+            unknown.append(jobid)
+            continue
+
+        state = parse_state(out_text)
+        rule_key = derive_rule_key(log_dir, log_path)
+
+        LOG.debug("Job %s in rule dir %s has state %s", jobid, rule_key, state)
+
+        rule_to_jobs.setdefault(rule_key, []).append((jobid, log_path, state))
+
+    return rule_to_jobs, unknown
+
+
+def classify_jobs(
+    rule_to_jobs: Dict[str, List[Tuple[str, Path, Optional[str]]]]
+) -> Tuple[
+    List[Tuple[str, Path]],
+    List[Tuple[str, Path]],
+    List[Tuple[str, Path, str, str]],
+]:
+    """
+    Classify jobs into:
+      - failed (no successful retry for that rule)
+      - cancelled (no successful retry for that rule)
+      - resolved_failures (failed/cancelled but with a successful retry)
+    """
+    failed: List[Tuple[str, Path]] = []
+    cancelled: List[Tuple[str, Path]] = []
+    resolved_failures: List[Tuple[str, Path, str, str]] = []
+
+    for rule_key, jobs in rule_to_jobs.items():
+        has_success = any(state in SUCCESS_STATES for _, _, state in jobs)
+
+        for jobid, log_path, state in jobs:
+            if state not in FAILURE_LIKE_STATES:
+                continue
+
+            if has_success:
+                # Rule eventually succeeded; treat as resolved failure.
+                resolved_failures.append((jobid, log_path, state, rule_key))
+            elif state == "FAILED":
+                failed.append((jobid, log_path))
+            else:
+                cancelled.append((jobid, log_path))
+
+    return failed, cancelled, resolved_failures
+
+
 @click.command()
 @click.argument(
     "log_dir", type=click.Path(exists=True, file_okay=False, path_type=Path)
@@ -162,65 +246,12 @@ def check_failed_jobs(log_dir: Path, output: Path, log_level: str) -> None:
     LOG.info("Scanning logs under: %s", log_dir)
     job_logs = find_job_logs(log_dir)
 
-    unknown: List[str] = []
-
-    # rule_key -> list of (jobid, log_path, state)
-    rule_to_jobs: Dict[str, List[Tuple[str, Path, Optional[str]]]] = {}
-
     if not job_logs:
         LOG.warning("No job logs found (no files matching '*.log')")
         return
 
-    for jobid in sorted(job_logs.keys(), key=int):
-        log_path = job_logs[jobid]
-
-        out_text = get_job_state(jobid)
-        if not out_text:
-            LOG.warning(
-                "Missing scontrol output for job %s -- setting status UNKNOWN", jobid
-            )
-            unknown.append(jobid)
-            continue
-
-        state = parse_state(out_text)
-        # Derive "rule key" from parent directory relative to log_dir.
-        try:
-            rule_key = str(log_path.parent.relative_to(log_dir))
-        except ValueError:
-            # Fallback if for some reason the path isn't under log_dir
-            rule_key = str(log_path.parent)
-
-        LOG.debug("Job %s in rule dir %s has state %s", jobid, rule_key, state)
-
-        rule_to_jobs.setdefault(rule_key, []).append((jobid, log_path, state))
-
-    failed: List[Tuple[str, Path]] = []
-    cancelled: List[Tuple[str, Path]] = []
-    resolved_failures: List[Tuple[str, Path, str, str]] = []
-
-    failure_like_states = {"FAILED", "CANCELLED", "TIMEOUT", "OUT_OF_MEMORY"}
-    success_states = {
-        "COMPLETED"
-    }  # extend if you want to treat other states as success
-
-    # Now classify based on per-rule success/failure
-    for rule_key, jobs in rule_to_jobs.items():
-        has_success = any(state in success_states for _, _, state in jobs)
-
-        for jobid, log_path, state in jobs:
-            if state not in failure_like_states:
-                # Don't treat non-failure states as errors
-                continue
-
-            if has_success:
-                # This rule eventually succeeded; earlier failures go to the "resolved" section
-                resolved_failures.append((jobid, log_path, state, rule_key))
-            else:
-                # No successful retry in this rule dir; keep behavior as before
-                if state == "FAILED":
-                    failed.append((jobid, log_path))
-                else:
-                    cancelled.append((jobid, log_path))
+    rule_to_jobs, unknown = group_jobs_by_rule(log_dir, job_logs)
+    failed, cancelled, resolved_failures = classify_jobs(rule_to_jobs)
 
     write_results(output, failed, cancelled, unknown, resolved_failures)
 
