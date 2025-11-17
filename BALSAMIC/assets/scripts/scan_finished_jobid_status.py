@@ -83,21 +83,22 @@ def write_results(
         out_f.write(f"=== Job status check at {timestamp} ===\n")
 
         if failed:
-            out_f.write("Failed jobs (no successful retry in same rule directory):\n")
+            out_f.write("FAILED JOBS (no successful retry):\n")
             for jobid, log_path in failed:
                 out_f.write(f"{jobid}\t{log_path}\n")
             out_f.write("\n")
 
         if cancelled:
-            out_f.write("Cancelled/Timeout/Out-of-memory jobs "
-                        "(no successful retry in same rule directory):\n")
+            out_f.write("CANCELLED JOBS (no successful retry):\n")
             for jobid, log_path in cancelled:
                 out_f.write(f"{jobid}\t{log_path}\n")
             out_f.write("\n")
 
         if resolved_failures:
+            out_f.write("\n")
             out_f.write(
-                "Failed jobs with successful retry (same rule directory):\n"
+                "NOTE:\n"
+                "Failed jobs with successful retry:\n"
                 "(jobid\tlog_path\toriginal_state\trule_dir)\n"
             )
             for jobid, log_path, state, rule_key in resolved_failures:
