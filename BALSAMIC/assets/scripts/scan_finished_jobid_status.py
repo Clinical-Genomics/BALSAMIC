@@ -67,10 +67,13 @@ def write_results(
     failed: List[Tuple[str, Path]],
     cancelled: List[Tuple[str, Path]],
     unknown: List[str],
+    resolved_failures: List[Tuple[str, Path, str, str]],
 ) -> None:
     """
     Append job results to output_file.
     Each run is prefixed with a timestamp header.
+
+    resolved_failures items are (jobid, log_path, state, rule_key).
     """
     output_file.parent.mkdir(parents=True, exist_ok=True)
 
@@ -80,15 +83,25 @@ def write_results(
         out_f.write(f"=== Job status check at {timestamp} ===\n")
 
         if failed:
-            out_f.write("Failed jobs:\n")
+            out_f.write("Failed jobs (no successful retry in same rule directory):\n")
             for jobid, log_path in failed:
                 out_f.write(f"{jobid}\t{log_path}\n")
             out_f.write("\n")
 
         if cancelled:
-            out_f.write("Cancelled jobs:\n")
+            out_f.write("Cancelled/Timeout/Out-of-memory jobs "
+                        "(no successful retry in same rule directory):\n")
             for jobid, log_path in cancelled:
                 out_f.write(f"{jobid}\t{log_path}\n")
+            out_f.write("\n")
+
+        if resolved_failures:
+            out_f.write(
+                "Failed jobs with successful retry (same rule directory):\n"
+                "(jobid\tlog_path\toriginal_state\trule_dir)\n"
+            )
+            for jobid, log_path, state, rule_key in resolved_failures:
+                out_f.write(f"{jobid}\t{log_path}\t{state}\t{rule_key}\n")
             out_f.write("\n")
 
         if unknown:
@@ -97,11 +110,17 @@ def write_results(
                 out_f.write(f"{jobid}\tNA\n")
             out_f.write("\n")
 
+        # If there are no *unresolved* failures/cancellations, consider run successful.
         if not failed and not cancelled:
-            out_f.write("SUCCESSFUL\n\n")
+            out_f.write("SUCCESSFUL (no unresolved failed/cancelled jobs)\n\n")
 
     LOG.info(
-        f"Appended results to {output_file} (failed={len(failed)}, cancelled={len(cancelled)} unknown={len(unknown)})"
+        "Appended results to %s (failed=%d, cancelled=%d, resolved_failures=%d, unknown=%d)",
+        output_file,
+        len(failed),
+        len(cancelled),
+        len(resolved_failures),
+        len(unknown),
     )
 
 
@@ -129,6 +148,10 @@ def check_failed_jobs(log_dir: Path, output: Path, log_level: str) -> None:
     """
     Recursively scan LOG_DIR for SLURM *.log files (stdout+stderr combined),
     extract job IDs from filenames, and check their states via `scontrol show job JOBID`.
+
+    If multiple jobs share the same rule log directory and at least one of them
+    completes successfully, earlier failures in that directory are reported under
+    a separate heading as "Failed jobs with successful retry".
     """
     logging.basicConfig(
         level=getattr(logging, log_level.upper(), logging.INFO),
@@ -138,33 +161,65 @@ def check_failed_jobs(log_dir: Path, output: Path, log_level: str) -> None:
     LOG.info("Scanning logs under: %s", log_dir)
     job_logs = find_job_logs(log_dir)
 
-    failed: List[Tuple[str, Path]] = []
-    cancelled: List[Tuple[str, Path]] = []
     unknown: List[str] = []
+
+    # rule_key -> list of (jobid, log_path, state)
+    rule_to_jobs: Dict[str, List[Tuple[str, Path, Optional[str]]]] = {}
 
     if not job_logs:
         LOG.warning("No job logs found (no files matching '*.log')")
         return
 
     for jobid in sorted(job_logs.keys(), key=int):
+        log_path = job_logs[jobid]
+
         out_text = get_job_state(jobid)
         if not out_text:
-            # Can't classify without job info; skip but note it.
             LOG.warning(
-                f"Missing scontrol output for job {jobid} -- setting status UNKNOWN"
+                "Missing scontrol output for job %s -- setting status UNKNOWN", jobid
             )
             unknown.append(jobid)
             continue
 
         state = parse_state(out_text)
-        if state == "FAILED":
-            failed.append((jobid, job_logs[jobid]))
-        elif state in ["CANCELLED", "TIMEOUT", "OUT_OF_MEMORY"]:
-            cancelled.append((jobid, job_logs[jobid]))
-        else:
-            LOG.debug(f"Job {jobid} state is {state}")
+        # Derive "rule key" from parent directory relative to log_dir.
+        try:
+            rule_key = str(log_path.parent.relative_to(log_dir))
+        except ValueError:
+            # Fallback if for some reason the path isn't under log_dir
+            rule_key = str(log_path.parent)
 
-    write_results(output, failed, cancelled, unknown)
+        LOG.debug("Job %s in rule dir %s has state %s", jobid, rule_key, state)
+
+        rule_to_jobs.setdefault(rule_key, []).append((jobid, log_path, state))
+
+    failed: List[Tuple[str, Path]] = []
+    cancelled: List[Tuple[str, Path]] = []
+    resolved_failures: List[Tuple[str, Path, str, str]] = []
+
+    failure_like_states = {"FAILED", "CANCELLED", "TIMEOUT", "OUT_OF_MEMORY"}
+    success_states = {"COMPLETED"}  # extend if you want to treat other states as success
+
+    # Now classify based on per-rule success/failure
+    for rule_key, jobs in rule_to_jobs.items():
+        has_success = any(state in success_states for _, _, state in jobs)
+
+        for jobid, log_path, state in jobs:
+            if state not in failure_like_states:
+                # Don't treat non-failure states as errors
+                continue
+
+            if has_success:
+                # This rule eventually succeeded; earlier failures go to the "resolved" section
+                resolved_failures.append((jobid, log_path, state, rule_key))
+            else:
+                # No successful retry in this rule dir; keep behavior as before
+                if state == "FAILED":
+                    failed.append((jobid, log_path))
+                else:
+                    cancelled.append((jobid, log_path))
+
+    write_results(output, failed, cancelled, unknown, resolved_failures)
 
 
 if __name__ == "__main__":
