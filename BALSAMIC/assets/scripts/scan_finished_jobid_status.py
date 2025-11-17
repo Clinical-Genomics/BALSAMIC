@@ -98,11 +98,11 @@ def write_results(
             out_f.write("\n")
             out_f.write(
                 "NOTE:\n"
-                "Failed jobs with successful retry:\n"
-                "(jobid\tlog_path\toriginal_state\trule_dir)\n"
+                "Some jobs failed but succeeded on retry:\n"
+                "(jobid\tlog_path\toriginal_state\n"
             )
             for jobid, log_path, state, rule_key in resolved_failures:
-                out_f.write(f"{jobid}\t{log_path}\t{state}\t{rule_key}\n")
+                out_f.write(f"{jobid}\t{log_path}\t{state}\n")
             out_f.write("\n")
 
         if unknown:
@@ -199,7 +199,9 @@ def check_failed_jobs(log_dir: Path, output: Path, log_level: str) -> None:
     resolved_failures: List[Tuple[str, Path, str, str]] = []
 
     failure_like_states = {"FAILED", "CANCELLED", "TIMEOUT", "OUT_OF_MEMORY"}
-    success_states = {"COMPLETED"}  # extend if you want to treat other states as success
+    success_states = {
+        "COMPLETED"
+    }  # extend if you want to treat other states as success
 
     # Now classify based on per-rule success/failure
     for rule_key, jobs in rule_to_jobs.items():
