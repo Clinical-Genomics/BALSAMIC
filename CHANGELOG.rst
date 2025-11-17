@@ -6,6 +6,8 @@ Added:
 
 Changed:
 ^^^^^^^^
+* changed reporting of failed jobs that succeeded on restart https://github.com/Clinical-Genomics/BALSAMIC/pull/1636
+
 
 Removed:
 ^^^^^^^^
