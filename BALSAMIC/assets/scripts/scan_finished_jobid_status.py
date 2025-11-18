@@ -125,10 +125,7 @@ def write_results(
 
         if resolved_failures:
             out_f.write("\n")
-            out_f.write(
-                "NOTE:\n"
-                "Some jobs failed but succeeded on retry:\n"
-            )
+            out_f.write("NOTE:\n" "Some jobs failed but succeeded on retry:\n")
             for jobid, log_path, state, rule_key in resolved_failures:
                 out_f.write(f"{jobid}\t{log_path}\t{state}\n")
             out_f.write("\n")
