@@ -1,14 +1,10 @@
 import importlib
-import types
 from pathlib import Path
 from click.testing import CliRunner
 import subprocess
-import textwrap
-import re
 import logging
 import pytest
 
-# 👇 Change this to your actual module filename (no .py)
 MODULE_NAME = "BALSAMIC.assets.scripts.scan_finished_jobid_status"
 
 
@@ -16,21 +12,6 @@ MODULE_NAME = "BALSAMIC.assets.scripts.scan_finished_jobid_status"
 def m():
     # Import the target module once for all tests
     return importlib.import_module(MODULE_NAME)
-
-
-# ---------- parse_state ----------
-
-
-def test_parse_state_ok(m):
-    out = "JobId=1234 JobState=FAILED Reason=NonZeroExitCode"
-    assert m.parse_state(out) == "FAILED"
-
-
-def test_parse_state_missing(m, caplog):
-    caplog.set_level(logging.DEBUG)
-    out = "JobId=5678 SomeOtherField=foo"
-    assert m.parse_state(out) is None
-    assert any("JobState not found" in rec.message for rec in caplog.records)
 
 
 # ---------- find_job_logs ----------
@@ -56,49 +37,60 @@ def test_find_job_logs_filters_numeric(tmp_path: Path, m, caplog):
     assert any("Discovered 2 job logs" in rec.message for rec in caplog.records)
 
 
-# ---------- get_job_state ----------
+# ---------- get_job_states (batched sacct) ----------
 
 
-def test_get_job_state_success(monkeypatch, m):
+def test_get_job_states_success(monkeypatch, m, caplog):
+    caplog.set_level(logging.DEBUG)
+
     class Dummy:
-        stdout = "JobId=42 JobState=COMPLETED"
+        # Simulate sacct --parsable2 JobID,State
+        # 42|COMPLETED
+        # 123|FAILED+
+        stdout = "42|COMPLETED\n123|FAILED+\n"
 
     def fake_run(*args, **kwargs):
         return Dummy()
 
     monkeypatch.setattr(subprocess, "run", fake_run)
 
-    out = m.get_job_state("42")
-    assert "JobState=COMPLETED" in out
+    out = m.get_job_state(["42", "123"])
+    # We expect normalized states, and both jobids present
+    assert out == {
+        "42": "COMPLETED",
+        "123": "FAILED",  # '+' stripped
+    }
 
 
-def test_get_job_state_not_found(monkeypatch, m, caplog):
+def test_get_job_states_not_found_executable(monkeypatch, m, caplog):
     caplog.set_level(logging.ERROR)
 
     def boom(*args, **kwargs):
-        raise FileNotFoundError("no scontrol")
+        raise FileNotFoundError("no sacct")
 
     monkeypatch.setattr(subprocess, "run", boom)
 
-    assert m.get_job_state("7") is None
-    assert any("scontrol executable not found" in rec.message for rec in caplog.records)
+    out = m.get_job_states(["7"])
+    assert out == {}
+    assert any("sacct executable not found" in rec.message for rec in caplog.records)
 
 
-def test_get_job_state_calledprocesserror(monkeypatch, m, caplog):
+def test_get_job_states_calledprocesserror(monkeypatch, m, caplog):
     caplog.set_level(logging.DEBUG)
 
     def boom(*args, **kwargs):
         raise subprocess.CalledProcessError(
-            returncode=1, cmd=["scontrol"], stderr="bad things"
+            returncode=1, cmd=["sacct"], stderr="bad things"
         )
 
     monkeypatch.setattr(subprocess, "run", boom)
 
-    assert m.get_job_state("99") is None
-    assert any("Could not check job 99" in rec.message for rec in caplog.records)
+    out = m.get_job_states(["99"])
+    assert out == {}
     assert any(
-        "scontrol stderr for 99 bad things" in rec.message for rec in caplog.records
+        "Could not query sacct for jobs" in rec.message for rec in caplog.records
     )
+    assert any("sacct stderr: bad things" in rec.message for rec in caplog.records)
 
 
 # ---------- write_results ----------
@@ -133,7 +125,7 @@ def test_write_results_all_sections(tmp_path: Path, m):
     assert "202\t/logs/202.log" in txt
 
     # Cancelled block (note: new heading text)
-    assert ("CANCELLED JOBS (no successful retry)") in txt
+    assert "CANCELLED JOBS (no successful retry):" in txt
     assert "303\t/logs/303.log" in txt
 
     # Resolved failures block
@@ -143,7 +135,7 @@ def test_write_results_all_sections(tmp_path: Path, m):
     # Example job
     assert "909\t/logs/909.log\tFAILED" in txt
 
-    # Unknown block (unchanged)
+    # Unknown block
     assert "Unknown status jobs:" in txt
     assert "404\tNA" in txt
     assert "505\tNA" in txt
@@ -199,17 +191,21 @@ def test_cli_classifies_and_writes(monkeypatch, m, tmp_path: Path, caplog):
     }
     monkeypatch.setattr(m, "find_job_logs", lambda p: fake_map)
 
-    # get_job_state behavior per jobid
-    def fake_get(jobid: str):
+    # get_job_states behavior for the batch of jobids
+    # 100 -> FAILED
+    # 200 -> CANCELLED
+    # 300 -> COMPLETED
+    # 400 -> missing (unknown)
+    def fake_get_states(jobids):
         table = {
-            "100": "JobId=100 JobState=FAILED",
-            "200": "JobId=200 JobState=CANCELLED",
-            "300": "JobId=300 JobState=COMPLETED",
-            "400": None,  # e.g., missing/failed scontrol
+            "100": "FAILED",
+            "200": "CANCELLED",
+            "300": "COMPLETED",
+            # 400 intentionally omitted to simulate missing sacct info
         }
-        return table[jobid]
+        return {jid: table[jid] for jid in jobids if jid in table}
 
-    monkeypatch.setattr(m, "get_job_state", fake_get)
+    monkeypatch.setattr(m, "get_job_states", fake_get_states)
 
     out = tmp_path / "report.txt"
     runner = CliRunner()

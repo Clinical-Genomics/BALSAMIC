@@ -33,35 +33,57 @@ def find_job_logs(log_root: Path) -> Dict[str, Path]:
 
 def get_job_state(jobid: str) -> Optional[str]:
     """
-    Return raw output of `scontrol show job JOBID`, or None if the query fails.
+    Look up the final job state via `sacct`.
+
+    We prefer the top-level job record (e.g. '10683002')
+    over step records (e.g. '10683002.batch', '10683002.0').
+
+    Returns a normalized state string like 'COMPLETED', 'FAILED',
+    'CANCELLED', etc., or None if not found.
     """
+    cmd = [
+        "sacct",
+        "-j",
+        jobid,
+        "--noheader",  # no column headers
+        "--parsable2",  # '|' separator, stable columns
+        "-o",
+        "JobID,State",
+    ]
+
     try:
-        LOG.debug(f"Running show job scontrol {jobid}")
+        LOG.debug("Running: %s", " ".join(cmd))
         result = subprocess.run(
-            ["scontrol", "show", "job", jobid],
+            cmd,
             capture_output=True,
             text=True,
             check=True,
         )
-        return result.stdout
     except FileNotFoundError:
-        LOG.error("scontrol executable not found: scontrol")
+        LOG.error("sacct executable not found: sacct")
         return None
     except subprocess.CalledProcessError as e:
-        LOG.warning(f"Could not check job {jobid} (may not exist). rc={e.returncode}")
-        LOG.debug(f"scontrol stderr for {jobid} {e.stderr}")
+        LOG.warning("Could not check job %s via sacct (rc=%s)", jobid, e.returncode)
+        LOG.debug("sacct stderr for %s: %s", jobid, e.stderr)
         return None
 
+    lines = [ln.strip() for ln in result.stdout.splitlines() if ln.strip()]
+    if not lines:
+        LOG.debug("No sacct records returned for job %s", jobid)
+        return None
 
-def parse_state(scontrol_output: str) -> Optional[str]:
-    """
-    Extract JobState from scontrol text, e.g. 'JobState=FAILED'.
-    Returns the state string (e.g. 'FAILED') or None if not found.
-    """
-    m = re.search(r"JobState=(\S+)", scontrol_output)
-    state = m.group(1) if m else None
-    if state is None:
-        LOG.debug("JobState not found in scontrol output")
+    # Each line looks like: "10683002|FAILED" or "10683002.0|CANCELLED+"
+    records = [ln.split("|") for ln in lines]
+
+    # Prefer the exact jobid (no step suffix)
+    parent_record = next((r for r in records if r[0] == jobid), None)
+    chosen = parent_record or records[0]
+
+    raw_state = chosen[1]
+    # Normalize things like "CANCELLED+" or "FAILED node_fail"
+    state = raw_state.split()[0].rstrip("+")
+    LOG.debug("Job %s sacct raw state=%r -> normalized=%r", jobid, raw_state, state)
+
     return state
 
 
@@ -156,15 +178,13 @@ def group_jobs_by_rule(
     for jobid in sorted(job_logs.keys(), key=int):
         log_path = job_logs[jobid]
 
-        out_text = get_job_state(jobid)
-        if not out_text:
+        state = get_job_state(jobid)
+        if state is None:
             LOG.warning(
-                "Missing scontrol output for job %s -- setting status UNKNOWN", jobid
+                "Missing sacct state for job %s -- setting status UNKNOWN", jobid
             )
             unknown.append(jobid)
             continue
-
-        state = parse_state(out_text)
         rule_key = derive_rule_key(log_dir, log_path)
 
         LOG.debug("Job %s in rule dir %s has state %s", jobid, rule_key, state)
