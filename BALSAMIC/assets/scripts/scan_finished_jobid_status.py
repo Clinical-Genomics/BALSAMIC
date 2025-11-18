@@ -128,7 +128,6 @@ def write_results(
             out_f.write(
                 "NOTE:\n"
                 "Some jobs failed but succeeded on retry:\n"
-                "(jobid\tlog_path\toriginal_state)\n"
             )
             for jobid, log_path, state, rule_key in resolved_failures:
                 out_f.write(f"{jobid}\t{log_path}\t{state}\n")

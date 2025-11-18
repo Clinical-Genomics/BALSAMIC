@@ -157,8 +157,6 @@ def test_write_results_all_sections(tmp_path: Path, m):
 
     # Resolved failures block
     assert "Some jobs failed but succeeded on retry" in txt
-    # Column header line
-    assert "(jobid\tlog_path\toriginal_state)" in txt
     # Example job
     assert "909\t/logs/909.log\tFAILED" in txt
 
@@ -242,7 +240,6 @@ def test_cli_classifies_and_writes(monkeypatch, m, tmp_path: Path, caplog):
     # We now expect the "resolved failures" section, because the rule dir /fake
     # has at least one COMPLETED job (300), and 100/200 are failure-like states.
     assert "Some jobs failed but succeeded on retry:" in txt
-    assert "(jobid\tlog_path\toriginal_state)" in txt
     assert "100\t/fake/100.log\tFAILED" in txt
     assert "200\t/fake/200.log\tCANCELLED" in txt
 
