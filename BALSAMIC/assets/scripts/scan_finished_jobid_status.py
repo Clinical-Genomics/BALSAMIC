@@ -105,7 +105,7 @@ def write_results(
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     with output_file.open("a") as out_f:
-        out_f.write(f"=== Job status check at {timestamp} ===\n")
+        out_f.write(f"=== Job status check at {timestamp} ===\n\n")
 
         # If there are no *unresolved* failures/cancellations, consider run successful.
         if not failed and not cancelled:
