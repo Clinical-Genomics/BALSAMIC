@@ -107,6 +107,10 @@ def write_results(
     with output_file.open("a") as out_f:
         out_f.write(f"=== Job status check at {timestamp} ===\n")
 
+        # If there are no *unresolved* failures/cancellations, consider run successful.
+        if not failed and not cancelled:
+            out_f.write("SUCCESSFUL\n\n")
+
         if failed:
             out_f.write("FAILED JOBS (no successful retry):\n")
             for jobid, log_path in failed:
@@ -135,10 +139,6 @@ def write_results(
             for jobid in unknown:
                 out_f.write(f"{jobid}\tNA\n")
             out_f.write("\n")
-
-        # If there are no *unresolved* failures/cancellations, consider run successful.
-        if not failed and not cancelled:
-            out_f.write("SUCCESSFUL\n\n")
 
     LOG.info(
         "Appended results to %s (failed=%d, cancelled=%d, resolved_failures=%d, unknown=%d)",
