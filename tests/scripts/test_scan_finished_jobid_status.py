@@ -5,6 +5,7 @@ import subprocess
 import logging
 import pytest
 
+
 MODULE_NAME = "BALSAMIC.assets.scripts.scan_finished_jobid_status"
 
 
@@ -37,32 +38,58 @@ def test_find_job_logs_filters_numeric(tmp_path: Path, m, caplog):
     assert any("Discovered 2 job logs" in rec.message for rec in caplog.records)
 
 
-# ---------- get_job_states (batched sacct) ----------
+# ---------- get_job_state (per-job sacct wrapper) ----------
 
 
-def test_get_job_states_success(monkeypatch, m, caplog):
+def test_get_job_state_success(monkeypatch, m, caplog):
     caplog.set_level(logging.DEBUG)
 
     class Dummy:
-        # Simulate sacct --parsable2 JobID,State
+        # Simulate:
+        # sacct --parsable2 -o JobID,State
         # 42|COMPLETED
-        # 123|FAILED+
-        stdout = "42|COMPLETED\n123|FAILED+\n"
+        stdout = "42|COMPLETED\n"
 
     def fake_run(*args, **kwargs):
         return Dummy()
 
     monkeypatch.setattr(subprocess, "run", fake_run)
 
-    out = m.get_job_state(["42", "123"])
-    # We expect normalized states, and both jobids present
-    assert out == {
-        "42": "COMPLETED",
-        "123": "FAILED",  # '+' stripped
-    }
+    out = m.get_job_state("42")
+    # We expect the normalized state string
+    assert out == "COMPLETED"
+    # And a debug log about normalization
+    assert any(
+        "Job 42 sacct raw state='COMPLETED' -> normalized='COMPLETED'" in rec.message
+        for rec in caplog.records
+    )
 
 
-def test_get_job_states_not_found_executable(monkeypatch, m, caplog):
+def test_get_job_state_prefers_parent_and_normalizes(monkeypatch, m, caplog):
+    caplog.set_level(logging.DEBUG)
+
+    class Dummy:
+        # Here we have multiple records:
+        # - parent: 42|FAILED node_fail
+        # - step:   42.0|CANCELLED+
+        stdout = "42|FAILED node_fail\n42.0|CANCELLED+\n"
+
+    def fake_run(*args, **kwargs):
+        return Dummy()
+
+    monkeypatch.setattr(subprocess, "run", fake_run)
+
+    out = m.get_job_state("42")
+    # Parent record is chosen, and state is normalized to the first token without '+'
+    assert out == "FAILED"
+    assert any(
+        "Job 42 sacct raw state='FAILED node_fail' -> normalized='FAILED'"
+        in rec.message
+        for rec in caplog.records
+    )
+
+
+def test_get_job_state_not_found_executable(monkeypatch, m, caplog):
     caplog.set_level(logging.ERROR)
 
     def boom(*args, **kwargs):
@@ -70,12 +97,11 @@ def test_get_job_states_not_found_executable(monkeypatch, m, caplog):
 
     monkeypatch.setattr(subprocess, "run", boom)
 
-    out = m.get_job_states(["7"])
-    assert out == {}
+    assert m.get_job_state("7") is None
     assert any("sacct executable not found" in rec.message for rec in caplog.records)
 
 
-def test_get_job_states_calledprocesserror(monkeypatch, m, caplog):
+def test_get_job_state_calledprocesserror(monkeypatch, m, caplog):
     caplog.set_level(logging.DEBUG)
 
     def boom(*args, **kwargs):
@@ -85,12 +111,13 @@ def test_get_job_states_calledprocesserror(monkeypatch, m, caplog):
 
     monkeypatch.setattr(subprocess, "run", boom)
 
-    out = m.get_job_states(["99"])
-    assert out == {}
+    assert m.get_job_state("99") is None
     assert any(
-        "Could not query sacct for jobs" in rec.message for rec in caplog.records
+        "Could not check job 99 via sacct" in rec.message for rec in caplog.records
     )
-    assert any("sacct stderr: bad things" in rec.message for rec in caplog.records)
+    assert any(
+        "sacct stderr for 99: bad things" in rec.message for rec in caplog.records
+    )
 
 
 # ---------- write_results ----------
@@ -191,21 +218,17 @@ def test_cli_classifies_and_writes(monkeypatch, m, tmp_path: Path, caplog):
     }
     monkeypatch.setattr(m, "find_job_logs", lambda p: fake_map)
 
-    # get_job_states behavior for the batch of jobids
-    # 100 -> FAILED
-    # 200 -> CANCELLED
-    # 300 -> COMPLETED
-    # 400 -> missing (unknown)
-    def fake_get_states(jobids):
+    # get_job_state behavior per jobid – already normalized states
+    def fake_get(jobid: str):
         table = {
             "100": "FAILED",
             "200": "CANCELLED",
             "300": "COMPLETED",
-            # 400 intentionally omitted to simulate missing sacct info
+            "400": None,  # e.g., missing sacct info
         }
-        return {jid: table[jid] for jid in jobids if jid in table}
+        return table[jobid]
 
-    monkeypatch.setattr(m, "get_job_states", fake_get_states)
+    monkeypatch.setattr(m, "get_job_state", fake_get)
 
     out = tmp_path / "report.txt"
     runner = CliRunner()
