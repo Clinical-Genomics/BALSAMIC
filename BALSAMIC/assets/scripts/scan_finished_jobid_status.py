@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import logging
-import re
 import subprocess
 from pathlib import Path
 from typing import Dict, List, Tuple, Optional
@@ -149,7 +148,7 @@ def write_results(
 
 def derive_rule_key(log_root: Path, log_path: Path) -> str:
     """
-    Derive a "rule key" from the log path.
+    Derive the unique log-directory path for the rule + any wildcard as a key
 
     Prefer path relative to log_root; fall back to absolute parent directory.
     """
@@ -163,11 +162,11 @@ def group_jobs_by_rule(
     log_dir: Path, job_logs: Dict[str, Path]
 ) -> Tuple[Dict[str, List[Tuple[str, Path, Optional[str]]]], List[str]]:
     """
-    Query scontrol for each job and group them per rule directory.
+    Query sacct for each job and group them per rule directory.
 
     Returns:
         rule_to_jobs: {rule_key -> [(jobid, log_path, state), ...]}
-        unknown: list of jobids with missing scontrol info
+        unknown: list of jobids with missing sacct info
     """
     rule_to_jobs: Dict[str, List[Tuple[str, Path, Optional[str]]]] = {}
     unknown: List[str] = []
@@ -200,8 +199,8 @@ def classify_jobs(
 ]:
     """
     Classify jobs into:
-      - failed (no successful retry for that rule)
-      - cancelled (no successful retry for that rule)
+      - failed (no successful retry for that rule) -> **only the latest attempt**
+      - cancelled (no successful retry for that rule) -> **only the latest attempt**
       - resolved_failures (failed/cancelled but with a successful retry)
     """
     failed: List[Tuple[str, Path]] = []
@@ -209,19 +208,32 @@ def classify_jobs(
     resolved_failures: List[Tuple[str, Path, str, str]] = []
 
     for rule_key, jobs in rule_to_jobs.items():
+        # jobs for this rule are in ascending jobid order (because of sorted(...) in group_jobs_by_rule)
         has_success = any(state in SUCCESS_STATES for _, _, state in jobs)
 
-        for jobid, log_path, state in jobs:
-            if state not in FAILURE_LIKE_STATES:
-                continue
+        # All failure-like attempts for this rule
+        failure_like_jobs = [
+            (jobid, log_path, state)
+            for jobid, log_path, state in jobs
+            if state in FAILURE_LIKE_STATES
+        ]
 
-            if has_success:
-                # Rule eventually succeeded; treat as resolved failure.
+        if not failure_like_jobs:
+            # Nothing to do for this rule
+            continue
+
+        if has_success:
+            # Rule eventually succeeded; treat *all* failure-like attempts as resolved.
+            for jobid, log_path, state in failure_like_jobs:
                 resolved_failures.append((jobid, log_path, state, rule_key))
-            elif state == "FAILED":
-                failed.append((jobid, log_path))
+        else:
+            # Rule never succeeded: only report the **latest** failure-like attempt.
+            latest_jobid, latest_log_path, latest_state = failure_like_jobs[-1]
+            if latest_state == "FAILED":
+                failed.append((latest_jobid, latest_log_path))
             else:
-                cancelled.append((jobid, log_path))
+                # CANCELLED, TIMEOUT, OUT_OF_MEMORY, ...
+                cancelled.append((latest_jobid, latest_log_path))
 
     return failed, cancelled, resolved_failures
 
@@ -249,11 +261,11 @@ def classify_jobs(
 def check_failed_jobs(log_dir: Path, output: Path, log_level: str) -> None:
     """
     Recursively scan LOG_DIR for SLURM *.log files (stdout+stderr combined),
-    extract job IDs from filenames, and check their states via `scontrol show job JOBID`.
+    extract job IDs from filenames, and check their states via `sacct`.
 
     If multiple jobs share the same rule log directory and at least one of them
     completes successfully, earlier failures in that directory are reported under
-    a separate heading as "Failed jobs with successful retry".
+    a separate heading as “Failed jobs with successful retry”.
     """
     logging.basicConfig(
         level=getattr(logging, log_level.upper(), logging.INFO),
