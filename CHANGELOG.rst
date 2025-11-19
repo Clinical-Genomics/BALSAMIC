@@ -11,7 +11,8 @@ Changed:
 * increased memory of samtools fixmate https://github.com/Clinical-Genomics/BALSAMIC/pull/1632
 * no rerun for rule all https://github.com/Clinical-Genomics/BALSAMIC/pull/1632
 * increased head-job runtime to 7 days https://github.com/Clinical-Genomics/BALSAMIC/pull/1632
-
+* improved information on failed job status https://github.com/Clinical-Genomics/BALSAMIC/pull/1636
+* scontrol replaced with sacct in jobstatus script https://github.com/Clinical-Genomics/BALSAMIC/pull/1636
 
 Removed:
 ^^^^^^^^
