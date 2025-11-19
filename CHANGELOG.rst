@@ -9,6 +9,8 @@ Changed:
 * changed slurm extra qos with slurm_qos argument https://github.com/Clinical-Genomics/BALSAMIC/pull/1632
 * moved default resource allocation to snakemake command https://github.com/Clinical-Genomics/BALSAMIC/pull/1632
 * increased memory of samtools fixmate https://github.com/Clinical-Genomics/BALSAMIC/pull/1632
+* no rerun for rule all https://github.com/Clinical-Genomics/BALSAMIC/pull/1632
+* increased head-job runtime to 7 days https://github.com/Clinical-Genomics/BALSAMIC/pull/1632
 
 
 Removed:
