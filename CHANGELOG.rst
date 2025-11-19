@@ -6,6 +6,8 @@ Added:
 
 Changed:
 ^^^^^^^^
+* improved information on failed job status https://github.com/Clinical-Genomics/BALSAMIC/pull/1636
+* scontrol replaced with sacct in jobstatus script https://github.com/Clinical-Genomics/BALSAMIC/pull/1636
 
 Removed:
 ^^^^^^^^
