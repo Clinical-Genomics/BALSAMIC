@@ -631,11 +631,11 @@ rule all:
         quality_control_results + analysis_specific_results,
     output:
         finish_file=Path(get_result_dir(config), "analysis_finished_successfully").as_posix(),
-    restart_times: 0
     params:
         tmp_dir=tmp_dir,
         case_name=config["analysis"]["case_id"],
         status_file=Path(get_result_dir(config), "analysis_status.txt").as_posix(),
+    retries: 0
     message:
         "Finalizing analysis for {params.case_name}"
     run:
