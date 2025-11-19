@@ -7,7 +7,7 @@ Added:
 Changed:
 ^^^^^^^^
 * changed reporting of failed jobs that succeeded on restart https://github.com/Clinical-Genomics/BALSAMIC/pull/1636
-* changed to using sacct instead of scontrol in job status check chore: clarify failjobs https://github.com/Clinical-Genomics/BALSAMIC/pull/1636
+* scontrol replaced with sacct and improved information on failed job status: https://github.com/Clinical-Genomics/BALSAMIC/pull/1636
 
 Removed:
 ^^^^^^^^
