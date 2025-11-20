@@ -10,8 +10,6 @@ rule sentieon_DNAscope_wgs:
         recal_table = bam_dir + "{sample_type}.recal_data.table"
     output:
         vcf = vcf_dir + "SNV.germline.{sample_type}.dnascope.vcf.gz",
-    resources:
-        mem_mb = lambda wc, input, attempt: min(max(0.1 * input.size_mb * attempt, 10000),  250000)
     params:
         tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
         pcr_model = params.common.pcr_model,

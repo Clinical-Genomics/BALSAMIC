@@ -12,6 +12,7 @@ Changed:
 * increased head-job runtime to 7 days https://github.com/Clinical-Genomics/BALSAMIC/pull/1632
 * improved information on failed job status https://github.com/Clinical-Genomics/BALSAMIC/pull/1636
 * scontrol replaced with sacct in jobstatus script https://github.com/Clinical-Genomics/BALSAMIC/pull/1636
+* add attempt mem bump to vep_somatic_research_sv https://github.com/Clinical-Genomics/BALSAMIC/pull/1632
 
 Removed:
 ^^^^^^^^
