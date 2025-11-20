@@ -1,6 +1,5 @@
 import json
 import graphviz
-import logging
 from unittest import mock
 from pathlib import Path
 from BALSAMIC.constants.analysis import PONWorkflow

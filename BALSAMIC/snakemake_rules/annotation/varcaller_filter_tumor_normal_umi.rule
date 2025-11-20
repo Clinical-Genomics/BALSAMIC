@@ -20,8 +20,6 @@ rule bcftools_filter_TNscope_umi_research_tumor_normal:
     case_name = '{case_name}',
     edit_vcf_script = get_script_path("edit_vcf_info.py"),
     variant_caller = "tnscope_umi"
-  threads:
-    get_threads(cluster_config, 'bcftools_filter_TNscope_umi_research_tumor_normal')
   message:
     "Filtering TNscope_umi tumor-normal annotated research variants using bcftools and "
     "adding FOUND_IN tags to the output VCF file for {params.case_name} "
@@ -62,40 +60,49 @@ rule bcftools_filter_TNscope_umi_clinical_tumor_normal:
     Path(singularity_image, config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
   params:
     artefact_freq = get_tag_and_filtername(umi_snv_clinical_filters, "ArtefactFrq"),
+    somatic_snv_panel_freq = get_tag_and_filtername(snv_clinical_filters,"HighOccurrenceFrq"),
     pop_freq = get_tag_and_filtername(umi_snv_research_filters, "balsamic_high_pop_freq"),
     swegen_freq = get_tag_and_filtername(umi_snv_research_filters, "SWEGENAF"),
     loqusdb_clinical_freq = get_tag_and_filtername(umi_snv_clinical_filters, "Frq"),
     housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "clinical"},
     case_name = '{case_name}',
     hard_filters = TgaUmiSNVFilters.get_bcftools_filter_string(category="clinical", analysis_type=analysis_type, soft_filter_normals=soft_filter_normal),
+    rescue_script= get_script_path("rescue_snvs.py"),
+    rescue_flag=lambda wildcards, rescue_snvs=config_model.analysis.rescue_snvs: f"--rescue-list {rescue_snvs}" if rescue_snvs else "",
+    cancer_somatic_panel_frq = config_model.reference.get("cancer_somatic_snv_panel_observations"),
+    tmpdir = tempfile.mkdtemp(prefix=tmp_dir),
     edit_vcf_script = get_script_path("edit_vcf_info.py"),
     variant_caller = "tnscope_umi"
-  threads:
-    get_threads(cluster_config, 'bcftools_filter_TNscope_umi_clinical_tumor_normal')
   message:
     "Filtering TNscope_umi tumor-normal annotated clinical variants using bcftools and "
     "adding FOUND_IN tags to the output VCF file for {params.case_name} "
   shell:
     """
+
 bcftools reheader --threads {threads} -s {input.namemap} {input.vcf_snv_clinical} |\
 bcftools filter --threads {threads} --include 'INFO/ArtefactFrq <= {params.artefact_freq[0]} || INFO/ArtefactFrq == \".\"' --soft-filter '{params.artefact_freq[1]}' --mode '+' |\
 bcftools filter --threads {threads} --include 'INFO/GNOMADAF_popmax <= {params.pop_freq[0]} || INFO/GNOMADAF_popmax == \".\"' --soft-filter '{params.pop_freq[1]}' --mode '+' | \
 bcftools filter --threads {threads} --include 'INFO/SWEGENAF <= {params.swegen_freq[0]} || INFO/SWEGENAF == \".\"' --soft-filter '{params.swegen_freq[1]}' --mode '+' |\
-bcftools filter --threads {threads} --include 'INFO/Frq <= {params.loqusdb_clinical_freq[0]} || INFO/Frq == \".\"' --soft-filter '{params.loqusdb_clinical_freq[1]}' --mode '+' |\
-bcftools view --threads {threads} --exclude '{params.hard_filters}' -O z -o {output.vcf_pass_tnscope_umi}.temp1;
+bcftools filter --threads {threads} --include 'INFO/Frq <= {params.loqusdb_clinical_freq[0]} || INFO/Frq == \".\"' --soft-filter '{params.loqusdb_clinical_freq[1]}' --mode '+' -O z -o {params.tmpdir}/clinical.filtered.pass_before_rescue.vcf.gz ;
+
+if [ "{params.cancer_somatic_panel_frq}" != "None" ] ; then
+  bcftools filter --threads {threads} --include 'INFO/Cancer_Somatic_Panel_Frq <= {params.somatic_snv_panel_freq[0]} || INFO/Cancer_Somatic_Panel_Frq == \".\"' --soft-filter '{params.somatic_snv_panel_freq[1]}' --mode '+' {params.tmpdir}/clinical.filtered.pass_before_rescue.vcf.gz -O z -o {params.tmpdir}/clinical.filtered.pass_before_rescue.1.vcf.gz ;
+  mv {params.tmpdir}/clinical.filtered.pass_before_rescue.1.vcf.gz {params.tmpdir}/clinical.filtered.pass_before_rescue.vcf.gz ;
+fi
 
 python {params.edit_vcf_script} \
---input_vcf {output.vcf_pass_tnscope_umi}.temp1 \
---output_vcf {output.vcf_pass_tnscope_umi}.temp2 \
+--input_vcf {params.tmpdir}/clinical.filtered.pass_before_rescue.vcf.gz \
+--output_vcf {params.tmpdir}/clinical.filtered.pass_before_rescue.1.vcf \
 --variant_caller {params.variant_caller};
 
-bgzip -@ {threads} -l 9 -c {output.vcf_pass_tnscope_umi}.temp2 > {output.vcf_pass_tnscope_umi}
+bgzip {params.tmpdir}/clinical.filtered.pass_before_rescue.1.vcf ;
+
+python {params.rescue_script} --vcf {params.tmpdir}/clinical.filtered.pass_before_rescue.vcf.gz --out {params.tmpdir}/clinical.filtered.pass_after_rescue.vcf {params.rescue_flag} ;
+
+bcftools view --threads {threads} --exclude '{params.hard_filters}' -O z -o {output.vcf_pass_tnscope_umi} {params.tmpdir}/clinical.filtered.pass_after_rescue.vcf ;
 
 tabix -p vcf -f {output.vcf_pass_tnscope_umi};
 
 bcftools +counts {output.vcf_pass_tnscope_umi} > {output.bcftools_counts_clinical};
 
-rm {output.vcf_pass_tnscope_umi}.temp1;
-
-rm {output.vcf_pass_tnscope_umi}.temp2;
     """

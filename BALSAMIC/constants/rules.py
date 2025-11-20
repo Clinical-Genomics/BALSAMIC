@@ -2,12 +2,6 @@
 from typing import Dict, List
 
 from BALSAMIC.constants.cache import GenomeVersion
-from BALSAMIC.constants.analysis import (
-    AnalysisType,
-    AnalysisWorkflow,
-    SequencingType,
-    WorkflowSolution,
-)
 
 common_cache_rules: List[str] = [
     "snakemake_rules/cache/singularity_containers.rule",
@@ -23,14 +17,8 @@ hg_cache_rules: List[str] = common_cache_rules + [
     "snakemake_rules/cache/vep.rule",
 ]
 
-canfam_cache_rules: List[str] = common_cache_rules + [
-    "snakemake_rules/cache/refseq_canfam.rule"
-]
-
-
 SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
     "common": {
-        "misc": ["snakemake_rules/misc/sleep.rule"],
         "qc": [
             "snakemake_rules/quality_control/fastqc.rule",
             "snakemake_rules/quality_control/multiqc.rule",
@@ -46,6 +34,7 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
             "snakemake_rules/align/bam_compress.rule",
         ],
         "varcall": [
+            "snakemake_rules/variant_calling/sv_quality_filter.rule",
             "snakemake_rules/variant_calling/snv_quality_filter.rule",
             "snakemake_rules/variant_calling/tnscope_post_process.rule",
         ],
@@ -181,7 +170,6 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
     "cache": {
         GenomeVersion.HG19: hg_cache_rules,
         GenomeVersion.HG38: hg_cache_rules,
-        GenomeVersion.CanFam3: canfam_cache_rules,
     },
 }
 
@@ -205,6 +193,7 @@ DELIVERY_RULES: List[str] = [
     "sentieon_tnscope_tga_tumor_only",
     "sentieon_tnscope_wgs_tumor_only",
     "sentieon_tnscope_wgs_tumor_normal",
+    "vardict_move_svs",
     "gatk_update_vcf_sequence_dictionary",
     "bcftools_filter_tnscope_clinical_tumor_only",
     "bcftools_filter_tnscope_clinical_tumor_normal",
@@ -221,13 +210,15 @@ DELIVERY_RULES: List[str] = [
     "svdb_merge_tumor_normal",
     "bcftools_filter_sv_research",
     "bcftools_filter_sv_clinical",
-    "tiddit_sv_tumor_only",
-    "tiddit_sv_tumor_normal",
+    "tiddit_sv_tumor_normal_wgs",
+    "tiddit_sv_tumor_only_wgs",
     # CNVs
     "delly_cnv_tumor_only",
     "delly_cnv_tumor_normal",
-    "ascat_tumor_normal",
-    "cnvpytor_tumor_only",
+    "delly_cnv_tumor_normal_wgs",
+    "delly_cnv_tumor_only_wgs",
+    "ascat_tumor_normal_wgs",
+    "cnvpytor_tumor_only_wgs",
     "vcf2cytosure_convert_tumor_only",
     "vcf2cytosure_convert_tumor_normal",
     "cnvkit_segment_CNV_research",

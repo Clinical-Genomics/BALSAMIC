@@ -4,7 +4,7 @@
 rule gatk_collectreadcounts:
     input:
         bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = wildcards.sample, specified_suffix="dedup"),
-        genome_interval = config["reference"]["genome_interval"]
+        genome_interval = config_model.reference["genome_interval"].file.as_posix(),
     output:
         readcounts_hdf5 = cnv_dir + "{sample}.collectreadcounts.hdf5"
     params:
@@ -14,8 +14,6 @@ rule gatk_collectreadcounts:
         Path(benchmark_dir, "gatk_collectreadcounts_{sample}.tsv").as_posix()
     singularity:
         Path(singularity_image,config["bioinfo_tools"].get("gatk") + ".sif").as_posix()
-    threads:
-        get_threads(cluster_config, "gatk_collectreadcounts")
     message:
         "Running GATK CollectReadCounts on {params.sample} for GENS."
     shell:

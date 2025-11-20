@@ -17,12 +17,10 @@ from _pytest.tmpdir import TempPathFactory
 from BALSAMIC.commands.config.case import case_config
 from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV, SampleType, SequencingType
 from BALSAMIC.constants.cache import CacheVersion
-from BALSAMIC.constants.cluster import ClusterConfigType
 from BALSAMIC.constants.constants import FileType
 from BALSAMIC.constants.paths import CONTAINERS_DIR
 from BALSAMIC.models.config import ConfigModel, FastqInfoModel, SampleInstanceModel
 from BALSAMIC.utils.cli import (
-    CaptureStdout,
     check_executable,
     convert_deliverables_tags,
     createDir,
@@ -30,7 +28,6 @@ from BALSAMIC.utils.cli import (
     generate_h5,
     get_analysis_fastq_files_directory,
     get_bioinfo_tools_version,
-    get_config_path,
     get_fastq_info,
     get_file_extension,
     get_file_status_string,
@@ -40,7 +37,6 @@ from BALSAMIC.utils.cli import (
     get_sample_list,
     get_snakefile,
     validate_cache_version,
-    validate_exome_option,
     validate_umi_min_reads,
 )
 from BALSAMIC.utils.exc import BalsamicError, WorkflowRunError
@@ -61,8 +57,8 @@ from BALSAMIC.utils.rule import (
     get_result_dir,
     get_rule_output,
     get_sample_type_from_sample_name,
+    get_sample_name_from_sample_type,
     get_script_path,
-    get_threads,
     get_variant_callers,
     get_vcf,
 )
@@ -416,28 +412,6 @@ def test_get_result_dir(sample_config: Dict):
     assert get_result_dir(sample_config) == sample_config["analysis"]["result"]
 
 
-def test_capturestdout():
-    # GIVEN a catpurestdout context
-    test_stdout_message = "Message to stdout"
-    with CaptureStdout() as captured_stdout_message:
-        print(test_stdout_message, file=sys.stdout)
-
-    assert "".join(captured_stdout_message) == test_stdout_message
-
-
-def test_get_config_path(cluster_analysis_config_path: str):
-    """Test return of a config path given its type."""
-
-    # GIVEN an analysis config path
-
-    # WHEN retrieving the cluster analysis configuration
-    cluster_analysis: Path = get_config_path(ClusterConfigType.ANALYSIS)
-
-    # THEN an analysis cluster json should be returned
-    assert cluster_analysis.exists()
-    assert cluster_analysis.as_posix() == cluster_analysis_config_path
-
-
 def test_write_json(tmp_path, reference):
     # GIVEN a dict from sample json file
     tmp = tmp_path / "tmp"
@@ -619,16 +593,6 @@ def test_write_yaml(metrics_yaml_path: str, tmp_path: Path):
     assert written_metrics_data == metrics_data
 
 
-def test_get_threads(cluster_analysis_config_path: str):
-    # GIVEN cluster config file and rule name
-    cluster_config = json.load(open(cluster_analysis_config_path, "r"))
-    rule_name = "sentieon_align_sort"
-
-    # WHEN passing cluster_config and rule_name
-    # THEN It should return threads value '12'
-    assert get_threads(cluster_config, rule_name)
-
-
 def test_get_file_status_string_file_exists(tmpdir):
     # GIVEN an existing file and condition_str False
     file_exist = tmpdir.mkdir("temporary_path").join("file_exists")
@@ -778,6 +742,21 @@ def test_get_sample_type_from_sample_name(config_dict: Dict):
 
     # THEN the retrieved sample type should match the expected one
     assert sample_type == SampleType.TUMOR
+
+
+def test_get_sample_name_from_sample_type(config_dict: Dict):
+    """Test sample type extraction from a extracted config file."""
+
+    # GIVEN a config dictionary
+
+    # GIVEN a sample type
+    sample_type = "tumor"
+
+    # WHEN calling the function
+    sample_name = get_sample_name_from_sample_type(config_dict, sample_type)
+
+    # THEN the retrieved sample name should match the expected one
+    assert sample_name == "ACC1"
 
 
 def test_get_rule_output(snakemake_bcftools_filter_tnscope_research_tumor_only):
@@ -1012,23 +991,6 @@ def test_get_fastp_parameters(balsamic_model: ConfigModel):
     assert "--disable_adapter_trimming" in fastp_params_tga["fastp_trim_qual"]
     # THEN quality trimming should NOT be active in adapter trim params
     assert "--disable_quality_filtering" in fastp_params_tga["fastp_trim_adapter"]
-
-
-def test_validate_exome_option(panel_bed_file: str):
-    # GIVEN that a panel bedfile has been supplied and exome parameter set to true
-    ctx = click.Context(case_config)
-    ctx.params["panel_bed"] = panel_bed_file
-    # WHEN validating exome option
-    # THEN exome argument should be correctly set
-    assert validate_exome_option(ctx, click.Parameter, True) == True
-
-    # GIVEN that a panel bedfile has NOT been supplied and exome parameter set to true
-    ctx.params["panel_bed"] = None
-
-    # WHEN validating exome option
-    # THEN a bad parameter error should be raised
-    with pytest.raises(click.BadParameter):
-        validate_exome_option(ctx, click.Parameter, True)
 
 
 def test_validate_cache_version_develop():

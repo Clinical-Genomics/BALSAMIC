@@ -5,6 +5,31 @@ from typing import Dict, List
 from BALSAMIC.constants.cache import DockerContainers
 
 
+class LogFile:
+    """Logfile constants"""
+
+    LOGNAME: str = "balsamic.log"
+
+
+class SubmitSnakemake:
+    """Constants for sbatch script running snakemake on cluster"""
+
+    MAX_RUN_HOURS: int = 168
+
+
+class SnakemakeDAG:
+    """Constants for Snakemake DAG parsing and rendering."""
+
+    DIGRAPH_HEADER: str = "digraph snakemake_dag {"
+    HEADER: str = "snakemake_dag {"
+
+    GRAPH_NAME: str = "BALSAMIC"
+    GRAPH_LABEL_LOC: str = "t"
+
+    GRAPHVIZ_FORMAT: str = "pdf"
+    GRAPHVIZ_ENGINE: str = "dot"
+
+
 class RunMode(StrEnum):
     """Balsamic workflow run mode."""
 
@@ -16,10 +41,11 @@ RUN_MODES: List[RunMode] = [mode for mode in RunMode]
 
 
 class Gender(StrEnum):
-    """Sex options."""
+    """Gender options."""
 
     FEMALE: str = "female"
     MALE: str = "male"
+    UNKNOWN: str = "unknown"
 
 
 class AnalysisType(StrEnum):
@@ -39,6 +65,128 @@ class AnalysisWorkflow(StrEnum):
 
 
 ANALYSIS_WORKFLOWS: List[AnalysisWorkflow] = [workflow for workflow in AnalysisWorkflow]
+
+
+class AnnotationCategory(StrEnum):
+    CLINICAL: str = "clinical"
+    RESEARCH: str = "research"
+
+
+VARIANT_OBSERVATION_METAVALUES = {
+    "gnomad_variant": {
+        "fields": ["AF", "AF_popmax"],
+        "ops": ["self", "self"],
+        "names": ["GNOMADAF", "GNOMADAF_popmax"],
+        "category": AnnotationCategory.RESEARCH,
+    },
+    "clinvar": {
+        "fields": [
+            "CLNVID",
+            "CLNREVSTAT",
+            "CLNSIG",
+            "ORIGIN",
+            "ONC",
+            "ONCDN",
+            "ONCREVSTAT",
+            "ONCDISDB",
+            "ONCCONF",
+            "CLNVC",
+            "CLNVCSO",
+        ],
+        "ops": [
+            "self",
+            "self",
+            "self",
+            "self",
+            "self",
+            "self",
+            "self",
+            "self",
+            "self",
+            "self",
+            "self",
+        ],
+        "names": [
+            "CLNVID",
+            "CLNREVSTAT",
+            "CLNSIG",
+            "ORIGIN",
+            "ONC",
+            "ONCDN",
+            "ONCREVSTAT",
+            "ONCDISDB",
+            "ONCCONF",
+            "CLNVC",
+            "CLNVCSO",
+        ],
+        "category": AnnotationCategory.RESEARCH,
+    },
+    "cadd_snv": {
+        "names": ["CADD"],
+        "ops": ["mean"],
+        "columns": [6],
+        "category": AnnotationCategory.RESEARCH,
+    },
+    "swegen_snv_frequency": {
+        "fields": ["AF", "AC_Hom", "AC_Het", "AC_Hemi"],
+        "ops": ["self", "self", "self", "self"],
+        "names": [
+            "SWEGENAF",
+            "SWEGENAAC_Hom",
+            "SWEGENAAC_Het",
+            "SWEGENAAC_Hemi",
+        ],
+        "category": AnnotationCategory.RESEARCH,
+    },
+    "artefact_snv_observations": {
+        "fields": ["Frq", "Obs", "Hom"],
+        "ops": ["self", "self", "self"],
+        "names": ["ArtefactFrq", "ArtefactObs", "ArtefactHom"],
+        "category": AnnotationCategory.CLINICAL,
+    },
+    "artefact_sv_observations": {
+        "fields": ["Frq", "Obs", "Hom"],
+        "ops": ["self", "self", "self"],
+        "names": ["ArtefactFrq", "ArtefactObs", "ArtefactHom"],
+        "category": AnnotationCategory.CLINICAL,
+    },
+    "clinical_snv_observations": {
+        "fields": ["Frq", "Obs", "Hom"],
+        "ops": ["self", "self", "self"],
+        "names": ["Frq", "Obs", "Hom"],
+        "category": AnnotationCategory.CLINICAL,
+    },
+    "cancer_germline_snv_observations": {
+        "fields": ["Frq", "Obs", "Hom"],
+        "ops": ["self", "self", "self"],
+        "names": [
+            "Cancer_Germline_Frq",
+            "Cancer_Germline_Obs",
+            "Cancer_Germline_Hom",
+        ],
+        "category": AnnotationCategory.CLINICAL,
+    },
+    "cancer_somatic_snv_observations": {
+        "fields": ["Frq", "Obs", "Hom"],
+        "ops": ["self", "self", "self"],
+        "names": [
+            "Cancer_Somatic_Frq",
+            "Cancer_Somatic_Obs",
+            "Cancer_Somatic_Hom",
+        ],
+        "category": AnnotationCategory.CLINICAL,
+    },
+    "cancer_somatic_snv_panel_observations": {
+        "fields": ["Frq", "Obs", "Hom"],
+        "ops": ["self", "self", "self"],
+        "names": [
+            "Cancer_Somatic_Panel_Frq",
+            "Cancer_Somatic_Panel_Obs",
+            "Cancer_Somatic_Panel_Hom",
+        ],
+        "category": AnnotationCategory.CLINICAL,
+    },
+}
 
 
 class SequencingType(StrEnum):
