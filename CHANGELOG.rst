@@ -1,5 +1,30 @@
+[X.X.X]
+--------
+
+Added:
+^^^^^^
+
+Changed:
+^^^^^^^^
+* moved default resource allocation to snakemake command https://github.com/Clinical-Genomics/BALSAMIC/pull/1632
+* increased memory of samtools fixmate https://github.com/Clinical-Genomics/BALSAMIC/pull/1632
+* no rerun for rule all https://github.com/Clinical-Genomics/BALSAMIC/pull/1632
+* increased head-job runtime to 7 days https://github.com/Clinical-Genomics/BALSAMIC/pull/1632
+* improved information on failed job status https://github.com/Clinical-Genomics/BALSAMIC/pull/1636
+* scontrol replaced with sacct in jobstatus script https://github.com/Clinical-Genomics/BALSAMIC/pull/1636
+* add attempt mem bump to vep_somatic_research_sv https://github.com/Clinical-Genomics/BALSAMIC/pull/1632
+
+Removed:
+^^^^^^^^
+* exome argument panel bed callback function https://github.com/Clinical-Genomics/BALSAMIC/pull/1632
+* removed -l flag in head-job sbatch script https://github.com/Clinical-Genomics/BALSAMIC/pull/1632
+
+Fixed:
+^^^^^^
+
+
 [18.0.0]
-=======
+--------
 
 Added:
 ^^^^^^
@@ -15,6 +40,10 @@ Added:
 * using predicted sex for CNV analysis for cases with unknown gender https://github.com/Clinical-Genomics/BALSAMIC/pull/1581
 * artefact database filter for WGS SVs  https://github.com/Clinical-Genomics/BALSAMIC/pull/1578
 * attempts increases mem on restart https://github.com/Clinical-Genomics/BALSAMIC/pull/1610
+* ProbioC4 coverage QC threshold https://github.com/Clinical-Genomics/BALSAMIC/pull/1613
+* normal coverage GENS preprocessing https://github.com/Clinical-Genomics/BALSAMIC/pull/1621
+* normal coverage normalisation in CNVkit for tumor normal panel cases https://github.com/Clinical-Genomics/BALSAMIC/pull/1621
+
 
 Changed:
 ^^^^^^^^
@@ -30,6 +59,8 @@ Changed:
 * refactored variant observations metadata fields into constants instead of snakemake file https://github.com/Clinical-Genomics/BALSAMIC/pull/1570
 * changed sex check to a warning metric instead of qc fail https://github.com/Clinical-Genomics/BALSAMIC/pull/1581
 * updated MultiQC to v1.31 https://github.com/Clinical-Genomics/BALSAMIC/pull/1607
+* lowered lymphoid panel GC_dropout threshold to 2 https://github.com/Clinical-Genomics/BALSAMIC/pull/1613
+* rescue only on clinvar ONC status and rescue list https://github.com/Clinical-Genomics/BALSAMIC/pull/1623
 
 Removed:
 ^^^^^^^^
@@ -40,7 +71,9 @@ Removed:
 Fixed:
 ^^^^^^
 * Fixed varcall_py27 container for Manta https://github.com/Clinical-Genomics/BALSAMIC/pull/1567
-
+* pinned numpy version to 1.23.5 for cnvpytor container https://github.com/Clinical-Genomics/BALSAMIC/pull/1617
+* qc metrics script bug https://github.com/Clinical-Genomics/BALSAMIC/pull/1615
+* fixed snv cadd annotation https://github.com/Clinical-Genomics/BALSAMIC/pull/1623
 
 [17.1.0]
 --------

@@ -2,7 +2,7 @@
 Installation
 ============
 
-This section describes steps to install BALSAMIC (**version** = 17.1.0)
+This section describes steps to install BALSAMIC (**version** = 18.0.0)
 
 
 
@@ -25,7 +25,7 @@ Step 1. Installing BALSAMIC
 
 ::
 
-    conda create --name S_balsamic -c conda-forge python=3.11 pip "cython<3" pygraphviz wkhtmltopdf snakemake-executor-plugin-slurm
+    conda create --name S_balsamic -c conda-forge python=3.11 pip "cython<3" pygraphviz wkhtmltopdf snakemake-executor-plugin-slurm=1.7.0
 
 
 

@@ -56,13 +56,6 @@ def update_headers(reader) -> None:
         )
 
 
-def get_clinvar_pathogenicity(record: vcfpy.Record) -> str:
-    clnsig = record.INFO.get("CLNSIG") or ""
-    if isinstance(clnsig, list):
-        clnsig = "|".join(clnsig)
-    return clnsig.lower()
-
-
 def determine_clinvar_reasons(record: vcfpy.Record) -> List[str]:
     """Determine rescue reasons based on ClinVar annotations."""
     reasons: List[str] = []
@@ -76,12 +69,6 @@ def determine_clinvar_reasons(record: vcfpy.Record) -> List[str]:
         # Exclude no_classification_for_the_single_variant, Benign and likely benign
         if "oncogenic" in onc or "tier" in onc or "uncertain" in onc:
             reasons.append(RescueReasons.CLINVAR_ONC)
-
-    clnsig = get_clinvar_pathogenicity(record)
-    if "likely_pathogenic" in clnsig:
-        reasons.append(RescueReasons.CLINVAR_LIKELY_PATH)
-    if "pathogenic" in clnsig:
-        reasons.append(RescueReasons.CLINVAR_PATH)
     return reasons
 
 
