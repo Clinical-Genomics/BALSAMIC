@@ -6,12 +6,10 @@ max-status-checks-per-second: 1
 max-jobs-per-second: 1
 restart-times: 2
 
-default-resources:
-    runtime: 120
-    mem_mb: 4000
-    slurm_partition: "core"
-
 set-resources:
+  all:
+    runtime: 60
+    mem_mb: 4000
   post_process_tnscope_info_fields_wgs:
     runtime: 60
     mem_mb: min(230000, 5000 * attempt)
@@ -471,7 +469,7 @@ set-resources:
     mem_mb: min(230000, 25000 * attempt)
     runtime: 1440
   samtools_fixmate:
-    mem_mb: min(230000, 50000 * attempt)
+    mem_mb: min(230000, 80000 * attempt)
     runtime: 560
   bam_compress_tumor:
     mem_mb: min(230000, 8000 * attempt)

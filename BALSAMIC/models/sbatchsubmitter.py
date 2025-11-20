@@ -65,7 +65,7 @@ class SbatchSubmitter:
           - optional partition if `self.headjob_partition` is set
         """
         lines = [
-            "#!/bin/bash -l",
+            "#!/bin/bash",
             f"#SBATCH --account={self.account}",
             f"#SBATCH --job-name=BALSAMIC_snakemake_submit.{self.case_id}.%j",
             f"#SBATCH --output={self.log_path}/BALSAMIC_snakemake_submit.{self.case_id}.%j.out",

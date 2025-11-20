@@ -23,7 +23,6 @@ from BALSAMIC.constants.rules import DELIVERY_RULES
 from BALSAMIC.constants.paths import WORKFLOW_PROFILE, CACHE_PROFILE
 from BALSAMIC.utils.cli import (
     validate_cache_version,
-    validate_exome_option,
     validate_umi_min_reads,
 )
 
@@ -222,7 +221,6 @@ OPTION_EXOME = click.option(
     is_flag=True,
     default=False,
     help="Assign exome parameters to TGA workflow",
-    callback=validate_exome_option,
 )
 
 OPTION_FASTQ_PATH = click.option(
