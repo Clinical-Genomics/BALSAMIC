@@ -16,6 +16,7 @@ from pydantic import (
 )
 
 from BALSAMIC import __version__ as balsamic_version
+from BALSAMIC.constants.cache import GenomeVersion
 from BALSAMIC.constants.cluster import QOS
 from BALSAMIC.constants.analysis import (
     AnalysisType,
@@ -151,6 +152,7 @@ class AnalysisModel(BaseModel):
         BALSAMIC_version  : Field(optional); Current version of BALSAMIC
         config_creation_date  : Field(optional); Timestamp when config was created
         rescue_snvs: Field(optional); Path to file with list of variants to be allowed through filters
+        genome_version: Field(required); GenomeVersion
 
     Raises:
         ValueError:
@@ -178,6 +180,7 @@ class AnalysisModel(BaseModel):
     pon_version: Optional[str] = None
     pon_workflow: Optional[PONWorkflow] = None
     rescue_snvs: Optional[Annotated[str, AfterValidator(is_file)]] = None
+    genome_version: GenomeVersion
 
     @field_validator("pon_version")
     def validate_pon_version(cls, pon_version: Optional[str]):
