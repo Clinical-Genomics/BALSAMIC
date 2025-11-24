@@ -167,7 +167,9 @@ rule cnvkit_call_CNV_research:
         gene_metrics = cnv_dir + config["analysis"]["case_id"] + ".gene_metrics",
         vcf =  cnv_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".cnvkit.vcf",
         diagram = cnv_dir + "tumor.merged-diagram.pdf",
+        diagram_svg = cnv_dir + "tumor.merged-diagram.svg",
         scatter = cnv_dir + "tumor.merged-scatter.pdf",
+        scatter_svg= cnv_dir + "tumor.merged-scatter.svg",
     benchmark:
         Path(f"{benchmark_dir}/cnvkit_call_{config['analysis']['case_id']}.tsv").as_posix()
     singularity:
@@ -203,10 +205,20 @@ cnvkit.py scatter {input.cnr} \
 --segment {output.cns} \
 --output {output.scatter};
 
+# Plot bin-level log2 coverages and segmentation calls
+cnvkit.py scatter {input.cnr} \
+--segment {output.cns} \
+--output {output.scatter_svg};
+
 # Draw copy number (.cnr or .cns) on chromosomes as an ideogram
 cnvkit.py diagram {input.cnr} \
 --segment  {output.cns} \
 --output {output.diagram};
+
+# Draw copy number (.cnr or .cns) on chromosomes as an ideogram
+cnvkit.py diagram {input.cnr} \
+--segment  {output.cns} \
+--output {output.diagram_svg} ;
 
 # Identify targeted genes with copy number gain or loss
 cnvkit.py genemetrics {input.cnr} \
