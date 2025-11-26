@@ -6,6 +6,8 @@ Added:
 
 Changed:
 ^^^^^^^^
+* increased runtime for a couple of small rules https://github.com/Clinical-Genomics/BALSAMIC/pull/1641
+* decreased memory for headjobs to 500mb https://github.com/Clinical-Genomics/BALSAMIC/pull/1641
 
 Removed:
 ^^^^^^^^
