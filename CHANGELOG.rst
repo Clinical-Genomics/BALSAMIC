@@ -6,6 +6,7 @@ Added:
 
 Changed:
 ^^^^^^^^
+* Updated sentieon to version 202503.01
 
 Removed:
 ^^^^^^^^
