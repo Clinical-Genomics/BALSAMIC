@@ -9,6 +9,7 @@ Changed:
 
 Removed:
 ^^^^^^^^
+* removed min QSS 20 filter
 
 Fixed:
 ^^^^^^
