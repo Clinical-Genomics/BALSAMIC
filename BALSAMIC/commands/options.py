@@ -112,6 +112,13 @@ OPTION_CANCER_SOMATIC_SV_OBSERVATIONS = click.option(
     help="VCF path of cancer SV observations (WGS analysis workflow)",
 )
 
+OPTION_CANCER_GENELIST = click.option(
+    "--cancer-genelist",
+    type=click.Path(exists=True, resolve_path=True),
+    required=False,
+    help="List of genenames to display in CNVkit scatterplot",
+)
+
 OPTION_CASE_ID = click.option(
     "--case-id",
     required=True,

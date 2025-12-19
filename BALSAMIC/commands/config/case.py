@@ -21,6 +21,7 @@ from BALSAMIC.commands.options import (
     OPTION_CANCER_SOMATIC_SNV_OBSERVATIONS,
     OPTION_CANCER_SOMATIC_SNV_PANEL_OBSERVATIONS,
     OPTION_CANCER_SOMATIC_SV_OBSERVATIONS,
+    OPTION_CANCER_GENELIST,
     OPTION_CASE_ID,
     OPTION_CLINICAL_SNV_OBSERVATIONS,
     OPTION_CLINICAL_SV_OBSERVATIONS,
@@ -89,6 +90,7 @@ LOG = logging.getLogger(__name__)
 @OPTION_CANCER_SOMATIC_SNV_OBSERVATIONS
 @OPTION_CANCER_SOMATIC_SNV_PANEL_OBSERVATIONS
 @OPTION_CANCER_SOMATIC_SV_OBSERVATIONS
+@OPTION_CANCER_GENELIST
 @OPTION_CASE_ID
 @OPTION_CLINICAL_SNV_OBSERVATIONS
 @OPTION_CLINICAL_SV_OBSERVATIONS
@@ -125,6 +127,7 @@ def case_config(
     cancer_somatic_snv_observations: Path,
     cancer_somatic_snv_panel_observations: Path,
     cancer_somatic_sv_observations: Path,
+    cancer_genelist: Path,
     case_id: str,
     clinical_snv_observations: Path,
     clinical_sv_observations: Path,
@@ -258,6 +261,7 @@ def case_config(
             "analysis_workflow": analysis_workflow,
             "config_creation_date": datetime.now().strftime("%Y-%m-%d %H:%M"),
             "rescue_snvs": rescue_snvs if rescue_snvs else RESCUE_SNVS.as_posix(),
+            "cancer_genelist": cancer_genelist.as_posix(),
         },
         custom_filters={"umi_min_reads": umi_min_reads if umi_min_reads else None},
         reference=references,
