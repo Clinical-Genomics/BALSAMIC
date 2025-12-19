@@ -161,6 +161,7 @@ class AnalysisModel(BaseModel):
     """
 
     case_id: str
+    cust_case_id: Optional[str] = None
     soft_filter_normal: Optional[bool] = False
     analysis_type: AnalysisType
     gender: Optional[Gender] = None

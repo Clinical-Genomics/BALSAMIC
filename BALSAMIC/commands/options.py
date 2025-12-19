@@ -125,6 +125,12 @@ OPTION_CASE_ID = click.option(
     help="Sample ID for reporting, naming the analysis jobs, and analysis path",
 )
 
+OPTION_CUSTOMER_CASE_ID = click.option(
+    "--cust-case-id",
+    required=True,
+    help="Case ID from customer",
+)
+
 OPTION_CLINICAL_SNV_OBSERVATIONS = click.option(
     "--clinical-snv-observations",
     type=click.Path(exists=True, resolve_path=True),

@@ -23,6 +23,7 @@ from BALSAMIC.commands.options import (
     OPTION_CANCER_SOMATIC_SV_OBSERVATIONS,
     OPTION_CANCER_GENELIST,
     OPTION_CASE_ID,
+    OPTION_CUSTOMER_CASE_ID,
     OPTION_CLINICAL_SNV_OBSERVATIONS,
     OPTION_CLINICAL_SV_OBSERVATIONS,
     OPTION_SOFT_FILTER_NORMAL,
@@ -92,6 +93,7 @@ LOG = logging.getLogger(__name__)
 @OPTION_CANCER_SOMATIC_SV_OBSERVATIONS
 @OPTION_CANCER_GENELIST
 @OPTION_CASE_ID
+@OPTION_CUSTOMER_CASE_ID
 @OPTION_CLINICAL_SNV_OBSERVATIONS
 @OPTION_CLINICAL_SV_OBSERVATIONS
 @OPTION_SOFT_FILTER_NORMAL
@@ -129,6 +131,7 @@ def case_config(
     cancer_somatic_sv_observations: Path,
     cancer_genelist: Path,
     case_id: str,
+    cust_case_id: str,
     clinical_snv_observations: Path,
     clinical_sv_observations: Path,
     exome: bool,
@@ -247,6 +250,7 @@ def case_config(
         },
         analysis={
             "case_id": case_id,
+            "cust_case_id": cust_case_id,
             "soft_filter_normal": soft_filter_normal,
             "gender": gender,
             "analysis_dir": analysis_dir,
