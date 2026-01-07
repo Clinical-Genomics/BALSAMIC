@@ -9,7 +9,7 @@ Changed:
 
 Removed:
 ^^^^^^^^
-* removed min QSS 20 filter
+* removed min QSS 20 filter for WGS TO
 
 Fixed:
 ^^^^^^

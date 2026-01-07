@@ -88,6 +88,7 @@ if config["analysis"]["sequencing_type"] == 'targeted' and config["analysis"]["a
       AD=get_tag_and_filtername(snv_quality_filters, "balsamic_low_tumor_ad"),
       DP=get_tag_and_filtername(snv_quality_filters, "balsamic_low_tumor_dp"),
       AF_min=get_tag_and_filtername(snv_quality_filters, "balsamic_low_af"),
+      qss=get_tag_and_filtername(snv_quality_filters,"balsamic_low_quality_scores"),
       sor=get_tag_and_filtername(snv_quality_filters, "balsamic_high_strand_oddsratio"),
       rpa=get_tag_and_filtername(snv_quality_filters,"balsamic_high_tnscope_rpa"),
       hard_filters=TgaSNVFilters.get_bcftools_filter_string(category="quality", analysis_type=analysis_type, variant_caller=BioinfoTools.TNSCOPE, soft_filter_normals=soft_filter_normal, exome=exome),
@@ -99,6 +100,7 @@ if config["analysis"]["sequencing_type"] == 'targeted' and config["analysis"]["a
     bcftools view {input.vcf} \
     | bcftools filter --include 'SUM(FORMAT/AD[0:0]+FORMAT/AD[0:1]) >= {params.DP[0]}' --soft-filter '{params.DP[1]}' --mode '+' \
     | bcftools filter --include 'FORMAT/AD[0:1] >= {params.AD[0]}' --soft-filter '{params.AD[1]}' --mode '+' \
+    | bcftools filter --threads {threads} --include 'SUM(FORMAT/QSS)/SUM(FORMAT/AD) >= {params.qss[0]}' --soft-filter '{params.qss[1]}' --mode '+' \
     | bcftools filter --threads {threads} --include "INFO/SOR < {params.sor[0]}" --soft-filter '{params.sor[1]}' --mode '+' \
     | bcftools filter --threads {threads} --exclude "INFO/RPA > {params.rpa[0]}" --soft-filter '{params.rpa[1]}' --mode + \
     | bcftools filter --include 'FORMAT/AF[0] >= {params.AF_min[0]}' --soft-filter '{params.AF_min[1]}' --mode '+' \

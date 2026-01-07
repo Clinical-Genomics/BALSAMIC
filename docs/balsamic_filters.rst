@@ -694,10 +694,6 @@ The somatic variants in TNscope raw VCF file (`SNV.somatic.<CASE_ID>.tnscope.all
 
     Minimum AF(tumor) > 0.05
 
-::
-
-    SUM(QSS)/SUM(AD) >= 20
-
 *Read Counts*: Count of reads in a given (F1R2, F2R1) pair orientation supporting the alternate allele
 
 ::

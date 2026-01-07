@@ -365,6 +365,13 @@ class TgaSNVFilters(BaseSNVFilters):
             variant_caller=BioinfoTools.VARDICT,
         ),
         VCFFilter(
+            tag_value=20,
+            filter_name="balsamic_low_quality_scores",
+            field="INFO",
+            variant_caller=BioinfoTools.TNSCOPE,
+            analysis_type=AnalysisType.SINGLE,
+        ),
+        VCFFilter(
             tag_value=2.7,
             filter_name="balsamic_high_strand_oddsratio",
             field="INFO",
