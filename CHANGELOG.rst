@@ -6,10 +6,10 @@ Added:
 
 Changed:
 ^^^^^^^^
+* lower average quality filter for WGS TO TNscope calls to 10 https://github.com/Clinical-Genomics/BALSAMIC/pull/1644
 
 Removed:
 ^^^^^^^^
-* removed min QSS 20 filter for WGS TO
 
 Fixed:
 ^^^^^^

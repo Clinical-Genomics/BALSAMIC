@@ -304,6 +304,12 @@ class WgsSNVFilters(BaseSNVFilters):
         VCFFilter(tag_value=10, filter_name="balsamic_low_tumor_dp", field="FORMAT"),
         VCFFilter(tag_value=0.05, filter_name="balsamic_low_af", field="FORMAT"),
         VCFFilter(
+            tag_value=10,
+            filter_name="balsamic_low_quality_scores",
+            field="FORMAT",
+            analysis_type=AnalysisType.SINGLE,
+        ),
+        VCFFilter(
             tag_value=0,
             filter_name="balsamic_low_strand_read_counts",
             field="FORMAT",
