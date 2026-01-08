@@ -61,7 +61,7 @@ requirements: List[str] = [
     "jupyter_core==5.3.1",
     "kiwisolver==1.4.4",
     "MarkupSafe==2.1.3",
-    "matplotlib==3.7.2",
+    "matplotlib==3.9.2",
     "monotonic==1.6",
     "multidict==6.0.4",
     "nbformat==5.9.2",
