@@ -169,7 +169,6 @@ rule cnvkit_call_CNV_research:
         diagram = cnv_dir + "tumor.merged-diagram.pdf",
         diagram_svg = cnv_dir + "tumor.merged-diagram.svg",
         scatter = cnv_dir + "tumor.merged-scatter.pdf",
-        scatter_svg= cnv_dir + "tumor.merged-scatter.svg",
     benchmark:
         Path(f"{benchmark_dir}/cnvkit_call_{config['analysis']['case_id']}.tsv").as_posix()
     singularity:
@@ -203,27 +202,24 @@ cnvkit.py call {input.cns_initial} \
 
 # Plot bin-level log2 coverages and segmentation calls
 cnvkit.py scatter {input.cnr} \
---vcf {input.snv_vcf} -z \
+--vcf {input.snv_vcf} \
 --segment {output.cns} \
 --output {output.scatter} \
-{params.cust_case_id};
-
-# Plot bin-level log2 coverages and segmentation calls
-cnvkit.py scatter {input.cnr} \
---vcf {input.snv_vcf} -z \
---segment {output.cns} \
---output {output.scatter_svg} \
-{params.cust_case_id} ;
+-i TUMOR {params.cust_case_id} --fig-size 18 8 ;
 
 # Draw copy number (.cnr or .cns) on chromosomes as an ideogram
 cnvkit.py diagram {input.cnr} \
 --segment  {output.cns} \
+--gender {params.gender} \ 
 --output {output.diagram};
 
 # Draw copy number (.cnr or .cns) on chromosomes as an ideogram
 cnvkit.py diagram {input.cnr} \
 --segment  {output.cns} \
---output {output.diagram_svg} ;
+--gender {params.gender} \
+--min-probes 5 \
+--output {output.diagram_svg} \
+{params.cust_case_id} ;
 
 # Identify targeted genes with copy number gain or loss
 cnvkit.py genemetrics {input.cnr} \
