@@ -183,7 +183,6 @@ rule cnvkit_call_CNV_research:
         gender = config_model.get_gender,
         sample_id = "TUMOR",
         genome_version = config["reference"]["genome_version"],
-        cancer_genelist = lambda wildcards, cancer_genelist=config_model.get_cancer_genelist_as_string: f"--gene {cancer_genelist}" if cancer_genelist else "",
         cust_case_id = lambda wildcards, cust_case_id=config_model.analysis.cust_case_id: f"--title {cust_case_id}" if cust_case_id else "",
     message:
         ("Calling CNVs using CNVkit for {params.case_name}")
@@ -207,14 +206,14 @@ cnvkit.py scatter {input.cnr} \
 --vcf {input.snv_vcf} -z \
 --segment {output.cns} \
 --output {output.scatter} \
-{params.cancer_genelist} {params.cust_case_id};
+{params.cust_case_id};
 
 # Plot bin-level log2 coverages and segmentation calls
 cnvkit.py scatter {input.cnr} \
 --vcf {input.snv_vcf} -z \
 --segment {output.cns} \
 --output {output.scatter_svg} \
-{params.cancer_genelist} {params.cust_case_id} ;
+{params.cust_case_id} ;
 
 # Draw copy number (.cnr or .cns) on chromosomes as an ideogram
 cnvkit.py diagram {input.cnr} \

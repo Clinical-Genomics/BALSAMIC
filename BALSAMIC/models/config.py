@@ -179,7 +179,6 @@ class AnalysisModel(BaseModel):
     pon_version: Optional[str] = None
     pon_workflow: Optional[PONWorkflow] = None
     rescue_snvs: Optional[Annotated[str, AfterValidator(is_file)]] = None
-    cancer_genelist: Optional[Annotated[str, AfterValidator(is_file)]] = None
 
     @field_validator("pon_version")
     def validate_pon_version(cls, pon_version: Optional[str]):
@@ -373,14 +372,6 @@ class ConfigModel(BaseModel):
             )
 
         return values
-
-    def get_cancer_genelist_as_string(self) -> str:
-        genes = (
-            line.strip()
-            for line in Path(self.analysis.cancer_genelist).read_text().splitlines()
-            if line.strip()
-        )
-        return ",".join(genes)
 
     def retrieve_annotations(self, category: Optional[str] = None) -> List[Dict]:
         """Builds the annotations list, optionally filtered by category."""
