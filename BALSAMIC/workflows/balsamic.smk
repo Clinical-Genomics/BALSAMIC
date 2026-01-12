@@ -469,7 +469,7 @@ if config["analysis"]["sequencing_type"] != "wgs":
     analysis_specific_results.extend(
         expand(cnv_dir + "tumor.merged-{plot}", plot=["diagram.pdf", "scatter.pdf"])
     )
-    analysis_specific_results.append(cnv_dir + "CNV.somatic." + case_id + "report.html")
+    analysis_specific_results.append(cnv_dir + "CNV.somatic." + case_id + ".report.html")
     analysis_specific_results.append(cnv_dir + case_id + ".gene_metrics")
     # vcf2cytosure
     analysis_specific_results.extend(expand(

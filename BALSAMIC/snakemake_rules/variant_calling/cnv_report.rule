@@ -9,7 +9,7 @@ rule create_cnv_html_report:
         diagram = cnv_dir + "tumor.merged-diagram.pdf",
         scatter = cnv_dir + "tumor.merged-scatter.pdf"
     output:
-        cnv_report_html = cnv_dir + "CNV.somatic." + config["analysis"]["case_id"] + "report.html"
+        cnv_report_html = cnv_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".report.html"
     singularity:
         Path(singularity_image, "cnvkit.sif").as_posix()
     benchmark:

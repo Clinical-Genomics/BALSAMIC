@@ -77,6 +77,8 @@ rule purecn_call_CNV_research:
         cnr = cnv_dir + "tumor.merged.cnr",
     output:
         purecn_purity = cnv_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".purecn.purity.csv",
+        loh_regions= cnv_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".purecn.LOHregions.csv",
+        loh_genes= cnv_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".purecn.LOHgenes.csv"
     benchmark:
         Path(f"{benchmark_dir}/purecn_call_{config['analysis']['case_id']}.tsv").as_posix()
     singularity:
@@ -88,8 +90,6 @@ rule purecn_call_CNV_research:
         sample_id = "TUMOR",
         genome = config["reference"]["genome_version"],
         purity_pdf = cnv_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".purecn.purity.pdf",
-        loh_regions = cnv_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".purecn.LOHregions.csv",
-        loh_genes = cnv_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".purecn.LOHgenes.csv",
         cnv_csv = cnv_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".purecn.cnv.csv",
         purecn_vcf = cnv_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".purecn.vcf.gz",
     message:
