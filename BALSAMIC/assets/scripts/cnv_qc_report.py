@@ -491,15 +491,15 @@ def csv_to_html_table(
               help="refgene.flat file.")
 @click.option("--cytoband",   type=click.Path(exists=True), required=True,
               help="cytoBand file for genome build.")
-@click.option("--sample-id",  type=str, required=True,
+@click.option("--case-id",  type=str, required=True,
               help="Sample ID for labels / outputs.")
 @click.option("--purecn-scatter", type=click.Path(exists=True), required=True,
-              help="purecn scatter SVG file.")
+              help="purecn scatter PDF file.")
 @click.option("--purecn-diagram", type=click.Path(exists=True), required=True,
               help="purecn diagram PDF file.")
 @click.option("--out-prefix", type=click.Path(), required=True,
               help="Output prefix (e.g. /path/to/sample_cnv_qc).")
-def main(loh_genes, loh_regions, cnr, pon, vcf, refgene, cytoband, sample_id, purecn_scatter, purecn_diagram, out_prefix):
+def main(loh_genes, loh_regions, cnr, pon, vcf, refgene, cytoband, case_id, purecn_scatter, purecn_diagram, out_prefix):
     """
     Build CNV QC plots + HTML report from PureCN + CNVkit outputs.
     """
@@ -517,7 +517,7 @@ def main(loh_genes, loh_regions, cnr, pon, vcf, refgene, cytoband, sample_id, pu
     # ----------------------------
     # Generate per-chromosome PNG plots in outdir
     # ----------------------------
-    chr_plots_dir = outdir / f"{sample_id}_chr_plots"
+    chr_plots_dir = outdir / f"{case_id}_chr_plots"
     chr_plots_dir.mkdir(exist_ok=True, parents=True)
 
     plot_chromosomes(pon, cnr, vcf, loh_genes, loh_regions, chr_plots_dir)
@@ -525,8 +525,12 @@ def main(loh_genes, loh_regions, cnr, pon, vcf, refgene, cytoband, sample_id, pu
     # ---------------
     # Convert PDF to PNG
     # ---------------
+    im = Image.open(purecn_scatter)
+    im.save(f"{outdir}/purecn_scatter_{case_id}.png", "PNG")
+
     im = Image.open(purecn_diagram)
-    im.save(f"{outdir}/purecn_diagram_{sample_id}.png", "PNG")
+    im.save(f"{outdir}/purecn_diagram_{case_id}.png", "PNG")
+
 
     # ----------------------------
     # HTML report
@@ -535,11 +539,11 @@ def main(loh_genes, loh_regions, cnr, pon, vcf, refgene, cytoband, sample_id, pu
     csv_to_html_table(
         df=df_genes,
         out_html=out_html,
-        svg_path_1=purecn_scatter,
-        png_path_2=f"{outdir}/purecn_diagram_{sample_id}.png",
+        svg_path_1=f"{outdir}/purecn_scatter_{case_id}.png",
+        png_path_2=f"{outdir}/purecn_diagram_{case_id}.png",
     )
 
-    click.echo(f"[CNV QC] Finished report for {sample_id}: {out_html}")
+    click.echo(f"[CNV QC] Finished report for {case_id}: {out_html}")
 
 
 if __name__ == "__main__":

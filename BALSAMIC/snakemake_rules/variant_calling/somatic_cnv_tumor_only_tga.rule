@@ -167,7 +167,6 @@ rule cnvkit_call_CNV_research:
         gene_metrics = cnv_dir + config["analysis"]["case_id"] + ".gene_metrics",
         vcf =  cnv_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".cnvkit.vcf",
         diagram = cnv_dir + "tumor.merged-diagram.pdf",
-        diagram_svg = cnv_dir + "tumor.merged-diagram.svg",
         scatter = cnv_dir + "tumor.merged-scatter.pdf",
     benchmark:
         Path(f"{benchmark_dir}/cnvkit_call_{config['analysis']['case_id']}.tsv").as_posix()
@@ -210,15 +209,9 @@ cnvkit.py scatter {input.cnr} \
 # Draw copy number (.cnr or .cns) on chromosomes as an ideogram
 cnvkit.py diagram {input.cnr} \
 --segment  {output.cns} \
---gender {params.gender} \ 
---output {output.diagram};
-
-# Draw copy number (.cnr or .cns) on chromosomes as an ideogram
-cnvkit.py diagram {input.cnr} \
---segment  {output.cns} \
 --gender {params.gender} \
 --min-probes 5 \
---output {output.diagram_svg} \
+--output {output.diagram} \
 {params.cust_case_id} ;
 
 # Identify targeted genes with copy number gain or loss
