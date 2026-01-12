@@ -42,7 +42,7 @@ rule bcftools_normalise_dnascope:
     output:
         vcf_normalised = vcf_dir + "SNV.germline.{sample_type}.dnascope.vcf.gz",
     benchmark:
-        Path(benchmark_dir,'bcftools_normalise_dnascope_' + config["analysis"]["case_id"] + ".tsv").as_posix()
+        Path(benchmark_dir,'bcftools_normalise_dnascope_{sample_type}_' + config["analysis"]["case_id"] + ".tsv").as_posix()
     singularity:
         Path(singularity_image,config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
     params:
