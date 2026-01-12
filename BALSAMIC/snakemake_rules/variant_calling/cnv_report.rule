@@ -23,14 +23,14 @@ rule create_cnv_html_report:
         """
 python {params.cnv_report_script} \
 --loh-genes {input.loh_genes} \
---loh-regions {input.loh_regions} 
---cnr {input.cnr}
---pon {params.pon}
---vcf {input.germline_vcf}
---refgene {input.refgene_flat}
---cytoband {params.cytoband}
---case-id {params.case_id}
---purecn-scatter {input.scatter}
---purecn-diagram {input.diagram}
+--loh-regions {input.loh_regions} \
+--cnr {input.cnr} \
+--pon {params.pon} \
+--vcf {input.germline_vcf} \
+--refgene {input.refgene_flat} \
+--cytoband {params.cytoband} \
+--case-id {params.case_id} \
+--purecn-scatter {input.scatter} \
+--purecn-diagram {input.diagram} \
 --out-prefix {output.cnv_report_html}
         """
