@@ -145,6 +145,8 @@ if [ "$exit_status" = "true" ]; then
 else
 echo '"Sampleid","Purity","Ploidy","Sex","Contamination","Flagged","Failed","Curated","Comment"
 "tumor.initial",0.02,2,"?",0,FALSE,FALSE,FALSE,"FAILED PURITY ESTIMATION"' > {output.purecn_purity};
+echo '' > {output.loh_genes}
+echo '' > {output.loh_regions}
 fi;
 
 rm -rf {params.tmpdir};
@@ -167,7 +169,7 @@ rule cnvkit_call_CNV_research:
         gene_metrics = cnv_dir + config["analysis"]["case_id"] + ".gene_metrics",
         vcf =  cnv_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".cnvkit.vcf",
         diagram = cnv_dir + "tumor.merged-diagram.pdf",
-        scatter = cnv_dir + "tumor.merged-scatter.pdf",
+        scatter = cnv_dir + "tumor.merged-scatter.pdf"
     benchmark:
         Path(f"{benchmark_dir}/cnvkit_call_{config['analysis']['case_id']}.tsv").as_posix()
     singularity:
