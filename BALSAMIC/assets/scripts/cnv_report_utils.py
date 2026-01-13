@@ -701,24 +701,9 @@ def add_pon_spread_significance(
     noise_factor_borderline: float = 1.0,
     noise_factor_strong: float = 2.0,
 ) -> pd.DataFrame:
-    """
-    For each gene in df_genes, compute PON-based noise and CNVkit weight summaries
-    from df_cnr + df_pon and add:
-
-      - pon_spread_median
-      - pon_spread_q90
-      - pon_n_bins
-      - weight_median
-      - weight_mean
-      - mean_vs_spread
-      - min_vs_spread
-      - max_vs_spread
-      - pon_spread_flag  (within_noise / borderline / beyond_pon_noise / unknown)
-    """
     df_genes = df_genes.copy()
     merged_bins = merge_cnr_pon(df_cnr, df_pon, chr_col=chr_col, spread_col=spread_col)
 
-    # Filter out non-gene bins and split multi-gene entries
     merged_bins = merged_bins[
         merged_bins[gene_col_cnr].notna()
         & (merged_bins[gene_col_cnr] != "Antitarget")
@@ -774,6 +759,9 @@ def add_pon_spread_significance(
         how="left",
     ).drop(columns=[gene_col_cnr])
 
+    # ---------------------------
+    # compute *_vs_spread metrics
+    # ---------------------------
     eps = 1e-6
     for col_gene, new_col in [
         ("gene.mean", "mean_vs_spread"),
@@ -781,12 +769,14 @@ def add_pon_spread_significance(
         ("gene.max", "max_vs_spread"),
     ]:
         if col_gene in df_genes.columns:
-            df_genes[new_col] = df_genes[col_gene].abs() / (
-                df_genes["pon_spread_median"].replace(0, eps) + eps
-            )
+            denom = df_genes["pon_spread_median"].replace(0, eps) + eps
+            df_genes[new_col] = df_genes[col_gene].abs() / denom
         else:
             df_genes[new_col] = np.nan
 
+    # ---------------------------
+    # CNV noise classification
+    # ---------------------------
     def classify_row(row: pd.Series) -> str:
         s = row["mean_vs_spread"]
         if pd.isna(s):
@@ -798,6 +788,21 @@ def add_pon_spread_significance(
         return "beyond_pon_noise"
 
     df_genes["pon_spread_flag"] = df_genes.apply(classify_row, axis=1)
+
+    # ---------------------------
+    # round all relevant metrics
+    # ---------------------------
+    round_cols = [
+        "pon_spread_median",
+        "pon_spread_q90",
+        "weight_median",
+        "weight_mean",
+        "mean_vs_spread",
+        "min_vs_spread",
+        "max_vs_spread",
+    ]
+    round_cols = [c for c in round_cols if c in df_genes.columns]
+    df_genes[round_cols] = df_genes[round_cols].round(3)
 
     return df_genes
 
