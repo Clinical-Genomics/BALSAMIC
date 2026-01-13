@@ -7,8 +7,8 @@ from pathlib import Path
 from cnv_report_utils import (
     plot_chromosomes,
     build_gene_table,
+    pdf_first_page_to_png
 )
-from PIL import Image
 
 def csv_to_html_table(
     df: pd.DataFrame,
@@ -523,11 +523,8 @@ def main(loh_genes, loh_regions, cnr, pon, vcf, refgene, cytoband, case_id, pure
     # ---------------
     # Convert PDF to PNG
     # ---------------
-    im = Image.open(purecn_diagram)
-    im.save(f"{outdir}/purecn_diagram_{case_id}.png", "PNG")
-
-    im = Image.open(purecn_scatter)
-    im.save(f"{outdir}/purecn_scatter_{case_id}.png", "PNG")
+    pdf_first_page_to_png(purecn_diagram, f"{outdir}/purecn_diagram_{case_id}.png")
+    pdf_first_page_to_png(purecn_scatter, f"{outdir}/purecn_scatter_{case_id}.png")
 
     # ----------------------------
     # HTML report

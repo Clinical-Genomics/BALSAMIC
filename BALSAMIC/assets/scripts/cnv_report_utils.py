@@ -5,11 +5,17 @@ import matplotlib.pyplot as plt
 from matplotlib import colormaps
 import numpy as np
 import pandas as pd
-
+import fitz
 
 # =============================================================================
 # Generic helpers
 # =============================================================================
+
+def pdf_first_page_to_png(pdf_path: str, png_path: str, dpi: int = 300) -> None:
+    doc = fitz.open(pdf_path)
+    page = doc[0]
+    page.get_pixmap(dpi=dpi).save(png_path)
+    doc.close()
 
 def normalize_chr_column(df: pd.DataFrame, prefer_col: str | None = None) -> tuple[pd.DataFrame, str]:
     """
