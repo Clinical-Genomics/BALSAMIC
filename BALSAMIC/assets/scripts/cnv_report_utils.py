@@ -308,12 +308,12 @@ def plot_chromosomes(
     outdir: Path,
     case_id: str,
     include_y: bool = False,
-    weight_thresh: float = 0.5,
-    pct_spread: float = 0.90,
-    window: int = 21,
-    anti_factor: float = 0.2,
+    weight_thresh: float = 0.1,
+    pct_spread: float = 0.95,
+    window: int = 7,
+    anti_factor: float = 0.15,
     base_label_offset: float = 1.5,
-    min_targets_cnvgene: int = 4,
+    min_targets_cnvgene: int = 2,
 ) -> None:
     """
     Main plotting routine creating one PNG per chromosome with:
@@ -459,7 +459,7 @@ def plot_chromosomes(
                 bg_antis["x_coord"],
                 bg_antis["log2"],
                 s=3,
-                alpha=0.3,
+                alpha=0.38,
                 color="lightgrey",
                 label="Antitarget bins",
             )
