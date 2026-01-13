@@ -128,11 +128,11 @@ if [ "$exit_status" = "true" ]; then
     fi;
 
     if [[ -f "{params.tmpdir}/{params.sample_id}_loh.csv" ]];  then
-    mv {params.tmpdir}/{params.sample_id}_loh.csv {params.loh_regions};
+    mv {params.tmpdir}/{params.sample_id}_loh.csv {output.loh_regions};
     fi;
 
     if [[ -f "{params.tmpdir}/{params.sample_id}_genes.csv" ]];  then
-    mv {params.tmpdir}/{params.sample_id}_genes.csv {params.loh_genes};
+    mv {params.tmpdir}/{params.sample_id}_genes.csv {output.loh_genes};
     fi;
 
     if [[ -f "{params.tmpdir}/{params.sample_id}.vcf.gz" ]];  then
