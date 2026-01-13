@@ -145,8 +145,8 @@ if [ "$exit_status" = "true" ]; then
 else
 echo '"Sampleid","Purity","Ploidy","Sex","Contamination","Flagged","Failed","Curated","Comment"
 "tumor.initial",0.02,2,"?",0,FALSE,FALSE,FALSE,"FAILED PURITY ESTIMATION"' > {output.purecn_purity};
-echo '' > {output.loh_genes}
-echo '' > {output.loh_regions}
+echo '' > {output.loh_genes} ;
+echo '' > {output.loh_regions} ;
 fi;
 
 rm -rf {params.tmpdir};
