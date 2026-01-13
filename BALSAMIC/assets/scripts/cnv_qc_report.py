@@ -530,7 +530,7 @@ def main(loh_genes, loh_regions, cnr, pon, vcf, refgene, cytoband, case_id, pure
     # ----------------------------
     # HTML report
     # ----------------------------
-    out_html = str(out_prefix) + ".html"
+    out_html = str(out_prefix)
     csv_to_html_table(
         df=df_genes,
         out_html=out_html,
