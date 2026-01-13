@@ -506,6 +506,12 @@ def main(loh_genes, loh_regions, cnr, pon, vcf, refgene, cytoband, case_id, pure
     outdir = out_prefix.parent
     outdir.mkdir(parents=True, exist_ok=True)
 
+    # ---------------
+    # Convert PDF to PNG
+    # ---------------
+    pdf_first_page_to_png(purecn_diagram, f"{outdir}/purecn_diagram_{case_id}.png")
+    pdf_first_page_to_png(purecn_scatter, f"{outdir}/purecn_scatter_{case_id}.png")
+
     # ----------------------------
     # Generate per-chromosome PNG plots in outdir
     # ----------------------------
@@ -519,12 +525,6 @@ def main(loh_genes, loh_regions, cnr, pon, vcf, refgene, cytoband, case_id, pure
     chr_plots_dir.mkdir(exist_ok=True, parents=True)
 
     plot_chromosomes(pon, cnr, vcf, loh_genes, loh_regions, chr_plots_dir)
-
-    # ---------------
-    # Convert PDF to PNG
-    # ---------------
-    pdf_first_page_to_png(purecn_diagram, f"{outdir}/purecn_diagram_{case_id}.png")
-    pdf_first_page_to_png(purecn_scatter, f"{outdir}/purecn_scatter_{case_id}.png")
 
     # ----------------------------
     # HTML report
