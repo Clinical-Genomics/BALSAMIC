@@ -87,6 +87,7 @@ requirements: List[str] = [
     "python-dateutil==2.8.2",
     "pytz==2023.3",
     "pyu2f==0.1.5",
+    "pymupdf==1.24.10",
     "PyYAML==6.0.1",
     "referencing==0.30.0",
     "requests==2.31.0",
