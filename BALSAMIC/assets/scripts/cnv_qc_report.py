@@ -539,7 +539,7 @@ def main(
     refgene,
     cytoband,
     case_id,
-    cust_case_id,,
+    cust_case_id,
     purecn_scatter,
     purecn_diagram,
     out_prefix,
