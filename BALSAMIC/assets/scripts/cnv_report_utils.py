@@ -539,9 +539,7 @@ def plot_chromosomes(
         ax1.axhline(0, color="black", linewidth=0.8)
         ax1.set_ylim(*y_lim)
         ax1.set_ylabel("log2 / spread")
-        ax1.set_title(
-            f"Chr {chr_name} – log2 vs PON spread: {case_id}\n"
-        )
+        ax1.set_title(f"Chr {chr_name} – log2 vs PON spread: {case_id}\n")
         ax1.legend(loc="upper right", fontsize=8)
 
         # Gene labels (directional offset)

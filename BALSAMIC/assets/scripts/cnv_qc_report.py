@@ -44,26 +44,15 @@ def csv_to_html_table(
         if "gene.symbol" in df_chr.columns:
             df_chr = df_chr[~df_chr["gene.symbol"].isin(["Antitarget", "-"])]
 
-        # Normalize LOH
+        # Normalize
         df_chr["loh_str"] = df_chr["loh"].astype(str).str.upper()
+        df_chr["type_str"] = df_chr["type"].fillna("NA").astype(str).str.upper()
 
-        # Handle missing type values properly
-        # Use fillna so pd.NA becomes 'NA' *before* upper()
-        df_chr["type_str"] = (
-            df_chr["type"]
-            .fillna("NA")
-            .astype(str)
-            .str.upper()
-        )
+        # Missing / placeholder types
+        bad_type = {"NA", "NAN", ".", "", "<NA>", "NONE"}
+        is_type_real = df_chr["type_str"].notna() & ~df_chr["type_str"].isin(bad_type)
 
-        bad_type = {"", ".", "NA", "NAN", "<NA>"}
-        is_type_real = df_chr["type"].notna() & ~df_chr["type_str"].isin(bad_type)
-
-        cnv_mask = (
-                ((df_chr["C"].notna()) & (df_chr["C"] != 2))
-                | (df_chr["loh_str"] == "TRUE")
-                | is_type_real
-        )
+        cnv_mask = (df_chr["loh_str"] == "TRUE") | is_type_real
 
         cnv_chr_set = set(df_chr.loc[cnv_mask, chr_col].astype(str).tolist())
 
@@ -303,48 +292,33 @@ def csv_to_html_table(
       }}
 
       function isCnvRow(row) {{
-        // CNV = C != 2 OR loh == TRUE OR type annotated (not NA/NAN/./empty)
-        let isCnv = false;
-        let evaluated = false;
-
-        // C != 2
-        if (cColIdx !== -1) {{
-          const cCell = row.cells[cColIdx];
-          const cText = normalizeCellText(cCell);
-          if (cText.length > 0) {{
-            const cVal = parseFloat(cText);
-            if (!Number.isNaN(cVal)) {{
+        // CNV = loh == TRUE OR type annotated (not NA/NAN/./empty/<NA>)
+          let isCnv = false;
+          let evaluated = false;
+        
+          // loh == TRUE
+          if (lohColIdx !== -1) {{
+            const lohCell = row.cells[lohColIdx];
+            const lohVal = normalizeCellText(lohCell);
+            if (lohVal === "true") {{
               evaluated = true;
-              if (cVal !== 2) {{
-                isCnv = true;
-              }}
+              isCnv = true;
             }}
           }}
-        }}
-
-        // loh == TRUE
-        if (!isCnv && lohColIdx !== -1) {{
-          const lohCell = row.cells[lohColIdx];
-          const lohVal = normalizeCellText(lohCell);
-          if (lohVal === "true") {{
-            evaluated = true;
-            isCnv = true;
+        
+          // type annotated
+          if (!isCnv && typeColIdx !== -1) {{
+            const typeCell = row.cells[typeColIdx];
+            const typeVal = normalizeCellText(typeCell);
+            const bad = ["na", "nan", ".", "", "<na>", "none"];
+            if (typeVal && !bad.includes(typeVal)) {{
+              evaluated = true;
+              isCnv = true;
+            }}
           }}
-        }}
-
-        // type annotated
-        if (!isCnv && typeColIdx !== -1) {{
-          const typeCell = row.cells[typeColIdx];
-          const typeVal = normalizeCellText(typeCell);
-          const bad = ["na", "nan", ".", ""];
-          if (typeVal && !bad.includes(typeVal)) {{
-            evaluated = true;
-            isCnv = true;
-          }}
-        }}
-
-        return evaluated ? isCnv : false;
-      }}
+        
+          return evaluated ? isCnv : false;
+    }}
 
       function applyFilter() {{
         const hideTrue   = checkboxFlagged && checkboxFlagged.checked;
@@ -520,7 +494,10 @@ def csv_to_html_table(
     "--case-id", type=str, required=True, help="Case ID for labels / outputs."
 )
 @click.option(
-    "--cust-case-id", type=str, required=False, help="Cust Case ID for labels / outputs."
+    "--cust-case-id",
+    type=str,
+    required=False,
+    help="Cust Case ID for labels / outputs.",
 )
 @click.option(
     "--purecn-scatter",
