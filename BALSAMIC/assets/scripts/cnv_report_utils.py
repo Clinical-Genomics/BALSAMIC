@@ -1,11 +1,13 @@
 import math
 from pathlib import Path
 from typing import Dict, Tuple, List
+
+import fitz
 import matplotlib.pyplot as plt
 from matplotlib import colormaps
 import numpy as np
 import pandas as pd
-import fitz
+
 
 # =============================================================================
 # Generic helpers
@@ -41,20 +43,6 @@ def normalize_chr_column(
     df[col] = df[col].str.replace("^chr", "", regex=True)
 
     return df, col
-
-
-def extract_info_float(info_str: str, key: str) -> float:
-    """Extract float like 'MQ=60.00' from INFO; NaN if missing."""
-    if pd.isna(info_str):
-        return math.nan
-    key_eq = key + "="
-    for field in str(info_str).split(";"):
-        if field.startswith(key_eq):
-            try:
-                return float(field[len(key_eq) :])
-            except ValueError:
-                return math.nan
-    return math.nan
 
 
 def parse_sample_fields(format_str: str, sample_str: str) -> tuple[float, None, float]:
@@ -190,10 +178,10 @@ def flag_cnv_genes(df: pd.DataFrame, min_targets_cnvgene: int = 4) -> pd.DataFra
     """
     Subset PureCN genes to those that look like CNV genes.
 
-    - drop 'Antitarget' and '-' pseudo-genes
-    - keep genes where:
-        C != 2 OR loh == TRUE OR type != NA
-    - require at least min_targets_cnvgene targets
+      - drop 'Antitarget' and '-' pseudo-genes
+      - keep genes where:
+          C != 2 OR loh == TRUE OR type != NA
+      - require at least min_targets_cnvgene targets
     """
     df = df.copy()
     df = df[~df["gene.symbol"].isin(["Antitarget", "-"])]
@@ -261,7 +249,6 @@ def load_vcf_with_baf(vcf_path: str | Path, chr_order: list[str]) -> pd.DataFram
 
       - BAF (alt / (ref+alt))
       - DP_sample
-      - MQ, QD, SOR from INFO
     """
     vcf_cols = [
         "CHROM",
@@ -599,7 +586,7 @@ def plot_chromosomes(
 
 
 # =============================================================================
-# Segment → gene table annotation (size, MAF)
+# Segment → gene table annotation (size, MAF, seg.mean, num.snps)
 # =============================================================================
 
 
@@ -610,8 +597,9 @@ def annotate_genes_with_segments(
     For each gene row in df_genes, find the LOH region in df_regions on the same
     chromosome with the largest overlap, and annotate:
 
-        seg_start, seg_end, seg_size_bp, seg_overlap_bp,
-        maf.expected, maf.observed (if present in df_regions)
+        seg_start, seg_end, seg_size_bp,
+        maf.expected, maf.observed (if present in df_regions),
+        seg.mean, num.snps, num.mark (if present in df_regions)
 
     Matching is purely by chromosome and genomic intervals (no seg.id needed).
     """
@@ -635,10 +623,18 @@ def annotate_genes_with_segments(
     df_genes["seg_end"] = np.nan
     df_genes["seg_size_bp"] = np.nan
 
+    # MAF columns (if present)
     maf_cols: list[str] = []
     for col in ["maf.expected", "maf.observed"]:
         if col in df_regions.columns:
             maf_cols.append(col)
+            df_genes[col] = np.nan
+
+    # Additional segment-level metrics to carry over (if present)
+    seg_extra_cols: list[str] = []
+    for col in ["seg.mean", "num.snps", "num.mark"]:
+        if col in df_regions.columns:
+            seg_extra_cols.append(col)
             df_genes[col] = np.nan
 
     for chr_name, genes_chr in df_genes.groupby("chr"):
@@ -655,14 +651,20 @@ def annotate_genes_with_segments(
         for col in maf_cols:
             maf_arrays[col] = regs_chr[col].to_numpy()
 
+        extra_arrays: dict[str, np.ndarray] = {}
+        for col in seg_extra_cols:
+            extra_arrays[col] = regs_chr[col].to_numpy()
+
         for idx, row in genes_chr.iterrows():
             g_start = row["start_int"]
             g_end = row["end_int"]
 
+            # segments that overlap the gene
             overlap_mask = (seg_starts <= g_end) & (seg_ends >= g_start)
             if not overlap_mask.any():
                 continue
 
+            # compute overlap size with each overlapping segment
             o_starts = np.maximum(seg_starts[overlap_mask], g_start)
             o_ends = np.minimum(seg_ends[overlap_mask], g_end)
             overlaps = o_ends - o_starts + 1
@@ -680,6 +682,9 @@ def annotate_genes_with_segments(
 
             for col in maf_cols:
                 df_genes.at[idx, col] = maf_arrays[col][seg_idx]
+
+            for col in seg_extra_cols:
+                df_genes.at[idx, col] = extra_arrays[col][seg_idx]
 
     return df_genes
 
@@ -701,6 +706,15 @@ def add_pon_spread_significance(
     noise_factor_borderline: float = 1.0,
     noise_factor_strong: float = 2.0,
 ) -> pd.DataFrame:
+    """
+    For each gene in df_genes, compute PON-based noise and CNVkit weight summaries
+    from df_cnr + df_pon and add:
+
+      - pon_spread_median
+      - weight_mean (if available)
+      - mean_vs_spread
+      - pon_spread_flag  (within_noise / borderline / beyond_pon_noise / unknown)
+    """
     df_genes = df_genes.copy()
     merged_bins = merge_cnr_pon(df_cnr, df_pon, chr_col=chr_col, spread_col=spread_col)
 
@@ -723,14 +737,12 @@ def add_pon_spread_significance(
     agg_dict = {
         spread_col: [
             ("pon_spread_median", "median"),
-            ("pon_spread_q90", lambda x: x.quantile(0.90)),
         ]
     }
 
     have_weight = weight_col in merged_expanded.columns
     if have_weight:
         agg_dict[weight_col] = [
-            ("weight_median", "median"),
             ("weight_mean", "mean"),
         ]
 
@@ -746,12 +758,6 @@ def add_pon_spread_significance(
         .reset_index()
     )
 
-    bin_counts = (
-        merged_expanded.groupby(gene_col_cnr).size().rename("pon_n_bins").reset_index()
-    )
-
-    agg = agg.merge(bin_counts, on=gene_col_cnr, how="left")
-
     df_genes = df_genes.merge(
         agg,
         left_on=gene_col_genes,
@@ -760,19 +766,14 @@ def add_pon_spread_significance(
     ).drop(columns=[gene_col_cnr])
 
     # ---------------------------
-    # compute *_vs_spread metrics
+    # compute mean_vs_spread metric
     # ---------------------------
     eps = 1e-6
-    for col_gene, new_col in [
-        ("gene.mean", "mean_vs_spread"),
-        ("gene.min", "min_vs_spread"),
-        ("gene.max", "max_vs_spread"),
-    ]:
-        if col_gene in df_genes.columns:
-            denom = df_genes["pon_spread_median"].replace(0, eps) + eps
-            df_genes[new_col] = df_genes[col_gene].abs() / denom
-        else:
-            df_genes[new_col] = np.nan
+    if "gene.mean" in df_genes.columns:
+        denom = df_genes["pon_spread_median"].replace(0, eps) + eps
+        df_genes["mean_vs_spread"] = df_genes["gene.mean"].abs() / denom
+    else:
+        df_genes["mean_vs_spread"] = np.nan
 
     # ---------------------------
     # CNV noise classification
@@ -794,12 +795,8 @@ def add_pon_spread_significance(
     # ---------------------------
     round_cols = [
         "pon_spread_median",
-        "pon_spread_q90",
-        "weight_median",
         "weight_mean",
         "mean_vs_spread",
-        "min_vs_spread",
-        "max_vs_spread",
     ]
     round_cols = [c for c in round_cols if c in df_genes.columns]
     df_genes[round_cols] = df_genes[round_cols].round(3)
@@ -1065,19 +1062,17 @@ def build_gene_table(
         "C",
         "M",
         "M.flagged",
+        "seg.mean",
+        "num.mark",
+        "num.snps",
         "maf.expected",
         "maf.observed",
         "gene.mean",
         "gene.min",
         "gene.max",
         "pon_spread_median",
-        "pon_spread_q90",
-        "weight_median",
         "weight_mean",
-        "pon_n_bins",
         "mean_vs_spread",
-        "min_vs_spread",
-        "max_vs_spread",
         "pon_spread_flag",
     ]
     cols = [c for c in cols if c in df_genes.columns]
@@ -1086,8 +1081,15 @@ def build_gene_table(
     # remove pseudo-genes
     df_genes = df_genes[~df_genes["gene.symbol"].isin(["Antitarget", "-"])]
 
-    # rounding
-    round_cols = ["maf.expected", "maf.observed", "gene.mean", "gene.min", "gene.max"]
+    # rounding for some numeric columns (3 decimals)
+    round_cols = [
+        "maf.expected",
+        "maf.observed",
+        "gene.mean",
+        "gene.min",
+        "gene.max",
+        "seg.mean",
+    ]
     round_cols = [c for c in round_cols if c in df_genes.columns]
     df_genes.loc[:, round_cols] = df_genes.loc[:, round_cols].round(3)
 
@@ -1101,16 +1103,5 @@ def build_gene_table(
             .astype("Int64")
             .astype(str)
         )
-
-    # drop some internal columns if you don't want them visible
-    drop_final = [
-        "pon_spread_q90",
-        "weight_median",
-        "pon_n_bins",
-        "min_vs_spread",
-        "max_vs_spread",
-    ]
-    drop_final = [c for c in drop_final if c in df_genes.columns]
-    df_genes = df_genes.drop(columns=drop_final)
 
     return df_genes
