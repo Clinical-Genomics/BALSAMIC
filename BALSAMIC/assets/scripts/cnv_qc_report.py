@@ -523,12 +523,11 @@ def main(loh_genes, loh_regions, cnr, pon, vcf, refgene, cytoband, case_id, pure
     # ---------------
     # Convert PDF to PNG
     # ---------------
-    im = Image.open(purecn_scatter)
-    im.save(f"{outdir}/purecn_scatter_{case_id}.png", "PNG")
-
     im = Image.open(purecn_diagram)
     im.save(f"{outdir}/purecn_diagram_{case_id}.png", "PNG")
 
+    im = Image.open(purecn_scatter)
+    im.save(f"{outdir}/purecn_scatter_{case_id}.png", "PNG")
 
     # ----------------------------
     # HTML report
