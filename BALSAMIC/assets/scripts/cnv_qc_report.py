@@ -44,15 +44,25 @@ def csv_to_html_table(
         if "gene.symbol" in df_chr.columns:
             df_chr = df_chr[~df_chr["gene.symbol"].isin(["Antitarget", "-"])]
 
+        # Normalize LOH
         df_chr["loh_str"] = df_chr["loh"].astype(str).str.upper()
-        df_chr["type_str"] = df_chr["type"].astype(str).str.upper()
 
-        is_type_real = ~df_chr["type_str"].isin(["NA", "NAN", ".", ""])
+        # Handle missing type values properly
+        # Use fillna so pd.NA becomes 'NA' *before* upper()
+        df_chr["type_str"] = (
+            df_chr["type"]
+            .fillna("NA")
+            .astype(str)
+            .str.upper()
+        )
+
+        bad_type = {"", ".", "NA", "NAN", "<NA>"}
+        is_type_real = df_chr["type"].notna() & ~df_chr["type_str"].isin(bad_type)
 
         cnv_mask = (
-            ((df_chr["C"].notna()) & (df_chr["C"] != 2))
-            | (df_chr["loh_str"] == "TRUE")
-            | is_type_real
+                ((df_chr["C"].notna()) & (df_chr["C"] != 2))
+                | (df_chr["loh_str"] == "TRUE")
+                | is_type_real
         )
 
         cnv_chr_set = set(df_chr.loc[cnv_mask, chr_col].astype(str).tolist())
