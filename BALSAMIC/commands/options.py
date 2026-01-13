@@ -120,7 +120,7 @@ OPTION_CASE_ID = click.option(
 
 OPTION_CUSTOMER_CASE_ID = click.option(
     "--cust-case-id",
-    required=True,
+    required=False,
     help="Case ID from customer",
 )
 

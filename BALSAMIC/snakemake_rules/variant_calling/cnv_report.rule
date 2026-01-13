@@ -16,7 +16,8 @@ rule create_cnv_html_report:
         cnv_report_script = get_script_path("cnv_qc_report.py"),
         pon = pon_cnn,
         cytoband = config_model.analysis.cytoband,
-        case_id = config["analysis"]["case_id"]
+        case_id = config["analysis"]["case_id"],
+        cust_case_id = lambda wildcards, cust_case_id=config_model.analysis.cust_case_id: f"--cust-case-id {cust_case_id}" if cust_case_id else "",
     shell:
         """
 python {params.cnv_report_script} \
@@ -30,5 +31,6 @@ python {params.cnv_report_script} \
 --case-id {params.case_id} \
 --purecn-scatter {input.scatter} \
 --purecn-diagram {input.diagram} \
---out-prefix {output.cnv_report_html}
+--out-prefix {output.cnv_report_html} \
+{params.cust_case_id}
         """

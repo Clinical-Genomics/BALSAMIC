@@ -306,12 +306,13 @@ def plot_chromosomes(
     genes_path: Path,
     segs_path: Path,
     outdir: Path,
+    case_id: str,
     include_y: bool = False,
     weight_thresh: float = 0.5,
     pct_spread: float = 0.90,
     window: int = 21,
     anti_factor: float = 0.2,
-    base_label_offset: float = 0.2,
+    base_label_offset: float = 1.5,
     min_targets_cnvgene: int = 4,
 ) -> None:
     """
@@ -458,7 +459,7 @@ def plot_chromosomes(
                 bg_antis["x_coord"],
                 bg_antis["log2"],
                 s=3,
-                alpha=0.10,
+                alpha=0.3,
                 color="lightgrey",
                 label="Antitarget bins",
             )
@@ -469,7 +470,7 @@ def plot_chromosomes(
                 bg_targets["x_coord"],
                 bg_targets["log2"],
                 s=4,
-                alpha=0.4,
+                alpha=0.5,
                 color="tab:blue",
                 label="Target bins (no CNV gene)",
             )
@@ -494,7 +495,7 @@ def plot_chromosomes(
             x,
             -sub["spread_smooth"],
             sub["spread_smooth"],
-            alpha=0.3,
+            alpha=0.4,
             step="mid",
             label="PON noise band",
         )
@@ -539,8 +540,7 @@ def plot_chromosomes(
         ax1.set_ylim(*y_lim)
         ax1.set_ylabel("log2 / spread")
         ax1.set_title(
-            f"Chr {chr_name} – log2 vs PON spread + BAF + CNV genes + segments\n"
-            "(targets expanded, antitargets compressed)"
+            f"Chr {chr_name} – log2 vs PON spread: {case_id}\n"
         )
         ax1.legend(loc="upper right", fontsize=8)
 

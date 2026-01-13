@@ -507,7 +507,10 @@ def csv_to_html_table(
     help="cytoBand file for genome build.",
 )
 @click.option(
-    "--case-id", type=str, required=True, help="Sample ID for labels / outputs."
+    "--case-id", type=str, required=True, help="Case ID for labels / outputs."
+)
+@click.option(
+    "--cust-case-id", type=str, required=False, help="Cust Case ID for labels / outputs."
 )
 @click.option(
     "--purecn-scatter",
@@ -536,6 +539,7 @@ def main(
     refgene,
     cytoband,
     case_id,
+    cust_case_id,,
     purecn_scatter,
     purecn_diagram,
     out_prefix,
@@ -557,7 +561,6 @@ def main(
     # ----------------------------
     # Generate per-chromosome PNG plots in outdir
     # ----------------------------
-
     df_genes = build_gene_table(loh_regions, loh_genes, cnr, pon, refgene, cytoband)
 
     # ----------------------------
@@ -565,8 +568,11 @@ def main(
     # ----------------------------
     chr_plots_dir = outdir / f"{case_id}_chr_plots"
     chr_plots_dir.mkdir(exist_ok=True, parents=True)
-
-    plot_chromosomes(pon, cnr, vcf, loh_genes, loh_regions, chr_plots_dir)
+    if cust_case_id:
+        plot_case_id = cust_case_id
+    else:
+        plot_case_id = case_id
+    plot_chromosomes(pon, cnr, vcf, loh_genes, loh_regions, chr_plots_dir, plot_case_id)
 
     # ----------------------------
     # HTML report
