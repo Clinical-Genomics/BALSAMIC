@@ -80,11 +80,9 @@ def flag_cnv_genes(df: pd.DataFrame) -> pd.DataFrame:
     df = df[~df["gene.symbol"].isin(["Antitarget", "-"])]
 
     cnv_mask = (
-        (df["C"].notna()) & (df["C"] != 2)
-    ) | (
-        df["loh"].astype(str).str.upper() == "TRUE"
-    ) | (
-        df["type"].notna() & (df["type"].astype(str) != "NA")
+        ((df["C"].notna()) & (df["C"] != 2))
+        | (df["loh"].astype(str).str.upper() == "TRUE")
+        | (df["type"].notna() & (df["type"].astype(str) != "NA"))
     )
 
     return df[cnv_mask]
@@ -258,12 +256,10 @@ def plot_chromosomes(
 
         # Smoothing (rolling on row order; x only used for plotting)
         sub = sub.sort_values("x_coord")
-        sub["log2_smooth"] = sub["log2"].rolling(
-            window=window, center=True
-        ).median()
-        sub["spread_smooth"] = sub["spread"].rolling(
-            window=window, center=True
-        ).median()
+        sub["log2_smooth"] = sub["log2"].rolling(window=window, center=True).median()
+        sub["spread_smooth"] = (
+            sub["spread"].rolling(window=window, center=True).median()
+        )
 
         # Helper: map genomic POS → x_coord (nearest bin)
         bin_starts = sub["start"].values
@@ -467,9 +463,7 @@ def plot_chromosomes(
         for frac in [1 / 3, 2 / 3]:
             ax2.axhline(frac, color="lightgray", linewidth=0.6, linestyle=":")
         ax2.set_ylim(0, 1)
-        ax2.set_xlabel(
-            "Pseudo-position (targets expanded, antitargets compressed)"
-        )
+        ax2.set_xlabel("Pseudo-position (targets expanded, antitargets compressed)")
         ax2.set_ylabel("BAF")
 
         plt.tight_layout()
@@ -482,22 +476,86 @@ def plot_chromosomes(
 # Click CLI
 # -----------------------------
 @click.command()
-@click.option("--pon", "pon_path", required=True, type=click.Path(exists=True), help="CNVkit PON .cnn file")
-@click.option("--cnr", "cnr_path", required=True, type=click.Path(exists=True), help="Tumor CNVkit .cnr file")
-@click.option("--vcf", "vcf_path", required=True, type=click.Path(exists=True), help="VCF with germline SNPs")
-@click.option("--genes", "genes_path", required=True, type=click.Path(exists=True), help="PureCN *_genes.csv file")
-@click.option("--segs", "segs_path", required=True, type=click.Path(exists=True), help="PureCN *_loh.csv or segments CSV")
-@click.option("--outdir", required=True, type=click.Path(), help="Output directory for PNGs")
-@click.option("--include-y/--no-include-y", default=False, show_default=True, help="Include chromosome Y")
-@click.option("--weight-thresh", default=0.5, show_default=True, help="Minimum bin weight to keep")
-@click.option("--spread-quantile", default=0.90, show_default=True, help="Spread quantile threshold for noisy bins")
-@click.option("--window", default=21, show_default=True, help="Rolling window size for smoothing")
-@click.option("--anti-factor", default=0.2, show_default=True, help="Relative x-width of antitarget bins")
-@click.option("--label-offset", default=0.2, show_default=True, help="Vertical offset for gene labels (log2 units)")
-@click.option("--dp-min", default=15, show_default=True, help="Minimum DP for SNPs used in BAF")
-@click.option("--mq-min", default=35.0, show_default=True, help="Minimum MQ for SNPs used in BAF")
-@click.option("--qd-min", default=30.0, show_default=True, help="Minimum QD for SNPs used in BAF")
-@click.option("--sor-max", default=2.0, show_default=True, help="Maximum SOR for SNPs used in BAF")
+@click.option(
+    "--pon",
+    "pon_path",
+    required=True,
+    type=click.Path(exists=True),
+    help="CNVkit PON .cnn file",
+)
+@click.option(
+    "--cnr",
+    "cnr_path",
+    required=True,
+    type=click.Path(exists=True),
+    help="Tumor CNVkit .cnr file",
+)
+@click.option(
+    "--vcf",
+    "vcf_path",
+    required=True,
+    type=click.Path(exists=True),
+    help="VCF with germline SNPs",
+)
+@click.option(
+    "--genes",
+    "genes_path",
+    required=True,
+    type=click.Path(exists=True),
+    help="PureCN *_genes.csv file",
+)
+@click.option(
+    "--segs",
+    "segs_path",
+    required=True,
+    type=click.Path(exists=True),
+    help="PureCN *_loh.csv or segments CSV",
+)
+@click.option(
+    "--outdir", required=True, type=click.Path(), help="Output directory for PNGs"
+)
+@click.option(
+    "--include-y/--no-include-y",
+    default=False,
+    show_default=True,
+    help="Include chromosome Y",
+)
+@click.option(
+    "--weight-thresh", default=0.5, show_default=True, help="Minimum bin weight to keep"
+)
+@click.option(
+    "--spread-quantile",
+    default=0.90,
+    show_default=True,
+    help="Spread quantile threshold for noisy bins",
+)
+@click.option(
+    "--window", default=21, show_default=True, help="Rolling window size for smoothing"
+)
+@click.option(
+    "--anti-factor",
+    default=0.2,
+    show_default=True,
+    help="Relative x-width of antitarget bins",
+)
+@click.option(
+    "--label-offset",
+    default=0.2,
+    show_default=True,
+    help="Vertical offset for gene labels (log2 units)",
+)
+@click.option(
+    "--dp-min", default=15, show_default=True, help="Minimum DP for SNPs used in BAF"
+)
+@click.option(
+    "--mq-min", default=35.0, show_default=True, help="Minimum MQ for SNPs used in BAF"
+)
+@click.option(
+    "--qd-min", default=30.0, show_default=True, help="Minimum QD for SNPs used in BAF"
+)
+@click.option(
+    "--sor-max", default=2.0, show_default=True, help="Maximum SOR for SNPs used in BAF"
+)
 def cli(
     pon_path,
     cnr_path,

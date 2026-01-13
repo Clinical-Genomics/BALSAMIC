@@ -11,13 +11,17 @@ import fitz
 # Generic helpers
 # =============================================================================
 
+
 def pdf_first_page_to_png(pdf_path: str, png_path: str, dpi: int = 300) -> None:
     doc = fitz.open(pdf_path)
     page = doc[0]
     page.get_pixmap(dpi=dpi).save(png_path)
     doc.close()
 
-def normalize_chr_column(df: pd.DataFrame, prefer_col: str | None = None) -> tuple[pd.DataFrame, str]:
+
+def normalize_chr_column(
+    df: pd.DataFrame, prefer_col: str | None = None
+) -> tuple[pd.DataFrame, str]:
     """
     Detect and normalize a chromosome column to plain '1'..'22','X','Y'.
     Returns (df_with_chr, chr_col_name).
@@ -47,7 +51,7 @@ def extract_info_float(info_str: str, key: str) -> float:
     for field in str(info_str).split(";"):
         if field.startswith(key_eq):
             try:
-                return float(field[len(key_eq):])
+                return float(field[len(key_eq) :])
             except ValueError:
                 return math.nan
     return math.nan
@@ -84,7 +88,7 @@ def parse_sample_fields(format_str: str, sample_str: str) -> tuple[float, None, 
         if len(counts) < 2:
             return math.nan, None, dp_sample
         ref_c = counts[0]
-        alt_c = counts[1]   # if multi-allelic, this is the first alt
+        alt_c = counts[1]  # if multi-allelic, this is the first alt
         total = ref_c + alt_c
         if total == 0:
             return math.nan, None, dp_sample
@@ -98,6 +102,7 @@ def parse_sample_fields(format_str: str, sample_str: str) -> tuple[float, None, 
 # Cytoband
 # =============================================================================
 
+
 def load_cytobands(path: str | Path) -> pd.DataFrame:
     cols = ["chrom", "chromStart", "chromEnd", "name", "gieStain"]
     cyto = pd.read_csv(path, sep="\t", header=None, names=cols)
@@ -105,13 +110,14 @@ def load_cytobands(path: str | Path) -> pd.DataFrame:
     # normalize
     cyto["chrom"] = cyto["chrom"].astype(str).str.replace("^chr", "", regex=True)
     cyto["start_int"] = cyto["chromStart"].astype(int)
-    cyto["end_int"]   = cyto["chromEnd"].astype(int)
+    cyto["end_int"] = cyto["chromEnd"].astype(int)
 
     return cyto
 
 
-def annotate_genes_with_cytoband(df_genes: pd.DataFrame,
-                                 cyto: pd.DataFrame) -> pd.DataFrame:
+def annotate_genes_with_cytoband(
+    df_genes: pd.DataFrame, cyto: pd.DataFrame
+) -> pd.DataFrame:
     """
     Add a 'cytoband' column to df_genes based on the segment coordinates
     (seg_start, seg_end). If seg_* are NaN, falls back to gene start/end.
@@ -128,7 +134,7 @@ def annotate_genes_with_cytoband(df_genes: pd.DataFrame,
     df["chr"] = df["chr"].astype(str).str.replace("^chr", "", regex=True)
 
     # Prepare output column
-    df["cytoband"] = np.nan
+    df["cytoband"] = pd.Series(pd.NA, index=df.index, dtype="string")
 
     # ensure seg_start / seg_end exist; if not, create as NaN
     if "seg_start" not in df.columns:
@@ -143,19 +149,19 @@ def annotate_genes_with_cytoband(df_genes: pd.DataFrame,
 
         cyto_chr = cyto_chr.sort_values("start_int")
         band_starts = cyto_chr["start_int"].to_numpy()
-        band_ends   = cyto_chr["end_int"].to_numpy()
-        band_names  = cyto_chr["name"].to_numpy()
+        band_ends = cyto_chr["end_int"].to_numpy()
+        band_names = cyto_chr["name"].to_numpy()
 
         for idx, row in genes_chr.iterrows():
             # prefer segment coords; fallback to gene coords
             if not pd.isna(row["seg_start"]) and not pd.isna(row["seg_end"]):
                 s_start = int(row["seg_start"])
-                s_end   = int(row["seg_end"])
+                s_end = int(row["seg_end"])
             else:
                 if "start" not in df.columns or "end" not in df.columns:
                     continue
                 s_start = int(row["start"])
-                s_end   = int(row["end"])
+                s_end = int(row["end"])
 
             mask = (band_starts <= s_end) & (band_ends >= s_start)
             if not mask.any():
@@ -167,7 +173,7 @@ def annotate_genes_with_cytoband(df_genes: pd.DataFrame,
                 label = f"{chrom}{names[0]}"
             else:
                 first = names[0]
-                last  = names[-1]
+                last = names[-1]
                 label = f"{chrom}{first}-{chrom}{last}"
 
             df.at[idx, "cytoband"] = label
@@ -179,8 +185,8 @@ def annotate_genes_with_cytoband(df_genes: pd.DataFrame,
 # PureCN CNV genes
 # =============================================================================
 
-def flag_cnv_genes(df: pd.DataFrame,
-                   min_targets_cnvgene: int = 4) -> pd.DataFrame:
+
+def flag_cnv_genes(df: pd.DataFrame, min_targets_cnvgene: int = 4) -> pd.DataFrame:
     """
     Subset PureCN genes to those that look like CNV genes.
 
@@ -193,11 +199,9 @@ def flag_cnv_genes(df: pd.DataFrame,
     df = df[~df["gene.symbol"].isin(["Antitarget", "-"])]
 
     cnv_mask = (
-        (df["C"].notna()) & (df["C"] != 2)
-    ) | (
-        df["loh"].astype(str).str.upper() == "TRUE"
-    ) | (
-        df["type"].notna() & (df["type"].astype(str) != "NA")
+        ((df["C"].notna()) & (df["C"] != 2))
+        | (df["loh"].astype(str).str.upper() == "TRUE")
+        | (df["type"].notna() & (df["type"].astype(str) != "NA"))
     )
 
     df = df[cnv_mask]
@@ -212,10 +216,13 @@ def flag_cnv_genes(df: pd.DataFrame,
 # CNR + PON merge
 # =============================================================================
 
-def merge_cnr_pon(df_cnr: pd.DataFrame,
-                  df_pon: pd.DataFrame,
-                  chr_col: str = "chromosome",
-                  spread_col: str = "spread") -> pd.DataFrame:
+
+def merge_cnr_pon(
+    df_cnr: pd.DataFrame,
+    df_pon: pd.DataFrame,
+    chr_col: str = "chromosome",
+    spread_col: str = "spread",
+) -> pd.DataFrame:
     """
     Merge CNVkit tumor CNR with PON on (chr, start, end) and drop rows
     without PON spread.
@@ -247,8 +254,8 @@ def merge_cnr_pon(df_cnr: pd.DataFrame,
 # VCF → BAF
 # =============================================================================
 
-def load_vcf_with_baf(vcf_path: str | Path,
-                      chr_order: list[str]) -> pd.DataFrame:
+
+def load_vcf_with_baf(vcf_path: str | Path, chr_order: list[str]) -> pd.DataFrame:
     """
     Load a (possibly unfiltered) VCF with a single tumor sample and compute:
 
@@ -290,6 +297,7 @@ def load_vcf_with_baf(vcf_path: str | Path,
 # =============================================================================
 # Per-chromosome plots (PON spread + log2 + segments + BAF + CNV genes)
 # =============================================================================
+
 
 def plot_chromosomes(
     pon_path: Path,
@@ -378,11 +386,13 @@ def plot_chromosomes(
         # smoothing
         sub = sub.sort_values("x_coord")
         sub["log2_smooth"] = sub["log2"].rolling(window=window, center=True).median()
-        sub["spread_smooth"] = sub["spread"].rolling(window=window, center=True).median()
+        sub["spread_smooth"] = (
+            sub["spread"].rolling(window=window, center=True).median()
+        )
 
         # helper: map genomic POS → x_coord (nearest bin)
         bin_starts = sub["start"].values
-        x_coords   = sub["x_coord"].values
+        x_coords = sub["x_coord"].values
 
         def pos_to_xcoord(pos: int) -> float:
             idx = np.searchsorted(bin_starts, pos, side="right") - 1
@@ -420,11 +430,12 @@ def plot_chromosomes(
 
         if not segs_chr.empty:
             segs_chr["x_start"] = segs_chr["start"].apply(pos_to_xcoord)
-            segs_chr["x_end"]   = segs_chr["end"].apply(pos_to_xcoord)
+            segs_chr["x_end"] = segs_chr["end"].apply(pos_to_xcoord)
 
         # ---------- Figure + axes ----------
         fig, (ax1, ax2) = plt.subplots(
-            2, 1,
+            2,
+            1,
             figsize=(14, 6),
             sharex=True,
             gridspec_kw={"height_ratios": [2, 1]},
@@ -439,7 +450,7 @@ def plot_chromosomes(
             non_cnv = sub
 
         bg_targets = non_cnv[non_cnv["type"] == "Target"]
-        bg_antis   = non_cnv[non_cnv["type"] == "Antitarget"]
+        bg_antis = non_cnv[non_cnv["type"] == "Antitarget"]
 
         # Non-CNV antitargets: faint grey
         if not bg_antis.empty:
@@ -539,8 +550,8 @@ def plot_chromosomes(
 
             for _, row in genes_chr.iterrows():
                 gene = row["gene.symbol"]
-                gx   = row["x_coord"]
-                key  = (gene, gx)
+                gx = row["x_coord"]
+                key = (gene, gx)
                 if key in seen_positions:
                     continue
                 seen_positions.add(key)
@@ -580,9 +591,7 @@ def plot_chromosomes(
         for frac in [1 / 3, 2 / 3]:
             ax2.axhline(frac, color="lightgray", linewidth=0.6, linestyle=":")
         ax2.set_ylim(0, 1)
-        ax2.set_xlabel(
-            "Pseudo-position (targets expanded, antitargets compressed)"
-        )
+        ax2.set_xlabel("Pseudo-position (targets expanded, antitargets compressed)")
         ax2.set_ylabel("BAF")
 
         plt.tight_layout()
@@ -595,8 +604,10 @@ def plot_chromosomes(
 # Segment → gene table annotation (size, MAF)
 # =============================================================================
 
-def annotate_genes_with_segments(df_genes: pd.DataFrame,
-                                 df_regions: pd.DataFrame) -> pd.DataFrame:
+
+def annotate_genes_with_segments(
+    df_genes: pd.DataFrame, df_regions: pd.DataFrame
+) -> pd.DataFrame:
     """
     For each gene row in df_genes, find the LOH region in df_regions on the same
     chromosome with the largest overlap, and annotate:
@@ -610,19 +621,21 @@ def annotate_genes_with_segments(df_genes: pd.DataFrame,
     df_regions = df_regions.copy()
 
     # normalize chr / positions
-    df_genes["chr"]   = df_genes["chr"].astype(str).str.replace("^chr", "", regex=True)
-    df_regions["chr"] = df_regions["chr"].astype(str).str.replace("^chr", "", regex=True)
+    df_genes["chr"] = df_genes["chr"].astype(str).str.replace("^chr", "", regex=True)
+    df_regions["chr"] = (
+        df_regions["chr"].astype(str).str.replace("^chr", "", regex=True)
+    )
 
-    df_genes["start_int"]   = df_genes["start"].astype(int)
-    df_genes["end_int"]     = df_genes["end"].astype(int)
+    df_genes["start_int"] = df_genes["start"].astype(int)
+    df_genes["end_int"] = df_genes["end"].astype(int)
     df_regions["start_int"] = df_regions["start"].astype(int)
-    df_regions["end_int"]   = df_regions["end"].astype(int)
+    df_regions["end_int"] = df_regions["end"].astype(int)
 
     df_regions["seg_size_bp"] = df_regions["end_int"] - df_regions["start_int"] + 1
 
-    df_genes["seg_start"]      = np.nan
-    df_genes["seg_end"]        = np.nan
-    df_genes["seg_size_bp"]    = np.nan
+    df_genes["seg_start"] = np.nan
+    df_genes["seg_end"] = np.nan
+    df_genes["seg_size_bp"] = np.nan
 
     maf_cols: list[str] = []
     for col in ["maf.expected", "maf.observed"]:
@@ -637,8 +650,8 @@ def annotate_genes_with_segments(df_genes: pd.DataFrame,
 
         regs_chr = regs_chr.sort_values("start_int")
         seg_starts = regs_chr["start_int"].to_numpy()
-        seg_ends   = regs_chr["end_int"].to_numpy()
-        seg_sizes  = regs_chr["seg_size_bp"].to_numpy()
+        seg_ends = regs_chr["end_int"].to_numpy()
+        seg_sizes = regs_chr["seg_size_bp"].to_numpy()
 
         maf_arrays: dict[str, np.ndarray] = {}
         for col in maf_cols:
@@ -646,26 +659,26 @@ def annotate_genes_with_segments(df_genes: pd.DataFrame,
 
         for idx, row in genes_chr.iterrows():
             g_start = row["start_int"]
-            g_end   = row["end_int"]
+            g_end = row["end_int"]
 
             overlap_mask = (seg_starts <= g_end) & (seg_ends >= g_start)
             if not overlap_mask.any():
                 continue
 
             o_starts = np.maximum(seg_starts[overlap_mask], g_start)
-            o_ends   = np.minimum(seg_ends[overlap_mask], g_end)
+            o_ends = np.minimum(seg_ends[overlap_mask], g_end)
             overlaps = o_ends - o_starts + 1
 
             best_idx_local = overlaps.argmax()
             seg_idx = np.where(overlap_mask)[0][best_idx_local]
 
             seg_start = seg_starts[seg_idx]
-            seg_end   = seg_ends[seg_idx]
-            seg_size  = seg_sizes[seg_idx]
+            seg_end = seg_ends[seg_idx]
+            seg_size = seg_sizes[seg_idx]
 
-            df_genes.at[idx, "seg_start"]      = int(seg_start)
-            df_genes.at[idx, "seg_end"]        = int(seg_end)
-            df_genes.at[idx, "seg_size_bp"]    = int(seg_size)
+            df_genes.at[idx, "seg_start"] = int(seg_start)
+            df_genes.at[idx, "seg_end"] = int(seg_end)
+            df_genes.at[idx, "seg_size_bp"] = int(seg_size)
 
             for col in maf_cols:
                 df_genes.at[idx, col] = maf_arrays[col][seg_idx]
@@ -676,6 +689,7 @@ def annotate_genes_with_segments(df_genes: pd.DataFrame,
 # =============================================================================
 # PON spread & weight significance per gene
 # =============================================================================
+
 
 def add_pon_spread_significance(
     df_genes: pd.DataFrame,
@@ -715,20 +729,18 @@ def add_pon_spread_significance(
 
     merged_bins[gene_col_cnr] = merged_bins[gene_col_cnr].astype(str)
 
-    merged_expanded = (
-        merged_bins
-        .assign(**{
+    merged_expanded = merged_bins.assign(
+        **{
             gene_col_cnr: merged_bins[gene_col_cnr]
-                .str.split(",")
-                .apply(lambda lst: [g.strip() for g in lst if g.strip()])
-        })
-        .explode(gene_col_cnr)
-    )
+            .str.split(",")
+            .apply(lambda lst: [g.strip() for g in lst if g.strip()])
+        }
+    ).explode(gene_col_cnr)
 
     agg_dict = {
         spread_col: [
             ("pon_spread_median", "median"),
-            ("pon_spread_q90",    lambda x: x.quantile(0.90)),
+            ("pon_spread_q90", lambda x: x.quantile(0.90)),
         ]
     }
 
@@ -736,26 +748,23 @@ def add_pon_spread_significance(
     if have_weight:
         agg_dict[weight_col] = [
             ("weight_median", "median"),
-            ("weight_mean",   "mean"),
+            ("weight_mean", "mean"),
         ]
 
     agg = (
-        merged_expanded
-        .groupby(gene_col_cnr)
-        .agg(**{
-            name: pd.NamedAgg(column=col, aggfunc=func)
-            for col, specs in agg_dict.items()
-            for name, func in specs
-        })
+        merged_expanded.groupby(gene_col_cnr)
+        .agg(
+            **{
+                name: pd.NamedAgg(column=col, aggfunc=func)
+                for col, specs in agg_dict.items()
+                for name, func in specs
+            }
+        )
         .reset_index()
     )
 
     bin_counts = (
-        merged_expanded
-        .groupby(gene_col_cnr)
-        .size()
-        .rename("pon_n_bins")
-        .reset_index()
+        merged_expanded.groupby(gene_col_cnr).size().rename("pon_n_bins").reset_index()
     )
 
     agg = agg.merge(bin_counts, on=gene_col_cnr, how="left")
@@ -770,13 +779,12 @@ def add_pon_spread_significance(
     eps = 1e-6
     for col_gene, new_col in [
         ("gene.mean", "mean_vs_spread"),
-        ("gene.min",  "min_vs_spread"),
-        ("gene.max",  "max_vs_spread"),
+        ("gene.min", "min_vs_spread"),
+        ("gene.max", "max_vs_spread"),
     ]:
         if col_gene in df_genes.columns:
-            df_genes[new_col] = (
-                df_genes[col_gene].abs()
-                / (df_genes["pon_spread_median"].replace(0, eps) + eps)
+            df_genes[new_col] = df_genes[col_gene].abs() / (
+                df_genes["pon_spread_median"].replace(0, eps) + eps
             )
         else:
             df_genes[new_col] = np.nan
@@ -799,6 +807,7 @@ def add_pon_spread_significance(
 # =============================================================================
 # refGene / exon coverage
 # =============================================================================
+
 
 def load_refgene_exons(
     refgene_path: str | Path,
@@ -823,22 +832,22 @@ def load_refgene_exons(
     """
     cols = [
         "gene_symbol",  # 0
-        "transcript",   # 1
-        "chrom",        # 2
-        "strand",       # 3
-        "txStart",      # 4
-        "txEnd",        # 5
-        "cdsStart",     # 6
-        "cdsEnd",       # 7
-        "exonCount",    # 8
-        "exonStarts",   # 9
-        "exonEnds",     #10
+        "transcript",  # 1
+        "chrom",  # 2
+        "strand",  # 3
+        "txStart",  # 4
+        "txEnd",  # 5
+        "cdsStart",  # 6
+        "cdsEnd",  # 7
+        "exonCount",  # 8
+        "exonStarts",  # 9
+        "exonEnds",  # 10
     ]
     rg = pd.read_csv(refgene_path, sep="\t", header=None, names=cols)
 
     rg["chrom"] = rg["chrom"].astype(str).str.replace("^chr", "", regex=True)
     rg["txStart"] = rg["txStart"].astype(int)
-    rg["txEnd"]   = rg["txEnd"].astype(int)
+    rg["txEnd"] = rg["txEnd"].astype(int)
 
     exon_map: Dict[Tuple[str, str], dict] = {}
 
@@ -853,10 +862,10 @@ def load_refgene_exons(
             best = sub.iloc[0]
 
         transcript = best["transcript"]
-        strand     = best["strand"]
+        strand = best["strand"]
 
         starts = [int(x) for x in str(best["exonStarts"]).split(",") if x != ""]
-        ends   = [int(x) for x in str(best["exonEnds"]).split(",") if x != ""]
+        ends = [int(x) for x in str(best["exonEnds"]).split(",") if x != ""]
         exons: List[Tuple[int, int]] = list(zip(starts, ends))
 
         if not exons:
@@ -901,41 +910,41 @@ def annotate_genes_with_exons(
 
     df_genes["chr"] = df_genes["chr"].astype(str).str.replace("^chr", "", regex=True)
 
-    df_genes["transcript"]    = ""
+    df_genes["transcript"] = ""
     df_genes["exon_coverage"] = np.nan
-    df_genes["exons_hit"]     = ""
+    df_genes["exons_hit"] = ""
 
     gene_col = "gene.symbol" if "gene.symbol" in df_genes.columns else "gene"
 
     for idx, row in df_genes.iterrows():
         chrom = str(row["chr"])
-        gene  = row[gene_col]
+        gene = row[gene_col]
 
         entry = exon_map.get((chrom, gene))
         if entry is None:
             continue
 
-        exons      = entry["exons"]
+        exons = entry["exons"]
         transcript = entry["transcript"]
 
         if pd.isna(row["seg_start"]) or pd.isna(row["seg_end"]):
             continue
 
         seg_start = int(row["seg_start"])
-        seg_end   = int(row["seg_end"])
+        seg_end = int(row["seg_end"])
 
-        total_exonic_bp   = 0
+        total_exonic_bp = 0
         covered_exonic_bp = 0
-        hit_exon_indices  = []
+        hit_exon_indices = []
 
         for i, (e_start, e_end) in enumerate(exons, start=1):
             exon_len = e_end - e_start + 1
             total_exonic_bp += exon_len
 
             ov_start = max(e_start, seg_start)
-            ov_end   = min(e_end, seg_end)
+            ov_end = min(e_end, seg_end)
             if ov_end >= ov_start:
-                covered_exonic_bp += (ov_end - ov_start + 1)
+                covered_exonic_bp += ov_end - ov_start + 1
                 hit_exon_indices.append(i)
 
         if total_exonic_bp == 0:
@@ -943,7 +952,7 @@ def annotate_genes_with_exons(
 
         cov = covered_exonic_bp / total_exonic_bp
 
-        df_genes.at[idx, "transcript"]    = transcript
+        df_genes.at[idx, "transcript"] = transcript
         df_genes.at[idx, "exon_coverage"] = round(cov, 3)
 
         if cov >= coverage_threshold:
@@ -952,13 +961,14 @@ def annotate_genes_with_exons(
             desc = "no coding exons"
         else:
             N = len(exons)
-            if (
-                len(hit_exon_indices) > 1
-                and max(hit_exon_indices) - min(hit_exon_indices) + 1 == len(hit_exon_indices)
-            ):
+            if len(hit_exon_indices) > 1 and max(hit_exon_indices) - min(
+                hit_exon_indices
+            ) + 1 == len(hit_exon_indices):
                 desc = f"exons {min(hit_exon_indices)}–{max(hit_exon_indices)} of {N}"
             else:
-                desc = "exons " + ",".join(str(i) for i in hit_exon_indices) + f" of {N}"
+                desc = (
+                    "exons " + ",".join(str(i) for i in hit_exon_indices) + f" of {N}"
+                )
 
         df_genes.at[idx, "exons_hit"] = desc
 
@@ -968,6 +978,7 @@ def annotate_genes_with_exons(
 # =============================================================================
 # Final LOH genes table builder
 # =============================================================================
+
 
 def build_gene_table(
     loh_regions_path: str | Path,
@@ -988,18 +999,22 @@ def build_gene_table(
       - rounded / cleaned numeric columns
     """
     df_regions = pd.read_csv(loh_regions_path, sep=",")
-    df_cnr     = pd.read_csv(cnr_path, sep="\t")
-    df_genes   = pd.read_csv(loh_genes_path, sep=",")
-    df_pon     = pd.read_csv(pon_path, sep="\t")
-    cyto       = load_cytobands(cytoband_path)
+    df_cnr = pd.read_csv(cnr_path, sep="\t")
+    df_genes = pd.read_csv(loh_genes_path, sep=",")
+    df_pon = pd.read_csv(pon_path, sep="\t")
+    cyto = load_cytobands(cytoband_path)
 
     # segment annotation
     df_genes = annotate_genes_with_segments(df_genes, df_regions)
 
     # drop helper columns we don't want in final table
     drop_cols = [
-        "Sampleid", "C.flagged", "seg.id",
-        "start_int", "end_int", "breakpoints",
+        "Sampleid",
+        "C.flagged",
+        "seg.id",
+        "start_int",
+        "end_int",
+        "breakpoints",
     ]
     drop_cols = [c for c in drop_cols if c in df_genes.columns]
     df_genes = df_genes.drop(columns=drop_cols)
@@ -1012,17 +1027,17 @@ def build_gene_table(
     df_genes = annotate_genes_with_exons(df_genes, exon_map, coverage_threshold=0.95)
 
     # type cleanup (fill NaN using C)
-    df_genes["type"] = df_genes["type"].astype(str)
+    df_genes["type"] = df_genes["type"].astype("string")
     df_genes["type"] = df_genes["type"].replace(
         ["NA", "NaN", "nan", "None", ".", ""],
-        np.nan
+        pd.NA,  # or np.nan, but pd.NA plays nicer with "string" dtype
     )
     missing_type = df_genes["type"].isna()
 
-    gain_mask = missing_type & (df_genes["C"].notna()) & (df_genes["C"] > 2)
-    df_genes.loc[gain_mask, "type"] = "AMPLIFICATION"
+    gain_mask = missing_type & df_genes["C"].notna() & (df_genes["C"] > 2)
+    loss_mask = missing_type & df_genes["C"].notna() & (df_genes["C"] < 2)
 
-    loss_mask = missing_type & (df_genes["C"].notna()) & (df_genes["C"] < 2)
+    df_genes.loc[gain_mask, "type"] = "AMPLIFICATION"
     df_genes.loc[loss_mask, "type"] = "DELETION"
 
     # cytoband
@@ -1030,16 +1045,36 @@ def build_gene_table(
 
     # column order
     cols = [
-        "gene.symbol", "transcript", "number.targets",
-        "chr", "start", "end",
-        "seg_start", "seg_end", "seg_size_bp", "cytoband",
-        "exon_coverage", "exons_hit",
-        "type", "loh", "C", "M", "M.flagged",
-        "maf.expected", "maf.observed",
-        "gene.mean", "gene.min", "gene.max",
-        "pon_spread_median", "pon_spread_q90",
-        "weight_median", "weight_mean", "pon_n_bins",
-        "mean_vs_spread", "min_vs_spread", "max_vs_spread",
+        "gene.symbol",
+        "transcript",
+        "number.targets",
+        "chr",
+        "start",
+        "end",
+        "seg_start",
+        "seg_end",
+        "seg_size_bp",
+        "cytoband",
+        "exon_coverage",
+        "exons_hit",
+        "type",
+        "loh",
+        "C",
+        "M",
+        "M.flagged",
+        "maf.expected",
+        "maf.observed",
+        "gene.mean",
+        "gene.min",
+        "gene.max",
+        "pon_spread_median",
+        "pon_spread_q90",
+        "weight_median",
+        "weight_mean",
+        "pon_n_bins",
+        "mean_vs_spread",
+        "min_vs_spread",
+        "max_vs_spread",
         "pon_spread_flag",
     ]
     cols = [c for c in cols if c in df_genes.columns]
@@ -1066,8 +1101,11 @@ def build_gene_table(
 
     # drop some internal columns if you don't want them visible
     drop_final = [
-        "pon_spread_q90", "weight_median",
-        "pon_n_bins", "min_vs_spread", "max_vs_spread",
+        "pon_spread_q90",
+        "weight_median",
+        "pon_n_bins",
+        "min_vs_spread",
+        "max_vs_spread",
     ]
     drop_final = [c for c in drop_final if c in df_genes.columns]
     df_genes = df_genes.drop(columns=drop_final)

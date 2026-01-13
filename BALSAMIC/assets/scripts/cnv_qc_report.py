@@ -4,11 +4,8 @@ import base64
 import json
 import pandas as pd
 from pathlib import Path
-from cnv_report_utils import (
-    plot_chromosomes,
-    build_gene_table,
-    pdf_first_page_to_png
-)
+from cnv_report_utils import plot_chromosomes, build_gene_table, pdf_first_page_to_png
+
 
 def csv_to_html_table(
     df: pd.DataFrame,
@@ -53,10 +50,10 @@ def csv_to_html_table(
         is_type_real = ~df_chr["type_str"].isin(["NA", "NAN", ".", ""])
 
         cnv_mask = (
-            (df_chr["C"].notna()) & (df_chr["C"] != 2)
-        ) | (
-            df_chr["loh_str"] == "TRUE"
-        ) | is_type_real
+            ((df_chr["C"].notna()) & (df_chr["C"] != 2))
+            | (df_chr["loh_str"] == "TRUE")
+            | is_type_real
+        )
 
         cnv_chr_set = set(df_chr.loc[cnv_mask, chr_col].astype(str).tolist())
 
@@ -476,29 +473,73 @@ def csv_to_html_table(
 
 
 @click.command()
-@click.option("--loh-genes",  type=click.Path(exists=True), required=True,
-              help="PureCN LOH genes CSV (…_genes.csv).")
-@click.option("--loh-regions", type=click.Path(exists=True), required=True,
-              help="PureCN LOH regions CSV (…_loh.csv).")
-@click.option("--cnr",        type=click.Path(exists=True), required=True,
-              help="CNVkit tumor .cnr file.")
-@click.option("--pon",        type=click.Path(exists=True), required=True,
-              help="CNVkit PON .cnn file.")
-@click.option("--vcf",        type=click.Path(exists=True), required=True,
-              help="VCF with germline variants for BAF.")
-@click.option("--refgene",    type=click.Path(exists=True), required=True,
-              help="refgene.flat file.")
-@click.option("--cytoband",   type=click.Path(exists=True), required=True,
-              help="cytoBand file for genome build.")
-@click.option("--case-id",  type=str, required=True,
-              help="Sample ID for labels / outputs.")
-@click.option("--purecn-scatter", type=click.Path(exists=True), required=True,
-              help="purecn scatter PDF file.")
-@click.option("--purecn-diagram", type=click.Path(exists=True), required=True,
-              help="purecn diagram PDF file.")
-@click.option("--out-prefix", type=click.Path(), required=True,
-              help="Output prefix (e.g. /path/to/sample_cnv_qc).")
-def main(loh_genes, loh_regions, cnr, pon, vcf, refgene, cytoband, case_id, purecn_scatter, purecn_diagram, out_prefix):
+@click.option(
+    "--loh-genes",
+    type=click.Path(exists=True),
+    required=True,
+    help="PureCN LOH genes CSV (…_genes.csv).",
+)
+@click.option(
+    "--loh-regions",
+    type=click.Path(exists=True),
+    required=True,
+    help="PureCN LOH regions CSV (…_loh.csv).",
+)
+@click.option(
+    "--cnr", type=click.Path(exists=True), required=True, help="CNVkit tumor .cnr file."
+)
+@click.option(
+    "--pon", type=click.Path(exists=True), required=True, help="CNVkit PON .cnn file."
+)
+@click.option(
+    "--vcf",
+    type=click.Path(exists=True),
+    required=True,
+    help="VCF with germline variants for BAF.",
+)
+@click.option(
+    "--refgene", type=click.Path(exists=True), required=True, help="refgene.flat file."
+)
+@click.option(
+    "--cytoband",
+    type=click.Path(exists=True),
+    required=True,
+    help="cytoBand file for genome build.",
+)
+@click.option(
+    "--case-id", type=str, required=True, help="Sample ID for labels / outputs."
+)
+@click.option(
+    "--purecn-scatter",
+    type=click.Path(exists=True),
+    required=True,
+    help="purecn scatter PDF file.",
+)
+@click.option(
+    "--purecn-diagram",
+    type=click.Path(exists=True),
+    required=True,
+    help="purecn diagram PDF file.",
+)
+@click.option(
+    "--out-prefix",
+    type=click.Path(),
+    required=True,
+    help="Output prefix (e.g. /path/to/sample_cnv_qc).",
+)
+def main(
+    loh_genes,
+    loh_regions,
+    cnr,
+    pon,
+    vcf,
+    refgene,
+    cytoband,
+    case_id,
+    purecn_scatter,
+    purecn_diagram,
+    out_prefix,
+):
     """
     Build CNV QC plots + HTML report from PureCN + CNVkit outputs.
     """
