@@ -15,7 +15,7 @@ def csv_to_html_table(
     out_html: str,
     scatter_png: str,
     diagram_png: str,
-    cnv_chrom_dir: str | Path | None = None,
+    chr_plots_dir: str | Path | None = None,
 ) -> None:
     out_path = Path(out_html)
 
@@ -66,8 +66,8 @@ def csv_to_html_table(
     with_cnv_blocks: list[str] = []
     no_cnv_blocks: list[str] = []
 
-    if cnv_chrom_dir is not None:
-        qc_dir = Path(cnv_chrom_dir)
+    if chr_plots_dir is not None:
+        qc_dir = Path(chr_plots_dir)
         if qc_dir.is_dir():
             png_files = list(qc_dir.glob("cnv_chr*segments.png"))
 
@@ -204,9 +204,13 @@ def csv_to_html_table(
 <body>
   <h1>CNV Report</h1>
 
-  <h2>PureCN plot (SVG)</h2>
+  <h2>PureCN plot (PNG embedded)</h2>
   <div style="border:1px solid #ccc; padding:10px; margin-top:20px; width:100%;">
-    {scatter_png_data_uri}
+    <img
+      src="{scatter_png_data_uri}"
+      alt="PureCN PNG plot"
+      style="max-width:100%; height:auto; display:block;"
+    />
   </div>
 
   <h2>PureCN plot (PNG embedded)</h2>
@@ -532,6 +536,7 @@ def main(loh_genes, loh_regions, cnr, pon, vcf, refgene, cytoband, case_id, pure
         out_html=out_html,
         scatter_png=f"{outdir}/purecn_scatter_{case_id}.png",
         diagram_png=f"{outdir}/purecn_diagram_{case_id}.png",
+        chr_plots_dir=chr_plots_dir,
     )
 
     click.echo(f"[CNV QC] Finished report for {case_id}: {out_html}")
