@@ -13,24 +13,21 @@ from cnv_report_utils import (
 def csv_to_html_table(
     df: pd.DataFrame,
     out_html: str,
-    svg_path_1: str,
-    png_path_2: str,
+    scatter_png: str,
+    diagram_png: str,
     qc_dir: str | Path | None = None,
 ) -> None:
     out_path = Path(out_html)
 
-    # --- Read the SVG and scale it ---
-    svg_content_1 = Path(svg_path_1).read_text(encoding="utf-8")
-    svg_content_1 = svg_content_1.replace(
-        "<svg",
-        '<svg width="100%" height="800px"',
-        1,
-    )
+    # --- PNG → Base64 (original PureCN plot) ---
+    png_bytes = Path(scatter_png).read_bytes()
+    png_base64 = base64.b64encode(png_bytes).decode("ascii")
+    scatter_png_data_uri = f"data:image/png;base64,{png_base64}"
 
     # --- PNG → Base64 (original PureCN plot) ---
-    png_bytes = Path(png_path_2).read_bytes()
+    png_bytes = Path(diagram_png).read_bytes()
     png_base64 = base64.b64encode(png_bytes).decode("ascii")
-    png_data_uri = f"data:image/png;base64,{png_base64}"
+    diagram_png_data_uri = f"data:image/png;base64,{png_base64}"
 
     # ------------------------------------------------------------------
     # Determine which chromosomes have CNV genes
@@ -209,13 +206,13 @@ def csv_to_html_table(
 
   <h2>PureCN plot (SVG)</h2>
   <div style="border:1px solid #ccc; padding:10px; margin-top:20px; width:100%;">
-    {svg_content_1}
+    {scatter_png_data_uri}
   </div>
 
   <h2>PureCN plot (PNG embedded)</h2>
   <div style="border:1px solid #ccc; padding:10px; margin-top:20px; width:100%;">
     <img
-      src="{png_data_uri}"
+      src="{diagram_png_data_uri}"
       alt="PureCN PNG plot"
       style="max-width:100%; height:auto; display:block;"
     />
@@ -533,8 +530,8 @@ def main(loh_genes, loh_regions, cnr, pon, vcf, refgene, cytoband, case_id, pure
     csv_to_html_table(
         df=df_genes,
         out_html=out_html,
-        svg_path_1=f"{outdir}/purecn_scatter_{case_id}.png",
-        png_path_2=f"{outdir}/purecn_diagram_{case_id}.png",
+        scatter_png=f"{outdir}/purecn_scatter_{case_id}.png",
+        diagram_png=f"{outdir}/purecn_diagram_{case_id}.png",
     )
 
     click.echo(f"[CNV QC] Finished report for {case_id}: {out_html}")
