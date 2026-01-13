@@ -586,7 +586,7 @@ def plot_chromosomes(
         ax2.set_ylabel("BAF")
 
         plt.tight_layout()
-        out_path = outdir / f"qc_chr{chr_name}_segments.png"
+        out_path = outdir / f"cnv_chr{chr_name}_segments.png"
         plt.savefig(out_path, dpi=150)
         plt.close(fig)
 

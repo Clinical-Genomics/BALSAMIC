@@ -15,7 +15,7 @@ def csv_to_html_table(
     out_html: str,
     scatter_png: str,
     diagram_png: str,
-    qc_dir: str | Path | None = None,
+    cnv_chrom_dir: str | Path | None = None,
 ) -> None:
     out_path = Path(out_html)
 
@@ -66,10 +66,10 @@ def csv_to_html_table(
     with_cnv_blocks: list[str] = []
     no_cnv_blocks: list[str] = []
 
-    if qc_dir is not None:
-        qc_dir = Path(qc_dir)
+    if cnv_chrom_dir is not None:
+        qc_dir = Path(cnv_chrom_dir)
         if qc_dir.is_dir():
-            png_files = list(qc_dir.glob("qc_chr*segments.png"))
+            png_files = list(qc_dir.glob("cnv_chr*segments.png"))
 
             def chr_sort_key(path: Path):
                 stem = path.stem
