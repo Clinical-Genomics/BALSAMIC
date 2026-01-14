@@ -17,12 +17,12 @@ def csv_to_html_table(
 ) -> None:
     out_path = Path(out_html)
 
-    # --- PNG → Base64 (original PureCN plot) ---
+    # --- PNG → Base64 (CNVkit scatter) ---
     png_bytes = Path(scatter_png).read_bytes()
     png_base64 = base64.b64encode(png_bytes).decode("ascii")
     scatter_png_data_uri = f"data:image/png;base64,{png_base64}"
 
-    # --- PNG → Base64 (original PureCN plot) ---
+    # --- PNG → Base64 (CNVkit diagram) ---
     png_bytes = Path(diagram_png).read_bytes()
     png_base64 = base64.b64encode(png_bytes).decode("ascii")
     diagram_png_data_uri = f"data:image/png;base64,{png_base64}"
@@ -115,7 +115,7 @@ def csv_to_html_table(
         qc_plots_html += """
         <h2>Per-chromosome CNV QC plots</h2>
         <p class="muted">
-          These plots show log2 coverage, PON spread (noise band), BAF and PureCN segments/genes
+          These plots show log2 coverage, PON spread (if available), BAF and PureCN segments/genes
           per chromosome. CNV genes are highlighted in colour.
         </p>
         """
@@ -138,7 +138,6 @@ def csv_to_html_table(
     # ---------------- Summary table ----------------
     summary_html = ""
     if summary_df is not None and not summary_df.empty:
-        # typically a single row
         summary_html = summary_df.to_html(
             index=False,
             border=0,
@@ -218,29 +217,27 @@ def csv_to_html_table(
       <h2>Sample summary</h2>
       {summary_html}
 
-      <h2>PureCN plot (PNG embedded)</h2>
+      <h2>CNVkit scatter</h2>
       <div style="border:1px solid #ccc; padding:10px; margin-top:20px; width:100%;">
         <img
           src="{scatter_png_data_uri}"
-          alt="PureCN PNG plot"
+          alt="CNVkit scatter PNG plot"
           style="max-width:100%; height:auto; display:block;"
         />
       </div>
 
-      <h2>PureCN plot (PNG embedded)</h2>
+      <h2>CNVkit diagram</h2>
       <div style="border:1px solid #ccc; padding:10px; margin-top:20px; width:100%;">
         <img
           src="{diagram_png_data_uri}"
-          alt="PureCN PNG plot"
+          alt="CNVkit diagram PNG plot"
           style="max-width:100%; height:auto; display:block;"
         />
       </div>
 
       {qc_plots_html}
 
-      <h1>LOH Genes</h1>
-
-      <!-- controls + LOH table + JS (your existing stuff, including pon_spread_flag logic) -->
+      <h1>LOH / CNV Genes</h1>
 
       {table_html}
 
@@ -381,7 +378,7 @@ def csv_to_html_table(
           if (geneInput)        geneInput.addEventListener("input", applyFilter);
           if (minTargetsInput)  minTargetsInput.addEventListener("input", applyFilter);
 
-          // copy-to-clipboard unchanged...
+          // copy-to-clipboard hook could go here if you add a button with id="copy-table"
         }})();
       </script>
     </body>
@@ -394,20 +391,26 @@ def csv_to_html_table(
 @click.option(
     "--loh-genes",
     type=click.Path(exists=True),
-    required=True,
+    required=True,  # PureCN genes CSV (can be empty but must exist)
     help="PureCN LOH genes CSV (…_genes.csv).",
 )
 @click.option(
     "--loh-regions",
     type=click.Path(exists=True),
-    required=True,
+    required=True,  # PureCN regions CSV (can be empty but must exist)
     help="PureCN LOH regions CSV (…_loh.csv).",
 )
 @click.option(
-    "--cnr", type=click.Path(exists=True), required=True, help="CNVkit tumor .cnr file."
+    "--cnr",
+    type=click.Path(exists=True),
+    required=True,
+    help="CNVkit tumor .cnr file.",
 )
 @click.option(
-    "--pon", type=click.Path(exists=True), required=True, help="CNVkit PON .cnn file."
+    "--pon",
+    type=click.Path(exists=True),
+    required=False,  # <- NOW OPTIONAL
+    help="CNVkit PON .cnn file (optional; if absent, plots and table are built without PON spread).",
 )
 @click.option(
     "--vcf",
@@ -416,7 +419,10 @@ def csv_to_html_table(
     help="VCF with germline variants for BAF.",
 )
 @click.option(
-    "--refgene", type=click.Path(exists=True), required=True, help="refgene.flat file."
+    "--refgene",
+    type=click.Path(exists=True),
+    required=True,
+    help="refgene.flat file.",
 )
 @click.option(
     "--cytoband",
@@ -425,7 +431,10 @@ def csv_to_html_table(
     help="cytoBand file for genome build.",
 )
 @click.option(
-    "--case-id", type=str, required=True, help="Case ID for labels / outputs."
+    "--case-id",
+    type=str,
+    required=True,
+    help="Case ID for labels / outputs.",
 )
 @click.option(
     "--cust-case-id",
@@ -434,28 +443,28 @@ def csv_to_html_table(
     help="Cust Case ID for labels / outputs.",
 )
 @click.option(
-    "--purecn-scatter",
+    "--cnvkit-scatter",
     type=click.Path(exists=True),
     required=True,
-    help="purecn scatter PDF file.",
+    help="cnvkit scatter PDF file.",
 )
 @click.option(
-    "--purecn-diagram",
+    "--cnvkit-diagram",
     type=click.Path(exists=True),
     required=True,
-    help="purecn diagram PDF file.",
+    help="cnvkit diagram PDF file.",
 )
 @click.option(
     "--out-prefix",
     type=click.Path(),
     required=True,
-    help="Output prefix (e.g. /path/to/sample_cnv_qc).",
+    help="Output prefix (e.g. /path/to/sample_cnv_qc.html).",
 )
 @click.option(
-    "--purity-cnv",
+    "--purity-csv",
     type=click.Path(exists=True),
     required=False,
-    help="PureCN sample summary CSV (Purity, Ploidy, etc.).",
+    help="PureCN sample summary CSV (Purity, Ploidy, etc., optional).",
 )
 def main(
     loh_genes,
@@ -467,13 +476,14 @@ def main(
     cytoband,
     case_id,
     cust_case_id,
-    purecn_scatter,
-    purecn_diagram,
+    cnvkit_scatter,
+    cnvkit_diagram,
     out_prefix,
-    purity_cnv,
+    purity_csv,
 ):
     """
-    Build CNV QC plots + HTML report from PureCN + CNVkit outputs.
+    Build CNV QC plots + HTML report from CNVkit outputs, optionally
+    annotated with PureCN segments/genes and PON spread.
     """
 
     out_prefix = Path(out_prefix)
@@ -481,33 +491,51 @@ def main(
     outdir.mkdir(parents=True, exist_ok=True)
 
     # ---------------
-    # Convert PDF to PNG
+    # Convert CNVkit PDFs to PNG
     # ---------------
-    pdf_first_page_to_png(purecn_diagram, f"{outdir}/purecn_diagram_{case_id}.png")
-    pdf_first_page_to_png(purecn_scatter, f"{outdir}/purecn_scatter_{case_id}.png")
+    scatter_png_path = outdir / f"cnvkit_scatter_{case_id}.png"
+    diagram_png_path = outdir / f"cnvkit_diagram_{case_id}.png"
+
+    pdf_first_page_to_png(cnvkit_scatter, scatter_png_path)
+    pdf_first_page_to_png(cnvkit_diagram, diagram_png_path)
 
     # ---------------
-    # Read PureCN purity and ploidy estimation
+    # Read PureCN purity and ploidy estimation (optional)
     # ---------------
     purity_df = None
-    if purity_cnv:
-        purity_df = pd.read_csv(purity_cnv)
+    if purity_csv:
+        purity_df = pd.read_csv(purity_csv)
 
     # ----------------------------
-    # Generate per-chromosome PNG plots in outdir
+    # Create per-gene CNV table
     # ----------------------------
-    df_genes = build_gene_table(loh_regions, loh_genes, cnr, pon, refgene, cytoband)
+    # pon can be None (no PON file); build_gene_table handles that
+    df_genes = build_gene_table(
+        loh_regions_path=loh_regions,
+        loh_genes_path=loh_genes,
+        cnr_path=cnr,
+        pon_path=pon,
+        refgene_path=refgene,
+        cytoband_path=cytoband,
+    )
 
     # ----------------------------
     # Generate per-chromosome PNG plots in outdir
     # ----------------------------
     chr_plots_dir = outdir / f"{case_id}_chr_plots"
     chr_plots_dir.mkdir(exist_ok=True, parents=True)
-    if cust_case_id:
-        plot_case_id = cust_case_id
-    else:
-        plot_case_id = case_id
-    plot_chromosomes(pon, cnr, vcf, loh_genes, loh_regions, chr_plots_dir, plot_case_id)
+    plot_case_id = cust_case_id if cust_case_id else case_id
+
+    # pon may be None; plot_chromosomes is written to handle that
+    plot_chromosomes(
+        pon_path=pon,
+        cnr_path=cnr,
+        vcf_path=vcf,
+        genes_path=loh_genes,
+        segs_path=loh_regions,
+        outdir=chr_plots_dir,
+        case_id=plot_case_id,
+    )
 
     # ----------------------------
     # HTML report
@@ -516,8 +544,8 @@ def main(
     csv_to_html_table(
         df=df_genes,
         out_html=out_html,
-        scatter_png=f"{outdir}/purecn_scatter_{case_id}.png",
-        diagram_png=f"{outdir}/purecn_diagram_{case_id}.png",
+        scatter_png=str(scatter_png_path),
+        diagram_png=str(diagram_png_path),
         chr_plots_dir=chr_plots_dir,
         summary_df=purity_df,
     )
@@ -526,5 +554,4 @@ def main(
 
 
 if __name__ == "__main__":
-    # Use Click for argument parsing
     sys.exit(main())

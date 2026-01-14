@@ -1,7 +1,7 @@
 import math
 from pathlib import Path
 from typing import Dict, Tuple, List
-
+from pandas.errors import EmptyDataError
 import fitz
 import matplotlib.pyplot as plt
 from matplotlib import colormaps
@@ -19,7 +19,6 @@ def pdf_first_page_to_png(pdf_path: str, png_path: str, dpi: int = 300) -> None:
     page = doc[0]
     page.get_pixmap(dpi=dpi).save(png_path)
     doc.close()
-
 
 def normalize_chr_column(
     df: pd.DataFrame, prefer_col: str | None = None
@@ -84,6 +83,17 @@ def parse_sample_fields(format_str: str, sample_str: str) -> tuple[float, None, 
         return baf, None, dp_sample
     except Exception:
         return math.nan, None, dp_sample
+
+
+def safe_read_csv(path: str | Path, **kwargs) -> pd.DataFrame:
+    """
+    Wrapper around pd.read_csv that returns an empty DataFrame
+    if file is empty or missing.
+    """
+    try:
+        return pd.read_csv(path, **kwargs)
+    except (EmptyDataError, FileNotFoundError):
+        return pd.DataFrame()
 
 
 # =============================================================================
@@ -170,7 +180,7 @@ def annotate_genes_with_cytoband(
 
 
 # =============================================================================
-# PureCN CNV genes
+# PureCN CNV genes (for plotting only)
 # =============================================================================
 
 
@@ -220,6 +230,9 @@ def merge_cnr_pon(
 
     cnr[chr_col] = cnr[chr_col].astype(str).str.replace("^chr", "", regex=True)
     pon[chr_col] = pon[chr_col].astype(str).str.replace("^chr", "", regex=True)
+
+    if spread_col not in pon.columns:
+        raise ValueError(f"PON is missing required column '{spread_col}'")
 
     pon = pon.dropna(subset=[spread_col])
 
@@ -282,12 +295,84 @@ def load_vcf_with_baf(vcf_path: str | Path, chr_order: list[str]) -> pd.DataFram
 
 
 # =============================================================================
+# Build per-gene table from CNR
+# =============================================================================
+
+
+def build_genes_from_cnr(cnr_path: str | Path) -> pd.DataFrame:
+    """
+    Build a per-gene table from CNVkit .cnr:
+
+      - one row per (chromosome, gene.symbol)
+      - gene span from min(start)/max(end)
+      - number.targets = number of bins for that gene
+      - gene.mean / gene.min / gene.max from CNR log2
+
+    Pseudo-genes 'Antitarget' and '-' are dropped.
+    """
+    cnr = safe_read_csv(cnr_path, sep="\t").copy()
+    if cnr.empty:
+        return cnr
+
+    # normalize chromosome
+    chr_col = "chromosome" if "chromosome" in cnr.columns else "chr"
+    cnr[chr_col] = cnr[chr_col].astype(str).str.replace("^chr", "", regex=True)
+
+    gene_col = "gene"
+    if gene_col not in cnr.columns:
+        raise ValueError("CNR file must contain a 'gene' column.")
+
+    # drop pseudo-genes
+    cnr = cnr[cnr[gene_col].notna()]
+    cnr = cnr[~cnr[gene_col].isin(["Antitarget", "-"])]
+
+    # expand multi-gene bins (A,B,C → 3 rows)
+    cnr["gene.symbol"] = (
+        cnr[gene_col]
+        .astype(str)
+        .str.split(",")
+        .apply(lambda lst: [g.strip() for g in lst if g.strip()])
+    )
+    cnr = cnr.explode("gene.symbol")
+
+    # basic per-gene aggregation
+    agg = (
+        cnr.groupby([chr_col, "gene.symbol"], as_index=False)
+        .agg(
+            start=("start", "min"),
+            end=("end", "max"),
+            number_targets=("log2", "count"),
+            gene_mean=("log2", "mean"),
+            gene_min=("log2", "min"),
+            gene_max=("log2", "max"),
+        )
+    )
+
+    # match existing naming in your code
+    agg = agg.rename(
+        columns={
+            chr_col: "chr",
+            "number_targets": "number.targets",
+            "gene_mean": "gene.mean",
+            "gene_min": "gene.min",
+            "gene_max": "gene.max",
+        }
+    )
+
+    # round gene stats a bit
+    for col in ["gene.mean", "gene.min", "gene.max"]:
+        agg[col] = agg[col].round(3)
+
+    return agg
+
+
+# =============================================================================
 # Per-chromosome plots (PON spread + log2 + segments + BAF + CNV genes)
 # =============================================================================
 
 
 def plot_chromosomes(
-    pon_path: Path,
+    pon_path: Path | None,
     cnr_path: Path,
     vcf_path: Path,
     genes_path: Path,
@@ -305,10 +390,10 @@ def plot_chromosomes(
     """
     Main plotting routine creating one PNG per chromosome with:
 
-      - PON spread band
+      - PON spread band (if PON available)
       - smoothed log2 coverage
-      - CNV segments
-      - CNV genes colored & labeled
+      - CNV segments (PureCN LOH regions)
+      - CNV genes colored & labeled (PureCN genes)
       - BAF panel underneath
     """
     outdir.mkdir(parents=True, exist_ok=True)
@@ -318,23 +403,49 @@ def plot_chromosomes(
     if include_y:
         chr_order.append("Y")
 
-    # 1. Load PON/CNR and merge
-    pon = pd.read_csv(pon_path, sep="\t")
-    cnr = pd.read_csv(cnr_path, sep="\t")
+    # 1. Load CNR (always) and PON (optional) and merge
+    cnr = safe_read_csv(cnr_path, sep="\t")
+    if cnr.empty:
+        return
 
-    merged = merge_cnr_pon(cnr, pon, chr_col="chromosome", spread_col="spread")
+    use_pon = False
+    merged = None
+
+    if pon_path is not None and Path(pon_path).is_file():
+        pon = safe_read_csv(pon_path, sep="\t")
+        if not pon.empty and "spread" in pon.columns:
+            try:
+                merged = merge_cnr_pon(cnr, pon, chr_col="chromosome", spread_col="spread")
+                if not merged.empty:
+                    use_pon = True
+            except Exception:
+                use_pon = False
+
+    if not use_pon:
+        # Fall back: use cnr only, with a dummy spread column so code still works
+        merged = cnr.copy()
+        merged["chromosome"] = (
+            merged["chromosome"].astype(str).str.replace("^chr", "", regex=True)
+        )
+        if "spread" not in merged.columns:
+            merged["spread"] = np.nan
+
     merged = merged[merged["chromosome"].isin(chr_order)]
 
-    # 2. Load genes & segments from PureCN
-    genes = pd.read_csv(genes_path)
-    genes, genes_chr_col = normalize_chr_column(genes)
-    genes = genes[genes[genes_chr_col].isin(chr_order)]
+    # 2. Load genes & segments from PureCN (optional, but typically present)
+    genes = safe_read_csv(genes_path)
+    genes_cnv = pd.DataFrame()
+    genes_chr_col = "chr"
+    if not genes.empty:
+        genes, genes_chr_col = normalize_chr_column(genes)
+        genes = genes[genes[genes_chr_col].isin(chr_order)]
+        genes_cnv = flag_cnv_genes(genes, min_targets_cnvgene=min_targets_cnvgene)
 
-    genes_cnv = flag_cnv_genes(genes, min_targets_cnvgene=min_targets_cnvgene)
-
-    segs = pd.read_csv(segs_path)
-    segs, segs_chr_col = normalize_chr_column(segs)
-    segs = segs[segs[segs_chr_col].isin(chr_order)]
+    segs = safe_read_csv(segs_path)
+    segs_chr_col = "chr"
+    if not segs.empty:
+        segs, segs_chr_col = normalize_chr_column(segs)
+        segs = segs[segs[segs_chr_col].isin(chr_order)]
 
     # 3. Load VCF and compute BAF
     vcf = load_vcf_with_baf(
@@ -343,9 +454,13 @@ def plot_chromosomes(
     )
 
     # 4. QC thresholds & smoothing setup
-    spread_thresh = merged["spread"].quantile(pct_spread)
+    if use_pon:
+        spread_thresh = merged["spread"].quantile(pct_spread)
+        y_max = max(merged["log2"].abs().max(), merged["spread"].max())
+    else:
+        spread_thresh = np.inf
+        y_max = merged["log2"].abs().max()
 
-    y_max = max(merged["log2"].abs().max(), merged["spread"].max())
     y_pad = 0.1
     y_lim = (-y_max - y_pad, y_max + y_pad)
 
@@ -362,7 +477,10 @@ def plot_chromosomes(
         sub["type"] = np.where(sub["gene"] == "Antitarget", "Antitarget", "Target")
 
         # Plotting filters
-        sub = sub[(sub["weight"] > weight_thresh) & (sub["spread"] <= spread_thresh)]
+        if use_pon:
+            sub = sub[(sub["weight"] > weight_thresh) & (sub["spread"] <= spread_thresh)]
+        else:
+            sub = sub[sub["weight"] > weight_thresh]
         if sub.empty:
             continue
 
@@ -374,9 +492,12 @@ def plot_chromosomes(
         # smoothing
         sub = sub.sort_values("x_coord")
         sub["log2_smooth"] = sub["log2"].rolling(window=window, center=True).median()
-        sub["spread_smooth"] = (
-            sub["spread"].rolling(window=window, center=True).median()
-        )
+        if use_pon:
+            sub["spread_smooth"] = (
+                sub["spread"].rolling(window=window, center=True).median()
+            )
+        else:
+            sub["spread_smooth"] = np.nan
 
         # helper: map genomic POS → x_coord (nearest bin)
         bin_starts = sub["start"].values
@@ -396,29 +517,30 @@ def plot_chromosomes(
         if not baf_chr.empty:
             baf_chr["x_coord"] = baf_chr["POS"].apply(pos_to_xcoord)
 
-        # CNV genes for this chromosome
-        genes_chr = genes_cnv[genes_cnv[genes_chr_col] == chr_name].copy()
-        genes_chr = genes_chr.sort_values("start")
-
+        # CNV genes for this chromosome (PureCN)
+        genes_chr = pd.DataFrame()
         gene_to_color: dict[str, tuple] = {}
         gene_names = np.array([])
 
-        if not genes_chr.empty:
-            genes_chr["x_coord"] = genes_chr["start"].apply(pos_to_xcoord)
+        if not genes_cnv.empty:
+            genes_chr = genes_cnv[genes_cnv[genes_chr_col] == chr_name].copy()
+            genes_chr = genes_chr.sort_values("start")
+            if not genes_chr.empty:
+                genes_chr["x_coord"] = genes_chr["start"].apply(pos_to_xcoord)
+                gene_names = genes_chr["gene.symbol"].unique()
+                n_genes = len(gene_names)
+                cmap = colormaps.get_cmap("tab20").resampled(n_genes)
+                for i, g in enumerate(gene_names):
+                    gene_to_color[g] = cmap(i)
 
-            gene_names = genes_chr["gene.symbol"].unique()
-            n_genes = len(gene_names)
-            cmap = colormaps.get_cmap("tab20").resampled(n_genes)
-            for i, g in enumerate(gene_names):
-                gene_to_color[g] = cmap(i)
-
-        # Segments for this chromosome
-        segs_chr = segs[segs[segs_chr_col] == chr_name].copy()
-        segs_chr = segs_chr.sort_values("start")
-
-        if not segs_chr.empty:
-            segs_chr["x_start"] = segs_chr["start"].apply(pos_to_xcoord)
-            segs_chr["x_end"] = segs_chr["end"].apply(pos_to_xcoord)
+        # Segments for this chromosome (PureCN regions)
+        segs_chr = pd.DataFrame()
+        if not segs.empty:
+            segs_chr = segs[segs[segs_chr_col] == chr_name].copy()
+            segs_chr = segs_chr.sort_values("start")
+            if not segs_chr.empty:
+                segs_chr["x_start"] = segs_chr["start"].apply(pos_to_xcoord)
+                segs_chr["x_end"] = segs_chr["end"].apply(pos_to_xcoord)
 
         # ---------- Figure + axes ----------
         fig, (ax1, ax2) = plt.subplots(
@@ -478,14 +600,15 @@ def plot_chromosomes(
                 )
 
         # PON spread band
-        ax1.fill_between(
-            x,
-            -sub["spread_smooth"],
-            sub["spread_smooth"],
-            alpha=0.4,
-            step="mid",
-            label="PON noise band",
-        )
+        if use_pon and sub["spread_smooth"].notna().any():
+            ax1.fill_between(
+                x,
+                -sub["spread_smooth"],
+                sub["spread_smooth"],
+                alpha=0.4,
+                step="mid",
+                label="PON noise band",
+            )
 
         # smoothed log2
         ax1.plot(
@@ -498,7 +621,7 @@ def plot_chromosomes(
         )
 
         # segment bars
-        if not segs_chr.empty:
+        if not segs_chr.empty and "seg.mean" in segs_chr.columns:
             for _, srow in segs_chr.iterrows():
                 xs = srow["x_start"]
                 xe = srow["x_end"]
@@ -526,7 +649,8 @@ def plot_chromosomes(
         ax1.axhline(0, color="black", linewidth=0.8)
         ax1.set_ylim(*y_lim)
         ax1.set_ylabel("log2 / spread")
-        ax1.set_title(f"Chr {chr_name} – log2 vs PON spread: {case_id}\n")
+        title_suffix = "log2 vs PON spread" if use_pon else "log2 (no PON available)"
+        ax1.set_title(f"Chr {chr_name} – {title_suffix}: {case_id}\n")
         ax1.legend(loc="upper right", fontsize=8)
 
         # Gene labels (directional offset)
@@ -586,7 +710,7 @@ def plot_chromosomes(
 
 
 # =============================================================================
-# Segment → gene table annotation (size, MAF, seg.mean, num.snps)
+# Segment → gene table annotation (size, MAF, seg.mean, num.snps, C/M/loh/type)
 # =============================================================================
 
 
@@ -599,12 +723,18 @@ def annotate_genes_with_segments(
 
         seg_start, seg_end, seg_size_bp,
         maf.expected, maf.observed (if present in df_regions),
-        seg.mean, num.snps (if present in df_regions)
+        seg.mean, num.snps, C, M, M.flagged, type, loh (if present)
 
     Matching is purely by chromosome and genomic intervals (no seg.id needed).
     """
     df_genes = df_genes.copy()
     df_regions = df_regions.copy()
+    if df_regions.empty:
+        # ensure seg_* columns exist
+        for col in ["seg_start", "seg_end", "seg_size_bp"]:
+            if col not in df_genes.columns:
+                df_genes[col] = np.nan
+        return df_genes
 
     # normalize chr / positions
     df_genes["chr"] = df_genes["chr"].astype(str).str.replace("^chr", "", regex=True)
@@ -632,7 +762,7 @@ def annotate_genes_with_segments(
 
     # Additional segment-level metrics to carry over (if present)
     seg_extra_cols: list[str] = []
-    for col in ["seg.mean", "num.snps"]:
+    for col in ["seg.mean", "num.snps", "C", "M", "M.flagged", "type", "loh"]:
         if col in df_regions.columns:
             seg_extra_cols.append(col)
             df_genes[col] = np.nan
@@ -716,6 +846,12 @@ def add_pon_spread_significance(
       - pon_spread_flag  (within_noise / borderline / beyond_pon_noise / unknown)
     """
     df_genes = df_genes.copy()
+    if df_pon.empty:
+        for col in ["pon_spread_median", "weight_mean", "mean_vs_spread", "pon_spread_flag"]:
+            if col not in df_genes.columns:
+                df_genes[col] = pd.NA
+        return df_genes
+
     merged_bins = merge_cnr_pon(df_cnr, df_pon, chr_col=chr_col, spread_col=spread_col)
 
     merged_bins = merged_bins[
@@ -976,38 +1112,54 @@ def annotate_genes_with_exons(
 
 
 # =============================================================================
-# Final LOH genes table builder
+# Final gene table builder (CNR base + optional PureCN + PON)
 # =============================================================================
 
 
 def build_gene_table(
-    loh_regions_path: str | Path,
-    loh_genes_path: str | Path,
+    loh_regions_path: str | Path | None,
+    loh_genes_path: str | Path | None,
     cnr_path: str | Path,
-    pon_path: str | Path,
+    pon_path: str | Path | None,
     refgene_path: str | Path,
     cytoband_path: str | Path,
 ) -> pd.DataFrame:
     """
-    End-to-end construction of the LOH genes table for reporting:
+    Construction of the per-gene CNV table for reporting:
 
-      - LOH segment overlap (seg_start, seg_end, seg_size_bp, maf.*)
-      - PON spread & weights (pon_spread_median, mean_vs_spread, etc.)
+      - Base: CNR-derived gene stats (always available)
+      - Optional: LOH segment overlap from PureCN regions (seg_start, seg_end, seg_size_bp, maf.*, seg.mean, C/M/etc.)
+      - Optional: gene-level LOH/type/C/M from PureCN genes file
+      - Optional: PON spread & weights (pon_spread_median, mean_vs_spread, etc.)
       - exon coverage and transcript
       - cytoband
       - cleaned 'type' column (AMPLIFICATION/DELETION where missing)
       - rounded / cleaned numeric columns
     """
-    df_regions = pd.read_csv(loh_regions_path, sep=",")
-    df_cnr = pd.read_csv(cnr_path, sep="\t")
-    df_genes = pd.read_csv(loh_genes_path, sep=",")
-    df_pon = pd.read_csv(pon_path, sep="\t")
-    cyto = load_cytobands(cytoband_path)
+    # 1) base gene table from CNR
+    df_genes = build_genes_from_cnr(cnr_path)
+    if df_genes.empty:
+        return df_genes
 
-    # segment annotation
-    df_genes = annotate_genes_with_segments(df_genes, df_regions)
+    # ensure seg_* columns exist even if we never annotate segments
+    for col in ["seg_start", "seg_end", "seg_size_bp"]:
+        if col not in df_genes.columns:
+            df_genes[col] = np.nan
 
-    # drop helper columns we don't want in final table
+    df_cnr = safe_read_csv(cnr_path, sep="\t")
+    df_pon = (
+        safe_read_csv(pon_path, sep="\t")
+        if pon_path is not None and Path(pon_path).is_file()
+        else pd.DataFrame()
+    )
+
+    # 2) overlay PureCN LOH segments (if available)
+    if loh_regions_path is not None and Path(loh_regions_path).is_file():
+        df_regions = safe_read_csv(loh_regions_path, sep=",")
+        if not df_regions.empty:
+            df_genes = annotate_genes_with_segments(df_genes, df_regions)
+
+    # drop helper columns we don't want in final table (if they sneaked in)
     drop_cols = [
         "Sampleid",
         "C.flagged",
@@ -1019,31 +1171,100 @@ def build_gene_table(
     drop_cols = [c for c in drop_cols if c in df_genes.columns]
     df_genes = df_genes.drop(columns=drop_cols)
 
-    # PON spread + weights
+    # 2b) overlay PureCN gene-level LOH (and optionally other columns)
+    if loh_genes_path is not None and Path(loh_genes_path).is_file():
+        df_loh_genes = safe_read_csv(loh_genes_path, sep=",")
+        if not df_loh_genes.empty:
+            # normalize chr
+            if "chr" in df_loh_genes.columns:
+                df_loh_genes["chr"] = (
+                    df_loh_genes["chr"]
+                    .astype(str)
+                    .str.replace("^chr", "", regex=True)
+                )
+            elif "chromosome" in df_loh_genes.columns:
+                df_loh_genes["chr"] = (
+                    df_loh_genes["chromosome"]
+                    .astype(str)
+                    .str.replace("^chr", "", regex=True)
+                )
+
+            # make sure gene.symbol exists
+            gene_col = "gene.symbol" if "gene.symbol" in df_loh_genes.columns else "gene"
+            df_loh_genes = df_loh_genes.rename(columns={gene_col: "gene.symbol"})
+
+            # LOH per (chr, gene.symbol): any(TRUE)
+            if "loh" in df_loh_genes.columns:
+                tmp = df_loh_genes.copy()
+                tmp["loh_str"] = tmp["loh"].astype(str).str.upper()
+                tmp["loh_flag"] = tmp["loh_str"] == "TRUE"
+
+                gene_loh = (
+                    tmp.groupby(["chr", "gene.symbol"], as_index=False)["loh_flag"]
+                    .any()
+                )
+                gene_loh["loh"] = gene_loh["loh_flag"].replace(
+                    {True: True, False: False}
+                )
+                gene_loh = gene_loh[["chr", "gene.symbol", "loh"]]
+
+                # Merge into df_genes; this becomes canonical LOH
+                df_genes = df_genes.merge(
+                    gene_loh,
+                    on=["chr", "gene.symbol"],
+                    how="left",
+                )
+
+            # optional: other gene-level columns (first per group)
+            extra_cols = []
+            for col in ["M.flagged", "type", "C", "M"]:
+                if col in df_loh_genes.columns:
+                    extra_cols.append(col)
+
+            if extra_cols:
+                gene_extra = (
+                    df_loh_genes.groupby(["chr", "gene.symbol"], as_index=False)[
+                        extra_cols
+                    ]
+                    .first()
+                )
+                df_genes = df_genes.merge(
+                    gene_extra,
+                    on=["chr", "gene.symbol"],
+                    how="left",
+                    suffixes=("", "_purecn"),
+                )
+    else:
+        if "loh" not in df_genes.columns:
+            df_genes["loh"] = pd.NA
+
+    # 3) PON spread + weights
     df_genes = add_pon_spread_significance(df_genes, df_cnr, df_pon)
 
-    # exon coverage
+    # 4) exon coverage
     exon_map = load_refgene_exons(refgene_path)
     df_genes = annotate_genes_with_exons(df_genes, exon_map, coverage_threshold=0.95)
 
-    # type cleanup (fill NaN using C)
-    df_genes["type"] = df_genes["type"].astype("string")
-    df_genes["type"] = df_genes["type"].replace(
-        ["NA", "NaN", "nan", "None", ".", ""],
-        pd.NA,  # or np.nan, but pd.NA plays nicer with "string" dtype
-    )
-    missing_type = df_genes["type"].isna()
+    # 5) type cleanup (fill NaN using C, if we have both)
+    if "type" in df_genes.columns:
+        df_genes["type"] = df_genes["type"].astype("string")
+        df_genes["type"] = df_genes["type"].replace(
+            ["NA", "NaN", "nan", "None", ".", ""],
+            pd.NA,
+        )
+        if "C" in df_genes.columns:
+            missing_type = df_genes["type"].isna()
+            gain_mask = missing_type & df_genes["C"].notna() & (df_genes["C"] > 2)
+            loss_mask = missing_type & df_genes["C"].notna() & (df_genes["C"] < 2)
 
-    gain_mask = missing_type & df_genes["C"].notna() & (df_genes["C"] > 2)
-    loss_mask = missing_type & df_genes["C"].notna() & (df_genes["C"] < 2)
+            df_genes.loc[gain_mask, "type"] = "AMPLIFICATION"
+            df_genes.loc[loss_mask, "type"] = "DELETION"
 
-    df_genes.loc[gain_mask, "type"] = "AMPLIFICATION"
-    df_genes.loc[loss_mask, "type"] = "DELETION"
-
-    # cytoband
+    # 6) cytoband
+    cyto = load_cytobands(cytoband_path)
     df_genes = annotate_genes_with_cytoband(df_genes, cyto)
 
-    # column order
+    # 7) column order
     cols = [
         "gene.symbol",
         "transcript",
@@ -1077,8 +1298,9 @@ def build_gene_table(
     cols = [c for c in cols if c in df_genes.columns]
     df_genes = df_genes[cols]
 
-    # remove pseudo-genes
-    df_genes = df_genes[~df_genes["gene.symbol"].isin(["Antitarget", "-"])]
+    # remove pseudo-genes (if any slipped in)
+    if "gene.symbol" in df_genes.columns:
+        df_genes = df_genes[~df_genes["gene.symbol"].isin(["Antitarget", "-"])]
 
     # rounding for some numeric columns (3 decimals)
     round_cols = [
@@ -1090,7 +1312,8 @@ def build_gene_table(
         "seg.mean",
     ]
     round_cols = [c for c in round_cols if c in df_genes.columns]
-    df_genes.loc[:, round_cols] = df_genes.loc[:, round_cols].round(3)
+    if round_cols:
+        df_genes.loc[:, round_cols] = df_genes.loc[:, round_cols].round(3)
 
     # pretty integers for seg_start/seg_end/size
     int_cols = ["seg_start", "seg_end", "seg_size_bp"]

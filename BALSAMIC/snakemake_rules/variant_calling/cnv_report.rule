@@ -29,8 +29,8 @@ python {params.cnv_report_script} \
 --refgene {input.refgene_flat} \
 --cytoband {params.cytoband} \
 --case-id {params.case_id} \
---purecn-scatter {input.scatter} \
---purecn-diagram {input.diagram} \
+--cnvkit-scatter {input.scatter} \
+--cnvkit-diagram {input.diagram} \
 --out-prefix {output.cnv_report_html} \
 {params.cust_case_id}
         """
