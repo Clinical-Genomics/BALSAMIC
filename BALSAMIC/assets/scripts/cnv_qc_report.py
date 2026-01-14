@@ -240,6 +240,12 @@ def csv_to_html_table(
     </div>
     <div class="control-group">
       <label>
+        <input type="checkbox" id="show-beyond-pon-noise">
+        Show rows where <code>pon_spread_flag</code> = "beyond_pon_noise"
+      </label>
+    </div>
+    <div class="control-group">
+      <label>
         Min <code>number.targets</code>:
         <input type="number" id="min-targets" value="2" min="0" step="1">
       </label>
@@ -257,9 +263,10 @@ def csv_to_html_table(
     </div>
     <div class="muted">
       Use the checkboxes to hide flagged calls and non-CNV genes,
-      limit by min number.targets, and type one or more genes separated by commas
-      to focus the list. Use the button to copy the currently visible table
-      to the clipboard and paste into Excel.
+      optionally show high-noise genes, limit by min number.targets,
+      and type one or more genes separated by commas to focus the list.
+      Use the button to copy the currently visible table to the clipboard
+      and paste into Excel.
     </div>
   </div>
 
@@ -270,6 +277,7 @@ def csv_to_html_table(
       const table           = document.getElementById("report-table");
       const checkboxFlagged = document.getElementById("hide-flagged");
       const checkboxNonCnv  = document.getElementById("hide-non-cnv");
+      const checkboxBeyond  = document.getElementById("show-beyond-pon-noise");
       const geneInput       = document.getElementById("gene-filter");
       const minTargetsInput = document.getElementById("min-targets");
       const copyBtn         = document.getElementById("copy-table");
@@ -278,12 +286,13 @@ def csv_to_html_table(
 
       const colIndex = {col_idx_json};
 
-      const flaggedColIdx  = colIndex["M.flagged"] ?? -1;
-      const geneColIdx     = colIndex["gene.symbol"] ?? -1;
-      const cColIdx        = colIndex["C"] ?? -1;
-      const lohColIdx      = colIndex["loh"] ?? -1;
-      const typeColIdx     = colIndex["type"] ?? -1;
-      const nTargetsColIdx = colIndex["number.targets"] ?? -1;
+      const flaggedColIdx   = colIndex["M.flagged"] ?? -1;
+      const geneColIdx      = colIndex["gene.symbol"] ?? -1;
+      const cColIdx         = colIndex["C"] ?? -1;
+      const lohColIdx       = colIndex["loh"] ?? -1;
+      const typeColIdx      = colIndex["type"] ?? -1;
+      const nTargetsColIdx  = colIndex["number.targets"] ?? -1;
+      const ponSpreadColIdx = colIndex["pon_spread_flag"] ?? -1;
 
       function normalizeCellText(td) {{
         return (td && td.textContent ? td.textContent : "")
@@ -293,36 +302,37 @@ def csv_to_html_table(
 
       function isCnvRow(row) {{
         // CNV = loh == TRUE OR type annotated (not NA/NAN/./empty/<NA>)
-          let isCnv = false;
-          let evaluated = false;
-        
-          // loh == TRUE
-          if (lohColIdx !== -1) {{
-            const lohCell = row.cells[lohColIdx];
-            const lohVal = normalizeCellText(lohCell);
-            if (lohVal === "true") {{
-              evaluated = true;
-              isCnv = true;
-            }}
+        let isCnv = false;
+        let evaluated = false;
+
+        // loh == TRUE
+        if (lohColIdx !== -1) {{
+          const lohCell = row.cells[lohColIdx];
+          const lohVal = normalizeCellText(lohCell);
+          if (lohVal === "true") {{
+            evaluated = true;
+            isCnv = true;
           }}
-        
-          // type annotated
-          if (!isCnv && typeColIdx !== -1) {{
-            const typeCell = row.cells[typeColIdx];
-            const typeVal = normalizeCellText(typeCell);
-            const bad = ["na", "nan", ".", "", "<na>", "none"];
-            if (typeVal && !bad.includes(typeVal)) {{
-              evaluated = true;
-              isCnv = true;
-            }}
+        }}
+
+        // type annotated
+        if (!isCnv && typeColIdx !== -1) {{
+          const typeCell = row.cells[typeColIdx];
+          const typeVal = normalizeCellText(typeCell);
+          const bad = ["na", "nan", ".", "", "<na>", "none"];
+          if (typeVal && !bad.includes(typeVal)) {{
+            evaluated = true;
+            isCnv = true;
           }}
-        
-          return evaluated ? isCnv : false;
-    }}
+        }}
+
+        return evaluated ? isCnv : false;
+      }}
 
       function applyFilter() {{
-        const hideTrue   = checkboxFlagged && checkboxFlagged.checked;
-        const hideNonCnv = checkboxNonCnv && checkboxNonCnv.checked;
+        const hideTrue      = checkboxFlagged && checkboxFlagged.checked;
+        const hideNonCnv    = checkboxNonCnv && checkboxNonCnv.checked;
+        const showBeyondPon = checkboxBeyond && checkboxBeyond.checked;
 
         const geneList = (geneInput && geneInput.value ? geneInput.value : "")
           .split(",")
@@ -346,6 +356,17 @@ def csv_to_html_table(
             const flaggedVal = normalizeCellText(flaggedCell);
             const isTrue = (flaggedVal === "true");
             if (hideTrue && isTrue) {{
+              hideRow = true;
+            }}
+          }}
+
+          // PON spread "beyond_pon_noise" gating
+          if (!hideRow && ponSpreadColIdx !== -1 && checkboxBeyond) {{
+            const ponCell = row.cells[ponSpreadColIdx];
+            const ponVal = normalizeCellText(ponCell);
+            const isBeyond = (ponVal === "beyond_pon_noise");
+            // Default: hide these rows unless explicitly allowed
+            if (isBeyond && !showBeyondPon) {{
               hideRow = true;
             }}
           }}
@@ -386,6 +407,7 @@ def csv_to_html_table(
       applyFilter();
       if (checkboxFlagged)  checkboxFlagged.addEventListener("change", applyFilter);
       if (checkboxNonCnv)   checkboxNonCnv.addEventListener("change", applyFilter);
+      if (checkboxBeyond)   checkboxBeyond.addEventListener("change", applyFilter);
       if (geneInput)        geneInput.addEventListener("input", applyFilter);
       if (minTargetsInput)  minTargetsInput.addEventListener("input", applyFilter);
 

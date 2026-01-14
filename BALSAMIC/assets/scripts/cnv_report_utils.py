@@ -599,7 +599,7 @@ def annotate_genes_with_segments(
 
         seg_start, seg_end, seg_size_bp,
         maf.expected, maf.observed (if present in df_regions),
-        seg.mean, num.snps, num.mark (if present in df_regions)
+        seg.mean, num.snps (if present in df_regions)
 
     Matching is purely by chromosome and genomic intervals (no seg.id needed).
     """
@@ -632,7 +632,7 @@ def annotate_genes_with_segments(
 
     # Additional segment-level metrics to carry over (if present)
     seg_extra_cols: list[str] = []
-    for col in ["seg.mean", "num.snps", "num.mark"]:
+    for col in ["seg.mean", "num.snps"]:
         if col in df_regions.columns:
             seg_extra_cols.append(col)
             df_genes[col] = np.nan
@@ -1063,7 +1063,6 @@ def build_gene_table(
         "M",
         "M.flagged",
         "seg.mean",
-        "num.mark",
         "num.snps",
         "maf.expected",
         "maf.observed",
