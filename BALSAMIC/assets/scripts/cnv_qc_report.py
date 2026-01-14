@@ -6,7 +6,6 @@ import pandas as pd
 from pathlib import Path
 from cnv_report_utils import plot_chromosomes, build_gene_table, pdf_first_page_to_png
 
-
 def csv_to_html_table(
     df: pd.DataFrame,
     out_html: str,
@@ -241,7 +240,7 @@ def csv_to_html_table(
     <div class="control-group">
       <label>
         <input type="checkbox" id="show-beyond-pon-noise">
-        Show rows where <code>pon_spread_flag</code> = "beyond_pon_noise"
+        Also show non-CNV genes with <code>pon_spread_flag</code> = "beyond_pon_noise"
       </label>
     </div>
     <div class="control-group">
@@ -263,10 +262,10 @@ def csv_to_html_table(
     </div>
     <div class="muted">
       Use the checkboxes to hide flagged calls and non-CNV genes,
-      optionally show high-noise genes, limit by min number.targets,
-      and type one or more genes separated by commas to focus the list.
-      Use the button to copy the currently visible table to the clipboard
-      and paste into Excel.
+      and optionally include high-noise genes flagged as beyond_pon_noise
+      even if they are not CNV. Limit by min number.targets and filter by
+      gene.symbol as needed. Use the button to copy the currently visible table
+      to the clipboard and paste into Excel.
     </div>
   </div>
 
@@ -360,21 +359,25 @@ def csv_to_html_table(
             }}
           }}
 
-          // PON spread "beyond_pon_noise" gating
-          if (!hideRow && ponSpreadColIdx !== -1 && checkboxBeyond) {{
-            const ponCell = row.cells[ponSpreadColIdx];
-            const ponVal = normalizeCellText(ponCell);
-            const isBeyond = (ponVal === "beyond_pon_noise");
-            // Default: hide these rows unless explicitly allowed
-            if (isBeyond && !showBeyondPon) {{
-              hideRow = true;
-            }}
-          }}
+          // CNV / non-CNV filter with beyond_pon_noise override
+          if (!hideRow && checkboxNonCnv) {{
+            const isCnv = isCnvRow(row);
 
-          // CNV filter
-          if (!hideRow && hideNonCnv && checkboxNonCnv) {{
-            if (!isCnvRow(row)) {{
-              hideRow = true;
+            let isBeyond = false;
+            if (ponSpreadColIdx !== -1) {{
+              const ponCell = row.cells[ponSpreadColIdx];
+              const ponVal = normalizeCellText(ponCell);
+              isBeyond = (ponVal === "beyond_pon_noise");
+            }}
+
+            if (hideNonCnv) {{
+              // Treat as CNV if:
+              //   - it's a CNV by the usual rules, OR
+              //   - it's beyond_pon_noise and the user wants to show such genes
+              const treatedAsCnv = isCnv || (showBeyondPon && isBeyond);
+              if (!treatedAsCnv) {{
+                hideRow = true;
+              }}
             }}
           }}
 
