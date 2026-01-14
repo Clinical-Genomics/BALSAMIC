@@ -452,7 +452,7 @@ def csv_to_html_table(
     help="Output prefix (e.g. /path/to/sample_cnv_qc).",
 )
 @click.option(
-    "--sample-summary",
+    "--purity-cnv",
     type=click.Path(exists=True),
     required=False,
     help="PureCN sample summary CSV (Purity, Ploidy, etc.).",
@@ -470,7 +470,7 @@ def main(
     purecn_scatter,
     purecn_diagram,
     out_prefix,
-    sample_summary,
+    purity_cnv,
 ):
     """
     Build CNV QC plots + HTML report from PureCN + CNVkit outputs.
@@ -489,9 +489,9 @@ def main(
     # ---------------
     # Read PureCN purity and ploidy estimation
     # ---------------
-    summary_df = None
-    if sample_summary:
-        summary_df = pd.read_csv(sample_summary)
+    purity_df = None
+    if purity_cnv:
+        purity_df = pd.read_csv(purity_cnv)
 
     # ----------------------------
     # Generate per-chromosome PNG plots in outdir
@@ -519,7 +519,7 @@ def main(
         scatter_png=f"{outdir}/purecn_scatter_{case_id}.png",
         diagram_png=f"{outdir}/purecn_diagram_{case_id}.png",
         chr_plots_dir=chr_plots_dir,
-        summary_df=summary_df,
+        summary_df=purity_df,
     )
 
     click.echo(f"[CNV QC] Finished report for {case_id}: {out_html}")
