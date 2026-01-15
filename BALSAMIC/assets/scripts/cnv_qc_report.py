@@ -246,12 +246,6 @@ def csv_to_html_table(
       <div class="controls">
         <div class="control-group">
           <label>
-            <input type="checkbox" id="hide-flagged" checked>
-            Hide rows with M.flagged = TRUE
-          </label>
-        </div>
-        <div class="control-group">
-          <label>
             <input type="checkbox" id="hide-non-cnv">
             Show only LOH / CNV genes (loh = TRUE or type set)
           </label>
@@ -279,7 +273,6 @@ def csv_to_html_table(
       <script>
         (function() {{
           const table           = document.getElementById("report-table");
-          const checkboxFlagged = document.getElementById("hide-flagged");
           const checkboxNonCnv  = document.getElementById("hide-non-cnv");
           const checkboxBeyond  = document.getElementById("show-beyond-pon-noise");
           const geneInput       = document.getElementById("gene-filter");
@@ -290,7 +283,6 @@ def csv_to_html_table(
 
           const colIndex = {col_idx_json};
 
-          const flaggedColIdx   = colIndex["M.flagged"] ?? -1;
           const geneColIdx      = colIndex["gene.symbol"] ?? -1;
           const cColIdx         = colIndex["C"] ?? -1;
           const lohColIdx       = colIndex["loh"] ?? -1;
@@ -351,16 +343,6 @@ def csv_to_html_table(
             for (const row of rows) {{
               let hideRow = false;
 
-              // M.flagged filter
-              if (flaggedColIdx !== -1 && checkboxFlagged) {{
-                const flaggedCell = row.cells[flaggedColIdx];
-                const flaggedVal = normalizeCellText(flaggedCell);
-                const isTrue = (flaggedVal === "true");
-                if (hideTrue && isTrue) {{
-                  hideRow = true;
-                }}
-              }}
-
               // CNV / non-CNV filter with beyond_pon_noise override
               if (!hideRow && checkboxNonCnv) {{
                 const isCnv = isCnvRow(row);
@@ -407,7 +389,6 @@ def csv_to_html_table(
           }}
 
           applyFilter();
-          if (checkboxFlagged)  checkboxFlagged.addEventListener("change", applyFilter);
           if (checkboxNonCnv)   checkboxNonCnv.addEventListener("change", applyFilter);
           if (checkboxBeyond)   checkboxBeyond.addEventListener("change", applyFilter);
           if (geneInput)        geneInput.addEventListener("input", applyFilter);
