@@ -1279,6 +1279,29 @@ def build_gene_table(
     cyto = load_cytobands(cytoband_path)
     df_genes = annotate_genes_with_cytoband(df_genes, cyto)
 
+    # 6b) sort genes by chromosome and start
+    if "chr" in df_genes.columns and "start" in df_genes.columns:
+        def _chr_order(v: str) -> int:
+            s = str(v).replace("chr", "")
+            s = s.upper()
+            if s.isdigit():
+                return int(s)
+            if s == "X":
+                return 23
+            if s == "Y":
+                return 24
+            return 25  # anything weird goes last
+
+        df_genes["chr_sort"] = df_genes["chr"].astype(str).map(_chr_order)
+        # use seg_start if you prefer segment start; fall back to start
+        sort_pos_col = "seg_start" if "seg_start" in df_genes.columns else "start"
+        # make sure we sort numerically even if seg_start is currently string/NA
+        df_genes["_sort_pos"] = pd.to_numeric(
+            df_genes[sort_pos_col], errors="coerce"
+        )
+        df_genes = df_genes.sort_values(["chr_sort", "_sort_pos"], kind="mergesort")
+        df_genes = df_genes.drop(columns=["chr_sort", "_sort_pos"])
+
     # 7) column order
     cols = [
         "gene.symbol",

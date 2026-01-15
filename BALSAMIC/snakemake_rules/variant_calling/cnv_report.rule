@@ -7,7 +7,8 @@ rule create_cnv_html_report:
         cnr = cnv_dir + "tumor.merged.cnr",
         germline_vcf = vcf_dir + "SNV.germline.tumor.dnascope.vcf.gz",
         diagram = cnv_dir + "tumor.merged-diagram.pdf",
-        scatter = cnv_dir + "tumor.merged-scatter.pdf"
+        scatter = cnv_dir + "tumor.merged-scatter.pdf",
+        purity = cnv_dir+ "CNV.somatic." + config["analysis"]["case_id"] + ".purecn.purity.csv",
     output:
         cnv_report_html = cnv_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".report.html"
     benchmark:
@@ -31,6 +32,7 @@ python {params.cnv_report_script} \
 --case-id {params.case_id} \
 --cnvkit-scatter {input.scatter} \
 --cnvkit-diagram {input.diagram} \
+--purity-csv {input.purity} \
 --out-prefix {output.cnv_report_html} \
 {params.cust_case_id}
         """
