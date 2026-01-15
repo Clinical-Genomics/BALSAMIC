@@ -5,8 +5,6 @@ import json
 import pandas as pd
 from pathlib import Path
 from cnv_report_utils import plot_chromosomes, build_gene_table, pdf_first_page_to_png
-
-
 def csv_to_html_table(
     df: pd.DataFrame,
     out_html: str,
@@ -277,14 +275,12 @@ def csv_to_html_table(
           const checkboxBeyond  = document.getElementById("show-beyond-pon-noise");
           const geneInput       = document.getElementById("gene-filter");
           const minTargetsInput = document.getElementById("min-targets");
-          const copyBtn         = document.getElementById("copy-table");
 
           if (!table) return;
 
           const colIndex = {col_idx_json};
 
           const geneColIdx      = colIndex["gene.symbol"] ?? -1;
-          const cColIdx         = colIndex["C"] ?? -1;
           const lohColIdx       = colIndex["loh"] ?? -1;
           const typeColIdx      = colIndex["type"] ?? -1;
           const nTargetsColIdx  = colIndex["number.targets"] ?? -1;
@@ -323,7 +319,6 @@ def csv_to_html_table(
           }}
 
           function applyFilter() {{
-            const hideTrue      = checkboxFlagged && checkboxFlagged.checked;
             const hideNonCnv    = checkboxNonCnv && checkboxNonCnv.checked;
             const showBeyondPon = checkboxBeyond && checkboxBeyond.checked;
 
@@ -344,7 +339,7 @@ def csv_to_html_table(
               let hideRow = false;
 
               // CNV / non-CNV filter with beyond_pon_noise override
-              if (!hideRow && checkboxNonCnv) {{
+              if (!hideRow && hideNonCnv) {{
                 const isCnv = isCnvRow(row);
 
                 let isBeyond = false;
@@ -354,11 +349,9 @@ def csv_to_html_table(
                   isBeyond = (ponVal === "beyond_pon_noise");
                 }}
 
-                if (hideNonCnv) {{
-                  const treatedAsCnv = isCnv || (showBeyondPon && isBeyond);
-                  if (!treatedAsCnv) {{
-                    hideRow = true;
-                  }}
+                const treatedAsCnv = isCnv || (showBeyondPon && isBeyond);
+                if (!treatedAsCnv) {{
+                  hideRow = true;
                 }}
               }}
 
@@ -393,15 +386,13 @@ def csv_to_html_table(
           if (checkboxBeyond)   checkboxBeyond.addEventListener("change", applyFilter);
           if (geneInput)        geneInput.addEventListener("input", applyFilter);
           if (minTargetsInput)  minTargetsInput.addEventListener("input", applyFilter);
-
-          // copyBtn is declared but not used (safe); you can attach a click
-          // handler here later if you add a copy-to-clipboard button.
         }})();
       </script>
     </body>
     </html>
     """
     out_path.write_text(html, encoding="utf-8")
+
 
 
 @click.command()
