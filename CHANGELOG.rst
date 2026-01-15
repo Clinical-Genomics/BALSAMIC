@@ -3,6 +3,7 @@
 
 Added:
 ^^^^^^
+* add AT_DROPOUT to all panel analyses QC deliverables 
 
 Changed:
 ^^^^^^^^
