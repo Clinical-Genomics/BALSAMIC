@@ -835,7 +835,6 @@ def add_pon_spread_significance(
     gene_col_cnr: str = "gene",
     chr_col: str = "chromosome",
     spread_col: str = "spread",
-    weight_col: str = "weight",
     noise_factor_borderline: float = 1.0,
     noise_factor_strong: float = 2.0,
 ) -> pd.DataFrame:
@@ -1323,7 +1322,7 @@ def build_gene_table(
         "gene.min",
         "gene.max",
         "pon_spread_median",
-        "weight_mean",
+        "weight.mean",
         "mean_vs_spread",
         "pon_spread_flag",
     ]
