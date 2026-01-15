@@ -345,6 +345,7 @@ def build_genes_from_cnr(cnr_path: str | Path) -> pd.DataFrame:
             gene_mean=("log2", "mean"),
             gene_min=("log2", "min"),
             gene_max=("log2", "max"),
+            weight_mean=("weight", "mean"),
         )
     )
 
@@ -356,11 +357,12 @@ def build_genes_from_cnr(cnr_path: str | Path) -> pd.DataFrame:
             "gene_mean": "gene.mean",
             "gene_min": "gene.min",
             "gene_max": "gene.max",
+            "weight_mean": "weight.mean",
         }
     )
 
     # round gene stats a bit
-    for col in ["gene.mean", "gene.min", "gene.max"]:
+    for col in ["gene.mean", "gene.min", "gene.max", "weight.mean"]:
         agg[col] = agg[col].round(3)
 
     return agg
@@ -842,13 +844,12 @@ def add_pon_spread_significance(
     from df_cnr + df_pon and add:
 
       - pon_spread_median
-      - weight_mean (if available)
       - mean_vs_spread
       - pon_spread_flag  (within_noise / borderline / beyond_pon_noise / unknown)
     """
     df_genes = df_genes.copy()
     if df_pon.empty:
-        for col in ["pon_spread_median", "weight_mean", "mean_vs_spread", "pon_spread_flag"]:
+        for col in ["pon_spread_median", "mean_vs_spread", "pon_spread_flag"]:
             if col not in df_genes.columns:
                 df_genes[col] = pd.NA
         return df_genes
@@ -876,12 +877,6 @@ def add_pon_spread_significance(
             ("pon_spread_median", "median"),
         ]
     }
-
-    have_weight = weight_col in merged_expanded.columns
-    if have_weight:
-        agg_dict[weight_col] = [
-            ("weight_mean", "mean"),
-        ]
 
     agg = (
         merged_expanded.groupby(gene_col_cnr)
@@ -932,7 +927,6 @@ def add_pon_spread_significance(
     # ---------------------------
     round_cols = [
         "pon_spread_median",
-        "weight_mean",
         "mean_vs_spread",
     ]
     round_cols = [c for c in round_cols if c in df_genes.columns]

@@ -25,6 +25,9 @@ set-resources:
   cnvpytor_tumor_only_wgs:
     runtime: 600
     mem_mb: min(230000, 60000 * attempt)
+  create_cnv_html_report:
+    runtime: 60
+    mem_mb: min(230000, 8000 * attempt)
   igh_dux4_detection_tumor_only_wgs:
     runtime: 120
     mem_mb: min(230000, 5000 * attempt)
@@ -506,6 +509,7 @@ set-threads:
   tnscope_sort: 1
   merge_tnscope_to_mnvs: 4
   cnvpytor_tumor_only_wgs: 24
+  create_cnv_html_report: 2
   igh_dux4_detection_tumor_only_wgs: 2
   igh_dux4_detection_tumor_normal_wgs: 2
   tiddit_sv_tumor_only_wgs: 24
