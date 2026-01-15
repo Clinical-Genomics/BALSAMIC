@@ -133,8 +133,6 @@ def csv_to_html_table(
             qc_plots_html += "\n".join(no_cnv_blocks)
             qc_plots_html += "</details>"
 
-    # ---------------- Tables ----------------
-
     # ---------------- Summary table ----------------
     summary_html = ""
     if summary_df is not None and not summary_df.empty:
@@ -172,6 +170,9 @@ def csv_to_html_table(
         }}
         .controls {{
           margin-bottom: 12px;
+          padding: 8px 10px;
+          border: 1px solid #ddd;
+          background: #fafafa;
         }}
         .control-group {{
           margin-bottom: 6px;
@@ -209,6 +210,9 @@ def csv_to_html_table(
           font-size: 13px;
           cursor: pointer;
         }}
+        label {{
+          font-size: 13px;
+        }}
       </style>
     </head>
     <body>
@@ -238,6 +242,37 @@ def csv_to_html_table(
       {qc_plots_html}
 
       <h1>LOH / CNV Genes</h1>
+
+      <div class="controls">
+        <div class="control-group">
+          <label>
+            <input type="checkbox" id="hide-flagged" checked>
+            Hide rows with M.flagged = TRUE
+          </label>
+        </div>
+        <div class="control-group">
+          <label>
+            <input type="checkbox" id="hide-non-cnv">
+            Show only LOH / CNV genes (loh = TRUE or type set)
+          </label>
+          <label style="margin-left:12px;">
+            <input type="checkbox" id="show-beyond-pon-noise">
+            Also include genes with pon_spread_flag = "beyond_pon_noise"
+          </label>
+        </div>
+        <div class="control-group">
+          <label>
+            Min number.targets:
+            <input type="number" id="min-targets" min="0" step="1" value="0">
+          </label>
+        </div>
+        <div class="control-group">
+          <label>
+            Gene filter (comma-separated gene.symbol list):
+            <input type="text" id="gene-filter" placeholder="TP53,EGFR,MYC">
+          </label>
+        </div>
+      </div>
 
       {table_html}
 
@@ -378,7 +413,8 @@ def csv_to_html_table(
           if (geneInput)        geneInput.addEventListener("input", applyFilter);
           if (minTargetsInput)  minTargetsInput.addEventListener("input", applyFilter);
 
-          // copy-to-clipboard hook could go here if you add a button with id="copy-table"
+          // copyBtn is declared but not used (safe); you can attach a click
+          // handler here later if you add a copy-to-clipboard button.
         }})();
       </script>
     </body>
