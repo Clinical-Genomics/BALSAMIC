@@ -713,7 +713,6 @@ def plot_chromosomes(
 # Segment → gene table annotation (size, MAF, seg.mean, num.snps, C/M/loh/type)
 # =============================================================================
 
-
 def annotate_genes_with_segments(
     df_genes: pd.DataFrame, df_regions: pd.DataFrame
 ) -> pd.DataFrame:
@@ -723,7 +722,7 @@ def annotate_genes_with_segments(
 
         seg_start, seg_end, seg_size_bp,
         maf.expected, maf.observed (if present in df_regions),
-        seg.mean, num.snps, C, M, M.flagged, type, loh (if present)
+        seg.mean, num.snps, C, M, M.flagged (if present)
 
     Matching is purely by chromosome and genomic intervals (no seg.id needed).
     """
@@ -761,8 +760,9 @@ def annotate_genes_with_segments(
             df_genes[col] = np.nan
 
     # Additional segment-level metrics to carry over (if present)
+    # NOTE: 'type' is intentionally NOT included here so we don't get 'LOH' in type.
     seg_extra_cols: list[str] = []
-    for col in ["seg.mean", "num.snps", "C", "M", "M.flagged", "type", "loh"]:
+    for col in ["seg.mean", "num.snps", "C", "M", "M.flagged"]:
         if col in df_regions.columns:
             seg_extra_cols.append(col)
             df_genes[col] = np.nan
@@ -817,6 +817,7 @@ def annotate_genes_with_segments(
                 df_genes.at[idx, col] = extra_arrays[col][seg_idx]
 
     return df_genes
+
 
 
 # =============================================================================
@@ -1245,13 +1246,27 @@ def build_gene_table(
     exon_map = load_refgene_exons(refgene_path)
     df_genes = annotate_genes_with_exons(df_genes, exon_map, coverage_threshold=0.95)
 
-    # 5) type cleanup (fill NaN using C, if we have both)
+    # 5) type cleanup (keep only AMP/DEL-like; LOH stays in its own column)
     if "type" in df_genes.columns:
         df_genes["type"] = df_genes["type"].astype("string")
+
+        # treat obvious missing markers as NA
         df_genes["type"] = df_genes["type"].replace(
             ["NA", "NaN", "nan", "None", ".", ""],
             pd.NA,
         )
+
+        # any LOH-like type string should NOT live in 'type' – we have a separate loh column
+        type_str = df_genes["type"].astype(str).str.upper()
+        loh_like = type_str.str.contains("LOH", na=False)
+        df_genes.loc[loh_like, "type"] = pd.NA
+
+        # also, if loh column says TRUE, force type to NA (LOH is handled separately)
+        if "loh" in df_genes.columns:
+            loh_true = df_genes["loh"].astype(str).str.upper() == "TRUE"
+            df_genes.loc[loh_true, "type"] = pd.NA
+
+        # now fill missing type from C where possible
         if "C" in df_genes.columns:
             missing_type = df_genes["type"].isna()
             gain_mask = missing_type & df_genes["C"].notna() & (df_genes["C"] > 2)
