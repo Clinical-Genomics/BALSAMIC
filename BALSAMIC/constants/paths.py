@@ -16,6 +16,7 @@ REFSEQ_SCRIPT_PATH: Path = Path(SCRIPT_DIR, "refseq_sql.awk")
 # Metadata resources
 RESCUE_SNVS = Path(METADATA_DIR, "rescue_snvs.vcf")
 CYTOBAND = Path(METADATA_DIR, "cytoBand_hg19.txt")
+CANCERGENES = Path(METADATA_DIR, "cancerGeneList.tsv")
 
 # Sentieon specific constants
 SENTIEON_MODELS_DIR: Path = Path(BALSAMIC_DIR, "assets", "sentieon_models")

@@ -4,7 +4,7 @@ import base64
 import json
 import pandas as pd
 from pathlib import Path
-from cnv_report_utils import plot_chromosomes, build_gene_table, pdf_first_page_to_png
+from cnv_report_utils import plot_chromosomes, build_gene_table, pdf_first_page_to_png, load_cancer_gene_set
 def csv_to_html_table(
     df: pd.DataFrame,
     out_html: str,
@@ -474,6 +474,12 @@ def csv_to_html_table(
     required=False,
     help="PureCN sample summary CSV (Purity, Ploidy, etc., optional).",
 )
+@click.option(
+    "--cancer-genes",
+    type=click.Path(exists=True),
+    required=False,
+    help="Cancer Genelist from OncoKB",
+)
 def main(
     loh_genes,
     loh_regions,
@@ -488,6 +494,7 @@ def main(
     cnvkit_diagram,
     out_prefix,
     purity_csv,
+    cancer_genelist,
 ):
     """
     Build CNV QC plots + HTML report from CNVkit outputs, optionally
@@ -527,6 +534,10 @@ def main(
         cytoband_path=cytoband,
     )
 
+    cancer_genes = load_cancer_gene_set(cancer_genelist,
+                                        min_occurrence=3,
+                                        only_annotated=True)
+
     # ----------------------------
     # Generate per-chromosome PNG plots in outdir
     # ----------------------------
@@ -543,6 +554,8 @@ def main(
         segs_path=loh_regions,
         outdir=chr_plots_dir,
         case_id=plot_case_id,
+        cancer_genes=cancer_genes,
+        neutral_target_factor=0.2,
     )
 
     # ----------------------------

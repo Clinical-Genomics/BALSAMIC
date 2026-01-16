@@ -59,6 +59,7 @@ from BALSAMIC.constants.paths import (
     SENTIEON_TNSCOPE_MODEL,
     RESCUE_SNVS,
     CYTOBAND,
+    CANCERGENES,
 )
 from BALSAMIC.constants.workflow_params import VCF_DICT
 from BALSAMIC.models.config import ConfigModel
@@ -264,6 +265,7 @@ def case_config(
             "config_creation_date": datetime.now().strftime("%Y-%m-%d %H:%M"),
             "rescue_snvs": rescue_snvs if rescue_snvs else RESCUE_SNVS.as_posix(),
             "cytoband": CYTOBAND.as_posix(),
+            "cancergenes": CANCERGENES.as_posix(),
         },
         custom_filters={"umi_min_reads": umi_min_reads if umi_min_reads else None},
         reference=references,

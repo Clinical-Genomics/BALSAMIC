@@ -17,6 +17,7 @@ rule create_cnv_html_report:
         cnv_report_script = get_script_path("cnv_qc_report.py"),
         pon = pon_cnn,
         cytoband = config_model.analysis.cytoband,
+        cancergenes = config_model.analysis.cancergenes,
         case_id = config["analysis"]["case_id"],
         cust_case_id = lambda wildcards, cust_case_id=config_model.analysis.cust_case_id: f"--cust-case-id {cust_case_id}" if cust_case_id else "",
     shell:
@@ -34,5 +35,6 @@ python {params.cnv_report_script} \
 --cnvkit-diagram {input.diagram} \
 --purity-csv {input.purity} \
 --out-prefix {output.cnv_report_html} \
+--cancer-genes {params.cancergenes} \
 {params.cust_case_id}
         """

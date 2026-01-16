@@ -20,6 +20,36 @@ def pdf_first_page_to_png(pdf_path: str, png_path: str, dpi: int = 300) -> None:
     page.get_pixmap(dpi=dpi).save(png_path)
     doc.close()
 
+def load_cancer_gene_set(path: str | Path,
+                         min_occurrence: int = 1,
+                         only_annotated: bool = True) -> set[str]:
+    df = pd.read_csv(path, sep="\t", dtype=str)
+    # Clean up column names
+    df.columns = df.columns.str.strip()
+
+    # Standardize column names we care about
+    # (Change these strings if your headers differ slightly.)
+    symbol_col = "Hugo Symbol"
+    occ_col = "# of occurrence within resources (Column J-P)"
+    onco_col = "OncoKB Annotated"
+    type_col = "Gene Type"
+
+    # Convert occurrence to numeric
+    df[occ_col] = pd.to_numeric(df[occ_col], errors="coerce").fillna(0).astype(int)
+
+    # Basic filters: cancer-relevant genes
+    mask = df[occ_col] >= min_occurrence
+
+    if only_annotated and onco_col in df.columns:
+        mask &= df[onco_col].str.upper().eq("YES")
+
+    # Optional: keep classic cancer gene types only
+    if type_col in df.columns:
+        mask &= df[type_col].isin(["ONCOGENE", "TSG"])
+
+    selected = df.loc[mask, symbol_col].astype(str).str.strip()
+    return set(selected)
+
 def normalize_chr_column(
     df: pd.DataFrame, prefer_col: str | None = None
 ) -> tuple[pd.DataFrame, str]:
@@ -372,7 +402,6 @@ def build_genes_from_cnr(cnr_path: str | Path) -> pd.DataFrame:
 # Per-chromosome plots (PON spread + log2 + segments + BAF + CNV genes)
 # =============================================================================
 
-
 def plot_chromosomes(
     pon_path: Path | None,
     cnr_path: Path,
@@ -388,6 +417,8 @@ def plot_chromosomes(
     anti_factor: float = 0.15,
     base_label_offset: float = 1.5,
     min_targets_cnvgene: int = 2,
+    cancer_genes: set[str] | None = None,
+    neutral_target_factor: float = 0.3,
 ) -> None:
     """
     Main plotting routine creating one PNG per chromosome with:
@@ -397,6 +428,12 @@ def plot_chromosomes(
       - CNV segments (PureCN LOH regions)
       - CNV genes colored & labeled (PureCN genes)
       - BAF panel underneath
+
+    For large panels / exomes:
+      - If `cancer_genes` is provided, only CNV genes whose symbol is in this
+        set are highlighted & labeled.
+      - Non-CNV targets are horizontally compressed by `neutral_target_factor`
+        so that cancer-relevant CNV genes stand out.
     """
     outdir.mkdir(parents=True, exist_ok=True)
 
@@ -417,7 +454,12 @@ def plot_chromosomes(
         pon = safe_read_csv(pon_path, sep="\t")
         if not pon.empty and "spread" in pon.columns:
             try:
-                merged = merge_cnr_pon(cnr, pon, chr_col="chromosome", spread_col="spread")
+                merged = merge_cnr_pon(
+                    cnr,
+                    pon,
+                    chr_col="chromosome",
+                    spread_col="spread",
+                )
                 if not merged.empty:
                     use_pon = True
             except Exception:
@@ -434,7 +476,7 @@ def plot_chromosomes(
 
     merged = merged[merged["chromosome"].isin(chr_order)]
 
-    # 2. Load genes & segments from PureCN (optional, but typically present)
+    # 2. Load genes & segments from PureCN
     genes = safe_read_csv(genes_path)
     genes_cnv = pd.DataFrame()
     genes_chr_col = "chr"
@@ -442,6 +484,12 @@ def plot_chromosomes(
         genes, genes_chr_col = normalize_chr_column(genes)
         genes = genes[genes[genes_chr_col].isin(chr_order)]
         genes_cnv = flag_cnv_genes(genes, min_targets_cnvgene=min_targets_cnvgene)
+
+        # Optional: restrict CNV genes to cancer-relevant list
+        if cancer_genes is not None and not genes_cnv.empty:
+            genes_cnv = genes_cnv[
+                genes_cnv["gene.symbol"].isin(cancer_genes)
+            ]
 
     segs = safe_read_csv(segs_path)
     segs_chr_col = "chr"
@@ -480,15 +528,42 @@ def plot_chromosomes(
 
         # Plotting filters
         if use_pon:
-            sub = sub[(sub["weight"] > weight_thresh) & (sub["spread"] <= spread_thresh)]
+            sub = sub[
+                (sub["weight"] > weight_thresh)
+                & (sub["spread"] <= spread_thresh)
+            ]
         else:
             sub = sub[sub["weight"] > weight_thresh]
         if sub.empty:
             continue
 
-        # variable-width x-coordinate (targets vs antitargets)
-        sub = sub.sort_values("start")
-        sub["bin_width"] = np.where(sub["type"] == "Antitarget", anti_factor, 1.0)
+        # Determine which CNV genes exist on this chromosome,
+        # optionally restricted by `cancer_genes`.
+        chr_genes = pd.DataFrame()
+        gene_to_color: dict[str, tuple] = {}
+        gene_names = np.array([])
+
+        if not genes_cnv.empty:
+            chr_genes = genes_cnv[genes_cnv[genes_chr_col] == chr_name].copy()
+            chr_genes = chr_genes.sort_values("start")
+            if not chr_genes.empty:
+                gene_names = chr_genes["gene.symbol"].unique()
+
+        # Mark which bins belong to CNV genes
+        sub["is_cnv_gene"] = sub["gene"].isin(gene_names)
+
+        # variable-width x-coordinate:
+        # - antitargets compressed by anti_factor
+        # - CNV-gene targets use width 1.0
+        # - non-CNV targets compressed by neutral_target_factor
+        def _bin_width(row: pd.Series) -> float:
+            if row["type"] == "Antitarget":
+                return anti_factor
+            if row["is_cnv_gene"]:
+                return 1.0
+            return neutral_target_factor
+
+        sub["bin_width"] = sub.apply(_bin_width, axis=1)
         sub["x_coord"] = sub["bin_width"].cumsum() - sub["bin_width"] / 2
 
         # smoothing
@@ -519,21 +594,15 @@ def plot_chromosomes(
         if not baf_chr.empty:
             baf_chr["x_coord"] = baf_chr["POS"].apply(pos_to_xcoord)
 
-        # CNV genes for this chromosome (PureCN)
-        genes_chr = pd.DataFrame()
-        gene_to_color: dict[str, tuple] = {}
-        gene_names = np.array([])
+        # Build gene color map and place gene x-coordinates
+        if not chr_genes.empty and len(gene_names) > 0:
+            chr_genes["x_coord"] = chr_genes["start"].apply(pos_to_xcoord)
+            n_genes = len(gene_names)
+            cmap = colormaps.get_cmap("tab20").resampled(n_genes)
+            for i, g in enumerate(gene_names):
+                gene_to_color[g] = cmap(i)
 
-        if not genes_cnv.empty:
-            genes_chr = genes_cnv[genes_cnv[genes_chr_col] == chr_name].copy()
-            genes_chr = genes_chr.sort_values("start")
-            if not genes_chr.empty:
-                genes_chr["x_coord"] = genes_chr["start"].apply(pos_to_xcoord)
-                gene_names = genes_chr["gene.symbol"].unique()
-                n_genes = len(gene_names)
-                cmap = colormaps.get_cmap("tab20").resampled(n_genes)
-                for i, g in enumerate(gene_names):
-                    gene_to_color[g] = cmap(i)
+        genes_chr = chr_genes  # keep old name for the labeling code
 
         # Segments for this chromosome (PureCN regions)
         segs_chr = pd.DataFrame()
@@ -575,7 +644,7 @@ def plot_chromosomes(
                 label="Antitarget bins",
             )
 
-        # Non-CNV targets: visible neutral
+        # Non-CNV targets: visible but compressed neutrals
         if not bg_targets.empty:
             ax1.scatter(
                 bg_targets["x_coord"],
@@ -583,7 +652,7 @@ def plot_chromosomes(
                 s=4,
                 alpha=0.5,
                 color="tab:blue",
-                label="Target bins (no CNV gene)",
+                label="Target bins (no highlighted CNV gene)",
             )
 
         # CNV genes: colored points
@@ -592,7 +661,7 @@ def plot_chromosomes(
                 gsub = sub[sub["gene"] == gene]
                 if gsub.empty:
                     continue
-                color = gene_to_color[gene]
+                color = gene_to_color.get(gene, "black")
                 ax1.scatter(
                     gsub["x_coord"],
                     gsub["log2"],
@@ -702,13 +771,16 @@ def plot_chromosomes(
         for frac in [1 / 3, 2 / 3]:
             ax2.axhline(frac, color="lightgray", linewidth=0.6, linestyle=":")
         ax2.set_ylim(0, 1)
-        ax2.set_xlabel("Pseudo-position (targets expanded, antitargets compressed)")
+        ax2.set_xlabel(
+            "Pseudo-position (CNV genes expanded, other bins compressed)"
+        )
         ax2.set_ylabel("BAF")
 
         plt.tight_layout()
         out_path = outdir / f"cnv_chr{chr_name}_segments.png"
         plt.savefig(out_path, dpi=150)
         plt.close(fig)
+
 
 
 # =============================================================================
