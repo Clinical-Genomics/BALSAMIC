@@ -8,6 +8,7 @@ Changed:
 ^^^^^^^^
 * increased runtime for a couple of small rules https://github.com/Clinical-Genomics/BALSAMIC/pull/1641
 * decreased memory for headjobs to 500mb https://github.com/Clinical-Genomics/BALSAMIC/pull/1641
+* updated tiddit from 3.3.2 to 3.9.3 https://github.com/Clinical-Genomics/BALSAMIC/pull/1647 
 
 Removed:
 ^^^^^^^^
