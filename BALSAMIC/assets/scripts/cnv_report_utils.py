@@ -434,6 +434,9 @@ def plot_chromosomes(
         set are highlighted & labeled.
       - Non-CNV targets are horizontally compressed by `neutral_target_factor`
         so that cancer-relevant CNV genes stand out.
+
+    Y-axis is scaled *per chromosome* (log2, spread, segments) instead of
+    globally across all chromosomes.
     """
     outdir.mkdir(parents=True, exist_ok=True)
 
@@ -503,16 +506,11 @@ def plot_chromosomes(
         chr_order=chr_order,
     )
 
-    # 4. QC thresholds & smoothing setup
+    # 4. QC thresholds (global spread threshold, per-chr plotting)
     if use_pon:
         spread_thresh = merged["spread"].quantile(pct_spread)
-        y_max = max(merged["log2"].abs().max(), merged["spread"].max())
     else:
         spread_thresh = np.inf
-        y_max = merged["log2"].abs().max()
-
-    y_pad = 0.1
-    y_lim = (-y_max - y_pad, y_max + y_pad)
 
     # 5. Per-chromosome plots
     for chr_name in chr_order:
@@ -612,6 +610,29 @@ def plot_chromosomes(
             if not segs_chr.empty:
                 segs_chr["x_start"] = segs_chr["start"].apply(pos_to_xcoord)
                 segs_chr["x_end"] = segs_chr["end"].apply(pos_to_xcoord)
+
+        # -------- Per-chromosome y-scaling --------
+        # log2 range on this chromosome
+        log2_max = sub["log2"].abs().max()
+
+        # spread range on this chromosome (if PON)
+        if use_pon and sub["spread_smooth"].notna().any():
+            spread_max = sub["spread_smooth"].abs().max()
+        elif use_pon:
+            spread_max = sub["spread"].abs().max()
+        else:
+            spread_max = 0.0
+
+        # segment range on this chromosome
+        if not segs_chr.empty and "seg.mean" in segs_chr.columns:
+            seg_max = segs_chr["seg.mean"].abs().max()
+        else:
+            seg_max = 0.0
+
+        # Protect against NaNs and too-small ranges
+        y_max = max(0.5, float(log2_max), float(spread_max), float(seg_max))
+        y_pad = 0.1
+        y_lim_chr = (-y_max - y_pad, y_max + y_pad)
 
         # ---------- Figure + axes ----------
         fig, (ax1, ax2) = plt.subplots(
@@ -718,7 +739,7 @@ def plot_chromosomes(
                 )
 
         ax1.axhline(0, color="black", linewidth=0.8)
-        ax1.set_ylim(*y_lim)
+        ax1.set_ylim(*y_lim_chr)
         ax1.set_ylabel("log2 / spread")
         title_suffix = "log2 vs PON spread" if use_pon else "log2 (no PON available)"
         ax1.set_title(f"Chr {chr_name} – {title_suffix}: {case_id}\n")
