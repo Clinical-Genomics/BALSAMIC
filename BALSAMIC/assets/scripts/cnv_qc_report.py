@@ -478,7 +478,13 @@ def csv_to_html_table(
     "--cancer-genes",
     type=click.Path(exists=True),
     required=False,
-    help="Cancer Genelist from OncoKB",
+    help="Cancer gene list TSV (OncoKB/CGC aggregate, optional).",
+)
+@click.option(
+    "--is-exome",
+    is_flag=True,
+    default=False,
+    help="Treat assay as exome (use more aggressive non-driver bin compression, etc.).",
 )
 def main(
     loh_genes,
@@ -494,7 +500,8 @@ def main(
     cnvkit_diagram,
     out_prefix,
     purity_csv,
-    cancer_genelist,
+    cancer_genes,
+    is_exome,
 ):
     """
     Build CNV QC plots + HTML report from CNVkit outputs, optionally
@@ -534,9 +541,18 @@ def main(
         cytoband_path=cytoband,
     )
 
-    cancer_genes = load_cancer_gene_set(cancer_genelist,
-                                        min_occurrence=3,
-                                        only_annotated=True)
+    # ----------------------------
+    # Load cancer gene list (optional)
+    # ----------------------------
+    cancer_gene_set = None
+    if cancer_genes:
+        # You can tune min_occurrence depending on exome/panel if you like
+        min_occ = 3 if is_exome else 1
+        cancer_gene_set = load_cancer_gene_set(
+            cancer_genes,
+            min_occurrence=min_occ,
+            only_annotated=True,
+        )
 
     # ----------------------------
     # Generate per-chromosome PNG plots in outdir
@@ -544,6 +560,9 @@ def main(
     chr_plots_dir = outdir / f"{case_id}_chr_plots"
     chr_plots_dir.mkdir(exist_ok=True, parents=True)
     plot_case_id = cust_case_id if cust_case_id else case_id
+
+    # Different compression for exome vs panel
+    neutral_target_factor = 0.2 if is_exome else 0.6
 
     # pon may be None; plot_chromosomes is written to handle that
     plot_chromosomes(
@@ -554,8 +573,8 @@ def main(
         segs_path=loh_regions,
         outdir=chr_plots_dir,
         case_id=plot_case_id,
-        cancer_genes=cancer_genes,
-        neutral_target_factor=0.2,
+        cancer_genes=cancer_gene_set,
+        neutral_target_factor=neutral_target_factor,
     )
 
     # ----------------------------
