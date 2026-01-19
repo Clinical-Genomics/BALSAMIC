@@ -5,6 +5,7 @@ import json
 import pandas as pd
 from pathlib import Path
 from cnv_report_utils import plot_chromosomes, build_gene_segment_table, pdf_first_page_to_png, load_cancer_gene_set
+
 def csv_to_html_table(
     df: pd.DataFrame,
     out_html: str,
@@ -26,8 +27,13 @@ def csv_to_html_table(
     diagram_png_data_uri = f"data:image/png;base64,{png_base64}"
 
     # ------------------------------------------------------------------
-    # Determine which chromosomes have CNV genes
-    # CNV = (C != 2) OR (loh == TRUE) OR (type annotated and not NA/NAN/./empty)
+    # Determine which chromosomes have CNV / LOH genes
+    #
+    # New definition:
+    #   CNV if:
+    #     - loh_flag == TRUE
+    #     OR cnvkit_cnv_call in {DELETION, AMPLIFICATION}
+    #     OR purecn_cnv_call in {DELETION, AMPLIFICATION}
     # ------------------------------------------------------------------
     df_chr = df.copy()
     if "chr" in df_chr.columns:
@@ -39,19 +45,26 @@ def csv_to_html_table(
 
     cnv_chr_set: set[str] = set()
 
-    if chr_col is not None and {"C", "loh", "type"}.issubset(df_chr.columns):
+    if chr_col is not None:
         if "gene.symbol" in df_chr.columns:
             df_chr = df_chr[~df_chr["gene.symbol"].isin(["Antitarget", "-"])]
 
-        # Normalize
-        df_chr["loh_str"] = df_chr["loh"].astype(str).str.upper()
-        df_chr["type_str"] = df_chr["type"].fillna("NA").astype(str).str.upper()
+        cnv_mask = pd.Series(False, index=df_chr.index)
 
-        # Missing / placeholder types
-        bad_type = {"NA", "NAN", ".", "", "<NA>", "NONE"}
-        is_type_real = df_chr["type_str"].notna() & ~df_chr["type_str"].isin(bad_type)
+        # LOH flag
+        if "loh_flag" in df_chr.columns:
+            loh_str = df_chr["loh_flag"].astype(str).str.upper()
+            cnv_mask |= (loh_str == "TRUE")
 
-        cnv_mask = (df_chr["loh_str"] == "TRUE") | is_type_real
+        # CNVkit call
+        if "cnvkit_cnv_call" in df_chr.columns:
+            cnvkit_str = df_chr["cnvkit_cnv_call"].astype(str).str.upper()
+            cnv_mask |= cnvkit_str.isin(["DELETION", "AMPLIFICATION"])
+
+        # PureCN call
+        if "purecn_cnv_call" in df_chr.columns:
+            purecn_str = df_chr["purecn_cnv_call"].astype(str).str.upper()
+            cnv_mask |= purecn_str.isin(["DELETION", "AMPLIFICATION"])
 
         cnv_chr_set = set(df_chr.loc[cnv_mask, chr_col].astype(str).tolist())
 
@@ -113,19 +126,19 @@ def csv_to_html_table(
         qc_plots_html += """
         <h2>Per-chromosome CNV QC plots</h2>
         <p class="muted">
-          These plots show log2 coverage, PON spread (if available), BAF and PureCN segments/genes
-          per chromosome. CNV genes are highlighted in colour.
+          These plots show log2 coverage, PON spread (if available), BAF and segments/genes
+          per chromosome. CNV / LOH genes are highlighted in colour.
         </p>
         """
         if with_cnv_blocks:
-            qc_plots_html += "<h3>Chromosomes with CNV genes</h3>\n" + "\n".join(
+            qc_plots_html += "<h3>Chromosomes with CNV / LOH genes</h3>\n" + "\n".join(
                 with_cnv_blocks
             )
         if no_cnv_blocks:
             qc_plots_html += """
             <details style="margin-top:15px;">
               <summary style="cursor:pointer; font-weight:500;">
-                Show chromosomes without CNV genes
+                Show chromosomes without CNV / LOH genes
               </summary>
             """
             qc_plots_html += "\n".join(no_cnv_blocks)
@@ -245,16 +258,16 @@ def csv_to_html_table(
         <div class="control-group">
           <label>
             <input type="checkbox" id="hide-non-cnv">
-            Show only LOH / CNV genes (loh = TRUE or type set)
+            Show only LOH / CNV genes (loh_flag TRUE or CNV call ≠ NEUTRAL)
           </label>
           <label style="margin-left:12px;">
-            <input type="checkbox" id="show-beyond-pon-noise">
-            Also include genes with pon_spread_flag = "beyond_pon_noise"
+            <input type="checkbox" id="show-significant-pon">
+            Also include genes with pon_call = "significant"
           </label>
         </div>
         <div class="control-group">
           <label>
-            Min number.targets:
+            Min n.targets:
             <input type="number" id="min-targets" min="0" step="1" value="0">
           </label>
         </div>
@@ -272,7 +285,7 @@ def csv_to_html_table(
         (function() {{
           const table           = document.getElementById("report-table");
           const checkboxNonCnv  = document.getElementById("hide-non-cnv");
-          const checkboxBeyond  = document.getElementById("show-beyond-pon-noise");
+          const checkboxPonSig  = document.getElementById("show-significant-pon");
           const geneInput       = document.getElementById("gene-filter");
           const minTargetsInput = document.getElementById("min-targets");
 
@@ -281,10 +294,11 @@ def csv_to_html_table(
           const colIndex = {col_idx_json};
 
           const geneColIdx      = colIndex["gene.symbol"] ?? -1;
-          const lohColIdx       = colIndex["loh"] ?? -1;
-          const typeColIdx      = colIndex["type"] ?? -1;
-          const nTargetsColIdx  = colIndex["number.targets"] ?? -1;
-          const ponSpreadColIdx = colIndex["pon_spread_flag"] ?? -1;
+          const lohColIdx       = colIndex["loh_flag"] ?? -1;
+          const cnvkitColIdx    = colIndex["cnvkit_cnv_call"] ?? -1;
+          const purecnColIdx    = colIndex["purecn_cnv_call"] ?? -1;
+          const nTargetsColIdx  = colIndex["n.targets"] ?? -1;
+          const ponCallColIdx   = colIndex["pon_call"] ?? -1;
 
           function normalizeCellText(td) {{
             return (td && td.textContent ? td.textContent : "")
@@ -294,33 +308,40 @@ def csv_to_html_table(
 
           function isCnvRow(row) {{
             let isCnv = false;
-            let evaluated = false;
 
+            // LOH flag
             if (lohColIdx !== -1) {{
               const lohCell = row.cells[lohColIdx];
               const lohVal = normalizeCellText(lohCell);
               if (lohVal === "true") {{
-                evaluated = true;
                 isCnv = true;
               }}
             }}
 
-            if (!isCnv && typeColIdx !== -1) {{
-              const typeCell = row.cells[typeColIdx];
-              const typeVal = normalizeCellText(typeCell);
-              const bad = ["na", "nan", ".", "", "<na>", "none"];
-              if (typeVal && !bad.includes(typeVal)) {{
-                evaluated = true;
+            // CNVkit call
+            if (!isCnv && cnvkitColIdx !== -1) {{
+              const cCell = row.cells[cnvkitColIdx];
+              const cVal = normalizeCellText(cCell);
+              if (cVal === "deletion" || cVal === "amplification") {{
                 isCnv = true;
               }}
             }}
 
-            return evaluated ? isCnv : false;
+            // PureCN call
+            if (!isCnv && purecnColIdx !== -1) {{
+              const pCell = row.cells[purecnColIdx];
+              const pVal = normalizeCellText(pCell);
+              if (pVal === "deletion" || pVal === "amplification") {{
+                isCnv = true;
+              }}
+            }}
+
+            return isCnv;
           }}
 
           function applyFilter() {{
             const hideNonCnv    = checkboxNonCnv && checkboxNonCnv.checked;
-            const showBeyondPon = checkboxBeyond && checkboxBeyond.checked;
+            const showPonSig    = checkboxPonSig && checkboxPonSig.checked;
 
             const geneList = (geneInput && geneInput.value ? geneInput.value : "")
               .split(",")
@@ -338,24 +359,24 @@ def csv_to_html_table(
             for (const row of rows) {{
               let hideRow = false;
 
-              // CNV / non-CNV filter with beyond_pon_noise override
+              // CNV / LOH filter with pon_call "significant" override
               if (!hideRow && hideNonCnv) {{
-                const isCnv = isCnvRow(row);
+                const cnv = isCnvRow(row);
 
-                let isBeyond = false;
-                if (ponSpreadColIdx !== -1) {{
-                  const ponCell = row.cells[ponSpreadColIdx];
+                let isPonSignificant = false;
+                if (ponCallColIdx !== -1) {{
+                  const ponCell = row.cells[ponCallColIdx];
                   const ponVal = normalizeCellText(ponCell);
-                  isBeyond = (ponVal === "beyond_pon_noise");
+                  isPonSignificant = (ponVal === "significant");
                 }}
 
-                const treatedAsCnv = isCnv || (showBeyondPon && isBeyond);
+                const treatedAsCnv = cnv || (showPonSig && isPonSignificant);
                 if (!treatedAsCnv) {{
                   hideRow = true;
                 }}
               }}
 
-              // min number.targets filter
+              // min n.targets filter
               if (!hideRow && nTargetsColIdx !== -1 && minTargetsInput) {{
                 const nCell = row.cells[nTargetsColIdx];
                 const nText = normalizeCellText(nCell);
@@ -383,7 +404,7 @@ def csv_to_html_table(
 
           applyFilter();
           if (checkboxNonCnv)   checkboxNonCnv.addEventListener("change", applyFilter);
-          if (checkboxBeyond)   checkboxBeyond.addEventListener("change", applyFilter);
+          if (checkboxPonSig)   checkboxPonSig.addEventListener("change", applyFilter);
           if (geneInput)        geneInput.addEventListener("input", applyFilter);
           if (minTargetsInput)  minTargetsInput.addEventListener("input", applyFilter);
         }})();
@@ -392,8 +413,6 @@ def csv_to_html_table(
     </html>
     """
     out_path.write_text(html, encoding="utf-8")
-
-
 
 @click.command()
 @click.option(
