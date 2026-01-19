@@ -552,7 +552,7 @@ def main(
         refgene_path=refgene,
         transcript_selection="longest_tx",
         pon_path=pon,
-        loh_pathh=loh_genes,
+        loh_path=loh_genes,
         cytoband_path=cytoband,
     )
 
