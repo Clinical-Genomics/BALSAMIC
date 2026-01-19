@@ -4,7 +4,7 @@ import base64
 import json
 import pandas as pd
 from pathlib import Path
-from cnv_report_utils import plot_chromosomes, build_gene_table, pdf_first_page_to_png, load_cancer_gene_set
+from cnv_report_utils import plot_chromosomes, build_gene_segment_table, pdf_first_page_to_png, load_cancer_gene_set
 def csv_to_html_table(
     df: pd.DataFrame,
     out_html: str,
@@ -415,6 +415,12 @@ def csv_to_html_table(
     help="CNVkit tumor .cnr file.",
 )
 @click.option(
+    "--cns",
+    type=click.Path(exists=True),
+    required=True,
+    help="CNVkit tumor .cns file.",
+)
+@click.option(
     "--pon",
     type=click.Path(exists=True),
     required=False,  # <- NOW OPTIONAL
@@ -490,6 +496,7 @@ def main(
     loh_genes,
     loh_regions,
     cnr,
+    cns,
     pon,
     vcf,
     refgene,
@@ -534,27 +541,27 @@ def main(
             only_annotated=True,
         )
 
+    # ----------------------------
+    # Create per-gene CNV table
+    # ----------------------------
+    # pon can be None (no PON file); build_gene_table handles that
+    df_genes = build_gene_segment_table(
+        cnr_path=cnr,
+        cns_path=cns,
+        cancer_genes=cancer_gene_set,
+        refgene_path=refgene,
+        transcript_selection="longest_tx",
+        pon_path=pon,
+        loh_genes_path=loh_genes,
+        cytoband_path=cytoband,
+    )
+
     # ---------------
     # Read PureCN purity and ploidy estimation (optional)
     # ---------------
     purity_df = None
     if purity_csv:
         purity_df = pd.read_csv(purity_csv)
-
-    # ----------------------------
-    # Create per-gene CNV table
-    # ----------------------------
-    # pon can be None (no PON file); build_gene_table handles that
-    df_genes = build_gene_table(
-        loh_regions_path=loh_regions,
-        loh_genes_path=loh_genes,
-        cnr_path=cnr,
-        pon_path=pon,
-        refgene_path=refgene,
-        cytoband_path=cytoband,
-        is_exome=is_exome,
-        cancer_gene_set=cancer_gene_set,
-    )
 
     # ----------------------------
     # Generate per-chromosome PNG plots in outdir
@@ -570,6 +577,7 @@ def main(
     plot_chromosomes(
         pon_path=pon,
         cnr_path=cnr,
+        cns_path=cns,
         vcf_path=vcf,
         genes_path=loh_genes,
         segs_path=loh_regions,
