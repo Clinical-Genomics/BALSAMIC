@@ -1219,6 +1219,28 @@ def annotate_genes_with_exons(
     return df_genes
 
 
+def classify_cnv_from_total_cn(cn: float | int | None) -> str:
+    """
+    Simple classifier based on total copy number:
+      <= 1  -> DELETION
+      >= 3  -> AMPLIFICATION
+      else  -> NEUTRAL
+
+    Works for both CNVkit seg_cn and PureCN C.
+    """
+    if pd.isna(cn):
+        return ""
+
+    # robust to float-ish values like 1.99, 2.01, etc.
+    cn_int = int(round(float(cn)))
+
+    if cn_int <= 1:
+        return "DELETION"
+    elif cn_int >= 3:
+        return "AMPLIFICATION"
+    else:
+        return "NEUTRAL"
+
 # =============================================================================
 # Final gene table builder (CNR base + optional PureCN + PON)
 # =============================================================================
@@ -1698,5 +1720,13 @@ def build_gene_segment_table(
     ]
     drop_cols = [c for c in drop_cols if c in grouped.columns]
     grouped = grouped.drop(columns=drop_cols)
+
+    # CNVkit-based call (from seg_cn)
+    if "seg_cn" in grouped.columns:
+        grouped["cnvkit_cnv_call"] = grouped["seg_cn"].apply(classify_cnv_from_total_cn)
+
+    # PureCN-based call (from loh_C)
+    if "loh_C" in grouped.columns:
+        grouped["purecn_cnv_call"] = grouped["loh_C"].apply(classify_cnv_from_total_cn)
 
     return grouped
