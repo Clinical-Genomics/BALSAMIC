@@ -403,7 +403,6 @@ def build_genes_from_cnr(cnr_path: str | Path) -> pd.DataFrame:
 # Per-chromosome plots (PON spread + log2 + segments + BAF + CNV genes)
 # =============================================================================
 
-
 def plot_chromosomes(
     cnr_path: Path,
     vcf_path: Path,
@@ -416,9 +415,10 @@ def plot_chromosomes(
     pct_spread: float = 0.95,
     window: int = 5,
     anti_factor: float = 0.15,
-    base_label_offset: float = 1.5,
+    base_label_offset: float = 0.5,
     neutral_target_factor: float = 0.3,
     highlight_only_cancer: bool = False,
+    y_abs_max: float = 3.0,
 ) -> None:
     """
     Create one PNG per chromosome with:
@@ -428,25 +428,6 @@ def plot_chromosomes(
       - segments reconstructed from `gene_seg_df`
       - CNV / LOH / PON-significant genes coloured & labelled
       - BAF panel under each chromosome (from VCF)
-
-    Inputs
-    ------
-    cnr_path:
-        CNVkit .cnr file (bin-level log2 + weight [+ optionally depth]).
-    vcf_path:
-        VCF with heterozygous SNPs used for BAF.
-        (Assumes you have a helper `load_vcf_with_baf` returning CHROM, POS, BAF.)
-    gene_seg_df:
-        Output from your `build_gene_segment_table`, expected columns (per row):
-          - chr, region_start, region_end
-          - gene.symbol
-          - seg_start, seg_end, seg_log2 (optional), seg_cn, loh_seg_mean, loh_C, ...
-          - loh_flag, cnvkit_cnv_call, purecn_cnv_call, pon_call, is_cancer_gene (optional)
-    pon_path:
-        Optional CNVkit PON .cnn. If provided, used only for PON spread band.
-    highlight_only_cancer:
-        If True and column `is_cancer_gene` exists, only those genes are used
-        for colour/labels; otherwise all CNV / LOH / PON-significant genes.
     """
 
     outdir.mkdir(parents=True, exist_ok=True)
@@ -527,37 +508,36 @@ def plot_chromosomes(
     # ---------------------------------
     def _is_cnv_chunk(row: pd.Series) -> bool:
         """
-        Define "interesting" CNV chunks using the same logic as your HTML filter:
+        "Interesting" CNV chunks:
           - loh_flag == TRUE
           - OR cnvkit_cnv_call in {DELETION, AMPLIFICATION}
           - OR purecn_cnv_call in {DELETION, AMPLIFICATION}
           - OR pon_call == 'significant'
         """
-        # loh_flag
         if "loh_flag" in row.index and pd.notna(row["loh_flag"]):
             if str(row["loh_flag"]).strip().upper() == "TRUE":
                 return True
 
-        # CNVkit call
         for col in ("cnvkit_cnv_call", "purecn_cnv_call"):
             if col in row.index and pd.notna(row[col]):
                 val = str(row[col]).strip().upper()
                 if val in ("DELETION", "AMPLIFICATION"):
                     return True
 
-        # PON-based
         if "pon_call" in row.index and pd.notna(row["pon_call"]):
             if str(row["pon_call"]).strip().lower() == "significant":
                 return True
 
         return False
 
-    # Precompute a boolean cnv_flag on gene_seg_df
     gdf["cnv_flag"] = gdf.apply(_is_cnv_chunk, axis=1)
 
     # ---------------------------------
     # 3. Per-chromosome plotting
     # ---------------------------------
+    y_clip = float(y_abs_max)
+    y_lim_chr = (-y_clip, y_clip)
+
     for chr_name in chr_order:
         # ---------- 3a. Bin-level data for this chromosome ----------
         sub = merged[merged[chr_col] == chr_name].copy()
@@ -587,12 +567,8 @@ def plot_chromosomes(
         # ---------- 3b. Gene-level info for this chromosome ----------
         g_chr = gdf[gdf["chr"] == chr_name].copy()
         if g_chr.empty:
-            # still plot coverage + BAF even if no gene table rows
             g_chr = pd.DataFrame(columns=gdf.columns)
 
-        # decide which genes to highlight
-        #  - must have cnv_flag True
-        #  - if highlight_only_cancer and is_cancer_gene exists: also require that
         if highlight_only_cancer and "is_cancer_gene" in g_chr.columns:
             mask_gene = g_chr["cnv_flag"] & g_chr["is_cancer_gene"].fillna(False)
         else:
@@ -639,6 +615,15 @@ def plot_chromosomes(
         else:
             sub["spread_smooth"] = np.nan
 
+        # ---------- CLIPPING of log2 / spread (for plotting) ----------
+        sub["log2_clipped"] = sub["log2"].clip(-y_clip, y_clip)
+        sub["log2_smooth_clipped"] = sub["log2_smooth"].clip(-y_clip, y_clip)
+        if use_pon:
+            # spread is positive; clip the magnitude
+            sub["spread_smooth_clipped"] = sub["spread_smooth"].clip(upper=y_clip)
+        else:
+            sub["spread_smooth_clipped"] = np.nan
+
         # helper: map genomic POS → x_coord (nearest bin)
         bin_starts = sub["start"].values
         x_coords = sub["x_coord"].values
@@ -662,7 +647,6 @@ def plot_chromosomes(
         genes_chr = pd.DataFrame()
 
         if highlighted_genes.size > 0:
-            # choose a representative genomic position per gene (min region_start)
             if {"gene.symbol", "region_start"}.issubset(g_chr_cnv.columns):
                 gene_pos = (
                     g_chr_cnv.groupby("gene.symbol", as_index=False)["region_start"]
@@ -670,7 +654,6 @@ def plot_chromosomes(
                     .rename(columns={"region_start": "gene_start"})
                 )
             else:
-                # fallback: use seg_start if region_start absent
                 gene_pos = (
                     g_chr_cnv.groupby("gene.symbol", as_index=False)["seg_start"]
                     .min()
@@ -685,34 +668,19 @@ def plot_chromosomes(
             for i, gname in enumerate(highlighted_genes):
                 gene_to_color[gname] = cmap(i)
 
-        # ---------- 3f. Segment x-coordinates ----------
+        # ---------- 3f. Segment x-coordinates + clipping ----------
         if not segs_chr.empty:
             segs_chr = segs_chr.copy()
             segs_chr["x_start"] = segs_chr["seg_start"].apply(pos_to_xcoord)
             segs_chr["x_end"] = segs_chr["seg_end"].apply(pos_to_xcoord)
 
-        # ---------- 3g. y-scaling ----------
-        log2_max = sub["log2"].abs().max()
+            # clip segment-level values for plotting
+            if "seg_log2" in segs_chr.columns:
+                segs_chr["seg_log2_clipped"] = segs_chr["seg_log2"].clip(-y_clip, y_clip)
+            if "loh_seg_mean" in segs_chr.columns:
+                segs_chr["loh_seg_mean_clipped"] = segs_chr["loh_seg_mean"].clip(-y_clip, y_clip)
 
-        if use_pon and sub["spread_smooth"].notna().any():
-            spread_max = sub["spread_smooth"].abs().max()
-        elif use_pon:
-            spread_max = sub["spread"].abs().max()
-        else:
-            spread_max = 0.0
-
-        seg_max = 0.0
-        if not segs_chr.empty:
-            if "seg_log2" in segs_chr.columns and pd.notna(segs_chr["seg_log2"]).any():
-                seg_max = max(seg_max, segs_chr["seg_log2"].abs().max())
-            if "loh_seg_mean" in segs_chr.columns and pd.notna(segs_chr["loh_seg_mean"]).any():
-                seg_max = max(seg_max, segs_chr["loh_seg_mean"].abs().max())
-
-        y_max = max(0.5, float(log2_max), float(spread_max), float(seg_max))
-        y_pad = 0.1
-        y_lim_chr = (-y_max - y_pad, y_max + y_pad)
-
-        # ---------- 3h. Figure + axes ----------
+        # ---------- 3g. Figure + axes ----------
         fig, (ax1, ax2) = plt.subplots(
             2,
             1,
@@ -735,7 +703,7 @@ def plot_chromosomes(
         if not bg_antis.empty:
             ax1.scatter(
                 bg_antis["x_coord"],
-                bg_antis["log2"],
+                bg_antis["log2_clipped"],
                 s=3,
                 alpha=0.38,
                 color="lightgrey",
@@ -745,7 +713,7 @@ def plot_chromosomes(
         if not bg_targets.empty:
             ax1.scatter(
                 bg_targets["x_coord"],
-                bg_targets["log2"],
+                bg_targets["log2_clipped"],
                 s=4,
                 alpha=0.5,
                 color="tab:blue",
@@ -761,18 +729,18 @@ def plot_chromosomes(
                 color = gene_to_color.get(gene, "black")
                 ax1.scatter(
                     gsub["x_coord"],
-                    gsub["log2"],
+                    gsub["log2_clipped"],
                     s=8,
                     alpha=0.9,
                     color=color,
                 )
 
         # PON spread band
-        if use_pon and sub["spread_smooth"].notna().any():
+        if use_pon and sub["spread_smooth_clipped"].notna().any():
             ax1.fill_between(
                 x,
-                -sub["spread_smooth"],
-                sub["spread_smooth"],
+                -sub["spread_smooth_clipped"],
+                sub["spread_smooth_clipped"],
                 alpha=0.4,
                 step="mid",
                 label="PON noise band",
@@ -781,7 +749,7 @@ def plot_chromosomes(
         # smoothed log2
         ax1.plot(
             x,
-            sub["log2_smooth"],
+            sub["log2_smooth_clipped"],
             linewidth=1.5,
             alpha=0.9,
             color="tab:green",
@@ -794,15 +762,14 @@ def plot_chromosomes(
                 xs = srow["x_start"]
                 xe = srow["x_end"]
 
-                # prefer loh_seg_mean if present, else seg_log2
-                if "loh_seg_mean" in srow.index and pd.notna(srow["loh_seg_mean"]):
-                    y_seg = srow["loh_seg_mean"]
-                elif "seg_log2" in srow.index and pd.notna(srow["seg_log2"]):
-                    y_seg = srow["seg_log2"]
+                # prefer loh_seg_mean_clipped if present, else seg_log2_clipped
+                if "loh_seg_mean_clipped" in srow.index and pd.notna(srow["loh_seg_mean_clipped"]):
+                    y_seg = srow["loh_seg_mean_clipped"]
+                elif "seg_log2_clipped" in srow.index and pd.notna(srow["seg_log2_clipped"]):
+                    y_seg = srow["seg_log2_clipped"]
                 else:
                     continue
 
-                # colour by CN if available
                 C_val = np.nan
                 if "loh_C" in srow.index and pd.notna(srow["loh_C"]):
                     C_val = srow["loh_C"]
@@ -848,7 +815,7 @@ def plot_chromosomes(
                 color = gene_to_color.get(gene, "black")
 
                 idx_near = np.argmin(np.abs(sub["x_coord"] - gx))
-                y_val = sub["log2_smooth"].iloc[idx_near]
+                y_val = sub["log2_smooth_clipped"].iloc[idx_near]
                 if pd.isna(y_val):
                     y_val = 0.0
 
@@ -888,6 +855,7 @@ def plot_chromosomes(
         out_png = outdir / f"cnv_chr{chr_name}_segments.png"
         plt.savefig(out_png, dpi=150)
         plt.close(fig)
+
 
 
 
@@ -1001,118 +969,6 @@ def annotate_genes_with_segments(
 
     return df_genes
 
-
-
-# =============================================================================
-# PON spread & weight significance per gene
-# =============================================================================
-
-
-def add_pon_spread_significance(
-    df_genes: pd.DataFrame,
-    df_cnr: pd.DataFrame,
-    df_pon: pd.DataFrame,
-    gene_col_genes: str = "gene.symbol",
-    gene_col_cnr: str = "gene",
-    chr_col: str = "chromosome",
-    spread_col: str = "spread",
-    noise_factor_borderline: float = 1.0,
-    noise_factor_strong: float = 2.0,
-) -> pd.DataFrame:
-    """
-    For each gene in df_genes, compute PON-based noise and CNVkit weight summaries
-    from df_cnr + df_pon and add:
-
-      - pon_spread_median
-      - mean_vs_spread
-      - pon_spread_flag  (within_noise / borderline / beyond_pon_noise / unknown)
-    """
-    df_genes = df_genes.copy()
-    if df_pon.empty:
-        for col in ["pon_spread_median", "mean_vs_spread", "pon_spread_flag"]:
-            if col not in df_genes.columns:
-                df_genes[col] = pd.NA
-        return df_genes
-
-    merged_bins = merge_cnr_pon(df_cnr, df_pon, chr_col=chr_col, spread_col=spread_col)
-
-    merged_bins = merged_bins[
-        merged_bins[gene_col_cnr].notna()
-        & (merged_bins[gene_col_cnr] != "Antitarget")
-        & (merged_bins[gene_col_cnr] != "-")
-    ].copy()
-
-    merged_bins[gene_col_cnr] = merged_bins[gene_col_cnr].astype(str)
-
-    merged_expanded = merged_bins.assign(
-        **{
-            gene_col_cnr: merged_bins[gene_col_cnr]
-            .str.split(",")
-            .apply(lambda lst: [g.strip() for g in lst if g.strip()])
-        }
-    ).explode(gene_col_cnr)
-
-    agg_dict = {
-        spread_col: [
-            ("pon_spread_median", "median"),
-        ]
-    }
-
-    agg = (
-        merged_expanded.groupby(gene_col_cnr)
-        .agg(
-            **{
-                name: pd.NamedAgg(column=col, aggfunc=func)
-                for col, specs in agg_dict.items()
-                for name, func in specs
-            }
-        )
-        .reset_index()
-    )
-
-    df_genes = df_genes.merge(
-        agg,
-        left_on=gene_col_genes,
-        right_on=gene_col_cnr,
-        how="left",
-    ).drop(columns=[gene_col_cnr])
-
-    # ---------------------------
-    # compute mean_vs_spread metric
-    # ---------------------------
-    eps = 1e-6
-    if "gene.mean" in df_genes.columns:
-        denom = df_genes["pon_spread_median"].replace(0, eps) + eps
-        df_genes["mean_vs_spread"] = df_genes["gene.mean"].abs() / denom
-    else:
-        df_genes["mean_vs_spread"] = np.nan
-
-    # ---------------------------
-    # CNV noise classification
-    # ---------------------------
-    def classify_row(row: pd.Series) -> str:
-        s = row["mean_vs_spread"]
-        if pd.isna(s):
-            return "unknown"
-        if s < noise_factor_borderline:
-            return "within_noise"
-        if s < noise_factor_strong:
-            return "borderline"
-        return "beyond_pon_noise"
-
-    df_genes["pon_spread_flag"] = df_genes.apply(classify_row, axis=1)
-
-    # ---------------------------
-    # round all relevant metrics
-    # ---------------------------
-    round_cols = [
-        "pon_spread_median",
-        "mean_vs_spread",
-    ]
-    round_cols = [c for c in round_cols if c in df_genes.columns]
-    df_genes[round_cols] = df_genes[round_cols].round(3)
-
-    return df_genes
 
 
 # =============================================================================
@@ -1615,16 +1471,28 @@ def build_gene_segment_table(
         grouped["is_cancer_gene"] = grouped["gene.symbol"].isin(cancer_genes)
 
     # -------------------- 5. PON-based deviation per chunk -------------------- #
+    min_n_for_pon = 2  # ignore PON-driven stat if fewer bins than this
+
     if "pon_mean_log2" in grouped.columns and "pon_mean_spread" in grouped.columns:
-        # difference tumor vs PON center
         grouped["pon_effect"] = grouped["mean_log2"] - grouped["pon_mean_log2"]
 
         def _compute_pon_z(row: pd.Series) -> float:
             eff = row["pon_effect"]
             sigma = row["pon_mean_spread"]
+            n = row.get("n_targets", row.get("n.targets", np.nan))
+
             if pd.isna(eff) or pd.isna(sigma) or sigma <= 0:
                 return np.nan
-            return abs(eff) / sigma
+            if pd.isna(n) or n < min_n_for_pon:
+                # too few bins for a decent PON-based z
+                return np.nan
+
+            # effective sigma of the mean
+            sigma_eff = sigma / np.sqrt(float(n))
+            if sigma_eff <= 0:
+                return np.nan
+
+            return abs(eff) / sigma_eff
 
         grouped["pon_z"] = grouped.apply(_compute_pon_z, axis=1)
 
@@ -1644,9 +1512,9 @@ def build_gene_segment_table(
             z = row["pon_z"]
             if pd.isna(z):
                 return ""
-            if z < 1.0:
+            if z < 1.5:
                 return "noise"
-            if z < 2.0:
+            if z < 3.0:
                 return "borderline"
             return "significant"
 
