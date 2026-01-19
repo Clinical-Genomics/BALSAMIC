@@ -419,6 +419,7 @@ def plot_chromosomes(
     min_targets_cnvgene: int = 2,
     cancer_genes: set[str] | None = None,
     neutral_target_factor: float = 0.3,
+    is_exome: bool = False,
 ) -> None:
     """
     Main plotting routine creating one PNG per chromosome with:
@@ -489,10 +490,11 @@ def plot_chromosomes(
         genes_cnv = flag_cnv_genes(genes, min_targets_cnvgene=min_targets_cnvgene)
 
         # Optional: restrict CNV genes to cancer-relevant list
-        if cancer_genes is not None and not genes_cnv.empty:
-            genes_cnv = genes_cnv[
-                genes_cnv["gene.symbol"].isin(cancer_genes)
-            ]
+        if is_exome and cancer_genes:
+            # Only keep cancer genes (skip if no matches or df empty)
+            if not genes_cnv.empty:
+                mask = genes_cnv["gene.symbol"].isin(cancer_genes)
+                genes_cnv = genes_cnv[mask]
 
     segs = safe_read_csv(segs_path)
     segs_chr_col = "chr"

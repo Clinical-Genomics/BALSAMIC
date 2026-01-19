@@ -547,7 +547,7 @@ def main(
     cancer_gene_set = None
     if cancer_genes:
         # You can tune min_occurrence depending on exome/panel if you like
-        min_occ = 3 if is_exome else 1
+        min_occ = 3
         cancer_gene_set = load_cancer_gene_set(
             cancer_genes,
             min_occurrence=min_occ,
@@ -562,7 +562,7 @@ def main(
     plot_case_id = cust_case_id if cust_case_id else case_id
 
     # Different compression for exome vs panel
-    neutral_target_factor = 0.2 if is_exome else 0.6
+    neutral_target_factor = 0.1 if is_exome else 0.6
 
     # pon may be None; plot_chromosomes is written to handle that
     plot_chromosomes(
@@ -575,6 +575,7 @@ def main(
         case_id=plot_case_id,
         cancer_genes=cancer_gene_set,
         neutral_target_factor=neutral_target_factor,
+        is_exome=is_exome,
     )
 
     # ----------------------------
