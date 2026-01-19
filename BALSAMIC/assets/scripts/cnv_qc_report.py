@@ -617,7 +617,7 @@ def main(
     plot_chromosomes(
         cnr_path=cnr,
         vcf_path=vcf,
-        df_seg_df=df_genes,
+        gene_seg_df=df_genes,
         outdir=chr_plots_dir,
         case_id=plot_case_id,
         pon_path=pon,
