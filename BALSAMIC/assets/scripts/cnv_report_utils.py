@@ -413,7 +413,7 @@ def plot_chromosomes(
     include_y: bool = False,
     weight_thresh: float = 0.1,
     pct_spread: float = 0.95,
-    window: int = 7,
+    window: int = 5,
     anti_factor: float = 0.15,
     base_label_offset: float = 1.5,
     min_targets_cnvgene: int = 2,
@@ -487,14 +487,32 @@ def plot_chromosomes(
     if not genes.empty:
         genes, genes_chr_col = normalize_chr_column(genes)
         genes = genes[genes[genes_chr_col].isin(chr_order)]
-        genes_cnv = flag_cnv_genes(genes, min_targets_cnvgene=min_targets_cnvgene)
 
-        # Optional: restrict CNV genes to cancer-relevant list
-        if is_exome and cancer_genes:
-            # Only keep cancer genes (skip if no matches or df empty)
-            if not genes_cnv.empty:
-                mask = genes_cnv["gene.symbol"].isin(cancer_genes)
-                genes_cnv = genes_cnv[mask]
+        # --- Pass 1: standard CNV gene calling (e.g. needs >= 2 targets) ---
+        genes_cnv = flag_cnv_genes(
+            genes,
+            min_targets_cnvgene=min_targets_cnvgene,
+        )
+
+        # --- Pass 2: relaxed calling for cancer genes (>= 1 target) ---
+        if cancer_genes:
+            # Work on the subset of genes that are cancer-relevant
+            genes_cancer = genes[genes["gene.symbol"].isin(cancer_genes)].copy()
+            if not genes_cancer.empty:
+                genes_cnv_cancer_relaxed = flag_cnv_genes(
+                    genes_cancer,
+                    min_targets_cnvgene=1,  # <- always allow 1 target for cancer genes
+                )
+
+                # Union of (normal CNV genes) ∪ (relaxed cancer CNV genes)
+                genes_cnv = (
+                    pd.concat([genes_cnv, genes_cnv_cancer_relaxed], ignore_index=True)
+                    .drop_duplicates(subset=[genes_chr_col, "gene.symbol"])
+                )
+
+            # For exome runs, we still want to *only* keep cancer genes
+            if is_exome:
+                genes_cnv = genes_cnv[genes_cnv["gene.symbol"].isin(cancer_genes)]
 
     segs = safe_read_csv(segs_path)
     segs_chr_col = "chr"
@@ -1212,6 +1230,8 @@ def build_gene_table(
     pon_path: str | Path | None,
     refgene_path: str | Path,
     cytoband_path: str | Path,
+    is_exome: bool = False,
+    cancer_gene_set: set = None,
 ) -> pd.DataFrame:
     """
     Construction of the per-gene CNV table for reporting:

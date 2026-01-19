@@ -521,6 +521,19 @@ def main(
     pdf_first_page_to_png(cnvkit_scatter, scatter_png_path)
     pdf_first_page_to_png(cnvkit_diagram, diagram_png_path)
 
+    # ----------------------------
+    # Load cancer gene list (optional)
+    # ----------------------------
+    cancer_gene_set = None
+    if cancer_genes:
+        # You can tune min_occurrence depending on exome/panel if you like
+        min_occ = 3
+        cancer_gene_set = load_cancer_gene_set(
+            cancer_genes,
+            min_occurrence=min_occ,
+            only_annotated=True,
+        )
+
     # ---------------
     # Read PureCN purity and ploidy estimation (optional)
     # ---------------
@@ -539,20 +552,9 @@ def main(
         pon_path=pon,
         refgene_path=refgene,
         cytoband_path=cytoband,
+        is_exome=is_exome,
+        cancer_gene_set=cancer_gene_set,
     )
-
-    # ----------------------------
-    # Load cancer gene list (optional)
-    # ----------------------------
-    cancer_gene_set = None
-    if cancer_genes:
-        # You can tune min_occurrence depending on exome/panel if you like
-        min_occ = 3
-        cancer_gene_set = load_cancer_gene_set(
-            cancer_genes,
-            min_occurrence=min_occ,
-            only_annotated=True,
-        )
 
     # ----------------------------
     # Generate per-chromosome PNG plots in outdir
