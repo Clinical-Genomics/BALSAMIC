@@ -5,6 +5,7 @@ import json
 import pandas as pd
 from pathlib import Path
 from cnv_report_utils import plot_chromosomes, build_gene_segment_table, pdf_first_page_to_png, load_cancer_gene_set
+from BALSAMIC.constants.analysis import Gender
 
 def csv_to_html_table(
     df: pd.DataFrame,
@@ -28,12 +29,6 @@ def csv_to_html_table(
 
     # ------------------------------------------------------------------
     # Determine which chromosomes have CNV / LOH genes
-    #
-    # New definition:
-    #   CNV if:
-    #     - loh_flag == TRUE
-    #     OR cnvkit_cnv_call in {DELETION, AMPLIFICATION}
-    #     OR purecn_cnv_call in {DELETION, AMPLIFICATION}
     # ------------------------------------------------------------------
     df_chr = df.copy()
     if "chr" in df_chr.columns:
@@ -264,6 +259,10 @@ def csv_to_html_table(
             <input type="checkbox" id="show-significant-pon">
             Also include genes with pon_call = "significant"
           </label>
+          <label style="margin-left:12px;">
+            <input type="checkbox" id="only-cancer-genes">
+            Show only cancer genes (is_cancer_gene TRUE)
+          </label>
         </div>
         <div class="control-group">
           <label>
@@ -283,22 +282,24 @@ def csv_to_html_table(
 
       <script>
         (function() {{
-          const table           = document.getElementById("report-table");
-          const checkboxNonCnv  = document.getElementById("hide-non-cnv");
-          const checkboxPonSig  = document.getElementById("show-significant-pon");
-          const geneInput       = document.getElementById("gene-filter");
-          const minTargetsInput = document.getElementById("min-targets");
+          const table             = document.getElementById("report-table");
+          const checkboxNonCnv    = document.getElementById("hide-non-cnv");
+          const checkboxPonSig    = document.getElementById("show-significant-pon");
+          const checkboxCancer    = document.getElementById("only-cancer-genes");  // NEW
+          const geneInput         = document.getElementById("gene-filter");
+          const minTargetsInput   = document.getElementById("min-targets");
 
           if (!table) return;
 
           const colIndex = {col_idx_json};
 
-          const geneColIdx      = colIndex["gene.symbol"] ?? -1;
-          const lohColIdx       = colIndex["loh_flag"] ?? -1;
-          const cnvkitColIdx    = colIndex["cnvkit_cnv_call"] ?? -1;
-          const purecnColIdx    = colIndex["purecn_cnv_call"] ?? -1;
-          const nTargetsColIdx  = colIndex["n.targets"] ?? -1;
-          const ponCallColIdx   = colIndex["pon_call"] ?? -1;
+          const geneColIdx        = colIndex["gene.symbol"] ?? -1;
+          const lohColIdx         = colIndex["loh_flag"] ?? -1;
+          const cnvkitColIdx      = colIndex["cnvkit_cnv_call"] ?? -1;
+          const purecnColIdx      = colIndex["purecn_cnv_call"] ?? -1;
+          const nTargetsColIdx    = colIndex["n.targets"] ?? -1;
+          const ponCallColIdx     = colIndex["pon_call"] ?? -1;
+          const cancerColIdx      = colIndex["is_cancer_gene"] ?? -1;  // NEW
 
           function normalizeCellText(td) {{
             return (td && td.textContent ? td.textContent : "")
@@ -339,9 +340,19 @@ def csv_to_html_table(
             return isCnv;
           }}
 
+          // NEW: cancer gene predicate
+          function isCancerGeneRow(row) {{
+            if (cancerColIdx === -1) return false;
+            const cell = row.cells[cancerColIdx];
+            const val = normalizeCellText(cell);
+            // Accept typical truthy representations
+            return (val === "true" || val === "1" || val === "yes");
+          }}
+
           function applyFilter() {{
             const hideNonCnv    = checkboxNonCnv && checkboxNonCnv.checked;
             const showPonSig    = checkboxPonSig && checkboxPonSig.checked;
+            const onlyCancer    = checkboxCancer && checkboxCancer.checked;
 
             const geneList = (geneInput && geneInput.value ? geneInput.value : "")
               .split(",")
@@ -376,6 +387,12 @@ def csv_to_html_table(
                 }}
               }}
 
+              if (!hideRow && onlyCancer && cancerColIdx !== -1) {{
+                if (!isCancerGeneRow(row)) {{
+                  hideRow = true;
+                }}
+              }}
+
               // min n.targets filter
               if (!hideRow && nTargetsColIdx !== -1 && minTargetsInput) {{
                 const nCell = row.cells[nTargetsColIdx];
@@ -405,6 +422,7 @@ def csv_to_html_table(
           applyFilter();
           if (checkboxNonCnv)   checkboxNonCnv.addEventListener("change", applyFilter);
           if (checkboxPonSig)   checkboxPonSig.addEventListener("change", applyFilter);
+          if (checkboxCancer)   checkboxCancer.addEventListener("change", applyFilter);  // NEW
           if (geneInput)        geneInput.addEventListener("input", applyFilter);
           if (minTargetsInput)  minTargetsInput.addEventListener("input", applyFilter);
         }})();
@@ -414,18 +432,13 @@ def csv_to_html_table(
     """
     out_path.write_text(html, encoding="utf-8")
 
+
 @click.command()
 @click.option(
     "--loh-genes",
     type=click.Path(exists=True),
     required=True,  # PureCN genes CSV (can be empty but must exist)
     help="PureCN LOH genes CSV (…_genes.csv).",
-)
-@click.option(
-    "--loh-regions",
-    type=click.Path(exists=True),
-    required=True,  # PureCN regions CSV (can be empty but must exist)
-    help="PureCN LOH regions CSV (…_loh.csv).",
 )
 @click.option(
     "--cnr",
@@ -511,9 +524,14 @@ def csv_to_html_table(
     default=False,
     help="Treat assay as exome (use more aggressive non-driver bin compression, etc.).",
 )
+@click.option(
+    "--sex",
+    type=click.Choice([Gender.FEMALE, Gender.MALE]),
+    default=False,
+    help="Sex for how to handle sex chromosomes.",
+)
 def main(
     loh_genes,
-    loh_regions,
     cnr,
     cns,
     pon,
@@ -528,6 +546,7 @@ def main(
     purity_csv,
     cancer_genes,
     is_exome,
+    sex,
 ):
     """
     Build CNV QC plots + HTML report from CNVkit outputs, optionally
@@ -573,6 +592,7 @@ def main(
         pon_path=pon,
         loh_path=loh_genes,
         cytoband_path=cytoband,
+        sex=sex,
     )
 
     # ---------------
@@ -591,20 +611,19 @@ def main(
 
     # Different compression for exome vs panel
     neutral_target_factor = 0.1 if is_exome else 0.6
+    highlight_only_cancer = True if is_exome else False
 
     # pon may be None; plot_chromosomes is written to handle that
     plot_chromosomes(
-        pon_path=pon,
         cnr_path=cnr,
-        cns_path=cns,
         vcf_path=vcf,
-        genes_path=loh_genes,
-        segs_path=loh_regions,
+        df_seg_df=df_genes,
         outdir=chr_plots_dir,
         case_id=plot_case_id,
-        cancer_genes=cancer_gene_set,
+        pon_path=pon,
+        include_y=True,
         neutral_target_factor=neutral_target_factor,
-        is_exome=is_exome,
+        highlight_only_cancer=highlight_only_cancer,
     )
 
     # ----------------------------

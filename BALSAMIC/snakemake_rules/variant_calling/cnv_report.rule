@@ -2,7 +2,6 @@
 rule create_cnv_html_report:
     input:
         refgene_flat = refgene_flat,
-        loh_regions = cnv_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".purecn.LOHregions.csv",
         loh_genes = cnv_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".purecn.LOHgenes.csv",
         cnr = cnv_dir + "tumor.merged.cnr",
         cns = cnv_dir + "tumor.merged.cns",
@@ -17,6 +16,7 @@ rule create_cnv_html_report:
     params:
         cnv_report_script = get_script_path("cnv_qc_report.py"),
         pon = pon_cnn,
+        gender = config_model.get_gender,
         cytoband = config_model.analysis.cytoband,
         is_exome = lambda wildcards, is_exome=config_model.panel.exome: f"--is-exome" if is_exome else "",
         cancergenes = config_model.analysis.cancergenes,
@@ -26,7 +26,6 @@ rule create_cnv_html_report:
         """
 python {params.cnv_report_script} \
 --loh-genes {input.loh_genes} \
---loh-regions {input.loh_regions} \
 --cnr {input.cnr} \
 --cns {input.cns} \
 --pon {params.pon} \
@@ -39,6 +38,7 @@ python {params.cnv_report_script} \
 --purity-csv {input.purity} \
 --out-prefix {output.cnv_report_html} \
 --cancer-genes {params.cancergenes} \
+--sex {params.gender} \
 {params.is_exome} \
 {params.cust_case_id}
         """
