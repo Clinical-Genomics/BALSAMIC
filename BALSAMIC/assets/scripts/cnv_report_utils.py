@@ -1311,9 +1311,9 @@ def classify_cnv_from_total_cn_sex_aware(
     if chrom_str.isdigit():
         expected = 2  # autosomes
     elif chrom_str.upper() == "X":
-        expected = 2 if sex == Gender.female else 1
+        expected = 2 if sex == Gender.FEMALE else 1
     elif chrom_str.upper() == "Y":
-        expected = 1 if sex == Gender.male else 0
+        expected = 1 if sex == Gender.MALE else 0
     else:
         # unknown contig: fall back to 2
         expected = 2
