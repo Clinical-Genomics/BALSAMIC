@@ -1369,70 +1369,15 @@ def build_gene_segment_table(
     # normalize column names
     cnr = cnr.rename(columns={cnr_chr_col: "chr"})
 
-    # ------------------------- 1b. Optional: Load PON + GC ------------------------- #
+    # ------------------------- 1b. Optional: Load PON ------------------------- #
     # Join by (chr, start, end). Assumes PON is built on same bin design.
-    def _apply_gc_correction_from_pon(df: pd.DataFrame) -> pd.DataFrame:
-        """
-        Use PON gc + pon_log2 to fit a GC-bias curve and correct both
-        sample log2 and pon_log2.
-
-        Adds:
-          - log2_raw, pon_log2_raw
-          - gc_trend
-          - log2 (overwritten with GC-corrected)
-          - pon_log2 (overwritten with GC-corrected)
-        """
-        if not {"gc", "pon_log2", "log2"}.issubset(df.columns):
-            return df
-
-        out = df.copy()
-
-        gc = out["gc"].astype(float).values
-        y_pon = out["pon_log2"].astype(float).values
-        y_samp = out["log2"].astype(float).values
-
-        mask = np.isfinite(gc) & np.isfinite(y_pon)
-        # drop extreme GC tails if you like
-        mask &= (gc > 0.2) & (gc < 0.8)
-
-        if mask.sum() < 20:
-            # not enough bins for a sensible fit
-            return out
-
-        # quadratic fit: pon_log2 ~ a*gc^2 + b*gc + c
-        coeffs = np.polyfit(gc[mask], y_pon[mask], deg=2)
-        trend = np.polyval(coeffs, gc)
-
-        out["gc_trend"] = trend
-
-        # residuals
-        samp_resid = y_samp - trend
-        pon_resid = y_pon - trend
-
-        # recenter both
-        samp_resid -= np.nanmedian(samp_resid)
-        pon_resid -= np.nanmedian(pon_resid)
-
-        # save raw + corrected
-        out["log2_raw"] = out["log2"]
-        out["pon_log2_raw"] = out["pon_log2"]
-
-        out["log2"] = samp_resid
-        out["pon_log2"] = pon_resid
-
-        return out
-
     if pon_path is not None and Path(pon_path).is_file():
         pon = safe_read_csv(pon_path, sep="\t").copy()
         if not pon.empty:
             pon_chr_col = "chromosome" if "chromosome" in pon.columns else "chr"
             pon[pon_chr_col] = pon[pon_chr_col].astype(str).str.replace("^chr", "", regex=True)
-
-            required_pon_cols = {"start", "end", "log2", "spread"}
-            missing_pon = required_pon_cols - set(pon.columns)
-            if missing_pon:
+            if not {"start", "end", "log2", "spread"}.issubset(pon.columns):
                 raise ValueError("PON file must contain 'start','end','log2','spread' columns.")
-
             pon = pon.rename(
                 columns={
                     pon_chr_col: "chr",
@@ -1440,20 +1385,11 @@ def build_gene_segment_table(
                     "spread": "pon_spread",
                 }
             )
-
-            # keep gc if present
-            merge_cols = ["chr", "start", "end", "pon_log2", "pon_spread"]
-            if "gc" in pon.columns:
-                merge_cols.append("gc")
-
             cnr = cnr.merge(
-                pon[merge_cols],
+                pon[["chr", "start", "end", "pon_log2", "pon_spread"]],
                 how="left",
                 on=["chr", "start", "end"],
             )
-
-            # GC correction (only if gc + pon_log2 are present)
-            cnr = _apply_gc_correction_from_pon(cnr)
 
     # ------------------------- 2. Load CNS ------------------------- #
     cns = safe_read_csv(cns_path, sep="\t").copy()
@@ -1879,4 +1815,3 @@ def build_gene_segment_table(
         )
 
     return grouped
-
