@@ -57,6 +57,7 @@ class DockerContainers(StrEnum):
     PYTHON_3: str = "varcall_py3"
     PYTHON_27: str = "varcall_py27"
     SOMALIER: str = "somalier"
+    TIDDIT: str = "tiddit"
     VCF2CYTOSURE: str = "vcf2cytosure"
 
 

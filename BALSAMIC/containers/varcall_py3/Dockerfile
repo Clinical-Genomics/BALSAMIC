@@ -10,7 +10,7 @@ ENV PATH="/opt/conda/bin/:${PATH}"
 
 RUN apk add --no-cache bash gcc git
 
-ARG WORK_DIR=project
+ARG WORK_DIR=project 
 ARG CONTAINER_NAME
 
 # Copy all project files

@@ -317,7 +317,7 @@ BIOINFO_TOOL_ENV: Dict[str, str] = {
     BioinfoTools.BGZIP: DockerContainers.PYTHON_3,
     BioinfoTools.VARDICT: DockerContainers.PYTHON_3,
     BioinfoTools.SVDB: DockerContainers.PYTHON_3,
-    BioinfoTools.TIDDIT: DockerContainers.PYTHON_3,
+    BioinfoTools.TIDDIT: DockerContainers.TIDDIT,
     BioinfoTools.CNVPYTOR: DockerContainers.CNVPYTOR,
     BioinfoTools.MANTA: DockerContainers.PYTHON_27,
     BioinfoTools.CNVKIT: DockerContainers.CNVKIT,
