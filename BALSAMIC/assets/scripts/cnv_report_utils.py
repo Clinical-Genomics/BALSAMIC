@@ -402,7 +402,6 @@ def build_genes_from_cnr(cnr_path: str | Path) -> pd.DataFrame:
 # =============================================================================
 # Per-chromosome plots (PON spread + log2 + segments + BAF + CNV genes)
 # =============================================================================
-
 def plot_chromosomes(
     cnr_path: Path,
     vcf_path: Path,
@@ -438,9 +437,7 @@ def plot_chromosomes(
         must be cancer genes (for CNV/LOH as well).
     """
 
-    # Minimum number of targets required to highlight a gene
     MIN_GENE_TARGETS = 3
-
     outdir.mkdir(parents=True, exist_ok=True)
 
     # ---------------------------------
@@ -464,7 +461,7 @@ def plot_chromosomes(
         gdf = gdf.rename(columns={"n.targets": "n_targets"})
         targets_col = "n_targets"
     else:
-        targets_col = None  # no target-count filter possible
+        targets_col = None
 
     # Normalise cancer-gene column to a boolean if present
     if "is_cancer_gene" in gdf.columns:
@@ -496,7 +493,6 @@ def plot_chromosomes(
     if "gene" not in cnr.columns:
         cnr["gene"] = ""
 
-    # Optional PON (for spread band)
     use_pon = False
     merged = None
 
@@ -504,6 +500,9 @@ def plot_chromosomes(
         pon = safe_read_csv(pon_path, sep="\t")
         if not pon.empty and "spread" in pon.columns:
             try:
+                # merge_cnr_pon is assumed to add at least:
+                #  - 'spread'
+                #  - 'pon_log2'  (PON mean log2 at each bin)
                 merged = merge_cnr_pon(
                     cnr,
                     pon,
@@ -533,38 +532,24 @@ def plot_chromosomes(
     # 2. Chunk-level CNV classification in gene_seg_df
     # ---------------------------------
     def _is_loh_or_cnv_chunk(row: pd.Series) -> bool:
-        """
-        LOH or CNV chunk:
-          - loh_flag == TRUE
-          - OR cnvkit_cnv_call in {DELETION, AMPLIFICATION}
-          - OR purecn_cnv_call in {DELETION, AMPLIFICATION}
-        """
-        # LOH
         if "loh_flag" in row.index and pd.notna(row["loh_flag"]):
             if str(row["loh_flag"]).strip().upper() == "TRUE":
                 return True
-
-        # CNV calls
         for col in ("cnvkit_cnv_call", "purecn_cnv_call"):
             if col in row.index and pd.notna(row[col]):
                 val = str(row[col]).strip().upper()
                 if val in ("DELETION", "AMPLIFICATION"):
                     return True
-
         return False
 
     def _is_pon_signif_chunk(row: pd.Series) -> bool:
-        """
-        PON-significant chunk:
-          - pon_call == 'significant'
-        """
         if "pon_call" in row.index and pd.notna(row["pon_call"]):
             return str(row["pon_call"]).strip().lower() == "significant"
         return False
 
     gdf["is_loh_or_cnv"] = gdf.apply(_is_loh_or_cnv_chunk, axis=1)
     gdf["is_pon_signif"] = gdf.apply(_is_pon_signif_chunk, axis=1)
-    gdf["cnv_flag"] = gdf["is_loh_or_cnv"] | gdf["is_pon_signif"]  # kept for debugging/compat
+    gdf["cnv_flag"] = gdf["is_loh_or_cnv"] | gdf["is_pon_signif"]
 
     # ---------------------------------
     # 2b. Gene-level aggregation
@@ -583,34 +568,26 @@ def plot_chromosomes(
 
         gene_level = grouped.agg(**agg_dict)
 
-        # Ensure presence and types
         if "total_targets" not in gene_level.columns:
             gene_level["total_targets"] = np.nan
         gene_level["total_targets"] = gene_level["total_targets"].fillna(0)
-
         gene_level["is_cancer_gene"] = (
             gene_level["is_cancer_gene"].fillna(False).astype(bool)
         )
 
-        # Base: must have any LOH/CNV or any PON significance
         mask_base = gene_level["has_loh_or_cnv"] | gene_level["has_pon_sig"]
-
-        # Must have at least MIN_GENE_TARGETS targets
         mask_base &= gene_level["total_targets"] >= MIN_GENE_TARGETS
 
-        # Additional rule: PON-only genes must be cancer genes
         pon_only = gene_level["has_pon_sig"] & ~gene_level["has_loh_or_cnv"]
         mask_pon_cancer = ~pon_only | (pon_only & gene_level["is_cancer_gene"])
 
         mask_highlight = mask_base & mask_pon_cancer
 
-        # Global override: only highlight cancer genes (for all reasons)
         if highlight_only_cancer:
             mask_highlight &= gene_level["is_cancer_gene"]
 
         gene_level["highlight_gene"] = mask_highlight
     else:
-        # Fallback if gene.symbol is missing (no highlighting possible)
         gene_level = None
 
     # ---------------------------------
@@ -620,17 +597,14 @@ def plot_chromosomes(
     y_lim_chr = (-y_clip, y_clip)
 
     for chr_name in chr_order:
-        # ---------- 3a. Bin-level data for this chromosome ----------
         sub = merged[merged[chr_col] == chr_name].copy()
         if sub.empty:
             continue
 
         sub = sub.sort_values("start")
 
-        # classify target vs antitarget
         sub["type"] = np.where(sub["gene"] == "Antitarget", "Antitarget", "Target")
 
-        # weight + spread filtering
         if "weight" in sub.columns:
             w_mask = sub["weight"] > weight_thresh
         else:
@@ -645,19 +619,16 @@ def plot_chromosomes(
         if sub.empty:
             continue
 
-        # ---------- 3b. Gene-/segment-level info for this chromosome ----------
         g_chr = gdf[gdf["chr"] == chr_name].copy()
         if g_chr.empty:
             g_chr = pd.DataFrame(columns=gdf.columns)
 
-        # Determine which genes to highlight on this chromosome
         if gene_level is not None:
             g_chr_gene = gene_level[
                 (gene_level["chr"] == chr_name) & (gene_level["highlight_gene"])
             ].copy()
             highlighted_genes = g_chr_gene["gene.symbol"].astype(str).unique()
         else:
-            # Very old fallback: use chunk-level cnv_flag only
             if highlight_only_cancer and "is_cancer_gene" in g_chr.columns:
                 mask_gene = g_chr["cnv_flag"] & g_chr["is_cancer_gene"].fillna(False)
             else:
@@ -669,32 +640,25 @@ def plot_chromosomes(
                 else np.array([])
             )
 
-        # Chunks for highlighted genes (used for positions)
         if highlighted_genes.size > 0 and "gene.symbol" in g_chr.columns:
             g_chr_high = g_chr[g_chr["gene.symbol"].isin(highlighted_genes)].copy()
         else:
             g_chr_high = pd.DataFrame(columns=g_chr.columns)
 
-        # ---------- 3c. Segment info reconstructed from gene_seg_df ----------
+        # ---------- segments ----------
         segs_chr = pd.DataFrame()
         if {"seg_start", "seg_end"}.issubset(g_chr.columns):
             segs_chr = (
                 g_chr.dropna(subset=["seg_start", "seg_end"])
                 .groupby(["chr", "seg_start", "seg_end"], as_index=False)
                 .agg(
-                    seg_log2=(
-                        "seg_log2",
-                        "first",
-                    )
+                    seg_log2=("seg_log2", "first")
                     if "seg_log2" in g_chr.columns
                     else ("region_start", "first"),
                     seg_C=("seg_cn", "first")
                     if "seg_cn" in g_chr.columns
                     else ("region_start", "first"),
-                    loh_seg_mean=(
-                        "loh_seg_mean",
-                        "first",
-                    )
+                    loh_seg_mean=("loh_seg_mean", "first")
                     if "loh_seg_mean" in g_chr.columns
                     else ("region_start", "first"),
                     loh_C=("loh_C", "first")
@@ -704,7 +668,7 @@ def plot_chromosomes(
             )
             segs_chr = segs_chr[segs_chr["chr"] == chr_name].sort_values("seg_start")
 
-        # ---------- 3d. Variable-width x-coordinate ----------
+        # ---------- variable-width x ----------
         def _bin_width(row: pd.Series) -> float:
             if row["type"] == "Antitarget":
                 return anti_factor
@@ -720,18 +684,21 @@ def plot_chromosomes(
         sub["log2_smooth"] = sub["log2"].rolling(window=window, center=True).median()
         if use_pon:
             sub["spread_smooth"] = sub["spread"].rolling(window=window, center=True).median()
+            if "pon_log2" in sub.columns:
+                sub["pon_log2_smooth"] = sub["pon_log2"].rolling(
+                    window=window, center=True
+                ).median()
+            else:
+                sub["pon_log2_smooth"] = 0.0
         else:
             sub["spread_smooth"] = np.nan
+            sub["pon_log2_smooth"] = 0.0
 
-        # ---------- CLIPPING of log2 / spread (for plotting) ----------
+        # clipping
         sub["log2_clipped"] = sub["log2"].clip(-y_clip, y_clip)
         sub["log2_smooth_clipped"] = sub["log2_smooth"].clip(-y_clip, y_clip)
-        if use_pon:
-            sub["spread_smooth_clipped"] = sub["spread_smooth"].clip(upper=y_clip)
-        else:
-            sub["spread_smooth_clipped"] = np.nan
 
-        # helper: map genomic POS → x_coord (nearest bin)
+        # helper: genomic POS → x_coord
         bin_starts = sub["start"].values
         x_coords = sub["x_coord"].values
 
@@ -749,7 +716,7 @@ def plot_chromosomes(
         if not baf_chr.empty:
             baf_chr["x_coord"] = baf_chr["POS"].apply(pos_to_xcoord)
 
-        # ---------- 3e. Gene x-positions for labels ----------
+        # gene x-positions
         gene_to_color: dict[str, tuple] = {}
         genes_chr = pd.DataFrame()
 
@@ -775,7 +742,7 @@ def plot_chromosomes(
             for i, gname in enumerate(highlighted_genes):
                 gene_to_color[gname] = cmap(i)
 
-        # ---------- 3f. Segment x-coordinates + clipping ----------
+        # segment x-coordinates + clipping
         if not segs_chr.empty:
             segs_chr = segs_chr.copy()
             segs_chr["x_start"] = segs_chr["seg_start"].apply(pos_to_xcoord)
@@ -788,7 +755,7 @@ def plot_chromosomes(
                     -y_clip, y_clip
                 )
 
-        # ---------- 3g. Figure + axes ----------
+        # ---------- figure ----------
         fig, (ax1, ax2) = plt.subplots(
             2,
             1,
@@ -843,12 +810,23 @@ def plot_chromosomes(
                     color=color,
                 )
 
-        # PON spread band
-        if use_pon and sub["spread_smooth_clipped"].notna().any():
+        # ---------- PON spread band, centered at PON log2 ----------
+        if (
+            use_pon
+            and "spread_smooth" in sub.columns
+            and "pon_log2_smooth" in sub.columns
+            and sub["spread_smooth"].notna().any()
+        ):
+            band_center = sub["pon_log2_smooth"].fillna(0.0)
+            band_half = sub["spread_smooth"].fillna(0.0)
+
+            band_bottom = (band_center - band_half).clip(-y_clip, y_clip)
+            band_top = (band_center + band_half).clip(-y_clip, y_clip)
+
             ax1.fill_between(
                 x,
-                -sub["spread_smooth_clipped"],
-                sub["spread_smooth_clipped"],
+                band_bottom,
+                band_top,
                 alpha=0.4,
                 step="mid",
                 label="PON noise band",
@@ -909,7 +887,7 @@ def plot_chromosomes(
 
         ax1.axhline(0, color="black", linewidth=0.8)
         ax1.set_ylim(*y_lim_chr)
-        ax1.set_ylabel("log2 / spread")
+        ax1.set_ylabel("log2 / PON band")
         title_suffix = "log2 vs PON spread" if use_pon else "log2 (no PON available)"
         ax1.set_title(f"Chr {chr_name} – {title_suffix}: {case_id}\n")
         ax1.legend(loc="upper right", fontsize=8)
@@ -968,7 +946,6 @@ def plot_chromosomes(
         out_png = outdir / f"cnv_chr{chr_name}_segments.png"
         plt.savefig(out_png, dpi=150)
         plt.close(fig)
-
 
 
 
