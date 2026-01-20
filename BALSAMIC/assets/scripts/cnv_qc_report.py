@@ -579,6 +579,9 @@ def main(
             only_annotated=True,
         )
 
+    chr_plots_dir = outdir / f"{case_id}_chr_plots"
+    chr_plots_dir.mkdir(exist_ok=True, parents=True)
+
     # ----------------------------
     # Create per-gene CNV table
     # ----------------------------
@@ -593,7 +596,7 @@ def main(
         loh_path=loh_genes,
         cytoband_path=cytoband,
         sex=sex,
-        plot_dir=plot_case_id,
+        plot_dir=chr_plots_dir,
     )
 
     # ---------------
@@ -606,8 +609,7 @@ def main(
     # ----------------------------
     # Generate per-chromosome PNG plots in outdir
     # ----------------------------
-    chr_plots_dir = outdir / f"{case_id}_chr_plots"
-    chr_plots_dir.mkdir(exist_ok=True, parents=True)
+
     plot_case_id = cust_case_id if cust_case_id else case_id
 
     # Different compression for exome vs panel
