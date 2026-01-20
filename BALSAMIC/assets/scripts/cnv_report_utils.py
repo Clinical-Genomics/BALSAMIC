@@ -1299,6 +1299,113 @@ def classify_cnv_from_total_cn_sex_aware(
     else:
         return "NEUTRAL"
 
+def plot_gc_bias(
+    cnr_bins: pd.DataFrame,
+    chr_name: str | None = None,
+    sample_label: str | None = None,
+    n_points_max: int = 100_000,
+) -> None:
+    """
+    Visualise GC bias before/after correction using bin-level CNR data.
+
+    Expects columns:
+        - 'gc'
+        - 'log2_raw' (pre-GC correction)
+        - 'log2'     (post-GC correction)
+        - 'chr'      (optional, if you want per-chromosome view)
+
+    Parameters
+    ----------
+    cnr_bins : pd.DataFrame
+        Bin-level CNR dataframe (the one inside build_gene_segment_table
+        *before* collapsing to genes; or reproduced similarly).
+    chr_name : str or None
+        If provided, filters to that chromosome (e.g. "1", "X").
+        If None, uses all chromosomes.
+    sample_label : str or None
+        Just for the plot title.
+    n_points_max : int
+        If there are more than this many points, subsample for speed/clarity.
+    """
+    df = cnr_bins.copy()
+
+    # Filter to one chromosome if requested
+    if chr_name is not None:
+        df = df[df["chr"].astype(str) == str(chr_name)]
+
+    # Need gc + log2_raw + log2
+    required = {"gc", "log2_raw", "log2"}
+    missing = required - set(df.columns)
+    if missing:
+        raise ValueError(f"plot_gc_bias: dataframe is missing columns: {missing}")
+
+    # Drop bins without GC or log2
+    mask = df["gc"].notna() & df["log2_raw"].notna() & df["log2"].notna()
+    df = df[mask]
+    if df.empty:
+        raise ValueError("plot_gc_bias: no valid bins after filtering.")
+
+    # Optional: subsample for speed / readability
+    if len(df) > n_points_max:
+        df = df.sample(n_points_max, random_state=42)
+
+    gc = df["gc"].astype(float).values
+    y_raw = df["log2_raw"].astype(float).values
+    y_corr = df["log2"].astype(float).values
+
+    # Simple trend line fit (quadratic) just for visualisation
+    def _fit_quad(x: np.ndarray, y: np.ndarray, mask: np.ndarray) -> np.ndarray:
+        if mask.sum() < 20:
+            return np.full_like(x, np.nan)
+        coeffs = np.polyfit(x[mask], y[mask], deg=2)
+        return np.polyval(coeffs, x)
+
+    mask_fit = np.isfinite(gc) & np.isfinite(y_raw)
+    mask_fit &= (gc > 0.2) & (gc < 0.8)
+
+    x_grid = np.linspace(0.2, 0.8, 200)
+    trend_raw = _fit_quad(gc, y_raw, mask_fit)
+    trend_corr = _fit_quad(gc, y_corr, mask_fit)
+    # For the plotted smooth line, evaluate on x_grid using the same fits
+    if mask_fit.sum() >= 20:
+        coeffs_raw = np.polyfit(gc[mask_fit], y_raw[mask_fit], deg=2)
+        coeffs_corr = np.polyfit(gc[mask_fit], y_corr[mask_fit], deg=2)
+        y_grid_raw = np.polyval(coeffs_raw, x_grid)
+        y_grid_corr = np.polyval(coeffs_corr, x_grid)
+    else:
+        x_grid = np.array([])
+        y_grid_raw = np.array([])
+        y_grid_corr = np.array([])
+
+    fig, axes = plt.subplots(1, 2, figsize=(12, 5), sharex=True, sharey=True)
+    ax1, ax2 = axes
+
+    # Before correction
+    ax1.scatter(gc, y_raw, s=4, alpha=0.2)
+    if x_grid.size > 0:
+        ax1.plot(x_grid, y_grid_raw, linewidth=2)
+    ax1.set_title("Before GC correction (log2_raw)")
+    ax1.set_xlabel("GC fraction")
+    ax1.set_ylabel("log2 coverage")
+
+    # After correction
+    ax2.scatter(gc, y_corr, s=4, alpha=0.2)
+    if x_grid.size > 0:
+        ax2.plot(x_grid, y_grid_corr, linewidth=2)
+    ax2.set_title("After GC correction (log2)")
+    ax2.set_xlabel("GC fraction")
+
+    # Overall title
+    title_bits = ["GC bias"]
+    if sample_label:
+        title_bits.append(sample_label)
+    if chr_name is not None:
+        title_bits.append(f"chr {chr_name}")
+    fig.suptitle(" – ".join(title_bits))
+
+    plt.tight_layout()
+    plt.show()
+
 # =============================================================================
 # Final gene table builder (CNR base + optional PureCN + PON)
 # =============================================================================
@@ -1454,6 +1561,8 @@ def build_gene_segment_table(
 
             # GC correction (only if gc + pon_log2 are present)
             cnr = _apply_gc_correction_from_pon(cnr)
+
+            plot_gc_bias(cnr, chr_name="1", sample_label=str(cnr_path))
 
     # ------------------------- 2. Load CNS ------------------------- #
     cns = safe_read_csv(cns_path, sep="\t").copy()
