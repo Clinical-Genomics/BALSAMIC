@@ -593,6 +593,7 @@ def main(
         loh_path=loh_genes,
         cytoband_path=cytoband,
         sex=sex,
+        plot_dir=plot_case_id,
     )
 
     # ---------------
