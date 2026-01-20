@@ -16,7 +16,9 @@ ARG CONTAINER_NAME
 # Copy all project files
 COPY . /${WORK_DIR}
 
-RUN cd /${WORK_DIR}/BALSAMIC/containers/${CONTAINER_NAME}/ && /bin/sh ${CONTAINER_NAME}.sh ${CONTAINER_NAME}
+RUN cd /${WORK_DIR}/BALSAMIC/containers/${CONTAINER_NAME}/ && /bin/sh ${CONTAINER_NAME}.sh ${CONTAINER_NAME} 
+
+RUN pip install requests --upgrade
 
 # Clean work environment
 RUN rm -rf /${WORK_DIR:?} && conda clean --all --yes
