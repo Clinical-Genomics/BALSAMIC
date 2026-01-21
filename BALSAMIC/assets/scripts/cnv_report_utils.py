@@ -446,13 +446,11 @@ def plot_chromosomes(
     MIN_GENE_TARGETS = 3
     outdir.mkdir(parents=True, exist_ok=True)
 
-    # Normalise focus_genes
+    # Normalise focus_genes to a set (global)
     if focus_genes is not None:
-        focus_genes_set = {str(g) for g in focus_genes}
-        zoom_tag = "genes_" + "_".join(sorted(focus_genes_set))
+        focus_genes_set: set[str] = {str(g) for g in focus_genes}
     else:
         focus_genes_set = None
-        zoom_tag = None
 
     # ---------------------------------
     # 0. Chromosome order and VCF
@@ -569,7 +567,7 @@ def plot_chromosomes(
     # ---------------------------------
     if "gene.symbol" in gdf.columns:
         group_cols = ["chr", "gene.symbol"]
-        grouped = gdf.groupby(group_cols, as_index=False)
+        grouped_gl = gdf.groupby(group_cols, as_index=False)
 
         agg_dict = {
             "has_loh_or_cnv": ("is_loh_or_cnv", "any"),
@@ -579,7 +577,7 @@ def plot_chromosomes(
         if targets_col is not None:
             agg_dict["total_targets"] = (targets_col, "sum")
 
-        gene_level = grouped.agg(**agg_dict)
+        gene_level = grouped_gl.agg(**agg_dict)
 
         if "total_targets" not in gene_level.columns:
             gene_level["total_targets"] = np.nan
@@ -636,12 +634,18 @@ def plot_chromosomes(
         if g_chr.empty:
             g_chr = pd.DataFrame(columns=gdf.columns)
 
-        # ---------- NEW: restrict to focus_genes window, if requested ----------
+        # ---------- Restrict to focus_genes window, if requested ----------
+        focus_genes_chr: list[str] = []  # genes on THIS chromosome
         if focus_genes_set is not None:
             g_focus_chr = g_chr[g_chr["gene.symbol"].isin(focus_genes_set)].copy()
             if g_focus_chr.empty:
                 # No genes of interest on this chromosome → skip
                 continue
+
+            # Compute per-chromosome list of focus genes actually present
+            focus_genes_chr = sorted(
+                set(g_focus_chr["gene.symbol"].astype(str).tolist())
+            )
 
             # Try to use region_start/region_end if available, else seg_start/seg_end
             if {"region_start", "region_end"}.issubset(g_focus_chr.columns):
@@ -652,7 +656,7 @@ def plot_chromosomes(
                 end_max = g_focus_chr["seg_end"].max()
             else:
                 # Fallback: use bin-level positions from CNR
-                bins_focus = sub[sub["gene"].isin(focus_genes_set)]
+                bins_focus = sub[sub["gene"].isin(focus_genes_chr)]
                 if bins_focus.empty:
                     continue
                 start_min = bins_focus["start"].min()
@@ -666,11 +670,8 @@ def plot_chromosomes(
             if sub.empty:
                 continue
 
-            # Restrict gene chunks to genes of interest (this chromosome)
+            # Restrict gene chunks to these genes of interest (this chromosome)
             g_chr = g_focus_chr
-
-            # BAF will be filtered later after we compute x-coords, but we
-            # already know the genomic span for filtering POS.
         # ----------------------------------------------------------------------
 
         # Determine which genes to highlight on this chromosome
@@ -678,7 +679,7 @@ def plot_chromosomes(
             if focus_genes_set is not None:
                 gene_level_chr = gene_level[
                     (gene_level["chr"] == chr_name)
-                    & (gene_level["gene.symbol"].isin(focus_genes_set))
+                    & (gene_level["gene.symbol"].isin(focus_genes_chr))
                 ]
             else:
                 gene_level_chr = gene_level[gene_level["chr"] == chr_name]
@@ -697,10 +698,10 @@ def plot_chromosomes(
                 else np.array([])
             )
 
-        if focus_genes_set is not None:
-            # If we zoom to genes, always treat those genes as "visible", even
-            # if not flagged as CNV – you can adjust this if you want.
-            highlighted_genes = np.union1d(highlighted_genes, list(focus_genes_set))
+        # Ensure focus genes on this chromosome are highlighted,
+        # even if not CNV/LOH/PON-significant
+        if focus_genes_chr:
+            highlighted_genes = np.union1d(highlighted_genes, focus_genes_chr)
 
         if highlighted_genes.size > 0 and "gene.symbol" in g_chr.columns:
             g_chr_high = g_chr[g_chr["gene.symbol"].isin(highlighted_genes)].copy()
@@ -775,8 +776,7 @@ def plot_chromosomes(
         # BAF for this chromosome, optionally restricted to focus window
         baf_chr = vcf[vcf["CHROM"] == chr_name].copy()
         baf_chr = baf_chr.sort_values("POS")
-        if focus_genes_set is not None and not baf_chr.empty:
-            # We know our current CNR span from sub
+        if focus_genes_chr and not baf_chr.empty:
             start_span = sub["start"].min()
             end_span = sub["end"].max()
             baf_chr = baf_chr[
@@ -955,8 +955,8 @@ def plot_chromosomes(
         title_suffix = "log2 vs PON spread" if use_pon else "log2 (no PON available)"
 
         title = f"Chr {chr_name} – {title_suffix}: {case_id}"
-        if focus_genes_set is not None:
-            title += f"  (genes: {', '.join(sorted(focus_genes_set))})"
+        if focus_genes_chr:
+            title += f"  (genes: {', '.join(focus_genes_chr)})"
         ax1.set_title(title + "\n")
         ax1.legend(loc="upper right", fontsize=8)
 
@@ -1012,14 +1012,16 @@ def plot_chromosomes(
 
         plt.tight_layout()
 
-        # file name, with optional gene zoom tag
-        if zoom_tag is not None:
-            out_png = outdir / f"cnv_chr{chr_name}_{zoom_tag}_segments.png"
+        # --- Filename: per-chromosome gene tag, if focusing ---
+        if focus_genes_chr:
+            tag = "genes_" + "_".join(focus_genes_chr)
+            out_png = outdir / f"cnv_chr{chr_name}_{tag}_segments.png"
         else:
             out_png = outdir / f"cnv_chr{chr_name}_segments.png"
 
         plt.savefig(out_png, dpi=150)
         plt.close(fig)
+
 
 
 # =============================================================================
