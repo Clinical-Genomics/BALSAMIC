@@ -1728,6 +1728,24 @@ def build_gene_segment_table(
     if "pon_spread" in bins.columns:
         agg_dict["pon_spread"] = ["mean"]
 
+    # Also carry seg_* directly from bins (they’re identical within a true CNV segment)
+    if "seg_start" in bins.columns:
+        agg_dict["seg_start"] = ["first"]
+    if "seg_end" in bins.columns:
+        agg_dict["seg_end"] = ["first"]
+    if "seg_log2" in bins.columns:
+        agg_dict["seg_log2"] = ["first"]
+    if "seg_baf" in bins.columns:
+        agg_dict["seg_baf"] = ["first"]
+    if "seg_cn" in bins.columns:
+        agg_dict["seg_cn"] = ["first"]
+    if "seg_cn1" in bins.columns:
+        agg_dict["seg_cn1"] = ["first"]
+    if "seg_cn2" in bins.columns:
+        agg_dict["seg_cn2"] = ["first"]
+    if "seg_depth" in bins.columns:
+        agg_dict["seg_depth"] = ["first"]
+
     grouped = (
         bins.groupby(["chr", "gene.symbol", "chunk_id"], as_index=False)
         .agg(agg_dict)
@@ -1751,31 +1769,20 @@ def build_gene_segment_table(
             "weight_mean": "mean_weight" if has_weight else "weight_mean",
             "pon_log2_mean": "pon_mean_log2",
             "pon_spread_mean": "pon_mean_spread",
+            "seg_start_first": "seg_start",
+            "seg_end_first": "seg_end",
+            "seg_log2_first": "seg_log2",
+            "seg_baf_first": "seg_baf",
+            "seg_cn_first": "seg_cn",
+            "seg_cn1_first": "seg_cn1",
+            "seg_cn2_first": "seg_cn2",
+            "seg_depth_first": "seg_depth",
         }
     )
+
+    # keep legacy alias if you need it
     if "n_targets" in grouped.columns:
         grouped["n.targets"] = grouped["n_targets"]
-
-    # attach segment attributes (one row per segment_id per chr)
-    seg_info = (
-        bins.groupby(["chr", "segment_id"], as_index=False)
-        .agg(
-            seg_start=("seg_start", "first"),
-            seg_end=("seg_end", "first"),
-            seg_log2=("seg_log2", "first"),
-            seg_baf=("seg_baf", "first"),
-            seg_cn=("seg_cn", "first"),
-            seg_cn1=("seg_cn1", "first"),
-            seg_cn2=("seg_cn2", "first"),
-            seg_depth=("seg_depth", "first"),
-        )
-    )
-
-    grouped = grouped.merge(
-        seg_info,
-        how="left",
-        on=["chr", "segment_id"],
-    )
 
     # Cancer gene flag
     if cancer_genes is not None:
