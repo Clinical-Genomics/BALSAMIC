@@ -403,7 +403,6 @@ def build_genes_from_cnr(cnr_path: str | Path) -> pd.DataFrame:
 # Per-chromosome plots (PON spread + log2 + segments + BAF + CNV genes)
 # =============================================================================
 
-
 def plot_chromosomes(
     cnr_path: Path,
     vcf_path: Path,
@@ -429,6 +428,7 @@ def plot_chromosomes(
       - PON spread band (if PON available)
       - smoothed log2 coverage (CNR)
       - segments reconstructed from `gene_seg_df`
+      - gene-level PON-driven chunks drawn as lines (if present)
       - CNV / LOH / PON-significant genes coloured & labelled
       - BAF panel under each chromosome (from VCF)
 
@@ -554,6 +554,7 @@ def plot_chromosomes(
         return False
 
     def _is_pon_signif_chunk(row: pd.Series) -> bool:
+        # NOTE: this is the *old* per-row PON call if still present
         if "pon_call" in row.index and pd.notna(row["pon_call"]):
             return str(row["pon_call"]).strip().lower() == "significant"
         return False
@@ -708,7 +709,7 @@ def plot_chromosomes(
         else:
             g_chr_high = pd.DataFrame(columns=g_chr.columns)
 
-        # ---------- Segment info ----------
+        # ---------- Segment info (CNVkit / LOH segments) ----------
         segs_chr = pd.DataFrame()
         if {"seg_start", "seg_end"}.issubset(g_chr.columns):
             segs_chr = (
@@ -811,7 +812,7 @@ def plot_chromosomes(
             for i, gname in enumerate(highlighted_genes):
                 gene_to_color[gname] = cmap(i)
 
-        # segments x-coordinates
+        # segments x-coordinates (CNVkit / LOH)
         if not segs_chr.empty:
             segs_chr = segs_chr.copy()
             segs_chr["x_start"] = segs_chr["seg_start"].apply(pos_to_xcoord)
@@ -880,13 +881,10 @@ def plot_chromosomes(
                 )
 
         # ---------- target / antitarget density bar at top ----------
-        # Use a small fraction of the y-range for a "barcode" band
         y_min, y_max = y_lim_chr
-        bar_height = 0.07 * (y_max - y_min)  # 7% of vertical range
+        bar_height = 0.07 * (y_max - y_min)
         bar_bottom = y_max - bar_height
 
-        # We'll use the pseudo-positions and bin widths already computed
-        # Target bins
         mask_t = sub["type"] == "Target"
         if mask_t.any():
             ax1.bar(
@@ -898,10 +896,9 @@ def plot_chromosomes(
                 color="tab:blue",
                 alpha=0.6,
                 linewidth=0,
-                zorder=1,  # keep behind points
+                zorder=1,
             )
 
-        # Antitarget bins
         mask_a = sub["type"] == "Antitarget"
         if mask_a.any():
             ax1.bar(
@@ -915,9 +912,8 @@ def plot_chromosomes(
                 linewidth=0,
                 zorder=1,
             )
-        # -------------------------------------------------------------
 
-        # PON band centred at PON mean
+        # ---------- PON band centred at PON mean ----------
         if (
             use_pon
             and "spread_smooth" in sub.columns
@@ -926,18 +922,19 @@ def plot_chromosomes(
         ):
             band_center = sub["pon_log2_smooth"].fillna(0.0)
             band_half = sub["spread_smooth"].fillna(0.0)
-            band_bottom = (band_center - band_half).clip(-y_clip, y_clip)
-            band_top = (band_center + band_half).clip(-y_clip, y_clip)
+            band_bottom_pon = (band_center - band_half).clip(-y_clip, y_clip)
+            band_top_pon = (band_center + band_half).clip(-y_clip, y_clip)
 
             ax1.fill_between(
                 x,
-                band_bottom,
-                band_top,
+                band_bottom_pon,
+                band_top_pon,
                 alpha=0.4,
                 step="mid",
                 label="PON noise band",
             )
 
+        # smoothed log2
         ax1.plot(
             x,
             sub["log2_smooth_clipped"],
@@ -947,6 +944,7 @@ def plot_chromosomes(
             label=f"log2 (median {window} bins)",
         )
 
+        # ---------- CNVkit / LOH segments ----------
         if not segs_chr.empty:
             for _, srow in segs_chr.iterrows():
                 xs = srow["x_start"]
@@ -986,6 +984,81 @@ def plot_chromosomes(
                     linewidth=1.0,
                     alpha=0.8,
                 )
+
+        # ---------- NEW: gene-level PON-driven chunks ----------
+        gene_chunks_label_added = False
+        if {"region_start", "region_end", "mean_log2"}.issubset(g_chr.columns):
+            # restrict to current plotted genomic span
+            start_span = sub["start"].min()
+            end_span = sub["end"].max()
+
+            g_chunks = g_chr[
+                (g_chr["region_end"] >= start_span)
+                & (g_chr["region_start"] <= end_span)
+            ].copy()
+
+            # If pon_chunk_call exists, only show borderline/significant chunks
+            if "pon_chunk_call" in g_chunks.columns:
+                g_chunks["pon_chunk_call_norm"] = (
+                    g_chunks["pon_chunk_call"]
+                    .astype(str)
+                    .str.strip()
+                    .str.lower()
+                )
+                g_chunks = g_chunks[
+                    g_chunks["pon_chunk_call_norm"].isin(
+                        ["borderline", "significant"]
+                    )
+                ]
+
+            if not g_chunks.empty:
+                for _, crow in g_chunks.iterrows():
+                    xs = pos_to_xcoord(int(crow["region_start"]))
+                    xe = pos_to_xcoord(int(crow["region_end"]))
+                    y_chunk = float(crow["mean_log2"])
+                    y_chunk = float(np.clip(y_chunk, -y_clip, y_clip))
+
+                    call = str(
+                        crow.get("pon_chunk_call", "")
+                    ).strip().lower()
+                    direction = str(
+                        crow.get("pon_chunk_direction", "")
+                    ).strip().lower()
+
+                    # Infer direction from mean_log2 if explicit direction is missing
+                    if not direction:
+                        if y_chunk > 0:
+                            direction = "gain"
+                        elif y_chunk < 0:
+                            direction = "loss"
+
+                    if call == "significant":
+                        if direction == "gain":
+                            color = "darkred"
+                        elif direction == "loss":
+                            color = "darkblue"
+                        else:
+                            color = "black"
+                    elif call == "borderline":
+                        color = "orange"
+                    else:
+                        color = "grey"
+
+                    ax1.hlines(
+                        y_chunk,
+                        xs,
+                        xe,
+                        colors=color,
+                        linewidth=2.0,
+                        alpha=0.9,
+                        linestyles="solid",
+                        label=(
+                            "Gene PON-chunk"
+                            if not gene_chunks_label_added
+                            else None
+                        ),
+                    )
+                    gene_chunks_label_added = True
 
         ax1.axhline(0, color="black", linewidth=0.8)
         ax1.set_ylim(*y_lim_chr)
