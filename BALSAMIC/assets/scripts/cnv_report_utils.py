@@ -1405,14 +1405,14 @@ def build_gene_segment_table(
     sex: Gender = None,
 ) -> pd.DataFrame:
     """
-    Build a gene x segment table from CNVkit CNR + CNS (+ optional refGene + optional PON).
+    Build a gene x (within-gene) chunk table from CNVkit CNR + CNS
+    (+ optional refGene + optional PON).
 
-    One row ≈ one (gene, segment) chunk:
+    One row ≈ one (gene, chunk) made from:
 
-      - A gene that lies entirely in one CNS segment → 1 row.
-      - A gene that spans two CNS segments → 2 rows.
-      - Gene parts without any CNS segment (neutral / no-call) form their own row
-        or, if they have enough bins, may be internally segmented based on CNR.
+      - Existing CNV segments (seg_* from CNVkit/PureCN remain as-is).
+      - Within-gene sub-chunks in regions without a CNS segment, derived
+        from CNR bins and PON (if available).
 
     Optional:
       - refgene_path: annotate exons_hit (whole_gene vs exon indices).
@@ -1426,7 +1426,8 @@ def build_gene_segment_table(
       seg_start, seg_end, seg_log2, seg_baf, seg_cn, seg_cn1, seg_cn2,
       is_cancer_gene,
       exons_hit (if refgene_path),
-      pon_mean_log2, pon_mean_spread, pon_effect, pon_z, pon_direction, pon_call (if pon_path).
+      pon_mean_log2, pon_mean_spread,
+      pon_chunk_effect, pon_chunk_z, pon_chunk_direction, pon_chunk_call.
     """
 
     # ------------------------- 1. Load CNR ------------------------- #
@@ -1489,6 +1490,7 @@ def build_gene_segment_table(
     # ------------------------- 2. Load CNS ------------------------- #
     cns = safe_read_csv(cns_path, sep="\t").copy()
     if cns.empty:
+        # In the no-CNS case we keep the old simple behaviour
         grouped = cnr.groupby(["chr", "gene.symbol"], as_index=False).agg(
             region_start=("start", "min"),
             region_end=("end", "max"),
@@ -1499,7 +1501,6 @@ def build_gene_segment_table(
             mean_depth=("depth", "mean") if has_depth else ("log2", "size"),
             mean_weight=("weight", "mean") if has_weight else ("log2", "size"),
         )
-        grouped["segment_id"] = "no_segment"
         grouped["seg_start"] = np.nan
         grouped["seg_end"] = np.nan
         grouped["seg_log2"] = np.nan
@@ -1512,7 +1513,6 @@ def build_gene_segment_table(
         if cancer_genes is not None:
             grouped["is_cancer_gene"] = grouped["gene.symbol"].isin(cancer_genes)
 
-        # Simple case: no segments; we won't do exon or PON logic here for now.
         return grouped
 
     cns_chr_col = "chromosome" if "chromosome" in cns.columns else "chr"
@@ -1616,117 +1616,104 @@ def build_gene_segment_table(
 
     bins = pd.concat(annotated_bins_list, ignore_index=True)
 
-    # ---- 3b. Optional gene-internal segmentation on CNR (for no-segment bins) ----
-    # Heuristic:
-    #   - only consider genes with >= MIN_GENE_SEG_TARGETS bins (no CNS segment),
-    #   - build runs of >= MIN_RUN_BINS bins where |eff| >= LOG2_THRESH
-    #     with consistent sign (gain/loss),
-    #   - eff = log2 - pon_log2 if PON available, else log2.
-    MIN_GENE_SEG_TARGETS = 8
-    MIN_RUN_BINS = 3
-    LOG2_THRESH = 0.25
+    # -------------------- 3b. Within-gene chunking on no-segment bins -------------------- #
+    # We do NOT alter seg_*; we just split the gene into sub-chunks.
+    MIN_GENE_SEG_TARGETS = 8   # only genes with at least this many no-seg bins
+    MIN_RUN_BINS = 3           # min consecutive bins in a run
+    LOG2_THRESH = 0.25         # |effect| threshold for "active" bins
 
-    if not bins.empty:
-        # ensure sort order for reproducibility
-        bins = bins.sort_values(["chr", "gene.symbol", "start"]).reset_index(drop=True)
+    if bins.empty:
+        return pd.DataFrame()
 
-        next_gene_seg_id = 0
+    bins = bins.sort_values(["chr", "gene.symbol", "start"]).reset_index(drop=True)
 
-        def _segment_no_cns_within_gene(df_gene: pd.DataFrame) -> None:
-            nonlocal next_gene_seg_id, bins
+    # Start with a default chunk_id = underlying segment_id (so CNV segments stay intact)
+    bins["chunk_id"] = bins["segment_id"].astype(str).fillna("no_segment")
 
-            # subset of bins in this gene with no CNS segment
-            mask_no_seg = (df_gene["segment_id"] == "no_segment") | df_gene[
-                "segment_id"
-            ].isna()
-            df_gene_no_seg = df_gene[mask_no_seg]
-            if df_gene_no_seg.shape[0] < MIN_GENE_SEG_TARGETS:
+    # Helper to assign gene-internal chunks for no-segment bins
+    next_gene_chunk_id = 0
+
+    def _assign_gene_chunks(df_gene: pd.DataFrame) -> None:
+        nonlocal next_gene_chunk_id, bins
+
+        # Work only on bins not in a CNS segment
+        mask_no_seg = (df_gene["segment_id"] == "no_segment") | df_gene["segment_id"].isna()
+        df_gene_no_seg = df_gene[mask_no_seg]
+        if df_gene_no_seg.shape[0] < MIN_GENE_SEG_TARGETS:
+            return
+
+        idxs = df_gene_no_seg.index.to_numpy()
+        if idxs.size == 0:
+            return
+
+        # Effect per bin: log2 - pon_log2 (if available), else log2
+        if "pon_log2" in df_gene_no_seg.columns:
+            eff = (
+                df_gene_no_seg["log2"].values
+                - df_gene_no_seg["pon_log2"].fillna(0.0).values
+            )
+        else:
+            eff = df_gene_no_seg["log2"].values
+
+        current_run: list[int] = []
+        current_sign: int | None = None
+
+        def _finalize_run(run_idxs: list[int]) -> None:
+            nonlocal next_gene_chunk_id, bins
+            if len(run_idxs) < MIN_RUN_BINS:
                 return
+            sub = bins.loc[run_idxs]
 
-            idxs = df_gene_no_seg.index.to_numpy()
-            if idxs.size == 0:
-                return
-
-            # effect = log2 - pon_log2 (if available), else log2
-            if {"pon_log2"}.issubset(df_gene_no_seg.columns):
-                eff = (
-                    df_gene_no_seg["log2"].values
-                    - df_gene_no_seg["pon_log2"].fillna(0.0).values
-                )
+            # recompute effect in this run with same logic
+            if "pon_log2" in sub.columns:
+                eff_run = sub["log2"].values - sub["pon_log2"].fillna(0.0).values
             else:
-                eff = df_gene_no_seg["log2"].values
+                eff_run = sub["log2"].values
+            mean_eff = float(np.nanmean(eff_run)) if eff_run.size > 0 else 0.0
+            if not np.isfinite(mean_eff) or abs(mean_eff) < LOG2_THRESH:
+                return
 
-            current_run: list[int] = []
-            current_sign: int | None = None
+            chunk_label = f"genechunk_{next_gene_chunk_id}"
+            next_gene_chunk_id += 1
 
-            def _finalize_run(run_idxs: list[int]) -> None:
-                nonlocal next_gene_seg_id, bins
-                if len(run_idxs) < MIN_RUN_BINS:
-                    return
-                sub = bins.loc[run_idxs]
-                # recompute effect for this run (matching above)
-                if "pon_log2" in sub.columns:
-                    eff_run = sub["log2"].values - sub["pon_log2"].fillna(0.0).values
-                else:
-                    eff_run = sub["log2"].values
-                mean_eff = float(np.nanmean(eff_run)) if eff_run.size > 0 else 0.0
-                if not np.isfinite(mean_eff) or abs(mean_eff) < LOG2_THRESH:
-                    return
+            # Assign chunk_id; seg_* remain as they were (often NaN here)
+            bins.loc[run_idxs, "chunk_id"] = chunk_label
 
-                seg_label = f"gene_seg_{next_gene_seg_id}"
-                next_gene_seg_id += 1
+        for idx, val in zip(idxs, eff):
+            if not np.isfinite(val):
+                if current_run:
+                    _finalize_run(current_run)
+                    current_run = []
+                    current_sign = None
+                continue
 
-                seg_start = sub["start"].min()
-                seg_end = sub["end"].max()
-                seg_log2 = float(sub["log2"].mean())
+            if abs(val) < LOG2_THRESH:
+                if current_run:
+                    _finalize_run(current_run)
+                    current_run = []
+                    current_sign = None
+                continue
 
-                # assign new segment_id + segment-level attributes
-                bins.loc[run_idxs, "segment_id"] = seg_label
-                bins.loc[run_idxs, "seg_start"] = seg_start
-                bins.loc[run_idxs, "seg_end"] = seg_end
-                bins.loc[run_idxs, "seg_log2"] = seg_log2
-                # seg_cn / seg_cn1 / seg_cn2 stay NaN for these inferred segments
+            sgn = 1 if val > 0 else -1
+            if current_sign is None or sgn == current_sign:
+                current_run.append(idx)
+                current_sign = sgn
+            else:
+                if current_run:
+                    _finalize_run(current_run)
+                current_run = [idx]
+                current_sign = sgn
 
-            for idx, val in zip(idxs, eff):
-                if not np.isfinite(val):
-                    # break run on NaN
-                    if current_run:
-                        _finalize_run(current_run)
-                        current_run = []
-                        current_sign = None
-                    continue
+        if current_run:
+            _finalize_run(current_run)
 
-                if abs(val) < LOG2_THRESH:
-                    # neutral-ish → break the run
-                    if current_run:
-                        _finalize_run(current_run)
-                        current_run = []
-                        current_sign = None
-                    continue
+    # Apply per gene
+    for (_, _), df_gene in bins.groupby(["chr", "gene.symbol"], sort=False):
+        _assign_gene_chunks(df_gene)
 
-                sgn = 1 if val > 0 else -1
-                if current_sign is None or sgn == current_sign:
-                    current_run.append(idx)
-                    current_sign = sgn
-                else:
-                    # sign flip: close previous run, start new
-                    if current_run:
-                        _finalize_run(current_run)
-                    current_run = [idx]
-                    current_sign = sgn
+    bins = bins.sort_values(["chr", "gene.symbol", "start"]).reset_index(drop=True)
 
-            # finalize last run
-            if current_run:
-                _finalize_run(current_run)
-
-        # apply per (chr, gene.symbol)
-        for (_, _), df_gene in bins.groupby(["chr", "gene.symbol"], sort=False):
-            _segment_no_cns_within_gene(df_gene)
-
-        # re-sort after modifications
-        bins = bins.sort_values(["chr", "gene.symbol", "start"]).reset_index(drop=True)
-
-    # -------------------- 4. Collapse to gene x segment -------------------- #
+    # -------------------- 4. Collapse to gene x chunk -------------------- #
     agg_dict: dict[str, list[str]] = {
         "start": ["min", "max"],  # region_start/region_end
         "log2": ["count", "mean", "min", "max"],
@@ -1741,8 +1728,9 @@ def build_gene_segment_table(
     if "pon_spread" in bins.columns:
         agg_dict["pon_spread"] = ["mean"]
 
-    grouped = bins.groupby(["chr", "gene.symbol", "segment_id"], as_index=False).agg(
-        agg_dict
+    grouped = (
+        bins.groupby(["chr", "gene.symbol", "chunk_id"], as_index=False)
+        .agg(agg_dict)
     )
 
     # flatten multi-index columns
@@ -1765,20 +1753,22 @@ def build_gene_segment_table(
             "pon_spread_mean": "pon_mean_spread",
         }
     )
-    # keep legacy alias if you need it
     if "n_targets" in grouped.columns:
         grouped["n.targets"] = grouped["n_targets"]
 
     # attach segment attributes (one row per segment_id per chr)
-    seg_info = bins.groupby(["chr", "segment_id"], as_index=False).agg(
-        seg_start=("seg_start", "first"),
-        seg_end=("seg_end", "first"),
-        seg_log2=("seg_log2", "first"),
-        seg_baf=("seg_baf", "first"),
-        seg_cn=("seg_cn", "first"),
-        seg_cn1=("seg_cn1", "first"),
-        seg_cn2=("seg_cn2", "first"),
-        seg_depth=("seg_depth", "first"),
+    seg_info = (
+        bins.groupby(["chr", "segment_id"], as_index=False)
+        .agg(
+            seg_start=("seg_start", "first"),
+            seg_end=("seg_end", "first"),
+            seg_log2=("seg_log2", "first"),
+            seg_baf=("seg_baf", "first"),
+            seg_cn=("seg_cn", "first"),
+            seg_cn1=("seg_cn1", "first"),
+            seg_cn2=("seg_cn2", "first"),
+            seg_depth=("seg_depth", "first"),
+        )
     )
 
     grouped = grouped.merge(
@@ -1795,30 +1785,28 @@ def build_gene_segment_table(
     min_n_for_pon = 2  # ignore PON-driven stat if fewer bins than this
 
     if "pon_mean_log2" in grouped.columns and "pon_mean_spread" in grouped.columns:
-        grouped["pon_effect"] = grouped["mean_log2"] - grouped["pon_mean_log2"]
+        grouped["pon_chunk_effect"] = grouped["mean_log2"] - grouped["pon_mean_log2"]
 
         def _compute_pon_z(row: pd.Series) -> float:
-            eff = row["pon_effect"]
+            eff = row["pon_chunk_effect"]
             sigma = row["pon_mean_spread"]
             n = row.get("n_targets", row.get("n.targets", np.nan))
 
             if pd.isna(eff) or pd.isna(sigma) or sigma <= 0:
                 return np.nan
             if pd.isna(n) or n < min_n_for_pon:
-                # too few bins for a decent PON-based z
                 return np.nan
 
-            # effective sigma of the mean
             sigma_eff = sigma / np.sqrt(float(n))
             if sigma_eff <= 0:
                 return np.nan
 
             return abs(eff) / sigma_eff
 
-        grouped["pon_z"] = grouped.apply(_compute_pon_z, axis=1)
+        grouped["pon_chunk_z"] = grouped.apply(_compute_pon_z, axis=1)
 
         def _pon_direction(row: pd.Series) -> str:
-            eff = row["pon_effect"]
+            eff = row["pon_chunk_effect"]
             if pd.isna(eff):
                 return ""
             if eff > 0:
@@ -1827,10 +1815,10 @@ def build_gene_segment_table(
                 return "loss"
             return "neutral"
 
-        grouped["pon_direction"] = grouped.apply(_pon_direction, axis=1)
+        grouped["pon_chunk_direction"] = grouped.apply(_pon_direction, axis=1)
 
         def _pon_call(row: pd.Series) -> str:
-            z = row["pon_z"]
+            z = row["pon_chunk_z"]
             if pd.isna(z):
                 return ""
             if z < 1.5:
@@ -1839,7 +1827,7 @@ def build_gene_segment_table(
                 return "borderline"
             return "significant"
 
-        grouped["pon_call"] = grouped.apply(_pon_call, axis=1)
+        grouped["pon_chunk_call"] = grouped.apply(_pon_call, axis=1)
 
     # -------------------- 6. Exon annotation (optional) -------------------- #
     if refgene_path is not None:
@@ -1857,7 +1845,7 @@ def build_gene_segment_table(
             if info is None or pd.isna(seg_start) or pd.isna(seg_end):
                 return ""
 
-            exons = info["exons"]  # already 5'->3' oriented
+            exons = info["exons"]  # 5'->3'
             gene_start = min(s for s, e in exons)
             gene_end = max(e for s, e in exons)
 
@@ -1872,7 +1860,6 @@ def build_gene_segment_table(
             if not hit_indices:
                 return ""
 
-            # compress contiguous exon numbers: [1,2,3,5] -> "1-3,5"
             ranges = []
             start = prev = hit_indices[0]
             for i in hit_indices[1:]:
@@ -1897,21 +1884,18 @@ def build_gene_segment_table(
     if loh_path is not None and Path(loh_path).is_file():
         loh = safe_read_csv(loh_path, sep=",").copy()
         if not loh.empty:
-            # normalize chromosome naming
             loh_chr_col = "chr" if "chr" in loh.columns else "chromosome"
             loh[loh_chr_col] = (
                 loh[loh_chr_col].astype(str).str.replace("^chr", "", regex=True)
             )
             loh = loh.rename(columns={loh_chr_col: "chr"})
 
-            # If multiple samples are present, force user to filter upstream
             if "Sampleid" in loh.columns and loh["Sampleid"].nunique() > 1:
                 raise ValueError(
                     "LOHgenes file contains multiple Sampleid values; "
                     "please subset to a single sample before calling build_gene_segment_table."
                 )
 
-            # ensure required columns
             required_loh_cols = {
                 "gene.symbol",
                 "chr",
@@ -1926,7 +1910,6 @@ def build_gene_segment_table(
             if missing:
                 raise ValueError(f"LOHgenes file missing columns: {missing}")
 
-            # keep only what we need and rename for clarity
             loh_small = loh[
                 [
                     "chr",
@@ -1950,7 +1933,6 @@ def build_gene_segment_table(
                 }
             )
 
-            # merge per (chr, gene.symbol); allows multiple segment rows for same gene
             grouped = grouped.merge(
                 loh_small,
                 how="left",
@@ -1990,12 +1972,14 @@ def build_gene_segment_table(
         "exons_hit",
         "pon_mean_log2",
         "pon_mean_spread",
-        "pon_z",
-        "pon_call",
+        "pon_chunk_effect",
+        "pon_chunk_z",
+        "pon_chunk_direction",
+        "pon_chunk_call",
     ]
     cols_order = [c for c in cols_order if c in grouped.columns]
     grouped = grouped[
-        cols_order + (["segment_id"] if "segment_id" in grouped.columns else [])
+        cols_order + (["chunk_id"] if "chunk_id" in grouped.columns else [])
     ]
 
     # chromosome sorting: numeric -> X -> Y -> others
@@ -2018,7 +2002,7 @@ def build_gene_segment_table(
 
     # drop helper columns we don't want in final table
     drop_cols = [
-        "segment_id",
+        "chunk_id",
         "mean_depth",
     ]
     drop_cols = [c for c in drop_cols if c in grouped.columns]
