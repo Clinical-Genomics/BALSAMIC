@@ -879,6 +879,45 @@ def plot_chromosomes(
                     color=color,
                 )
 
+        # ---------- target / antitarget density bar at top ----------
+        # Use a small fraction of the y-range for a "barcode" band
+        y_min, y_max = y_lim_chr
+        bar_height = 0.10 * (y_max - y_min)  # 10% of vertical range
+        bar_bottom = y_max - bar_height
+        bar_top = y_max
+
+        # We'll use the pseudo-positions and bin widths already computed
+        # Target bins
+        mask_t = sub["type"] == "Target"
+        if mask_t.any():
+            ax1.bar(
+                sub.loc[mask_t, "x_coord"],
+                bar_height,
+                bottom=bar_bottom,
+                width=sub.loc[mask_t, "bin_width"],
+                align="center",
+                color="tab:blue",
+                alpha=0.6,
+                linewidth=0,
+                zorder=1,  # keep behind points
+            )
+
+        # Antitarget bins
+        mask_a = sub["type"] == "Antitarget"
+        if mask_a.any():
+            ax1.bar(
+                sub.loc[mask_a, "x_coord"],
+                bar_height,
+                bottom=bar_bottom,
+                width=sub.loc[mask_a, "bin_width"],
+                align="center",
+                color="lightgrey",
+                alpha=0.6,
+                linewidth=0,
+                zorder=1,
+            )
+        # -------------------------------------------------------------
+
         # PON band centred at PON mean
         if (
             use_pon
