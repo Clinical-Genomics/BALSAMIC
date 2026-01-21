@@ -9,6 +9,7 @@ import numpy as np
 import pandas as pd
 from BALSAMIC.constants.analysis import Gender
 import re
+from collections.abc import Collection
 
 # =============================================================================
 # Generic helpers
@@ -402,6 +403,8 @@ def build_genes_from_cnr(cnr_path: str | Path) -> pd.DataFrame:
 # =============================================================================
 # Per-chromosome plots (PON spread + log2 + segments + BAF + CNV genes)
 # =============================================================================
+
+
 def plot_chromosomes(
     cnr_path: Path,
     vcf_path: Path,
@@ -418,6 +421,8 @@ def plot_chromosomes(
     neutral_target_factor: float = 0.3,
     highlight_only_cancer: bool = False,
     y_abs_max: float = 3.0,
+    focus_genes: Optional[Collection[str]] = None,
+    focus_padding_bp: int = 0,
 ) -> None:
     """
     Create one PNG per chromosome with:
@@ -435,10 +440,20 @@ def plot_chromosomes(
         it must also have is_cancer_gene == True.
       - If highlight_only_cancer is True, then all highlighted genes
         must be cancer genes (for CNV/LOH as well).
+      - If focus_genes is provided, only bins / segments overlapping the
+        genomic span of those genes are shown (per chromosome).
     """
 
     MIN_GENE_TARGETS = 3
     outdir.mkdir(parents=True, exist_ok=True)
+
+    # Normalise focus_genes
+    if focus_genes is not None:
+        focus_genes_set = {str(g) for g in focus_genes}
+        zoom_tag = "genes_" + "_".join(sorted(focus_genes_set))
+    else:
+        focus_genes_set = None
+        zoom_tag = None
 
     # ---------------------------------
     # 0. Chromosome order and VCF
@@ -500,9 +515,6 @@ def plot_chromosomes(
         pon = safe_read_csv(pon_path, sep="\t")
         if not pon.empty and "spread" in pon.columns:
             try:
-                # merge_cnr_pon is assumed to add at least:
-                #  - 'spread'
-                #  - 'pon_log2'  (PON mean log2 at each bin)
                 merged = merge_cnr_pon(
                     cnr,
                     pon,
@@ -623,10 +635,54 @@ def plot_chromosomes(
         if g_chr.empty:
             g_chr = pd.DataFrame(columns=gdf.columns)
 
+        # ---------- NEW: restrict to focus_genes window, if requested ----------
+        if focus_genes_set is not None:
+            g_focus_chr = g_chr[g_chr["gene.symbol"].isin(focus_genes_set)].copy()
+            if g_focus_chr.empty:
+                # No genes of interest on this chromosome → skip
+                continue
+
+            # Try to use region_start/region_end if available, else seg_start/seg_end
+            if {"region_start", "region_end"}.issubset(g_focus_chr.columns):
+                start_min = g_focus_chr["region_start"].min()
+                end_max = g_focus_chr["region_end"].max()
+            elif {"seg_start", "seg_end"}.issubset(g_focus_chr.columns):
+                start_min = g_focus_chr["seg_start"].min()
+                end_max = g_focus_chr["seg_end"].max()
+            else:
+                # Fallback: use bin-level positions from CNR
+                bins_focus = sub[sub["gene"].isin(focus_genes_set)]
+                if bins_focus.empty:
+                    continue
+                start_min = bins_focus["start"].min()
+                end_max = bins_focus["end"].max()
+
+            start_min = max(0, int(start_min) - int(focus_padding_bp))
+            end_max = int(end_max) + int(focus_padding_bp)
+
+            # Restrict CNR bins to this genomic window
+            sub = sub[(sub["end"] >= start_min) & (sub["start"] <= end_max)]
+            if sub.empty:
+                continue
+
+            # Restrict gene chunks to genes of interest (this chromosome)
+            g_chr = g_focus_chr
+
+            # BAF will be filtered later after we compute x-coords, but we
+            # already know the genomic span for filtering POS.
+        # ----------------------------------------------------------------------
+
+        # Determine which genes to highlight on this chromosome
         if gene_level is not None:
-            g_chr_gene = gene_level[
-                (gene_level["chr"] == chr_name) & (gene_level["highlight_gene"])
-            ].copy()
+            if focus_genes_set is not None:
+                gene_level_chr = gene_level[
+                    (gene_level["chr"] == chr_name)
+                    & (gene_level["gene.symbol"].isin(focus_genes_set))
+                ]
+            else:
+                gene_level_chr = gene_level[gene_level["chr"] == chr_name]
+
+            g_chr_gene = gene_level_chr[gene_level_chr["highlight_gene"]].copy()
             highlighted_genes = g_chr_gene["gene.symbol"].astype(str).unique()
         else:
             if highlight_only_cancer and "is_cancer_gene" in g_chr.columns:
@@ -640,12 +696,19 @@ def plot_chromosomes(
                 else np.array([])
             )
 
+        if focus_genes_set is not None:
+            # If we zoom to genes, always treat those genes as "visible", even
+            # if not flagged as CNV – you can adjust this if you want.
+            highlighted_genes = np.union1d(
+                highlighted_genes, list(focus_genes_set)
+            )
+
         if highlighted_genes.size > 0 and "gene.symbol" in g_chr.columns:
             g_chr_high = g_chr[g_chr["gene.symbol"].isin(highlighted_genes)].copy()
         else:
             g_chr_high = pd.DataFrame(columns=g_chr.columns)
 
-        # ---------- segments ----------
+        # ---------- Segment info ----------
         segs_chr = pd.DataFrame()
         if {"seg_start", "seg_end"}.issubset(g_chr.columns):
             segs_chr = (
@@ -668,7 +731,7 @@ def plot_chromosomes(
             )
             segs_chr = segs_chr[segs_chr["chr"] == chr_name].sort_values("seg_start")
 
-        # ---------- variable-width x ----------
+        # ---------- Variable-width x ----------
         def _bin_width(row: pd.Series) -> float:
             if row["type"] == "Antitarget":
                 return anti_factor
@@ -694,11 +757,9 @@ def plot_chromosomes(
             sub["spread_smooth"] = np.nan
             sub["pon_log2_smooth"] = 0.0
 
-        # clipping
         sub["log2_clipped"] = sub["log2"].clip(-y_clip, y_clip)
         sub["log2_smooth_clipped"] = sub["log2_smooth"].clip(-y_clip, y_clip)
 
-        # helper: genomic POS → x_coord
         bin_starts = sub["start"].values
         x_coords = sub["x_coord"].values
 
@@ -710,13 +771,20 @@ def plot_chromosomes(
                 idx = len(x_coords) - 1
             return x_coords[idx]
 
-        # BAF for this chromosome
+        # BAF for this chromosome, optionally restricted to focus window
         baf_chr = vcf[vcf["CHROM"] == chr_name].copy()
         baf_chr = baf_chr.sort_values("POS")
+        if focus_genes_set is not None and not baf_chr.empty:
+            # We know our current CNR span from sub
+            start_span = sub["start"].min()
+            end_span = sub["end"].max()
+            baf_chr = baf_chr[
+                (baf_chr["POS"] >= start_span) & (baf_chr["POS"] <= end_span)
+            ]
         if not baf_chr.empty:
             baf_chr["x_coord"] = baf_chr["POS"].apply(pos_to_xcoord)
 
-        # gene x-positions
+        # gene positions
         gene_to_color: dict[str, tuple] = {}
         genes_chr = pd.DataFrame()
 
@@ -742,7 +810,7 @@ def plot_chromosomes(
             for i, gname in enumerate(highlighted_genes):
                 gene_to_color[gname] = cmap(i)
 
-        # segment x-coordinates + clipping
+        # segments x-coordinates
         if not segs_chr.empty:
             segs_chr = segs_chr.copy()
             segs_chr["x_start"] = segs_chr["seg_start"].apply(pos_to_xcoord)
@@ -766,7 +834,6 @@ def plot_chromosomes(
 
         x = sub["x_coord"]
 
-        # background points
         if highlighted_genes.size > 0:
             non_cnv = sub[~sub["gene"].isin(highlighted_genes)]
         else:
@@ -795,7 +862,6 @@ def plot_chromosomes(
                 label="Target bins (no highlighted CNV gene)",
             )
 
-        # highlighted genes
         if highlighted_genes.size > 0:
             for gene in highlighted_genes:
                 gsub = sub[sub["gene"] == gene]
@@ -810,7 +876,7 @@ def plot_chromosomes(
                     color=color,
                 )
 
-        # ---------- PON spread band, centered at PON log2 ----------
+        # PON band centred at PON mean
         if (
             use_pon
             and "spread_smooth" in sub.columns
@@ -819,7 +885,6 @@ def plot_chromosomes(
         ):
             band_center = sub["pon_log2_smooth"].fillna(0.0)
             band_half = sub["spread_smooth"].fillna(0.0)
-
             band_bottom = (band_center - band_half).clip(-y_clip, y_clip)
             band_top = (band_center + band_half).clip(-y_clip, y_clip)
 
@@ -832,7 +897,6 @@ def plot_chromosomes(
                 label="PON noise band",
             )
 
-        # smoothed log2
         ax1.plot(
             x,
             sub["log2_smooth_clipped"],
@@ -842,7 +906,6 @@ def plot_chromosomes(
             label=f"log2 (median {window} bins)",
         )
 
-        # segments
         if not segs_chr.empty:
             for _, srow in segs_chr.iterrows():
                 xs = srow["x_start"]
@@ -889,7 +952,11 @@ def plot_chromosomes(
         ax1.set_ylim(*y_lim_chr)
         ax1.set_ylabel("log2 / PON band")
         title_suffix = "log2 vs PON spread" if use_pon else "log2 (no PON available)"
-        ax1.set_title(f"Chr {chr_name} – {title_suffix}: {case_id}\n")
+
+        title = f"Chr {chr_name} – {title_suffix}: {case_id}"
+        if focus_genes_set is not None:
+            title += f"  (genes: {', '.join(sorted(focus_genes_set))})"
+        ax1.set_title(title + "\n")
         ax1.legend(loc="upper right", fontsize=8)
 
         # gene labels
@@ -943,7 +1010,13 @@ def plot_chromosomes(
         ax2.set_ylabel("BAF")
 
         plt.tight_layout()
-        out_png = outdir / f"cnv_chr{chr_name}_segments.png"
+
+        # file name, with optional gene zoom tag
+        if zoom_tag is not None:
+            out_png = outdir / f"cnv_chr{chr_name}_{zoom_tag}_segments.png"
+        else:
+            out_png = outdir / f"cnv_chr{chr_name}_segments.png"
+
         plt.savefig(out_png, dpi=150)
         plt.close(fig)
 

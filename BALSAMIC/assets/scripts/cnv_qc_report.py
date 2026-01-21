@@ -626,6 +626,20 @@ def main(
         highlight_only_cancer=highlight_only_cancer,
     )
 
+    plot_chromosomes(
+        cnr_path=cnr,
+        vcf_path=vcf,
+        gene_seg_df=df_genes,
+        outdir=chr_plots_dir,
+        case_id=plot_case_id,
+        pon_path=pon,
+        include_y=True,
+        neutral_target_factor=neutral_target_factor,
+        highlight_only_cancer=highlight_only_cancer,
+        focus_genes=["RB1", "DLEU1"],
+        focus_padding_bp=100_000,
+    )
+
     # ----------------------------
     # HTML report
     # ----------------------------
