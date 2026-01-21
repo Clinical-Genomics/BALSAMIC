@@ -882,9 +882,8 @@ def plot_chromosomes(
         # ---------- target / antitarget density bar at top ----------
         # Use a small fraction of the y-range for a "barcode" band
         y_min, y_max = y_lim_chr
-        bar_height = 0.10 * (y_max - y_min)  # 10% of vertical range
+        bar_height = 0.07 * (y_max - y_min)  # 7% of vertical range
         bar_bottom = y_max - bar_height
-        bar_top = y_max
 
         # We'll use the pseudo-positions and bin widths already computed
         # Target bins
@@ -1394,7 +1393,6 @@ def classify_cnv_from_total_cn_sex_aware(
 # Final gene table builder (CNR base + optional PureCN + PON)
 # =============================================================================
 
-
 def build_gene_segment_table(
     cnr_path: str | Path,
     cns_path: str | Path,
@@ -1413,7 +1411,8 @@ def build_gene_segment_table(
 
       - A gene that lies entirely in one CNS segment → 1 row.
       - A gene that spans two CNS segments → 2 rows.
-      - Gene parts without any CNS segment (neutral / no-call) form their own row.
+      - Gene parts without any CNS segment (neutral / no-call) form their own row
+        or, if they have enough bins, may be internally segmented based on CNR.
 
     Optional:
       - refgene_path: annotate exons_hit (whole_gene vs exon indices).
@@ -1616,6 +1615,116 @@ def build_gene_segment_table(
         annotated_bins_list.append(annotated)
 
     bins = pd.concat(annotated_bins_list, ignore_index=True)
+
+    # ---- 3b. Optional gene-internal segmentation on CNR (for no-segment bins) ----
+    # Heuristic:
+    #   - only consider genes with >= MIN_GENE_SEG_TARGETS bins (no CNS segment),
+    #   - build runs of >= MIN_RUN_BINS bins where |eff| >= LOG2_THRESH
+    #     with consistent sign (gain/loss),
+    #   - eff = log2 - pon_log2 if PON available, else log2.
+    MIN_GENE_SEG_TARGETS = 8
+    MIN_RUN_BINS = 3
+    LOG2_THRESH = 0.25
+
+    if not bins.empty:
+        # ensure sort order for reproducibility
+        bins = bins.sort_values(["chr", "gene.symbol", "start"]).reset_index(drop=True)
+
+        next_gene_seg_id = 0
+
+        def _segment_no_cns_within_gene(df_gene: pd.DataFrame) -> None:
+            nonlocal next_gene_seg_id, bins
+
+            # subset of bins in this gene with no CNS segment
+            mask_no_seg = (df_gene["segment_id"] == "no_segment") | df_gene[
+                "segment_id"
+            ].isna()
+            df_gene_no_seg = df_gene[mask_no_seg]
+            if df_gene_no_seg.shape[0] < MIN_GENE_SEG_TARGETS:
+                return
+
+            idxs = df_gene_no_seg.index.to_numpy()
+            if idxs.size == 0:
+                return
+
+            # effect = log2 - pon_log2 (if available), else log2
+            if {"pon_log2"}.issubset(df_gene_no_seg.columns):
+                eff = (
+                    df_gene_no_seg["log2"].values
+                    - df_gene_no_seg["pon_log2"].fillna(0.0).values
+                )
+            else:
+                eff = df_gene_no_seg["log2"].values
+
+            current_run: list[int] = []
+            current_sign: int | None = None
+
+            def _finalize_run(run_idxs: list[int]) -> None:
+                nonlocal next_gene_seg_id, bins
+                if len(run_idxs) < MIN_RUN_BINS:
+                    return
+                sub = bins.loc[run_idxs]
+                # recompute effect for this run (matching above)
+                if "pon_log2" in sub.columns:
+                    eff_run = sub["log2"].values - sub["pon_log2"].fillna(0.0).values
+                else:
+                    eff_run = sub["log2"].values
+                mean_eff = float(np.nanmean(eff_run)) if eff_run.size > 0 else 0.0
+                if not np.isfinite(mean_eff) or abs(mean_eff) < LOG2_THRESH:
+                    return
+
+                seg_label = f"gene_seg_{next_gene_seg_id}"
+                next_gene_seg_id += 1
+
+                seg_start = sub["start"].min()
+                seg_end = sub["end"].max()
+                seg_log2 = float(sub["log2"].mean())
+
+                # assign new segment_id + segment-level attributes
+                bins.loc[run_idxs, "segment_id"] = seg_label
+                bins.loc[run_idxs, "seg_start"] = seg_start
+                bins.loc[run_idxs, "seg_end"] = seg_end
+                bins.loc[run_idxs, "seg_log2"] = seg_log2
+                # seg_cn / seg_cn1 / seg_cn2 stay NaN for these inferred segments
+
+            for idx, val in zip(idxs, eff):
+                if not np.isfinite(val):
+                    # break run on NaN
+                    if current_run:
+                        _finalize_run(current_run)
+                        current_run = []
+                        current_sign = None
+                    continue
+
+                if abs(val) < LOG2_THRESH:
+                    # neutral-ish → break the run
+                    if current_run:
+                        _finalize_run(current_run)
+                        current_run = []
+                        current_sign = None
+                    continue
+
+                sgn = 1 if val > 0 else -1
+                if current_sign is None or sgn == current_sign:
+                    current_run.append(idx)
+                    current_sign = sgn
+                else:
+                    # sign flip: close previous run, start new
+                    if current_run:
+                        _finalize_run(current_run)
+                    current_run = [idx]
+                    current_sign = sgn
+
+            # finalize last run
+            if current_run:
+                _finalize_run(current_run)
+
+        # apply per (chr, gene.symbol)
+        for (_, _), df_gene in bins.groupby(["chr", "gene.symbol"], sort=False):
+            _segment_no_cns_within_gene(df_gene)
+
+        # re-sort after modifications
+        bins = bins.sort_values(["chr", "gene.symbol", "start"]).reset_index(drop=True)
 
     # -------------------- 4. Collapse to gene x segment -------------------- #
     agg_dict: dict[str, list[str]] = {
