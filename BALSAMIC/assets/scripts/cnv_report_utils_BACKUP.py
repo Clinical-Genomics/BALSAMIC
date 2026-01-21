@@ -20,9 +20,10 @@ def pdf_first_page_to_png(pdf_path: str, png_path: str, dpi: int = 300) -> None:
     page.get_pixmap(dpi=dpi).save(png_path)
     doc.close()
 
-def load_cancer_gene_set(path: str | Path,
-                         min_occurrence: int = 1,
-                         only_annotated: bool = True) -> set[str]:
+
+def load_cancer_gene_set(
+    path: str | Path, min_occurrence: int = 1, only_annotated: bool = True
+) -> set[str]:
     df = pd.read_csv(path, sep="\t", dtype=str)
     # Clean up column names
     df.columns = df.columns.str.strip()
@@ -49,6 +50,7 @@ def load_cancer_gene_set(path: str | Path,
 
     selected = df.loc[mask, symbol_col].astype(str).str.strip()
     return set(selected)
+
 
 def normalize_chr_column(
     df: pd.DataFrame, prefer_col: str | None = None
@@ -366,17 +368,14 @@ def build_genes_from_cnr(cnr_path: str | Path) -> pd.DataFrame:
     cnr = cnr.explode("gene.symbol")
 
     # basic per-gene aggregation
-    agg = (
-        cnr.groupby([chr_col, "gene.symbol"], as_index=False)
-        .agg(
-            start=("start", "min"),
-            end=("end", "max"),
-            number_targets=("log2", "count"),
-            gene_mean=("log2", "mean"),
-            gene_min=("log2", "min"),
-            gene_max=("log2", "max"),
-            weight_mean=("weight", "mean"),
-        )
+    agg = cnr.groupby([chr_col, "gene.symbol"], as_index=False).agg(
+        start=("start", "min"),
+        end=("end", "max"),
+        number_targets=("log2", "count"),
+        gene_mean=("log2", "mean"),
+        gene_min=("log2", "min"),
+        gene_max=("log2", "max"),
+        weight_mean=("weight", "mean"),
     )
 
     # match existing naming in your code
@@ -401,6 +400,7 @@ def build_genes_from_cnr(cnr_path: str | Path) -> pd.DataFrame:
 # =============================================================================
 # Per-chromosome plots (PON spread + log2 + segments + BAF + CNV genes)
 # =============================================================================
+
 
 def plot_chromosomes(
     pon_path: Path | None,
@@ -506,10 +506,9 @@ def plot_chromosomes(
                 )
 
                 # Union of (normal CNV genes) ∪ (relaxed cancer CNV genes)
-                genes_cnv = (
-                    pd.concat([genes_cnv, genes_cnv_cancer_relaxed], ignore_index=True)
-                    .drop_duplicates(subset=[genes_chr_col, "gene.symbol"])
-                )
+                genes_cnv = pd.concat(
+                    [genes_cnv, genes_cnv_cancer_relaxed], ignore_index=True
+                ).drop_duplicates(subset=[genes_chr_col, "gene.symbol"])
 
             # For exome runs, we still want to *only* keep cancer genes
             if is_exome:
@@ -548,8 +547,7 @@ def plot_chromosomes(
         # Plotting filters
         if use_pon:
             sub = sub[
-                (sub["weight"] > weight_thresh)
-                & (sub["spread"] <= spread_thresh)
+                (sub["weight"] > weight_thresh) & (sub["spread"] <= spread_thresh)
             ]
         else:
             sub = sub[sub["weight"] > weight_thresh]
@@ -813,9 +811,7 @@ def plot_chromosomes(
         for frac in [1 / 3, 2 / 3]:
             ax2.axhline(frac, color="lightgray", linewidth=0.6, linestyle=":")
         ax2.set_ylim(0, 1)
-        ax2.set_xlabel(
-            "Pseudo-position (CNV genes expanded, other bins compressed)"
-        )
+        ax2.set_xlabel("Pseudo-position (CNV genes expanded, other bins compressed)")
         ax2.set_ylabel("BAF")
 
         plt.tight_layout()
@@ -824,10 +820,10 @@ def plot_chromosomes(
         plt.close(fig)
 
 
-
 # =============================================================================
 # Segment → gene table annotation (size, MAF, seg.mean, num.snps, C/M/loh/type)
 # =============================================================================
+
 
 def annotate_genes_with_segments(
     df_genes: pd.DataFrame, df_regions: pd.DataFrame
@@ -933,7 +929,6 @@ def annotate_genes_with_segments(
                 df_genes.at[idx, col] = extra_arrays[col][seg_idx]
 
     return df_genes
-
 
 
 # =============================================================================
@@ -1286,9 +1281,7 @@ def build_gene_table(
             # normalize chr
             if "chr" in df_loh_genes.columns:
                 df_loh_genes["chr"] = (
-                    df_loh_genes["chr"]
-                    .astype(str)
-                    .str.replace("^chr", "", regex=True)
+                    df_loh_genes["chr"].astype(str).str.replace("^chr", "", regex=True)
                 )
             elif "chromosome" in df_loh_genes.columns:
                 df_loh_genes["chr"] = (
@@ -1298,7 +1291,9 @@ def build_gene_table(
                 )
 
             # make sure gene.symbol exists
-            gene_col = "gene.symbol" if "gene.symbol" in df_loh_genes.columns else "gene"
+            gene_col = (
+                "gene.symbol" if "gene.symbol" in df_loh_genes.columns else "gene"
+            )
             df_loh_genes = df_loh_genes.rename(columns={gene_col: "gene.symbol"})
 
             # LOH per (chr, gene.symbol): any(TRUE)
@@ -1307,10 +1302,9 @@ def build_gene_table(
                 tmp["loh_str"] = tmp["loh"].astype(str).str.upper()
                 tmp["loh_flag"] = tmp["loh_str"] == "TRUE"
 
-                gene_loh = (
-                    tmp.groupby(["chr", "gene.symbol"], as_index=False)["loh_flag"]
-                    .any()
-                )
+                gene_loh = tmp.groupby(["chr", "gene.symbol"], as_index=False)[
+                    "loh_flag"
+                ].any()
                 gene_loh["loh"] = gene_loh["loh_flag"].replace(
                     {True: True, False: False}
                 )
@@ -1330,12 +1324,9 @@ def build_gene_table(
                     extra_cols.append(col)
 
             if extra_cols:
-                gene_extra = (
-                    df_loh_genes.groupby(["chr", "gene.symbol"], as_index=False)[
-                        extra_cols
-                    ]
-                    .first()
-                )
+                gene_extra = df_loh_genes.groupby(
+                    ["chr", "gene.symbol"], as_index=False
+                )[extra_cols].first()
                 df_genes = df_genes.merge(
                     gene_extra,
                     on=["chr", "gene.symbol"],
@@ -1388,6 +1379,7 @@ def build_gene_table(
 
     # 6b) sort genes by chromosome and start
     if "chr" in df_genes.columns and "start" in df_genes.columns:
+
         def _chr_order(v: str) -> int:
             s = str(v).replace("chr", "")
             s = s.upper()
@@ -1403,9 +1395,7 @@ def build_gene_table(
         # use seg_start if you prefer segment start; fall back to start
         sort_pos_col = "seg_start" if "seg_start" in df_genes.columns else "start"
         # make sure we sort numerically even if seg_start is currently string/NA
-        df_genes["_sort_pos"] = pd.to_numeric(
-            df_genes[sort_pos_col], errors="coerce"
-        )
+        df_genes["_sort_pos"] = pd.to_numeric(df_genes[sort_pos_col], errors="coerce")
         df_genes = df_genes.sort_values(["chr_sort", "_sort_pos"], kind="mergesort")
         df_genes = df_genes.drop(columns=["chr_sort", "_sort_pos"])
 

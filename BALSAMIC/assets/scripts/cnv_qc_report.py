@@ -4,8 +4,14 @@ import base64
 import json
 import pandas as pd
 from pathlib import Path
-from cnv_report_utils import plot_chromosomes, build_gene_segment_table, pdf_first_page_to_png, load_cancer_gene_set
+from cnv_report_utils import (
+    plot_chromosomes,
+    build_gene_segment_table,
+    pdf_first_page_to_png,
+    load_cancer_gene_set,
+)
 from BALSAMIC.constants.analysis import Gender
+
 
 def csv_to_html_table(
     df: pd.DataFrame,
@@ -50,7 +56,7 @@ def csv_to_html_table(
         # LOH flag
         if "loh_flag" in df_chr.columns:
             loh_str = df_chr["loh_flag"].astype(str).str.upper()
-            cnv_mask |= (loh_str == "TRUE")
+            cnv_mask |= loh_str == "TRUE"
 
         # CNVkit call
         if "cnvkit_cnv_call" in df_chr.columns:
@@ -65,9 +71,7 @@ def csv_to_html_table(
         cnv_chr_set = set(df_chr.loc[cnv_mask, chr_col].astype(str).tolist())
 
         if "gene.symbol" in df_chr.columns:
-            cnv_gene_set = set(
-                df_chr.loc[cnv_mask, "gene.symbol"].astype(str).tolist()
-            )
+            cnv_gene_set = set(df_chr.loc[cnv_mask, "gene.symbol"].astype(str).tolist())
 
     # -------------------------------------------------------------
     # Per-chromosome & gene-level PNGs (sorted, CNV highlighted)
@@ -182,10 +186,16 @@ def csv_to_html_table(
         """
         if chr_plot_blocks_with_cnv:
             section_html += "<h3>Chromosomes with CNV / LOH</h3>\n"
-            section_html += '<div class="plot-grid">' + "\n".join(chr_plot_blocks_with_cnv) + "</div>"
+            section_html += (
+                '<div class="plot-grid">'
+                + "\n".join(chr_plot_blocks_with_cnv)
+                + "</div>"
+            )
         if chr_plot_blocks_no_cnv:
             section_html += "<h3>Chromosomes without CNV / LOH</h3>\n"
-            section_html += '<div class="plot-grid">' + "\n".join(chr_plot_blocks_no_cnv) + "</div>"
+            section_html += (
+                '<div class="plot-grid">' + "\n".join(chr_plot_blocks_no_cnv) + "</div>"
+            )
         qc_plots_html += section_html
 
     # Gene-level plots
@@ -200,10 +210,18 @@ def csv_to_html_table(
         """
         if gene_plot_blocks_with_cnv:
             section_html += "<h3>Regions with CNV / LOH</h3>\n"
-            section_html += '<div class="plot-grid">' + "\n".join(gene_plot_blocks_with_cnv) + "</div>"
+            section_html += (
+                '<div class="plot-grid">'
+                + "\n".join(gene_plot_blocks_with_cnv)
+                + "</div>"
+            )
         if gene_plot_blocks_no_cnv:
             section_html += "<h3>Regions without CNV / LOH</h3>\n"
-            section_html += '<div class="plot-grid">' + "\n".join(gene_plot_blocks_no_cnv) + "</div>"
+            section_html += (
+                '<div class="plot-grid">'
+                + "\n".join(gene_plot_blocks_no_cnv)
+                + "</div>"
+            )
         qc_plots_html += section_html
 
     # ---------------- Summary table ----------------
@@ -333,19 +351,21 @@ def csv_to_html_table(
           top: 0;
           width: 100%;
           height: 100%;
-          background: rgba(0, 0, 0, 0.75);
+          background: rgba(0, 0, 0, 0.85); /* a bit darker */
         }}
         .modal-content-wrapper {{
           position: absolute;
           top: 50%;
           left: 50%;
           transform: translate(-50%, -50%);
-          max-width: 95%;
-          max-height: 95%;
+          max-width: 98vw;   /* almost full viewport width */
+          max-height: 98vh;  /* almost full viewport height */
         }}
         .modal-image {{
-          max-width: 100%;
-          max-height: 100%;
+          max-width: 98vw;
+          max-height: 98vh;
+          width: auto;
+          height: auto;
           display: block;
           border-radius: 4px;
           box-shadow: 0 0 12px rgba(0,0,0,0.7);
@@ -618,7 +638,6 @@ def csv_to_html_table(
     </html>
     """
     out_path.write_text(html, encoding="utf-8")
-
 
 
 @click.command()
