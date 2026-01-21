@@ -1950,6 +1950,27 @@ def build_gene_segment_table(
     cyto = load_cytobands(cytoband_path)
     grouped = annotate_genes_with_cytoband(grouped, cyto)
 
+    # How many chunks does each (chr, gene.symbol) have?
+    if "chunk_id" in grouped.columns:
+        gene_chunk_counts = (
+            grouped.groupby(["chr", "gene.symbol"], as_index=False)["chunk_id"]
+            .nunique()
+            .rename(columns={"chunk_id": "gene_chunk_count"})
+        )
+
+        grouped = grouped.merge(
+            gene_chunk_counts,
+            how="left",
+            on=["chr", "gene.symbol"],
+        )
+
+        # A gene is considered "split" if it appears in >1 chunk
+        grouped["is_gene_split"] = grouped["gene_chunk_count"].fillna(1) > 1
+    else:
+        # Fallback (shouldn't usually happen): every gene is treated as single-chunk
+        grouped["gene_chunk_count"] = 1
+        grouped["is_gene_split"] = False
+
     # -------------------- 9. Column order & sorting -------------------- #
     cols_order = [
         "chr",
@@ -1959,6 +1980,8 @@ def build_gene_segment_table(
         "seg_end",
         "cytoband",
         "gene.symbol",
+        "gene_chunk_count",
+        "is_gene_split",
         "n.targets",
         "seg_log2",
         "loh_seg_mean",

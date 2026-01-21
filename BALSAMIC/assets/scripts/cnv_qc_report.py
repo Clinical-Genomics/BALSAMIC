@@ -12,7 +12,6 @@ from cnv_report_utils import (
 )
 from BALSAMIC.constants.analysis import Gender
 
-
 def csv_to_html_table(
     df: pd.DataFrame,
     out_html: str,
@@ -171,7 +170,7 @@ def csv_to_html_table(
                     else:
                         chr_plot_blocks_no_cnv.append(block)
 
-    # Build visible chr & gene plots HTML (no hiding, just grouped)
+    # Build visible chr & gene plots HTML
     qc_plots_html = ""
 
     # Chromosome-level plots
@@ -219,8 +218,7 @@ def csv_to_html_table(
             section_html += "<h3>Regions without CNV / LOH</h3>\n"
             section_html += (
                 '<div class="plot-grid">'
-                + "\n".join(gene_plot_blocks_no_cnv)
-                + "</div>"
+                + "\n".join(gene_plot_blocks_no_cnv) + "</div>"
             )
         qc_plots_html += section_html
 
@@ -351,15 +349,15 @@ def csv_to_html_table(
           top: 0;
           width: 100%;
           height: 100%;
-          background: rgba(0, 0, 0, 0.85); /* a bit darker */
+          background: rgba(0, 0, 0, 0.85);
         }}
         .modal-content-wrapper {{
           position: absolute;
           top: 50%;
           left: 50%;
           transform: translate(-50%, -50%);
-          max-width: 98vw;   /* almost full viewport width */
-          max-height: 98vh;  /* almost full viewport height */
+          max-width: 98vw;
+          max-height: 98vh;
         }}
         .modal-image {{
           max-width: 98vw;
@@ -422,11 +420,15 @@ def csv_to_html_table(
           </label>
           <label style="margin-left:12px;">
             <input type="checkbox" id="show-significant-pon">
-            Also include genes with pon_call = "significant"
+            Also include genes with pon_call / pon_chunk_call = "significant"
           </label>
           <label style="margin-left:12px;">
             <input type="checkbox" id="only-cancer-genes">
             Show only cancer genes (is_cancer_gene TRUE)
+          </label>
+          <label style="margin-left:12px;">
+            <input type="checkbox" id="only-split-genes">
+            Show only split genes (is_gene_split TRUE)
           </label>
         </div>
         <div class="control-group">
@@ -459,6 +461,7 @@ def csv_to_html_table(
           const checkboxNonCnv    = document.getElementById("hide-non-cnv");
           const checkboxPonSig    = document.getElementById("show-significant-pon");
           const checkboxCancer    = document.getElementById("only-cancer-genes");
+          const checkboxSplit     = document.getElementById("only-split-genes");
           const geneInput         = document.getElementById("gene-filter");
           const minTargetsInput   = document.getElementById("min-targets");
 
@@ -471,8 +474,9 @@ def csv_to_html_table(
           const cnvkitColIdx      = colIndex["cnvkit_cnv_call"] ?? -1;
           const purecnColIdx      = colIndex["purecn_cnv_call"] ?? -1;
           const nTargetsColIdx    = colIndex["n.targets"] ?? -1;
-          const ponCallColIdx     = colIndex["pon_call"] ?? -1;
+          const ponCallColIdx     = (colIndex["pon_chunk_call"] ?? colIndex["pon_call"] ?? -1);
           const cancerColIdx      = colIndex["is_cancer_gene"] ?? -1;
+          const splitColIdx       = colIndex["is_gene_split"] ?? -1;
 
           function normalizeCellText(td) {{
             return (td && td.textContent ? td.textContent : "")
@@ -517,10 +521,18 @@ def csv_to_html_table(
             return (val === "true" || val === "1" || val === "yes");
           }}
 
+          function isSplitGeneRow(row) {{
+            if (splitColIdx === -1) return false;
+            const cell = row.cells[splitColIdx];
+            const val = normalizeCellText(cell);
+            return (val === "true" || val === "1" || val === "yes");
+          }}
+
           function applyFilter() {{
             const hideNonCnv    = checkboxNonCnv && checkboxNonCnv.checked;
             const showPonSig    = checkboxPonSig && checkboxPonSig.checked;
             const onlyCancer    = checkboxCancer && checkboxCancer.checked;
+            const onlySplit     = checkboxSplit && checkboxSplit.checked;
 
             const geneList = (geneInput && geneInput.value ? geneInput.value : "")
               .split(",")
@@ -538,6 +550,7 @@ def csv_to_html_table(
             for (const row of rows) {{
               let hideRow = false;
 
+              // CNV / LOH filter with PON "significant" override
               if (!hideRow && hideNonCnv) {{
                 const cnv = isCnvRow(row);
 
@@ -556,6 +569,12 @@ def csv_to_html_table(
 
               if (!hideRow && onlyCancer && cancerColIdx !== -1) {{
                 if (!isCancerGeneRow(row)) {{
+                  hideRow = true;
+                }}
+              }}
+
+              if (!hideRow && onlySplit && splitColIdx !== -1) {{
+                if (!isSplitGeneRow(row)) {{
                   hideRow = true;
                 }}
               }}
@@ -588,6 +607,7 @@ def csv_to_html_table(
           if (checkboxNonCnv)   checkboxNonCnv.addEventListener("change", applyFilter);
           if (checkboxPonSig)   checkboxPonSig.addEventListener("change", applyFilter);
           if (checkboxCancer)   checkboxCancer.addEventListener("change", applyFilter);
+          if (checkboxSplit)    checkboxSplit.addEventListener("change", applyFilter);
           if (geneInput)        geneInput.addEventListener("input", applyFilter);
           if (minTargetsInput)  minTargetsInput.addEventListener("input", applyFilter);
 
@@ -638,6 +658,7 @@ def csv_to_html_table(
     </html>
     """
     out_path.write_text(html, encoding="utf-8")
+
 
 
 @click.command()
