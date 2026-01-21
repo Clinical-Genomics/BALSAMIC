@@ -843,7 +843,7 @@ def main(
         include_y=True,
         neutral_target_factor=neutral_target_factor,
         highlight_only_cancer=highlight_only_cancer,
-        focus_genes=["RB1", "DLEU1"],
+        focus_genes=["RB1", "DLEU1", "TP53", "KMT2D"],
         focus_padding_bp=100_000,
     )
 
