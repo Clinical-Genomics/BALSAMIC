@@ -6,7 +6,6 @@ import pandas as pd
 from pathlib import Path
 from cnv_report_utils import plot_chromosomes, build_gene_segment_table, pdf_first_page_to_png, load_cancer_gene_set
 from BALSAMIC.constants.analysis import Gender
-
 def csv_to_html_table(
     df: pd.DataFrame,
     out_html: str,
@@ -28,7 +27,7 @@ def csv_to_html_table(
     diagram_png_data_uri = f"data:image/png;base64,{png_base64}"
 
     # ------------------------------------------------------------------
-    # Determine which chromosomes have CNV / LOH genes
+    # Determine which chromosomes & genes have CNV / LOH
     # ------------------------------------------------------------------
     df_chr = df.copy()
     if "chr" in df_chr.columns:
@@ -39,6 +38,7 @@ def csv_to_html_table(
         chr_col = None
 
     cnv_chr_set: set[str] = set()
+    cnv_gene_set: set[str] = set()
 
     if chr_col is not None:
         if "gene.symbol" in df_chr.columns:
@@ -63,11 +63,19 @@ def csv_to_html_table(
 
         cnv_chr_set = set(df_chr.loc[cnv_mask, chr_col].astype(str).tolist())
 
+        if "gene.symbol" in df_chr.columns:
+            cnv_gene_set = set(
+                df_chr.loc[cnv_mask, "gene.symbol"].astype(str).tolist()
+            )
+
     # -------------------------------------------------------------
-    # Per-chromosome QC PNGs (sorted, split by CNV / non-CNV)
+    # Per-chromosome & gene-level PNGs (sorted, CNV highlighted)
     # -------------------------------------------------------------
-    with_cnv_blocks: list[str] = []
-    no_cnv_blocks: list[str] = []
+    chr_plot_blocks_with_cnv: list[str] = []
+    chr_plot_blocks_no_cnv: list[str] = []
+
+    gene_plot_blocks_with_cnv: list[str] = []
+    gene_plot_blocks_no_cnv: list[str] = []
 
     if chr_plots_dir is not None:
         qc_dir = Path(chr_plots_dir)
@@ -75,7 +83,7 @@ def csv_to_html_table(
             png_files = list(qc_dir.glob("cnv_chr*segments.png"))
 
             def chr_sort_key(path: Path):
-                stem = path.stem
+                stem = path.stem  # e.g. cnv_chr13_genes_RB1_DLEU1_segments
                 label = stem
                 if "chr" in stem:
                     label = stem.split("chr", 1)[1]
@@ -94,15 +102,54 @@ def csv_to_html_table(
                 img_data_uri = f"data:image/png;base64,{img_b64}"
 
                 stem = png_file.stem
+                # Extract chromosome label
                 chr_label = stem
                 if "chr" in stem:
                     chr_label = stem.split("chr", 1)[1]
                 if "_" in chr_label:
                     chr_label = chr_label.split("_", 1)[0]
 
+                # Detect whether this is a gene-level zoom plot
+                # Expected pattern: cnv_chr{chr}_genes_{GENE1[_GENE2…]}_segments
+                is_gene_plot = "_genes_" in stem
+
+                gene_names: list[str] = []
+                gene_title = ""
+                if is_gene_plot:
+                    # e.g. "cnv_chr13_genes_RB1_DLEU1_segments"
+                    after_genes = stem.split("_genes_", 1)[1]  # "RB1_DLEU1_segments"
+                    gene_part = after_genes
+                    if gene_part.endswith("_segments"):
+                        gene_part = gene_part[: -len("_segments")]
+                    # Genes were joined by "_"
+                    gene_names = [g for g in gene_part.split("_") if g]
+                    gene_title = ", ".join(gene_names)
+
+                # Does this plot contain any CNV / LOH?
+                has_cnv = False
+                if not is_gene_plot:
+                    # chromosome-level plot
+                    if chr_col is not None and chr_label in cnv_chr_set:
+                        has_cnv = True
+                else:
+                    # gene-level plot: any gene in cnv_gene_set?
+                    if any(g in cnv_gene_set for g in gene_names):
+                        has_cnv = True
+
+                # Build plot card with highlighting
+                if not is_gene_plot:
+                    title = f"Chr {chr_label}"
+                else:
+                    title = f"Chr {chr_label} – {gene_title}"
+
+                badge_html = '<span class="plot-badge">CNV</span>' if has_cnv else ""
+
                 block = f"""
-                <div style="border:1px solid #ccc; padding:10px; margin-top:20px; width:100%;">
-                  <h3 style="margin-top:0;">Chr {chr_label}</h3>
+                <div class="plot-card {'plot-card-cnv' if has_cnv else 'plot-card-normal'}">
+                  <div class="plot-header">
+                    <span class="plot-title">{title}</span>
+                    {badge_html}
+                  </div>
                   <img
                     src="{img_data_uri}"
                     alt="QC plot {stem}"
@@ -111,33 +158,73 @@ def csv_to_html_table(
                 </div>
                 """
 
-                if chr_col is not None and chr_label in cnv_chr_set:
-                    with_cnv_blocks.append(block)
+                if is_gene_plot:
+                    if has_cnv:
+                        gene_plot_blocks_with_cnv.append(block)
+                    else:
+                        gene_plot_blocks_no_cnv.append(block)
                 else:
-                    no_cnv_blocks.append(block)
+                    if has_cnv:
+                        chr_plot_blocks_with_cnv.append(block)
+                    else:
+                        chr_plot_blocks_no_cnv.append(block)
 
+    # Build chromosome & gene plots HTML (all collapsible)
     qc_plots_html = ""
-    if with_cnv_blocks or no_cnv_blocks:
-        qc_plots_html += """
-        <h2>Per-chromosome CNV QC plots</h2>
-        <p class="muted">
-          These plots show log2 coverage, PON spread (if available), BAF and segments/genes
-          per chromosome. CNV / LOH genes are highlighted in colour.
-        </p>
+
+    # Chromosome-level plots
+    if chr_plot_blocks_with_cnv or chr_plot_blocks_no_cnv:
+        section_html = """
+        <details>
+          <summary class="collapsible-header">
+            Per-chromosome CNV plots
+          </summary>
+          <p class="muted">
+            These plots show log2 coverage, PON spread (if available), BAF and segments/genes
+            per chromosome. Plots containing CNV / LOH genes are highlighted.
+          </p>
         """
-        if with_cnv_blocks:
-            qc_plots_html += "<h3>Chromosomes with CNV / LOH genes</h3>\n" + "\n".join(
-                with_cnv_blocks
-            )
-        if no_cnv_blocks:
-            qc_plots_html += """
-            <details style="margin-top:15px;">
-              <summary style="cursor:pointer; font-weight:500;">
-                Show chromosomes without CNV / LOH genes
+        if chr_plot_blocks_with_cnv:
+            section_html += "<h3>Chromosomes with CNV / LOH</h3>\n"
+            section_html += '<div class="plot-grid">' + "\n".join(chr_plot_blocks_with_cnv) + "</div>"
+        if chr_plot_blocks_no_cnv:
+            section_html += """
+            <details style="margin-top:10px;">
+              <summary class="collapsible-subheader">
+                Show chromosomes without CNV / LOH
               </summary>
             """
-            qc_plots_html += "\n".join(no_cnv_blocks)
-            qc_plots_html += "</details>"
+            section_html += '<div class="plot-grid">' + "\n".join(chr_plot_blocks_no_cnv) + "</div>"
+            section_html += "</details>"
+        section_html += "</details>"
+        qc_plots_html += section_html
+
+    # Gene-level plots
+    if gene_plot_blocks_with_cnv or gene_plot_blocks_no_cnv:
+        section_html = """
+        <details>
+          <summary class="collapsible-header">
+            Gene-level CNV plots
+          </summary>
+          <p class="muted">
+            Zoomed plots centred on specific genes or gene intervals.
+            Plots containing CNV / LOH in any of the genes are highlighted.
+          </p>
+        """
+        if gene_plot_blocks_with_cnv:
+            section_html += "<h3>Regions with CNV / LOH</h3>\n"
+            section_html += '<div class="plot-grid">' + "\n".join(gene_plot_blocks_with_cnv) + "</div>"
+        if gene_plot_blocks_no_cnv:
+            section_html += """
+            <details style="margin-top:10px;">
+              <summary class="collapsible-subheader">
+                Show regions without CNV / LOH
+              </summary>
+            """
+            section_html += '<div class="plot-grid">' + "\n".join(gene_plot_blocks_no_cnv) + "</div>"
+            section_html += "</details>"
+        section_html += "</details>"
+        qc_plots_html += section_html
 
     # ---------------- Summary table ----------------
     summary_html = ""
@@ -219,6 +306,57 @@ def csv_to_html_table(
         label {{
           font-size: 13px;
         }}
+        /* Plot layout & highlighting */
+        .plot-grid {{
+          display: flex;
+          flex-wrap: wrap;
+          gap: 16px;
+          margin-top: 8px;
+        }}
+        .plot-card {{
+          border-radius: 4px;
+          border: 1px solid #ccc;
+          padding: 8px;
+          background: #fff;
+          flex: 1 1 320px;
+          max-width: 520px;
+        }}
+        .plot-card-cnv {{
+          border-color: #c0392b;
+          box-shadow: 0 0 4px rgba(192, 57, 43, 0.4);
+        }}
+        .plot-header {{
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: 6px;
+        }}
+        .plot-title {{
+          font-weight: 600;
+          font-size: 14px;
+        }}
+        .plot-badge {{
+          display: inline-block;
+          padding: 2px 6px;
+          border-radius: 12px;
+          background: #c0392b;
+          color: #fff;
+          font-size: 11px;
+          font-weight: 600;
+        }}
+        .collapsible-header {{
+          cursor: pointer;
+          font-weight: 600;
+          font-size: 15px;
+        }}
+        .collapsible-subheader {{
+          cursor: pointer;
+          font-weight: 500;
+          font-size: 14px;
+        }}
+        details {{
+          margin-top: 16px;
+        }}
       </style>
     </head>
     <body>
@@ -227,23 +365,30 @@ def csv_to_html_table(
       <h2>Sample summary</h2>
       {summary_html}
 
-      <h2>CNVkit scatter</h2>
-      <div style="border:1px solid #ccc; padding:10px; margin-top:20px; width:100%;">
-        <img
-          src="{scatter_png_data_uri}"
-          alt="CNVkit scatter PNG plot"
-          style="max-width:100%; height:auto; display:block;"
-        />
-      </div>
+      <details open>
+        <summary class="collapsible-header">
+          Genome-wide CNVkit plots
+        </summary>
+        <div style="margin-top:10px;">
+          <h3>CNVkit scatter</h3>
+          <div style="border:1px solid #ccc; padding:10px; margin-top:10px; width:100%;">
+            <img
+              src="{scatter_png_data_uri}"
+              alt="CNVkit scatter PNG plot"
+              style="max-width:100%; height:auto; display:block;"
+            />
+          </div>
 
-      <h2>CNVkit diagram</h2>
-      <div style="border:1px solid #ccc; padding:10px; margin-top:20px; width:100%;">
-        <img
-          src="{diagram_png_data_uri}"
-          alt="CNVkit diagram PNG plot"
-          style="max-width:100%; height:auto; display:block;"
-        />
-      </div>
+          <h3>CNVkit diagram</h3>
+          <div style="border:1px solid #ccc; padding:10px; margin-top:10px; width:100%;">
+            <img
+              src="{diagram_png_data_uri}"
+              alt="CNVkit diagram PNG plot"
+              style="max-width:100%; height:auto; display:block;"
+            />
+          </div>
+        </div>
+      </details>
 
       {qc_plots_html}
 
@@ -285,7 +430,7 @@ def csv_to_html_table(
           const table             = document.getElementById("report-table");
           const checkboxNonCnv    = document.getElementById("hide-non-cnv");
           const checkboxPonSig    = document.getElementById("show-significant-pon");
-          const checkboxCancer    = document.getElementById("only-cancer-genes");  // NEW
+          const checkboxCancer    = document.getElementById("only-cancer-genes");
           const geneInput         = document.getElementById("gene-filter");
           const minTargetsInput   = document.getElementById("min-targets");
 
@@ -299,7 +444,7 @@ def csv_to_html_table(
           const purecnColIdx      = colIndex["purecn_cnv_call"] ?? -1;
           const nTargetsColIdx    = colIndex["n.targets"] ?? -1;
           const ponCallColIdx     = colIndex["pon_call"] ?? -1;
-          const cancerColIdx      = colIndex["is_cancer_gene"] ?? -1;  // NEW
+          const cancerColIdx      = colIndex["is_cancer_gene"] ?? -1;
 
           function normalizeCellText(td) {{
             return (td && td.textContent ? td.textContent : "")
@@ -310,7 +455,6 @@ def csv_to_html_table(
           function isCnvRow(row) {{
             let isCnv = false;
 
-            // LOH flag
             if (lohColIdx !== -1) {{
               const lohCell = row.cells[lohColIdx];
               const lohVal = normalizeCellText(lohCell);
@@ -319,7 +463,6 @@ def csv_to_html_table(
               }}
             }}
 
-            // CNVkit call
             if (!isCnv && cnvkitColIdx !== -1) {{
               const cCell = row.cells[cnvkitColIdx];
               const cVal = normalizeCellText(cCell);
@@ -328,7 +471,6 @@ def csv_to_html_table(
               }}
             }}
 
-            // PureCN call
             if (!isCnv && purecnColIdx !== -1) {{
               const pCell = row.cells[purecnColIdx];
               const pVal = normalizeCellText(pCell);
@@ -340,12 +482,10 @@ def csv_to_html_table(
             return isCnv;
           }}
 
-          // NEW: cancer gene predicate
           function isCancerGeneRow(row) {{
             if (cancerColIdx === -1) return false;
             const cell = row.cells[cancerColIdx];
             const val = normalizeCellText(cell);
-            // Accept typical truthy representations
             return (val === "true" || val === "1" || val === "yes");
           }}
 
@@ -370,7 +510,6 @@ def csv_to_html_table(
             for (const row of rows) {{
               let hideRow = false;
 
-              // CNV / LOH filter with pon_call "significant" override
               if (!hideRow && hideNonCnv) {{
                 const cnv = isCnvRow(row);
 
@@ -393,7 +532,6 @@ def csv_to_html_table(
                 }}
               }}
 
-              // min n.targets filter
               if (!hideRow && nTargetsColIdx !== -1 && minTargetsInput) {{
                 const nCell = row.cells[nTargetsColIdx];
                 const nText = normalizeCellText(nCell);
@@ -405,7 +543,6 @@ def csv_to_html_table(
                 }}
               }}
 
-              // gene.symbol filter
               if (!hideRow && geneColIdx !== -1 && geneList.length > 0) {{
                 const geneCell = row.cells[geneColIdx];
                 const geneText = normalizeCellText(geneCell);
@@ -422,7 +559,7 @@ def csv_to_html_table(
           applyFilter();
           if (checkboxNonCnv)   checkboxNonCnv.addEventListener("change", applyFilter);
           if (checkboxPonSig)   checkboxPonSig.addEventListener("change", applyFilter);
-          if (checkboxCancer)   checkboxCancer.addEventListener("change", applyFilter);  // NEW
+          if (checkboxCancer)   checkboxCancer.addEventListener("change", applyFilter);
           if (geneInput)        geneInput.addEventListener("input", applyFilter);
           if (minTargetsInput)  minTargetsInput.addEventListener("input", applyFilter);
         }})();
