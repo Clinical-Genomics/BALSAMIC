@@ -637,7 +637,6 @@ def plot_chromosomes(
 
         # ---------- NEW: restrict to focus_genes window, if requested ----------
         if focus_genes_set is not None:
-            highlighted_genes = np.union1d(highlighted_genes, list(focus_genes_set))
             g_focus_chr = g_chr[g_chr["gene.symbol"].isin(focus_genes_set)].copy()
             if g_focus_chr.empty:
                 # No genes of interest on this chromosome → skip
