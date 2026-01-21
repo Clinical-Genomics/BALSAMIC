@@ -6,6 +6,7 @@ import pandas as pd
 from pathlib import Path
 from cnv_report_utils import plot_chromosomes, build_gene_segment_table, pdf_first_page_to_png, load_cancer_gene_set
 from BALSAMIC.constants.analysis import Gender
+
 def csv_to_html_table(
     df: pd.DataFrame,
     out_html: str,
@@ -109,8 +110,7 @@ def csv_to_html_table(
                 if "_" in chr_label:
                     chr_label = chr_label.split("_", 1)[0]
 
-                # Detect whether this is a gene-level zoom plot
-                # Expected pattern: cnv_chr{chr}_genes_{GENE1[_GENE2…]}_segments
+                # Detect gene-level zoom plot
                 is_gene_plot = "_genes_" in stem
 
                 gene_names: list[str] = []
@@ -121,22 +121,19 @@ def csv_to_html_table(
                     gene_part = after_genes
                     if gene_part.endswith("_segments"):
                         gene_part = gene_part[: -len("_segments")]
-                    # Genes were joined by "_"
                     gene_names = [g for g in gene_part.split("_") if g]
                     gene_title = ", ".join(gene_names)
 
-                # Does this plot contain any CNV / LOH?
+                # Flag CNV presence
                 has_cnv = False
                 if not is_gene_plot:
-                    # chromosome-level plot
                     if chr_col is not None and chr_label in cnv_chr_set:
                         has_cnv = True
                 else:
-                    # gene-level plot: any gene in cnv_gene_set?
                     if any(g in cnv_gene_set for g in gene_names):
                         has_cnv = True
 
-                # Build plot card with highlighting
+                # Plot title & badge
                 if not is_gene_plot:
                     title = f"Chr {chr_label}"
                 else:
@@ -153,7 +150,8 @@ def csv_to_html_table(
                   <img
                     src="{img_data_uri}"
                     alt="QC plot {stem}"
-                    style="max-width:100%; height:auto; display:block;"
+                    class="clickable-plot"
+                    style="max-width:100%; height:auto; display:block; cursor:pointer;"
                   />
                 </div>
                 """
@@ -169,61 +167,43 @@ def csv_to_html_table(
                     else:
                         chr_plot_blocks_no_cnv.append(block)
 
-    # Build chromosome & gene plots HTML (all collapsible)
+    # Build visible chr & gene plots HTML (no hiding, just grouped)
     qc_plots_html = ""
 
     # Chromosome-level plots
     if chr_plot_blocks_with_cnv or chr_plot_blocks_no_cnv:
         section_html = """
-        <details>
-          <summary class="collapsible-header">
-            Per-chromosome CNV plots
-          </summary>
-          <p class="muted">
-            These plots show log2 coverage, PON spread (if available), BAF and segments/genes
-            per chromosome. Plots containing CNV / LOH genes are highlighted.
-          </p>
+        <h2>Per-chromosome CNV plots</h2>
+        <p class="muted">
+          These plots show log2 coverage, PON spread (if available), BAF and segments/genes
+          per chromosome. Plots containing CNV / LOH genes are highlighted.
+          Click any plot to view it in a larger overlay.
+        </p>
         """
         if chr_plot_blocks_with_cnv:
             section_html += "<h3>Chromosomes with CNV / LOH</h3>\n"
             section_html += '<div class="plot-grid">' + "\n".join(chr_plot_blocks_with_cnv) + "</div>"
         if chr_plot_blocks_no_cnv:
-            section_html += """
-            <details style="margin-top:10px;">
-              <summary class="collapsible-subheader">
-                Show chromosomes without CNV / LOH
-              </summary>
-            """
+            section_html += "<h3>Chromosomes without CNV / LOH</h3>\n"
             section_html += '<div class="plot-grid">' + "\n".join(chr_plot_blocks_no_cnv) + "</div>"
-            section_html += "</details>"
-        section_html += "</details>"
         qc_plots_html += section_html
 
     # Gene-level plots
     if gene_plot_blocks_with_cnv or gene_plot_blocks_no_cnv:
         section_html = """
-        <details>
-          <summary class="collapsible-header">
-            Gene-level CNV plots
-          </summary>
-          <p class="muted">
-            Zoomed plots centred on specific genes or gene intervals.
-            Plots containing CNV / LOH in any of the genes are highlighted.
-          </p>
+        <h2>Gene-level CNV plots</h2>
+        <p class="muted">
+          Zoomed plots centred on specific genes or gene intervals.
+          Plots containing CNV / LOH in any of the genes are highlighted.
+          Click any plot to view it in a larger overlay.
+        </p>
         """
         if gene_plot_blocks_with_cnv:
             section_html += "<h3>Regions with CNV / LOH</h3>\n"
             section_html += '<div class="plot-grid">' + "\n".join(gene_plot_blocks_with_cnv) + "</div>"
         if gene_plot_blocks_no_cnv:
-            section_html += """
-            <details style="margin-top:10px;">
-              <summary class="collapsible-subheader">
-                Show regions without CNV / LOH
-              </summary>
-            """
+            section_html += "<h3>Regions without CNV / LOH</h3>\n"
             section_html += '<div class="plot-grid">' + "\n".join(gene_plot_blocks_no_cnv) + "</div>"
-            section_html += "</details>"
-        section_html += "</details>"
         qc_plots_html += section_html
 
     # ---------------- Summary table ----------------
@@ -318,8 +298,8 @@ def csv_to_html_table(
           border: 1px solid #ccc;
           padding: 8px;
           background: #fff;
-          flex: 1 1 320px;
-          max-width: 520px;
+          flex: 0 0 320px;
+          max-width: 380px;
         }}
         .plot-card-cnv {{
           border-color: #c0392b;
@@ -344,18 +324,40 @@ def csv_to_html_table(
           font-size: 11px;
           font-weight: 600;
         }}
-        .collapsible-header {{
-          cursor: pointer;
-          font-weight: 600;
-          font-size: 15px;
+        /* Modal for enlarged plots */
+        .modal-overlay {{
+          display: none;
+          position: fixed;
+          z-index: 9999;
+          left: 0;
+          top: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0, 0, 0, 0.75);
         }}
-        .collapsible-subheader {{
-          cursor: pointer;
-          font-weight: 500;
-          font-size: 14px;
+        .modal-content-wrapper {{
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          max-width: 95%;
+          max-height: 95%;
         }}
-        details {{
-          margin-top: 16px;
+        .modal-image {{
+          max-width: 100%;
+          max-height: 100%;
+          display: block;
+          border-radius: 4px;
+          box-shadow: 0 0 12px rgba(0,0,0,0.7);
+        }}
+        .modal-close {{
+          position: absolute;
+          top: -32px;
+          right: 0;
+          color: #fff;
+          font-size: 24px;
+          font-weight: 700;
+          cursor: pointer;
         }}
       </style>
     </head>
@@ -365,30 +367,28 @@ def csv_to_html_table(
       <h2>Sample summary</h2>
       {summary_html}
 
-      <details open>
-        <summary class="collapsible-header">
-          Genome-wide CNVkit plots
-        </summary>
-        <div style="margin-top:10px;">
-          <h3>CNVkit scatter</h3>
-          <div style="border:1px solid #ccc; padding:10px; margin-top:10px; width:100%;">
-            <img
-              src="{scatter_png_data_uri}"
-              alt="CNVkit scatter PNG plot"
-              style="max-width:100%; height:auto; display:block;"
-            />
-          </div>
-
-          <h3>CNVkit diagram</h3>
-          <div style="border:1px solid #ccc; padding:10px; margin-top:10px; width:100%;">
-            <img
-              src="{diagram_png_data_uri}"
-              alt="CNVkit diagram PNG plot"
-              style="max-width:100%; height:auto; display:block;"
-            />
-          </div>
+      <h2>Genome-wide CNVkit plots</h2>
+      <div style="margin-top:10px;">
+        <h3>CNVkit scatter</h3>
+        <div style="border:1px solid #ccc; padding:10px; margin-top:10px; width:100%;">
+          <img
+            src="{scatter_png_data_uri}"
+            alt="CNVkit scatter PNG plot"
+            class="clickable-plot"
+            style="max-width:100%; height:auto; display:block; cursor:pointer;"
+          />
         </div>
-      </details>
+
+        <h3>CNVkit diagram</h3>
+        <div style="border:1px solid #ccc; padding:10px; margin-top:10px; width:100%;">
+          <img
+            src="{diagram_png_data_uri}"
+            alt="CNVkit diagram PNG plot"
+            class="clickable-plot"
+            style="max-width:100%; height:auto; display:block; cursor:pointer;"
+          />
+        </div>
+      </div>
 
       {qc_plots_html}
 
@@ -424,6 +424,14 @@ def csv_to_html_table(
       </div>
 
       {table_html}
+
+      <!-- Modal overlay for enlarged plots -->
+      <div id="plot-modal" class="modal-overlay">
+        <div class="modal-content-wrapper">
+          <span class="modal-close" id="plot-modal-close">&times;</span>
+          <img id="plot-modal-image" class="modal-image" src="" alt="Enlarged plot">
+        </div>
+      </div>
 
       <script>
         (function() {{
@@ -562,12 +570,55 @@ def csv_to_html_table(
           if (checkboxCancer)   checkboxCancer.addEventListener("change", applyFilter);
           if (geneInput)        geneInput.addEventListener("input", applyFilter);
           if (minTargetsInput)  minTargetsInput.addEventListener("input", applyFilter);
+
+          // --- Modal logic for enlarged plots ---
+          const modal       = document.getElementById("plot-modal");
+          const modalImg    = document.getElementById("plot-modal-image");
+          const modalClose  = document.getElementById("plot-modal-close");
+          const clickableImgs = document.querySelectorAll(".clickable-plot");
+
+          function openModal(src) {{
+            if (!modal || !modalImg) return;
+            modalImg.src = src;
+            modal.style.display = "block";
+          }}
+
+          function closeModal() {{
+            if (!modal) return;
+            modal.style.display = "none";
+            if (modalImg) {{
+              modalImg.src = "";
+            }}
+          }}
+
+          clickableImgs.forEach(img => {{
+            img.addEventListener("click", () => openModal(img.src));
+          }});
+
+          if (modalClose) {{
+            modalClose.addEventListener("click", closeModal);
+          }}
+
+          if (modal) {{
+            modal.addEventListener("click", (event) => {{
+              if (event.target === modal) {{
+                closeModal();
+              }}
+            }});
+          }}
+
+          document.addEventListener("keydown", (event) => {{
+            if (event.key === "Escape") {{
+              closeModal();
+            }}
+          }});
         }})();
       </script>
     </body>
     </html>
     """
     out_path.write_text(html, encoding="utf-8")
+
 
 
 @click.command()
