@@ -1483,9 +1483,11 @@ def build_gene_segment_table(
 
     One row ≈ one (gene, chunk) made from:
 
-      - Existing CNV segments (seg_* from CNVkit/PureCN remain as-is).
-      - Within-gene sub-chunks in regions without a CNS segment, derived
-        from CNR bins and PON (if available).
+      - Existing CNV segments (seg_* from CNVkit/PureCN are propagated as
+        annotation for bins/chunks that lie in those segments).
+      - Within-gene sub-chunks defined directly from CNR (and PON if present),
+        based on runs of bins with coherent gain/loss effect, regardless of
+        whether CNVkit produced a segment there.
 
     Optional:
       - refgene_path: annotate exons_hit (whole_gene vs exon indices).
@@ -1689,44 +1691,43 @@ def build_gene_segment_table(
 
     bins = pd.concat(annotated_bins_list, ignore_index=True)
 
-    # -------------------- 3b. Within-gene chunking on no-segment bins -------------------- #
-    # We do NOT alter seg_*; we just split the gene into sub-chunks.
-    MIN_GENE_SEG_TARGETS = 8   # only genes with at least this many no-seg bins
-    MIN_RUN_BINS = 3           # min consecutive bins in a run
-    LOG2_THRESH = 0.25         # |effect| threshold for "active" bins
+    # -------------------- 3b. Within-gene chunking based on CNR/PON -------------------- #
+    # We define gene-internal chunks using CNR (and PON if present), independent
+    # of whether CNVkit created a segment. CNV segments remain as annotation.
+    MIN_GENE_TARGETS = 8   # only genes with at least this many bins
+    MIN_RUN_BINS = 3       # min consecutive bins in a run
+    LOG2_THRESH = 0.25     # |effect| threshold for "active" bins
 
     if bins.empty:
         return pd.DataFrame()
 
     bins = bins.sort_values(["chr", "gene.symbol", "start"]).reset_index(drop=True)
 
-    # Start with a default chunk_id = underlying segment_id (so CNV segments stay intact)
+    # Default chunk_id = underlying segment_id (so segments are preserved if no
+    # gene-chunk is detected).
     bins["chunk_id"] = bins["segment_id"].astype(str).fillna("no_segment")
 
-    # Helper to assign gene-internal chunks for no-segment bins
+    # Helper to assign gene-internal chunks based on effect runs
     next_gene_chunk_id = 0
 
     def _assign_gene_chunks(df_gene: pd.DataFrame) -> None:
         nonlocal next_gene_chunk_id, bins
 
-        # Work only on bins not in a CNS segment
-        mask_no_seg = (df_gene["segment_id"] == "no_segment") | df_gene["segment_id"].isna()
-        df_gene_no_seg = df_gene[mask_no_seg]
-        if df_gene_no_seg.shape[0] < MIN_GENE_SEG_TARGETS:
+        if df_gene.shape[0] < MIN_GENE_TARGETS:
             return
 
-        idxs = df_gene_no_seg.index.to_numpy()
+        idxs = df_gene.index.to_numpy()
         if idxs.size == 0:
             return
 
         # Effect per bin: log2 - pon_log2 (if available), else log2
-        if "pon_log2" in df_gene_no_seg.columns:
+        if "pon_log2" in df_gene.columns:
             eff = (
-                df_gene_no_seg["log2"].values
-                - df_gene_no_seg["pon_log2"].fillna(0.0).values
+                df_gene["log2"].values
+                - df_gene["pon_log2"].fillna(0.0).values
             )
         else:
-            eff = df_gene_no_seg["log2"].values
+            eff = df_gene["log2"].values
 
         current_run: list[int] = []
         current_sign: int | None = None
@@ -1749,7 +1750,7 @@ def build_gene_segment_table(
             chunk_label = f"genechunk_{next_gene_chunk_id}"
             next_gene_chunk_id += 1
 
-            # Assign chunk_id; seg_* remain as they were (often NaN here)
+            # Assign chunk_id; seg_* remain as they were
             bins.loc[run_idxs, "chunk_id"] = chunk_label
 
         for idx, val in zip(idxs, eff):
@@ -1772,6 +1773,7 @@ def build_gene_segment_table(
                 current_run.append(idx)
                 current_sign = sgn
             else:
+                # sign flip → close previous run and start new one
                 if current_run:
                     _finalize_run(current_run)
                 current_run = [idx]
@@ -1780,7 +1782,7 @@ def build_gene_segment_table(
         if current_run:
             _finalize_run(current_run)
 
-    # Apply per gene
+    # Apply per (chr, gene)
     for (_, _), df_gene in bins.groupby(["chr", "gene.symbol"], sort=False):
         _assign_gene_chunks(df_gene)
 
