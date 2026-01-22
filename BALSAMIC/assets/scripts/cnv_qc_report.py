@@ -14,23 +14,67 @@ from BALSAMIC.constants.analysis import Gender
 
 def csv_to_html_table(
     df: pd.DataFrame,
-    out_html: str,
-    scatter_png: str,
-    diagram_png: str,
+    out_html: str | Path,
+    scatter_png: str | Path | None = None,
+    diagram_png: str | Path | None = None,
     chr_plots_dir: str | Path | None = None,
     summary_df: pd.DataFrame | None = None,
 ) -> None:
     out_path = Path(out_html)
 
-    # --- PNG → Base64 (CNVkit scatter) ---
-    png_bytes = Path(scatter_png).read_bytes()
-    png_base64 = base64.b64encode(png_bytes).decode("ascii")
-    scatter_png_data_uri = f"data:image/png;base64,{png_base64}"
+    # --- Optional PNG → Base64 (CNVkit scatter) ---
+    scatter_png_data_uri: str | None = None
+    if scatter_png is not None:
+        scatter_path = Path(scatter_png)
+        if scatter_path.is_file():
+            png_bytes = scatter_path.read_bytes()
+            png_base64 = base64.b64encode(png_bytes).decode("ascii")
+            scatter_png_data_uri = f"data:image/png;base64,{png_base64}"
 
-    # --- PNG → Base64 (CNVkit diagram) ---
-    png_bytes = Path(diagram_png).read_bytes()
-    png_base64 = base64.b64encode(png_bytes).decode("ascii")
-    diagram_png_data_uri = f"data:image/png;base64,{png_base64}"
+    # --- Optional PNG → Base64 (CNVkit diagram) ---
+    diagram_png_data_uri: str | None = None
+    if diagram_png is not None:
+        diagram_path = Path(diagram_png)
+        if diagram_path.is_file():
+            png_bytes = diagram_path.read_bytes()
+            png_base64 = base64.b64encode(png_bytes).decode("ascii")
+            diagram_png_data_uri = f"data:image/png;base64,{png_base64}"
+
+    # Build genome-wide CNVkit plots HTML section (optional)
+    genome_plots_html = ""
+    if scatter_png_data_uri or diagram_png_data_uri:
+        parts: list[str] = []
+        parts.append("<h2>Genome-wide CNVkit plots</h2>")
+        parts.append('<div style="margin-top:10px;">')
+
+        if scatter_png_data_uri:
+            parts.append("""
+        <h3>CNVkit scatter</h3>
+        <div style="border:1px solid #ccc; padding:10px; margin-top:10px; width:100%;">
+          <img
+            src="{scatter_src}"
+            alt="CNVkit scatter PNG plot"
+            class="clickable-plot"
+            style="max-width:100%; height:auto; display:block; cursor:pointer;"
+          />
+        </div>
+            """.format(scatter_src=scatter_png_data_uri))
+
+        if diagram_png_data_uri:
+            parts.append("""
+        <h3>CNVkit diagram</h3>
+        <div style="border:1px solid #ccc; padding:10px; margin-top:10px; width:100%;">
+          <img
+            src="{diagram_src}"
+            alt="CNVkit diagram PNG plot"
+            class="clickable-plot"
+            style="max-width:100%; height:auto; display:block; cursor:pointer;"
+          />
+        </div>
+            """.format(diagram_src=diagram_png_data_uri))
+
+        parts.append("</div>")
+        genome_plots_html = "\n".join(parts)
 
     # ------------------------------------------------------------------
     # Determine which chromosomes & genes have CNV / LOH
@@ -385,28 +429,7 @@ def csv_to_html_table(
       <h2>Sample summary</h2>
       {summary_html}
 
-      <h2>Genome-wide CNVkit plots</h2>
-      <div style="margin-top:10px;">
-        <h3>CNVkit scatter</h3>
-        <div style="border:1px solid #ccc; padding:10px; margin-top:10px; width:100%;">
-          <img
-            src="{scatter_png_data_uri}"
-            alt="CNVkit scatter PNG plot"
-            class="clickable-plot"
-            style="max-width:100%; height:auto; display:block; cursor:pointer;"
-          />
-        </div>
-
-        <h3>CNVkit diagram</h3>
-        <div style="border:1px solid #ccc; padding:10px; margin-top:10px; width:100%;">
-          <img
-            src="{diagram_png_data_uri}"
-            alt="CNVkit diagram PNG plot"
-            class="clickable-plot"
-            style="max-width:100%; height:auto; display:block; cursor:pointer;"
-          />
-        </div>
-      </div>
+      {genome_plots_html}
 
       {qc_plots_html}
 
@@ -660,7 +683,6 @@ def csv_to_html_table(
     out_path.write_text(html, encoding="utf-8")
 
 
-
 @click.command()
 @click.option(
     "--loh-genes",
@@ -719,13 +741,13 @@ def csv_to_html_table(
 @click.option(
     "--cnvkit-scatter",
     type=click.Path(exists=True),
-    required=True,
+    required=False,
     help="cnvkit scatter PDF file.",
 )
 @click.option(
     "--cnvkit-diagram",
     type=click.Path(exists=True),
-    required=True,
+    required=False,
     help="cnvkit diagram PDF file.",
 )
 @click.option(
@@ -791,8 +813,10 @@ def main(
     scatter_png_path = outdir / f"cnvkit_scatter_{case_id}.png"
     diagram_png_path = outdir / f"cnvkit_diagram_{case_id}.png"
 
-    pdf_first_page_to_png(cnvkit_scatter, scatter_png_path)
-    pdf_first_page_to_png(cnvkit_diagram, diagram_png_path)
+    if cnvkit_scatter:
+        pdf_first_page_to_png(cnvkit_scatter, scatter_png_path)
+    if diagram_png_path:
+        pdf_first_page_to_png(cnvkit_diagram, diagram_png_path)
 
     # ----------------------------
     # Load cancer gene list (optional)
