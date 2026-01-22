@@ -133,6 +133,205 @@ def safe_read_csv(path: str | Path, **kwargs) -> pd.DataFrame:
         return pd.DataFrame()
 
 
+def compute_dlr_spread_from_cnr(
+    cnr_path: str | Path,
+    weight_thresh: float = 0.1,
+    targets_only: bool = True,
+    exclude_sex_chromosomes: bool = True,
+) -> float:
+    """
+    Compute a DLR-like spread metric from a CNVkit .cnr file.
+
+    - Sort bins by chr, start.
+    - Optionally keep only target bins, with weight > threshold, autosomes only.
+    - Compute differences between adjacent log2 values.
+    - Return np.nanstd of these differences.
+
+    Returns np.nan if fewer than 3 usable bins.
+    """
+    cnr = pd.read_csv(cnr_path, sep="\t")
+    if cnr.empty or "log2" not in cnr.columns:
+        return float("nan")
+
+    chr_col = "chromosome" if "chromosome" in cnr.columns else "chr"
+    cnr[chr_col] = cnr[chr_col].astype(str).str.replace("^chr", "", regex=True)
+
+    # mark Target / Antitarget
+    if "gene" in cnr.columns:
+        cnr["type"] = np.where(cnr["gene"] == "Antitarget", "Antitarget", "Target")
+    else:
+        cnr["type"] = "Target"
+
+    if targets_only:
+        cnr = cnr[cnr["type"] == "Target"]
+
+    if "weight" in cnr.columns:
+        cnr = cnr[cnr["weight"] > weight_thresh]
+
+    if exclude_sex_chromosomes:
+        cnr = cnr[~cnr[chr_col].isin(["X", "x", "Y", "y"])]
+
+    cnr = cnr.dropna(subset=["log2"])
+    if cnr.empty:
+        return float("nan")
+
+    def _chr_key(c: str):
+        try:
+            return (0, int(c))
+        except ValueError:
+            if c.upper() == "X":
+                return (1, 23)
+            if c.upper() == "Y":
+                return (1, 24)
+            return (2, c)
+
+    cnr["chr_sort"] = cnr[chr_col].map(_chr_key)
+    cnr = cnr.sort_values(["chr_sort", "start"]).reset_index(drop=True)
+    log2_vals = cnr["log2"].to_numpy()
+
+    if log2_vals.size < 3:
+        return float("nan")
+
+    diffs = np.diff(log2_vals)
+    dlr = float(np.nanstd(diffs))
+    return dlr
+
+def compute_pon_spread_summaries(
+    cnn_path: str | Path,
+    targets_only: bool = True,
+    exclude_sex_chromosomes: bool = True,
+) -> dict[str, float]:
+    """
+    Compute simple spread summaries from a CNVkit PON .cnn file.
+
+    Returns a dict with:
+      - pon_spread_median_target
+      - pon_spread_q90_target
+
+    (np.nan if not available)
+    """
+    cnn = pd.read_csv(cnn_path, sep="\t")
+    if cnn.empty or "spread" not in cnn.columns:
+        return {
+            "pon_spread_median_target": float("nan"),
+            "pon_spread_q90_target": float("nan"),
+        }
+
+    chr_col = "chromosome" if "chromosome" in cnn.columns else "chr"
+    cnn[chr_col] = cnn[chr_col].astype(str).str.replace("^chr", "", regex=True)
+
+    # mark Target / Antitarget
+    if "gene" in cnn.columns:
+        cnn["type"] = np.where(cnn["gene"] == "Antitarget", "Antitarget", "Target")
+    else:
+        cnn["type"] = "Target"
+
+    if targets_only:
+        cnn = cnn[cnn["type"] == "Target"]
+
+    if exclude_sex_chromosomes:
+        cnn = cnn[~cnn[chr_col].isin(["X", "x", "Y", "y"])]
+
+    cnn = cnn.dropna(subset=["spread"])
+    if cnn.empty:
+        return {
+            "pon_spread_median_target": float("nan"),
+            "pon_spread_q90_target": float("nan"),
+        }
+
+    return {
+        "pon_spread_median_target": float(cnn["spread"].median()),
+        "pon_spread_q90_target": float(cnn["spread"].quantile(0.90)),
+    }
+
+def compute_gene_chunk_summaries(gene_seg_df: pd.DataFrame) -> dict[str, float]:
+    """
+    Summaries from the gene-chunk table built by build_gene_segment_table.
+
+    Expected columns (if present):
+      - cnvkit_cnv_call, purecn_cnv_call, pon_cnv_call
+      - loh_flag
+      - gene.symbol
+    """
+    if gene_seg_df is None or gene_seg_df.empty:
+        return {
+            "n_genes_cnvkit_cnv": 0,
+            "n_genes_purecn_cnv": 0,
+            "n_genes_pon_cnv": 0,
+            "n_genes_loh": 0,
+        }
+
+    df = gene_seg_df.copy()
+
+    # Gene-level: any chunk of the gene satisfies the condition
+    if "gene.symbol" in df.columns:
+        gene_grp = df.groupby("gene.symbol")
+        genes_cnvkit = int((gene_grp["cnvkit_cnv_call"]
+                            .apply(lambda s: s.astype(str).str.upper()
+                                   .isin(["DELETION", "AMPLIFICATION"])
+                                   .any())
+                            ).sum())
+        genes_purecn = int((gene_grp["purecn_cnv_call"]
+                            .apply(lambda s: s.astype(str).str.upper()
+                                   .isin(["DELETION", "AMPLIFICATION"])
+                                   .any())
+                            ).sum())
+        genes_pon = int((gene_grp["pon_cnv_call"]
+                         .apply(lambda s: s.astype(str).str.upper()
+                                .isin(["DELETION", "AMPLIFICATION"])
+                                .any())
+                         ).sum())
+        genes_loh = int((gene_grp["loh_flag"]
+                         .apply(lambda s: s.astype(str).str.upper()
+                                .eq("TRUE")
+                                .any())
+                         ).sum())
+    else:
+        genes_cnvkit = genes_purecn = genes_pon = genes_loh = 0
+
+    return {
+        # gene-level
+        "n_genes_cnvkit_cnv": genes_cnvkit,
+        "n_genes_purecn_cnv": genes_purecn,
+        "n_genes_pon_cnv": genes_pon,
+        "n_genes_loh": genes_loh,
+    }
+
+
+def compute_summary_metrics(
+    cnr_path: str | Path,
+    cnn_path: str | Path | None,
+    gene_seg_df: pd.DataFrame | None,
+) -> pd.DataFrame:
+    """
+    Build a 1-row DataFrame with various QC / burden summaries:
+
+      - DLR_spread (CNR-based)
+      - PON spread quantiles (CNN-based, targets only)
+      - chunk-level CNV/LOH counts & fractions
+      - gene-level CNV/LOH counts
+    """
+    metrics: dict[str, float | int] = {}
+
+    # 1) DLR-like spread
+    metrics["DLR_spread"] = compute_dlr_spread_from_cnr(cnr_path)
+
+    # 2) PON spread summaries
+    if cnn_path is not None and Path(cnn_path).is_file():
+        pon_stats = compute_pon_spread_summaries(cnn_path)
+        metrics.update(pon_stats)
+    else:
+        metrics["pon_spread_median_target"] = float("nan")
+        metrics["pon_spread_q90_target"] = float("nan")
+
+    # 3) Gene/chunk-level CNV / LOH summaries
+    chunk_stats = compute_gene_chunk_summaries(gene_seg_df)
+    metrics.update(chunk_stats)
+
+    # Wrap as 1-row DataFrame
+    summary_df = pd.DataFrame([metrics])
+    return summary_df
+
 # =============================================================================
 # Cytoband
 # =============================================================================

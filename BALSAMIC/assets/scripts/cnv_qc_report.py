@@ -3,16 +3,17 @@ import click
 import base64
 import json
 import pandas as pd
+import numpy as np
 from pathlib import Path
 from cnv_report_utils import (
     plot_chromosomes,
     build_gene_segment_table,
     load_cancer_gene_set,
+    compute_summary_metrics,
 )
 from BALSAMIC.constants.analysis import Gender
 
 # pdf_first_page_to_png,
-
 
 def csv_to_html_table(
     df: pd.DataFrame,
@@ -20,7 +21,8 @@ def csv_to_html_table(
     scatter_png: str | Path | None = None,
     diagram_png: str | Path | None = None,
     chr_plots_dir: str | Path | None = None,
-    summary_df: pd.DataFrame | None = None,
+    purecn_summary_df: pd.DataFrame | None = None,
+    qc_summary_df: pd.DataFrame | None = None,
 ) -> None:
     out_path = Path(out_html)
 
@@ -272,19 +274,34 @@ def csv_to_html_table(
             section_html += "<h3>Regions without CNV / LOH</h3>\n"
             section_html += (
                 '<div class="plot-grid">'
-                + "\n".join(gene_plot_blocks_no_cnv)
-                + "</div>"
+                + "\n".join(gene_plot_blocks_no_cnv) + "</div>"
             )
         qc_plots_html += section_html
 
-    # ---------------- Summary table ----------------
-    summary_html = ""
-    if summary_df is not None and not summary_df.empty:
-        summary_html = summary_df.to_html(
+    # ---------------- PureCN sample summary table ----------------
+    purecn_summary_html = ""
+    if purecn_summary_df is not None and not purecn_summary_df.empty:
+        purecn_summary_html = purecn_summary_df.to_html(
             index=False,
             border=0,
             classes="dataframe",
-            table_id="summary-table",
+            table_id="purecn-summary-table",
+        )
+
+    # ---------------- Extra QC / CNV summary table ----------------
+    qc_summary_html = ""
+    if qc_summary_df is not None and not qc_summary_df.empty:
+        qc_display = qc_summary_df.copy()
+        # Round floats for readability
+        for col in qc_display.columns:
+            if np.issubdtype(qc_display[col].dtype, np.floating):
+                qc_display[col] = qc_display[col].round(3)
+
+        qc_summary_html = qc_display.to_html(
+            index=False,
+            border=0,
+            classes="dataframe",
+            table_id="qc-summary-table",
         )
 
     # ---------------- CNV Gene table ----------------
@@ -437,8 +454,15 @@ def csv_to_html_table(
     <body>
       <h1>CNV Report</h1>
 
-      <h2>Sample summary</h2>
-      {summary_html}
+      <h2>PureCN sample summary</h2>
+      {purecn_summary_html}
+
+      <h2>CNV / QC summary</h2>
+      <p class="muted">
+        Additional metrics derived from CNVkit CNR/CNN and gene-level segments,
+        including DLR-like probe-to-probe noise and PON spread summaries.
+      </p>
+      {qc_summary_html}
 
       {genome_plots_html}
 
@@ -827,7 +851,7 @@ def main(
     scatter_png_path = outdir / f"cnvkit_scatter_{case_id}.png"
     diagram_png_path = outdir / f"cnvkit_diagram_{case_id}.png"
 
-    if cnvkit_scatter:
+    if scatter_png_path:
         print("t")
         # pdf_first_page_to_png(cnvkit_scatter, scatter_png_path)
     if diagram_png_path:
@@ -863,12 +887,32 @@ def main(
         sex=sex,
     )
 
-    # ---------------
-    # Read PureCN purity and ploidy estimation (optional)
-    # ---------------
-    purity_df = None
+    # --- 1) PureCN summary (from purity_csv) ---
+    purecn_summary_df: pd.DataFrame | None = None
     if purity_csv:
-        purity_df = pd.read_csv(purity_csv)
+        purecn_summary_df = pd.read_csv(purity_csv)
+        # Optionally: keep / reorder only the columns you care about
+        wanted_cols = [
+            "Sampleid",
+            "Purity",
+            "Ploidy",
+            "Sex",
+            "Contamination",
+            "Flagged",
+            "Failed",
+            "Curated",
+            "Comment",
+        ]
+        purecn_summary_df = purecn_summary_df[
+            [c for c in wanted_cols if c in purecn_summary_df.columns]
+        ]
+
+    # --- 2) Extra QC / CNV metrics (DLR, PON spread, chunk stats) ---
+    qc_summary_df = compute_summary_metrics(
+        cnr_path=cnr,
+        cnn_path=pon,  # CNVkit .cnn PON, or None
+        gene_seg_df=df_genes,  # from build_gene_segment_table
+    )
 
     # ----------------------------
     # Generate per-chromosome PNG plots in outdir
@@ -918,7 +962,8 @@ def main(
         scatter_png=str(scatter_png_path),
         diagram_png=str(diagram_png_path),
         chr_plots_dir=chr_plots_dir,
-        summary_df=purity_df,
+        purecn_summary_df=purecn_summary_df,
+        qc_summary_df=qc_summary_df,
     )
 
     click.echo(f"[CNV QC] Finished report for {case_id}: {out_html}")
