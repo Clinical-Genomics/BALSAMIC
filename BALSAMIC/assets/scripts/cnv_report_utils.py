@@ -2,9 +2,11 @@ import math
 from pathlib import Path
 from typing import Dict, Tuple, List, Optional, Set
 from pandas.errors import EmptyDataError
-import fitz
+
+# import fitz
 import matplotlib.pyplot as plt
 from matplotlib import colormaps
+from matplotlib import patheffects as pe
 import numpy as np
 import pandas as pd
 from BALSAMIC.constants.analysis import Gender
@@ -15,12 +17,13 @@ from collections.abc import Collection
 # Generic helpers
 # =============================================================================
 
-
+"""
 def pdf_first_page_to_png(pdf_path: str, png_path: str, dpi: int = 300) -> None:
     doc = fitz.open(pdf_path)
     page = doc[0]
     page.get_pixmap(dpi=dpi).save(png_path)
     doc.close()
+"""
 
 
 def load_cancer_gene_set(
@@ -403,6 +406,7 @@ def build_genes_from_cnr(cnr_path: str | Path) -> pd.DataFrame:
 # Per-chromosome plots (PON spread + log2 + segments + BAF + CNV genes)
 # =============================================================================
 
+
 def plot_chromosomes(
     cnr_path: Path,
     vcf_path: Path,
@@ -427,18 +431,19 @@ def plot_chromosomes(
 
       - PON spread band (if PON available)
       - smoothed log2 coverage (CNR)
-      - segments reconstructed from `gene_seg_df`
-      - gene-level PON-driven chunks drawn as lines (if present)
-      - CNV / LOH / PON-significant genes coloured & labelled
+      - CNVkit / PureCN segments (if present)
+      - gene-level PON-driven CNV chunks (pon_cnv_call == AMPLIFICATION/DELETION)
       - BAF panel under each chromosome (from VCF)
 
     Additional logic:
 
-      - Only genes with >= 3 targets are highlighted.
+      - Only genes with >= 3 targets are highlighted (for CNV/LOH).
       - If a gene is highlighted *only* because it is PON-significant,
         it must also have is_cancer_gene == True.
       - If highlight_only_cancer is True, then all highlighted genes
         must be cancer genes (for CNV/LOH as well).
+      - Genes with PON-based CNV (pon_cnv_call == AMPLIFICATION/DELETION)
+        are always highlighted and labelled in the plot.
       - If focus_genes is provided, only bins / segments overlapping the
         genomic span of those genes are shown (per chromosome).
     """
@@ -554,7 +559,7 @@ def plot_chromosomes(
         return False
 
     def _is_pon_signif_chunk(row: pd.Series) -> bool:
-        # NOTE: this is the *old* per-row PON call if still present
+        # legacy per-row PON significance, kept only for table compatibility
         if "pon_call" in row.index and pd.notna(row["pon_call"]):
             return str(row["pon_call"]).strip().lower() == "significant"
         return False
@@ -564,7 +569,7 @@ def plot_chromosomes(
     gdf["cnv_flag"] = gdf["is_loh_or_cnv"] | gdf["is_pon_signif"]
 
     # ---------------------------------
-    # 2b. Gene-level aggregation
+    # 2b. Gene-level aggregation (for CNV/LOH highlighting)
     # ---------------------------------
     if "gene.symbol" in gdf.columns:
         group_cols = ["chr", "gene.symbol"]
@@ -675,7 +680,7 @@ def plot_chromosomes(
             g_chr = g_focus_chr
         # ----------------------------------------------------------------------
 
-        # Determine which genes to highlight on this chromosome
+        # Determine which genes to highlight on this chromosome (CNV / LOH / PON-signif)
         if gene_level is not None:
             if focus_genes_set is not None:
                 gene_level_chr = gene_level[
@@ -698,6 +703,21 @@ def plot_chromosomes(
                 if "gene.symbol" in g_chr_cnv.columns
                 else np.array([])
             )
+
+        # ---------- NEW: add PON-based CNV genes to highlighted_genes ----------
+        pon_cnv_genes_chr: np.ndarray = np.array([])
+        if "pon_cnv_call" in g_chr.columns:
+            mask_pon_cnv = (
+                g_chr["pon_cnv_call"]
+                .astype(str)
+                .str.upper()
+                .isin(["AMPLIFICATION", "DELETION"])
+            )
+            pon_cnv_genes_chr = (
+                g_chr.loc[mask_pon_cnv, "gene.symbol"].dropna().astype(str).unique()
+            )
+            # ensure these are always highlighted + labelled
+            highlighted_genes = np.union1d(highlighted_genes, pon_cnv_genes_chr)
 
         # Ensure focus genes on this chromosome are highlighted,
         # even if not CNV/LOH/PON-significant
@@ -786,7 +806,7 @@ def plot_chromosomes(
         if not baf_chr.empty:
             baf_chr["x_coord"] = baf_chr["POS"].apply(pos_to_xcoord)
 
-        # gene positions
+        # gene positions (for labels)
         gene_to_color: dict[str, tuple] = {}
         genes_chr = pd.DataFrame()
 
@@ -853,6 +873,8 @@ def plot_chromosomes(
                 s=3,
                 alpha=0.38,
                 color="lightgrey",
+                edgecolors="black",
+                linewidths=0.2,
                 label="Antitarget bins",
             )
 
@@ -863,6 +885,8 @@ def plot_chromosomes(
                 s=4,
                 alpha=0.5,
                 color="tab:blue",
+                edgecolors="black",
+                linewidths=0.25,
                 label="Target bins (no highlighted CNV gene)",
             )
 
@@ -878,6 +902,8 @@ def plot_chromosomes(
                     s=8,
                     alpha=0.9,
                     color=color,
+                    edgecolors="black",
+                    linewidths=0.3,
                 )
 
         # ---------- target / antitarget density bar at top ----------
@@ -985,9 +1011,15 @@ def plot_chromosomes(
                     alpha=0.8,
                 )
 
-        # ---------- NEW: gene-level PON-driven chunks ----------
+        # ---------- NEW: gene-level PON-based CNV chunks (pon_cnv_call) ----------
         gene_chunks_label_added = False
-        if {"region_start", "region_end", "mean_log2"}.issubset(g_chr.columns):
+        if {
+            "region_start",
+            "region_end",
+            "mean_log2",
+            "gene.symbol",
+            "pon_cnv_call",
+        }.issubset(g_chr.columns):
             # restrict to current plotted genomic span
             start_span = sub["start"].min()
             end_span = sub["end"].max()
@@ -997,19 +1029,13 @@ def plot_chromosomes(
                 & (g_chr["region_start"] <= end_span)
             ].copy()
 
-            # If pon_chunk_call exists, only show borderline/significant chunks
-            if "pon_chunk_call" in g_chunks.columns:
-                g_chunks["pon_chunk_call_norm"] = (
-                    g_chunks["pon_chunk_call"]
-                    .astype(str)
-                    .str.strip()
-                    .str.lower()
-                )
-                g_chunks = g_chunks[
-                    g_chunks["pon_chunk_call_norm"].isin(
-                        ["borderline", "significant"]
-                    )
-                ]
+            # Only segments with pon_cnv_call == AMPLIFICATION / DELETION
+            g_chunks["pon_cnv_call_norm"] = (
+                g_chunks["pon_cnv_call"].astype(str).str.strip().str.upper()
+            )
+            g_chunks = g_chunks[
+                g_chunks["pon_cnv_call_norm"].isin(["AMPLIFICATION", "DELETION"])
+            ]
 
             if not g_chunks.empty:
                 for _, crow in g_chunks.iterrows():
@@ -1018,46 +1044,35 @@ def plot_chromosomes(
                     y_chunk = float(crow["mean_log2"])
                     y_chunk = float(np.clip(y_chunk, -y_clip, y_clip))
 
-                    call = str(
-                        crow.get("pon_chunk_call", "")
-                    ).strip().lower()
-                    direction = str(
-                        crow.get("pon_chunk_direction", "")
-                    ).strip().lower()
-
-                    # Infer direction from mean_log2 if explicit direction is missing
-                    if not direction:
-                        if y_chunk > 0:
-                            direction = "gain"
-                        elif y_chunk < 0:
-                            direction = "loss"
-
-                    if call == "significant":
-                        if direction == "gain":
-                            color = "darkred"
-                        elif direction == "loss":
-                            color = "darkblue"
-                        else:
-                            color = "black"
-                    elif call == "borderline":
-                        color = "orange"
+                    call = str(crow["pon_cnv_call_norm"])
+                    if call == "AMPLIFICATION":
+                        seg_color = "red"
+                    elif call == "DELETION":
+                        seg_color = "royalblue"
                     else:
-                        color = "grey"
+                        seg_color = "black"
 
-                    ax1.hlines(
+                    line = ax1.hlines(
                         y_chunk,
                         xs,
                         xe,
-                        colors=color,
-                        linewidth=2.0,
+                        colors=seg_color,
+                        linewidth=0.8,  # thin line
                         alpha=0.9,
                         linestyles="solid",
                         label=(
-                            "Gene PON-chunk"
-                            if not gene_chunks_label_added
-                            else None
+                            "PON CNV segment" if not gene_chunks_label_added else None
                         ),
                     )
+
+                    # Very thin black outline around the colored line
+                    line.set_path_effects(
+                        [
+                            pe.Stroke(linewidth=1.1, foreground="black"),
+                            pe.Normal(),
+                        ]
+                    )
+
                     gene_chunks_label_added = True
 
         ax1.axhline(0, color="black", linewidth=0.8)
@@ -1071,7 +1086,7 @@ def plot_chromosomes(
         ax1.set_title(title + "\n")
         ax1.legend(loc="upper right", fontsize=8)
 
-        # gene labels
+        # gene labels (now includes PON-CNV genes due to highlighted_genes union)
         if not genes_chr.empty:
             seen_positions: set[tuple[str, float]] = set()
             for _, row in genes_chr.iterrows():
@@ -1132,7 +1147,6 @@ def plot_chromosomes(
 
         plt.savefig(out_png, dpi=150)
         plt.close(fig)
-
 
 
 # =============================================================================
@@ -1466,6 +1480,7 @@ def classify_cnv_from_total_cn_sex_aware(
 # Final gene table builder (CNR base + optional PureCN + PON)
 # =============================================================================
 
+
 def build_gene_segment_table(
     cnr_path: str | Path,
     cns_path: str | Path,
@@ -1694,9 +1709,14 @@ def build_gene_segment_table(
     # -------------------- 3b. Within-gene chunking based on CNR/PON -------------------- #
     # We define gene-internal chunks using CNR (and PON if present), independent
     # of whether CNVkit created a segment. CNV segments remain as annotation.
-    MIN_GENE_TARGETS = 8   # only genes with at least this many bins
-    MIN_RUN_BINS = 3       # min consecutive bins in a run
-    LOG2_THRESH = 0.25     # |effect| threshold for "active" bins
+    # If PON is available, we work in per-bin Z-score units (effect / spread);
+    # otherwise we fall back to a simple log2 amplitude threshold.
+    MIN_GENE_TARGETS = 10  # only genes with at least this many bins
+    MIN_RUN_BINS = 4  # min consecutive bins in a run
+    LOG2_THRESH_FALLBACK = 0.30  # fallback |effect| threshold without PON
+    Z_BIN_THRESH = 1.5  # per-bin |z| threshold to be "active"
+    Z_RUN_THRESH = 2.0  # per-run z threshold to keep a chunk
+    SMOOTH_WINDOW = 3  # rolling median smoothing window
 
     if bins.empty:
         return pd.DataFrame()
@@ -1720,32 +1740,83 @@ def build_gene_segment_table(
         if idxs.size == 0:
             return
 
-        # Effect per bin: log2 - pon_log2 (if available), else log2
+        # ---- 1) Compute effect per bin ----
         if "pon_log2" in df_gene.columns:
-            eff = (
-                df_gene["log2"].values
-                - df_gene["pon_log2"].fillna(0.0).values
-            )
+            eff = df_gene["log2"].values - df_gene["pon_log2"].fillna(0.0).values
         else:
             eff = df_gene["log2"].values
+
+        # ---- 2) Decide whether we can use PON-based Z for this gene ----
+        use_pon = (
+            "pon_spread" in df_gene.columns and not df_gene["pon_spread"].isna().all()
+        )
+
+        if use_pon:
+            # Per-bin Z = effect / spread (with epsilon to avoid 0)
+            sigma = df_gene["pon_spread"].fillna(0.0).values
+            eps = 1e-3
+            sigma_safe = np.where(sigma <= 0, eps, sigma)
+            z_raw = eff / sigma_safe
+
+            # Smooth Z for sign / run detection to avoid single-bin outliers
+            z_series = pd.Series(z_raw, index=df_gene.index)
+            z_smooth = (
+                z_series.rolling(
+                    window=SMOOTH_WINDOW,
+                    center=True,
+                    min_periods=1,
+                )
+                .median()
+                .values
+            )
+
+        else:
+            # Fall back: use effect directly with amplitude threshold
+            z_raw = None
+            z_smooth = None
 
         current_run: list[int] = []
         current_sign: int | None = None
 
         def _finalize_run(run_idxs: list[int]) -> None:
             nonlocal next_gene_chunk_id, bins
+
             if len(run_idxs) < MIN_RUN_BINS:
                 return
+
             sub = bins.loc[run_idxs]
 
-            # recompute effect in this run with same logic
+            # Recompute effect in this run (unsmoothed)
             if "pon_log2" in sub.columns:
                 eff_run = sub["log2"].values - sub["pon_log2"].fillna(0.0).values
             else:
                 eff_run = sub["log2"].values
+
             mean_eff = float(np.nanmean(eff_run)) if eff_run.size > 0 else 0.0
-            if not np.isfinite(mean_eff) or abs(mean_eff) < LOG2_THRESH:
+            if not np.isfinite(mean_eff):
                 return
+
+            if use_pon:
+                # Approximate run-level Z using mean spread and N bins
+                sigma_run = sub["pon_spread"].fillna(0.0).values
+                eps = 1e-3
+                sigma_run_safe = np.where(sigma_run <= 0, eps, sigma_run)
+                sigma_mean = (
+                    float(np.nanmean(sigma_run_safe))
+                    if sigma_run_safe.size > 0
+                    else eps
+                )
+                n = len(eff_run)
+                sigma_eff = sigma_mean / np.sqrt(float(n))
+                if sigma_eff <= 0:
+                    return
+                run_z = abs(mean_eff) / sigma_eff
+                if run_z < Z_RUN_THRESH:
+                    return
+            else:
+                # Fallback: require a reasonably strong effect in log2 units
+                if abs(mean_eff) < LOG2_THRESH_FALLBACK:
+                    return
 
             chunk_label = f"genechunk_{next_gene_chunk_id}"
             next_gene_chunk_id += 1
@@ -1753,39 +1824,222 @@ def build_gene_segment_table(
             # Assign chunk_id; seg_* remain as they were
             bins.loc[run_idxs, "chunk_id"] = chunk_label
 
-        for idx, val in zip(idxs, eff):
-            if not np.isfinite(val):
-                if current_run:
-                    _finalize_run(current_run)
-                    current_run = []
-                    current_sign = None
-                continue
+        # ---- 3) Build runs along the gene ----
+        if use_pon:
+            # Use smoothed Z for active/neutral + sign
+            for idx, z_val in zip(idxs, z_smooth):
+                if not np.isfinite(z_val):
+                    if current_run:
+                        _finalize_run(current_run)
+                        current_run = []
+                        current_sign = None
+                    continue
 
-            if abs(val) < LOG2_THRESH:
-                if current_run:
-                    _finalize_run(current_run)
-                    current_run = []
-                    current_sign = None
-                continue
+                if abs(z_val) < Z_BIN_THRESH:
+                    if current_run:
+                        _finalize_run(current_run)
+                        current_run = []
+                        current_sign = None
+                    continue
 
-            sgn = 1 if val > 0 else -1
-            if current_sign is None or sgn == current_sign:
-                current_run.append(idx)
-                current_sign = sgn
-            else:
-                # sign flip → close previous run and start new one
-                if current_run:
-                    _finalize_run(current_run)
-                current_run = [idx]
-                current_sign = sgn
+                sgn = 1 if z_val > 0 else -1
+                if current_sign is None or sgn == current_sign:
+                    current_run.append(idx)
+                    current_sign = sgn
+                else:
+                    if current_run:
+                        _finalize_run(current_run)
+                    current_run = [idx]
+                    current_sign = sgn
+        else:
+            # Fallback: use effect in log2 units
+            eff_series = pd.Series(eff, index=df_gene.index)
+            eff_smooth = (
+                eff_series.rolling(
+                    window=SMOOTH_WINDOW,
+                    center=True,
+                    min_periods=1,
+                )
+                .median()
+                .values
+            )
+
+            for idx, val in zip(idxs, eff_smooth):
+                if not np.isfinite(val):
+                    if current_run:
+                        _finalize_run(current_run)
+                        current_run = []
+                        current_sign = None
+                    continue
+
+                if abs(val) < LOG2_THRESH_FALLBACK:
+                    if current_run:
+                        _finalize_run(current_run)
+                        current_run = []
+                        current_sign = None
+                    continue
+
+                sgn = 1 if val > 0 else -1
+                if current_sign is None or sgn == current_sign:
+                    current_run.append(idx)
+                    current_sign = sgn
+                else:
+                    if current_run:
+                        _finalize_run(current_run)
+                    current_run = [idx]
+                    current_sign = sgn
 
         if current_run:
             _finalize_run(current_run)
 
-    # Apply per (chr, gene)
+    # Apply per (chr, gene) – initial segmentation
     for (_, _), df_gene in bins.groupby(["chr", "gene.symbol"], sort=False):
         _assign_gene_chunks(df_gene)
 
+    # -------------------- 3c. Post-hoc cleanup of tiny bridge segments -------------------- #
+    # Idea:
+    #   Work per gene, look at contiguous runs of the current chunk_id.
+    #   If we see patterns like big A – tiny B – big C with mean(A) ~ mean(C),
+    #   we merge A+B+C into a single chunk.
+    #   We also merge very small adjacent chunks with similar means.
+    MAX_BRIDGE_BINS = 3  # size of "island" allowed between similar flanks
+    BRIDGE_DELTA = 0.15  # max |mean_eff(A) - mean_eff(C)| to consider them similar
+    SMALL_SEG_N = 3  # max bins to consider a run "small"
+    MERGE_DELTA = 0.10  # adjacency merge threshold on |mean_eff|
+
+    def _cleanup_gene_chunks(df_gene: pd.DataFrame) -> None:
+        nonlocal bins
+
+        if df_gene.empty:
+            return
+
+        # Per-bin effect for this gene (same definition as segmentation)
+        if "pon_log2" in df_gene.columns:
+            eff_all = df_gene["log2"].values - df_gene["pon_log2"].fillna(0.0).values
+        else:
+            eff_all = df_gene["log2"].values
+
+        n = df_gene.shape[0]
+        chunk_labels = df_gene["chunk_id"].tolist()
+
+        # Build runs: contiguous bins with the same chunk_id
+        runs: list[dict] = []
+        current_positions: list[int] = [0]
+        current_label = chunk_labels[0]
+
+        for pos in range(1, n):
+            if chunk_labels[pos] == current_label:
+                current_positions.append(pos)
+            else:
+                # finalize current run
+                run_eff = eff_all[current_positions]
+                mean_eff = float(np.nanmean(run_eff)) if len(run_eff) > 0 else np.nan
+                indices = df_gene.index[current_positions].tolist()
+                runs.append(
+                    {
+                        "positions": current_positions,
+                        "indices": indices,
+                        "mean_eff": mean_eff,
+                    }
+                )
+                # start new run
+                current_label = chunk_labels[pos]
+                current_positions = [pos]
+
+        # finalize last run
+        if current_positions:
+            run_eff = eff_all[current_positions]
+            mean_eff = float(np.nanmean(run_eff)) if len(run_eff) > 0 else np.nan
+            indices = df_gene.index[current_positions].tolist()
+            runs.append(
+                {
+                    "positions": current_positions,
+                    "indices": indices,
+                    "mean_eff": mean_eff,
+                }
+            )
+
+        if len(runs) <= 1:
+            return
+
+        # First: handle A–B–C bridge patterns
+        new_runs: list[dict] = []
+        i = 0
+        while i < len(runs):
+            # Try triple merge A–B–C starting at i
+            if i <= len(runs) - 3:
+                rA = runs[i]
+                rB = runs[i + 1]
+                rC = runs[i + 2]
+
+                if (
+                    len(rB["indices"]) <= MAX_BRIDGE_BINS
+                    and np.isfinite(rA["mean_eff"])
+                    and np.isfinite(rC["mean_eff"])
+                    and abs(rA["mean_eff"] - rC["mean_eff"]) <= BRIDGE_DELTA
+                ):
+                    # Merge A+B+C into a single run
+                    merged_positions = (
+                        rA["positions"] + rB["positions"] + rC["positions"]
+                    )
+                    merged_indices = rA["indices"] + rB["indices"] + rC["indices"]
+                    merged_eff = eff_all[merged_positions]
+                    merged_mean = (
+                        float(np.nanmean(merged_eff)) if len(merged_eff) > 0 else np.nan
+                    )
+                    new_runs.append(
+                        {
+                            "positions": merged_positions,
+                            "indices": merged_indices,
+                            "mean_eff": merged_mean,
+                        }
+                    )
+                    i += 3
+                    continue
+
+            # No bridge merge starting here → maybe adjacency merge with previous
+            r = runs[i]
+            if new_runs:
+                last = new_runs[-1]
+                if (
+                    np.isfinite(r["mean_eff"])
+                    and np.isfinite(last["mean_eff"])
+                    and abs(r["mean_eff"] - last["mean_eff"]) <= MERGE_DELTA
+                    and (
+                        len(r["indices"]) <= SMALL_SEG_N
+                        or len(last["indices"]) <= SMALL_SEG_N
+                    )
+                ):
+                    # Merge r into last
+                    merged_positions = last["positions"] + r["positions"]
+                    merged_indices = last["indices"] + r["indices"]
+                    merged_eff = eff_all[merged_positions]
+                    merged_mean = (
+                        float(np.nanmean(merged_eff)) if len(merged_eff) > 0 else np.nan
+                    )
+                    new_runs[-1] = {
+                        "positions": merged_positions,
+                        "indices": merged_indices,
+                        "mean_eff": merged_mean,
+                    }
+                else:
+                    new_runs.append(r)
+            else:
+                new_runs.append(r)
+
+            i += 1
+
+        # Reassign chunk_id for this gene based on cleaned runs
+        # (seg_* remain unchanged; chunk_id is just a gene-level partition).
+        for run_idx, run in enumerate(new_runs):
+            new_label = f"genechunk_clean_{run_idx}"
+            bins.loc[run["indices"], "chunk_id"] = new_label
+
+    # Apply cleanup per (chr, gene)
+    for (_, _), df_gene in bins.groupby(["chr", "gene.symbol"], sort=False):
+        _cleanup_gene_chunks(df_gene)
+
+    # After this, bins → [chr, gene.symbol, start, ..., chunk_id] is ready
     bins = bins.sort_values(["chr", "gene.symbol", "start"]).reset_index(drop=True)
 
     # -------------------- 4. Collapse to gene x chunk -------------------- #
@@ -1821,9 +2075,8 @@ def build_gene_segment_table(
     if "seg_depth" in bins.columns:
         agg_dict["seg_depth"] = ["first"]
 
-    grouped = (
-        bins.groupby(["chr", "gene.symbol", "chunk_id"], as_index=False)
-        .agg(agg_dict)
+    grouped = bins.groupby(["chr", "gene.symbol", "chunk_id"], as_index=False).agg(
+        agg_dict
     )
 
     # flatten multi-index columns
@@ -1910,6 +2163,33 @@ def build_gene_segment_table(
             return "significant"
 
         grouped["pon_chunk_call"] = grouped.apply(_pon_call, axis=1)
+
+        # -------------------- PON-based CNV call (AMPLIFICATION / DELETION) -------------------- #
+        def _pon_cnv_call(row: pd.Series) -> str:
+            """
+            Derive a simple CNV call from PON information.
+
+            Rule:
+              - Only consider rows with pon_chunk_call == 'significant'.
+              - If mean_log2 >  0.08 → AMPLIFICATION
+              - If mean_log2 < -0.08 → DELETION
+              - Else → no call ("").
+            """
+            call = str(row.get("pon_chunk_call", "")).strip().lower()
+            if call != "significant":
+                return ""
+
+            ml = row.get("mean_log2", np.nan)
+            if pd.isna(ml):
+                return ""
+
+            if ml > 0.08:
+                return "AMPLIFICATION"
+            if ml < -0.08:
+                return "DELETION"
+            return ""
+
+        grouped["pon_cnv_call"] = grouped.apply(_pon_cnv_call, axis=1)
 
     # -------------------- 6. Exon annotation (optional) -------------------- #
     if refgene_path is not None:
@@ -2081,6 +2361,7 @@ def build_gene_segment_table(
         "pon_chunk_z",
         "pon_chunk_direction",
         "pon_chunk_call",
+        "pon_cnv_call",
     ]
     cols_order = [c for c in cols_order if c in grouped.columns]
     grouped = grouped[

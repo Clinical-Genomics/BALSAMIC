@@ -7,10 +7,12 @@ from pathlib import Path
 from cnv_report_utils import (
     plot_chromosomes,
     build_gene_segment_table,
-    pdf_first_page_to_png,
     load_cancer_gene_set,
 )
 from BALSAMIC.constants.analysis import Gender
+
+# pdf_first_page_to_png,
+
 
 def csv_to_html_table(
     df: pd.DataFrame,
@@ -48,7 +50,8 @@ def csv_to_html_table(
         parts.append('<div style="margin-top:10px;">')
 
         if scatter_png_data_uri:
-            parts.append("""
+            parts.append(
+                """
         <h3>CNVkit scatter</h3>
         <div style="border:1px solid #ccc; padding:10px; margin-top:10px; width:100%;">
           <img
@@ -58,10 +61,14 @@ def csv_to_html_table(
             style="max-width:100%; height:auto; display:block; cursor:pointer;"
           />
         </div>
-            """.format(scatter_src=scatter_png_data_uri))
+            """.format(
+                    scatter_src=scatter_png_data_uri
+                )
+            )
 
         if diagram_png_data_uri:
-            parts.append("""
+            parts.append(
+                """
         <h3>CNVkit diagram</h3>
         <div style="border:1px solid #ccc; padding:10px; margin-top:10px; width:100%;">
           <img
@@ -71,7 +78,10 @@ def csv_to_html_table(
             style="max-width:100%; height:auto; display:block; cursor:pointer;"
           />
         </div>
-            """.format(diagram_src=diagram_png_data_uri))
+            """.format(
+                    diagram_src=diagram_png_data_uri
+                )
+            )
 
         parts.append("</div>")
         genome_plots_html = "\n".join(parts)
@@ -262,7 +272,8 @@ def csv_to_html_table(
             section_html += "<h3>Regions without CNV / LOH</h3>\n"
             section_html += (
                 '<div class="plot-grid">'
-                + "\n".join(gene_plot_blocks_no_cnv) + "</div>"
+                + "\n".join(gene_plot_blocks_no_cnv)
+                + "</div>"
             )
         qc_plots_html += section_html
 
@@ -442,8 +453,8 @@ def csv_to_html_table(
             Show only LOH / CNV genes (loh_flag TRUE or CNV call ≠ NEUTRAL)
           </label>
           <label style="margin-left:12px;">
-            <input type="checkbox" id="show-significant-pon">
-            Also include genes with pon_call / pon_chunk_call = "significant"
+            <input type="checkbox" id="show-pon-cnv">
+            Also include genes with PON-based CNV call (pon_cnv_call ≠ "")
           </label>
           <label style="margin-left:12px;">
             <input type="checkbox" id="only-cancer-genes">
@@ -482,7 +493,7 @@ def csv_to_html_table(
         (function() {{
           const table             = document.getElementById("report-table");
           const checkboxNonCnv    = document.getElementById("hide-non-cnv");
-          const checkboxPonSig    = document.getElementById("show-significant-pon");
+          const checkboxPonCnv    = document.getElementById("show-pon-cnv");
           const checkboxCancer    = document.getElementById("only-cancer-genes");
           const checkboxSplit     = document.getElementById("only-split-genes");
           const geneInput         = document.getElementById("gene-filter");
@@ -497,7 +508,7 @@ def csv_to_html_table(
           const cnvkitColIdx      = colIndex["cnvkit_cnv_call"] ?? -1;
           const purecnColIdx      = colIndex["purecn_cnv_call"] ?? -1;
           const nTargetsColIdx    = colIndex["n.targets"] ?? -1;
-          const ponCallColIdx     = (colIndex["pon_chunk_call"] ?? colIndex["pon_call"] ?? -1);
+          const ponCnvColIdx      = colIndex["pon_cnv_call"] ?? -1;
           const cancerColIdx      = colIndex["is_cancer_gene"] ?? -1;
           const splitColIdx       = colIndex["is_gene_split"] ?? -1;
 
@@ -553,7 +564,7 @@ def csv_to_html_table(
 
           function applyFilter() {{
             const hideNonCnv    = checkboxNonCnv && checkboxNonCnv.checked;
-            const showPonSig    = checkboxPonSig && checkboxPonSig.checked;
+            const includePonCnv = checkboxPonCnv && checkboxPonCnv.checked;
             const onlyCancer    = checkboxCancer && checkboxCancer.checked;
             const onlySplit     = checkboxSplit && checkboxSplit.checked;
 
@@ -573,18 +584,21 @@ def csv_to_html_table(
             for (const row of rows) {{
               let hideRow = false;
 
-              // CNV / LOH filter with PON "significant" override
+              // CNV / LOH filter with optional PON-based CNV override
               if (!hideRow && hideNonCnv) {{
                 const cnv = isCnvRow(row);
 
-                let isPonSignificant = false;
-                if (ponCallColIdx !== -1) {{
-                  const ponCell = row.cells[ponCallColIdx];
+                let isPonCnv = false;
+                if (ponCnvColIdx !== -1) {{
+                  const ponCell = row.cells[ponCnvColIdx];
                   const ponVal = normalizeCellText(ponCell);
-                  isPonSignificant = (ponVal === "significant");
+                  // pon_cnv_call has values 'AMPLIFICATION' or 'DELETION' (or empty)
+                  if (ponVal === "amplification" || ponVal === "deletion") {{
+                    isPonCnv = true;
+                  }}
                 }}
 
-                const treatedAsCnv = cnv || (showPonSig && isPonSignificant);
+                const treatedAsCnv = cnv || (includePonCnv && isPonCnv);
                 if (!treatedAsCnv) {{
                   hideRow = true;
                 }}
@@ -628,7 +642,7 @@ def csv_to_html_table(
 
           applyFilter();
           if (checkboxNonCnv)   checkboxNonCnv.addEventListener("change", applyFilter);
-          if (checkboxPonSig)   checkboxPonSig.addEventListener("change", applyFilter);
+          if (checkboxPonCnv)   checkboxPonCnv.addEventListener("change", applyFilter);
           if (checkboxCancer)   checkboxCancer.addEventListener("change", applyFilter);
           if (checkboxSplit)    checkboxSplit.addEventListener("change", applyFilter);
           if (geneInput)        geneInput.addEventListener("input", applyFilter);
@@ -814,9 +828,11 @@ def main(
     diagram_png_path = outdir / f"cnvkit_diagram_{case_id}.png"
 
     if cnvkit_scatter:
-        pdf_first_page_to_png(cnvkit_scatter, scatter_png_path)
+        print("t")
+        # pdf_first_page_to_png(cnvkit_scatter, scatter_png_path)
     if diagram_png_path:
-        pdf_first_page_to_png(cnvkit_diagram, diagram_png_path)
+        print("t")
+        # pdf_first_page_to_png(cnvkit_diagram, diagram_png_path)
 
     # ----------------------------
     # Load cancer gene list (optional)
