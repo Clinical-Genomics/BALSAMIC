@@ -645,6 +645,14 @@ def plot_chromosomes(
         any focus gene bin.
     """
 
+    # Stable per-gene colour, used for any gene that doesn't already
+    # have a colour from the highlighted-gene cmap.
+    cmap_all = colormaps.get_cmap("tab20")
+
+    def _stable_gene_color(gname: str):
+        h = abs(hash(str(gname)))
+        return cmap_all(h % cmap_all.N)
+
     MIN_GENE_TARGETS = 3
     PSEUDO_PAD = 50.0  # pseudo-position padding around focus genes
     outdir.mkdir(parents=True, exist_ok=True)
@@ -1284,31 +1292,35 @@ def plot_chromosomes(
 
         # ---------- Gene labels + gene-level start/end markers ----------
         # Any gene that is:
-        #   - highlighted_genes (CNV/LOH/PON-signif) OR
-        #   - pon_cnv_genes (explicit PON CNV chunk)
+        #   - in highlighted_genes (CNV/LOH/PON-signif), or
+        #   - in pon_cnv_genes (explicit PON CNV chunk)
         # gets:
         #   - two vertical lines at start/end of the gene
-        #   - a single label, all in its unique cmap colour (not yellow).
+        #   - a single label, all in its unique gene colour.
         label_genes = sorted(set(highlighted_genes) | pon_cnv_genes)
 
         if label_genes:
             for gname in label_genes:
-                # gene-level colour
-                color = gene_to_color.get(gname, "black")
+                # gene-level colour:
+                #   - use cmap colour if we already assigned one
+                #   - otherwise use a stable hash → colour mapping
+                color = gene_to_color.get(gname)
+                if color is None:
+                    color = _stable_gene_color(gname)
 
                 # get genomic span for this gene on this chromosome
                 g_rows = g_chr[g_chr["gene.symbol"] == gname]
                 if (
-                    not g_rows.empty
-                    and "region_start" in g_rows.columns
-                    and "region_end" in g_rows.columns
+                        not g_rows.empty
+                        and "region_start" in g_rows.columns
+                        and "region_end" in g_rows.columns
                 ):
                     g_start = int(g_rows["region_start"].min())
                     g_end = int(g_rows["region_end"].max())
                 elif (
-                    not g_rows.empty
-                    and "seg_start" in g_rows.columns
-                    and "seg_end" in g_rows.columns
+                        not g_rows.empty
+                        and "seg_start" in g_rows.columns
+                        and "seg_end" in g_rows.columns
                 ):
                     g_start = int(g_rows["seg_start"].min())
                     g_end = int(g_rows["seg_end"].max())
@@ -1324,19 +1336,14 @@ def plot_chromosomes(
                 xe_gene = pos_to_xcoord(g_end)
 
                 # start & end vertical lines in gene colour
+                # (thin, no black outline as requested)
                 for xg in (xs_gene, xe_gene):
-                    vline = ax1.axvline(
+                    ax1.axvline(
                         xg,
                         color=color,
-                        linewidth=1.4,
+                        linewidth=1.0,  # thin line
                         alpha=0.95,
                         zorder=4,
-                    )
-                    vline.set_path_effects(
-                        [
-                            pe.Stroke(linewidth=1.8, foreground="black"),
-                            pe.Normal(),
-                        ]
                     )
 
                 # single gene label at the middle of the gene span
@@ -1352,6 +1359,7 @@ def plot_chromosomes(
                     ha="center",
                     va="top",
                     color=color,
+                    # keep white outline on text for readability
                     path_effects=[
                         pe.Stroke(linewidth=1.5, foreground="white"),
                         pe.Normal(),
@@ -2540,7 +2548,7 @@ def build_gene_segment_table(
                 return ",".join(parts)
 
             grouped["exons_hit"] = grouped.apply(_exons_hit, axis=1)
-    
+
     # -------------------- 7. LOHgenes annotation (optional) -------------------- #
     if loh_path is not None and Path(loh_path).is_file():
         loh = safe_read_csv(loh_path, sep=",").copy()
