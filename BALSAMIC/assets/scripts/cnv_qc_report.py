@@ -949,6 +949,13 @@ def main(
         focus_padding_bp=100_000,
     )
 
+    if is_exome:
+        if "is_cancer_gene" in df_genes.columns:
+            mask = df_genes["is_cancer_gene"].fillna(False).astype(bool)
+            filtered = df_genes[mask]
+            if not filtered.empty:
+                df_genes = filtered
+
     # ----------------------------
     # HTML report
     # ----------------------------
