@@ -2430,57 +2430,117 @@ def build_gene_segment_table(
 
         grouped["pon_cnv_call"] = grouped.apply(_pon_cnv_call, axis=1)
 
-    # -------------------- 6. Exon annotation (optional) -------------------- #
-    if refgene_path is not None:
-        exon_map = load_refgene_exons(
-            refgene_path=refgene_path,
-            transcript_selection=transcript_selection,
-        )
+        # -------------------- 6. Exon annotation (optional) -------------------- #
+        if refgene_path is not None:
+            exon_map = load_refgene_exons(
+                refgene_path=refgene_path,
+                transcript_selection=transcript_selection,
+            )
 
-        def _exons_hit(row: pd.Series) -> str:
-            key = (str(row["chr"]), str(row["gene.symbol"]))
-            info = exon_map.get(key)
-            seg_start = row.get("seg_start")
-            seg_end = row.get("seg_end")
+            def _segment_is_cnv(row: pd.Series) -> bool:
+                """
+                Return True if this row is part of a CNV segment according to
+                CNVkit (seg_cn) or PureCN (loh_C). Uses the same classifier
+                as later, but local here so we can decide exon behaviour.
+                """
+                # CNVkit-based
+                seg_cn = row.get("seg_cn", np.nan)
+                if pd.notna(seg_cn):
+                    call = classify_cnv_from_total_cn_sex_aware(
+                        seg_cn,
+                        row.get("chr"),
+                        sex,
+                    )
+                    if str(call).upper() in ("AMPLIFICATION", "DELETION"):
+                        return True
 
-            if info is None or pd.isna(seg_start) or pd.isna(seg_end):
-                return ""
+                # PureCN-based
+                loh_C = row.get("loh_C", np.nan)
+                if pd.notna(loh_C):
+                    call = classify_cnv_from_total_cn_sex_aware(
+                        loh_C,
+                        row.get("chr"),
+                        sex,
+                    )
+                    if str(call).upper() in ("AMPLIFICATION", "DELETION"):
+                        return True
 
-            exons = info["exons"]  # 5'->3'
-            gene_start = min(s for s, e in exons)
-            gene_end = max(e for s, e in exons)
+                return False
 
-            if seg_start <= gene_start and seg_end >= gene_end:
-                return "whole_gene"
+            def _exons_hit(row: pd.Series) -> str:
+                """
+                Exon mapping with chunk-awareness:
 
-            hit_indices: list[int] = []
-            for idx, (s, e) in enumerate(exons, start=1):
-                if e > seg_start and s < seg_end:
-                    hit_indices.append(idx)
+                  - If the underlying segment is CNV (CNVkit or PureCN),
+                    we use the segment span (seg_start/seg_end).
 
-            if not hit_indices:
-                return ""
+                  - Otherwise we use the chunk span (region_start/region_end),
+                    so exon numbers reflect the gene-chunk, not the full neutral segment.
+                """
+                key = (str(row["chr"]), str(row["gene.symbol"]))
+                info = exon_map.get(key)
+                if info is None:
+                    return ""
 
-            ranges = []
-            start = prev = hit_indices[0]
-            for i in hit_indices[1:]:
-                if i == prev + 1:
-                    prev = i
+                # Decide which genomic interval to use
+                use_segment_span = _segment_is_cnv(row)
+
+                seg_start = row.get("seg_start")
+                seg_end = row.get("seg_end")
+                chunk_start = row.get("region_start")
+                chunk_end = row.get("region_end")
+
+                if use_segment_span and pd.notna(seg_start) and pd.notna(seg_end):
+                    region_start = seg_start
+                    region_end = seg_end
                 else:
-                    ranges.append((start, prev))
-                    start = prev = i
-            ranges.append((start, prev))
+                    # fall back to chunk span
+                    region_start = chunk_start
+                    region_end = chunk_end
 
-            parts = []
-            for a, b in ranges:
-                if a == b:
-                    parts.append(str(a))
-                else:
-                    parts.append(f"{a}-{b}")
-            return ",".join(parts)
+                if pd.isna(region_start) or pd.isna(region_end):
+                    return ""
 
-        grouped["exons_hit"] = grouped.apply(_exons_hit, axis=1)
+                exons = info["exons"]  # list of (start, end) 5'->3'
 
+                gene_start = min(s for s, e in exons)
+                gene_end = max(e for s, e in exons)
+
+                # Entire gene covered?
+                if region_start <= gene_start and region_end >= gene_end:
+                    return "whole_gene"
+
+                hit_indices: list[int] = []
+                for idx, (s, e) in enumerate(exons, start=1):
+                    # overlap test
+                    if e > region_start and s < region_end:
+                        hit_indices.append(idx)
+
+                if not hit_indices:
+                    return ""
+
+                # compress contiguous exon indices into ranges
+                ranges = []
+                start = prev = hit_indices[0]
+                for i in hit_indices[1:]:
+                    if i == prev + 1:
+                        prev = i
+                    else:
+                        ranges.append((start, prev))
+                        start = prev = i
+                ranges.append((start, prev))
+
+                parts = []
+                for a, b in ranges:
+                    if a == b:
+                        parts.append(str(a))
+                    else:
+                        parts.append(f"{a}-{b}")
+
+                return ",".join(parts)
+
+            grouped["exons_hit"] = grouped.apply(_exons_hit, axis=1)
+    
     # -------------------- 7. LOHgenes annotation (optional) -------------------- #
     if loh_path is not None and Path(loh_path).is_file():
         loh = safe_read_csv(loh_path, sep=",").copy()
