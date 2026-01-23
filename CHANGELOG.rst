@@ -3,7 +3,7 @@
 
 Added:
 ^^^^^^
-* add AT_DROPOUT to all panel analyses QC deliverables 
+* add AT_DROPOUT to all panel analyses QC deliverables https://github.com/Clinical-Genomics/BALSAMIC/pull/1646
 
 Changed:
 ^^^^^^^^
