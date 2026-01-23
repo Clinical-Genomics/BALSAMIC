@@ -605,6 +605,7 @@ def build_genes_from_cnr(cnr_path: str | Path) -> pd.DataFrame:
 # Per-chromosome plots (PON spread + log2 + segments + BAF + CNV genes)
 # =============================================================================
 
+import matplotlib.patheffects as pe
 
 def plot_chromosomes(
     cnr_path: Path,
@@ -630,24 +631,26 @@ def plot_chromosomes(
 
       - PON spread band (if PON available)
       - smoothed log2 coverage (CNR)
-      - CNVkit / PureCN segments (if present)
-      - gene-level PON-driven CNV chunks (pon_cnv_call == AMPLIFICATION/DELETION)
+      - segments reconstructed from `gene_seg_df`
+      - gene-level PON-driven chunks drawn as lines (if present)
+      - CNV / LOH / PON-significant genes coloured & labelled
       - BAF panel under each chromosome (from VCF)
 
     Additional logic:
 
-      - Only genes with >= 3 targets are highlighted (for CNV/LOH).
+      - Only genes with >= 3 targets are highlighted.
       - If a gene is highlighted *only* because it is PON-significant,
         it must also have is_cancer_gene == True.
       - If highlight_only_cancer is True, then all highlighted genes
         must be cancer genes (for CNV/LOH as well).
-      - Genes with PON-based CNV (pon_cnv_call == AMPLIFICATION/DELETION)
-        are always highlighted and labelled in the plot.
       - If focus_genes is provided, only bins / segments overlapping the
-        genomic span of those genes are shown (per chromosome).
+        genomic span of those genes are shown (per chromosome), and then
+        further restricted in pseudo-position to bins within +/- 50 of
+        any focus gene bin.
     """
 
     MIN_GENE_TARGETS = 3
+    PSEUDO_PAD = 50.0  # pseudo-position padding around focus genes
     outdir.mkdir(parents=True, exist_ok=True)
 
     # Normalise focus_genes to a set (global)
@@ -758,7 +761,7 @@ def plot_chromosomes(
         return False
 
     def _is_pon_signif_chunk(row: pd.Series) -> bool:
-        # legacy per-row PON significance, kept only for table compatibility
+        # NOTE: legacy per-row PON call, if still present
         if "pon_call" in row.index and pd.notna(row["pon_call"]):
             return str(row["pon_call"]).strip().lower() == "significant"
         return False
@@ -768,7 +771,7 @@ def plot_chromosomes(
     gdf["cnv_flag"] = gdf["is_loh_or_cnv"] | gdf["is_pon_signif"]
 
     # ---------------------------------
-    # 2b. Gene-level aggregation (for CNV/LOH highlighting)
+    # 2b. Gene-level aggregation
     # ---------------------------------
     if "gene.symbol" in gdf.columns:
         group_cols = ["chr", "gene.symbol"]
@@ -839,7 +842,7 @@ def plot_chromosomes(
         if g_chr.empty:
             g_chr = pd.DataFrame(columns=gdf.columns)
 
-        # ---------- Restrict to focus_genes window, if requested ----------
+        # ---------- Restrict to focus_genes genomic window, if requested ----------
         focus_genes_chr: list[str] = []  # genes on THIS chromosome
         if focus_genes_set is not None:
             g_focus_chr = g_chr[g_chr["gene.symbol"].isin(focus_genes_set)].copy()
@@ -879,7 +882,7 @@ def plot_chromosomes(
             g_chr = g_focus_chr
         # ----------------------------------------------------------------------
 
-        # Determine which genes to highlight on this chromosome (CNV / LOH / PON-signif)
+        # Determine which genes to highlight on this chromosome
         if gene_level is not None:
             if focus_genes_set is not None:
                 gene_level_chr = gene_level[
@@ -902,21 +905,6 @@ def plot_chromosomes(
                 if "gene.symbol" in g_chr_cnv.columns
                 else np.array([])
             )
-
-        # ---------- NEW: add PON-based CNV genes to highlighted_genes ----------
-        pon_cnv_genes_chr: np.ndarray = np.array([])
-        if "pon_cnv_call" in g_chr.columns:
-            mask_pon_cnv = (
-                g_chr["pon_cnv_call"]
-                .astype(str)
-                .str.upper()
-                .isin(["AMPLIFICATION", "DELETION"])
-            )
-            pon_cnv_genes_chr = (
-                g_chr.loc[mask_pon_cnv, "gene.symbol"].dropna().astype(str).unique()
-            )
-            # ensure these are always highlighted + labelled
-            highlighted_genes = np.union1d(highlighted_genes, pon_cnv_genes_chr)
 
         # Ensure focus genes on this chromosome are highlighted,
         # even if not CNV/LOH/PON-significant
@@ -962,6 +950,17 @@ def plot_chromosomes(
         sub["bin_width"] = sub.apply(_bin_width, axis=1)
         sub["x_coord"] = sub["bin_width"].cumsum() - sub["bin_width"] / 2
 
+        # NEW: if we have focus genes on this chromosome, keep only bins
+        # whose pseudo-position is within +/- PSEUDO_PAD of any focus gene bin.
+        if focus_genes_chr:
+            focus_bins = sub[sub["gene"].isin(focus_genes_chr)]
+            if not focus_bins.empty:
+                focus_x = focus_bins["x_coord"].to_numpy()
+                all_x = sub["x_coord"].to_numpy()
+                # min distance in pseudo-position to any focus gene bin
+                dist = np.min(np.abs(all_x[:, None] - focus_x[None, :]), axis=1)
+                sub = sub.loc[dist <= PSEUDO_PAD].copy()
+
         # smoothing
         sub = sub.sort_values("x_coord")
         sub["log2_smooth"] = sub["log2"].rolling(window=window, center=True).median()
@@ -996,7 +995,7 @@ def plot_chromosomes(
         # BAF for this chromosome, optionally restricted to focus window
         baf_chr = vcf[vcf["CHROM"] == chr_name].copy()
         baf_chr = baf_chr.sort_values("POS")
-        if focus_genes_chr and not baf_chr.empty:
+        if not sub.empty and focus_genes_chr and not baf_chr.empty:
             start_span = sub["start"].min()
             end_span = sub["end"].max()
             baf_chr = baf_chr[
@@ -1005,7 +1004,7 @@ def plot_chromosomes(
         if not baf_chr.empty:
             baf_chr["x_coord"] = baf_chr["POS"].apply(pos_to_xcoord)
 
-        # gene positions (for labels)
+        # gene positions
         gene_to_color: dict[str, tuple] = {}
         genes_chr = pd.DataFrame()
 
@@ -1210,15 +1209,9 @@ def plot_chromosomes(
                     alpha=0.8,
                 )
 
-        # ---------- NEW: gene-level PON-based CNV chunks (pon_cnv_call) ----------
+        # ---------- PON-based CNV segments (bright yellow) ----------
         gene_chunks_label_added = False
-        if {
-            "region_start",
-            "region_end",
-            "mean_log2",
-            "gene.symbol",
-            "pon_cnv_call",
-        }.issubset(g_chr.columns):
+        if {"region_start", "region_end", "mean_log2"}.issubset(g_chr.columns):
             # restrict to current plotted genomic span
             start_span = sub["start"].min()
             end_span = sub["end"].max()
@@ -1228,13 +1221,19 @@ def plot_chromosomes(
                 & (g_chr["region_start"] <= end_span)
             ].copy()
 
-            # Only segments with pon_cnv_call == AMPLIFICATION / DELETION
-            g_chunks["pon_cnv_call_norm"] = (
-                g_chunks["pon_cnv_call"].astype(str).str.strip().str.upper()
-            )
-            g_chunks = g_chunks[
-                g_chunks["pon_cnv_call_norm"].isin(["AMPLIFICATION", "DELETION"])
-            ]
+            # Only keep PON-based CNV calls (AMPLIFICATION / DELETION)
+            if "pon_cnv_call" in g_chunks.columns:
+                g_chunks["pon_cnv_call_norm"] = (
+                    g_chunks["pon_cnv_call"]
+                    .astype(str)
+                    .str.strip()
+                    .str.upper()
+                )
+                g_chunks = g_chunks[
+                    g_chunks["pon_cnv_call_norm"].isin(["AMPLIFICATION", "DELETION"])
+                ]
+            else:
+                g_chunks = g_chunks.iloc[0:0]  # empty if no column
 
             if not g_chunks.empty:
                 for _, crow in g_chunks.iterrows():
@@ -1243,34 +1242,45 @@ def plot_chromosomes(
                     y_chunk = float(crow["mean_log2"])
                     y_chunk = float(np.clip(y_chunk, -y_clip, y_clip))
 
-                    call = str(crow["pon_cnv_call_norm"])
-                    if call == "AMPLIFICATION":
-                        seg_color = "red"
-                    elif call == "DELETION":
-                        seg_color = "royalblue"
-                    else:
-                        seg_color = "black"
+                    seg_color = "yellow"  # bright yellow for PON CNV segments
 
                     line = ax1.hlines(
                         y_chunk,
                         xs,
                         xe,
                         colors=seg_color,
-                        linewidth=0.8,  # thin line
-                        alpha=0.9,
+                        linewidth=0.9,  # thin line
+                        alpha=0.95,
                         linestyles="solid",
                         label=(
-                            "PON CNV segment" if not gene_chunks_label_added else None
+                            "PON-based CNV segment"
+                            if not gene_chunks_label_added
+                            else None
                         ),
                     )
 
-                    # Very thin black outline around the colored line
+                    # Very thin black outline around the yellow line
                     line.set_path_effects(
                         [
-                            pe.Stroke(linewidth=1.1, foreground="black"),
+                            pe.Stroke(linewidth=1.2, foreground="black"),
                             pe.Normal(),
                         ]
                     )
+
+                    # Label with gene name at the middle of the segment
+                    gname = str(crow.get("gene.symbol", "")).strip()
+                    if gname:
+                        x_mid = (xs + xe) / 2.0
+                        ax1.text(
+                            x_mid,
+                            y_chunk + (base_label_offset * 0.6),
+                            gname,
+                            rotation=90,
+                            fontsize=9,
+                            ha="center",
+                            va="bottom",
+                            color="black",
+                        )
 
                     gene_chunks_label_added = True
 
@@ -1285,7 +1295,7 @@ def plot_chromosomes(
         ax1.set_title(title + "\n")
         ax1.legend(loc="upper right", fontsize=8)
 
-        # gene labels (now includes PON-CNV genes due to highlighted_genes union)
+        # gene labels (for general CNV/LOH/PON-significant genes)
         if not genes_chr.empty:
             seen_positions: set[tuple[str, float]] = set()
             for _, row in genes_chr.iterrows():
