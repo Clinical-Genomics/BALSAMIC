@@ -654,6 +654,7 @@ def plot_chromosomes(
         return cmap_all(h % cmap_all.N)
 
     MIN_GENE_TARGETS = 3
+    MIN_GENE_TARGETS_CANCER = 5  # stricter for cancer-only highlighting (exomes)
     PSEUDO_PAD = 50.0  # pseudo-position padding around focus genes
     outdir.mkdir(parents=True, exist_ok=True)
 
@@ -793,13 +794,19 @@ def plot_chromosomes(
 
         if "total_targets" not in gene_level.columns:
             gene_level["total_targets"] = np.nan
+
         gene_level["total_targets"] = gene_level["total_targets"].fillna(0)
         gene_level["is_cancer_gene"] = (
             gene_level["is_cancer_gene"].fillna(False).astype(bool)
         )
 
+        # Stricter target requirement when we’re in cancer-only mode (exomes)
+        min_targets_required = (
+            MIN_GENE_TARGETS_CANCER if highlight_only_cancer else MIN_GENE_TARGETS
+        )
+
         mask_base = gene_level["has_loh_or_cnv"] | gene_level["has_pon_sig"]
-        mask_base &= gene_level["total_targets"] >= MIN_GENE_TARGETS
+        mask_base &= gene_level["total_targets"] >= min_targets_required
 
         pon_only = gene_level["has_pon_sig"] & ~gene_level["has_loh_or_cnv"]
         mask_pon_cancer = ~pon_only | (pon_only & gene_level["is_cancer_gene"])
@@ -1278,6 +1285,14 @@ def plot_chromosomes(
                 pon_cnv_genes = set(
                     g_chunks["gene.symbol"].dropna().astype(str).tolist()
                 )
+                # In cancer-only mode, only keep cancer genes with enough targets
+                if highlight_only_cancer and gene_level is not None:
+                    allowed = gene_level[
+                        (gene_level["chr"] == chr_name)
+                        & (gene_level["is_cancer_gene"])
+                        & (gene_level["total_targets"] >= MIN_GENE_TARGETS_CANCER)
+                        ]["gene.symbol"].astype(str)
+                    pon_cnv_genes &= set(allowed)
 
         ax1.axhline(0, color="black", linewidth=0.8)
         ax1.set_ylim(*y_lim_chr)
