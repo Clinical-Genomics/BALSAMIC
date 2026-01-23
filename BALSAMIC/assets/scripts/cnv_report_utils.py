@@ -2612,12 +2612,218 @@ def build_gene_segment_table(
     cyto = load_cytobands(cytoband_path)
     grouped = annotate_genes_with_cytoband(grouped, cyto)
 
-    # How many chunks does each (chr, gene.symbol) have?
-    if "chunk_id" in grouped.columns:
+    # -------------------- 9. CNV calls from CNVkit / PureCN with amplitude sanity check -------------------- #
+    AMP_EPS = 0.05  # minimum |log2| required to trust a CNV call
+
+    # CNVkit-based call (from seg_cn) + seg_log2 sanity check
+    if {"seg_cn", "chr"}.issubset(grouped.columns):
+
+        def _cnvkit_call_with_sanity(row: pd.Series) -> str:
+            base_call = classify_cnv_from_total_cn_sex_aware(
+                row["seg_cn"],
+                row["chr"],
+                sex,
+            )
+
+            base_call_str = str(base_call).strip().upper()
+            if base_call_str not in ("AMPLIFICATION", "DELETION"):
+                return base_call
+
+            # Amplitude sanity check: require |seg_log2| ≥ AMP_EPS
+            seg_log2 = row.get("seg_log2", np.nan)
+            if pd.notna(seg_log2) and abs(seg_log2) < AMP_EPS:
+                return "NEUTRAL"
+
+            return base_call
+
+        grouped["cnvkit_cnv_call"] = grouped.apply(
+            _cnvkit_call_with_sanity,
+            axis=1,
+        )
+
+    # PureCN-based call (from loh_C) + loh_seg_mean sanity check
+    if {"loh_C", "chr"}.issubset(grouped.columns):
+
+        def _purecn_call_with_sanity(row: pd.Series) -> str:
+            base_call = classify_cnv_from_total_cn_sex_aware(
+                row["loh_C"],
+                row["chr"],
+                sex,
+            )
+
+            base_call_str = str(base_call).strip().upper()
+            if base_call_str not in ("AMPLIFICATION", "DELETION"):
+                return base_call
+
+            # Amplitude sanity check: require |loh_seg_mean| ≥ AMP_EPS
+            seg_mean = row.get("loh_seg_mean", np.nan)
+            if pd.notna(seg_mean) and abs(seg_mean) < AMP_EPS:
+                return "NEUTRAL"
+
+            return base_call
+
+        grouped["purecn_cnv_call"] = grouped.apply(
+            _purecn_call_with_sanity,
+            axis=1,
+        )
+
+    # -------------------- 10. Merge adjacent neutral chunks per gene -------------------- #
+    def _row_is_cnv_like(row: pd.Series) -> bool:
+        """
+        A chunk is considered CNV-like if any of:
+          - cnvkit_cnv_call == AMPLIFICATION / DELETION
+          - purecn_cnv_call == AMPLIFICATION / DELETION
+          - pon_cnv_call    == AMPLIFICATION / DELETION
+        """
+        for col in ("cnvkit_cnv_call", "purecn_cnv_call", "pon_cnv_call"):
+            if col in row.index:
+                val = str(row.get(col, "")).strip().upper()
+                if val in ("AMPLIFICATION", "DELETION"):
+                    return True
+        return False
+
+    def _merge_neutral_run(df_run: pd.DataFrame) -> pd.Series:
+        """
+        Merge a contiguous neutral run (1+ rows from the same gene)
+        into a single neutral chunk row. If len == 1 this will
+        effectively return that row unchanged.
+        """
+        df_run = df_run.sort_values("region_start").reset_index(drop=True)
+        base = df_run.iloc[0].copy()
+
+        # Genomic span over the run
+        if "region_start" in df_run.columns:
+            base["region_start"] = df_run["region_start"].min()
+        if "region_end" in df_run.columns:
+            base["region_end"] = df_run["region_end"].max()
+
+        # n_targets / n.targets: sum
+        if "n_targets" in df_run.columns:
+            base["n_targets"] = df_run["n_targets"].sum(min_count=1)
+        if "n.targets" in df_run.columns:
+            base["n.targets"] = df_run["n.targets"].sum(min_count=1)
+
+        # Weights for weighted means
+        if "n_targets" in df_run.columns:
+            w = df_run["n_targets"].copy()
+        elif "n.targets" in df_run.columns:
+            w = df_run["n.targets"].copy()
+        else:
+            w = pd.Series(1.0, index=df_run.index)
+
+        w = w.fillna(0.0)
+        wsum = float(w.sum())
+        if wsum <= 0:
+            w = pd.Series(1.0, index=df_run.index)
+            wsum = float(w.sum())
+
+        # Weighted means for "average" style columns
+        for col in ("mean_log2", "mean_weight", "pon_mean_log2", "pon_mean_spread"):
+            if col in df_run.columns:
+                vals = df_run[col]
+                base[col] = float(np.nansum(vals * w) / wsum)
+
+        # Extremes across the run
+        if "min_log2" in df_run.columns:
+            base["min_log2"] = df_run["min_log2"].min()
+        if "max_log2" in df_run.columns:
+            base["max_log2"] = df_run["max_log2"].max()
+
+        # Per-gene / categorical fields – keep first non-null in the run
+        copy_first_cols = [
+            "seg_cn",
+            "seg_cn1",
+            "seg_cn2",
+            "seg_log2",
+            "seg_baf",
+            "seg_start",
+            "seg_end",
+            "seg_depth",
+            "loh_C",
+            "loh_M",
+            "loh_M_flagged",
+            "loh_flag",
+            "loh_seg_mean",
+            "loh_num_snps",
+            "pon_chunk_effect",
+            "pon_chunk_z",
+            "pon_chunk_direction",
+            "pon_chunk_call",
+            "pon_cnv_call",
+            "exons_hit",
+            "cytoband",
+            "is_cancer_gene",
+            "cnvkit_cnv_call",
+            "purecn_cnv_call",
+        ]
+        for col in copy_first_cols:
+            if col in df_run.columns:
+                ser = df_run[col]
+                if ser.notna().any():
+                    base[col] = ser.dropna().iloc[0]
+                else:
+                    base[col] = "" if ser.dtype == object else np.nan
+
+        # Mark as merged neutral (for debugging; dropped later anyway)
+        if "chunk_id" in base.index:
+            base["chunk_id"] = "merged_neutral"
+
+        return base
+
+    def _merge_neutral_chunks_per_gene(df_gene: pd.DataFrame) -> pd.DataFrame:
+        """
+        For a given (chr, gene.symbol), merge **adjacent neutral chunks**:
+
+          - Traverse chunks ordered by region_start.
+          - CNV-like rows are kept as-is.
+          - Consecutive neutral rows are merged into one row.
+          - If the whole gene is neutral, everything collapses to a single row.
+        """
+        if df_gene.shape[0] <= 1:
+            return df_gene
+
+        df_gene = df_gene.sort_values("region_start").reset_index(drop=True)
+
+        out_rows: list[pd.Series] = []
+        current_neutral_idxs: list[int] = []
+
+        for idx, row in df_gene.iterrows():
+            is_cnv = _row_is_cnv_like(row)
+
+            if is_cnv:
+                # Flush any pending neutral run
+                if current_neutral_idxs:
+                    merged = _merge_neutral_run(df_gene.loc[current_neutral_idxs])
+                    out_rows.append(merged)
+                    current_neutral_idxs = []
+
+                # Keep CNV chunk as-is
+                out_rows.append(row)
+            else:
+                # Neutral chunk: accumulate into current run
+                current_neutral_idxs.append(idx)
+
+        # Flush tail neutral run if any
+        if current_neutral_idxs:
+            merged = _merge_neutral_run(df_gene.loc[current_neutral_idxs])
+            out_rows.append(merged)
+
+        # Build DataFrame back
+        out_df = pd.DataFrame(out_rows).reset_index(drop=True)
+        return out_df
+
+    grouped = (
+        grouped.groupby(["chr", "gene.symbol"], as_index=False, group_keys=False)
+        .apply(_merge_neutral_chunks_per_gene)
+        .reset_index(drop=True)
+    )
+
+    # -------------------- 11. Gene split flags (after merging neutrals) -------------------- #
+    if "gene.symbol" in grouped.columns:
         gene_chunk_counts = (
-            grouped.groupby(["chr", "gene.symbol"], as_index=False)["chunk_id"]
-            .nunique()
-            .rename(columns={"chunk_id": "gene_chunk_count"})
+            grouped.groupby(["chr", "gene.symbol"], as_index=False)
+            .size()
+            .rename(columns={"size": "gene_chunk_count"})
         )
 
         grouped = grouped.merge(
@@ -2626,14 +2832,12 @@ def build_gene_segment_table(
             on=["chr", "gene.symbol"],
         )
 
-        # A gene is considered "split" if it appears in >1 chunk
         grouped["is_gene_split"] = grouped["gene_chunk_count"].fillna(1) > 1
     else:
-        # Fallback (shouldn't usually happen): every gene is treated as single-chunk
         grouped["gene_chunk_count"] = 1
         grouped["is_gene_split"] = False
 
-    # -------------------- 9. Column order & sorting -------------------- #
+    # -------------------- 12. Column order & sorting -------------------- #
     cols_order = [
         "chr",
         "region_start",
@@ -2669,11 +2873,13 @@ def build_gene_segment_table(
         "pon_chunk_direction",
         "pon_chunk_call",
         "pon_cnv_call",
+        "cnvkit_cnv_call",
+        "purecn_cnv_call",
     ]
     cols_order = [c for c in cols_order if c in grouped.columns]
     grouped = grouped[
         cols_order + (["chunk_id"] if "chunk_id" in grouped.columns else [])
-    ]
+        ]
 
     # chromosome sorting: numeric -> X -> Y -> others
     def _chr_key(c):
@@ -2701,26 +2907,5 @@ def build_gene_segment_table(
     drop_cols = [c for c in drop_cols if c in grouped.columns]
     grouped = grouped.drop(columns=drop_cols)
 
-    # CNVkit-based call (from seg_cn)
-    if {"seg_cn", "chr"}.issubset(grouped.columns):
-        grouped["cnvkit_cnv_call"] = grouped.apply(
-            lambda r: classify_cnv_from_total_cn_sex_aware(
-                r["seg_cn"],
-                r["chr"],
-                sex,
-            ),
-            axis=1,
-        )
-
-    # PureCN-based call (from loh_C)
-    if {"loh_C", "chr"}.issubset(grouped.columns):
-        grouped["purecn_cnv_call"] = grouped.apply(
-            lambda r: classify_cnv_from_total_cn_sex_aware(
-                r["loh_C"],
-                r["chr"],
-                sex,
-            ),
-            axis=1,
-        )
-
     return grouped
+
