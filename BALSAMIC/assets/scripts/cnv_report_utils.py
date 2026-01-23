@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Dict, Tuple, List, Optional, Set
 from pandas.errors import EmptyDataError
 
-# import fitz
+import fitz
 import matplotlib.pyplot as plt
 from matplotlib import colormaps
 from matplotlib import patheffects as pe
@@ -17,14 +17,12 @@ from collections.abc import Collection
 # Generic helpers
 # =============================================================================
 
-"""
+
 def pdf_first_page_to_png(pdf_path: str, png_path: str, dpi: int = 300) -> None:
     doc = fitz.open(pdf_path)
     page = doc[0]
     page.get_pixmap(dpi=dpi).save(png_path)
     doc.close()
-"""
-
 
 def load_cancer_gene_set(
     path: str | Path, min_occurrence: int = 1, only_annotated: bool = True
@@ -605,7 +603,6 @@ def build_genes_from_cnr(cnr_path: str | Path) -> pd.DataFrame:
 # Per-chromosome plots (PON spread + log2 + segments + BAF + CNV genes)
 # =============================================================================
 
-import matplotlib.patheffects as pe
 
 def plot_chromosomes(
     cnr_path: Path,
@@ -1920,11 +1917,11 @@ def build_gene_segment_table(
     # of whether CNVkit created a segment. CNV segments remain as annotation.
     # If PON is available, we work in per-bin Z-score units (effect / spread);
     # otherwise we fall back to a simple log2 amplitude threshold.
-    MIN_GENE_TARGETS = 10  # only genes with at least this many bins
+    MIN_GENE_TARGETS = 8  # only genes with at least this many bins
     MIN_RUN_BINS = 4  # min consecutive bins in a run
     LOG2_THRESH_FALLBACK = 0.30  # fallback |effect| threshold without PON
     Z_BIN_THRESH = 1.5  # per-bin |z| threshold to be "active"
-    Z_RUN_THRESH = 2.0  # per-run z threshold to keep a chunk
+    Z_RUN_THRESH = 3.0  # per-run z threshold to keep a chunk
     SMOOTH_WINDOW = 3  # rolling median smoothing window
 
     if bins.empty:
@@ -2111,8 +2108,8 @@ def build_gene_segment_table(
     #   If we see patterns like big A – tiny B – big C with mean(A) ~ mean(C),
     #   we merge A+B+C into a single chunk.
     #   We also merge very small adjacent chunks with similar means.
-    MAX_BRIDGE_BINS = 3  # size of "island" allowed between similar flanks
-    BRIDGE_DELTA = 0.15  # max |mean_eff(A) - mean_eff(C)| to consider them similar
+    MAX_BRIDGE_BINS = 4  # size of "island" allowed between similar flanks
+    BRIDGE_DELTA = 0.12  # max |mean_eff(A) - mean_eff(C)| to consider them similar
     SMALL_SEG_N = 3  # max bins to consider a run "small"
     MERGE_DELTA = 0.10  # adjacency merge threshold on |mean_eff|
 

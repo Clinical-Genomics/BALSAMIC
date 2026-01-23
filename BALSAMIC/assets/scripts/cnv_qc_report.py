@@ -10,10 +10,9 @@ from cnv_report_utils import (
     build_gene_segment_table,
     load_cancer_gene_set,
     compute_summary_metrics,
+    pdf_first_page_to_png,
 )
 from BALSAMIC.constants.analysis import Gender
-
-# pdf_first_page_to_png,
 
 def csv_to_html_table(
     df: pd.DataFrame,
@@ -851,12 +850,10 @@ def main(
     scatter_png_path = outdir / f"cnvkit_scatter_{case_id}.png"
     diagram_png_path = outdir / f"cnvkit_diagram_{case_id}.png"
 
-    if scatter_png_path:
-        print("t")
-        # pdf_first_page_to_png(cnvkit_scatter, scatter_png_path)
-    if diagram_png_path:
-        print("t")
-        # pdf_first_page_to_png(cnvkit_diagram, diagram_png_path)
+    if Path(cnvkit_scatter).is_file():
+        pdf_first_page_to_png(cnvkit_scatter, scatter_png_path)
+    if Path(cnvkit_diagram).is_file():
+        pdf_first_page_to_png(cnvkit_diagram, diagram_png_path)
 
     # ----------------------------
     # Load cancer gene list (optional)
