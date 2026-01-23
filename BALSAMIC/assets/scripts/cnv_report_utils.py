@@ -603,7 +603,6 @@ def build_genes_from_cnr(cnr_path: str | Path) -> pd.DataFrame:
 # Per-chromosome plots (PON spread + log2 + segments + BAF + CNV genes)
 # =============================================================================
 
-
 def plot_chromosomes(
     cnr_path: Path,
     vcf_path: Path,
@@ -954,7 +953,6 @@ def plot_chromosomes(
             if not focus_bins.empty:
                 focus_x = focus_bins["x_coord"].to_numpy()
                 all_x = sub["x_coord"].to_numpy()
-                # min distance in pseudo-position to any focus gene bin
                 dist = np.min(np.abs(all_x[:, None] - focus_x[None, :]), axis=1)
                 sub = sub.loc[dist <= PSEUDO_PAD].copy()
 
@@ -1001,7 +999,7 @@ def plot_chromosomes(
         if not baf_chr.empty:
             baf_chr["x_coord"] = baf_chr["POS"].apply(pos_to_xcoord)
 
-        # gene positions
+        # gene positions & colours for highlighted genes
         gene_to_color: dict[str, tuple] = {}
         genes_chr = pd.DataFrame()
 
@@ -1206,8 +1204,10 @@ def plot_chromosomes(
                     alpha=0.8,
                 )
 
-        # ---------- PON-based CNV segments (bright yellow) ----------
+        # ---------- PON-based CNV segments (bright yellow, per chunk) ----------
+        pon_cnv_genes: set[str] = set()
         gene_chunks_label_added = False
+
         if {"region_start", "region_end", "mean_log2"}.issubset(g_chr.columns):
             # restrict to current plotted genomic span
             start_span = sub["start"].min()
@@ -1233,6 +1233,7 @@ def plot_chromosomes(
                 g_chunks = g_chunks.iloc[0:0]  # empty if no column
 
             if not g_chunks.empty:
+                # draw per-chunk yellow lines
                 for _, crow in g_chunks.iterrows():
                     xs = pos_to_xcoord(int(crow["region_start"]))
                     xe = pos_to_xcoord(int(crow["region_end"]))
@@ -1246,7 +1247,7 @@ def plot_chromosomes(
                         xs,
                         xe,
                         colors=seg_color,
-                        linewidth=0.9,  # thin line
+                        linewidth=0.9,
                         alpha=0.95,
                         linestyles="solid",
                         label=(
@@ -1256,7 +1257,6 @@ def plot_chromosomes(
                         ),
                     )
 
-                    # Very thin black outline around the yellow line
                     line.set_path_effects(
                         [
                             pe.Stroke(linewidth=1.2, foreground="black"),
@@ -1264,22 +1264,12 @@ def plot_chromosomes(
                         ]
                     )
 
-                    # Label with gene name at the middle of the segment
-                    gname = str(crow.get("gene.symbol", "")).strip()
-                    if gname:
-                        x_mid = (xs + xe) / 2.0
-                        ax1.text(
-                            x_mid,
-                            y_chunk + (base_label_offset * 0.6),
-                            gname,
-                            rotation=90,
-                            fontsize=9,
-                            ha="center",
-                            va="bottom",
-                            color="black",
-                        )
-
                     gene_chunks_label_added = True
+
+                # track which genes have PON-based CNV segments
+                pon_cnv_genes = set(
+                    g_chunks["gene.symbol"].dropna().astype(str).tolist()
+                )
 
         ax1.axhline(0, color="black", linewidth=0.8)
         ax1.set_ylim(*y_lim_chr)
@@ -1292,37 +1282,80 @@ def plot_chromosomes(
         ax1.set_title(title + "\n")
         ax1.legend(loc="upper right", fontsize=8)
 
-        # gene labels (for general CNV/LOH/PON-significant genes)
-        if not genes_chr.empty:
-            seen_positions: set[tuple[str, float]] = set()
-            for _, row in genes_chr.iterrows():
-                gene = row["gene.symbol"]
-                gx = row["x_coord"]
-                key = (gene, gx)
-                if key in seen_positions:
-                    continue
-                seen_positions.add(key)
+        # ---------- Gene labels + gene-level start/end markers ----------
+        # Any gene that is:
+        #   - highlighted_genes (CNV/LOH/PON-signif) OR
+        #   - pon_cnv_genes (explicit PON CNV chunk)
+        # gets:
+        #   - two vertical lines at start/end of the gene
+        #   - a single label, all in its unique cmap colour (not yellow).
+        label_genes = sorted(set(highlighted_genes) | pon_cnv_genes)
 
-                color = gene_to_color.get(gene, "black")
+        if label_genes:
+            for gname in label_genes:
+                # gene-level colour
+                color = gene_to_color.get(gname, "black")
 
-                idx_near = np.argmin(np.abs(sub["x_coord"] - gx))
-                y_val = sub["log2_smooth_clipped"].iloc[idx_near]
-                if pd.isna(y_val):
-                    y_val = 0.0
+                # get genomic span for this gene on this chromosome
+                g_rows = g_chr[g_chr["gene.symbol"] == gname]
+                if (
+                    not g_rows.empty
+                    and "region_start" in g_rows.columns
+                    and "region_end" in g_rows.columns
+                ):
+                    g_start = int(g_rows["region_start"].min())
+                    g_end = int(g_rows["region_end"].max())
+                elif (
+                    not g_rows.empty
+                    and "seg_start" in g_rows.columns
+                    and "seg_end" in g_rows.columns
+                ):
+                    g_start = int(g_rows["seg_start"].min())
+                    g_end = int(g_rows["seg_end"].max())
+                else:
+                    # fallback: approximate from CNR bins with that gene symbol
+                    bins_gene = sub[sub["gene"] == gname]
+                    if bins_gene.empty:
+                        continue
+                    g_start = int(bins_gene["start"].min())
+                    g_end = int(bins_gene["end"].max())
 
-                offset = base_label_offset if y_val < 0 else -base_label_offset
-                y_label = y_val + offset
+                xs_gene = pos_to_xcoord(g_start)
+                xe_gene = pos_to_xcoord(g_end)
 
-                ax1.axvline(gx, color=color, linewidth=0.5, alpha=0.3)
+                # start & end vertical lines in gene colour
+                for xg in (xs_gene, xe_gene):
+                    vline = ax1.axvline(
+                        xg,
+                        color=color,
+                        linewidth=1.4,
+                        alpha=0.95,
+                        zorder=4,
+                    )
+                    vline.set_path_effects(
+                        [
+                            pe.Stroke(linewidth=1.8, foreground="black"),
+                            pe.Normal(),
+                        ]
+                    )
+
+                # single gene label at the middle of the gene span
+                x_mid = (xs_gene + xe_gene) / 2.0
+                y_label = y_max - (base_label_offset * 0.5)
+
                 ax1.text(
-                    gx,
+                    x_mid,
                     y_label,
-                    gene,
+                    gname,
                     rotation=90,
-                    fontsize=10,
+                    fontsize=9,
                     ha="center",
-                    va="bottom" if offset > 0 else "top",
+                    va="top",
                     color=color,
+                    path_effects=[
+                        pe.Stroke(linewidth=1.5, foreground="white"),
+                        pe.Normal(),
+                    ],
                 )
 
         # BAF panel
