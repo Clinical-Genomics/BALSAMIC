@@ -298,7 +298,7 @@ def compute_summary_metrics(
     """
     Build a 1-row DataFrame with various QC / burden summaries:
 
-      - DLR_spread (CNR-based)
+      - CNR log spread
       - PON spread quantiles (CNN-based, targets only)
       - chunk-level CNV/LOH counts & fractions
       - gene-level CNV/LOH counts
@@ -306,7 +306,7 @@ def compute_summary_metrics(
     metrics: dict[str, float | int] = {}
 
     # 1) DLR-like spread
-    metrics["DLR_spread"] = compute_dlr_spread_from_cnr(cnr_path)
+    metrics["Log2-spread"] = compute_dlr_spread_from_cnr(cnr_path)
 
     # 2) PON spread summaries
     if cnn_path is not None and Path(cnn_path).is_file():
@@ -1843,7 +1843,6 @@ def build_gene_segment_table(
             mean_log2=("log2", "mean"),
             min_log2=("log2", "min"),
             max_log2=("log2", "max"),
-            mean_depth=("depth", "mean") if has_depth else ("log2", "size"),
             mean_weight=("weight", "mean") if has_weight else ("log2", "size"),
         )
         grouped["seg_start"] = np.nan
@@ -2005,7 +2004,6 @@ def build_gene_segment_table(
             "log2_mean": "mean_log2",
             "log2_min": "min_log2",
             "log2_max": "max_log2",
-            "depth_mean": "mean_depth" if has_depth else "depth_mean",
             "weight_mean": "mean_weight" if has_weight else "weight_mean",
             "seg_start_first": "seg_start",
             "seg_end_first": "seg_end",
@@ -2296,13 +2294,6 @@ def build_gene_segment_table(
         by=["chr_sort", "region_start", "region_end"],
         kind="stable",
     ).drop(columns=["chr_sort"])
-
-    # drop helper columns we don't want in final table
-    drop_cols = [
-        "mean_depth",
-    ]
-    drop_cols = [c for c in drop_cols if c in grouped.columns]
-    grouped = grouped.drop(columns=drop_cols)
 
     return grouped
 
@@ -2682,7 +2673,6 @@ def build_gene_chunk_table(
             "log2_mean": "mean_log2",
             "log2_min": "min_log2",
             "log2_max": "max_log2",
-            "depth_mean": "mean_depth" if has_depth else "depth_mean",
             "weight_mean": "mean_weight" if has_weight else "weight_mean",
             "pon_log2_mean": "pon_mean_log2",
             "pon_spread_mean": "pon_mean_spread",

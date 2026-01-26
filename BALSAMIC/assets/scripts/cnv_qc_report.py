@@ -520,7 +520,7 @@ def csv_to_html_table(
       <h2>CNV / QC summary</h2>
       <p class="muted">
         Additional metrics derived from CNVkit CNR/CNN and gene-level segments,
-        including DLR-like probe-to-probe noise and PON spread summaries.
+        including DLR-like noise, standard deviation of adjacent Target Log2-ratios, and PON spread summaries.
       </p>
       {qc_summary_html}
 
