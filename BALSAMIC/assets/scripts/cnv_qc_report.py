@@ -1002,7 +1002,7 @@ def main(
             mask = genes_df["is_cancer_gene"].fillna(False).astype(bool)
             filtered_genes = genes_df[mask]
             if not filtered_genes.empty:
-                df_genes = filtered_genes
+                genes_df = filtered_genes
             mask = chunk_df["is_cancer_gene"].fillna(False).astype(bool)
             filtered_chunks = chunk_df[mask]
             if not filtered_chunks.empty:
@@ -1013,7 +1013,7 @@ def main(
     # ----------------------------
     out_html = str(out_prefix)
     csv_to_html_table(
-        df=df_genes,
+        df=genes_df,
         out_html=out_html,
         scatter_png=str(scatter_png_path),
         diagram_png=str(diagram_png_path),

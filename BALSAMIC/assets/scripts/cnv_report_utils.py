@@ -411,7 +411,6 @@ def annotate_genes_with_cytoband(
 # PureCN CNV genes (for plotting only)
 # =============================================================================
 
-
 def flag_cnv_genes(df: pd.DataFrame, min_targets_cnvgene: int = 4) -> pd.DataFrame:
     """
     Subset PureCN genes to those that look like CNV genes.
