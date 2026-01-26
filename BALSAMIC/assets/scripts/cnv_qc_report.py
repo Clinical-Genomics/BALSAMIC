@@ -24,7 +24,7 @@ def csv_to_html_table(
     chr_plots_dir: str | Path | None = None,
     purecn_summary_df: pd.DataFrame | None = None,
     qc_summary_df: pd.DataFrame | None = None,
-    chunk_df: pd.DataFrame | None = None,   # NEW: chunk-level table (optional)
+    chunk_df: pd.DataFrame | None = None,
 ) -> None:
     out_path = Path(out_html)
 
@@ -912,7 +912,7 @@ def main(
     # Create per-gene CNV table
     # ----------------------------
     # pon can be None (no PON file); build_gene_table handles that
-    df_genes = build_gene_segment_table(
+    genes_df = build_gene_segment_table(
         cnr_path=cnr,
         cns_path=cns,
         cancer_genes=cancer_gene_set,
@@ -927,7 +927,7 @@ def main(
     # ----------------------------
     # Create per chunk table
     # ----------------------------
-    chunk_df = build_gene_chunk_table(cnr_path=cnr, gene_seg_df=df_genes, pon_path=pon)
+    chunk_df = build_gene_chunk_table(cnr_path=cnr, gene_seg_df=genes_df, pon_path=pon)
 
 
     # --- 1) PureCN summary (from purity_csv) ---
@@ -954,7 +954,7 @@ def main(
     qc_summary_df = compute_summary_metrics(
         cnr_path=cnr,
         cnn_path=pon,  # CNVkit .cnn PON, or None
-        gene_seg_df=df_genes,  # from build_gene_segment_table
+        gene_seg_df=genes_df,  # from build_gene_segment_table
     )
 
     # ----------------------------
@@ -972,7 +972,8 @@ def main(
     plot_chromosomes(
         cnr_path=cnr,
         vcf_path=vcf,
-        gene_seg_df=df_genes,
+        gene_seg_df=genes_df,
+        gene_chunk_df=chunk_df,
         outdir=chr_plots_dir,
         case_id=plot_case_id,
         pon_path=pon,
@@ -984,7 +985,8 @@ def main(
     plot_chromosomes(
         cnr_path=cnr,
         vcf_path=vcf,
-        gene_seg_df=df_genes,
+        gene_seg_df=genes_df,
+        gene_chunk_df=chunk_df,
         outdir=chr_plots_dir,
         case_id=plot_case_id,
         pon_path=pon,
@@ -996,11 +998,15 @@ def main(
     )
 
     if is_exome:
-        if "is_cancer_gene" in df_genes.columns:
-            mask = df_genes["is_cancer_gene"].fillna(False).astype(bool)
-            filtered = df_genes[mask]
-            if not filtered.empty:
-                df_genes = filtered
+        if "is_cancer_gene" in genes_df.columns:
+            mask = genes_df["is_cancer_gene"].fillna(False).astype(bool)
+            filtered_genes = genes_df[mask]
+            if not filtered_genes.empty:
+                df_genes = filtered_genes
+            mask = chunk_df["is_cancer_gene"].fillna(False).astype(bool)
+            filtered_chunks = chunk_df[mask]
+            if not filtered_chunks.empty:
+                chunk_df = filtered_chunks
 
     # ----------------------------
     # HTML report
@@ -1014,6 +1020,7 @@ def main(
         chr_plots_dir=chr_plots_dir,
         purecn_summary_df=purecn_summary_df,
         qc_summary_df=qc_summary_df,
+        chunk_df=chunk_df,
     )
 
     click.echo(f"[CNV QC] Finished report for {case_id}: {out_html}")
