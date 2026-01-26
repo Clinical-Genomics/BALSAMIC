@@ -286,7 +286,6 @@ def compute_gene_cnv_summaries(gene_seg_df: pd.DataFrame) -> dict[str, float]:
         # gene-level
         "n_genes_cnvkit_cnv": genes_cnvkit,
         "n_genes_purecn_cnv": genes_purecn,
-        "n_genes_pon_cnv": genes_pon,
         "n_genes_loh": genes_loh,
     }
 
