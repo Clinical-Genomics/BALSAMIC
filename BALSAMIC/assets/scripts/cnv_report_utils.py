@@ -906,22 +906,32 @@ def plot_chromosomes(
             if sub.empty:
                 continue
 
-            # Restrict gene rows
-            g_chr = g_focus_chr
-
-            # Restrict chunk rows to those genes / genomic span (if chunk df exists)
-            if not g_chunks_chr.empty and "gene.symbol" in g_chunks_chr.columns:
-                g_chunks_chr = g_chunks_chr[
-                    g_chunks_chr["gene.symbol"].isin(focus_genes_chr)
-                ]
+            # Restrict gene rows to any gene overlapping this genomic window
+            if {"region_start", "region_end"}.issubset(g_chr.columns):
+                g_chr = g_chr[
+                    (g_chr["region_end"] >= start_min)
+                    & (g_chr["region_start"] <= end_max)
+                ].copy()
+            elif {"seg_start", "seg_end"}.issubset(g_chr.columns):
+                g_chr = g_chr[
+                    (g_chr["seg_end"] >= start_min)
+                    & (g_chr["seg_start"] <= end_max)
+                ].copy()
+            # else: leave g_chr as-is (no coordinates available to filter)
         # ----------------------------------------------------------------------
 
         # Determine which genes to highlight on this chromosome
         if gene_level is not None:
-            if focus_genes_set is not None:
+            if "gene.symbol" in g_chr.columns:
+                genes_in_view = (
+                    g_chr["gene.symbol"]
+                    .dropna()
+                    .astype(str)
+                    .unique()
+                )
                 gene_level_chr = gene_level[
                     (gene_level["chr"] == chr_name)
-                    & (gene_level["gene.symbol"].isin(focus_genes_chr))
+                    & (gene_level["gene.symbol"].astype(str).isin(genes_in_view))
                 ]
             else:
                 gene_level_chr = gene_level[gene_level["chr"] == chr_name]
@@ -984,15 +994,26 @@ def plot_chromosomes(
         sub["bin_width"] = sub.apply(_bin_width, axis=1)
         sub["x_coord"] = sub["bin_width"].cumsum() - sub["bin_width"] / 2
 
-        # NEW: if we have focus genes on this chromosome, keep only bins
-        # whose pseudo-position is within +/- PSEUDO_PAD of any focus gene bin.
+        # If we have focus genes on this chromosome, trim pseudo-position.
+        # For >= 2 focus genes, keep a continuous region from the leftmost
+        # to the rightmost focus gene (± PSEUDO_PAD), so genes in between stay.
         if focus_genes_chr:
             focus_bins = sub[sub["gene"].isin(focus_genes_chr)]
             if not focus_bins.empty:
-                focus_x = focus_bins["x_coord"].to_numpy()
                 all_x = sub["x_coord"].to_numpy()
-                dist = np.min(np.abs(all_x[:, None] - focus_x[None, :]), axis=1)
-                sub = sub.loc[dist <= PSEUDO_PAD].copy()
+                if len(focus_genes_chr) >= 2:
+                    x_min = float(focus_bins["x_coord"].min()) - PSEUDO_PAD
+                    x_max = float(focus_bins["x_coord"].max()) + PSEUDO_PAD
+                    mask = (all_x >= x_min) & (all_x <= x_max)
+                else:
+                    focus_x = focus_bins["x_coord"].to_numpy()
+                    dist = np.min(
+                        np.abs(all_x[:, None] - focus_x[None, :]),
+                        axis=1,
+                    )
+                    mask = dist <= PSEUDO_PAD
+
+                sub = sub.loc[mask].copy()
 
         # smoothing
         sub = sub.sort_values("x_coord")
