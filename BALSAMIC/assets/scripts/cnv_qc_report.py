@@ -1031,7 +1031,6 @@ def main(
         cancer_genes=cancer_gene_set,
         refgene_path=refgene,
         transcript_selection="longest_tx",
-        pon_path=pon,
         loh_path=loh_genes,
         cytoband_path=cytoband,
         sex=sex,
