@@ -8,20 +8,23 @@ from pathlib import Path
 from cnv_report_utils import (
     plot_chromosomes,
     build_gene_segment_table,
+    build_gene_chunk_table,
     load_cancer_gene_set,
     compute_summary_metrics,
     pdf_first_page_to_png,
 )
 from BALSAMIC.constants.analysis import Gender
 
+
 def csv_to_html_table(
-    df: pd.DataFrame,
+    df: pd.DataFrame,                     # gene-level table
     out_html: str | Path,
     scatter_png: str | Path | None = None,
     diagram_png: str | Path | None = None,
     chr_plots_dir: str | Path | None = None,
     purecn_summary_df: pd.DataFrame | None = None,
     qc_summary_df: pd.DataFrame | None = None,
+    chunk_df: pd.DataFrame | None = None,   # NEW: chunk-level table (optional)
 ) -> None:
     out_path = Path(out_html)
 
@@ -303,15 +306,37 @@ def csv_to_html_table(
             table_id="qc-summary-table",
         )
 
-    # ---------------- CNV Gene table ----------------
-    table_html = df.to_html(
+    # ---------------- Gene-level CNV/LOH table ----------------
+    gene_table_html = df.to_html(
         index=False,
         border=0,
         classes="dataframe",
-        table_id="report-table",
+        table_id="report-table",   # gene-level
     )
 
-    # Column indices for JS
+    # ---------------- Chunk-level table (optional) ----------------
+    if chunk_df is not None and not chunk_df.empty:
+        chunk_table_html = chunk_df.to_html(
+            index=False,
+            border=0,
+            classes="dataframe",
+            table_id="chunk-table",
+        )
+        chunk_section_html = f"""
+        <h2>Within-gene PON-driven chunks (optional detail)</h2>
+        <p class="muted">
+          These rows represent sub-gene chunks defined by PON-based deviation (log2 vs panel-of-normals),
+          for genes in the main table. Use this for fine-grained inspection of noisy or complex genes.
+        </p>
+        <button id="toggle-chunk-table" type="button">Show chunk-level table</button>
+        <div id="chunk-table-container" style="display:none; margin-top:10px;">
+          {chunk_table_html}
+        </div>
+        """
+    else:
+        chunk_section_html = ""  # no PON / no chunks → omit completely
+
+    # Column indices for JS (gene-level table)
     col_idx_map = {name: idx for idx, name in enumerate(df.columns)}
     col_idx_json = json.dumps(col_idx_map)
 
@@ -467,7 +492,7 @@ def csv_to_html_table(
 
       {qc_plots_html}
 
-      <h1>LOH / CNV Genes</h1>
+      <h1>LOH / CNV Genes (gene-level)</h1>
 
       <div class="controls">
         <div class="control-group">
@@ -502,7 +527,9 @@ def csv_to_html_table(
         </div>
       </div>
 
-      {table_html}
+      {gene_table_html}
+
+      {chunk_section_html}
 
       <!-- Modal overlay for enlarged plots -->
       <div id="plot-modal" class="modal-overlay">
@@ -615,7 +642,6 @@ def csv_to_html_table(
                 if (ponCnvColIdx !== -1) {{
                   const ponCell = row.cells[ponCnvColIdx];
                   const ponVal = normalizeCellText(ponCell);
-                  // pon_cnv_call has values 'AMPLIFICATION' or 'DELETION' (or empty)
                   if (ponVal === "amplification" || ponVal === "deletion") {{
                     isPonCnv = true;
                   }}
@@ -670,6 +696,20 @@ def csv_to_html_table(
           if (checkboxSplit)    checkboxSplit.addEventListener("change", applyFilter);
           if (geneInput)        geneInput.addEventListener("input", applyFilter);
           if (minTargetsInput)  minTargetsInput.addEventListener("input", applyFilter);
+
+          // --- Chunk-level table toggle (if present) ---
+          const chunkToggleBtn   = document.getElementById("toggle-chunk-table");
+          const chunkContainer   = document.getElementById("chunk-table-container");
+          if (chunkToggleBtn && chunkContainer) {{
+            let chunkVisible = false;
+            chunkToggleBtn.addEventListener("click", () => {{
+              chunkVisible = !chunkVisible;
+              chunkContainer.style.display = chunkVisible ? "block" : "none";
+              chunkToggleBtn.textContent = chunkVisible
+                ? "Hide chunk-level table"
+                : "Show chunk-level table";
+            }});
+          }}
 
           // --- Modal logic for enlarged plots ---
           const modal       = document.getElementById("plot-modal");
@@ -883,6 +923,12 @@ def main(
         cytoband_path=cytoband,
         sex=sex,
     )
+
+    # ----------------------------
+    # Create per chunk table
+    # ----------------------------
+    chunk_df = build_gene_chunk_table(cnr_path=cnr, gene_seg_df=df_genes, pon_path=pon)
+
 
     # --- 1) PureCN summary (from purity_csv) ---
     purecn_summary_df: pd.DataFrame | None = None

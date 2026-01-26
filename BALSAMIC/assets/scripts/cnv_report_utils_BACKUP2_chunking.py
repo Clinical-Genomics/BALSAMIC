@@ -1742,31 +1742,33 @@ def classify_cnv_from_total_cn_sex_aware(
 # Final gene table builder (CNR base + optional PureCN + PON)
 # =============================================================================
 
+
 def build_gene_segment_table(
     cnr_path: str | Path,
     cns_path: str | Path,
     cancer_genes: Optional[Set[str]] = None,
     refgene_path: str | Path | None = None,
     transcript_selection: str = "longest_tx",
-    pon_path: str | Path | None = None,  # kept in signature for compatibility (unused)
+    pon_path: str | Path | None = None,
     loh_path: str | Path | None = None,
     cytoband_path: str | Path | None = None,
     sex: Gender = None,
 ) -> pd.DataFrame:
     """
-    Build a per-gene x segment table from CNVkit CNR + CNS
-    (+ optional refGene, LOHgenes, cytobands).
+    Build a gene x (within-gene) chunk table from CNVkit CNR + CNS
+    (+ optional refGene + optional PON).
 
-    One row ≈ one (gene, segment):
+    One row ≈ one (gene, chunk) made from:
 
-      - If a gene lies entirely in one CNS segment → 1 row.
-      - If a gene spans multiple CNS segments → 1 row per segment.
-      - If there is no CNS (cns_path empty) → 1 row per gene over all its bins.
+      - Existing CNV segments (seg_* from CNVkit/PureCN are propagated as
+        annotation for bins/chunks that lie in those segments).
+      - Within-gene sub-chunks defined directly from CNR (and PON if present),
+        based on runs of bins with coherent gain/loss effect, regardless of
+        whether CNVkit produced a segment there.
 
     Optional:
-      - refgene_path: annotate exons_hit (whole_gene vs exon indices) using segment span.
-      - loh_path: PureCN LOHgenes table (C, M, loh, seg.mean, num.snps).
-      - cytoband_path: annotate cytoband from UCSC cytoband file.
+      - refgene_path: annotate exons_hit (whole_gene vs exon indices).
+      - pon_path: use CNVkit PON .cnn to compute a PON-based deviation per chunk.
 
     Key columns:
 
@@ -1774,11 +1776,10 @@ def build_gene_segment_table(
       region_start, region_end,
       n_targets, mean_log2, min_log2, max_log2,
       seg_start, seg_end, seg_log2, seg_baf, seg_cn, seg_cn1, seg_cn2,
-      is_cancer_gene (if cancer_genes provided),
+      is_cancer_gene,
       exons_hit (if refgene_path),
-      loh_* (if loh_path),
-      cytoband (if cytoband_path),
-      cnvkit_cnv_call, purecn_cnv_call (if seg_cn / loh_C present).
+      pon_mean_log2, pon_mean_spread,
+      pon_chunk_effect, pon_chunk_z, pon_chunk_direction, pon_chunk_call.
     """
 
     # ------------------------- 1. Load CNR ------------------------- #
@@ -1812,10 +1813,36 @@ def build_gene_segment_table(
     # normalize column names
     cnr = cnr.rename(columns={cnr_chr_col: "chr"})
 
+    # ------------------------- 1b. Optional: Load PON ------------------------- #
+    # Join by (chr, start, end). Assumes PON is built on same bin design.
+    if pon_path is not None and Path(pon_path).is_file():
+        pon = safe_read_csv(pon_path, sep="\t").copy()
+        if not pon.empty:
+            pon_chr_col = "chromosome" if "chromosome" in pon.columns else "chr"
+            pon[pon_chr_col] = (
+                pon[pon_chr_col].astype(str).str.replace("^chr", "", regex=True)
+            )
+            if not {"start", "end", "log2", "spread"}.issubset(pon.columns):
+                raise ValueError(
+                    "PON file must contain 'start','end','log2','spread' columns."
+                )
+            pon = pon.rename(
+                columns={
+                    pon_chr_col: "chr",
+                    "log2": "pon_log2",
+                    "spread": "pon_spread",
+                }
+            )
+            cnr = cnr.merge(
+                pon[["chr", "start", "end", "pon_log2", "pon_spread"]],
+                how="left",
+                on=["chr", "start", "end"],
+            )
+
     # ------------------------- 2. Load CNS ------------------------- #
     cns = safe_read_csv(cns_path, sep="\t").copy()
     if cns.empty:
-        # No CNS: simple per-gene aggregation over all bins
+        # In the no-CNS case we keep the old simple behaviour
         grouped = cnr.groupby(["chr", "gene.symbol"], as_index=False).agg(
             region_start=("start", "min"),
             region_end=("end", "max"),
@@ -1838,7 +1865,6 @@ def build_gene_segment_table(
         if cancer_genes is not None:
             grouped["is_cancer_gene"] = grouped["gene.symbol"].isin(cancer_genes)
 
-        # In the no-CNS case, we skip LOH / cytoband / CN calls (as in earlier behaviour)
         return grouped
 
     cns_chr_col = "chromosome" if "chromosome" in cns.columns else "chr"
@@ -1941,12 +1967,344 @@ def build_gene_segment_table(
         annotated_bins_list.append(annotated)
 
     bins = pd.concat(annotated_bins_list, ignore_index=True)
+
+    # -------------------- 3b. Within-gene chunking based on CNR/PON -------------------- #
+    # We define gene-internal chunks using CNR (and PON if present), independent
+    # of whether CNVkit created a segment. CNV segments remain as annotation.
+    # If PON is available, we work in per-bin Z-score units (effect / spread);
+    # otherwise we fall back to a simple log2 amplitude threshold.
+    MIN_GENE_TARGETS = 8  # only genes with at least this many bins
+    MIN_RUN_BINS = 4  # min consecutive bins in a run
+    LOG2_THRESH_FALLBACK = 0.30  # fallback |effect| threshold without PON
+    Z_BIN_THRESH = 1.5  # per-bin |z| threshold to be "active"
+    Z_RUN_THRESH = 3.0  # per-run z threshold to keep a chunk
+    SMOOTH_WINDOW = 3  # rolling median smoothing window
+
     if bins.empty:
         return pd.DataFrame()
 
     bins = bins.sort_values(["chr", "gene.symbol", "start"]).reset_index(drop=True)
 
-    # -------------------- 4. Collapse to gene × segment -------------------- #
+    # Default chunk_id = underlying segment_id (so segments are preserved if no
+    # gene-chunk is detected).
+    bins["chunk_id"] = bins["segment_id"].astype(str).fillna("no_segment")
+
+    # Helper to assign gene-internal chunks based on effect runs
+    next_gene_chunk_id = 0
+
+    def _assign_gene_chunks(df_gene: pd.DataFrame) -> None:
+        nonlocal next_gene_chunk_id, bins
+
+        if df_gene.shape[0] < MIN_GENE_TARGETS:
+            return
+
+        idxs = df_gene.index.to_numpy()
+        if idxs.size == 0:
+            return
+
+        # ---- 1) Compute effect per bin ----
+        if "pon_log2" in df_gene.columns:
+            eff = df_gene["log2"].values - df_gene["pon_log2"].fillna(0.0).values
+        else:
+            eff = df_gene["log2"].values
+
+        # ---- 2) Decide whether we can use PON-based Z for this gene ----
+        use_pon = (
+            "pon_spread" in df_gene.columns and not df_gene["pon_spread"].isna().all()
+        )
+
+        if use_pon:
+            # Per-bin Z = effect / spread (with epsilon to avoid 0)
+            sigma = df_gene["pon_spread"].fillna(0.0).values
+            eps = 1e-3
+            sigma_safe = np.where(sigma <= 0, eps, sigma)
+            z_raw = eff / sigma_safe
+
+            # Smooth Z for sign / run detection to avoid single-bin outliers
+            z_series = pd.Series(z_raw, index=df_gene.index)
+            z_smooth = (
+                z_series.rolling(
+                    window=SMOOTH_WINDOW,
+                    center=True,
+                    min_periods=1,
+                )
+                .median()
+                .values
+            )
+
+        else:
+            # Fall back: use effect directly with amplitude threshold
+            z_raw = None
+            z_smooth = None
+
+        current_run: list[int] = []
+        current_sign: int | None = None
+
+        def _finalize_run(run_idxs: list[int]) -> None:
+            nonlocal next_gene_chunk_id, bins
+
+            if len(run_idxs) < MIN_RUN_BINS:
+                return
+
+            sub = bins.loc[run_idxs]
+
+            # Recompute effect in this run (unsmoothed)
+            if "pon_log2" in sub.columns:
+                eff_run = sub["log2"].values - sub["pon_log2"].fillna(0.0).values
+            else:
+                eff_run = sub["log2"].values
+
+            mean_eff = float(np.nanmean(eff_run)) if eff_run.size > 0 else 0.0
+            if not np.isfinite(mean_eff):
+                return
+
+            if use_pon:
+                # Approximate run-level Z using mean spread and N bins
+                sigma_run = sub["pon_spread"].fillna(0.0).values
+                eps = 1e-3
+                sigma_run_safe = np.where(sigma_run <= 0, eps, sigma_run)
+                sigma_mean = (
+                    float(np.nanmean(sigma_run_safe))
+                    if sigma_run_safe.size > 0
+                    else eps
+                )
+                n = len(eff_run)
+                sigma_eff = sigma_mean / np.sqrt(float(n))
+                if sigma_eff <= 0:
+                    return
+                run_z = abs(mean_eff) / sigma_eff
+                if run_z < Z_RUN_THRESH:
+                    return
+            else:
+                # Fallback: require a reasonably strong effect in log2 units
+                if abs(mean_eff) < LOG2_THRESH_FALLBACK:
+                    return
+
+            chunk_label = f"genechunk_{next_gene_chunk_id}"
+            next_gene_chunk_id += 1
+
+            # Assign chunk_id; seg_* remain as they were
+            bins.loc[run_idxs, "chunk_id"] = chunk_label
+
+        # ---- 3) Build runs along the gene ----
+        if use_pon:
+            # Use smoothed Z for active/neutral + sign
+            for idx, z_val in zip(idxs, z_smooth):
+                if not np.isfinite(z_val):
+                    if current_run:
+                        _finalize_run(current_run)
+                        current_run = []
+                        current_sign = None
+                    continue
+
+                if abs(z_val) < Z_BIN_THRESH:
+                    if current_run:
+                        _finalize_run(current_run)
+                        current_run = []
+                        current_sign = None
+                    continue
+
+                sgn = 1 if z_val > 0 else -1
+                if current_sign is None or sgn == current_sign:
+                    current_run.append(idx)
+                    current_sign = sgn
+                else:
+                    if current_run:
+                        _finalize_run(current_run)
+                    current_run = [idx]
+                    current_sign = sgn
+        else:
+            # Fallback: use effect in log2 units
+            eff_series = pd.Series(eff, index=df_gene.index)
+            eff_smooth = (
+                eff_series.rolling(
+                    window=SMOOTH_WINDOW,
+                    center=True,
+                    min_periods=1,
+                )
+                .median()
+                .values
+            )
+
+            for idx, val in zip(idxs, eff_smooth):
+                if not np.isfinite(val):
+                    if current_run:
+                        _finalize_run(current_run)
+                        current_run = []
+                        current_sign = None
+                    continue
+
+                if abs(val) < LOG2_THRESH_FALLBACK:
+                    if current_run:
+                        _finalize_run(current_run)
+                        current_run = []
+                        current_sign = None
+                    continue
+
+                sgn = 1 if val > 0 else -1
+                if current_sign is None or sgn == current_sign:
+                    current_run.append(idx)
+                    current_sign = sgn
+                else:
+                    if current_run:
+                        _finalize_run(current_run)
+                    current_run = [idx]
+                    current_sign = sgn
+
+        if current_run:
+            _finalize_run(current_run)
+
+    # Apply per (chr, gene) – initial segmentation
+    for (_, _), df_gene in bins.groupby(["chr", "gene.symbol"], sort=False):
+        _assign_gene_chunks(df_gene)
+
+    # -------------------- 3c. Post-hoc cleanup of tiny bridge segments -------------------- #
+    # Idea:
+    #   Work per gene, look at contiguous runs of the current chunk_id.
+    #   If we see patterns like big A – tiny B – big C with mean(A) ~ mean(C),
+    #   we merge A+B+C into a single chunk.
+    #   We also merge very small adjacent chunks with similar means.
+    MAX_BRIDGE_BINS = 4  # size of "island" allowed between similar flanks
+    BRIDGE_DELTA = 0.12  # max |mean_eff(A) - mean_eff(C)| to consider them similar
+    SMALL_SEG_N = 3  # max bins to consider a run "small"
+    MERGE_DELTA = 0.10  # adjacency merge threshold on |mean_eff|
+
+    def _cleanup_gene_chunks(df_gene: pd.DataFrame) -> None:
+        nonlocal bins
+
+        if df_gene.empty:
+            return
+
+        # Per-bin effect for this gene (same definition as segmentation)
+        if "pon_log2" in df_gene.columns:
+            eff_all = df_gene["log2"].values - df_gene["pon_log2"].fillna(0.0).values
+        else:
+            eff_all = df_gene["log2"].values
+
+        n = df_gene.shape[0]
+        chunk_labels = df_gene["chunk_id"].tolist()
+
+        # Build runs: contiguous bins with the same chunk_id
+        runs: list[dict] = []
+        current_positions: list[int] = [0]
+        current_label = chunk_labels[0]
+
+        for pos in range(1, n):
+            if chunk_labels[pos] == current_label:
+                current_positions.append(pos)
+            else:
+                # finalize current run
+                run_eff = eff_all[current_positions]
+                mean_eff = float(np.nanmean(run_eff)) if len(run_eff) > 0 else np.nan
+                indices = df_gene.index[current_positions].tolist()
+                runs.append(
+                    {
+                        "positions": current_positions,
+                        "indices": indices,
+                        "mean_eff": mean_eff,
+                    }
+                )
+                # start new run
+                current_label = chunk_labels[pos]
+                current_positions = [pos]
+
+        # finalize last run
+        if current_positions:
+            run_eff = eff_all[current_positions]
+            mean_eff = float(np.nanmean(run_eff)) if len(run_eff) > 0 else np.nan
+            indices = df_gene.index[current_positions].tolist()
+            runs.append(
+                {
+                    "positions": current_positions,
+                    "indices": indices,
+                    "mean_eff": mean_eff,
+                }
+            )
+
+        if len(runs) <= 1:
+            return
+
+        # First: handle A–B–C bridge patterns
+        new_runs: list[dict] = []
+        i = 0
+        while i < len(runs):
+            # Try triple merge A–B–C starting at i
+            if i <= len(runs) - 3:
+                rA = runs[i]
+                rB = runs[i + 1]
+                rC = runs[i + 2]
+
+                if (
+                    len(rB["indices"]) <= MAX_BRIDGE_BINS
+                    and np.isfinite(rA["mean_eff"])
+                    and np.isfinite(rC["mean_eff"])
+                    and abs(rA["mean_eff"] - rC["mean_eff"]) <= BRIDGE_DELTA
+                ):
+                    # Merge A+B+C into a single run
+                    merged_positions = (
+                        rA["positions"] + rB["positions"] + rC["positions"]
+                    )
+                    merged_indices = rA["indices"] + rB["indices"] + rC["indices"]
+                    merged_eff = eff_all[merged_positions]
+                    merged_mean = (
+                        float(np.nanmean(merged_eff)) if len(merged_eff) > 0 else np.nan
+                    )
+                    new_runs.append(
+                        {
+                            "positions": merged_positions,
+                            "indices": merged_indices,
+                            "mean_eff": merged_mean,
+                        }
+                    )
+                    i += 3
+                    continue
+
+            # No bridge merge starting here → maybe adjacency merge with previous
+            r = runs[i]
+            if new_runs:
+                last = new_runs[-1]
+                if (
+                    np.isfinite(r["mean_eff"])
+                    and np.isfinite(last["mean_eff"])
+                    and abs(r["mean_eff"] - last["mean_eff"]) <= MERGE_DELTA
+                    and (
+                        len(r["indices"]) <= SMALL_SEG_N
+                        or len(last["indices"]) <= SMALL_SEG_N
+                    )
+                ):
+                    # Merge r into last
+                    merged_positions = last["positions"] + r["positions"]
+                    merged_indices = last["indices"] + r["indices"]
+                    merged_eff = eff_all[merged_positions]
+                    merged_mean = (
+                        float(np.nanmean(merged_eff)) if len(merged_eff) > 0 else np.nan
+                    )
+                    new_runs[-1] = {
+                        "positions": merged_positions,
+                        "indices": merged_indices,
+                        "mean_eff": merged_mean,
+                    }
+                else:
+                    new_runs.append(r)
+            else:
+                new_runs.append(r)
+
+            i += 1
+
+        # Reassign chunk_id for this gene based on cleaned runs
+        # (seg_* remain unchanged; chunk_id is just a gene-level partition).
+        for run_idx, run in enumerate(new_runs):
+            new_label = f"genechunk_clean_{run_idx}"
+            bins.loc[run["indices"], "chunk_id"] = new_label
+
+    # Apply cleanup per (chr, gene)
+    for (_, _), df_gene in bins.groupby(["chr", "gene.symbol"], sort=False):
+        _cleanup_gene_chunks(df_gene)
+
+    # After this, bins → [chr, gene.symbol, start, ..., chunk_id] is ready
+    bins = bins.sort_values(["chr", "gene.symbol", "start"]).reset_index(drop=True)
+
+    # -------------------- 4. Collapse to gene x chunk -------------------- #
     agg_dict: dict[str, list[str]] = {
         "start": ["min", "max"],  # region_start/region_end
         "log2": ["count", "mean", "min", "max"],
@@ -1955,8 +2313,13 @@ def build_gene_segment_table(
         agg_dict["depth"] = ["mean"]
     if has_weight:
         agg_dict["weight"] = ["mean"]
+    # Optional PON aggregation
+    if "pon_log2" in bins.columns:
+        agg_dict["pon_log2"] = ["mean"]
+    if "pon_spread" in bins.columns:
+        agg_dict["pon_spread"] = ["mean"]
 
-    # segment-level annotation
+    # Also carry seg_* directly from bins (they’re identical within a true CNV segment)
     if "seg_start" in bins.columns:
         agg_dict["seg_start"] = ["first"]
     if "seg_end" in bins.columns:
@@ -1974,9 +2337,9 @@ def build_gene_segment_table(
     if "seg_depth" in bins.columns:
         agg_dict["seg_depth"] = ["first"]
 
-    grouped = bins.groupby(
-        ["chr", "gene.symbol", "segment_id"], as_index=False
-    ).agg(agg_dict)
+    grouped = bins.groupby(["chr", "gene.symbol", "chunk_id"], as_index=False).agg(
+        agg_dict
+    )
 
     # flatten multi-index columns
     grouped.columns = [
@@ -1994,6 +2357,8 @@ def build_gene_segment_table(
             "log2_max": "max_log2",
             "depth_mean": "mean_depth" if has_depth else "depth_mean",
             "weight_mean": "mean_weight" if has_weight else "weight_mean",
+            "pon_log2_mean": "pon_mean_log2",
+            "pon_spread_mean": "pon_mean_spread",
             "seg_start_first": "seg_start",
             "seg_end_first": "seg_end",
             "seg_log2_first": "seg_log2",
@@ -2009,15 +2374,197 @@ def build_gene_segment_table(
     if "n_targets" in grouped.columns:
         grouped["n.targets"] = grouped["n_targets"]
 
-    # we don't need segment_id downstream in the report
-    if "segment_id" in grouped.columns:
-        grouped = grouped.drop(columns=["segment_id"])
-
     # Cancer gene flag
     if cancer_genes is not None:
         grouped["is_cancer_gene"] = grouped["gene.symbol"].isin(cancer_genes)
 
-    # -------------------- 5. LOHgenes annotation (optional) -------------------- #
+    # -------------------- 5. PON-based deviation per chunk -------------------- #
+    min_n_for_pon = 2  # ignore PON-driven stat if fewer bins than this
+
+    if "pon_mean_log2" in grouped.columns and "pon_mean_spread" in grouped.columns:
+        grouped["pon_chunk_effect"] = grouped["mean_log2"] - grouped["pon_mean_log2"]
+
+        def _compute_pon_z(row: pd.Series) -> float:
+            eff = row["pon_chunk_effect"]
+            sigma = row["pon_mean_spread"]
+            n = row.get("n_targets", row.get("n.targets", np.nan))
+
+            if pd.isna(eff) or pd.isna(sigma) or sigma <= 0:
+                return np.nan
+            if pd.isna(n) or n < min_n_for_pon:
+                return np.nan
+
+            sigma_eff = sigma / np.sqrt(float(n))
+            if sigma_eff <= 0:
+                return np.nan
+
+            return abs(eff) / sigma_eff
+
+        grouped["pon_chunk_z"] = grouped.apply(_compute_pon_z, axis=1)
+
+        def _pon_direction(row: pd.Series) -> str:
+            eff = row["pon_chunk_effect"]
+            if pd.isna(eff):
+                return ""
+            if eff > 0:
+                return "gain"
+            if eff < 0:
+                return "loss"
+            return "neutral"
+
+        grouped["pon_chunk_direction"] = grouped.apply(_pon_direction, axis=1)
+
+        def _pon_call(row: pd.Series) -> str:
+            z = row["pon_chunk_z"]
+            if pd.isna(z):
+                return ""
+            if z < 1.5:
+                return "noise"
+            if z < 3.0:
+                return "borderline"
+            return "significant"
+
+        grouped["pon_chunk_call"] = grouped.apply(_pon_call, axis=1)
+
+        # -------------------- PON-based CNV call (AMPLIFICATION / DELETION) -------------------- #
+        def _pon_cnv_call(row: pd.Series) -> str:
+            """
+            Derive a simple CNV call from PON information.
+
+            Rule:
+              - Only consider rows with pon_chunk_call == 'significant'.
+              - If mean_log2 >  0.08 → AMPLIFICATION
+              - If mean_log2 < -0.08 → DELETION
+              - Else → no call ("").
+            """
+            call = str(row.get("pon_chunk_call", "")).strip().lower()
+            if call != "significant":
+                return ""
+
+            ml = row.get("mean_log2", np.nan)
+            if pd.isna(ml):
+                return ""
+
+            if ml > 0.08:
+                return "AMPLIFICATION"
+            if ml < -0.08:
+                return "DELETION"
+            return ""
+
+        grouped["pon_cnv_call"] = grouped.apply(_pon_cnv_call, axis=1)
+
+        # -------------------- 6. Exon annotation (optional) -------------------- #
+        if refgene_path is not None:
+            exon_map = load_refgene_exons(
+                refgene_path=refgene_path,
+                transcript_selection=transcript_selection,
+            )
+
+            def _segment_is_cnv(row: pd.Series) -> bool:
+                """
+                Return True if this row is part of a CNV segment according to
+                CNVkit (seg_cn) or PureCN (loh_C). Uses the same classifier
+                as later, but local here so we can decide exon behaviour.
+                """
+                # CNVkit-based
+                seg_cn = row.get("seg_cn", np.nan)
+                if pd.notna(seg_cn):
+                    call = classify_cnv_from_total_cn_sex_aware(
+                        seg_cn,
+                        row.get("chr"),
+                        sex,
+                    )
+                    if str(call).upper() in ("AMPLIFICATION", "DELETION"):
+                        return True
+
+                # PureCN-based
+                loh_C = row.get("loh_C", np.nan)
+                if pd.notna(loh_C):
+                    call = classify_cnv_from_total_cn_sex_aware(
+                        loh_C,
+                        row.get("chr"),
+                        sex,
+                    )
+                    if str(call).upper() in ("AMPLIFICATION", "DELETION"):
+                        return True
+
+                return False
+
+            def _exons_hit(row: pd.Series) -> str:
+                """
+                Exon mapping with chunk-awareness:
+
+                  - If the underlying segment is CNV (CNVkit or PureCN),
+                    we use the segment span (seg_start/seg_end).
+
+                  - Otherwise we use the chunk span (region_start/region_end),
+                    so exon numbers reflect the gene-chunk, not the full neutral segment.
+                """
+                key = (str(row["chr"]), str(row["gene.symbol"]))
+                info = exon_map.get(key)
+                if info is None:
+                    return ""
+
+                # Decide which genomic interval to use
+                use_segment_span = _segment_is_cnv(row)
+
+                seg_start = row.get("seg_start")
+                seg_end = row.get("seg_end")
+                chunk_start = row.get("region_start")
+                chunk_end = row.get("region_end")
+
+                if use_segment_span and pd.notna(seg_start) and pd.notna(seg_end):
+                    region_start = seg_start
+                    region_end = seg_end
+                else:
+                    # fall back to chunk span
+                    region_start = chunk_start
+                    region_end = chunk_end
+
+                if pd.isna(region_start) or pd.isna(region_end):
+                    return ""
+
+                exons = info["exons"]  # list of (start, end) 5'->3'
+
+                gene_start = min(s for s, e in exons)
+                gene_end = max(e for s, e in exons)
+
+                # Entire gene covered?
+                if region_start <= gene_start and region_end >= gene_end:
+                    return "whole_gene"
+
+                hit_indices: list[int] = []
+                for idx, (s, e) in enumerate(exons, start=1):
+                    # overlap test
+                    if e > region_start and s < region_end:
+                        hit_indices.append(idx)
+
+                if not hit_indices:
+                    return ""
+
+                # compress contiguous exon indices into ranges
+                ranges = []
+                start = prev = hit_indices[0]
+                for i in hit_indices[1:]:
+                    if i == prev + 1:
+                        prev = i
+                    else:
+                        ranges.append((start, prev))
+                        start = prev = i
+                ranges.append((start, prev))
+
+                parts = []
+                for a, b in ranges:
+                    if a == b:
+                        parts.append(str(a))
+                    else:
+                        parts.append(f"{a}-{b}")
+
+                return ",".join(parts)
+
+            grouped["exons_hit"] = grouped.apply(_exons_hit, axis=1)
+
+    # -------------------- 7. LOHgenes annotation (optional) -------------------- #
     if loh_path is not None and Path(loh_path).is_file():
         loh = safe_read_csv(loh_path, sep=",").copy()
         if not loh.empty:
@@ -2076,12 +2623,11 @@ def build_gene_segment_table(
                 on=["chr", "gene.symbol"],
             )
 
-    # -------------------- 6. Cytoband annotation (optional) -------------------- #
-    if cytoband_path is not None:
-        cyto = load_cytobands(cytoband_path)
-        grouped = annotate_genes_with_cytoband(grouped, cyto)
+    # 8) cytoband
+    cyto = load_cytobands(cytoband_path)
+    grouped = annotate_genes_with_cytoband(grouped, cyto)
 
-    # -------------------- 7. CNV calls from CNVkit / PureCN with amplitude sanity check -------------------- #
+    # -------------------- 9. CNV calls from CNVkit / PureCN with amplitude sanity check -------------------- #
     AMP_EPS = 0.05  # minimum |log2| required to trust a CNV call
 
     # CNVkit-based call (from seg_cn) + seg_log2 sanity check
@@ -2136,108 +2682,177 @@ def build_gene_segment_table(
             axis=1,
         )
 
-    # -------------------- 8. Exon annotation (optional, uses segment span) -------------------- #
-    if refgene_path is not None:
-        exon_map = load_refgene_exons(
-            refgene_path=refgene_path,
-            transcript_selection=transcript_selection,
+    # -------------------- 10. Merge adjacent neutral chunks per gene -------------------- #
+    def _row_is_cnv_like(row: pd.Series) -> bool:
+        """
+        A chunk is considered CNV-like if any of:
+          - cnvkit_cnv_call == AMPLIFICATION / DELETION
+          - purecn_cnv_call == AMPLIFICATION / DELETION
+          - pon_cnv_call    == AMPLIFICATION / DELETION
+        """
+        for col in ("cnvkit_cnv_call", "purecn_cnv_call", "pon_cnv_call"):
+            if col in row.index:
+                val = str(row.get(col, "")).strip().upper()
+                if val in ("AMPLIFICATION", "DELETION"):
+                    return True
+        return False
+
+    def _merge_neutral_run(df_run: pd.DataFrame) -> pd.Series:
+        """
+        Merge a contiguous neutral run (1+ rows from the same gene)
+        into a single neutral chunk row. If len == 1 this will
+        effectively return that row unchanged.
+        """
+        df_run = df_run.sort_values("region_start").reset_index(drop=True)
+        base = df_run.iloc[0].copy()
+
+        # Genomic span over the run
+        if "region_start" in df_run.columns:
+            base["region_start"] = df_run["region_start"].min()
+        if "region_end" in df_run.columns:
+            base["region_end"] = df_run["region_end"].max()
+
+        # n_targets / n.targets: sum
+        if "n_targets" in df_run.columns:
+            base["n_targets"] = df_run["n_targets"].sum(min_count=1)
+        if "n.targets" in df_run.columns:
+            base["n.targets"] = df_run["n.targets"].sum(min_count=1)
+
+        # Weights for weighted means
+        if "n_targets" in df_run.columns:
+            w = df_run["n_targets"].copy()
+        elif "n.targets" in df_run.columns:
+            w = df_run["n.targets"].copy()
+        else:
+            w = pd.Series(1.0, index=df_run.index)
+
+        w = w.fillna(0.0)
+        wsum = float(w.sum())
+        if wsum <= 0:
+            w = pd.Series(1.0, index=df_run.index)
+            wsum = float(w.sum())
+
+        # Weighted means for "average" style columns
+        for col in ("mean_log2", "mean_weight", "pon_mean_log2", "pon_mean_spread"):
+            if col in df_run.columns:
+                vals = df_run[col]
+                base[col] = float(np.nansum(vals * w) / wsum)
+
+        # Extremes across the run
+        if "min_log2" in df_run.columns:
+            base["min_log2"] = df_run["min_log2"].min()
+        if "max_log2" in df_run.columns:
+            base["max_log2"] = df_run["max_log2"].max()
+
+        # Per-gene / categorical fields – keep first non-null in the run
+        copy_first_cols = [
+            "seg_cn",
+            "seg_cn1",
+            "seg_cn2",
+            "seg_log2",
+            "seg_baf",
+            "seg_start",
+            "seg_end",
+            "seg_depth",
+            "loh_C",
+            "loh_M",
+            "loh_M_flagged",
+            "loh_flag",
+            "loh_seg_mean",
+            "loh_num_snps",
+            "pon_chunk_effect",
+            "pon_chunk_z",
+            "pon_chunk_direction",
+            "pon_chunk_call",
+            "pon_cnv_call",
+            "exons_hit",
+            "cytoband",
+            "is_cancer_gene",
+            "cnvkit_cnv_call",
+            "purecn_cnv_call",
+        ]
+        for col in copy_first_cols:
+            if col in df_run.columns:
+                ser = df_run[col]
+                if ser.notna().any():
+                    base[col] = ser.dropna().iloc[0]
+                else:
+                    base[col] = "" if ser.dtype == object else np.nan
+
+        # Mark as merged neutral (for debugging; dropped later anyway)
+        if "chunk_id" in base.index:
+            base["chunk_id"] = "merged_neutral"
+
+        return base
+
+    def _merge_neutral_chunks_per_gene(df_gene: pd.DataFrame) -> pd.DataFrame:
+        """
+        For a given (chr, gene.symbol), merge **adjacent neutral chunks**:
+
+          - Traverse chunks ordered by region_start.
+          - CNV-like rows are kept as-is.
+          - Consecutive neutral rows are merged into one row.
+          - If the whole gene is neutral, everything collapses to a single row.
+        """
+        if df_gene.shape[0] <= 1:
+            return df_gene
+
+        df_gene = df_gene.sort_values("region_start").reset_index(drop=True)
+
+        out_rows: list[pd.Series] = []
+        current_neutral_idxs: list[int] = []
+
+        for idx, row in df_gene.iterrows():
+            is_cnv = _row_is_cnv_like(row)
+
+            if is_cnv:
+                # Flush any pending neutral run
+                if current_neutral_idxs:
+                    merged = _merge_neutral_run(df_gene.loc[current_neutral_idxs])
+                    out_rows.append(merged)
+                    current_neutral_idxs = []
+
+                # Keep CNV chunk as-is
+                out_rows.append(row)
+            else:
+                # Neutral chunk: accumulate into current run
+                current_neutral_idxs.append(idx)
+
+        # Flush tail neutral run if any
+        if current_neutral_idxs:
+            merged = _merge_neutral_run(df_gene.loc[current_neutral_idxs])
+            out_rows.append(merged)
+
+        # Build DataFrame back
+        out_df = pd.DataFrame(out_rows).reset_index(drop=True)
+        return out_df
+
+    grouped = (
+        grouped.groupby(["chr", "gene.symbol"], as_index=False, group_keys=False)
+        .apply(_merge_neutral_chunks_per_gene)
+        .reset_index(drop=True)
+    )
+
+    # -------------------- 11. Gene split flags (after merging neutrals) -------------------- #
+    if "gene.symbol" in grouped.columns:
+        gene_chunk_counts = (
+            grouped.groupby(["chr", "gene.symbol"], as_index=False)
+            .size()
+            .rename(columns={"size": "gene_chunk_count"})
         )
 
-        def _segment_is_cnv(row: pd.Series) -> bool:
-            """
-            Return True if this row is part of a CNV segment according to
-            CNVkit (seg_cn) or PureCN (loh_C).
-            """
-            # CNVkit-based
-            seg_cn = row.get("seg_cn", np.nan)
-            if pd.notna(seg_cn):
-                call = classify_cnv_from_total_cn_sex_aware(
-                    seg_cn,
-                    row.get("chr"),
-                    sex,
-                )
-                if str(call).upper() in ("AMPLIFICATION", "DELETION"):
-                    return True
+        grouped = grouped.merge(
+            gene_chunk_counts,
+            how="left",
+            on=["chr", "gene.symbol"],
+        )
 
-            # PureCN-based
-            loh_C = row.get("loh_C", np.nan)
-            if pd.notna(loh_C):
-                call = classify_cnv_from_total_cn_sex_aware(
-                    loh_C,
-                    row.get("chr"),
-                    sex,
-                )
-                if str(call).upper() in ("AMPLIFICATION", "DELETION"):
-                    return True
+        grouped["is_gene_split"] = grouped["gene_chunk_count"].fillna(1) > 1
+    else:
+        grouped["gene_chunk_count"] = 1
+        grouped["is_gene_split"] = False
 
-            return False
-
-        def _exons_hit(row: pd.Series) -> str:
-            """
-            Exon mapping using segment span (or region span if seg_* missing).
-            """
-            key = (str(row["chr"]), str(row["gene.symbol"]))
-            info = exon_map.get(key)
-            if info is None:
-                return ""
-
-            use_segment_span = _segment_is_cnv(row)
-
-            seg_start = row.get("seg_start")
-            seg_end = row.get("seg_end")
-            chunk_start = row.get("region_start")
-            chunk_end = row.get("region_end")
-
-            if use_segment_span and pd.notna(seg_start) and pd.notna(seg_end):
-                region_start = seg_start
-                region_end = seg_end
-            else:
-                region_start = chunk_start
-                region_end = chunk_end
-
-            if pd.isna(region_start) or pd.isna(region_end):
-                return ""
-
-            exons = info["exons"]  # list of (start, end) 5'->3'
-
-            gene_start = min(s for s, e in exons)
-            gene_end = max(e for s, e in exons)
-
-            # Entire gene covered?
-            if region_start <= gene_start and region_end >= gene_end:
-                return "whole_gene"
-
-            hit_indices: list[int] = []
-            for idx, (s, e) in enumerate(exons, start=1):
-                if e > region_start and s < region_end:
-                    hit_indices.append(idx)
-
-            if not hit_indices:
-                return ""
-
-            # compress contiguous exon indices into ranges
-            ranges = []
-            start = prev = hit_indices[0]
-            for i in hit_indices[1:]:
-                if i == prev + 1:
-                    prev = i
-                else:
-                    ranges.append((start, prev))
-                    start = prev = i
-            ranges.append((start, prev))
-
-            parts = []
-            for a, b in ranges:
-                if a == b:
-                    parts.append(str(a))
-                else:
-                    parts.append(f"{a}-{b}")
-
-            return ",".join(parts)
-
-        grouped["exons_hit"] = grouped.apply(_exons_hit, axis=1)
-
-    # -------------------- 9. Column order & sorting -------------------- #
+    # -------------------- 12. Column order & sorting -------------------- #
     cols_order = [
         "chr",
         "region_start",
@@ -2246,6 +2861,8 @@ def build_gene_segment_table(
         "seg_end",
         "cytoband",
         "gene.symbol",
+        "gene_chunk_count",
+        "is_gene_split",
         "n.targets",
         "seg_log2",
         "loh_seg_mean",
@@ -2264,11 +2881,20 @@ def build_gene_segment_table(
         "loh_flag",
         "is_cancer_gene",
         "exons_hit",
+        "pon_mean_log2",
+        "pon_mean_spread",
+        "pon_chunk_effect",
+        "pon_chunk_z",
+        "pon_chunk_direction",
+        "pon_chunk_call",
+        "pon_cnv_call",
         "cnvkit_cnv_call",
         "purecn_cnv_call",
     ]
     cols_order = [c for c in cols_order if c in grouped.columns]
-    grouped = grouped[cols_order + [c for c in grouped.columns if c not in cols_order]]
+    grouped = grouped[
+        cols_order + (["chunk_id"] if "chunk_id" in grouped.columns else [])
+        ]
 
     # chromosome sorting: numeric -> X -> Y -> others
     def _chr_key(c):
@@ -2290,555 +2916,11 @@ def build_gene_segment_table(
 
     # drop helper columns we don't want in final table
     drop_cols = [
+        "chunk_id",
         "mean_depth",
     ]
     drop_cols = [c for c in drop_cols if c in grouped.columns]
     grouped = grouped.drop(columns=drop_cols)
 
     return grouped
-def build_gene_chunk_table(
-    cnr_path: str | Path,
-    gene_seg_df: pd.DataFrame,
-    pon_path: str | Path | None = None,
-) -> pd.DataFrame:
-    """
-    Build a per-gene, per-chunk table using CNR + PON (required),
-    then annotate each chunk from an existing gene-segment table.
 
-    This function is ONLY applicable when a valid PON is available:
-
-      - If pon_path is None or the file does not exist, returns an empty DataFrame.
-      - If the PON file is malformed (missing required columns), raises ValueError.
-
-    Workflow:
-      1. Load CNR and PON .cnn (same bin design), merge on (chr, start, end).
-      2. Drop Antitarget / "-" pseudo-genes, explode multi-gene bins into gene.symbol.
-      3. For each (chr, gene.symbol), define within-gene chunks based on:
-           - effect = log2 - pon_log2
-           - pon_spread → per-bin Z, smoothed in runs
-      4. Cleanup tiny bridge segments within each gene (A–B–C patterns).
-      5. Collapse bins to one row per (chr, gene.symbol, chunk_id).
-      6. Compute PON-driven stats (effect, Z, direction, call, pon_cnv_call).
-      7. Annotate chunks from gene_seg_df by overlap in
-         (chr, gene.symbol, region_start..region_end).
-
-    Returns
-    -------
-    pd.DataFrame
-        One row per (chr, gene.symbol, chunk) with PON-driven stats and
-        annotations from gene_seg_df. Empty if no usable PON.
-    """
-
-    # ------------------------- 0. PON requirement ------------------------- #
-    if pon_path is None or not Path(pon_path).is_file():
-        # No PON → chunk table conceptually "not applicable"
-        return pd.DataFrame()
-
-    # ------------------------- 1. Load CNR ------------------------- #
-    cnr = safe_read_csv(cnr_path, sep="\t").copy()
-    if cnr.empty:
-        return pd.DataFrame()
-
-    cnr_chr_col = "chromosome" if "chromosome" in cnr.columns else "chr"
-    cnr[cnr_chr_col] = cnr[cnr_chr_col].astype(str).str.replace("^chr", "", regex=True)
-
-    if not {"start", "end", "log2", "gene"}.issubset(cnr.columns):
-        missing = {"start", "end", "log2", "gene"} - set(cnr.columns)
-        raise ValueError(f"CNR missing required columns: {missing}")
-
-    has_depth = "depth" in cnr.columns
-    has_weight = "weight" in cnr.columns
-
-    # drop pseudo-genes
-    cnr = cnr[cnr["gene"].notna()]
-    cnr = cnr[~cnr["gene"].isin(["Antitarget", "-"])]
-
-    # explode multi-gene bins
-    cnr["gene.symbol"] = (
-        cnr["gene"]
-        .astype(str)
-        .str.split(",")
-        .apply(lambda lst: [g.strip() for g in lst if g.strip()])
-    )
-    cnr = cnr.explode("gene.symbol")
-
-    # normalize column names
-    cnr = cnr.rename(columns={cnr_chr_col: "chr"})
-
-    # ------------------------- 1b. Load PON (required) ------------------------- #
-    pon = safe_read_csv(pon_path, sep="\t").copy()
-    if pon.empty:
-        # PON exists but has no rows → treat as unusable
-        return pd.DataFrame()
-
-    pon_chr_col = "chromosome" if "chromosome" in pon.columns else "chr"
-    pon[pon_chr_col] = pon[pon_chr_col].astype(str).str.replace("^chr", "", regex=True)
-
-    if not {"start", "end", "log2", "spread"}.issubset(pon.columns):
-        missing = {"start", "end", "log2", "spread"} - set(pon.columns)
-        raise ValueError(
-            f"PON file must contain 'start','end','log2','spread' columns, missing: {missing}"
-        )
-
-    pon = pon.rename(
-        columns={
-            pon_chr_col: "chr",
-            "log2": "pon_log2",
-            "spread": "pon_spread",
-        }
-    )
-
-    # Merge PON onto CNR bins
-    cnr = cnr.merge(
-        pon[["chr", "start", "end", "pon_log2", "pon_spread"]],
-        how="left",
-        on=["chr", "start", "end"],
-    )
-
-    bins = cnr.copy()
-    if bins.empty:
-        return pd.DataFrame()
-
-    bins = bins.sort_values(["chr", "gene.symbol", "start"]).reset_index(drop=True)
-
-    # If literally all pon_spread are NaN, we can't do PON-based chunking
-    if "pon_spread" not in bins.columns or bins["pon_spread"].isna().all():
-        return pd.DataFrame()
-
-    # -------------------- 2. Within-gene chunking (PON-based only) -------------------- #
-    MIN_GENE_TARGETS = 8    # only genes with at least this many bins
-    MIN_RUN_BINS = 4        # min consecutive bins in a run
-    Z_BIN_THRESH = 1.5      # per-bin |z| threshold to be "active"
-    Z_RUN_THRESH = 3.0      # per-run z threshold to keep a chunk
-    SMOOTH_WINDOW = 3       # rolling median smoothing window
-
-    bins["chunk_id"] = "no_chunk"
-    next_gene_chunk_id = 0
-
-    def _assign_gene_chunks(df_gene: pd.DataFrame) -> None:
-        nonlocal next_gene_chunk_id, bins
-
-        if df_gene.shape[0] < MIN_GENE_TARGETS:
-            return
-
-        # if no PON spread for this gene, skip
-        if df_gene["pon_spread"].isna().all():
-            return
-
-        idxs = df_gene.index.to_numpy()
-        if idxs.size == 0:
-            return
-
-        # ---- 1) effect and per-bin Z ----
-        eff = df_gene["log2"].values - df_gene["pon_log2"].fillna(0.0).values
-
-        sigma = df_gene["pon_spread"].fillna(0.0).values
-        eps = 1e-3
-        sigma_safe = np.where(sigma <= 0, eps, sigma)
-        z_raw = eff / sigma_safe
-
-        z_series = pd.Series(z_raw, index=df_gene.index)
-        z_smooth = (
-            z_series.rolling(
-                window=SMOOTH_WINDOW,
-                center=True,
-                min_periods=1,
-            )
-            .median()
-            .values
-        )
-
-        current_run: list[int] = []
-        current_sign: int | None = None
-
-        def _finalize_run(run_idxs: list[int]) -> None:
-            nonlocal next_gene_chunk_id, bins
-
-            if len(run_idxs) < MIN_RUN_BINS:
-                return
-
-            sub = bins.loc[run_idxs]
-
-            eff_run = sub["log2"].values - sub["pon_log2"].fillna(0.0).values
-            mean_eff = float(np.nanmean(eff_run)) if eff_run.size > 0 else 0.0
-            if not np.isfinite(mean_eff):
-                return
-
-            sigma_run = sub["pon_spread"].fillna(0.0).values
-            eps_local = 1e-3
-            sigma_run_safe = np.where(sigma_run <= 0, eps_local, sigma_run)
-            sigma_mean = (
-                float(np.nanmean(sigma_run_safe)) if sigma_run_safe.size > 0 else eps_local
-            )
-
-            n = len(eff_run)
-            sigma_eff = sigma_mean / np.sqrt(float(n))
-            if sigma_eff <= 0:
-                return
-
-            run_z = abs(mean_eff) / sigma_eff
-            if run_z < Z_RUN_THRESH:
-                return
-
-            chunk_label = f"genechunk_{next_gene_chunk_id}"
-            next_gene_chunk_id += 1
-
-            bins.loc[run_idxs, "chunk_id"] = chunk_label
-
-        # ---- 2) Build runs along the gene using smoothed Z ----
-        for idx, z_val in zip(idxs, z_smooth):
-            if not np.isfinite(z_val):
-                if current_run:
-                    _finalize_run(current_run)
-                    current_run = []
-                    current_sign = None
-                continue
-
-            if abs(z_val) < Z_BIN_THRESH:
-                if current_run:
-                    _finalize_run(current_run)
-                    current_run = []
-                    current_sign = None
-                continue
-
-            sgn = 1 if z_val > 0 else -1
-            if current_sign is None or sgn == current_sign:
-                current_run.append(idx)
-                current_sign = sgn
-            else:
-                if current_run:
-                    _finalize_run(current_run)
-                current_run = [idx]
-                current_sign = sgn
-
-        if current_run:
-            _finalize_run(current_run)
-
-    # Apply per (chr, gene) – initial segmentation
-    for (_, _), df_gene in bins.groupby(["chr", "gene.symbol"], sort=False):
-        _assign_gene_chunks(df_gene)
-
-    # -------------------- 2b. Post-hoc cleanup of tiny bridge segments -------------------- #
-    MAX_BRIDGE_BINS = 4   # size of "island" allowed between similar flanks
-    BRIDGE_DELTA = 0.12   # max |mean_eff(A) - mean_eff(C)| to consider them similar
-    SMALL_SEG_N = 3       # max bins to consider a run "small"
-    MERGE_DELTA = 0.10    # adjacency merge threshold on |mean_eff|
-
-    def _cleanup_gene_chunks(df_gene: pd.DataFrame) -> None:
-        nonlocal bins
-
-        if df_gene.empty:
-            return
-
-        eff_all = df_gene["log2"].values - df_gene["pon_log2"].fillna(0.0).values
-
-        n = df_gene.shape[0]
-        chunk_labels = df_gene["chunk_id"].tolist()
-
-        runs: list[dict] = []
-        current_positions: list[int] = [0]
-        current_label = chunk_labels[0]
-
-        for pos in range(1, n):
-            if chunk_labels[pos] == current_label:
-                current_positions.append(pos)
-            else:
-                run_eff = eff_all[current_positions]
-                mean_eff = float(np.nanmean(run_eff)) if len(run_eff) > 0 else np.nan
-                indices = df_gene.index[current_positions].tolist()
-                runs.append(
-                    {
-                        "positions": current_positions,
-                        "indices": indices,
-                        "mean_eff": mean_eff,
-                    }
-                )
-                current_label = chunk_labels[pos]
-                current_positions = [pos]
-
-        if current_positions:
-            run_eff = eff_all[current_positions]
-            mean_eff = float(np.nanmean(run_eff)) if len(run_eff) > 0 else np.nan
-            indices = df_gene.index[current_positions].tolist()
-            runs.append(
-                {
-                    "positions": current_positions,
-                    "indices": indices,
-                    "mean_eff": mean_eff,
-                }
-            )
-
-        if len(runs) <= 1:
-            return
-
-        new_runs: list[dict] = []
-        i = 0
-        while i < len(runs):
-            # Try triple merge A–B–C starting at i
-            if i <= len(runs) - 3:
-                rA = runs[i]
-                rB = runs[i + 1]
-                rC = runs[i + 2]
-
-                if (
-                    len(rB["indices"]) <= MAX_BRIDGE_BINS
-                    and np.isfinite(rA["mean_eff"])
-                    and np.isfinite(rC["mean_eff"])
-                    and abs(rA["mean_eff"] - rC["mean_eff"]) <= BRIDGE_DELTA
-                ):
-                    merged_positions = (
-                        rA["positions"] + rB["positions"] + rC["positions"]
-                    )
-                    merged_indices = rA["indices"] + rB["indices"] + rC["indices"]
-                    merged_eff = eff_all[merged_positions]
-                    merged_mean = (
-                        float(np.nanmean(merged_eff)) if len(merged_eff) > 0 else np.nan
-                    )
-                    new_runs.append(
-                        {
-                            "positions": merged_positions,
-                            "indices": merged_indices,
-                            "mean_eff": merged_mean,
-                        }
-                    )
-                    i += 3
-                    continue
-
-            r = runs[i]
-            if new_runs:
-                last = new_runs[-1]
-                if (
-                    np.isfinite(r["mean_eff"])
-                    and np.isfinite(last["mean_eff"])
-                    and abs(r["mean_eff"] - last["mean_eff"]) <= MERGE_DELTA
-                    and (
-                        len(r["indices"]) <= SMALL_SEG_N
-                        or len(last["indices"]) <= SMALL_SEG_N
-                    )
-                ):
-                    merged_positions = last["positions"] + r["positions"]
-                    merged_indices = last["indices"] + r["indices"]
-                    merged_eff = eff_all[merged_positions]
-                    merged_mean = (
-                        float(np.nanmean(merged_eff)) if len(merged_eff) > 0 else np.nan
-                    )
-                    new_runs[-1] = {
-                        "positions": merged_positions,
-                        "indices": merged_indices,
-                        "mean_eff": merged_mean,
-                    }
-                else:
-                    new_runs.append(r)
-            else:
-                new_runs.append(r)
-
-            i += 1
-
-        for run_idx, run in enumerate(new_runs):
-            new_label = f"genechunk_clean_{run_idx}"
-            bins.loc[run["indices"], "chunk_id"] = new_label
-
-    for (_, _), df_gene in bins.groupby(["chr", "gene.symbol"], sort=False):
-        _cleanup_gene_chunks(df_gene)
-
-    bins = bins.sort_values(["chr", "gene.symbol", "start"]).reset_index(drop=True)
-
-    # -------------------- 3. Collapse to gene × chunk -------------------- #
-    agg_dict: dict[str, list[str]] = {
-        "start": ["min", "max"],  # region_start/region_end
-        "log2": ["count", "mean", "min", "max"],
-    }
-    if has_depth:
-        agg_dict["depth"] = ["mean"]
-    if has_weight:
-        agg_dict["weight"] = ["mean"]
-    agg_dict["pon_log2"] = ["mean"]
-    agg_dict["pon_spread"] = ["mean"]
-
-    chunked = bins.groupby(
-        ["chr", "gene.symbol", "chunk_id"], as_index=False
-    ).agg(agg_dict)
-
-    chunked.columns = [
-        "_".join(col).strip("_") if isinstance(col, tuple) else col
-        for col in chunked.columns
-    ]
-
-    chunked = chunked.rename(
-        columns={
-            "start_min": "region_start",
-            "start_max": "region_end",
-            "log2_count": "n_targets",
-            "log2_mean": "mean_log2",
-            "log2_min": "min_log2",
-            "log2_max": "max_log2",
-            "depth_mean": "mean_depth" if has_depth else "depth_mean",
-            "weight_mean": "mean_weight" if has_weight else "weight_mean",
-            "pon_log2_mean": "pon_mean_log2",
-            "pon_spread_mean": "pon_mean_spread",
-        }
-    )
-
-    if "n_targets" in chunked.columns:
-        chunked["n.targets"] = chunked["n_targets"]
-
-    # -------------------- 4. PON-based deviation per chunk -------------------- #
-    min_n_for_pon = 2
-
-    chunked["pon_chunk_effect"] = chunked["mean_log2"] - chunked["pon_mean_log2"]
-
-    def _compute_pon_z(row: pd.Series) -> float:
-        eff = row["pon_chunk_effect"]
-        sigma = row["pon_mean_spread"]
-        n = row.get("n_targets", row.get("n.targets", np.nan))
-
-        if pd.isna(eff) or pd.isna(sigma) or sigma <= 0:
-            return np.nan
-        if pd.isna(n) or n < min_n_for_pon:
-            return np.nan
-
-        sigma_eff = sigma / np.sqrt(float(n))
-        if sigma_eff <= 0:
-            return np.nan
-
-        return abs(eff) / sigma_eff
-
-    chunked["pon_chunk_z"] = chunked.apply(_compute_pon_z, axis=1)
-
-    def _pon_direction(row: pd.Series) -> str:
-        eff = row["pon_chunk_effect"]
-        if pd.isna(eff):
-            return ""
-        if eff > 0:
-            return "gain"
-        if eff < 0:
-            return "loss"
-        return "neutral"
-
-    chunked["pon_chunk_direction"] = chunked.apply(_pon_direction, axis=1)
-
-    def _pon_call(row: pd.Series) -> str:
-        z = row["pon_chunk_z"]
-        if pd.isna(z):
-            return ""
-        if z < 1.5:
-            return "noise"
-        if z < 3.0:
-            return "borderline"
-        return "significant"
-
-    chunked["pon_chunk_call"] = chunked.apply(_pon_call, axis=1)
-
-    def _pon_cnv_call(row: pd.Series) -> str:
-        """
-        Derive a simple CNV call from PON information.
-
-          - Only consider rows with pon_chunk_call == 'significant'.
-          - If mean_log2 >  0.08 → AMPLIFICATION
-          - If mean_log2 < -0.08 → DELETION
-          - Else → no call ("").
-        """
-        call = str(row.get("pon_chunk_call", "")).strip().lower()
-        if call != "significant":
-            return ""
-
-        ml = row.get("mean_log2", np.nan)
-        if pd.isna(ml):
-            return ""
-
-        if ml > 0.08:
-            return "AMPLIFICATION"
-        if ml < -0.08:
-            return "DELETION"
-        return ""
-
-    chunked["pon_cnv_call"] = chunked.apply(_pon_cnv_call, axis=1)
-
-    # -------------------- 5. Annotate from gene_seg_df -------------------- #
-    if not {"chr", "gene.symbol", "region_start", "region_end"}.issubset(
-        gene_seg_df.columns
-    ):
-        raise ValueError(
-            "gene_seg_df must contain 'chr', 'gene.symbol', 'region_start', 'region_end'."
-        )
-
-    gseg = gene_seg_df.copy()
-    gseg["chr"] = gseg["chr"].astype(str).str.replace("^chr", "", regex=True)
-
-    seg_map: dict[tuple[str, str], pd.DataFrame] = {}
-    for (ch, g), df_g in gseg.groupby(["chr", "gene.symbol"], sort=False):
-        seg_map[(str(ch), str(g))] = df_g.reset_index(drop=True)
-
-    exclude_cols = {"chr", "gene.symbol", "region_start", "region_end"}
-    annot_cols = [c for c in gseg.columns if c not in exclude_cols]
-
-    def _annotate_chunk(row: pd.Series) -> pd.Series:
-        key = (str(row["chr"]), str(row["gene.symbol"]))
-        segs = seg_map.get(key)
-        if segs is None or segs.empty:
-            return row
-
-        c_start = row["region_start"]
-        c_end = row["region_end"]
-        if pd.isna(c_start) or pd.isna(c_end):
-            return row
-
-        mask = (segs["region_end"] > c_start) & (segs["region_start"] < c_end)
-        if not mask.any():
-            return row
-
-        ssub = segs.loc[mask].copy()
-        overlap_start = np.maximum(ssub["region_start"].values, c_start)
-        overlap_end = np.minimum(ssub["region_end"].values, c_end)
-        overlap_len = overlap_end - overlap_start
-        best_idx = int(overlap_len.argmax())
-        seg_row = ssub.iloc[best_idx]
-
-        for col in annot_cols:
-            row[col] = seg_row[col]
-
-        return row
-
-    chunked = chunked.apply(_annotate_chunk, axis=1)
-
-    # -------------------- 6. Column order & sorting -------------------- #
-    cols_order = [
-        "chr",
-        "region_start",
-        "region_end",
-        "gene.symbol",
-        "n.targets",
-        "mean_log2",
-        "min_log2",
-        "max_log2",
-        "mean_weight",
-        "pon_mean_log2",
-        "pon_mean_spread",
-        "pon_chunk_effect",
-        "pon_chunk_z",
-        "pon_chunk_direction",
-        "pon_chunk_call",
-        "pon_cnv_call",
-    ]
-    cols_order = [c for c in cols_order if c in chunked.columns]
-    chunked = chunked[
-        cols_order + [c for c in chunked.columns if c not in cols_order]
-    ]
-
-    def _chr_key(c):
-        try:
-            return (0, int(c))
-        except ValueError:
-            if c in ("X", "x"):
-                return (1, 23)
-            if c in ("Y", "y"):
-                return (1, 24)
-            return (2, c)
-
-    chunked["chr_sort"] = chunked["chr"].map(_chr_key)
-    chunked = chunked.sort_values(
-        by=["chr_sort", "region_start", "region_end"],
-        kind="stable",
-    ).drop(columns=["chr_sort"])
-
-    return chunked
