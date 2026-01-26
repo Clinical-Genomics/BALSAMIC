@@ -1996,6 +1996,7 @@ def build_gene_segment_table(
         for col in grouped.columns
     ]
 
+
     grouped = grouped.rename(
         columns={
             "start_min": "region_start",
@@ -2245,6 +2246,7 @@ def build_gene_segment_table(
         grouped["exons_hit"] = grouped.apply(_exons_hit, axis=1)
 
     # -------------------- 9. Column order & sorting -------------------- #
+    grouped = grouped.rename(columns={"n_targets": "n.targets"})
     cols_order = [
         "chr",
         "region_start",
@@ -2865,6 +2867,6 @@ def build_gene_chunk_table(
     chunked = chunked.sort_values(
         by=["chr_sort", "region_start", "region_end"],
         kind="stable",
-    ).drop(columns=["chr_sort", "chunk_id"])
+    ).drop(columns=["chr_sort", "chunk_id", "n_targets"])
 
     return chunked

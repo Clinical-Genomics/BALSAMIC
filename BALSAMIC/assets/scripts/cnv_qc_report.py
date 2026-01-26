@@ -321,12 +321,12 @@ def csv_to_html_table(
             classes="dataframe",
             table_id="chunk-table",
         )
-        # NOTE: this now includes its own visible controls with *-chunk IDs
+        # Chunk-level controls (includes PON + split options)
         chunk_section_html = f"""
         <h2>Within-gene PON-driven chunks (optional detail)</h2>
         <p class="muted">
           These rows represent sub-gene chunks defined by PON-based deviation (log2 vs panel-of-normals),
-          for genes in the main table. Filters below mirror the gene-level filters and affect both tables.
+          for genes in the main table. Filters below apply only to this chunk-level table.
         </p>
         <button id="toggle-chunk-table" type="button">Show chunk-level table</button>
         <div id="chunk-table-container" style="display:none; margin-top:10px;">
@@ -366,13 +366,12 @@ def csv_to_html_table(
         </div>
         """
     else:
-        chunk_section_html = ""  # no PON / no chunks → omit completely
+        chunk_section_html = ""  # no chunks
 
-    # Column indices for JS (gene-level table)
+    # Column indices for JS
     col_idx_map = {name: idx for idx, name in enumerate(df.columns)}
     col_idx_json = json.dumps(col_idx_map)
 
-    # Column indices for JS (chunk-level table)
     if chunk_df is not None and not chunk_df.empty:
         chunk_col_idx_map = {name: idx for idx, name in enumerate(chunk_df.columns)}
         chunk_col_idx_json = json.dumps(chunk_col_idx_map)
@@ -437,7 +436,6 @@ def csv_to_html_table(
         label {{
           font-size: 13px;
         }}
-        /* Plot layout & highlighting */
         .plot-grid {{
           display: flex;
           flex-wrap: wrap;
@@ -475,7 +473,6 @@ def csv_to_html_table(
           font-size: 11px;
           font-weight: 600;
         }}
-        /* Modal for enlarged plots */
         .modal-overlay {{
           display: none;
           position: fixed;
@@ -541,16 +538,8 @@ def csv_to_html_table(
               Show only LOH / CNV genes (loh_flag TRUE or CNV call ≠ NEUTRAL)
             </label>
             <label style="margin-left:12px;">
-              <input type="checkbox" id="show-pon-cnv">
-              Also include genes with PON-based CNV call (pon_cnv_call ≠ "")
-            </label>
-            <label style="margin-left:12px;">
               <input type="checkbox" id="only-cancer-genes">
               Show only cancer genes (is_cancer_gene TRUE)
-            </label>
-            <label style="margin-left:12px;">
-              <input type="checkbox" id="only-split-genes">
-              Show only split genes (is_gene_split TRUE)
             </label>
           </div>
           <div class="control-group">
@@ -572,7 +561,6 @@ def csv_to_html_table(
 
       {chunk_section_html}
 
-      <!-- Modal overlay for enlarged plots -->
       <div id="plot-modal" class="modal-overlay">
         <div class="modal-content-wrapper">
           <span class="modal-close" id="plot-modal-close">&times;</span>
@@ -582,23 +570,22 @@ def csv_to_html_table(
 
       <script>
         (function() {{
-          const geneTable        = document.getElementById("report-table");
-          const chunkTable       = document.getElementById("chunk-table");
+          const geneTable  = document.getElementById("report-table");
+          const chunkTable = document.getElementById("chunk-table");
 
-          const checkboxNonCnv    = document.getElementById("hide-non-cnv");
-          const checkboxPonCnv    = document.getElementById("show-pon-cnv");
-          const checkboxCancer    = document.getElementById("only-cancer-genes");
-          const checkboxSplit     = document.getElementById("only-split-genes");
-          const geneInput         = document.getElementById("gene-filter");
-          const minTargetsInput   = document.getElementById("min-targets");
+          // Gene-level controls (no PON / split)
+          const gHideNonCnv  = document.getElementById("hide-non-cnv");
+          const gOnlyCancer  = document.getElementById("only-cancer-genes");
+          const gGeneInput   = document.getElementById("gene-filter");
+          const gMinTargets  = document.getElementById("min-targets");
 
-          // Chunk-section proxy controls
-          const checkboxNonCnvChunk  = document.getElementById("hide-non-cnv-chunk");
-          const checkboxPonCnvChunk  = document.getElementById("show-pon-cnv-chunk");
-          const checkboxCancerChunk  = document.getElementById("only-cancer-genes-chunk");
-          const checkboxSplitChunk   = document.getElementById("only-split-genes-chunk");
-          const geneInputChunk       = document.getElementById("gene-filter-chunk");
-          const minTargetsInputChunk = document.getElementById("min-targets-chunk");
+          // Chunk-level controls (includes PON + split)
+          const cHideNonCnv    = document.getElementById("hide-non-cnv-chunk");
+          const cIncludePonCnv = document.getElementById("show-pon-cnv-chunk");
+          const cOnlyCancer    = document.getElementById("only-cancer-genes-chunk");
+          const cOnlySplit     = document.getElementById("only-split-genes-chunk");
+          const cGeneInput     = document.getElementById("gene-filter-chunk");
+          const cMinTargets    = document.getElementById("min-targets-chunk");
 
           const colIndexGene  = {col_idx_json};
           const colIndexChunk = {chunk_col_idx_json};
@@ -659,26 +646,19 @@ def csv_to_html_table(
             return (val === "true" || val === "1" || val === "yes");
           }}
 
-          function filterTable(table, colIndex) {{
+          function parseGeneList(value) {{
+            return (value || "")
+              .split(",")
+              .map(g => g.trim().toLowerCase())
+              .filter(g => g.length > 0);
+          }}
+
+          function filterTable(table, colIndex, cfg) {{
             if (!table) return;
 
             const geneColIdx     = (colIndex["gene.symbol"] ?? -1);
             const nTargetsColIdx = (colIndex["n.targets"] ?? -1);
             const ponCnvColIdx   = (colIndex["pon_cnv_call"] ?? -1);
-
-            const hideNonCnv    = checkboxNonCnv && checkboxNonCnv.checked;
-            const includePonCnv = checkboxPonCnv && checkboxPonCnv.checked;
-            const onlyCancer    = checkboxCancer && checkboxCancer.checked;
-            const onlySplit     = checkboxSplit && checkboxSplit.checked;
-
-            const geneList = (geneInput && geneInput.value ? geneInput.value : "")
-              .split(",")
-              .map(g => g.trim().toLowerCase())
-              .filter(g => g.length > 0);
-
-            const minTargets = minTargetsInput
-              ? (parseInt(minTargetsInput.value, 10) || 0)
-              : 0;
 
             const body = table.tBodies[0];
             if (!body) return;
@@ -687,8 +667,7 @@ def csv_to_html_table(
             for (const row of rows) {{
               let hideRow = false;
 
-              // CNV / LOH filter with optional PON-based CNV override
-              if (!hideRow && hideNonCnv) {{
+              if (!hideRow && cfg.hideNonCnv) {{
                 const cnv = isCnvRow(row, colIndex);
 
                 let isPonCnv = false;
@@ -700,39 +679,39 @@ def csv_to_html_table(
                   }}
                 }}
 
-                const treatedAsCnv = cnv || (includePonCnv && isPonCnv);
+                const treatedAsCnv = cnv || (cfg.includePonCnv && isPonCnv);
                 if (!treatedAsCnv) {{
                   hideRow = true;
                 }}
               }}
 
-              if (!hideRow && onlyCancer) {{
+              if (!hideRow && cfg.onlyCancer) {{
                 if (!isCancerGeneRow(row, colIndex)) {{
                   hideRow = true;
                 }}
               }}
 
-              if (!hideRow && onlySplit) {{
+              if (!hideRow && cfg.onlySplit) {{
                 if (!isSplitGeneRow(row, colIndex)) {{
                   hideRow = true;
                 }}
               }}
 
-              if (!hideRow && nTargetsColIdx !== -1 && minTargetsInput) {{
+              if (!hideRow && nTargetsColIdx !== -1 && cfg.minTargets > 0) {{
                 const nCell = row.cells[nTargetsColIdx];
                 const nText = normalizeCellText(nCell);
                 if (nText.length > 0) {{
                   const nVal = parseFloat(nText);
-                  if (!Number.isNaN(nVal) && nVal < minTargets) {{
+                  if (!Number.isNaN(nVal) && nVal < cfg.minTargets) {{
                     hideRow = true;
                   }}
                 }}
               }}
 
-              if (!hideRow && geneColIdx !== -1 && geneList.length > 0) {{
+              if (!hideRow && geneColIdx !== -1 && cfg.geneList.length > 0) {{
                 const geneCell = row.cells[geneColIdx];
                 const geneText = normalizeCellText(geneCell);
-                const matches = geneList.some(g => geneText === g);
+                const matches = cfg.geneList.some(g => geneText === g);
                 if (!matches) {{
                   hideRow = true;
                 }}
@@ -742,56 +721,52 @@ def csv_to_html_table(
             }}
           }}
 
+          function filterGeneTable() {{
+            if (!geneTable) return;
+
+            const cfg = {{
+              hideNonCnv:  gHideNonCnv && gHideNonCnv.checked,
+              includePonCnv: false,  // gene-level ignores PON-based CNV override
+              onlyCancer:  gOnlyCancer && gOnlyCancer.checked,
+              onlySplit:   false,    // gene-level ignores split-gene filter
+              geneList:    parseGeneList(gGeneInput && gGeneInput.value),
+              minTargets:  gMinTargets ? (parseInt(gMinTargets.value, 10) || 0) : 0,
+            }};
+            filterTable(geneTable, colIndexGene, cfg);
+          }}
+
+          function filterChunkTable() {{
+            if (!chunkTable) return;
+
+            const cfg = {{
+              hideNonCnv:   cHideNonCnv && cHideNonCnv.checked,
+              includePonCnv: cIncludePonCnv && cIncludePonCnv.checked,
+              onlyCancer:   cOnlyCancer && cOnlyCancer.checked,
+              onlySplit:    cOnlySplit && cOnlySplit.checked,
+              geneList:     parseGeneList(cGeneInput && cGeneInput.value),
+              minTargets:   cMinTargets ? (parseInt(cMinTargets.value, 10) || 0) : 0,
+            }};
+            filterTable(chunkTable, colIndexChunk, cfg);
+          }}
+
           function applyFilter() {{
-            filterTable(geneTable,  colIndexGene);
-            filterTable(chunkTable, colIndexChunk);
+            filterGeneTable();
+            filterChunkTable();
           }}
 
-          // Hook main controls
-          if (checkboxNonCnv)   checkboxNonCnv.addEventListener("change", applyFilter);
-          if (checkboxPonCnv)   checkboxPonCnv.addEventListener("change", applyFilter);
-          if (checkboxCancer)   checkboxCancer.addEventListener("change", applyFilter);
-          if (checkboxSplit)    checkboxSplit.addEventListener("change", applyFilter);
-          if (geneInput)        geneInput.addEventListener("input", applyFilter);
-          if (minTargetsInput)  minTargetsInput.addEventListener("input", applyFilter);
+          // Hook gene-level controls
+          if (gHideNonCnv)  gHideNonCnv.addEventListener("change", applyFilter);
+          if (gOnlyCancer)  gOnlyCancer.addEventListener("change", applyFilter);
+          if (gGeneInput)   gGeneInput.addEventListener("input", applyFilter);
+          if (gMinTargets)  gMinTargets.addEventListener("input", applyFilter);
 
-          // Hook chunk proxy controls -> update main controls and reapply
-          if (checkboxNonCnvChunk && checkboxNonCnv) {{
-            checkboxNonCnvChunk.addEventListener("change", () => {{
-              checkboxNonCnv.checked = checkboxNonCnvChunk.checked;
-              applyFilter();
-            }});
-          }}
-          if (checkboxPonCnvChunk && checkboxPonCnv) {{
-            checkboxPonCnvChunk.addEventListener("change", () => {{
-              checkboxPonCnv.checked = checkboxPonCnvChunk.checked;
-              applyFilter();
-            }});
-          }}
-          if (checkboxCancerChunk && checkboxCancer) {{
-            checkboxCancerChunk.addEventListener("change", () => {{
-              checkboxCancer.checked = checkboxCancerChunk.checked;
-              applyFilter();
-            }});
-          }}
-          if (checkboxSplitChunk && checkboxSplit) {{
-            checkboxSplitChunk.addEventListener("change", () => {{
-              checkboxSplit.checked = checkboxSplitChunk.checked;
-              applyFilter();
-            }});
-          }}
-          if (geneInputChunk && geneInput) {{
-            geneInputChunk.addEventListener("input", () => {{
-              geneInput.value = geneInputChunk.value;
-              applyFilter();
-            }});
-          }}
-          if (minTargetsInputChunk && minTargetsInput) {{
-            minTargetsInputChunk.addEventListener("input", () => {{
-              minTargetsInput.value = minTargetsInputChunk.value;
-              applyFilter();
-            }});
-          }}
+          // Hook chunk-level controls
+          if (cHideNonCnv)    cHideNonCnv.addEventListener("change", applyFilter);
+          if (cIncludePonCnv) cIncludePonCnv.addEventListener("change", applyFilter);
+          if (cOnlyCancer)    cOnlyCancer.addEventListener("change", applyFilter);
+          if (cOnlySplit)     cOnlySplit.addEventListener("change", applyFilter);
+          if (cGeneInput)     cGeneInput.addEventListener("input", applyFilter);
+          if (cMinTargets)    cMinTargets.addEventListener("input", applyFilter);
 
           // Initial filter
           applyFilter();
