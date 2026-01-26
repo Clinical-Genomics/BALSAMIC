@@ -15,7 +15,6 @@ from cnv_report_utils import (
 )
 from BALSAMIC.constants.analysis import Gender
 
-
 def csv_to_html_table(
     df: pd.DataFrame,                     # gene-level table
     out_html: str | Path,
@@ -322,14 +321,47 @@ def csv_to_html_table(
             classes="dataframe",
             table_id="chunk-table",
         )
+        # NOTE: this now includes its own visible controls with *-chunk IDs
         chunk_section_html = f"""
         <h2>Within-gene PON-driven chunks (optional detail)</h2>
         <p class="muted">
           These rows represent sub-gene chunks defined by PON-based deviation (log2 vs panel-of-normals),
-          for genes in the main table. Use this for fine-grained inspection of noisy or complex genes.
+          for genes in the main table. Filters below mirror the gene-level filters and affect both tables.
         </p>
         <button id="toggle-chunk-table" type="button">Show chunk-level table</button>
         <div id="chunk-table-container" style="display:none; margin-top:10px;">
+          <div class="controls">
+            <div class="control-group">
+              <label>
+                <input type="checkbox" id="hide-non-cnv-chunk">
+                Show only LOH / CNV chunks (loh_flag TRUE or CNV call ≠ NEUTRAL)
+              </label>
+              <label style="margin-left:12px;">
+                <input type="checkbox" id="show-pon-cnv-chunk">
+                Also include chunks with PON-based CNV call (pon_cnv_call ≠ "")
+              </label>
+              <label style="margin-left:12px;">
+                <input type="checkbox" id="only-cancer-genes-chunk">
+                Show only cancer genes (is_cancer_gene TRUE)
+              </label>
+              <label style="margin-left:12px;">
+                <input type="checkbox" id="only-split-genes-chunk">
+                Show only split genes (is_gene_split TRUE)
+              </label>
+            </div>
+            <div class="control-group">
+              <label>
+                Min n.targets:
+                <input type="number" id="min-targets-chunk" min="0" step="1" value="0">
+              </label>
+            </div>
+            <div class="control-group">
+              <label>
+                Gene filter (comma-separated gene.symbol list):
+                <input type="text" id="gene-filter-chunk" placeholder="TP53,EGFR,MYC">
+              </label>
+            </div>
+          </div>
           {chunk_table_html}
         </div>
         """
@@ -340,7 +372,7 @@ def csv_to_html_table(
     col_idx_map = {name: idx for idx, name in enumerate(df.columns)}
     col_idx_json = json.dumps(col_idx_map)
 
-    # Column indices for JS (chunk-level table)  # NEW
+    # Column indices for JS (chunk-level table)
     if chunk_df is not None and not chunk_df.empty:
         chunk_col_idx_map = {name: idx for idx, name in enumerate(chunk_df.columns)}
         chunk_col_idx_json = json.dumps(chunk_col_idx_map)
@@ -500,7 +532,6 @@ def csv_to_html_table(
       {qc_plots_html}
 
       <h1>LOH / CNV Genes (gene-level)</h1>
-      <!-- NEW: toggle for gene-level table -->
       <button id="toggle-gene-table" type="button">Hide gene-level table</button>
       <div id="gene-table-container" style="margin-top:10px;">
         <div class="controls">
@@ -551,10 +582,8 @@ def csv_to_html_table(
 
       <script>
         (function() {{
-          const geneTable        = document.getElementById("report-table");   // gene-level
-          const chunkTable       = document.getElementById("chunk-table");    // chunk-level (optional)
-
-          if (!geneTable && !chunkTable) return;
+          const geneTable        = document.getElementById("report-table");
+          const chunkTable       = document.getElementById("chunk-table");
 
           const checkboxNonCnv    = document.getElementById("hide-non-cnv");
           const checkboxPonCnv    = document.getElementById("show-pon-cnv");
@@ -562,6 +591,14 @@ def csv_to_html_table(
           const checkboxSplit     = document.getElementById("only-split-genes");
           const geneInput         = document.getElementById("gene-filter");
           const minTargetsInput   = document.getElementById("min-targets");
+
+          // Chunk-section proxy controls
+          const checkboxNonCnvChunk  = document.getElementById("hide-non-cnv-chunk");
+          const checkboxPonCnvChunk  = document.getElementById("show-pon-cnv-chunk");
+          const checkboxCancerChunk  = document.getElementById("only-cancer-genes-chunk");
+          const checkboxSplitChunk   = document.getElementById("only-split-genes-chunk");
+          const geneInputChunk       = document.getElementById("gene-filter-chunk");
+          const minTargetsInputChunk = document.getElementById("min-targets-chunk");
 
           const colIndexGene  = {col_idx_json};
           const colIndexChunk = {chunk_col_idx_json};
@@ -710,7 +747,7 @@ def csv_to_html_table(
             filterTable(chunkTable, colIndexChunk);
           }}
 
-          applyFilter();
+          // Hook main controls
           if (checkboxNonCnv)   checkboxNonCnv.addEventListener("change", applyFilter);
           if (checkboxPonCnv)   checkboxPonCnv.addEventListener("change", applyFilter);
           if (checkboxCancer)   checkboxCancer.addEventListener("change", applyFilter);
@@ -718,7 +755,48 @@ def csv_to_html_table(
           if (geneInput)        geneInput.addEventListener("input", applyFilter);
           if (minTargetsInput)  minTargetsInput.addEventListener("input", applyFilter);
 
-          // --- Gene-level table toggle (NEW) ---
+          // Hook chunk proxy controls -> update main controls and reapply
+          if (checkboxNonCnvChunk && checkboxNonCnv) {{
+            checkboxNonCnvChunk.addEventListener("change", () => {{
+              checkboxNonCnv.checked = checkboxNonCnvChunk.checked;
+              applyFilter();
+            }});
+          }}
+          if (checkboxPonCnvChunk && checkboxPonCnv) {{
+            checkboxPonCnvChunk.addEventListener("change", () => {{
+              checkboxPonCnv.checked = checkboxPonCnvChunk.checked;
+              applyFilter();
+            }});
+          }}
+          if (checkboxCancerChunk && checkboxCancer) {{
+            checkboxCancerChunk.addEventListener("change", () => {{
+              checkboxCancer.checked = checkboxCancerChunk.checked;
+              applyFilter();
+            }});
+          }}
+          if (checkboxSplitChunk && checkboxSplit) {{
+            checkboxSplitChunk.addEventListener("change", () => {{
+              checkboxSplit.checked = checkboxSplitChunk.checked;
+              applyFilter();
+            }});
+          }}
+          if (geneInputChunk && geneInput) {{
+            geneInputChunk.addEventListener("input", () => {{
+              geneInput.value = geneInputChunk.value;
+              applyFilter();
+            }});
+          }}
+          if (minTargetsInputChunk && minTargetsInput) {{
+            minTargetsInputChunk.addEventListener("input", () => {{
+              minTargetsInput.value = minTargetsInputChunk.value;
+              applyFilter();
+            }});
+          }}
+
+          // Initial filter
+          applyFilter();
+
+          // --- Gene-level table toggle ---
           const geneToggleBtn   = document.getElementById("toggle-gene-table");
           const geneContainer   = document.getElementById("gene-table-container");
           if (geneToggleBtn && geneContainer) {{
@@ -732,7 +810,7 @@ def csv_to_html_table(
             }});
           }}
 
-          // --- Chunk-level table toggle (if present) ---
+          // --- Chunk-level table toggle ---
           const chunkToggleBtn   = document.getElementById("toggle-chunk-table");
           const chunkContainer   = document.getElementById("chunk-table-container");
           if (chunkToggleBtn && chunkContainer) {{

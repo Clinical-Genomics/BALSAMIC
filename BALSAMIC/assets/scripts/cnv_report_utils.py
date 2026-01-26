@@ -1769,7 +1769,6 @@ def build_gene_segment_table(
     cancer_genes: Optional[Set[str]] = None,
     refgene_path: str | Path | None = None,
     transcript_selection: str = "longest_tx",
-    pon_path: str | Path | None = None,  # kept in signature for compatibility (unused)
     loh_path: str | Path | None = None,
     cytoband_path: str | Path | None = None,
     sex: Gender = None,
@@ -1854,7 +1853,6 @@ def build_gene_segment_table(
         grouped["seg_cn"] = np.nan
         grouped["seg_cn1"] = np.nan
         grouped["seg_cn2"] = np.nan
-        grouped["seg_depth"] = np.nan
 
         if cancer_genes is not None:
             grouped["is_cancer_gene"] = grouped["gene.symbol"].isin(cancer_genes)
@@ -1899,7 +1897,6 @@ def build_gene_segment_table(
                 "seg_cn",
                 "seg_cn1",
                 "seg_cn2",
-                "seg_depth",
             ]:
                 df_bins[col] = np.nan
             return df_bins
@@ -1915,7 +1912,6 @@ def build_gene_segment_table(
         seg_cn_col = np.full(len(df_bins), np.nan)
         seg_cn1_col = np.full(len(df_bins), np.nan)
         seg_cn2_col = np.full(len(df_bins), np.nan)
-        seg_depth_col = np.full(len(df_bins), np.nan)
 
         centers = ((df_bins["start"].values + df_bins["end"].values) // 2).astype(int)
 
@@ -1939,8 +1935,6 @@ def build_gene_segment_table(
                 seg_cn1_col[i] = seg["cn1"]
             if "cn2" in segs.columns:
                 seg_cn2_col[i] = seg["cn2"]
-            if "depth" in segs.columns:
-                seg_depth_col[i] = seg["depth"]
 
         df_bins = df_bins.copy()
         df_bins["segment_id"] = seg_id_col
@@ -1951,7 +1945,6 @@ def build_gene_segment_table(
         df_bins["seg_cn"] = seg_cn_col
         df_bins["seg_cn1"] = seg_cn1_col
         df_bins["seg_cn2"] = seg_cn2_col
-        df_bins["seg_depth"] = seg_depth_col
 
         return df_bins
 
@@ -1992,8 +1985,6 @@ def build_gene_segment_table(
         agg_dict["seg_cn1"] = ["first"]
     if "seg_cn2" in bins.columns:
         agg_dict["seg_cn2"] = ["first"]
-    if "seg_depth" in bins.columns:
-        agg_dict["seg_depth"] = ["first"]
 
     grouped = bins.groupby(
         ["chr", "gene.symbol", "segment_id"], as_index=False
@@ -2022,13 +2013,8 @@ def build_gene_segment_table(
             "seg_cn_first": "seg_cn",
             "seg_cn1_first": "seg_cn1",
             "seg_cn2_first": "seg_cn2",
-            "seg_depth_first": "seg_depth",
         }
     )
-
-    # keep legacy alias if you need it
-    if "n_targets" in grouped.columns:
-        grouped["n.targets"] = grouped["n_targets"]
 
     # we don't need segment_id downstream in the report
     if "segment_id" in grouped.columns:
@@ -2317,6 +2303,7 @@ def build_gene_segment_table(
     grouped = grouped.drop(columns=drop_cols)
 
     return grouped
+
 def build_gene_chunk_table(
     cnr_path: str | Path,
     gene_seg_df: pd.DataFrame,
@@ -2827,12 +2814,28 @@ def build_gene_chunk_table(
         "chr",
         "region_start",
         "region_end",
+        "seg_start",
+        "seg_end",
+        "cytoband",
         "gene.symbol",
         "n.targets",
+        "seg_log2",
+        "loh_seg_mean",
+        "loh_num_snps",
+        "seg_baf",
         "mean_log2",
         "min_log2",
         "max_log2",
         "mean_weight",
+        "seg_cn",
+        "seg_cn1",
+        "seg_cn2",
+        "loh_C",
+        "loh_M",
+        "loh_M_flagged",
+        "loh_flag",
+        "is_cancer_gene",
+        "exons_hit",
         "pon_mean_log2",
         "pon_mean_spread",
         "pon_chunk_effect",
@@ -2840,6 +2843,8 @@ def build_gene_chunk_table(
         "pon_chunk_direction",
         "pon_chunk_call",
         "pon_cnv_call",
+        "cnvkit_cnv_call",
+        "purecn_cnv_call",
     ]
     cols_order = [c for c in cols_order if c in chunked.columns]
     chunked = chunked[
@@ -2860,6 +2865,6 @@ def build_gene_chunk_table(
     chunked = chunked.sort_values(
         by=["chr_sort", "region_start", "region_end"],
         kind="stable",
-    ).drop(columns=["chr_sort"])
+    ).drop(columns=["chr_sort", "chunk_id"])
 
     return chunked
