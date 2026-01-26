@@ -242,7 +242,7 @@ def compute_pon_spread_summaries(
         "pon_spread_q90_target": float(cnn["spread"].quantile(0.90)),
     }
 
-def compute_gene_chunk_summaries(gene_seg_df: pd.DataFrame) -> dict[str, float]:
+def compute_gene_cnv_summaries(gene_seg_df: pd.DataFrame) -> dict[str, float]:
     """
     Summaries from the gene-chunk table built by build_gene_segment_table.
 
@@ -274,18 +274,13 @@ def compute_gene_chunk_summaries(gene_seg_df: pd.DataFrame) -> dict[str, float]:
                                    .isin(["DELETION", "AMPLIFICATION"])
                                    .any())
                             ).sum())
-        genes_pon = int((gene_grp["pon_cnv_call"]
-                         .apply(lambda s: s.astype(str).str.upper()
-                                .isin(["DELETION", "AMPLIFICATION"])
-                                .any())
-                         ).sum())
         genes_loh = int((gene_grp["loh_flag"]
                          .apply(lambda s: s.astype(str).str.upper()
                                 .eq("TRUE")
                                 .any())
                          ).sum())
     else:
-        genes_cnvkit = genes_purecn = genes_pon = genes_loh = 0
+        genes_cnvkit = genes_purecn = genes_loh = 0
 
     return {
         # gene-level
@@ -323,7 +318,7 @@ def compute_summary_metrics(
         metrics["pon_spread_q90_target"] = float("nan")
 
     # 3) Gene/chunk-level CNV / LOH summaries
-    chunk_stats = compute_gene_chunk_summaries(gene_seg_df)
+    chunk_stats = compute_gene_cnv_summaries(gene_seg_df)
     metrics.update(chunk_stats)
 
     # Wrap as 1-row DataFrame
