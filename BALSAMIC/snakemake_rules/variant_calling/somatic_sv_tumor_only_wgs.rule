@@ -59,7 +59,8 @@ rule delly_sv_tumor_only_wgs:
         bamT = config_model.get_final_bam_name(bam_dir = bam_dir, sample_name = tumor_sample),
         excl = delly_exclusion_converted
     output:
-nvpytor        namemap= vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".dellysv.sample_name_map",
+        bcf = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".delly.bcf",
+        namemap = vcf_dir + "SV.somatic." + config["analysis"]["case_id"] + ".dellysv.sample_name_map"
     benchmark:
         benchmark_dir + 'delly_sv_tumor_only_' + config["analysis"]["case_id"] + ".tsv"
     singularity:
