@@ -1793,10 +1793,11 @@ def build_gene_segment_table(
     loh_path: str | Path | None = None,
     cytoband_path: str | Path | None = None,
     sex: Gender = None,
+    pon_path: str | Path | None = None,
 ) -> pd.DataFrame:
     """
     Build a per-gene x segment table from CNVkit CNR + CNS
-    (+ optional refGene, LOHgenes, cytobands).
+    (+ optional refGene, LOHgenes, cytobands, PON).
 
     One row ≈ one (gene, segment):
 
@@ -1808,6 +1809,7 @@ def build_gene_segment_table(
       - refgene_path: annotate exons_hit (whole_gene vs exon indices) using segment span.
       - loh_path: PureCN LOHgenes table (C, M, loh, seg.mean, num.snps).
       - cytoband_path: annotate cytoband from UCSC cytoband file.
+      - pon_path: CNVkit PON .cnn; used to compute gene-level PON deviation.
 
     Key columns:
 
@@ -1819,7 +1821,10 @@ def build_gene_segment_table(
       exons_hit (if refgene_path),
       loh_* (if loh_path),
       cytoband (if cytoband_path),
-      cnvkit_cnv_call, purecn_cnv_call (if seg_cn / loh_C present).
+      cnvkit_cnv_call, purecn_cnv_call (if seg_cn / loh_C present),
+      pon_gene_mean_log2, pon_gene_mean_spread,
+      pon_gene_effect, pon_gene_z, pon_gene_direction,
+      pon_gene_call, pon_gene_cnv_call (if pon_path provided and usable).
     """
 
     # ------------------------- 1. Load CNR ------------------------- #
@@ -1853,6 +1858,36 @@ def build_gene_segment_table(
     # normalize column names
     cnr = cnr.rename(columns={cnr_chr_col: "chr"})
 
+    # ------------------------- 1b. Optional PON merge (for gene-level stats) ------------------------- #
+    if pon_path is not None and Path(pon_path).is_file():
+        pon = safe_read_csv(pon_path, sep="\t").copy()
+        if not pon.empty:
+            pon_chr_col = "chromosome" if "chromosome" in pon.columns else "chr"
+            pon[pon_chr_col] = (
+                pon[pon_chr_col].astype(str).str.replace("^chr", "", regex=True)
+            )
+
+            required_pon_cols = {"start", "end", "log2", "spread"}
+            missing_pon = required_pon_cols - set(pon.columns)
+            if missing_pon:
+                raise ValueError(
+                    f"PON file must contain 'start','end','log2','spread' columns, missing: {missing_pon}"
+                )
+
+            pon = pon.rename(
+                columns={
+                    pon_chr_col: "chr",
+                    "log2": "pon_log2",
+                    "spread": "pon_spread",
+                }
+            )
+
+            cnr = cnr.merge(
+                pon[["chr", "start", "end", "pon_log2", "pon_spread"]],
+                how="left",
+                on=["chr", "start", "end"],
+            )
+
     # ------------------------- 2. Load CNS ------------------------- #
     cns = safe_read_csv(cns_path, sep="\t").copy()
     if cns.empty:
@@ -1877,7 +1912,7 @@ def build_gene_segment_table(
         if cancer_genes is not None:
             grouped["is_cancer_gene"] = grouped["gene.symbol"].isin(cancer_genes)
 
-        # In the no-CNS case, we skip LOH / cytoband / CN calls (as in earlier behaviour)
+        # In the no-CNS case, we skip LOH / cytoband / CN / PON calls for now
         return grouped
 
     cns_chr_col = "chromosome" if "chromosome" in cns.columns else "chr"
@@ -1980,6 +2015,118 @@ def build_gene_segment_table(
 
     bins = bins.sort_values(["chr", "gene.symbol", "start"]).reset_index(drop=True)
 
+    # -------------------- 3b. Gene-level PON stats (independent of segments) -------------------- #
+    gene_pon: pd.DataFrame | None = None
+
+    if {"pon_log2", "pon_spread"}.issubset(bins.columns):
+        has_pon = bins["pon_spread"].notna()
+        if has_pon.any():
+            # Aggregate per gene over bins that have PON info
+            gene_agg = (
+                bins.loc[has_pon]
+                .groupby(["chr", "gene.symbol"], as_index=False)
+                .agg(
+                    gene_n_targets=("log2", "count"),
+                    gene_mean_log2=("log2", "mean"),
+                    pon_gene_mean_log2=("pon_log2", "mean"),
+                    pon_gene_mean_spread=("pon_spread", "mean"),
+                )
+            )
+
+            MIN_N_FOR_PON = 2
+
+            def _gene_pon_effect(row: pd.Series) -> float:
+                return row["gene_mean_log2"] - row["pon_gene_mean_log2"]
+
+            gene_agg["pon_gene_effect"] = gene_agg.apply(
+                _gene_pon_effect, axis=1
+            )
+
+            def _gene_pon_z(row: pd.Series) -> float:
+                eff = row["pon_gene_effect"]
+                sigma = row["pon_gene_mean_spread"]
+                n = row["gene_n_targets"]
+
+                if pd.isna(eff) or pd.isna(sigma) or sigma <= 0:
+                    return np.nan
+                if pd.isna(n) or n < MIN_N_FOR_PON:
+                    return np.nan
+
+                sigma_eff = sigma / np.sqrt(float(n))
+                if sigma_eff <= 0:
+                    return np.nan
+
+                return abs(eff) / sigma_eff
+
+            gene_agg["pon_gene_z"] = gene_agg.apply(_gene_pon_z, axis=1)
+
+            def _gene_pon_direction(row: pd.Series) -> str:
+                eff = row["pon_gene_effect"]
+                if pd.isna(eff):
+                    return ""
+                if eff > 0:
+                    return "gain"
+                if eff < 0:
+                    return "loss"
+                return "neutral"
+
+            gene_agg["pon_gene_direction"] = gene_agg.apply(
+                _gene_pon_direction, axis=1
+            )
+
+            def _gene_pon_call(row: pd.Series) -> str:
+                z = row["pon_gene_z"]
+                if pd.isna(z):
+                    return ""
+                if z < 1.5:
+                    return "noise"
+                if z < 3.0:
+                    return "borderline"
+                return "significant"
+
+            gene_agg["pon_gene_call"] = gene_agg.apply(_gene_pon_call, axis=1)
+
+            def _gene_pon_cnv_call(row: pd.Series) -> str:
+                """
+                Derive a simple CNV call from gene-level PON information.
+
+                  - Only consider rows with pon_gene_call == 'significant'.
+                  - If gene_mean_log2 >  0.08 → AMPLIFICATION
+                  - If gene_mean_log2 < -0.08 → DELETION
+                  - Else → no call ("").
+                """
+                call = str(row.get("pon_gene_call", "")).strip().lower()
+                if call != "significant":
+                    return ""
+
+                ml = row.get("gene_mean_log2", np.nan)
+                if pd.isna(ml):
+                    return ""
+
+                if ml > 0.08:
+                    return "AMPLIFICATION"
+                if ml < -0.08:
+                    return "DELETION"
+                return ""
+
+            gene_agg["pon_gene_cnv_call"] = gene_agg.apply(
+                _gene_pon_cnv_call, axis=1
+            )
+
+            gene_pon = gene_agg[
+                [
+                    "chr",
+                    "gene.symbol",
+                    "pon_gene_mean_log2",
+                    "pon_gene_mean_spread",
+                    "pon_gene_effect",
+                    "pon_gene_z",
+                    "pon_gene_direction",
+                    "pon_gene_call",
+                    "pon_gene_cnv_call",
+                ]
+            ]
+
     # -------------------- 4. Collapse to gene × segment -------------------- #
     agg_dict: dict[str, list[str]] = {
         "start": ["min", "max"],  # region_start/region_end
@@ -2015,7 +2162,6 @@ def build_gene_segment_table(
         "_".join(col).strip("_") if isinstance(col, tuple) else col
         for col in grouped.columns
     ]
-
 
     grouped = grouped.rename(
         columns={
@@ -2264,6 +2410,14 @@ def build_gene_segment_table(
 
         grouped["exons_hit"] = grouped.apply(_exons_hit, axis=1)
 
+    # -------------------- 8b. Attach gene-level PON stats (if available) -------------------- #
+    if "gene_pon" in locals() and gene_pon is not None and not gene_pon.empty:
+        grouped = grouped.merge(
+            gene_pon,
+            how="left",
+            on=["chr", "gene.symbol"],
+        )
+
     # -------------------- 9. Column order & sorting -------------------- #
     grouped = grouped.rename(columns={"n_targets": "n.targets"})
     cols_order = [
@@ -2294,6 +2448,14 @@ def build_gene_segment_table(
         "exons_hit",
         "cnvkit_cnv_call",
         "purecn_cnv_call",
+        # Gene-level PON metrics (if pon_path was provided & usable)
+        "pon_gene_mean_log2",
+        "pon_gene_mean_spread",
+        "pon_gene_effect",
+        "pon_gene_z",
+        "pon_gene_direction",
+        "pon_gene_call",
+        "pon_gene_cnv_call",
     ]
     cols_order = [c for c in cols_order if c in grouped.columns]
     grouped = grouped[cols_order + [c for c in grouped.columns if c not in cols_order]]
@@ -2317,6 +2479,7 @@ def build_gene_segment_table(
     ).drop(columns=["chr_sort"])
 
     return grouped
+
 
 def build_gene_chunk_table(
     cnr_path: str | Path,

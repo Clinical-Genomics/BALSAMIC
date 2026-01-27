@@ -999,7 +999,7 @@ def main(
     # ----------------------------
     # Create per-gene CNV table
     # ----------------------------
-    # pon can be None (no PON file); build_gene_table handles that
+    # pon can be None (no PON file); build_gene_segment_table handles that
     genes_df = build_gene_segment_table(
         cnr_path=cnr,
         cns_path=cns,
@@ -1009,6 +1009,7 @@ def main(
         loh_path=loh_genes,
         cytoband_path=cytoband,
         sex=sex,
+        pon_path=pon,
     )
 
     # ----------------------------
