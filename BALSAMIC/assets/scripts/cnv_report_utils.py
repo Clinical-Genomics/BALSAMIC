@@ -519,7 +519,6 @@ def load_vcf_with_baf(vcf_path: str | Path, chr_order: list[str]) -> pd.DataFram
     vcf["DP_sample"] = dps
 
     return vcf
-
 # =============================================================================
 # Per-chromosome plots (PON spread + log2 + segments + BAF + CNV genes)
 # =============================================================================
@@ -563,6 +562,8 @@ def plot_chromosomes(
         genomic span of those genes are shown (per chromosome), and then
         further restricted in pseudo-position to bins within +/- 50 of
         any focus gene bin.
+      - If no chunk-level PON table is provided, *all* cancer genes with
+        enough targets are highlighted regardless of CNV/LOH/PON calls.
     """
 
     # Stable per-gene colour, used for any gene that doesn't already
@@ -607,6 +608,7 @@ def plot_chromosomes(
         gchunk = gchunk[gchunk["chr"].isin(chr_order)]
     else:
         gchunk = None
+    has_chunk_data = gchunk is not None and not gchunk.empty
 
     # Normalise targets column name if present (gene-level)
     if "n_targets" in gdf.columns:
@@ -698,15 +700,43 @@ def plot_chromosomes(
         return False
 
     def _is_pon_signif_chunk(row: pd.Series) -> bool:
-        # Prefer explicit PON chunk calls if present
+        """
+        PON-based significance at gene level.
+        Supports both legacy and newer naming:
+          - chunk-level: pon_chunk_significance, pon_chunk_call
+          - gene-level:  pon_gene_call, pon_gene_cnv_call
+          - legacy:      pon_cnv_call, pon_call
+        """
+        # Chunk-style significance
+        if "pon_chunk_significance" in row.index and pd.notna(
+            row["pon_chunk_significance"]
+        ):
+            return str(row["pon_chunk_significance"]).strip().lower() == "significant"
+
+        # Chunk-style CNV call (AMPLIFICATION / DELETION)
         if "pon_chunk_call" in row.index and pd.notna(row["pon_chunk_call"]):
-            return str(row["pon_chunk_call"]).strip().lower() == "significant"
+            val = str(row["pon_chunk_call"]).strip().upper()
+            if val in ("AMPLIFICATION", "DELETION"):
+                return True
+
+        # Gene-level significance
+        if "pon_gene_call" in row.index and pd.notna(row["pon_gene_call"]):
+            return str(row["pon_gene_call"]).strip().lower() == "significant"
+
+        # Gene-level CNV call
+        if "pon_gene_cnv_call" in row.index and pd.notna(row["pon_gene_cnv_call"]):
+            val = str(row["pon_gene_cnv_call"]).strip().upper()
+            if val in ("AMPLIFICATION", "DELETION"):
+                return True
+
+        # Legacy per-row call
         if "pon_cnv_call" in row.index and pd.notna(row["pon_cnv_call"]):
             val = str(row["pon_cnv_call"]).strip().upper()
-            return val in ("AMPLIFICATION", "DELETION")
-        # Legacy per-row call
+            if val in ("AMPLIFICATION", "DELETION"):
+                return True
         if "pon_call" in row.index and pd.notna(row["pon_call"]):
             return str(row["pon_call"]).strip().lower() == "significant"
+
         return False
 
     gdf["is_loh_or_cnv"] = gdf.apply(_is_loh_or_cnv_chunk, axis=1)
@@ -720,15 +750,15 @@ def plot_chromosomes(
         group_cols = ["chr", "gene.symbol"]
         grouped_gl = gdf.groupby(group_cols, as_index=False)
 
-        agg_dict = {
+        agg_dict_gl = {
             "has_loh_or_cnv": ("is_loh_or_cnv", "any"),
             "has_pon_sig": ("is_pon_signif", "any"),
             "is_cancer_gene": ("is_cancer_gene_bool", "any"),
         }
         if targets_col is not None:
-            agg_dict["total_targets"] = (targets_col, "sum")
+            agg_dict_gl["total_targets"] = (targets_col, "sum")
 
-        gene_level = grouped_gl.agg(**agg_dict)
+        gene_level = grouped_gl.agg(**agg_dict_gl)
 
         if "total_targets" not in gene_level.columns:
             gene_level["total_targets"] = np.nan
@@ -753,6 +783,13 @@ def plot_chromosomes(
 
         if highlight_only_cancer:
             mask_highlight &= gene_level["is_cancer_gene"]
+
+        # If NO chunk-level PON, also highlight all cancer genes with enough targets
+        if not has_chunk_data:
+            mask_highlight = mask_highlight | (
+                gene_level["is_cancer_gene"]
+                & (gene_level["total_targets"] >= min_targets_required)
+            )
 
         gene_level["highlight_gene"] = mask_highlight
     else:
@@ -793,7 +830,7 @@ def plot_chromosomes(
             g_chr = pd.DataFrame(columns=gdf.columns)
 
         # Chunk-level rows for this chr (if provided)
-        if gchunk is not None:
+        if gchunk is not None and not gchunk.empty:
             g_chunks_chr = gchunk[gchunk["chr"] == chr_name].copy()
         else:
             g_chunks_chr = pd.DataFrame(columns=["chr"])
@@ -891,25 +928,17 @@ def plot_chromosomes(
         # ---------- Segment info (CNVkit / LOH segments) ----------
         segs_chr = pd.DataFrame()
         if {"seg_start", "seg_end"}.issubset(g_chr.columns):
-            agg_dict_seg: dict[str, tuple[str, str]] = {
-                # coordinates stay as-is
-            }
-            # always group by these columns
+            agg_dict_seg: dict[str, tuple[str, str]] = {}
             group_cols_seg = ["chr", "seg_start", "seg_end"]
 
-            # seg_log2
             if "seg_log2" in g_chr.columns:
                 agg_dict_seg["seg_log2"] = ("seg_log2", "first")
-            # seg_cn (may still be useful elsewhere)
             if "seg_cn" in g_chr.columns:
                 agg_dict_seg["seg_C"] = ("seg_cn", "first")
-            # loh_seg_mean
             if "loh_seg_mean" in g_chr.columns:
                 agg_dict_seg["loh_seg_mean"] = ("loh_seg_mean", "first")
-            # loh_C
             if "loh_C" in g_chr.columns:
                 agg_dict_seg["loh_C"] = ("loh_C", "first")
-            # cnvkit_cnv_call for colouring
             if "cnvkit_cnv_call" in g_chr.columns:
                 agg_dict_seg["cnvkit_cnv_call"] = ("cnvkit_cnv_call", "first")
 
@@ -932,8 +961,6 @@ def plot_chromosomes(
         sub["x_coord"] = sub["bin_width"].cumsum() - sub["bin_width"] / 2
 
         # If we have focus genes on this chromosome, trim pseudo-position.
-        # For >= 2 focus genes, keep a continuous region from the leftmost
-        # to the rightmost focus gene (± PSEUDO_PAD), so genes in between stay.
         if focus_genes_chr:
             focus_bins = sub[sub["gene"].isin(focus_genes_chr)]
             if not focus_bins.empty:
@@ -1221,15 +1248,15 @@ def plot_chromosomes(
             ].copy()
 
             # Only keep PON-based CNV calls (AMPLIFICATION / DELETION)
-            if "pon_cnv_call" in chunks_span.columns:
-                chunks_span["pon_cnv_call_norm"] = (
-                    chunks_span["pon_cnv_call"]
+            if "pon_chunk_call" in chunks_span.columns:
+                chunks_span["pon_chunk_call_norm"] = (
+                    chunks_span["pon_chunk_call"]
                     .astype(str)
                     .str.strip()
                     .str.upper()
                 )
                 chunks_span = chunks_span[
-                    chunks_span["pon_cnv_call_norm"].isin(
+                    chunks_span["pon_chunk_call_norm"].isin(
                         ["AMPLIFICATION", "DELETION"]
                     )
                 ]
@@ -2425,7 +2452,8 @@ def build_gene_chunk_table(
       4. Cleanup tiny bridge segments within each gene (A–B–C patterns).
       5. Collapse bins to one row per (chr, gene.symbol, chunk_id)
          with per-chunk n.targets, mean_log2, min_log2, max_log2.
-      6. Compute PON-driven stats per chunk (effect, Z, direction, call).
+      6. Compute PON-driven stats per chunk (effect, Z, direction,
+         significance, and CNV call).
       7. Annotate chunks from gene_seg_df by overlap in
          (chr, gene.symbol, region_start..region_end), keeping
          per-chunk log2 stats and n.targets (do not overwrite with gene-level).
@@ -2464,9 +2492,9 @@ def build_gene_chunk_table(
     # Explode multi-gene bins
     cnr["gene.symbol"] = (
         cnr["gene"]
-        .astype(str)
-        .str.split(",")
-        .apply(lambda lst: [g.strip() for g in lst if g.strip()])
+            .astype(str)
+            .str.split(",")
+            .apply(lambda lst: [g.strip() for g in lst if g.strip()])
     )
     cnr = cnr.explode("gene.symbol")
 
@@ -2552,8 +2580,8 @@ def build_gene_chunk_table(
                 center=True,
                 min_periods=1,
             )
-            .median()
-            .values
+                .median()
+                .values
         )
 
         current_run: list[int] = []
@@ -2836,19 +2864,36 @@ def build_gene_chunk_table(
 
     chunked["pon_chunk_direction"] = chunked.apply(_pon_direction, axis=1)
 
-    def _pon_call(row: pd.Series) -> str:
+    # significance: noise / borderline / significant
+    def _pon_significance(row: pd.Series) -> str:
         z = row["pon_chunk_z"]
         if pd.isna(z):
             return ""
-        if z < 1.5:
+        if z < 2.0:
             return "noise"
-        if z < 3.0:
+        if z < 5.0:
             return "borderline"
         return "significant"
 
-    chunked["pon_chunk_call"] = chunked.apply(_pon_call, axis=1)
+    # rename old "call" to significance
+    chunked["pon_chunk_significance"] = chunked.apply(_pon_significance, axis=1)
 
-    # NOTE: pon_cnv_call removed in this version; we only keep pon_chunk_*.
+    # CNV call: NEUTRAL / AMPLIFICATION / DELETION
+    def _pon_cnv_call(row: pd.Series) -> str:
+        signif = str(row.get("pon_chunk_significance", "")).strip().lower()
+        ml = row.get("mean_log2", np.nan)
+
+        if signif != "significant" or pd.isna(ml):
+            return "NEUTRAL"
+
+        if ml > 0.07:
+            return "AMPLIFICATION"
+        if ml < -0.07:
+            return "DELETION"
+
+        return "NEUTRAL"
+
+    chunked["pon_chunk_call"] = chunked.apply(_pon_cnv_call, axis=1)
 
     # -------------------- 5. Annotate from gene_seg_df -------------------- #
     if not {"chr", "gene.symbol", "region_start", "region_end"}.issubset(
@@ -2881,6 +2926,7 @@ def build_gene_chunk_table(
         "pon_chunk_effect",
         "pon_chunk_z",
         "pon_chunk_direction",
+        "pon_chunk_significance",
         "pon_chunk_call",
     }
 
@@ -2961,6 +3007,7 @@ def build_gene_chunk_table(
         "pon_chunk_effect",
         "pon_chunk_z",
         "pon_chunk_direction",
+        "pon_chunk_significance",
         "pon_chunk_call",
         "cnvkit_cnv_call",
         "purecn_cnv_call",
