@@ -1,4 +1,23 @@
 [X.X.X]
+-------
+
+Added:
+^^^^^^
+* add AT_DROPOUT to all panel analyses QC deliverables https://github.com/Clinical-Genomics/BALSAMIC/pull/1646
+
+Changed:
+^^^^^^^^
+* lower average quality filter for WGS TO TNscope calls to 10 https://github.com/Clinical-Genomics/BALSAMIC/pull/1644
+* increased runtime for a couple of small rules https://github.com/Clinical-Genomics/BALSAMIC/pull/1641
+* decreased memory for headjobs to 500mb https://github.com/Clinical-Genomics/BALSAMIC/pull/1641
+
+Removed:
+^^^^^^^^
+
+Fixed:
+^^^^^^
+
+[18.0.1]
 --------
 
 Added:
@@ -6,9 +25,18 @@ Added:
 
 Changed:
 ^^^^^^^^
+* moved default resource allocation to snakemake command https://github.com/Clinical-Genomics/BALSAMIC/pull/1632
+* increased memory of samtools fixmate https://github.com/Clinical-Genomics/BALSAMIC/pull/1632
+* no rerun for rule all https://github.com/Clinical-Genomics/BALSAMIC/pull/1632
+* increased head-job runtime to 7 days https://github.com/Clinical-Genomics/BALSAMIC/pull/1632
+* improved information on failed job status https://github.com/Clinical-Genomics/BALSAMIC/pull/1636
+* scontrol replaced with sacct in jobstatus script https://github.com/Clinical-Genomics/BALSAMIC/pull/1636
+* add attempt mem bump to vep_somatic_research_sv https://github.com/Clinical-Genomics/BALSAMIC/pull/1632
 
 Removed:
 ^^^^^^^^
+* exome argument panel bed callback function https://github.com/Clinical-Genomics/BALSAMIC/pull/1632
+* removed -l flag in head-job sbatch script https://github.com/Clinical-Genomics/BALSAMIC/pull/1632
 
 Fixed:
 ^^^^^^

@@ -29,6 +29,7 @@ METRICS: Dict[str, dict] = {
             "MEAN_TARGET_COVERAGE": {"condition": None},
             "FOLD_80_BASE_PENALTY": {"condition": None},
             "PCT_OFF_BAIT": {"condition": None},
+            "AT_DROPOUT": {"condition": None},
             "GC_DROPOUT": {"condition": {"norm": "lt", "threshold": 1.00}},
         },
         "gicfdna": {

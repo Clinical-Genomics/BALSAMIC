@@ -635,6 +635,7 @@ rule all:
         tmp_dir=tmp_dir,
         case_name=config["analysis"]["case_id"],
         status_file=Path(get_result_dir(config), "analysis_status.txt").as_posix(),
+    retries: 0
     message:
         "Finalizing analysis for {params.case_name}"
     run:
