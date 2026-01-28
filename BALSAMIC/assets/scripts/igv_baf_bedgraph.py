@@ -39,7 +39,6 @@ def convert_vcf_to_bedgraph(
     n_written = 0
 
     with open_maybe_gzip(vcf_path) as fin, open_output(bedgraph_path) as fout:
-
         if track_name:
             fout.write(f'track type=bedGraph name="{track_name}"\n')
 

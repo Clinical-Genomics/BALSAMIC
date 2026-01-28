@@ -177,6 +177,7 @@ class BEDPreProcessingParams(BaseModel):
 
     minimum_region_size: int
 
+
 class IGVCNRBinning(BaseModel):
     """This class defines the params settings used as constants in IGV CNR binning rules.
 
@@ -185,6 +186,7 @@ class IGVCNRBinning(BaseModel):
     """
 
     bins_per_window: int
+
 
 class ParamsVardict(BaseModel):
     """This class defines the params settings used as constants in vardict rule.
