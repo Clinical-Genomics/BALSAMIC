@@ -11,7 +11,7 @@ rule baf_igv_bedgraphs:
         housekeeper_id = {"id": "{sample}","tags": "cnv"},
         sample_id = "{sample}",
     message:
-        "Extending regions in bedfile to a minimum size of {params.minimum_region_size}."
+        "Converting the forced DNAscope calls on gnomad positions to bedgraph for viewing in IGV, for sample {params.sample_id}."
     shell:
         """
 python {params.igv_baf_script} {input.gnomad_af5_vcf} {output.gnomad_af5_bedgraph} --track-name {sample_id}_gnomad_af5 ; 
@@ -29,7 +29,7 @@ rule cnr_binning_igv_bedgraphs:
         housekeeper_id = {"id": "{sample}","tags": "cnv"},
         bins_per_window = params.igv_cnr_binning.bins_per_window,
     message:
-        "Extending regions in bedfile to a minimum size of {params.minimum_region_size}."
+        "Converting the noise corrected collect read counts to bedgraph for viewing in IGV, and binning {params.bins_per_window} adjacent regions, for sample {params.sample_id}"
     shell:
         """
 python {params.igv_cnr_script} --bins-per-window {params.bins_per_window} {input.denoised_cr} {output.denoised_cr_bedgraph} ; 
