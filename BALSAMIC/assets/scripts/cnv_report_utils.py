@@ -2415,10 +2415,12 @@ def build_gene_chunk_table(
            - effect = log2 - pon_log2
            - pon_spread → per-bin Z, smoothed in runs
       4. Cleanup tiny bridge segments within each gene (A–B–C patterns).
-      5. Collapse bins to one row per (chr, gene.symbol, chunk_id).
-      6. Compute PON-driven stats (effect, Z, direction, call, pon_cnv_call).
+      5. Collapse bins to one row per (chr, gene.symbol, chunk_id)
+         with per-chunk n.targets, mean_log2, min_log2, max_log2.
+      6. Compute PON-driven stats per chunk (effect, Z, direction, call).
       7. Annotate chunks from gene_seg_df by overlap in
-         (chr, gene.symbol, region_start..region_end).
+         (chr, gene.symbol, region_start..region_end), keeping
+         per-chunk log2 stats and n.targets (do not overwrite with gene-level).
 
     Returns
     -------
@@ -2447,11 +2449,11 @@ def build_gene_chunk_table(
     has_depth = "depth" in cnr.columns
     has_weight = "weight" in cnr.columns
 
-    # drop pseudo-genes
+    # Drop pseudo-genes
     cnr = cnr[cnr["gene"].notna()]
     cnr = cnr[~cnr["gene"].isin(["Antitarget", "-"])]
 
-    # explode multi-gene bins
+    # Explode multi-gene bins
     cnr["gene.symbol"] = (
         cnr["gene"]
         .astype(str)
@@ -2460,7 +2462,7 @@ def build_gene_chunk_table(
     )
     cnr = cnr.explode("gene.symbol")
 
-    # normalize column names
+    # Normalize chromosome column
     cnr = cnr.rename(columns={cnr_chr_col: "chr"})
 
     # ------------------------- 1b. Load PON (required) ------------------------- #
@@ -2519,7 +2521,7 @@ def build_gene_chunk_table(
         if df_gene.shape[0] < MIN_GENE_TARGETS:
             return
 
-        # if no PON spread for this gene, skip
+        # If no PON spread for this gene, skip
         if df_gene["pon_spread"].isna().all():
             return
 
@@ -2566,7 +2568,9 @@ def build_gene_chunk_table(
             eps_local = 1e-3
             sigma_run_safe = np.where(sigma_run <= 0, eps_local, sigma_run)
             sigma_mean = (
-                float(np.nanmean(sigma_run_safe)) if sigma_run_safe.size > 0 else eps_local
+                float(np.nanmean(sigma_run_safe))
+                if sigma_run_safe.size > 0
+                else eps_local
             )
 
             n = len(eff_run)
@@ -2690,7 +2694,9 @@ def build_gene_chunk_table(
                     merged_indices = rA["indices"] + rB["indices"] + rC["indices"]
                     merged_eff = eff_all[merged_positions]
                     merged_mean = (
-                        float(np.nanmean(merged_eff)) if len(merged_eff) > 0 else np.nan
+                        float(np.nanmean(merged_eff))
+                        if len(merged_eff) > 0
+                        else np.nan
                     )
                     new_runs.append(
                         {
@@ -2718,7 +2724,9 @@ def build_gene_chunk_table(
                     merged_indices = last["indices"] + r["indices"]
                     merged_eff = eff_all[merged_positions]
                     merged_mean = (
-                        float(np.nanmean(merged_eff)) if len(merged_eff) > 0 else np.nan
+                        float(np.nanmean(merged_eff))
+                        if len(merged_eff) > 0
+                        else np.nan
                     )
                     new_runs[-1] = {
                         "positions": merged_positions,
@@ -2732,6 +2740,7 @@ def build_gene_chunk_table(
 
             i += 1
 
+        # Assign new, cleaned chunk labels
         for run_idx, run in enumerate(new_runs):
             new_label = f"genechunk_clean_{run_idx}"
             bins.loc[run["indices"], "chunk_id"] = new_label
@@ -2743,7 +2752,7 @@ def build_gene_chunk_table(
 
     # -------------------- 3. Collapse to gene × chunk -------------------- #
     agg_dict: dict[str, list[str]] = {
-        # region_start = min(start), region_end = max(end)
+        # region_start = min(start), region_end = max(end) (per chunk)
         "start": ["min"],
         "end": ["max"],
         "log2": ["count", "mean", "min", "max"],
@@ -2759,15 +2768,17 @@ def build_gene_chunk_table(
         ["chr", "gene.symbol", "chunk_id"], as_index=False
     ).agg(agg_dict)
 
+    # Flatten MultiIndex columns
     chunked.columns = [
         "_".join(col).strip("_") if isinstance(col, tuple) else col
         for col in chunked.columns
     ]
 
+    # Rename to per-chunk fields
     chunked = chunked.rename(
         columns={
             "start_min": "region_start",
-            "end_max": "region_end",  # <-- use end_max, not start_max
+            "end_max": "region_end",  # per-chunk end
             "log2_count": "n_targets",
             "log2_mean": "mean_log2",
             "log2_min": "min_log2",
@@ -2778,6 +2789,7 @@ def build_gene_chunk_table(
         }
     )
 
+    # Make n.targets explicitly per-chunk
     if "n_targets" in chunked.columns:
         chunked["n.targets"] = chunked["n_targets"]
 
@@ -2828,30 +2840,7 @@ def build_gene_chunk_table(
 
     chunked["pon_chunk_call"] = chunked.apply(_pon_call, axis=1)
 
-    def _pon_cnv_call(row: pd.Series) -> str:
-        """
-        Derive a simple CNV call from PON information.
-
-          - Only consider rows with pon_chunk_call == 'significant'.
-          - If mean_log2 >  0.08 → AMPLIFICATION
-          - If mean_log2 < -0.08 → DELETION
-          - Else → no call ("").
-        """
-        call = str(row.get("pon_chunk_call", "")).strip().lower()
-        if call != "significant":
-            return ""
-
-        ml = row.get("mean_log2", np.nan)
-        if pd.isna(ml):
-            return ""
-
-        if ml > 0.08:
-            return "AMPLIFICATION"
-        if ml < -0.08:
-            return "DELETION"
-        return ""
-
-    chunked["pon_cnv_call"] = chunked.apply(_pon_cnv_call, axis=1)
+    # NOTE: pon_cnv_call removed in this version; we only keep pon_chunk_*.
 
     # -------------------- 5. Annotate from gene_seg_df -------------------- #
     if not {"chr", "gene.symbol", "region_start", "region_end"}.issubset(
@@ -2868,7 +2857,26 @@ def build_gene_chunk_table(
     for (ch, g), df_g in gseg.groupby(["chr", "gene.symbol"], sort=False):
         seg_map[(str(ch), str(g))] = df_g.reset_index(drop=True)
 
-    exclude_cols = {"chr", "gene.symbol", "region_start", "region_end"}
+    # Do NOT overwrite these per-chunk fields with gene-level values
+    protected_cols = {
+        "region_start",
+        "region_end",
+        "n_targets",
+        "n.targets",
+        "mean_log2",
+        "min_log2",
+        "max_log2",
+        "mean_weight",
+        "weight_mean",
+        "pon_mean_log2",
+        "pon_mean_spread",
+        "pon_chunk_effect",
+        "pon_chunk_z",
+        "pon_chunk_direction",
+        "pon_chunk_call",
+    }
+
+    exclude_cols = {"chr", "gene.symbol", "region_start", "region_end"} | protected_cols
     annot_cols = [c for c in gseg.columns if c not in exclude_cols]
 
     def _annotate_chunk(row: pd.Series) -> pd.Series:
@@ -2900,7 +2908,20 @@ def build_gene_chunk_table(
 
     chunked = chunked.apply(_annotate_chunk, axis=1)
 
-    # -------------------- 6. Column order & sorting -------------------- #
+    # -------------------- 6. Drop gene-level PON columns you don't want -------------------- #
+    drop_gene_level_cols = [
+        "pon_gene_mean_log2",
+        "pon_gene_mean_spread",
+        "pon_gene_effect",
+        "pon_gene_z",
+        "pon_gene_direction",
+        "pon_gene_call",
+        "pon_gene_cnv_call",
+        "pon_cnv_call",
+    ]
+    chunked = chunked.drop(columns=drop_gene_level_cols, errors="ignore")
+
+    # -------------------- 7. Column order & sorting -------------------- #
     cols_order = [
         "chr",
         "region_start",
@@ -2933,7 +2954,6 @@ def build_gene_chunk_table(
         "pon_chunk_z",
         "pon_chunk_direction",
         "pon_chunk_call",
-        "pon_cnv_call",
         "cnvkit_cnv_call",
         "purecn_cnv_call",
     ]
