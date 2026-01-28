@@ -198,8 +198,9 @@ def test_get_snakemake_cluster_options(
 
     # THEN the expected format should be returned
     assert snakemake_cluster_options == (
-        f"--slurm-logdir {session_tmp_path} --profile {reference_file.as_posix()} --default-resources "
-        f'slurm_extra="--qos={QOS.HIGH}" slurm_partition={Partition.CORE} slurm_account={ClusterAccount.DEVELOPMENT} '
+        f"--slurm-logdir {session_tmp_path} --profile {reference_file.as_posix()} "
+        f'--default-resources slurm_extra="--qos={QOS.HIGH}" runtime=120 mem_mb=4000 '
+        f"slurm_partition={Partition.CORE} slurm_account={ClusterAccount.DEVELOPMENT} "
         "--slurm-keep-successful-logs"
     )
 
@@ -226,6 +227,6 @@ def test_get_snakemake_command(
         f"--use-singularity --singularity-args '--cleanenv --bind {session_tmp_path.as_posix()}:/' --quiet "
         f"--slurm-logdir {session_tmp_path} "
         f"--profile {reference_file.as_posix()} "
-        f'--default-resources slurm_extra="--qos={QOS.HIGH}" slurm_partition={Partition.CORE} slurm_account={ClusterAccount.DEVELOPMENT} --slurm-keep-successful-logs '
+        f'--default-resources slurm_extra="--qos={QOS.HIGH}" runtime=120 mem_mb=4000 slurm_partition={Partition.CORE} slurm_account={ClusterAccount.DEVELOPMENT} --slurm-keep-successful-logs '
         "--cores 36"
     )

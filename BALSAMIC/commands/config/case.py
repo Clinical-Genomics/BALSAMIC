@@ -151,6 +151,12 @@ def case_config(
 
     LOG.info(f"Starting configuring analysis case: {case_id}.")
 
+    if exome and not panel_bed:
+        raise click.BadParameter(
+            "If --exome is provided, --panel-bed must also be provided.",
+            param_hint=["--panel-bed"],
+        )
+
     LOG.info(f"Creating case analysis directory: {analysis_dir}/{case_id}.")
     Path(analysis_dir, case_id).mkdir(exist_ok=True)
 

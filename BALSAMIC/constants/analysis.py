@@ -14,7 +14,7 @@ class LogFile:
 class SubmitSnakemake:
     """Constants for sbatch script running snakemake on cluster"""
 
-    MAX_RUN_HOURS: int = 120
+    MAX_RUN_HOURS: int = 168
 
 
 class SnakemakeDAG:

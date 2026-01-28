@@ -5,7 +5,7 @@ Method description
 Target Genome Analysis
 ~~~~~~~~~~~~~~~~~~~~~~
 
-BALSAMIC :superscript:`1` (**version** = 18.0.0) was used to analyze the data from raw FASTQ files.
+BALSAMIC :superscript:`1` (**version** = 18.0.1) was used to analyze the data from raw FASTQ files.
 We first quality controlled FASTQ files using FastQC v0.11.9 :superscript:`2`.
 Adapter sequences are trimmed using fastp v0.23.2 :superscript:`3` and then UMI sequences are extracted using the UMI extract tool from sentieon-tools (version 202308.03) :superscript:`15` and finally low-quality bases were trimmed using fastp v0.23.2 :superscript:`3`.
 Trimmed reads were mapped to the reference genome hg19 using sentieon-tools :superscript:`15`.
@@ -25,7 +25,7 @@ to annotate somatic variants for their population allele frequency from gnomAD v
 Whole Genome Analysis
 ~~~~~~~~~~~~~~~~~~~~~
 
-BALSAMIC :superscript:`1` (**version** = 18.0.0) was used to analyze the data from raw FASTQ files.
+BALSAMIC :superscript:`1` (**version** = 18.0.1) was used to analyze the data from raw FASTQ files.
 We first quality controlled FASTQ files using FastQC v0.11.9 :superscript:`2`.
 Adapter sequences and low-quality bases were trimmed using fastp v0.23.2 :superscript:`3`.
 Trimmed reads were mapped to the reference genome hg19 using sentieon-tools 202308.03 :superscript:`15`.
@@ -34,7 +34,7 @@ The BAM file was then realigned using Realign from sentieon-tools 202308.03 :sup
 The final BAM is quality controlled using WgsMetricsAlgo, CoverageMetrics, AlignmentStat, InsertSizeMetricAlgo, GCBias, MeanQualityByCycle, QualDistribution and BaseDistributionByCycle from sentieon-tools 202308.03 :superscript:`15`, and CollectWgsMetrics and CollectHsMetrics functionalities from Picard tools v2.27.1 :superscript:`6`.
 Results of the quality controlled steps were summarized by MultiQC v1.31 :superscript:`7`.
 Small somatic mutations (SNVs and INDELs) were called for each sample using Sentieon TNscope :superscript:`16`.
-The called-variants were also further second filtered using the criteria (DP(tumor,normal) >= 10; AD(tumor) >= 3; AF(tumor) >= 0.05, Maximum AF(tumor < 1;  GNOMADAF_popmax <= 0.001; normalized base quality scores >= 20, read_counts of alt,ref alle > 0).
+The called-variants were also further second filtered using the criteria (DP(tumor,normal) >= 10; AD(tumor) >= 3; AF(tumor) >= 0.05, Maximum AF(tumor < 1;  GNOMADAF_popmax <= 0.001; normalized base quality scores >= 10, read_counts of alt,ref alle > 0).
 Structural variants were called using Manta v1.6.0 :superscript:`9`, Delly v1.0.3 :superscript:`10` and TIDDIT v3.3.2 :superscript:`12`.
 Copy number variations (CNV) were called using ascatNgs v4.5.0 :superscript:`17` (tumor-normal), Delly v1.0.3 :superscript:`10` and CNVpytor v1.3.1 :superscript:`22` (tumor-only) and converted from CNV to deletions (DEL) and duplications (DUP).
 The structural variant (SV) calls from Manta, Delly, TIDDIT, ascatNgs (tumor-normal) and CNVpytor (tumor-only) were merged using SVDB v2.8.1 :superscript:`12`
@@ -45,7 +45,7 @@ to annotate somatic single nucleotide variants for their population allele frequ
 UMI workflow
 ~~~~~~~~~~~~~~~~~~~~~
 
-BALSAMIC :superscript:`1` (**version** = 18.0.0) was used to analyze the data from raw FASTQ files.
+BALSAMIC :superscript:`1` (**version** = 18.0.1) was used to analyze the data from raw FASTQ files.
 We first quality controlled FASTQ files using FastQC v0.11.9 :superscript:`2`.
 Adapter sequences were trimmed using fastp v0.23.2 :superscript:`3`.
 UMI tag extraction and alignment and consensus-calling of UMI groups were performed using Sentieon tools 202308.03 :superscript:`15`.

@@ -95,7 +95,7 @@ def submitter_with_partition(tmp_path, monkeypatch, logger, fake_exec):
 def test_build_sbatch_header_includes_partition(submitter_with_partition):
     s = submitter_with_partition
     header = s._build_sbatch_header()
-    assert header.startswith("#!/bin/bash -l")
+    assert header.startswith("#!/bin/bash")
     assert f"#SBATCH --account={s.account}" in header
     assert f"#SBATCH --job-name=BALSAMIC_snakemake_submit.{s.case_id}.%j" in header
     assert (
@@ -107,7 +107,7 @@ def test_build_sbatch_header_includes_partition(submitter_with_partition):
         in header
     )
     assert "#SBATCH --ntasks=1" in header
-    assert "#SBATCH --mem=5G" in header
+    assert "#SBATCH --mem=500M" in header
     assert f"#SBATCH --time={s.max_run_hours}:00:00" in header
     assert f"#SBATCH --qos={s.qos}" in header
     assert "#SBATCH --cpus-per-task=1" in header
@@ -132,7 +132,7 @@ def test_build_sbatch_header_omits_partition_when_none(
     )
     header = s._build_sbatch_header()
     assert "#SBATCH --partition=" not in header
-    assert "#!/bin/bash -l" in header
+    assert "#!/bin/bash" in header
     assert "#SBATCH --time=2:00:00" in header
 
 
@@ -197,7 +197,7 @@ def test_create_sbatch_script_writes_once_and_contains_parts(submitter):
         assert isinstance(content, str) and content.strip()
 
         # Contains header + snakemake + status check + success snippet
-        assert "#!/bin/bash -l" in content
+        assert "#!/bin/bash" in content
         assert "snakemake --notemp -p --rerun-triggers mtime" in content
         assert "python " in content and "analysis_status.txt" in content
         assert "analysis_finished_successfully" in content
