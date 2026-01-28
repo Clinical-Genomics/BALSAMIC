@@ -891,23 +891,32 @@ def plot_chromosomes(
         # ---------- Segment info (CNVkit / LOH segments) ----------
         segs_chr = pd.DataFrame()
         if {"seg_start", "seg_end"}.issubset(g_chr.columns):
+            agg_dict_seg: dict[str, tuple[str, str]] = {
+                # coordinates stay as-is
+            }
+            # always group by these columns
+            group_cols_seg = ["chr", "seg_start", "seg_end"]
+
+            # seg_log2
+            if "seg_log2" in g_chr.columns:
+                agg_dict_seg["seg_log2"] = ("seg_log2", "first")
+            # seg_cn (may still be useful elsewhere)
+            if "seg_cn" in g_chr.columns:
+                agg_dict_seg["seg_C"] = ("seg_cn", "first")
+            # loh_seg_mean
+            if "loh_seg_mean" in g_chr.columns:
+                agg_dict_seg["loh_seg_mean"] = ("loh_seg_mean", "first")
+            # loh_C
+            if "loh_C" in g_chr.columns:
+                agg_dict_seg["loh_C"] = ("loh_C", "first")
+            # cnvkit_cnv_call for colouring
+            if "cnvkit_cnv_call" in g_chr.columns:
+                agg_dict_seg["cnvkit_cnv_call"] = ("cnvkit_cnv_call", "first")
+
             segs_chr = (
                 g_chr.dropna(subset=["seg_start", "seg_end"])
-                .groupby(["chr", "seg_start", "seg_end"], as_index=False)
-                .agg(
-                    seg_log2=("seg_log2", "first")
-                    if "seg_log2" in g_chr.columns
-                    else ("region_start", "first"),
-                    seg_C=("seg_cn", "first")
-                    if "seg_cn" in g_chr.columns
-                    else ("region_start", "first"),
-                    loh_seg_mean=("loh_seg_mean", "first")
-                    if "loh_seg_mean" in g_chr.columns
-                    else ("region_start", "first"),
-                    loh_C=("loh_C", "first")
-                    if "loh_C" in g_chr.columns
-                    else ("region_start", "first"),
-                )
+                .groupby(group_cols_seg, as_index=False)
+                .agg(**agg_dict_seg)
             )
             segs_chr = segs_chr[segs_chr["chr"] == chr_name].sort_values("seg_start")
 
@@ -1156,38 +1165,37 @@ def plot_chromosomes(
                 xs = srow["x_start"]
                 xe = srow["x_end"]
 
-                if "loh_seg_mean_clipped" in srow.index and pd.notna(
-                    srow["loh_seg_mean_clipped"]
-                ):
-                    y_seg = srow["loh_seg_mean_clipped"]
-                elif "seg_log2_clipped" in srow.index and pd.notna(
+                # Prefer seg_log2, then fall back to loh_seg_mean
+                if "seg_log2_clipped" in srow.index and pd.notna(
                     srow["seg_log2_clipped"]
                 ):
                     y_seg = srow["seg_log2_clipped"]
+                elif "loh_seg_mean_clipped" in srow.index and pd.notna(
+                    srow["loh_seg_mean_clipped"]
+                ):
+                    y_seg = srow["loh_seg_mean_clipped"]
                 else:
                     continue
 
-                C_val = np.nan
-                if "loh_C" in srow.index and pd.notna(srow["loh_C"]):
-                    C_val = srow["loh_C"]
-                elif "seg_C" in srow.index and pd.notna(srow["seg_C"]):
-                    C_val = srow["seg_C"]
-
-                if pd.isna(C_val):
+                # Colour by cnvkit_cnv_call
+                call_val = srow.get("cnvkit_cnv_call", np.nan)
+                if pd.isna(call_val):
                     seg_color = "black"
-                elif C_val > 2:
-                    seg_color = "red"
-                elif C_val < 2:
-                    seg_color = "royalblue"
                 else:
-                    seg_color = "black"
+                    c = str(call_val).strip().upper()
+                    if c == "AMPLIFICATION":
+                        seg_color = "red"
+                    elif c == "DELETION":
+                        seg_color = "royalblue"
+                    else:
+                        seg_color = "black"
 
                 ax1.hlines(
                     y_seg,
                     xs,
                     xe,
                     colors=seg_color,
-                    linewidth=1.8,   # <-- thicker segments
+                    linewidth=1.8,   # thicker segments
                     alpha=0.9,
                 )
 
