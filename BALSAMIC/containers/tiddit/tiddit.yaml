@@ -8,4 +8,3 @@ dependencies:
   - tabix=1.11
   - svdb=2.8.1
   - tiddit=3.9.3
-  - click=8.0.4
