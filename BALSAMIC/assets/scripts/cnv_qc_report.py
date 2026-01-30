@@ -1,10 +1,14 @@
+from __future__ import annotations
 import sys
-import click
 import base64
 import json
-import pandas as pd
-import numpy as np
 from pathlib import Path
+from typing import Optional
+
+import click
+import numpy as np
+import pandas as pd
+
 from cnv_report_utils import (
     plot_chromosomes,
     build_gene_segment_table,
@@ -14,6 +18,237 @@ from cnv_report_utils import (
     pdf_first_page_to_png,
 )
 from BALSAMIC.constants.analysis import Gender
+
+# =============================================================================
+# Small helpers to reduce duplication and keep csv_to_html_table readable
+# =============================================================================
+
+def _png_to_data_uri(png_path: str | Path | None) -> str | None:
+    """Read a PNG file and return a data URI, or None if missing."""
+    if png_path is None:
+        return None
+    path = Path(png_path)
+    if not path.is_file():
+        return None
+    png_bytes = path.read_bytes()
+    png_base64 = base64.b64encode(png_bytes).decode("ascii")
+    return f"data:image/png;base64,{png_base64}"
+
+
+def _chr_sort_key_from_stem(stem: str) -> tuple[int, int]:
+    """Sort by chr number (1..22) then X/Y, with unknowns last."""
+    label = stem
+    if "chr" in stem:
+        label = stem.split("chr", 1)[1]
+    if "_" in label:
+        label = label.split("_", 1)[0]
+    if label.isdigit():
+        return (0, int(label))
+    special = {"X": 23, "Y": 24}
+    return (1, special.get(label.upper(), 25))
+
+
+def _extract_chr_label_from_stem(stem: str) -> str:
+    chr_label = stem
+    if "chr" in stem:
+        chr_label = stem.split("chr", 1)[1]
+    if "_" in chr_label:
+        chr_label = chr_label.split("_", 1)[0]
+    return chr_label
+
+
+def _extract_gene_names_from_stem(stem: str) -> list[str]:
+    """Extract gene list from a gene-zoom plot stem, else empty list."""
+    if "_genes_" not in stem:
+        return []
+    after_genes = stem.split("_genes_", 1)[1]
+    gene_part = after_genes
+    if gene_part.endswith("_segments"):
+        gene_part = gene_part[: -len("_segments")]
+    return [g for g in gene_part.split("_") if g]
+
+
+def _as_upper_str(x) -> str:
+    if pd.isna(x):
+        return ""
+    return str(x).strip().upper()
+
+
+def _is_true_str(x) -> bool:
+    return _as_upper_str(x) == "TRUE"
+
+
+def _is_amp_del(x) -> bool:
+    return _as_upper_str(x) in {"DELETION", "AMPLIFICATION"}
+
+
+def _compute_cnv_sets(df: pd.DataFrame) -> tuple[set[str], set[str], str | None]:
+    """Return (cnv_chr_set, cnv_gene_set, chr_col)."""
+    df_chr = df.copy()
+
+    if "chr" in df_chr.columns:
+        chr_col: str | None = "chr"
+    elif "chromosome" in df_chr.columns:
+        chr_col = "chromosome"
+    else:
+        chr_col = None
+
+    cnv_chr_set: set[str] = set()
+    cnv_gene_set: set[str] = set()
+
+    if chr_col is None:
+        return cnv_chr_set, cnv_gene_set, chr_col
+
+    if "gene.symbol" in df_chr.columns:
+        df_chr = df_chr[~df_chr["gene.symbol"].isin(["Antitarget", "-"])]
+
+    cnv_mask = pd.Series(False, index=df_chr.index)
+
+    if "loh_flag" in df_chr.columns:
+        cnv_mask |= df_chr["loh_flag"].apply(_is_true_str)
+
+    if "cnvkit_cnv_call" in df_chr.columns:
+        cnv_mask |= df_chr["cnvkit_cnv_call"].apply(_is_amp_del)
+
+    if "purecn_cnv_call" in df_chr.columns:
+        cnv_mask |= df_chr["purecn_cnv_call"].apply(_is_amp_del)
+
+    cnv_chr_set = set(df_chr.loc[cnv_mask, chr_col].astype(str).tolist())
+
+    if "gene.symbol" in df_chr.columns:
+        cnv_gene_set = set(df_chr.loc[cnv_mask, "gene.symbol"].astype(str).tolist())
+
+    return cnv_chr_set, cnv_gene_set, chr_col
+
+
+def _build_genome_plots_html(scatter_data_uri: str | None, diagram_data_uri: str | None) -> str:
+    if not (scatter_data_uri or diagram_data_uri):
+        return ""
+
+    parts: list[str] = []
+    parts.append("<h2>Genome-wide CNVkit plots</h2>")
+    parts.append('<div style="margin-top:10px;">')
+
+    if scatter_data_uri:
+        parts.append(
+            """
+        <h3>CNVkit scatter</h3>
+        <div style=\"border:1px solid #ccc; padding:10px; margin-top:10px; width:100%;\">
+          <img
+            src=\"{scatter_src}\"
+            alt=\"CNVkit scatter PNG plot\"
+            class=\"clickable-plot\"
+            style=\"max-width:100%; height:auto; display:block; cursor:pointer;\"
+          />
+        </div>
+            """.format(
+                scatter_src=scatter_data_uri
+            )
+        )
+
+    if diagram_data_uri:
+        parts.append(
+            """
+        <h3>CNVkit diagram</h3>
+        <div style=\"border:1px solid #ccc; padding:10px; margin-top:10px; width:100%;\">
+          <img
+            src=\"{diagram_src}\"
+            alt=\"CNVkit diagram PNG plot\"
+            class=\"clickable-plot\"
+            style=\"max-width:100%; height:auto; display:block; cursor:pointer;\"
+          />
+        </div>
+            """.format(
+                diagram_src=diagram_data_uri
+            )
+        )
+
+    parts.append("</div>")
+    return "\n".join(parts)
+
+
+def _build_plot_card_html(
+    *,
+    title: str,
+    img_data_uri: str,
+    stem: str,
+    has_cnv: bool,
+) -> str:
+    badge_html = '<span class="plot-badge">CNV</span>' if has_cnv else ""
+    return f"""
+                <div class=\"plot-card {'plot-card-cnv' if has_cnv else 'plot-card-normal'}\">
+                  <div class=\"plot-header\">
+                    <span class=\"plot-title\">{title}</span>
+                    {badge_html}
+                  </div>
+                  <img
+                    src=\"{img_data_uri}\"
+                    alt=\"QC plot {stem}\"
+                    class=\"clickable-plot\"
+                    style=\"max-width:100%; height:auto; display:block; cursor:pointer;\"
+                  />
+                </div>
+    """
+
+
+def _collect_qc_plot_blocks(
+    qc_dir: Path,
+    chr_col: str | None,
+    cnv_chr_set: set[str],
+    cnv_gene_set: set[str],
+) -> tuple[list[str], list[str], list[str], list[str]]:
+    """Return (chr_with, chr_no, gene_with, gene_no) blocks."""
+    chr_plot_blocks_with_cnv: list[str] = []
+    chr_plot_blocks_no_cnv: list[str] = []
+    gene_plot_blocks_with_cnv: list[str] = []
+    gene_plot_blocks_no_cnv: list[str] = []
+
+    png_files = sorted(list(qc_dir.glob("cnv_chr*segments.png")), key=lambda p: _chr_sort_key_from_stem(p.stem))
+
+    for png_file in png_files:
+        img_data_uri = _png_to_data_uri(png_file)
+        if not img_data_uri:
+            continue
+
+        stem = png_file.stem
+        chr_label = _extract_chr_label_from_stem(stem)
+        gene_names = _extract_gene_names_from_stem(stem)
+        is_gene_plot = bool(gene_names)
+
+        if not is_gene_plot:
+            has_cnv = bool(chr_col is not None and chr_label in cnv_chr_set)
+            title = f"Chr {chr_label}"
+        else:
+            has_cnv = any(g in cnv_gene_set for g in gene_names)
+            title = f"Chr {chr_label} – {', '.join(gene_names)}"
+
+        block = _build_plot_card_html(title=title, img_data_uri=img_data_uri, stem=stem, has_cnv=has_cnv)
+
+        if is_gene_plot:
+            (gene_plot_blocks_with_cnv if has_cnv else gene_plot_blocks_no_cnv).append(block)
+        else:
+            (chr_plot_blocks_with_cnv if has_cnv else chr_plot_blocks_no_cnv).append(block)
+
+    return chr_plot_blocks_with_cnv, chr_plot_blocks_no_cnv, gene_plot_blocks_with_cnv, gene_plot_blocks_no_cnv
+
+
+def _read_purecn_summary(purity_csv: str | Path | None) -> pd.DataFrame | None:
+    if not purity_csv:
+        return None
+    df = pd.read_csv(purity_csv)
+    wanted_cols = [
+        "Sampleid",
+        "Purity",
+        "Ploidy",
+        "Sex",
+        "Contamination",
+        "Flagged",
+        "Failed",
+        "Curated",
+        "Comment",
+    ]
+    keep = [c for c in wanted_cols if c in df.columns]
+    return df[keep] if keep else df
 
 def csv_to_html_table(
     df: pd.DataFrame,                     # gene-level table
@@ -27,205 +262,27 @@ def csv_to_html_table(
 ) -> None:
     out_path = Path(out_html)
 
-    # --- Optional PNG → Base64 (CNVkit scatter) ---
-    scatter_png_data_uri: str | None = None
-    if scatter_png is not None:
-        scatter_path = Path(scatter_png)
-        if scatter_path.is_file():
-            png_bytes = scatter_path.read_bytes()
-            png_base64 = base64.b64encode(png_bytes).decode("ascii")
-            scatter_png_data_uri = f"data:image/png;base64,{png_base64}"
+    scatter_png_data_uri = _png_to_data_uri(scatter_png)
+    diagram_png_data_uri = _png_to_data_uri(diagram_png)
 
-    # --- Optional PNG → Base64 (CNVkit diagram) ---
-    diagram_png_data_uri: str | None = None
-    if diagram_png is not None:
-        diagram_path = Path(diagram_png)
-        if diagram_path.is_file():
-            png_bytes = diagram_path.read_bytes()
-            png_base64 = base64.b64encode(png_bytes).decode("ascii")
-            diagram_png_data_uri = f"data:image/png;base64,{png_base64}"
+    genome_plots_html = _build_genome_plots_html(scatter_png_data_uri, diagram_png_data_uri)
 
-    # Build genome-wide CNVkit plots HTML section (optional)
-    genome_plots_html = ""
-    if scatter_png_data_uri or diagram_png_data_uri:
-        parts: list[str] = []
-        parts.append("<h2>Genome-wide CNVkit plots</h2>")
-        parts.append('<div style="margin-top:10px;">')
+    cnv_chr_set, cnv_gene_set, chr_col = _compute_cnv_sets(df)
 
-        if scatter_png_data_uri:
-            parts.append(
-                """
-        <h3>CNVkit scatter</h3>
-        <div style="border:1px solid #ccc; padding:10px; margin-top:10px; width:100%;">
-          <img
-            src="{scatter_src}"
-            alt="CNVkit scatter PNG plot"
-            class="clickable-plot"
-            style="max-width:100%; height:auto; display:block; cursor:pointer;"
-          />
-        </div>
-            """.format(
-                    scatter_src=scatter_png_data_uri
-                )
-            )
-
-        if diagram_png_data_uri:
-            parts.append(
-                """
-        <h3>CNVkit diagram</h3>
-        <div style="border:1px solid #ccc; padding:10px; margin-top:10px; width:100%;">
-          <img
-            src="{diagram_src}"
-            alt="CNVkit diagram PNG plot"
-            class="clickable-plot"
-            style="max-width:100%; height:auto; display:block; cursor:pointer;"
-          />
-        </div>
-            """.format(
-                    diagram_src=diagram_png_data_uri
-                )
-            )
-
-        parts.append("</div>")
-        genome_plots_html = "\n".join(parts)
-
-    # ------------------------------------------------------------------
-    # Determine which chromosomes & genes have CNV / LOH
-    # ------------------------------------------------------------------
-    df_chr = df.copy()
-    if "chr" in df_chr.columns:
-        chr_col = "chr"
-    elif "chromosome" in df_chr.columns:
-        chr_col = "chromosome"
-    else:
-        chr_col = None
-
-    cnv_chr_set: set[str] = set()
-    cnv_gene_set: set[str] = set()
-
-    if chr_col is not None:
-        if "gene.symbol" in df_chr.columns:
-            df_chr = df_chr[~df_chr["gene.symbol"].isin(["Antitarget", "-"])]
-
-        cnv_mask = pd.Series(False, index=df_chr.index)
-
-        # LOH flag
-        if "loh_flag" in df_chr.columns:
-            loh_str = df_chr["loh_flag"].astype(str).str.upper()
-            cnv_mask |= loh_str == "TRUE"
-
-        # CNVkit call
-        if "cnvkit_cnv_call" in df_chr.columns:
-            cnvkit_str = df_chr["cnvkit_cnv_call"].astype(str).str.upper()
-            cnv_mask |= cnvkit_str.isin(["DELETION", "AMPLIFICATION"])
-
-        # PureCN call
-        if "purecn_cnv_call" in df_chr.columns:
-            purecn_str = df_chr["purecn_cnv_call"].astype(str).str.upper()
-            cnv_mask |= purecn_str.isin(["DELETION", "AMPLIFICATION"])
-
-        cnv_chr_set = set(df_chr.loc[cnv_mask, chr_col].astype(str).tolist())
-
-        if "gene.symbol" in df_chr.columns:
-            cnv_gene_set = set(df_chr.loc[cnv_mask, "gene.symbol"].astype(str).tolist())
-
-    # -------------------------------------------------------------
-    # Per-chromosome & gene-level PNGs (sorted, CNV highlighted)
-    # -------------------------------------------------------------
     chr_plot_blocks_with_cnv: list[str] = []
     chr_plot_blocks_no_cnv: list[str] = []
-
     gene_plot_blocks_with_cnv: list[str] = []
     gene_plot_blocks_no_cnv: list[str] = []
 
     if chr_plots_dir is not None:
         qc_dir = Path(chr_plots_dir)
         if qc_dir.is_dir():
-            png_files = list(qc_dir.glob("cnv_chr*segments.png"))
-
-            def chr_sort_key(path: Path):
-                stem = path.stem  # e.g. cnv_chr13_genes_RB1_DLEU1_segments
-                label = stem
-                if "chr" in stem:
-                    label = stem.split("chr", 1)[1]
-                if "_" in label:
-                    label = label.split("_", 1)[0]
-                if label.isdigit():
-                    return (0, int(label))
-                special = {"X": 23, "Y": 24}
-                return (1, special.get(label.upper(), 25))
-
-            png_files = sorted(png_files, key=chr_sort_key)
-
-            for png_file in png_files:
-                img_bytes = png_file.read_bytes()
-                img_b64 = base64.b64encode(img_bytes).decode("ascii")
-                img_data_uri = f"data:image/png;base64,{img_b64}"
-
-                stem = png_file.stem
-                # Extract chromosome label
-                chr_label = stem
-                if "chr" in stem:
-                    chr_label = stem.split("chr", 1)[1]
-                if "_" in chr_label:
-                    chr_label = chr_label.split("_", 1)[0]
-
-                # Detect gene-level zoom plot
-                is_gene_plot = "_genes_" in stem
-
-                gene_names: list[str] = []
-                gene_title = ""
-                if is_gene_plot:
-                    # e.g. "cnv_chr13_genes_RB1_DLEU1_segments"
-                    after_genes = stem.split("_genes_", 1)[1]  # "RB1_DLEU1_segments"
-                    gene_part = after_genes
-                    if gene_part.endswith("_segments"):
-                        gene_part = gene_part[: -len("_segments")]
-                    gene_names = [g for g in gene_part.split("_") if g]
-                    gene_title = ", ".join(gene_names)
-
-                # Flag CNV presence
-                has_cnv = False
-                if not is_gene_plot:
-                    if chr_col is not None and chr_label in cnv_chr_set:
-                        has_cnv = True
-                else:
-                    if any(g in cnv_gene_set for g in gene_names):
-                        has_cnv = True
-
-                # Plot title & badge
-                if not is_gene_plot:
-                    title = f"Chr {chr_label}"
-                else:
-                    title = f"Chr {chr_label} – {gene_title}"
-
-                badge_html = '<span class="plot-badge">CNV</span>' if has_cnv else ""
-
-                block = f"""
-                <div class="plot-card {'plot-card-cnv' if has_cnv else 'plot-card-normal'}">
-                  <div class="plot-header">
-                    <span class="plot-title">{title}</span>
-                    {badge_html}
-                  </div>
-                  <img
-                    src="{img_data_uri}"
-                    alt="QC plot {stem}"
-                    class="clickable-plot"
-                    style="max-width:100%; height:auto; display:block; cursor:pointer;"
-                  />
-                </div>
-                """
-
-                if is_gene_plot:
-                    if has_cnv:
-                        gene_plot_blocks_with_cnv.append(block)
-                    else:
-                        gene_plot_blocks_no_cnv.append(block)
-                else:
-                    if has_cnv:
-                        chr_plot_blocks_with_cnv.append(block)
-                    else:
-                        chr_plot_blocks_no_cnv.append(block)
+            (
+                chr_plot_blocks_with_cnv,
+                chr_plot_blocks_no_cnv,
+                gene_plot_blocks_with_cnv,
+                gene_plot_blocks_no_cnv,
+            ) = _collect_qc_plot_blocks(qc_dir, chr_col, cnv_chr_set, cnv_gene_set)
 
     # Build visible chr & gene plots HTML
     qc_plots_html = ""
@@ -978,9 +1035,9 @@ def main(
     scatter_png_path = outdir / f"cnvkit_scatter_{case_id}.png"
     diagram_png_path = outdir / f"cnvkit_diagram_{case_id}.png"
 
-    if Path(cnvkit_scatter).is_file():
+    if cnvkit_scatter and Path(cnvkit_scatter).is_file():
         pdf_first_page_to_png(cnvkit_scatter, scatter_png_path)
-    if Path(cnvkit_diagram).is_file():
+    if cnvkit_diagram and Path(cnvkit_diagram).is_file():
         pdf_first_page_to_png(cnvkit_diagram, diagram_png_path)
 
     # ----------------------------
@@ -1019,24 +1076,7 @@ def main(
 
 
     # --- 1) PureCN summary (from purity_csv) ---
-    purecn_summary_df: pd.DataFrame | None = None
-    if purity_csv:
-        purecn_summary_df = pd.read_csv(purity_csv)
-        # Optionally: keep / reorder only the columns you care about
-        wanted_cols = [
-            "Sampleid",
-            "Purity",
-            "Ploidy",
-            "Sex",
-            "Contamination",
-            "Flagged",
-            "Failed",
-            "Curated",
-            "Comment",
-        ]
-        purecn_summary_df = purecn_summary_df[
-            [c for c in wanted_cols if c in purecn_summary_df.columns]
-        ]
+    purecn_summary_df = _read_purecn_summary(purity_csv)
 
     # --- 2) Extra QC / CNV metrics (DLR, PON spread, chunk stats) ---
     qc_summary_df = compute_summary_metrics(
@@ -1087,14 +1127,9 @@ def main(
 
     if is_exome:
         if "is_cancer_gene" in genes_df.columns:
-            mask = genes_df["is_cancer_gene"].fillna(False).astype(bool)
-            filtered_genes = genes_df[mask]
-            if not filtered_genes.empty:
-                genes_df = filtered_genes
-            mask = chunk_df["is_cancer_gene"].fillna(False).astype(bool)
-            filtered_chunks = chunk_df[mask]
-            if not filtered_chunks.empty:
-                chunk_df = filtered_chunks
+            genes_df = genes_df[genes_df["is_cancer_gene"].fillna(False).astype(bool)]
+        if chunk_df is not None and not chunk_df.empty and "is_cancer_gene" in chunk_df.columns:
+            chunk_df = chunk_df[chunk_df["is_cancer_gene"].fillna(False).astype(bool)]
 
     # ----------------------------
     # HTML report
