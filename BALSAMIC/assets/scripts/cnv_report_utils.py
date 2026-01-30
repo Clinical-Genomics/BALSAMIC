@@ -2126,13 +2126,13 @@ def build_gene_segment_table(
             if col in bins.columns:
                 agg_dict[col] = ["first"]
 
-        grouped = bins.groupby(
+        genes_df = bins.groupby(
             ["chr", "gene.symbol", "segment_id"], as_index=False
         ).agg(agg_dict)
 
-        grouped = _flatten_agg_columns(grouped)
+        genes_df = _flatten_agg_columns(genes_df)
 
-        grouped = grouped.rename(
+        genes_df = genes_df.rename(
             columns={
                 "start_min": "region_start",
                 "end_max": "region_end",  # <-- this is the key fix
@@ -2151,18 +2151,18 @@ def build_gene_segment_table(
             }
         )
 
-        if "segment_id" in grouped.columns:
-            grouped = grouped.drop(columns=["segment_id"])
+        if "segment_id" in genes_df.columns:
+            genes_df = genes_df.drop(columns=["segment_id"])
 
-        return grouped
+        return genes_df
 
-    def _attach_lohgenes(grouped: pd.DataFrame) -> pd.DataFrame:
+    def _attach_lohgenes(genes_df: pd.DataFrame) -> pd.DataFrame:
         if loh_path is None or not Path(loh_path).is_file():
-            return grouped
+            return genes_df
 
         loh = safe_read_csv(loh_path, sep=",").copy()
         if loh.empty:
-            return grouped
+            return genes_df
 
         loh_chr_col = "chr" if "chr" in loh.columns else "chromosome"
         loh[loh_chr_col] = (
@@ -2213,12 +2213,12 @@ def build_gene_segment_table(
             }
         )
 
-        return grouped.merge(loh_small, how="left", on=["chr", "gene.symbol"])
+        return genes_df.merge(loh_small, how="left", on=["chr", "gene.symbol"])
 
-    def _add_cnv_calls(grouped: pd.DataFrame) -> pd.DataFrame:
+    def _add_cnv_calls(genes_df: pd.DataFrame) -> pd.DataFrame:
         AMP_EPS = 0.05
 
-        if {"seg_cn", "chr"}.issubset(grouped.columns):
+        if {"seg_cn", "chr"}.issubset(genes_df.columns):
 
             def _cnvkit_call_with_sanity(row: pd.Series) -> str:
                 base_call = classify_cnv_from_total_cn_sex_aware(
@@ -2234,12 +2234,12 @@ def build_gene_segment_table(
                     return "NEUTRAL"
                 return base_call
 
-            grouped["cnvkit_cnv_call"] = grouped.apply(
+            genes_df["cnvkit_cnv_call"] = genes_df.apply(
                 _cnvkit_call_with_sanity,
                 axis=1,
             )
 
-        if {"loh_C", "chr"}.issubset(grouped.columns):
+        if {"loh_C", "chr"}.issubset(genes_df.columns):
 
             def _purecn_call_with_sanity(row: pd.Series) -> str:
                 base_call = classify_cnv_from_total_cn_sex_aware(
@@ -2255,16 +2255,16 @@ def build_gene_segment_table(
                     return "NEUTRAL"
                 return base_call
 
-            grouped["purecn_cnv_call"] = grouped.apply(
+            genes_df["purecn_cnv_call"] = genes_df.apply(
                 _purecn_call_with_sanity,
                 axis=1,
             )
 
-        return grouped
+        return genes_df
 
-    def _add_exon_annotations(grouped: pd.DataFrame) -> pd.DataFrame:
+    def _add_exon_annotations(genes_df: pd.DataFrame) -> pd.DataFrame:
         if refgene_path is None:
-            return grouped
+            return genes_df
 
         exon_map = load_refgene_exons(
             refgene_path=refgene_path,
@@ -2350,22 +2350,22 @@ def build_gene_segment_table(
                     parts.append(f"{a}-{b}")
             return ",".join(parts)
 
-        grouped["exons_hit"] = grouped.apply(_exons_hit, axis=1)
-        return grouped
+        genes_df["exons_hit"] = genes_df.apply(_exons_hit, axis=1)
+        return genes_df
 
     def _attach_gene_pon(
-        grouped: pd.DataFrame, gene_pon: pd.DataFrame | None
+        genes_df: pd.DataFrame, gene_pon: pd.DataFrame | None
     ) -> pd.DataFrame:
         if gene_pon is None or gene_pon.empty:
-            return grouped
-        return grouped.merge(
+            return genes_df
+        return genes_df.merge(
             gene_pon,
             how="left",
             on=["chr", "gene.symbol"],
         )
 
-    def _order_and_sort_columns(grouped: pd.DataFrame) -> pd.DataFrame:
-        grouped = grouped.rename(columns={"n_targets": "n.targets"})
+    def _order_and_sort_columns(genes_df: pd.DataFrame) -> pd.DataFrame:
+        genes_df = genes_df.rename(columns={"n_targets": "n.targets"})
         cols_order = [
             "chr",
             "region_start",
@@ -2402,8 +2402,8 @@ def build_gene_segment_table(
             "pon_gene_call",
             "pon_gene_cnv_call",
         ]
-        grouped = _reorder_columns(grouped, cols_order)
-        return _stable_sort_by_chr_interval(grouped, "chr", "region_start", "region_end")
+        genes_df = _reorder_columns(genes_df, cols_order)
+        return _stable_sort_by_chr_interval(genes_df, "chr", "region_start", "region_end")
 
     # ------------------------- main flow ------------------------- #
 
@@ -2416,7 +2416,7 @@ def build_gene_segment_table(
     # CNS missing → one row per gene over all bins
     cns = _load_and_prepare_cns()
     if cns.empty:
-        grouped = cnr.groupby(["chr", "gene.symbol"], as_index=False).agg(
+        genes_df = cnr.groupby(["chr", "gene.symbol"], as_index=False).agg(
             region_start=("start", "min"),
             region_end=("end", "max"),
             n_targets=("log2", "count"),
@@ -2434,12 +2434,12 @@ def build_gene_segment_table(
             "seg_cn1",
             "seg_cn2",
         ]:
-            grouped[col] = np.nan
+            genes_df[col] = np.nan
 
         if cancer_genes is not None:
-            grouped["is_cancer_gene"] = grouped["gene.symbol"].isin(cancer_genes)
+            genes_df["is_cancer_gene"] = genes_df["gene.symbol"].isin(cancer_genes)
 
-        return _order_and_sort_columns(grouped)
+        return _order_and_sort_columns(genes_df)
 
     cns_per_chr: dict[str, pd.DataFrame] = {
         chrom: df_chr.reset_index(drop=True) for chrom, df_chr in cns.groupby("chr")
@@ -2460,23 +2460,23 @@ def build_gene_segment_table(
     # gene-level PON stats (independent of segments)
     gene_pon = _compute_gene_level_pon(bins)
 
-    grouped = _collapse_to_gene_segment(bins, has_depth, has_weight)
+    genes_df = _collapse_to_gene_segment(bins, has_depth, has_weight)
 
     if cancer_genes is not None:
-        grouped["is_cancer_gene"] = grouped["gene.symbol"].isin(cancer_genes)
+        genes_df["is_cancer_gene"] = genes_df["gene.symbol"].isin(cancer_genes)
 
-    grouped = _attach_lohgenes(grouped)
+    genes_df = _attach_lohgenes(genes_df)
 
     if cytoband_path is not None:
         cyto = load_cytobands(cytoband_path)
-        grouped = annotate_genes_with_cytoband(grouped, cyto)
+        genes_df = annotate_genes_with_cytoband(genes_df, cyto)
 
-    grouped = _add_cnv_calls(grouped)
-    grouped = _add_exon_annotations(grouped)
-    grouped = _attach_gene_pon(grouped, gene_pon)
+    genes_df = _add_cnv_calls(genes_df)
+    genes_df = _add_exon_annotations(genes_df)
+    genes_df = _attach_gene_pon(genes_df, gene_pon)
 
-    grouped = _order_and_sort_columns(grouped)
-    return grouped
+    genes_df = _order_and_sort_columns(genes_df)
+    return genes_df
 
 
 def build_gene_chunk_table(
@@ -2846,14 +2846,14 @@ def build_gene_chunk_table(
     agg_dict["pon_log2"] = ["mean"]
     agg_dict["pon_spread"] = ["mean"]
 
-    chunked = bins.groupby(["chr", "gene.symbol", "chunk_id"], as_index=False).agg(
+    chunks_df = bins.groupby(["chr", "gene.symbol", "chunk_id"], as_index=False).agg(
         agg_dict
     )
 
-    chunked = _flatten_agg_columns(chunked)
+    chunks_df = _flatten_agg_columns(chunks_df)
 
     # Rename to per-chunk fields
-    chunked = chunked.rename(
+    chunks_df = chunks_df.rename(
         columns={
             "start_min": "region_start",
             "end_max": "region_end",  # per-chunk end
@@ -2868,14 +2868,14 @@ def build_gene_chunk_table(
     )
 
     # Make n.targets explicitly per-chunk
-    if "n_targets" in chunked.columns:
-        chunked["n.targets"] = chunked["n_targets"]
+    if "n_targets" in chunks_df.columns:
+        chunks_df["n.targets"] = chunks_df["n_targets"]
 
     # -------------------- 4. PON-based deviation per chunk -------------------- #
     min_n_for_pon = 2
 
-    chunked["pon_chunk_effect"] = chunked["mean_log2"] - chunked["pon_mean_log2"]
-    chunked["pon_chunk_z"] = chunked.apply(
+    chunks_df["pon_chunk_effect"] = chunks_df["mean_log2"] - chunks_df["pon_mean_log2"]
+    chunks_df["pon_chunk_z"] = chunks_df.apply(
         lambda r: _pon_abs_z(
             r["pon_chunk_effect"],
             r["pon_mean_spread"],
@@ -2885,15 +2885,15 @@ def build_gene_chunk_table(
         axis=1,
     )
 
-    chunked["pon_chunk_direction"] = chunked["pon_chunk_effect"].apply(_pon_direction)
+    chunks_df["pon_chunk_direction"] = chunks_df["pon_chunk_effect"].apply(_pon_direction)
 
     # significance: noise / borderline / significant
-    chunked["pon_chunk_significance"] = chunked["pon_chunk_z"].apply(
+    chunks_df["pon_chunk_significance"] = chunks_df["pon_chunk_z"].apply(
         lambda z: _pon_significance(z, noise_lt=2.0, borderline_lt=5.0)
     )
 
     # CNV call: NEUTRAL / AMPLIFICATION / DELETION
-    chunked["pon_chunk_call"] = chunked.apply(
+    chunks_df["pon_chunk_call"] = chunks_df.apply(
         lambda r: _pon_cnv_call_from_log2(
             is_significant=str(r.get("pon_chunk_significance", "")).strip().lower()
             == "significant",
@@ -2971,7 +2971,7 @@ def build_gene_chunk_table(
 
         return row
 
-    chunked = chunked.apply(_annotate_chunk, axis=1)
+    chunks_df = chunks_df.apply(_annotate_chunk, axis=1)
 
     # -------------------- 6. Drop gene-level PON columns you don't want -------------------- #
     drop_gene_level_cols = [
@@ -2984,7 +2984,7 @@ def build_gene_chunk_table(
         "pon_gene_cnv_call",
         "pon_cnv_call",
     ]
-    chunked = chunked.drop(columns=drop_gene_level_cols, errors="ignore")
+    chunks_df = chunks_df.drop(columns=drop_gene_level_cols, errors="ignore")
 
     # -------------------- 7. Column order & sorting -------------------- #
     cols_order = [
@@ -3023,8 +3023,8 @@ def build_gene_chunk_table(
         "cnvkit_cnv_call",
         "purecn_cnv_call",
     ]
-    chunked = _reorder_columns(chunked, cols_order)
-    chunked = _stable_sort_by_chr_interval(chunked, "chr", "region_start", "region_end")
-    chunked = chunked.drop(columns=["chunk_id", "n_targets"])
+    chunks_df = _reorder_columns(chunks_df, cols_order)
+    chunks_df = _stable_sort_by_chr_interval(chunks_df, "chr", "region_start", "region_end")
+    chunks_df = chunks_df.drop(columns=["chunk_id", "n_targets"])
 
-    return chunked
+    return chunks_df

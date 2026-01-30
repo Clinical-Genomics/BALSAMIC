@@ -1092,7 +1092,7 @@ def main(
     # ----------------------------
     # Create per chunk table
     # ----------------------------
-    chunk_df = build_gene_chunk_table(cnr_path=cnr, gene_seg_df=genes_df, pon_path=pon)
+    chunks_df = build_gene_chunk_table(cnr_path=cnr, gene_seg_df=genes_df, pon_path=pon)
 
     # --- 1) PureCN summary (from purity_csv) ---
     purecn_summary_df = _read_purecn_summary(purity_csv)
@@ -1120,7 +1120,7 @@ def main(
         cnr_path=cnr,
         vcf_path=vcf,
         gene_seg_df=genes_df,
-        gene_chunk_df=chunk_df,
+        gene_chunk_df=chunks_df,
         outdir=chr_plots_dir,
         case_id=plot_case_id,
         pon_path=pon,
@@ -1133,7 +1133,7 @@ def main(
         cnr_path=cnr,
         vcf_path=vcf,
         gene_seg_df=genes_df,
-        gene_chunk_df=chunk_df,
+        gene_chunk_df=chunks_df,
         outdir=chr_plots_dir,
         case_id=plot_case_id,
         pon_path=pon,
@@ -1148,11 +1148,11 @@ def main(
         if "is_cancer_gene" in genes_df.columns:
             genes_df = genes_df[genes_df["is_cancer_gene"].fillna(False).astype(bool)]
         if (
-            chunk_df is not None
-            and not chunk_df.empty
-            and "is_cancer_gene" in chunk_df.columns
+            chunks_df is not None
+            and not chunks_df.empty
+            and "is_cancer_gene" in chunks_df.columns
         ):
-            chunk_df = chunk_df[chunk_df["is_cancer_gene"].fillna(False).astype(bool)]
+            chunks_df = chunks_df[chunks_df["is_cancer_gene"].fillna(False).astype(bool)]
 
     # ----------------------------
     # HTML report
@@ -1166,7 +1166,7 @@ def main(
         chr_plots_dir=chr_plots_dir,
         purecn_summary_df=purecn_summary_df,
         qc_summary_df=qc_summary_df,
-        chunk_df=chunk_df,
+        chunk_df=chunks_df,
     )
 
     click.echo(f"[CNV QC] Finished report for {case_id}: {out_html}")
