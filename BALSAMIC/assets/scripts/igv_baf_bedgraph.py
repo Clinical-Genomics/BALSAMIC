@@ -88,7 +88,7 @@ def _extract_bedgraph_record(parts: list[str]) -> Optional[BedGraphRecord]:
     if len(parts) < 10:
         return None
 
-    chrom, pos_str, _id, ref, alt, qual_, filt_, info_, fmt = parts[:9]
+    chrom, pos_str, _id, ref, alt, _, _, _, fmt = parts[:9]
     sample_field = parts[9]
 
     # Skip symbolic / no-call ALT
