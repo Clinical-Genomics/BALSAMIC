@@ -9,6 +9,7 @@ from typing import Optional, TextIO
 
 import click
 
+
 def open_maybe_gzip(path: str | Path) -> TextIO:
     """Open a file that may be gzipped; '-' means stdin."""
     p = str(path)
@@ -31,7 +32,7 @@ def open_output(path: str | Path) -> TextIO:
 class BedGraphRecord:
     chrom: str
     start: int  # 0-based
-    end: int    # half-open
+    end: int  # half-open
     value: float  # AF
 
 
@@ -123,6 +124,7 @@ def _extract_bedgraph_record(parts: list[str]) -> Optional[BedGraphRecord]:
     end0 = start0 + span
 
     return BedGraphRecord(chrom=chrom, start=start0, end=end0, value=af)
+
 
 def convert_vcf_to_bedgraph(
     vcf_path: str | Path,
