@@ -214,7 +214,7 @@
     "gatk": "varcall_py3",
     "vardict": "varcall_py3",
     "svdb": "varcall_py3",
-    "tiddit": "varcall_py3",
+    "tiddit": "tiddit",
     "cnvpytor": "cnvpytor",
     "manta": "varcall_py27",
     "cnvkit": "varcall_cnvkit",
