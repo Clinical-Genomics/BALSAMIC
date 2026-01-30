@@ -10,6 +10,7 @@ from typing import Dict, List, Optional, Set, Tuple
 import numpy as np
 import pandas as pd
 from pandas.errors import EmptyDataError
+import fitz
 
 # Local
 from BALSAMIC.constants.analysis import Gender
@@ -36,6 +37,7 @@ FINAL_FLOAT_COLUMNS = [
 # =============================================================================
 # Generic helpers
 # =============================================================================
+
 
 def safe_read_csv(path: str | Path, **kwargs) -> pd.DataFrame:
     """Read CSV/TSV; return empty DataFrame if file is empty or missing."""
@@ -74,7 +76,9 @@ def _stable_sort_by_chr_interval(
     """Stable-sort by (chr, start, end) using `_chrom_sort_key`."""
     df = df.copy()
     df[tmp_col] = df[chr_col].map(_chrom_sort_key)
-    df = df.sort_values(by=[tmp_col, start_col, end_col], kind="stable").drop(columns=[tmp_col])
+    df = df.sort_values(by=[tmp_col, start_col, end_col], kind="stable").drop(
+        columns=[tmp_col]
+    )
     return df
 
 
@@ -87,7 +91,10 @@ def _reorder_columns(df: pd.DataFrame, preferred: list[str]) -> pd.DataFrame:
 def _flatten_agg_columns(df: pd.DataFrame) -> pd.DataFrame:
     """Flatten MultiIndex columns produced by pandas .agg()."""
     df = df.copy()
-    df.columns = ["_".join(col).strip("_") if isinstance(col, tuple) else col for col in df.columns]
+    df.columns = [
+        "_".join(col).strip("_") if isinstance(col, tuple) else col
+        for col in df.columns
+    ]
     return df
 
 
@@ -148,6 +155,7 @@ def _pon_cnv_call_from_log2(
 # Shared IO / normalization (removes duplication)
 # =============================================================================
 
+
 @dataclass(frozen=True)
 class CnrMeta:
     has_depth: bool
@@ -161,7 +169,9 @@ def _detect_chr_col(df: pd.DataFrame, candidates: list[str]) -> str:
     raise ValueError(f"Could not find chromosome column among: {candidates}")
 
 
-def _explode_multigene_bins(cnr: pd.DataFrame, *, gene_col: str = "gene") -> pd.DataFrame:
+def _explode_multigene_bins(
+    cnr: pd.DataFrame, *, gene_col: str = "gene"
+) -> pd.DataFrame:
     """
     Drop pseudo genes and explode multi-gene bins into one row per gene.symbol.
     """
@@ -199,7 +209,9 @@ def _load_cnr_bins(cnr_path: str | Path) -> tuple[pd.DataFrame, CnrMeta]:
     if missing:
         raise ValueError(f"CNR missing required columns: {missing}")
 
-    meta = CnrMeta(has_depth=("depth" in cnr.columns), has_weight=("weight" in cnr.columns))
+    meta = CnrMeta(
+        has_depth=("depth" in cnr.columns), has_weight=("weight" in cnr.columns)
+    )
 
     cnr = _explode_multigene_bins(cnr, gene_col="gene")
     cnr = cnr.rename(columns={chr_col: "chr"})
@@ -226,7 +238,9 @@ def _load_pon_bins(pon_path: str | Path) -> pd.DataFrame:
             f"missing: {missing}"
         )
 
-    pon = pon.rename(columns={chr_col: "chr", "log2": "pon_log2", "spread": "pon_spread"})
+    pon = pon.rename(
+        columns={chr_col: "chr", "log2": "pon_log2", "spread": "pon_spread"}
+    )
     return pon[["chr", "start", "end", "pon_log2", "pon_spread"]]
 
 
@@ -276,7 +290,9 @@ _SEG_OUT_COLS = [
 ]
 
 
-def _assign_segments_by_center(bins_chr: pd.DataFrame, segs_chr: pd.DataFrame) -> pd.DataFrame:
+def _assign_segments_by_center(
+    bins_chr: pd.DataFrame, segs_chr: pd.DataFrame
+) -> pd.DataFrame:
     """
     Assign a segment to each bin by bin-center, for a single chromosome.
 
@@ -352,13 +368,16 @@ def _assign_segments_all_chrom(bins: pd.DataFrame, segs: pd.DataFrame) -> pd.Dat
 
     annotated = []
     for chrom, bins_chr in bins.groupby("chr", sort=False):
-        annotated.append(_assign_segments_by_center(bins_chr, segs_by_chr.get(chrom, pd.DataFrame())))
+        annotated.append(
+            _assign_segments_by_center(bins_chr, segs_by_chr.get(chrom, pd.DataFrame()))
+        )
     return pd.concat(annotated, ignore_index=True)
 
 
 # =============================================================================
 # CNV classification
 # =============================================================================
+
 
 def classify_cnv_from_total_cn_sex_aware(
     cn: float | int | None,
@@ -401,6 +420,7 @@ def classify_cnv_from_total_cn_sex_aware(
 # =============================================================================
 # refGene / exon coverage (unchanged API; just reused)
 # =============================================================================
+
 
 def load_refgene_exons(
     refgene_path: str | Path,
@@ -458,6 +478,7 @@ def load_refgene_exons(
 # Cytoband (kept as-is except tiny reuse of _strip_chr_prefix)
 # =============================================================================
 
+
 def load_cytobands(path: str | Path) -> pd.DataFrame:
     """Load cytoband UCSC file; return normalized df with integer coords."""
     cols = ["chrom", "chromStart", "chromEnd", "name", "gieStain"]
@@ -468,7 +489,9 @@ def load_cytobands(path: str | Path) -> pd.DataFrame:
     return cyto
 
 
-def annotate_genes_with_cytoband(df_genes: pd.DataFrame, cyto: pd.DataFrame) -> pd.DataFrame:
+def annotate_genes_with_cytoband(
+    df_genes: pd.DataFrame, cyto: pd.DataFrame
+) -> pd.DataFrame:
     """
     Add 'cytoband' based on (seg_start, seg_end), fallback to (start, end).
     """
@@ -516,9 +539,226 @@ def annotate_genes_with_cytoband(df_genes: pd.DataFrame, cyto: pd.DataFrame) -> 
     return df
 
 
+def pdf_first_page_to_png(
+    pdf_path: str | Path, png_path: str | Path, dpi: int = 300
+) -> None:
+    """
+    Render the first page of a PDF to a PNG image using PyMuPDF.
+    """
+    doc = fitz.open(str(pdf_path))
+    try:
+        page = doc[0]
+        page.get_pixmap(dpi=dpi).save(str(png_path))
+    finally:
+        doc.close()
+
+
+def load_cancer_gene_set(
+    path: str | Path, min_occurrence: int = 1, only_annotated: bool = True
+) -> set[str]:
+    """
+    Load and filter a cancer gene list TSV into a set of gene symbols.
+
+    Applies an occurrence threshold, optional OncoKB annotation filter,
+    and optional restriction to classic cancer gene types (ONCOGENE / TSG)
+    when the relevant columns exist.
+
+    Parameters
+    ----------
+    path : str | Path
+        Path to cancer gene list TSV file.
+    min_occurrence : int, optional
+        Minimum occurrence count required to include a gene (default: 1).
+    only_annotated : bool, optional
+        If True, require OncoKB annotation = YES when the column is present
+        (default: True).
+
+    Returns
+    -------
+    set[str]
+        Gene symbols passing filters.
+    """
+    df = pd.read_csv(path, sep="\t", dtype=str)
+    df.columns = df.columns.str.strip()
+
+    symbol_col = "Hugo Symbol"
+    occ_col = "# of occurrence within resources (Column J-P)"
+    onco_col = "OncoKB Annotated"
+    type_col = "Gene Type"
+
+    if symbol_col not in df.columns or occ_col not in df.columns:
+        missing = [c for c in (symbol_col, occ_col) if c not in df.columns]
+        raise ValueError(f"Cancer gene TSV missing required columns: {missing}")
+
+    df[occ_col] = pd.to_numeric(df[occ_col], errors="coerce").fillna(0).astype(int)
+
+    mask = df[occ_col] >= int(min_occurrence)
+
+    if only_annotated and onco_col in df.columns:
+        mask &= df[onco_col].astype(str).str.upper().eq("YES")
+
+    if type_col in df.columns:
+        mask &= df[type_col].isin(["ONCOGENE", "TSG"])
+
+    selected = df.loc[mask, symbol_col].astype(str).str.strip()
+    selected = selected[selected != ""]
+    return set(selected)
+
+
+def compute_dlr_spread_from_cnr(
+    cnr_path: str | Path,
+    weight_thresh: float = 0.1,
+    targets_only: bool = True,
+    exclude_sex_chromosomes: bool = True,
+) -> float:
+    """
+    Compute a DLR-like spread metric from a CNVkit .cnr file.
+
+    - Sort bins by chr, start.
+    - Optionally keep only target bins, with weight > threshold, autosomes only.
+    - Compute differences between adjacent log2 values.
+    - Return np.nanstd of these differences.
+
+    Returns np.nan if fewer than 3 usable bins.
+    """
+    cnr = pd.read_csv(cnr_path, sep="\t")
+    if cnr.empty or "log2" not in cnr.columns:
+        return float("nan")
+
+    chr_col = "chromosome" if "chromosome" in cnr.columns else "chr"
+    cnr[chr_col] = _strip_chr_prefix(cnr[chr_col])
+
+    # mark Target / Antitarget
+    if "gene" in cnr.columns:
+        cnr["type"] = np.where(cnr["gene"] == "Antitarget", "Antitarget", "Target")
+    else:
+        cnr["type"] = "Target"
+
+    if targets_only:
+        cnr = cnr[cnr["type"] == "Target"]
+
+    if "weight" in cnr.columns:
+        cnr = cnr[cnr["weight"] > weight_thresh]
+
+    if exclude_sex_chromosomes:
+        cnr = cnr[~cnr[chr_col].isin(["X", "x", "Y", "y"])]
+
+    cnr = cnr.dropna(subset=["log2"])
+    if cnr.empty:
+        return float("nan")
+
+    cnr["chr_sort"] = cnr[chr_col].map(_chrom_sort_key)
+    cnr = cnr.sort_values(["chr_sort", "start"]).reset_index(drop=True)
+    log2_vals = cnr["log2"].to_numpy()
+
+    if log2_vals.size < 3:
+        return float("nan")
+
+    diffs = np.diff(log2_vals)
+    dlr = float(np.nanstd(diffs))
+    return dlr
+
+
+def compute_pon_spread_summaries(
+    cnn_path: str | Path,
+    targets_only: bool = True,
+    exclude_sex_chromosomes: bool = True,
+) -> dict[str, float]:
+    """
+    Compute simple spread summaries from a CNVkit PON .cnn file.
+
+    Returns a dict with:
+      - pon_spread_median_target
+      - pon_spread_q90_target
+
+    (np.nan if not available)
+    """
+    cnn = pd.read_csv(cnn_path, sep="\t")
+    if cnn.empty or "spread" not in cnn.columns:
+        return {
+            "pon_spread_median_target": float("nan"),
+            "pon_spread_q90_target": float("nan"),
+        }
+
+    chr_col = "chromosome" if "chromosome" in cnn.columns else "chr"
+    cnn[chr_col] = cnn[chr_col].astype(str).str.replace("^chr", "", regex=True)
+
+    # mark Target / Antitarget
+    if "gene" in cnn.columns:
+        cnn["type"] = np.where(cnn["gene"] == "Antitarget", "Antitarget", "Target")
+    else:
+        cnn["type"] = "Target"
+
+    if targets_only:
+        cnn = cnn[cnn["type"] == "Target"]
+
+    if exclude_sex_chromosomes:
+        cnn = cnn[~cnn[chr_col].isin(["X", "x", "Y", "y"])]
+
+    cnn = cnn.dropna(subset=["spread"])
+    if cnn.empty:
+        return {
+            "pon_spread_median_target": float("nan"),
+            "pon_spread_q90_target": float("nan"),
+        }
+
+    return {
+        "pon_spread_median_target": float(cnn["spread"].median()),
+        "pon_spread_q90_target": float(cnn["spread"].quantile(0.90)),
+    }
+
+
+def compute_summary_metrics(
+    cnr_path: str | Path,
+    cnn_path: str | Path | None,
+    gene_seg_df: pd.DataFrame | None,
+) -> pd.DataFrame:
+    """
+    Build a 1-row DataFrame with QC / burden summaries.
+
+    Includes:
+      - Log2-spread (DLR-like) from the CNVkit .cnr file
+      - PON spread summaries from the CNVkit .cnn file (targets only)
+      - Gene-level CNV/LOH counts from the gene-segment table (if provided)
+
+    Parameters
+    ----------
+    cnr_path : str | Path
+        Path to CNVkit .cnr file.
+    cnn_path : str | Path | None
+        Path to CNVkit PON .cnn file (optional).
+    gene_seg_df : pd.DataFrame | None
+        Gene-segment table (optional).
+
+    Returns
+    -------
+    pd.DataFrame
+        Single-row DataFrame of metrics.
+    """
+    metrics: dict[str, float | int] = {}
+
+    # 1) DLR-like spread
+    metrics["Log2-spread"] = compute_dlr_spread_from_cnr(cnr_path)
+
+    # 2) PON spread summaries
+    if cnn_path is not None and Path(cnn_path).is_file():
+        pon_stats = compute_pon_spread_summaries(cnn_path)
+        metrics.update(pon_stats)
+    else:
+        metrics["pon_spread_median_target"] = float("nan")
+        metrics["pon_spread_q90_target"] = float("nan")
+
+    # 3) Gene-level CNV / LOH summaries
+    gene_stats = compute_gene_cnv_summaries(gene_seg_df)
+    metrics.update(gene_stats)
+
+    return pd.DataFrame([metrics])
+
+
 # =============================================================================
 # Gene table helpers (shared between gene-seg and gene-chunk)
 # =============================================================================
+
 
 def _compute_gene_level_pon_from_bins(bins: pd.DataFrame) -> pd.DataFrame | None:
     """
@@ -543,7 +783,9 @@ def _compute_gene_level_pon_from_bins(bins: pd.DataFrame) -> pd.DataFrame | None
     )
 
     MIN_N_FOR_PON = 2
-    gene_agg["pon_gene_effect"] = gene_agg["gene_mean_log2"] - gene_agg["pon_gene_mean_log2"]
+    gene_agg["pon_gene_effect"] = (
+        gene_agg["gene_mean_log2"] - gene_agg["pon_gene_mean_log2"]
+    )
 
     gene_agg["pon_gene_z"] = gene_agg.apply(
         lambda r: _pon_abs_z(
@@ -562,7 +804,8 @@ def _compute_gene_level_pon_from_bins(bins: pd.DataFrame) -> pd.DataFrame | None
 
     gene_agg["pon_gene_cnv_call"] = gene_agg.apply(
         lambda r: _pon_cnv_call_from_log2(
-            is_significant=str(r.get("pon_gene_call", "")).strip().lower() == "significant",
+            is_significant=str(r.get("pon_gene_call", "")).strip().lower()
+            == "significant",
             mean_log2=r.get("gene_mean_log2", np.nan),
             gain_gt=0.08,
             loss_lt=-0.08,
@@ -675,6 +918,7 @@ def _finalize_gene_table_order(genes_df: pd.DataFrame) -> pd.DataFrame:
 # build_gene_segment_table (refactored)
 # =============================================================================
 
+
 def build_gene_segment_table(
     cnr_path: str | Path,
     cns_path: str | Path,
@@ -719,7 +963,15 @@ def build_gene_segment_table(
 
         genes_df = bins.groupby(["chr", "gene.symbol"], as_index=False).agg(**agg)
 
-        for col in ["seg_start", "seg_end", "seg_log2", "seg_baf", "seg_cn", "seg_cn1", "seg_cn2"]:
+        for col in [
+            "seg_start",
+            "seg_end",
+            "seg_log2",
+            "seg_baf",
+            "seg_cn",
+            "seg_cn1",
+            "seg_cn2",
+        ]:
             genes_df[col] = np.nan
 
         if cancer_genes is not None:
@@ -734,7 +986,9 @@ def build_gene_segment_table(
 
     # 4) assign segment to bins (vectorized)
     bins = _assign_segments_all_chrom(bins, segs)
-    bins = bins.sort_values(["chr", "gene.symbol", "start"], kind="stable").reset_index(drop=True)
+    bins = bins.sort_values(["chr", "gene.symbol", "start"], kind="stable").reset_index(
+        drop=True
+    )
 
     # 5) gene-level PON stats (independent of segments)
     gene_pon = _compute_gene_level_pon_from_bins(bins)
@@ -751,13 +1005,20 @@ def build_gene_segment_table(
         agg_dict["weight"] = ["mean"]
 
     # segment fields as first()
-    for col in ["seg_start", "seg_end", "seg_log2", "seg_baf", "seg_cn", "seg_cn1", "seg_cn2"]:
+    for col in [
+        "seg_start",
+        "seg_end",
+        "seg_log2",
+        "seg_baf",
+        "seg_cn",
+        "seg_cn1",
+        "seg_cn2",
+    ]:
         if col in bins.columns:
             agg_dict[col] = ["first"]
 
-    genes_df = (
-        bins.groupby(["chr", "gene.symbol", "segment_id"], as_index=False)
-        .agg(agg_dict)
+    genes_df = bins.groupby(["chr", "gene.symbol", "segment_id"], as_index=False).agg(
+        agg_dict
     )
     genes_df = _flatten_agg_columns(genes_df).rename(
         columns={
@@ -797,13 +1058,31 @@ def build_gene_segment_table(
                     "subset to a single sample before calling build_gene_segment_table."
                 )
 
-            required_loh = {"gene.symbol", "chr", "C", "M", "M.flagged", "loh", "seg.mean", "num.snps"}
+            required_loh = {
+                "gene.symbol",
+                "chr",
+                "C",
+                "M",
+                "M.flagged",
+                "loh",
+                "seg.mean",
+                "num.snps",
+            }
             missing = required_loh - set(loh.columns)
             if missing:
                 raise ValueError(f"LOHgenes file missing columns: {missing}")
 
             loh_small = loh[
-                ["chr", "gene.symbol", "C", "M", "M.flagged", "loh", "seg.mean", "num.snps"]
+                [
+                    "chr",
+                    "gene.symbol",
+                    "C",
+                    "M",
+                    "M.flagged",
+                    "loh",
+                    "seg.mean",
+                    "num.snps",
+                ]
             ].rename(
                 columns={
                     "C": "loh_C",
@@ -826,7 +1105,9 @@ def build_gene_segment_table(
 
     # 10) exon annotations (kept behavior: writes exons_hit)
     if refgene_path is not None and Path(refgene_path).is_file():
-        exon_map = load_refgene_exons(refgene_path, transcript_selection=transcript_selection)
+        exon_map = load_refgene_exons(
+            refgene_path, transcript_selection=transcript_selection
+        )
 
         def _segment_is_cnv(row: pd.Series) -> bool:
             seg_cn = row.get("seg_cn", np.nan)
@@ -871,7 +1152,11 @@ def build_gene_segment_table(
             if region_start <= gene_start and region_end >= gene_end:
                 return "whole_gene"
 
-            hit = [i for i, (s, e) in enumerate(exons, start=1) if e > region_start and s < region_end]
+            hit = [
+                i
+                for i, (s, e) in enumerate(exons, start=1)
+                if e > region_start and s < region_end
+            ]
             if not hit:
                 return ""
 
@@ -902,6 +1187,7 @@ def build_gene_segment_table(
 # build_gene_chunk_table (refactored)
 # =============================================================================
 
+
 def build_gene_chunk_table(
     cnr_path: str | Path,
     gene_seg_df: pd.DataFrame,
@@ -927,7 +1213,9 @@ def build_gene_chunk_table(
         return pd.DataFrame()
 
     bins = _left_merge_pon(bins, pon)
-    bins = bins.sort_values(["chr", "gene.symbol", "start"], kind="stable").reset_index(drop=True)
+    bins = bins.sort_values(["chr", "gene.symbol", "start"], kind="stable").reset_index(
+        drop=True
+    )
 
     # If all pon_spread missing -> unusable
     if "pon_spread" not in bins.columns or bins["pon_spread"].isna().all():
@@ -1069,8 +1357,16 @@ def build_gene_chunk_table(
                 ):
                     merged_pos = A["positions"] + B["positions"] + C["positions"]
                     merged_ix = A["indices"] + B["indices"] + C["indices"]
-                    merged_mean = float(np.nanmean(eff_all[merged_pos])) if merged_pos else np.nan
-                    new_runs.append({"positions": merged_pos, "indices": merged_ix, "mean_eff": merged_mean})
+                    merged_mean = (
+                        float(np.nanmean(eff_all[merged_pos])) if merged_pos else np.nan
+                    )
+                    new_runs.append(
+                        {
+                            "positions": merged_pos,
+                            "indices": merged_ix,
+                            "mean_eff": merged_mean,
+                        }
+                    )
                     i += 3
                     continue
 
@@ -1081,12 +1377,21 @@ def build_gene_chunk_table(
                     np.isfinite(r["mean_eff"])
                     and np.isfinite(last["mean_eff"])
                     and abs(r["mean_eff"] - last["mean_eff"]) <= MERGE_DELTA
-                    and (len(r["indices"]) <= SMALL_SEG_N or len(last["indices"]) <= SMALL_SEG_N)
+                    and (
+                        len(r["indices"]) <= SMALL_SEG_N
+                        or len(last["indices"]) <= SMALL_SEG_N
+                    )
                 ):
                     merged_pos = last["positions"] + r["positions"]
                     merged_ix = last["indices"] + r["indices"]
-                    merged_mean = float(np.nanmean(eff_all[merged_pos])) if merged_pos else np.nan
-                    new_runs[-1] = {"positions": merged_pos, "indices": merged_ix, "mean_eff": merged_mean}
+                    merged_mean = (
+                        float(np.nanmean(eff_all[merged_pos])) if merged_pos else np.nan
+                    )
+                    new_runs[-1] = {
+                        "positions": merged_pos,
+                        "indices": merged_ix,
+                        "mean_eff": merged_mean,
+                    }
                 else:
                     new_runs.append(r)
             else:
@@ -1100,7 +1405,9 @@ def build_gene_chunk_table(
     for (_ch, _g), df_gene in bins.groupby(["chr", "gene.symbol"], sort=False):
         _cleanup_gene_chunks(df_gene)
 
-    bins = bins.sort_values(["chr", "gene.symbol", "start"], kind="stable").reset_index(drop=True)
+    bins = bins.sort_values(["chr", "gene.symbol", "start"], kind="stable").reset_index(
+        drop=True
+    )
 
     # -------------------- 4) Collapse to gene × chunk -------------------- #
     agg_dict: dict[str, list[str]] = {
@@ -1115,9 +1422,8 @@ def build_gene_chunk_table(
     if meta.has_weight and "weight" in bins.columns:
         agg_dict["weight"] = ["mean"]
 
-    chunks_df = (
-        bins.groupby(["chr", "gene.symbol", "chunk_id"], as_index=False)
-        .agg(agg_dict)
+    chunks_df = bins.groupby(["chr", "gene.symbol", "chunk_id"], as_index=False).agg(
+        agg_dict
     )
     chunks_df = _flatten_agg_columns(chunks_df).rename(
         columns={
@@ -1146,13 +1452,16 @@ def build_gene_chunk_table(
         ),
         axis=1,
     )
-    chunks_df["pon_chunk_direction"] = chunks_df["pon_chunk_effect"].apply(_pon_direction)
+    chunks_df["pon_chunk_direction"] = chunks_df["pon_chunk_effect"].apply(
+        _pon_direction
+    )
     chunks_df["pon_chunk_significance"] = chunks_df["pon_chunk_z"].apply(
         lambda z: _pon_significance(z, noise_lt=2.0, borderline_lt=5.0)
     )
     chunks_df["pon_chunk_call"] = chunks_df.apply(
         lambda r: _pon_cnv_call_from_log2(
-            is_significant=str(r.get("pon_chunk_significance", "")).strip().lower() == "significant",
+            is_significant=str(r.get("pon_chunk_significance", "")).strip().lower()
+            == "significant",
             mean_log2=r.get("mean_log2", np.nan),
             gain_gt=0.07,
             loss_lt=-0.07,
@@ -1165,7 +1474,9 @@ def build_gene_chunk_table(
     # -------------------- 6) Annotate from gene_seg_df by overlap -------------------- #
     required = {"chr", "gene.symbol", "region_start", "region_end"}
     if not required.issubset(gene_seg_df.columns):
-        raise ValueError("gene_seg_df must contain 'chr', 'gene.symbol', 'region_start', 'region_end'.")
+        raise ValueError(
+            "gene_seg_df must contain 'chr', 'gene.symbol', 'region_start', 'region_end'."
+        )
 
     gseg = gene_seg_df.copy()
     gseg["chr"] = _strip_chr_prefix(gseg["chr"])
@@ -1193,7 +1504,12 @@ def build_gene_chunk_table(
         "pon_chunk_call",
     }
 
-    annot_cols = [c for c in gseg.columns if c not in ({"chr", "gene.symbol", "region_start", "region_end"} | protected_cols)]
+    annot_cols = [
+        c
+        for c in gseg.columns
+        if c
+        not in ({"chr", "gene.symbol", "region_start", "region_end"} | protected_cols)
+    ]
 
     def _annotate_one(row: pd.Series) -> pd.Series:
         segs = seg_map.get((str(row["chr"]), str(row["gene.symbol"])))
@@ -1273,7 +1589,9 @@ def build_gene_chunk_table(
         "purecn_cnv_call",
     ]
     chunks_df = _reorder_columns(chunks_df, cols_order)
-    chunks_df = _stable_sort_by_chr_interval(chunks_df, "chr", "region_start", "region_end")
+    chunks_df = _stable_sort_by_chr_interval(
+        chunks_df, "chr", "region_start", "region_end"
+    )
     chunks_df = chunks_df.drop(columns=["chunk_id", "n_targets"], errors="ignore")
 
     return chunks_df

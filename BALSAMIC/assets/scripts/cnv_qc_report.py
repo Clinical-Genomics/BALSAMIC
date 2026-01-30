@@ -22,7 +22,6 @@ from cnv_report_plotting import plot_chromosomes
 from BALSAMIC.constants.analysis import Gender
 
 
-
 def round_float_columns(
     df: pd.DataFrame,
     columns: Iterable[str],
@@ -48,9 +47,11 @@ def round_float_columns(
 
     return target
 
+
 # =============================================================================
 # Small helpers to reduce duplication and keep csv_to_html_table readable
 # =============================================================================
+
 
 def _png_to_data_uri(png_path: str | Path | None) -> str | None:
     """Read a PNG file and return a data URI, or None if missing."""
@@ -1180,7 +1181,9 @@ def main(
             and not chunks_df.empty
             and "is_cancer_gene" in chunks_df.columns
         ):
-            chunks_df = chunks_df[chunks_df["is_cancer_gene"].fillna(False).astype(bool)]
+            chunks_df = chunks_df[
+                chunks_df["is_cancer_gene"].fillna(False).astype(bool)
+            ]
 
     genes_df = round_float_columns(genes_df, FINAL_FLOAT_COLUMNS)
     chunks_df = round_float_columns(chunks_df, FINAL_FLOAT_COLUMNS)

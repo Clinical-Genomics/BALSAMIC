@@ -21,6 +21,7 @@ from cnv_report_utils import safe_read_csv
 # VCF parsing / BAF
 # =============================================================================
 
+
 @dataclass(frozen=True)
 class ParsedSample:
     baf: float
@@ -118,6 +119,7 @@ def load_vcf_with_baf(vcf_path: str | Path, chr_order: list[str]) -> pd.DataFram
 # CNR + PON merge (dataframe-based)
 # =============================================================================
 
+
 def merge_cnr_pon(
     df_cnr: pd.DataFrame,
     df_pon: pd.DataFrame,
@@ -159,6 +161,7 @@ def merge_cnr_pon(
 # =============================================================================
 # Plotting helpers (refactor plot_chromosomes)
 # =============================================================================
+
 
 def _as_chr_order(include_y: bool) -> list[str]:
     """
@@ -329,7 +332,9 @@ def _load_cnr_and_optional_pon(
     if "weight" in merged.columns:
         merged = merged[merged["weight"] > weight_thresh].copy()
 
-    spread_thresh = float(merged["spread"].quantile(pct_spread)) if use_pon else float("inf")
+    spread_thresh = (
+        float(merged["spread"].quantile(pct_spread)) if use_pon else float("inf")
+    )
     return merged, chr_col, use_pon, spread_thresh
 
 
@@ -359,7 +364,9 @@ def _compute_row_flags(gdf: pd.DataFrame) -> pd.DataFrame:
         return False
 
     def _is_pon_signif_row(row: pd.Series) -> bool:
-        if "pon_chunk_significance" in row.index and pd.notna(row["pon_chunk_significance"]):
+        if "pon_chunk_significance" in row.index and pd.notna(
+            row["pon_chunk_significance"]
+        ):
             return str(row["pon_chunk_significance"]).strip().lower() == "significant"
 
         if "pon_chunk_call" in row.index and pd.notna(row["pon_chunk_call"]):
@@ -434,7 +441,9 @@ def _compute_gene_level_highlights(
         gene_level["total_targets"] = 0.0
 
     gene_level["total_targets"] = gene_level["total_targets"].fillna(0.0)
-    gene_level["is_cancer_gene"] = gene_level["is_cancer_gene"].fillna(False).astype(bool)
+    gene_level["is_cancer_gene"] = (
+        gene_level["is_cancer_gene"].fillna(False).astype(bool)
+    )
 
     min_req = min_gene_targets_cancer if highlight_only_cancer else min_gene_targets
 
@@ -517,19 +526,30 @@ def _restrict_to_focus_window(
     start_min = max(0, int(start_min) - int(focus_padding_bp))
     end_max = int(end_max) + int(focus_padding_bp)
 
-    sub_bins = sub_bins[(sub_bins["end"] >= start_min) & (sub_bins["start"] <= end_max)].copy()
+    sub_bins = sub_bins[
+        (sub_bins["end"] >= start_min) & (sub_bins["start"] <= end_max)
+    ].copy()
     if sub_bins.empty:
         return pd.DataFrame(), pd.DataFrame(), []
 
     if {"region_start", "region_end"}.issubset(g_chr.columns):
-        g_chr = g_chr[(g_chr["region_end"] >= start_min) & (g_chr["region_start"] <= end_max)].copy()
+        g_chr = g_chr[
+            (g_chr["region_end"] >= start_min) & (g_chr["region_start"] <= end_max)
+        ].copy()
     elif {"seg_start", "seg_end"}.issubset(g_chr.columns):
-        g_chr = g_chr[(g_chr["seg_end"] >= start_min) & (g_chr["seg_start"] <= end_max)].copy()
+        g_chr = g_chr[
+            (g_chr["seg_end"] >= start_min) & (g_chr["seg_start"] <= end_max)
+        ].copy()
 
     return sub_bins, g_chr, focus_genes_chr
 
 
-def _compute_variable_x(sub: pd.DataFrame, highlighted_genes: np.ndarray, anti_factor: float, neutral_target_factor: float) -> pd.DataFrame:
+def _compute_variable_x(
+    sub: pd.DataFrame,
+    highlighted_genes: np.ndarray,
+    anti_factor: float,
+    neutral_target_factor: float,
+) -> pd.DataFrame:
     """
     Construct pseudo-position x coordinate using variable bin widths.
 
@@ -611,9 +631,13 @@ def _add_smoothing(sub: pd.DataFrame, use_pon: bool, window: int) -> pd.DataFram
     out = sub.sort_values("x_coord").copy()
     out["log2_smooth"] = out["log2"].rolling(window=window, center=True).median()
     if use_pon:
-        out["spread_smooth"] = out["spread"].rolling(window=window, center=True).median()
+        out["spread_smooth"] = (
+            out["spread"].rolling(window=window, center=True).median()
+        )
         if "pon_log2" in out.columns:
-            out["pon_log2_smooth"] = out["pon_log2"].rolling(window=window, center=True).median()
+            out["pon_log2_smooth"] = (
+                out["pon_log2"].rolling(window=window, center=True).median()
+            )
         else:
             out["pon_log2_smooth"] = 0.0
     else:
@@ -645,7 +669,9 @@ def _pos_to_xcoord_fn(sub: pd.DataFrame) -> callable:
     return pos_to_xcoord
 
 
-def _collect_segments_for_chr(g_chr: pd.DataFrame, chr_name: str, y_clip: float) -> pd.DataFrame:
+def _collect_segments_for_chr(
+    g_chr: pd.DataFrame, chr_name: str, y_clip: float
+) -> pd.DataFrame:
     """
     Aggregate unique CNV/LOH segments from gene-level rows for plotting.
 
@@ -724,7 +750,9 @@ def _make_gene_colors(highlighted_genes: np.ndarray) -> dict[str, tuple]:
     return gene_to_color
 
 
-def _draw_background_bins(ax, sub: pd.DataFrame, highlighted_genes: np.ndarray, y_col: str):
+def _draw_background_bins(
+    ax, sub: pd.DataFrame, highlighted_genes: np.ndarray, y_col: str
+):
     """
     Draw background bin scatter layer for non-highlighted bins.
 
@@ -768,7 +796,13 @@ def _draw_background_bins(ax, sub: pd.DataFrame, highlighted_genes: np.ndarray, 
         )
 
 
-def _draw_highlighted_bins(ax, sub: pd.DataFrame, highlighted_genes: np.ndarray, gene_to_color: dict[str, tuple], y_col: str):
+def _draw_highlighted_bins(
+    ax,
+    sub: pd.DataFrame,
+    highlighted_genes: np.ndarray,
+    gene_to_color: dict[str, tuple],
+    y_col: str,
+):
     """
     Draw highlighted gene bin scatter layer.
 
@@ -879,7 +913,9 @@ def _draw_segments(ax, segs_chr: pd.DataFrame):
 
         if "seg_log2_clipped" in srow.index and pd.notna(srow["seg_log2_clipped"]):
             y_seg = srow["seg_log2_clipped"]
-        elif "loh_seg_mean_clipped" in srow.index and pd.notna(srow["loh_seg_mean_clipped"]):
+        elif "loh_seg_mean_clipped" in srow.index and pd.notna(
+            srow["loh_seg_mean_clipped"]
+        ):
             y_seg = srow["loh_seg_mean_clipped"]
         else:
             continue
@@ -943,7 +979,9 @@ def _draw_chunk_pon_segments(
     chunks_span["pon_chunk_call_norm"] = (
         chunks_span["pon_chunk_call"].astype(str).str.strip().str.upper()
     )
-    chunks_span = chunks_span[chunks_span["pon_chunk_call_norm"].isin(["AMPLIFICATION", "DELETION"])]
+    chunks_span = chunks_span[
+        chunks_span["pon_chunk_call_norm"].isin(["AMPLIFICATION", "DELETION"])
+    ]
 
     if chunks_span.empty:
         return pon_cnv_genes, label_added
@@ -963,7 +1001,9 @@ def _draw_chunk_pon_segments(
             linestyles="solid",
             label="PON-based CNV segment" if not label_added else None,
         )
-        line.set_path_effects([pe.Stroke(linewidth=1.6, foreground="black"), pe.Normal()])
+        line.set_path_effects(
+            [pe.Stroke(linewidth=1.6, foreground="black"), pe.Normal()]
+        )
         label_added = True
 
     if "gene.symbol" in chunks_span.columns:
@@ -1004,8 +1044,14 @@ def _draw_gene_labels(
     for gname in label_genes:
         color = gene_to_color.get(gname) or stable_color_fn(gname)
 
-        g_rows = g_chr[g_chr["gene.symbol"] == gname] if "gene.symbol" in g_chr.columns else pd.DataFrame()
-        if (not g_rows.empty) and {"region_start", "region_end"}.issubset(g_rows.columns):
+        g_rows = (
+            g_chr[g_chr["gene.symbol"] == gname]
+            if "gene.symbol" in g_chr.columns
+            else pd.DataFrame()
+        )
+        if (not g_rows.empty) and {"region_start", "region_end"}.issubset(
+            g_rows.columns
+        ):
             g_start = int(g_rows["region_start"].min())
             g_end = int(g_rows["region_end"].max())
         elif (not g_rows.empty) and {"seg_start", "seg_end"}.issubset(g_rows.columns):
@@ -1073,6 +1119,7 @@ def _output_png_path(outdir: Path, chr_name: str, focus_genes_chr: list[str]) ->
 # Main plotting function (now much thinner)
 # =============================================================================
 
+
 def plot_chromosomes(
     cnr_path: Path,
     vcf_path: Path,
@@ -1111,7 +1158,9 @@ def plot_chromosomes(
     chr_order = _as_chr_order(include_y)
 
     # Normalize gene dfs
-    gdf, gchunk, has_chunk_data = _normalize_gene_tables(gene_seg_df, chr_order, gene_chunk_df)
+    gdf, gchunk, has_chunk_data = _normalize_gene_tables(
+        gene_seg_df, chr_order, gene_chunk_df
+    )
     gdf, targets_col = _normalize_targets_col(gdf)
     gdf = _normalize_is_cancer_gene(gdf)
 
@@ -1162,7 +1211,11 @@ def plot_chromosomes(
                 continue
 
         g_chr = gdf[gdf["chr"] == chr_name].copy()
-        g_chunks_chr = gchunk[gchunk["chr"] == chr_name].copy() if (gchunk is not None and not gchunk.empty) else pd.DataFrame()
+        g_chunks_chr = (
+            gchunk[gchunk["chr"] == chr_name].copy()
+            if (gchunk is not None and not gchunk.empty)
+            else pd.DataFrame()
+        )
 
         focus_genes_chr: list[str] = []
         if focus_set is not None:
@@ -1182,7 +1235,11 @@ def plot_chromosomes(
                 (gene_level["chr"] == chr_name)
                 & (gene_level["gene.symbol"].astype(str).isin(genes_in_view))
             ]
-            highlighted = gene_level_chr[gene_level_chr["highlight_gene"]]["gene.symbol"].astype(str).unique()
+            highlighted = (
+                gene_level_chr[gene_level_chr["highlight_gene"]]["gene.symbol"]
+                .astype(str)
+                .unique()
+            )
         else:
             if highlight_only_cancer and "is_cancer_gene_bool" in g_chr.columns:
                 mask_gene = g_chr["cnv_flag"] & g_chr["is_cancer_gene_bool"]
@@ -1195,7 +1252,9 @@ def plot_chromosomes(
             )
 
         if focus_genes_chr:
-            highlighted = np.union1d(highlighted, np.array(focus_genes_chr, dtype=object))
+            highlighted = np.union1d(
+                highlighted, np.array(focus_genes_chr, dtype=object)
+            )
 
         gene_to_color = _make_gene_colors(highlighted)
 
@@ -1220,7 +1279,10 @@ def plot_chromosomes(
         # BAF chr (restricted to span if focus)
         baf_chr = vcf[vcf["CHROM"] == chr_name].sort_values("POS").copy()
         if focus_genes_chr and not baf_chr.empty:
-            baf_chr = baf_chr[(baf_chr["POS"] >= sub["start"].min()) & (baf_chr["POS"] <= sub["end"].max())].copy()
+            baf_chr = baf_chr[
+                (baf_chr["POS"] >= sub["start"].min())
+                & (baf_chr["POS"] <= sub["end"].max())
+            ].copy()
         if not baf_chr.empty:
             baf_chr["x_coord"] = baf_chr["POS"].apply(lambda p: pos_to_xcoord(int(p)))
 
@@ -1228,8 +1290,12 @@ def plot_chromosomes(
         segs_chr = _collect_segments_for_chr(g_chr, chr_name, y_clip=y_clip)
         if not segs_chr.empty:
             segs_chr = segs_chr.copy()
-            segs_chr["x_start"] = segs_chr["seg_start"].apply(lambda p: pos_to_xcoord(int(p)))
-            segs_chr["x_end"] = segs_chr["seg_end"].apply(lambda p: pos_to_xcoord(int(p)))
+            segs_chr["x_start"] = segs_chr["seg_start"].apply(
+                lambda p: pos_to_xcoord(int(p))
+            )
+            segs_chr["x_end"] = segs_chr["seg_end"].apply(
+                lambda p: pos_to_xcoord(int(p))
+            )
 
         # --- figure ---
         fig, (ax1, ax2) = plt.subplots(
@@ -1240,7 +1306,9 @@ def plot_chromosomes(
 
         _draw_background_bins(ax1, sub, highlighted, y_col="log2_clipped")
         if highlighted.size > 0:
-            _draw_highlighted_bins(ax1, sub, highlighted, gene_to_color, y_col="log2_clipped")
+            _draw_highlighted_bins(
+                ax1, sub, highlighted, gene_to_color, y_col="log2_clipped"
+            )
 
         y_min, y_max = y_lim_chr
         _draw_density_bar(ax1, sub, y_min, y_max)
@@ -1297,7 +1365,9 @@ def plot_chromosomes(
             )
 
         _plot_baf_panel(ax2, baf_chr)
-        ax2.set_xlabel("Pseudo-position (highlighted genes expanded, other bins compressed)")
+        ax2.set_xlabel(
+            "Pseudo-position (highlighted genes expanded, other bins compressed)"
+        )
 
         plt.tight_layout()
         out_png = _output_png_path(outdir, chr_name, focus_genes_chr)
