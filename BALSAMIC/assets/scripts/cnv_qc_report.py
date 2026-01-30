@@ -10,7 +10,6 @@ import numpy as np
 import pandas as pd
 
 from cnv_report_utils import (
-    plot_chromosomes,
     build_gene_segment_table,
     build_gene_chunk_table,
     load_cancer_gene_set,
@@ -18,6 +17,8 @@ from cnv_report_utils import (
     pdf_first_page_to_png,
     FINAL_FLOAT_COLUMNS,
 )
+from cnv_report_plotting import plot_chromosomes
+
 from BALSAMIC.constants.analysis import Gender
 
 
