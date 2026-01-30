@@ -5,6 +5,38 @@ from typing import TextIO, List, Tuple
 
 import click
 import pandas as pd
+def _parse_denoisedcr_row(line: str) -> tuple[str, int, int, float] | None:
+    """Parse a denoisedCR-style row into (chrom, start, end, value), or None if invalid."""
+    if line.startswith("@") or line.startswith("CONTIG"):
+        return None
+
+    parts = line.strip().split()
+    if len(parts) < 4:
+        return None
+
+    chrom, start_str, end_str, value_str = parts[:4]
+    try:
+        return chrom, int(start_str), int(end_str), float(value_str)
+    except ValueError:
+        return None
+
+
+def _flush_buffer(
+    out: list[tuple[str, int, int, float]],
+    chrom: str | None,
+    buffer: list[tuple[int, int, float]],
+    bin_size: int,
+) -> None:
+    """Aggregate buffered bins for a chromosome into bin_size chunks and append to out."""
+    if not buffer or chrom is None:
+        return
+
+    for i in range(0, len(buffer), bin_size):
+        chunk = buffer[i : i + bin_size]
+        start = chunk[0][0]
+        end = chunk[-1][1]
+        mean_val = sum(v for _, _, v in chunk) / len(chunk)
+        out.append((chrom, start, end, mean_val))
 
 
 def bin_denoised_segments(
@@ -15,68 +47,29 @@ def bin_denoised_segments(
     """
     Read a denoisedCR-style TSV (contig, start, end, value) and
     average every N bins per chromosome into a bedGraph-like output.
-
-    Parameters
-    ----------
-    infile : TextIO
-        Input handle (open text file).
-    outfile : TextIO
-        Output handle (open text file).
-    bin_size : int
-        Number of consecutive bins to aggregate.
     """
     chunks: List[Tuple[str, int, int, float]] = []
     current_chr: str | None = None
     buffer: list[tuple[int, int, float]] = []
 
     for line in infile:
-        # Skip GATK-style header / metadata lines
-        if line.startswith("@") or line.startswith("CONTIG"):
+        parsed = _parse_denoisedcr_row(line)
+        if parsed is None:
             continue
 
-        parts = line.strip().split()
-        if len(parts) < 4:
-            continue
-
-        chrom, start_str, end_str, value_str = parts[:4]
-
-        try:
-            start = int(start_str)
-            end = int(end_str)
-            log2 = float(value_str)
-        except ValueError:
-            # Malformed numeric fields; skip
-            continue
+        chrom, start, end, log2 = parsed
 
         if chrom != current_chr:
-            # Flush previous chromosome
-            if buffer:
-                for i in range(0, len(buffer), bin_size):
-                    chunk = buffer[i : i + bin_size]
-                    starts = [c[0] for c in chunk]
-                    ends = [c[1] for c in chunk]
-                    vals = [c[2] for c in chunk]
-                    chunks.append(
-                        (current_chr, starts[0], ends[-1], sum(vals) / len(vals))
-                    )
+            _flush_buffer(chunks, current_chr, buffer, bin_size)
             buffer = []
             current_chr = chrom
 
         buffer.append((start, end, log2))
 
-    # Flush last chromosome
-    if buffer and current_chr is not None:
-        for i in range(0, len(buffer), bin_size):
-            chunk = buffer[i : i + bin_size]
-            starts = [c[0] for c in chunk]
-            ends = [c[1] for c in chunk]
-            vals = [c[2] for c in chunk]
-            chunks.append((current_chr, starts[0], ends[-1], sum(vals) / len(vals)))
+    _flush_buffer(chunks, current_chr, buffer, bin_size)
 
-    df = pd.DataFrame(chunks, columns=["chrom", "start", "end", "value"])
-    df.to_csv(outfile, sep="\t", header=False, index=False)
-
-
+    pd.DataFrame(chunks, columns=["chrom", "start", "end", "value"]).to_csv(
+        outfile, sep="\t", header=False, index=False
 @click.command(context_settings={"show_default": True})
 @click.argument(
     "infile",
