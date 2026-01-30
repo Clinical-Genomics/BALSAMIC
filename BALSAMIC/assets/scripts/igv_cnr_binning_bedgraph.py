@@ -6,6 +6,7 @@ from typing import TextIO, List, Tuple
 import click
 import pandas as pd
 
+
 def _parse_denoisedcr_row(line: str) -> tuple[str, int, int, float] | None:
     """Parse a denoisedCR-style row into (chrom, start, end, value), or None if invalid."""
     if line.startswith("@") or line.startswith("CONTIG"):
@@ -72,6 +73,7 @@ def bin_denoised_segments(
     pd.DataFrame(chunks, columns=["chrom", "start", "end", "value"]).to_csv(
         outfile, sep="\t", header=False, index=False
     )
+
 
 @click.command(context_settings={"show_default": True})
 @click.argument(

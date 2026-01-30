@@ -6,18 +6,19 @@ from click.testing import CliRunner
 
 import BALSAMIC.assets.scripts.igv_baf_bedgraph as m
 
+
 @pytest.mark.parametrize(
     "ad,expected",
     [
         ("10,5", (10, 5)),
-        ("10,5,2", (10, 7)),          # multi-ALT sum
+        ("10,5,2", (10, 7)),  # multi-ALT sum
         ("0,1", (0, 1)),
         (".", None),
         ("", None),
-        ("10", None),                 # not enough fields
-        ("10,.", None),               # alt missing -> counts list has len 1
-        ("A,2", None),                # non-numeric
-        ("10,2,.", (10, 2)),          # ignore '.' after valid counts
+        ("10", None),  # not enough fields
+        ("10,.", None),  # alt missing -> counts list has len 1
+        ("A,2", None),  # non-numeric
+        ("10,2,.", (10, 2)),  # ignore '.' after valid counts
     ],
 )
 def test_parse_ad_counts(ad, expected):
@@ -47,9 +48,7 @@ def test_parse_header_line_requires_sample_column():
 
 
 def test_extract_record_happy_path_with_dp():
-    parts = [
-        "1", "100", ".", "A", "C", ".", ".", ".", "GT:AD:DP", "0/1:10,5:20"
-    ]
+    parts = ["1", "100", ".", "A", "C", ".", ".", ".", "GT:AD:DP", "0/1:10,5:20"]
     rec = m._extract_bedgraph_record(parts)
     assert rec is not None
     assert rec.chrom == "1"
@@ -59,9 +58,7 @@ def test_extract_record_happy_path_with_dp():
 
 
 def test_extract_record_dp_fallback_to_ad_sum():
-    parts = [
-        "1", "100", ".", "A", "C", ".", ".", ".", "GT:AD", "0/1:10,5"
-    ]
+    parts = ["1", "100", ".", "A", "C", ".", ".", ".", "GT:AD", "0/1:10,5"]
     rec = m._extract_bedgraph_record(parts)
     assert rec is not None
     assert rec.value == pytest.approx(5 / 15)
@@ -69,9 +66,7 @@ def test_extract_record_dp_fallback_to_ad_sum():
 
 def test_extract_record_span_for_indel_ref_length():
     # ref length 3 -> span=3, start=pos-1=99, end=102
-    parts = [
-        "1", "100", ".", "ATG", "A", ".", ".", ".", "GT:AD:DP", "0/1:10,5:20"
-    ]
+    parts = ["1", "100", ".", "ATG", "A", ".", ".", ".", "GT:AD:DP", "0/1:10,5:20"]
     rec = m._extract_bedgraph_record(parts)
     assert rec is not None
     assert rec.start == 99
@@ -103,9 +98,7 @@ def test_extract_record_skips_invalid(parts):
 
 
 def test_extract_record_accepts_multi_alt_by_summing_ad():
-    parts = [
-        "1", "100", ".", "A", "C,G", ".", ".", ".", "GT:AD:DP", "0/1:10,5,2:20"
-    ]
+    parts = ["1", "100", ".", "A", "C,G", ".", ".", ".", "GT:AD:DP", "0/1:10,5,2:20"]
     rec = m._extract_bedgraph_record(parts)
     assert rec is not None
     assert rec.value == pytest.approx((5 + 2) / 20)
@@ -141,7 +134,9 @@ def test_convert_vcf_to_bedgraph_writes_expected_rows(tmp_path: Path):
         + "\n",
     )
 
-    n = m.convert_vcf_to_bedgraph(vcf_path=str(vcf), bedgraph_path=str(out), track_name=None)
+    n = m.convert_vcf_to_bedgraph(
+        vcf_path=str(vcf), bedgraph_path=str(out), track_name=None
+    )
     assert n == 2
 
     lines = out.read_text(encoding="utf-8").strip().splitlines()
@@ -245,4 +240,7 @@ def test_cli_end_to_end(tmp_path: Path):
     # writes progress to stderr; Click captures it in output by default in testing
     assert "Done. Wrote 1 rows" in res.output
 
-    assert out.read_text(encoding="utf-8").splitlines()[0] == 'track type=bedGraph name="T"'
+    assert (
+        out.read_text(encoding="utf-8").splitlines()[0]
+        == 'track type=bedGraph name="T"'
+    )
