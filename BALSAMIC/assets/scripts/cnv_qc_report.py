@@ -23,6 +23,7 @@ from BALSAMIC.constants.analysis import Gender
 # Small helpers to reduce duplication and keep csv_to_html_table readable
 # =============================================================================
 
+
 def _png_to_data_uri(png_path: str | Path | None) -> str | None:
     """Read a PNG file and return a data URI, or None if missing."""
     if png_path is None:
@@ -121,7 +122,9 @@ def _compute_cnv_sets(df: pd.DataFrame) -> tuple[set[str], set[str], str | None]
     return cnv_chr_set, cnv_gene_set, chr_col
 
 
-def _build_genome_plots_html(scatter_data_uri: str | None, diagram_data_uri: str | None) -> str:
+def _build_genome_plots_html(
+    scatter_data_uri: str | None, diagram_data_uri: str | None
+) -> str:
     if not (scatter_data_uri or diagram_data_uri):
         return ""
 
@@ -203,7 +206,10 @@ def _collect_qc_plot_blocks(
     gene_plot_blocks_with_cnv: list[str] = []
     gene_plot_blocks_no_cnv: list[str] = []
 
-    png_files = sorted(list(qc_dir.glob("cnv_chr*segments.png")), key=lambda p: _chr_sort_key_from_stem(p.stem))
+    png_files = sorted(
+        list(qc_dir.glob("cnv_chr*segments.png")),
+        key=lambda p: _chr_sort_key_from_stem(p.stem),
+    )
 
     for png_file in png_files:
         img_data_uri = _png_to_data_uri(png_file)
@@ -222,14 +228,25 @@ def _collect_qc_plot_blocks(
             has_cnv = any(g in cnv_gene_set for g in gene_names)
             title = f"Chr {chr_label} – {', '.join(gene_names)}"
 
-        block = _build_plot_card_html(title=title, img_data_uri=img_data_uri, stem=stem, has_cnv=has_cnv)
+        block = _build_plot_card_html(
+            title=title, img_data_uri=img_data_uri, stem=stem, has_cnv=has_cnv
+        )
 
         if is_gene_plot:
-            (gene_plot_blocks_with_cnv if has_cnv else gene_plot_blocks_no_cnv).append(block)
+            (gene_plot_blocks_with_cnv if has_cnv else gene_plot_blocks_no_cnv).append(
+                block
+            )
         else:
-            (chr_plot_blocks_with_cnv if has_cnv else chr_plot_blocks_no_cnv).append(block)
+            (chr_plot_blocks_with_cnv if has_cnv else chr_plot_blocks_no_cnv).append(
+                block
+            )
 
-    return chr_plot_blocks_with_cnv, chr_plot_blocks_no_cnv, gene_plot_blocks_with_cnv, gene_plot_blocks_no_cnv
+    return (
+        chr_plot_blocks_with_cnv,
+        chr_plot_blocks_no_cnv,
+        gene_plot_blocks_with_cnv,
+        gene_plot_blocks_no_cnv,
+    )
 
 
 def _read_purecn_summary(purity_csv: str | Path | None) -> pd.DataFrame | None:
@@ -250,8 +267,9 @@ def _read_purecn_summary(purity_csv: str | Path | None) -> pd.DataFrame | None:
     keep = [c for c in wanted_cols if c in df.columns]
     return df[keep] if keep else df
 
+
 def csv_to_html_table(
-    df: pd.DataFrame,                     # gene-level table
+    df: pd.DataFrame,  # gene-level table
     out_html: str | Path,
     scatter_png: str | Path | None = None,
     diagram_png: str | Path | None = None,
@@ -265,7 +283,9 @@ def csv_to_html_table(
     scatter_png_data_uri = _png_to_data_uri(scatter_png)
     diagram_png_data_uri = _png_to_data_uri(diagram_png)
 
-    genome_plots_html = _build_genome_plots_html(scatter_png_data_uri, diagram_png_data_uri)
+    genome_plots_html = _build_genome_plots_html(
+        scatter_png_data_uri, diagram_png_data_uri
+    )
 
     cnv_chr_set, cnv_gene_set, chr_col = _compute_cnv_sets(df)
 
@@ -332,7 +352,8 @@ def csv_to_html_table(
             section_html += "<h3>Regions without CNV / LOH</h3>\n"
             section_html += (
                 '<div class="plot-grid">'
-                + "\n".join(gene_plot_blocks_no_cnv) + "</div>"
+                + "\n".join(gene_plot_blocks_no_cnv)
+                + "</div>"
             )
         qc_plots_html += section_html
 
@@ -367,7 +388,7 @@ def csv_to_html_table(
         index=False,
         border=0,
         classes="dataframe",
-        table_id="report-table",   # gene-level
+        table_id="report-table",  # gene-level
     )
 
     # ---------------- Chunk-level table (optional) ----------------
@@ -999,26 +1020,25 @@ def csv_to_html_table(
 @click.option(
     "--sex",
     type=click.Choice([Gender.FEMALE, Gender.MALE]),
-    default=False,
-    help="Sex for how to handle sex chromosomes.",
+    default=None,
 )
 def main(
-    loh_genes,
-    cnr,
-    cns,
-    pon,
-    vcf,
-    refgene,
-    cytoband,
-    case_id,
-    cust_case_id,
-    cnvkit_scatter,
-    cnvkit_diagram,
-    out_prefix,
-    purity_csv,
-    cancer_genes,
-    is_exome,
-    sex,
+    loh_genes: str,
+    cnr: str,
+    cns: str,
+    pon: Optional[str],
+    vcf: str,
+    refgene: str,
+    cytoband: str,
+    case_id: str,
+    cust_case_id: Optional[str],
+    cnvkit_scatter: Optional[str],
+    cnvkit_diagram: Optional[str],
+    out_prefix: str,
+    purity_csv: Optional[str],
+    cancer_genes: Optional[str],
+    is_exome: bool,
+    sex: Optional[Gender],
 ):
     """
     Build CNV QC plots + HTML report from CNVkit outputs, optionally
@@ -1074,7 +1094,6 @@ def main(
     # ----------------------------
     chunk_df = build_gene_chunk_table(cnr_path=cnr, gene_seg_df=genes_df, pon_path=pon)
 
-
     # --- 1) PureCN summary (from purity_csv) ---
     purecn_summary_df = _read_purecn_summary(purity_csv)
 
@@ -1128,7 +1147,11 @@ def main(
     if is_exome:
         if "is_cancer_gene" in genes_df.columns:
             genes_df = genes_df[genes_df["is_cancer_gene"].fillna(False).astype(bool)]
-        if chunk_df is not None and not chunk_df.empty and "is_cancer_gene" in chunk_df.columns:
+        if (
+            chunk_df is not None
+            and not chunk_df.empty
+            and "is_cancer_gene" in chunk_df.columns
+        ):
             chunk_df = chunk_df[chunk_df["is_cancer_gene"].fillna(False).astype(bool)]
 
     # ----------------------------

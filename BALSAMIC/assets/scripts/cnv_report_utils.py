@@ -1,17 +1,21 @@
+# Standard library
 import math
-from pathlib import Path
-from typing import Dict, Tuple, List, Optional, Set
-from pandas.errors import EmptyDataError
-
-import fitz
-import matplotlib.pyplot as plt
-from matplotlib import colormaps
-from matplotlib import patheffects as pe
-import numpy as np
-import pandas as pd
-from BALSAMIC.constants.analysis import Gender
 import re
 from collections.abc import Collection
+from pathlib import Path
+from typing import Dict, List, Optional, Set, Tuple
+
+# Third-party
+import fitz
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+from matplotlib import colormaps
+from matplotlib import patheffects as pe
+from pandas.errors import EmptyDataError
+
+# Local
+from BALSAMIC.constants.analysis import Gender
 
 # =============================================================================
 # Generic helpers
@@ -19,20 +23,39 @@ from collections.abc import Collection
 
 
 def pdf_first_page_to_png(pdf_path: str, png_path: str, dpi: int = 300) -> None:
+    """
+    Render the first page of a PDF to a PNG image using PyMuPDF.
+    """
     doc = fitz.open(pdf_path)
     page = doc[0]
     page.get_pixmap(dpi=dpi).save(png_path)
     doc.close()
 
+
 def load_cancer_gene_set(
     path: str | Path, min_occurrence: int = 1, only_annotated: bool = True
 ) -> set[str]:
+    """
+    Load and filter a cancer gene list TSV into a set of gene symbols.
+
+    Applies occurrence threshold, optional OncoKB annotation filter,
+    and optional restriction to ONCOGENE / TSG gene types.
+
+    Parameters
+    ----------
+    path : str | Path
+        Path to cancer gene list TSV file.
+    min_occurrence : int, optional
+        Minimum occurrence count required to include a gene (default: 1).
+    only_annotated : bool, optional
+        If True, require OncoKB annotation = YES when column is present
+        (default: True).
+    """
     df = pd.read_csv(path, sep="\t", dtype=str)
     # Clean up column names
     df.columns = df.columns.str.strip()
 
     # Standardize column names we care about
-    # (Change these strings if your headers differ slightly.)
     symbol_col = "Hugo Symbol"
     occ_col = "# of occurrence within resources (Column J-P)"
     onco_col = "OncoKB Annotated"
@@ -194,6 +217,7 @@ def compute_dlr_spread_from_cnr(
     dlr = float(np.nanstd(diffs))
     return dlr
 
+
 def compute_pon_spread_summaries(
     cnn_path: str | Path,
     targets_only: bool = True,
@@ -242,6 +266,7 @@ def compute_pon_spread_summaries(
         "pon_spread_q90_target": float(cnn["spread"].quantile(0.90)),
     }
 
+
 def compute_gene_cnv_summaries(gene_seg_df: pd.DataFrame) -> dict[str, float]:
     """
     Summaries from the gene-chunk table built by build_gene_segment_table.
@@ -264,21 +289,33 @@ def compute_gene_cnv_summaries(gene_seg_df: pd.DataFrame) -> dict[str, float]:
     # Gene-level: any chunk of the gene satisfies the condition
     if "gene.symbol" in df.columns:
         gene_grp = df.groupby("gene.symbol")
-        genes_cnvkit = int((gene_grp["cnvkit_cnv_call"]
-                            .apply(lambda s: s.astype(str).str.upper()
-                                   .isin(["DELETION", "AMPLIFICATION"])
-                                   .any())
-                            ).sum())
-        genes_purecn = int((gene_grp["purecn_cnv_call"]
-                            .apply(lambda s: s.astype(str).str.upper()
-                                   .isin(["DELETION", "AMPLIFICATION"])
-                                   .any())
-                            ).sum())
-        genes_loh = int((gene_grp["loh_flag"]
-                         .apply(lambda s: s.astype(str).str.upper()
-                                .eq("TRUE")
-                                .any())
-                         ).sum())
+        genes_cnvkit = int(
+            (
+                gene_grp["cnvkit_cnv_call"].apply(
+                    lambda s: s.astype(str)
+                    .str.upper()
+                    .isin(["DELETION", "AMPLIFICATION"])
+                    .any()
+                )
+            ).sum()
+        )
+        genes_purecn = int(
+            (
+                gene_grp["purecn_cnv_call"].apply(
+                    lambda s: s.astype(str)
+                    .str.upper()
+                    .isin(["DELETION", "AMPLIFICATION"])
+                    .any()
+                )
+            ).sum()
+        )
+        genes_loh = int(
+            (
+                gene_grp["loh_flag"].apply(
+                    lambda s: s.astype(str).str.upper().eq("TRUE").any()
+                )
+            ).sum()
+        )
     else:
         genes_cnvkit = genes_purecn = genes_loh = 0
 
@@ -324,12 +361,17 @@ def compute_summary_metrics(
     summary_df = pd.DataFrame([metrics])
     return summary_df
 
+
 # =============================================================================
 # Cytoband
 # =============================================================================
 
 
 def load_cytobands(path: str | Path) -> pd.DataFrame:
+    """
+    Load cytoband annotation from a UCSC-style file and return a normalized
+    dataframe with integer genomic coordinates.
+    """
     cols = ["chrom", "chromStart", "chromEnd", "name", "gieStain"]
     cyto = pd.read_csv(path, sep="\t", header=None, names=cols)
 
@@ -408,40 +450,8 @@ def annotate_genes_with_cytoband(
 
 
 # =============================================================================
-# PureCN CNV genes (for plotting only)
-# =============================================================================
-
-def flag_cnv_genes(df: pd.DataFrame, min_targets_cnvgene: int = 4) -> pd.DataFrame:
-    """
-    Subset PureCN genes to those that look like CNV genes.
-
-      - drop 'Antitarget' and '-' pseudo-genes
-      - keep genes where:
-          C != 2 OR loh == TRUE OR type != NA
-      - require at least min_targets_cnvgene targets
-    """
-    df = df.copy()
-    df = df[~df["gene.symbol"].isin(["Antitarget", "-"])]
-
-    cnv_mask = (
-        ((df["C"].notna()) & (df["C"] != 2))
-        | (df["loh"].astype(str).str.upper() == "TRUE")
-        | (df["type"].notna() & (df["type"].astype(str) != "NA"))
-    )
-
-    df = df[cnv_mask]
-
-    if "number.targets" in df.columns and min_targets_cnvgene is not None:
-        df = df[df["number.targets"] > min_targets_cnvgene]
-
-    return df
-
-
-# =============================================================================
 # CNR + PON merge
 # =============================================================================
-
-
 def merge_cnr_pon(
     df_cnr: pd.DataFrame,
     df_pon: pd.DataFrame,
@@ -481,8 +491,6 @@ def merge_cnr_pon(
 # =============================================================================
 # VCF → BAF
 # =============================================================================
-
-
 def load_vcf_with_baf(vcf_path: str | Path, chr_order: list[str]) -> pd.DataFrame:
     """
     Load a (possibly unfiltered) VCF with a single tumor sample and compute:
@@ -519,6 +527,8 @@ def load_vcf_with_baf(vcf_path: str | Path, chr_order: list[str]) -> pd.DataFram
     vcf["DP_sample"] = dps
 
     return vcf
+
+
 # =============================================================================
 # Per-chromosome plots (PON spread + log2 + segments + BAF + CNV genes)
 # =============================================================================
@@ -879,8 +889,7 @@ def plot_chromosomes(
                 ].copy()
             elif {"seg_start", "seg_end"}.issubset(g_chr.columns):
                 g_chr = g_chr[
-                    (g_chr["seg_end"] >= start_min)
-                    & (g_chr["seg_start"] <= end_max)
+                    (g_chr["seg_end"] >= start_min) & (g_chr["seg_start"] <= end_max)
                 ].copy()
             # else: leave g_chr as-is (no coordinates available to filter)
         # ----------------------------------------------------------------------
@@ -888,12 +897,7 @@ def plot_chromosomes(
         # Determine which genes to highlight on this chromosome
         if gene_level is not None:
             if "gene.symbol" in g_chr.columns:
-                genes_in_view = (
-                    g_chr["gene.symbol"]
-                    .dropna()
-                    .astype(str)
-                    .unique()
-                )
+                genes_in_view = g_chr["gene.symbol"].dropna().astype(str).unique()
                 gene_level_chr = gene_level[
                     (gene_level["chr"] == chr_name)
                     & (gene_level["gene.symbol"].astype(str).isin(genes_in_view))
@@ -1222,7 +1226,7 @@ def plot_chromosomes(
                     xs,
                     xe,
                     colors=seg_color,
-                    linewidth=1.8,   # thicker segments
+                    linewidth=1.8,  # thicker segments
                     alpha=0.9,
                 )
 
@@ -1250,10 +1254,7 @@ def plot_chromosomes(
             # Only keep PON-based CNV calls (AMPLIFICATION / DELETION)
             if "pon_chunk_call" in chunks_span.columns:
                 chunks_span["pon_chunk_call_norm"] = (
-                    chunks_span["pon_chunk_call"]
-                    .astype(str)
-                    .str.strip()
-                    .str.upper()
+                    chunks_span["pon_chunk_call"].astype(str).str.strip().str.upper()
                 )
                 chunks_span = chunks_span[
                     chunks_span["pon_chunk_call_norm"].isin(
@@ -1746,7 +1747,6 @@ def classify_cnv_from_total_cn_sex_aware(
 # =============================================================================
 # Final gene table builder (CNR base + optional PureCN + PON)
 # =============================================================================
-
 def build_gene_segment_table(
     cnr_path: str | Path,
     cns_path: str | Path,
@@ -1783,8 +1783,8 @@ def build_gene_segment_table(
             return pd.DataFrame(), False, False
 
         cnr_chr_col = "chromosome" if "chromosome" in cnr.columns else "chr"
-        cnr[cnr_chr_col] = cnr[cnr_chr_col].astype(str).str.replace(
-            "^chr", "", regex=True
+        cnr[cnr_chr_col] = (
+            cnr[cnr_chr_col].astype(str).str.replace("^chr", "", regex=True)
         )
 
         required = {"start", "end", "log2", "gene"}
@@ -1820,8 +1820,8 @@ def build_gene_segment_table(
             return cnr
 
         pon_chr_col = "chromosome" if "chromosome" in pon.columns else "chr"
-        pon[pon_chr_col] = pon[pon_chr_col].astype(str).str.replace(
-            "^chr", "", regex=True
+        pon[pon_chr_col] = (
+            pon[pon_chr_col].astype(str).str.replace("^chr", "", regex=True)
         )
 
         required_pon_cols = {"start", "end", "log2", "spread"}
@@ -1852,8 +1852,8 @@ def build_gene_segment_table(
             return cns
 
         cns_chr_col = "chromosome" if "chromosome" in cns.columns else "chr"
-        cns[cns_chr_col] = cns[cns_chr_col].astype(str).str.replace(
-            "^chr", "", regex=True
+        cns[cns_chr_col] = (
+            cns[cns_chr_col].astype(str).str.replace("^chr", "", regex=True)
         )
 
         if "start" not in cns.columns or "end" not in cns.columns:
@@ -2026,7 +2026,7 @@ def build_gene_segment_table(
         ]
 
     def _collapse_to_gene_segment(
-            bins: pd.DataFrame, has_depth: bool, has_weight: bool
+        bins: pd.DataFrame, has_depth: bool, has_weight: bool
     ) -> pd.DataFrame:
         # Aggregate per (chr, gene.symbol, segment_id)
         # region_start = min(start)
@@ -2096,8 +2096,8 @@ def build_gene_segment_table(
             return grouped
 
         loh_chr_col = "chr" if "chr" in loh.columns else "chromosome"
-        loh[loh_chr_col] = loh[loh_chr_col].astype(str).str.replace(
-            "^chr", "", regex=True
+        loh[loh_chr_col] = (
+            loh[loh_chr_col].astype(str).str.replace("^chr", "", regex=True)
         )
         loh = loh.rename(columns={loh_chr_col: "chr"})
 
@@ -2492,9 +2492,9 @@ def build_gene_chunk_table(
     # Explode multi-gene bins
     cnr["gene.symbol"] = (
         cnr["gene"]
-            .astype(str)
-            .str.split(",")
-            .apply(lambda lst: [g.strip() for g in lst if g.strip()])
+        .astype(str)
+        .str.split(",")
+        .apply(lambda lst: [g.strip() for g in lst if g.strip()])
     )
     cnr = cnr.explode("gene.symbol")
 
@@ -2542,11 +2542,11 @@ def build_gene_chunk_table(
         return pd.DataFrame()
 
     # -------------------- 2. Within-gene chunking (PON-based only) -------------------- #
-    MIN_GENE_TARGETS = 8    # only genes with at least this many bins
-    MIN_RUN_BINS = 4        # min consecutive bins in a run
-    Z_BIN_THRESH = 1.5      # per-bin |z| threshold to be "active"
-    Z_RUN_THRESH = 3.0      # per-run z threshold to keep a chunk
-    SMOOTH_WINDOW = 3       # rolling median smoothing window
+    MIN_GENE_TARGETS = 8  # only genes with at least this many bins
+    MIN_RUN_BINS = 4  # min consecutive bins in a run
+    Z_BIN_THRESH = 1.5  # per-bin |z| threshold to be "active"
+    Z_RUN_THRESH = 3.0  # per-run z threshold to keep a chunk
+    SMOOTH_WINDOW = 3  # rolling median smoothing window
 
     bins["chunk_id"] = "no_chunk"
     next_gene_chunk_id = 0
@@ -2580,8 +2580,8 @@ def build_gene_chunk_table(
                 center=True,
                 min_periods=1,
             )
-                .median()
-                .values
+            .median()
+            .values
         )
 
         current_run: list[int] = []
@@ -2657,10 +2657,10 @@ def build_gene_chunk_table(
         _assign_gene_chunks(df_gene)
 
     # -------------------- 2b. Post-hoc cleanup of tiny bridge segments -------------------- #
-    MAX_BRIDGE_BINS = 4   # size of "island" allowed between similar flanks
-    BRIDGE_DELTA = 0.12   # max |mean_eff(A) - mean_eff(C)| to consider them similar
-    SMALL_SEG_N = 3       # max bins to consider a run "small"
-    MERGE_DELTA = 0.10    # adjacency merge threshold on |mean_eff|
+    MAX_BRIDGE_BINS = 4  # size of "island" allowed between similar flanks
+    BRIDGE_DELTA = 0.12  # max |mean_eff(A) - mean_eff(C)| to consider them similar
+    SMALL_SEG_N = 3  # max bins to consider a run "small"
+    MERGE_DELTA = 0.10  # adjacency merge threshold on |mean_eff|
 
     def _cleanup_gene_chunks(df_gene: pd.DataFrame) -> None:
         nonlocal bins
@@ -2730,9 +2730,7 @@ def build_gene_chunk_table(
                     merged_indices = rA["indices"] + rB["indices"] + rC["indices"]
                     merged_eff = eff_all[merged_positions]
                     merged_mean = (
-                        float(np.nanmean(merged_eff))
-                        if len(merged_eff) > 0
-                        else np.nan
+                        float(np.nanmean(merged_eff)) if len(merged_eff) > 0 else np.nan
                     )
                     new_runs.append(
                         {
@@ -2760,9 +2758,7 @@ def build_gene_chunk_table(
                     merged_indices = last["indices"] + r["indices"]
                     merged_eff = eff_all[merged_positions]
                     merged_mean = (
-                        float(np.nanmean(merged_eff))
-                        if len(merged_eff) > 0
-                        else np.nan
+                        float(np.nanmean(merged_eff)) if len(merged_eff) > 0 else np.nan
                     )
                     new_runs[-1] = {
                         "positions": merged_positions,
@@ -2800,9 +2796,9 @@ def build_gene_chunk_table(
     agg_dict["pon_log2"] = ["mean"]
     agg_dict["pon_spread"] = ["mean"]
 
-    chunked = bins.groupby(
-        ["chr", "gene.symbol", "chunk_id"], as_index=False
-    ).agg(agg_dict)
+    chunked = bins.groupby(["chr", "gene.symbol", "chunk_id"], as_index=False).agg(
+        agg_dict
+    )
 
     # Flatten MultiIndex columns
     chunked.columns = [
@@ -3013,9 +3009,7 @@ def build_gene_chunk_table(
         "purecn_cnv_call",
     ]
     cols_order = [c for c in cols_order if c in chunked.columns]
-    chunked = chunked[
-        cols_order + [c for c in chunked.columns if c not in cols_order]
-    ]
+    chunked = chunked[cols_order + [c for c in chunked.columns if c not in cols_order]]
 
     def _chr_key(c):
         try:
