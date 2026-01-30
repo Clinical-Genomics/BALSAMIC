@@ -4,6 +4,8 @@
 Added:
 ^^^^^^
 * add AT_DROPOUT to all panel analyses QC deliverables https://github.com/Clinical-Genomics/BALSAMIC/pull/1646
+* gnomad af 5 baf bedgraph for viewing in IGV https://github.com/Clinical-Genomics/BALSAMIC/pull/1649
+* denoised gatk readcounts log2 bedgraph for viewing in IGV https://github.com/Clinical-Genomics/BALSAMIC/pull/1649
 
 Changed:
 ^^^^^^^^
