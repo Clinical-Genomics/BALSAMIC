@@ -22,6 +22,112 @@ from BALSAMIC.constants.analysis import Gender
 # =============================================================================
 
 
+def _strip_chr_prefix(series: pd.Series) -> pd.Series:
+    """Normalize chromosome values by stripping a leading 'chr' prefix."""
+    return series.astype(str).str.replace("^chr", "", regex=True)
+
+
+def _chrom_sort_key(chrom: str) -> tuple[int, int | str]:
+    """
+    Stable sort key for chromosomes.
+
+    Numeric autosomes sort first, then X, Y, then anything else.
+    """
+    try:
+        return (0, int(chrom))
+    except ValueError:
+        if chrom in ("X", "x"):
+            return (1, 23)
+        if chrom in ("Y", "y"):
+            return (1, 24)
+        return (2, chrom)
+
+
+def _stable_sort_by_chr_interval(
+    df: pd.DataFrame,
+    chr_col: str,
+    start_col: str,
+    end_col: str,
+    *,
+    tmp_col: str = "chr_sort",
+) -> pd.DataFrame:
+    """Stable-sort a dataframe by (chr, start, end) using `_chrom_sort_key`."""
+    df = df.copy()
+    df[tmp_col] = df[chr_col].map(_chrom_sort_key)
+    df = df.sort_values(by=[tmp_col, start_col, end_col], kind="stable").drop(
+        columns=[tmp_col]
+    )
+    return df
+
+
+def _reorder_columns(df: pd.DataFrame, preferred: list[str]) -> pd.DataFrame:
+    """Move preferred columns first (when present), preserving the rest."""
+    preferred_present = [c for c in preferred if c in df.columns]
+    return df[preferred_present + [c for c in df.columns if c not in preferred_present]]
+
+
+def _flatten_agg_columns(df: pd.DataFrame) -> pd.DataFrame:
+    """Flatten MultiIndex columns produced by pandas .agg()."""
+    df = df.copy()
+    df.columns = [
+        "_".join(col).strip("_") if isinstance(col, tuple) else col for col in df.columns
+    ]
+    return df
+
+
+def _pon_abs_z(effect: float, spread: float, n_targets: float, *, min_n: int) -> float:
+    """Compute abs(effect) / (spread / sqrt(n)) with defensive checks."""
+    if pd.isna(effect) or pd.isna(spread) or spread <= 0:
+        return np.nan
+    if pd.isna(n_targets) or n_targets < min_n:
+        return np.nan
+    sigma_eff = spread / np.sqrt(float(n_targets))
+    if sigma_eff <= 0:
+        return np.nan
+    return abs(effect) / sigma_eff
+
+
+def _pon_direction(effect: float) -> str:
+    """Map effect sign to 'gain'/'loss'/'neutral' (or '' when missing)."""
+    if pd.isna(effect):
+        return ""
+    if effect > 0:
+        return "gain"
+    if effect < 0:
+        return "loss"
+    return "neutral"
+
+
+def _pon_significance(z: float, *, noise_lt: float, borderline_lt: float) -> str:
+    """Map z-score to 'noise'/'borderline'/'significant' (or '' when missing)."""
+    if pd.isna(z):
+        return ""
+    if z < noise_lt:
+        return "noise"
+    if z < borderline_lt:
+        return "borderline"
+    return "significant"
+
+
+def _pon_cnv_call_from_log2(
+    *,
+    is_significant: bool,
+    mean_log2: float,
+    gain_gt: float,
+    loss_lt: float,
+    non_significant_value: str,
+    neutral_value: str,
+) -> str:
+    """Return AMPLIFICATION/DELETION/neutral/nonsignificant depending on thresholds."""
+    if not is_significant or pd.isna(mean_log2):
+        return non_significant_value
+    if mean_log2 > gain_gt:
+        return "AMPLIFICATION"
+    if mean_log2 < loss_lt:
+        return "DELETION"
+    return neutral_value
+
+
 def pdf_first_page_to_png(pdf_path: str, png_path: str, dpi: int = 300) -> None:
     """
     Render the first page of a PDF to a PNG image using PyMuPDF.
@@ -96,8 +202,7 @@ def normalize_chr_column(
         raise ValueError("Could not find a chromosome column in dataframe.")
 
     col = candidate_cols[0]
-    df[col] = df[col].astype(str)
-    df[col] = df[col].str.replace("^chr", "", regex=True)
+    df[col] = _strip_chr_prefix(df[col])
 
     return df, col
 
@@ -175,7 +280,7 @@ def compute_dlr_spread_from_cnr(
         return float("nan")
 
     chr_col = "chromosome" if "chromosome" in cnr.columns else "chr"
-    cnr[chr_col] = cnr[chr_col].astype(str).str.replace("^chr", "", regex=True)
+    cnr[chr_col] = _strip_chr_prefix(cnr[chr_col])
 
     # mark Target / Antitarget
     if "gene" in cnr.columns:
@@ -196,17 +301,7 @@ def compute_dlr_spread_from_cnr(
     if cnr.empty:
         return float("nan")
 
-    def _chr_key(c: str):
-        try:
-            return (0, int(c))
-        except ValueError:
-            if c.upper() == "X":
-                return (1, 23)
-            if c.upper() == "Y":
-                return (1, 24)
-            return (2, c)
-
-    cnr["chr_sort"] = cnr[chr_col].map(_chr_key)
+    cnr["chr_sort"] = cnr[chr_col].map(_chrom_sort_key)
     cnr = cnr.sort_values(["chr_sort", "start"]).reset_index(drop=True)
     log2_vals = cnr["log2"].to_numpy()
 
@@ -1957,59 +2052,37 @@ def build_gene_segment_table(
             gene_agg["gene_mean_log2"] - gene_agg["pon_gene_mean_log2"]
         )
 
-        def _gene_pon_z(row: pd.Series) -> float:
-            eff = row["pon_gene_effect"]
-            sigma = row["pon_gene_mean_spread"]
-            n = row["gene_n_targets"]
-            if pd.isna(eff) or pd.isna(sigma) or sigma <= 0:
-                return np.nan
-            if pd.isna(n) or n < MIN_N_FOR_PON:
-                return np.nan
-            sigma_eff = sigma / np.sqrt(float(n))
-            if sigma_eff <= 0:
-                return np.nan
-            return abs(eff) / sigma_eff
-
-        gene_agg["pon_gene_z"] = gene_agg.apply(_gene_pon_z, axis=1)
-
-        def _gene_pon_direction(eff: float) -> str:
-            if pd.isna(eff):
-                return ""
-            if eff > 0:
-                return "gain"
-            if eff < 0:
-                return "loss"
-            return "neutral"
-
-        gene_agg["pon_gene_direction"] = gene_agg["pon_gene_effect"].apply(
-            _gene_pon_direction
+        gene_agg["pon_gene_z"] = gene_agg.apply(
+            lambda r: _pon_abs_z(
+                r["pon_gene_effect"],
+                r["pon_gene_mean_spread"],
+                r["gene_n_targets"],
+                min_n=MIN_N_FOR_PON,
+            ),
+            axis=1,
         )
 
-        def _gene_pon_call(z: float) -> str:
-            if pd.isna(z):
-                return ""
-            if z < 1.5:
-                return "noise"
-            if z < 3.0:
-                return "borderline"
-            return "significant"
+        gene_agg["pon_gene_direction"] = gene_agg["pon_gene_effect"].apply(
+            _pon_direction
+        )
 
-        gene_agg["pon_gene_call"] = gene_agg["pon_gene_z"].apply(_gene_pon_call)
+        # gene-level z-score thresholds
+        gene_agg["pon_gene_call"] = gene_agg["pon_gene_z"].apply(
+            lambda z: _pon_significance(z, noise_lt=1.5, borderline_lt=3.0)
+        )
 
-        def _gene_pon_cnv_call(row: pd.Series) -> str:
-            call = str(row.get("pon_gene_call", "")).strip().lower()
-            if call != "significant":
-                return ""
-            ml = row.get("gene_mean_log2", np.nan)
-            if pd.isna(ml):
-                return ""
-            if ml > 0.08:
-                return "AMPLIFICATION"
-            if ml < -0.08:
-                return "DELETION"
-            return ""
-
-        gene_agg["pon_gene_cnv_call"] = gene_agg.apply(_gene_pon_cnv_call, axis=1)
+        gene_agg["pon_gene_cnv_call"] = gene_agg.apply(
+            lambda r: _pon_cnv_call_from_log2(
+                is_significant=str(r.get("pon_gene_call", "")).strip().lower()
+                == "significant",
+                mean_log2=r.get("gene_mean_log2", np.nan),
+                gain_gt=0.08,
+                loss_lt=-0.08,
+                non_significant_value="",
+                neutral_value="",
+            ),
+            axis=1,
+        )
 
         return gene_agg[
             [
@@ -2057,11 +2130,7 @@ def build_gene_segment_table(
             ["chr", "gene.symbol", "segment_id"], as_index=False
         ).agg(agg_dict)
 
-        # Flatten MultiIndex columns
-        grouped.columns = [
-            "_".join(col).strip("_") if isinstance(col, tuple) else col
-            for col in grouped.columns
-        ]
+        grouped = _flatten_agg_columns(grouped)
 
         grouped = grouped.rename(
             columns={
@@ -2333,27 +2402,8 @@ def build_gene_segment_table(
             "pon_gene_call",
             "pon_gene_cnv_call",
         ]
-        cols_order = [c for c in cols_order if c in grouped.columns]
-        grouped = grouped[
-            cols_order + [c for c in grouped.columns if c not in cols_order]
-        ]
-
-        def _chr_key(c):
-            try:
-                return (0, int(c))
-            except ValueError:
-                if c in ("X", "x"):
-                    return (1, 23)
-                if c in ("Y", "y"):
-                    return (1, 24)
-                return (2, c)
-
-        grouped["chr_sort"] = grouped["chr"].map(_chr_key)
-        grouped = grouped.sort_values(
-            by=["chr_sort", "region_start", "region_end"],
-            kind="stable",
-        ).drop(columns=["chr_sort"])
-        return grouped
+        grouped = _reorder_columns(grouped, cols_order)
+        return _stable_sort_by_chr_interval(grouped, "chr", "region_start", "region_end")
 
     # ------------------------- main flow ------------------------- #
 
@@ -2476,7 +2526,7 @@ def build_gene_chunk_table(
         return pd.DataFrame()
 
     cnr_chr_col = "chromosome" if "chromosome" in cnr.columns else "chr"
-    cnr[cnr_chr_col] = cnr[cnr_chr_col].astype(str).str.replace("^chr", "", regex=True)
+    cnr[cnr_chr_col] = _strip_chr_prefix(cnr[cnr_chr_col])
 
     if not {"start", "end", "log2", "gene"}.issubset(cnr.columns):
         missing = {"start", "end", "log2", "gene"} - set(cnr.columns)
@@ -2508,7 +2558,7 @@ def build_gene_chunk_table(
         return pd.DataFrame()
 
     pon_chr_col = "chromosome" if "chromosome" in pon.columns else "chr"
-    pon[pon_chr_col] = pon[pon_chr_col].astype(str).str.replace("^chr", "", regex=True)
+    pon[pon_chr_col] = _strip_chr_prefix(pon[pon_chr_col])
 
     if not {"start", "end", "log2", "spread"}.issubset(pon.columns):
         missing = {"start", "end", "log2", "spread"} - set(pon.columns)
@@ -2800,11 +2850,7 @@ def build_gene_chunk_table(
         agg_dict
     )
 
-    # Flatten MultiIndex columns
-    chunked.columns = [
-        "_".join(col).strip("_") if isinstance(col, tuple) else col
-        for col in chunked.columns
-    ]
+    chunked = _flatten_agg_columns(chunked)
 
     # Rename to per-chunk fields
     chunked = chunked.rename(
@@ -2829,67 +2875,36 @@ def build_gene_chunk_table(
     min_n_for_pon = 2
 
     chunked["pon_chunk_effect"] = chunked["mean_log2"] - chunked["pon_mean_log2"]
+    chunked["pon_chunk_z"] = chunked.apply(
+        lambda r: _pon_abs_z(
+            r["pon_chunk_effect"],
+            r["pon_mean_spread"],
+            r.get("n_targets", r.get("n.targets", np.nan)),
+            min_n=min_n_for_pon,
+        ),
+        axis=1,
+    )
 
-    def _compute_pon_z(row: pd.Series) -> float:
-        eff = row["pon_chunk_effect"]
-        sigma = row["pon_mean_spread"]
-        n = row.get("n_targets", row.get("n.targets", np.nan))
-
-        if pd.isna(eff) or pd.isna(sigma) or sigma <= 0:
-            return np.nan
-        if pd.isna(n) or n < min_n_for_pon:
-            return np.nan
-
-        sigma_eff = sigma / np.sqrt(float(n))
-        if sigma_eff <= 0:
-            return np.nan
-
-        return abs(eff) / sigma_eff
-
-    chunked["pon_chunk_z"] = chunked.apply(_compute_pon_z, axis=1)
-
-    def _pon_direction(row: pd.Series) -> str:
-        eff = row["pon_chunk_effect"]
-        if pd.isna(eff):
-            return ""
-        if eff > 0:
-            return "gain"
-        if eff < 0:
-            return "loss"
-        return "neutral"
-
-    chunked["pon_chunk_direction"] = chunked.apply(_pon_direction, axis=1)
+    chunked["pon_chunk_direction"] = chunked["pon_chunk_effect"].apply(_pon_direction)
 
     # significance: noise / borderline / significant
-    def _pon_significance(row: pd.Series) -> str:
-        z = row["pon_chunk_z"]
-        if pd.isna(z):
-            return ""
-        if z < 2.0:
-            return "noise"
-        if z < 5.0:
-            return "borderline"
-        return "significant"
-
-    # rename old "call" to significance
-    chunked["pon_chunk_significance"] = chunked.apply(_pon_significance, axis=1)
+    chunked["pon_chunk_significance"] = chunked["pon_chunk_z"].apply(
+        lambda z: _pon_significance(z, noise_lt=2.0, borderline_lt=5.0)
+    )
 
     # CNV call: NEUTRAL / AMPLIFICATION / DELETION
-    def _pon_cnv_call(row: pd.Series) -> str:
-        signif = str(row.get("pon_chunk_significance", "")).strip().lower()
-        ml = row.get("mean_log2", np.nan)
-
-        if signif != "significant" or pd.isna(ml):
-            return "NEUTRAL"
-
-        if ml > 0.07:
-            return "AMPLIFICATION"
-        if ml < -0.07:
-            return "DELETION"
-
-        return "NEUTRAL"
-
-    chunked["pon_chunk_call"] = chunked.apply(_pon_cnv_call, axis=1)
+    chunked["pon_chunk_call"] = chunked.apply(
+        lambda r: _pon_cnv_call_from_log2(
+            is_significant=str(r.get("pon_chunk_significance", "")).strip().lower()
+            == "significant",
+            mean_log2=r.get("mean_log2", np.nan),
+            gain_gt=0.07,
+            loss_lt=-0.07,
+            non_significant_value="NEUTRAL",
+            neutral_value="NEUTRAL",
+        ),
+        axis=1,
+    )
 
     # -------------------- 5. Annotate from gene_seg_df -------------------- #
     if not {"chr", "gene.symbol", "region_start", "region_end"}.issubset(
@@ -2900,7 +2915,7 @@ def build_gene_chunk_table(
         )
 
     gseg = gene_seg_df.copy()
-    gseg["chr"] = gseg["chr"].astype(str).str.replace("^chr", "", regex=True)
+    gseg["chr"] = _strip_chr_prefix(gseg["chr"])
 
     seg_map: dict[tuple[str, str], pd.DataFrame] = {}
     for (ch, g), df_g in gseg.groupby(["chr", "gene.symbol"], sort=False):
@@ -3008,23 +3023,8 @@ def build_gene_chunk_table(
         "cnvkit_cnv_call",
         "purecn_cnv_call",
     ]
-    cols_order = [c for c in cols_order if c in chunked.columns]
-    chunked = chunked[cols_order + [c for c in chunked.columns if c not in cols_order]]
-
-    def _chr_key(c):
-        try:
-            return (0, int(c))
-        except ValueError:
-            if c in ("X", "x"):
-                return (1, 23)
-            if c in ("Y", "y"):
-                return (1, 24)
-            return (2, c)
-
-    chunked["chr_sort"] = chunked["chr"].map(_chr_key)
-    chunked = chunked.sort_values(
-        by=["chr_sort", "region_start", "region_end"],
-        kind="stable",
-    ).drop(columns=["chr_sort", "chunk_id", "n_targets"])
+    chunked = _reorder_columns(chunked, cols_order)
+    chunked = _stable_sort_by_chr_interval(chunked, "chr", "region_start", "region_end")
+    chunked = chunked.drop(columns=["chunk_id", "n_targets"])
 
     return chunked
