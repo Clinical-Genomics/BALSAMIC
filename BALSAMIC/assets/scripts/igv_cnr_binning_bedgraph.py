@@ -5,6 +5,7 @@ from typing import TextIO, List, Tuple
 
 import click
 import pandas as pd
+
 def _parse_denoisedcr_row(line: str) -> tuple[str, int, int, float] | None:
     """Parse a denoisedCR-style row into (chrom, start, end, value), or None if invalid."""
     if line.startswith("@") or line.startswith("CONTIG"):
@@ -89,16 +90,16 @@ def bin_denoised_segments(
     show_default=True,
     help="Number of consecutive bins to average together.",
 )
-def cli(infile: TextIO, outfile: TextIO, bin_size: int) -> None:
+def cli(infile: TextIO, outfile: TextIO, bins_per_window: int) -> None:
     """
     Bin a denoisedCR-style TSV into larger bedGraph intervals.
 
     INFILE and OUTFILE can be "-" for stdin/stdout.
     """
-    if bin_size <= 0:
+    if bins_per_window <= 0:
         raise click.ClickException("--bin-size must be a positive integer")
 
-    bin_denoised_segments(infile=infile, outfile=outfile, bin_size=bin_size)
+    bin_denoised_segments(infile=infile, outfile=outfile, bin_size=bins_per_window)
 
 
 if __name__ == "__main__":
