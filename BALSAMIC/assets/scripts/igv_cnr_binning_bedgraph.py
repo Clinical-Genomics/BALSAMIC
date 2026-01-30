@@ -70,6 +70,8 @@ def bin_denoised_segments(
 
     pd.DataFrame(chunks, columns=["chrom", "start", "end", "value"]).to_csv(
         outfile, sep="\t", header=False, index=False
+    )
+
 @click.command(context_settings={"show_default": True})
 @click.argument(
     "infile",
