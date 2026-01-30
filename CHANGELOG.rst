@@ -3,9 +3,11 @@
 
 Added:
 ^^^^^^
+* add AT_DROPOUT to all panel analyses QC deliverables https://github.com/Clinical-Genomics/BALSAMIC/pull/1646
 
 Changed:
 ^^^^^^^^
+* lower average quality filter for WGS TO TNscope calls to 10 https://github.com/Clinical-Genomics/BALSAMIC/pull/1644
 * increased runtime for a couple of small rules https://github.com/Clinical-Genomics/BALSAMIC/pull/1641
 * decreased memory for headjobs to 500mb https://github.com/Clinical-Genomics/BALSAMIC/pull/1641
 * updated tiddit from 3.3.2 to 3.9.3 https://github.com/Clinical-Genomics/BALSAMIC/pull/1647 
