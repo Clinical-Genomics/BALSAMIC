@@ -8,8 +8,6 @@ LABEL about.description="Bioinformatic analysis pipeline for somatic mutations i
 
 ARG CONTAINER_NAME
 
-RUN pip install click 
-
 # Copy enviroment file
 COPY BALSAMIC/containers/${CONTAINER_NAME}/${CONTAINER_NAME}.yaml /tmp/environment.yaml
 
