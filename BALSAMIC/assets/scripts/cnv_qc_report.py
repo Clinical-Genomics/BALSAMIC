@@ -3,7 +3,7 @@ import sys
 import base64
 import json
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Iterable
 
 import click
 import numpy as np
@@ -16,13 +16,40 @@ from cnv_report_utils import (
     load_cancer_gene_set,
     compute_summary_metrics,
     pdf_first_page_to_png,
+    FINAL_FLOAT_COLUMNS,
 )
 from BALSAMIC.constants.analysis import Gender
+
+
+
+def round_float_columns(
+    df: pd.DataFrame,
+    columns: Iterable[str],
+    decimals: int = 3,
+    inplace: bool = False,
+) -> pd.DataFrame:
+    """
+    Round specified numeric columns to a fixed number of decimals if they exist in the dataframe.
+
+    Missing columns are ignored, non-numeric values are safely coerced, and NaNs are preserved.
+    """
+    target = df if inplace else df.copy()
+
+    existing = [c for c in columns if c in target.columns]
+    if not existing:
+        return target
+
+    # Ensure numeric (safe if already numeric, safe if NaN present)
+    target[existing] = target[existing].apply(pd.to_numeric, errors="coerce")
+
+    # Round
+    target[existing] = target[existing].round(decimals)
+
+    return target
 
 # =============================================================================
 # Small helpers to reduce duplication and keep csv_to_html_table readable
 # =============================================================================
-
 
 def _png_to_data_uri(png_path: str | Path | None) -> str | None:
     """Read a PNG file and return a data URI, or None if missing."""
@@ -1153,6 +1180,9 @@ def main(
             and "is_cancer_gene" in chunks_df.columns
         ):
             chunks_df = chunks_df[chunks_df["is_cancer_gene"].fillna(False).astype(bool)]
+
+    genes_df = round_float_columns(genes_df, FINAL_FLOAT_COLUMNS)
+    chunks_df = round_float_columns(chunks_df, FINAL_FLOAT_COLUMNS)
 
     # ----------------------------
     # HTML report

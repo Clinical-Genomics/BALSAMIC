@@ -17,10 +17,26 @@ from pandas.errors import EmptyDataError
 # Local
 from BALSAMIC.constants.analysis import Gender
 
+FINAL_FLOAT_COLUMNS = [
+    "seg_baf",
+    "mean_log2",
+    "min_log2",
+    "max_log2",
+    "mean_weight",
+    "pon_gene_mean_log2",
+    "pon_gene_mean_spread",
+    "pon_gene_effect",
+    "pon_gene_z",
+    "depth_mean",
+    "pon_mean_log2",
+    "pon_mean_spread",
+    "pon_chunk_effect",
+    "pon_chunk_z",
+]
+
 # =============================================================================
 # Generic helpers
 # =============================================================================
-
 
 def _strip_chr_prefix(series: pd.Series) -> pd.Series:
     """Normalize chromosome values by stripping a leading 'chr' prefix."""
@@ -2441,6 +2457,7 @@ def build_gene_segment_table(
 
         return _order_and_sort_columns(genes_df)
 
+
     cns_per_chr: dict[str, pd.DataFrame] = {
         chrom: df_chr.reset_index(drop=True) for chrom, df_chr in cns.groupby("chr")
     }
@@ -2476,6 +2493,7 @@ def build_gene_segment_table(
     genes_df = _attach_gene_pon(genes_df, gene_pon)
 
     genes_df = _order_and_sort_columns(genes_df)
+
     return genes_df
 
 
@@ -2973,7 +2991,7 @@ def build_gene_chunk_table(
 
     chunks_df = chunks_df.apply(_annotate_chunk, axis=1)
 
-    # -------------------- 6. Drop gene-level PON columns you don't want -------------------- #
+    # -------------------- 6. Drop gene-level PON columns  -------------------- #
     drop_gene_level_cols = [
         "pon_gene_mean_log2",
         "pon_gene_mean_spread",
