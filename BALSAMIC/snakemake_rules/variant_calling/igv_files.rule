@@ -28,6 +28,7 @@ rule cnr_binning_igv_bedgraphs:
         igv_cnr_script = get_script_path("igv_cnr_binning_bedgraph.py"),
         housekeeper_id = {"id": "{sample}","tags": "cnv"},
         bins_per_window = params.igv_cnr_binning.bins_per_window,
+        sample_id= "{sample}",
     message:
         "Converting the noise corrected collect read counts to bedgraph for viewing in IGV, and binning {params.bins_per_window} adjacent regions, for sample {params.sample_id}"
     shell:
