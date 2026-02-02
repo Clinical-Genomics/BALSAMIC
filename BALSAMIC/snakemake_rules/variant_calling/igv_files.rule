@@ -14,7 +14,7 @@ rule baf_igv_bedgraphs:
         "Converting the forced DNAscope calls on gnomad positions to bedgraph for viewing in IGV, for sample {params.sample_id}."
     shell:
         """
-python {params.igv_baf_script} {input.gnomad_af5_vcf} {output.gnomad_af5_bedgraph} --track-name {sample_id}_gnomad_af5 ; 
+python {params.igv_baf_script} {input.gnomad_af5_vcf} {output.gnomad_af5_bedgraph} --track-name {params.sample_id}_gnomad_af5 ; 
         """
 
 rule cnr_binning_igv_bedgraphs:
