@@ -1148,8 +1148,8 @@ def main(
     plot_chromosomes(
         cnr_path=cnr,
         vcf_path=vcf,
-        gene_seg_df=genes_df,
-        gene_chunk_df=chunks_df,
+        gdf=genes_df,
+        gchunk=chunks_df,
         outdir=chr_plots_dir,
         case_id=plot_case_id,
         pon_path=pon,
@@ -1161,8 +1161,8 @@ def main(
     plot_chromosomes(
         cnr_path=cnr,
         vcf_path=vcf,
-        gene_seg_df=genes_df,
-        gene_chunk_df=chunks_df,
+        gdf=genes_df,
+        gchunk=chunks_df,
         outdir=chr_plots_dir,
         case_id=plot_case_id,
         pon_path=pon,
