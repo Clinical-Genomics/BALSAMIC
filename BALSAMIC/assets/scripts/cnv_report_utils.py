@@ -708,6 +708,66 @@ def compute_pon_spread_summaries(
     }
 
 
+def compute_gene_cnv_summaries(gene_seg_df: pd.DataFrame) -> dict[str, float]:
+    """
+    Summaries from the gene-chunk table built by build_gene_segment_table.
+
+    Expected columns (if present):
+      - cnvkit_cnv_call, purecn_cnv_call, pon_cnv_call
+      - loh_flag
+      - gene.symbol
+    """
+    if gene_seg_df is None or gene_seg_df.empty:
+        return {
+            "n_genes_cnvkit_cnv": 0,
+            "n_genes_purecn_cnv": 0,
+            "n_genes_pon_cnv": 0,
+            "n_genes_loh": 0,
+        }
+
+    df = gene_seg_df.copy()
+
+    # Gene-level: any chunk of the gene satisfies the condition
+    if "gene.symbol" in df.columns:
+        gene_grp = df.groupby("gene.symbol")
+        genes_cnvkit = int(
+            (
+                gene_grp["cnvkit_cnv_call"].apply(
+                    lambda s: s.astype(str)
+                    .str.upper()
+                    .isin(["DELETION", "AMPLIFICATION"])
+                    .any()
+                )
+            ).sum()
+        )
+        genes_purecn = int(
+            (
+                gene_grp["purecn_cnv_call"].apply(
+                    lambda s: s.astype(str)
+                    .str.upper()
+                    .isin(["DELETION", "AMPLIFICATION"])
+                    .any()
+                )
+            ).sum()
+        )
+        genes_loh = int(
+            (
+                gene_grp["loh_flag"].apply(
+                    lambda s: s.astype(str).str.upper().eq("TRUE").any()
+                )
+            ).sum()
+        )
+    else:
+        genes_cnvkit = genes_purecn = genes_loh = 0
+
+    return {
+        # gene-level
+        "n_genes_cnvkit_cnv": genes_cnvkit,
+        "n_genes_purecn_cnv": genes_purecn,
+        "n_genes_loh": genes_loh,
+    }
+
+
 def compute_summary_metrics(
     cnr_path: str | Path,
     cnn_path: str | Path | None,
