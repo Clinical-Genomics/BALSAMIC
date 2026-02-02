@@ -189,42 +189,6 @@ def _norm_chr_inplace(df: pd.DataFrame, col: str) -> pd.DataFrame:
     out[col] = out[col].astype(str).str.replace("^chr", "", regex=True)
     return out
 
-
-def _normalize_gene_tables(
-    gene_seg_df: pd.DataFrame,
-    chr_order: list[str],
-    gene_chunk_df: pd.DataFrame | None,
-) -> tuple[pd.DataFrame, pd.DataFrame | None, bool]:
-    """
-    Normalize gene-level and optional chunk-level gene tables.
-
-    Ensures:
-      - 'chr' column exists
-      - chromosome prefix 'chr' is removed
-      - only requested chromosomes are retained
-
-    Returns:
-      (gene_seg_df_normalized, gene_chunk_df_normalized_or_None, has_chunk_data_flag)
-    """
-
-    gdf = gene_seg_df.copy()
-    if "chr" not in gdf.columns:
-        raise ValueError("gene_seg_df must contain a 'chr' column.")
-    gdf["chr"] = gdf["chr"].astype(str).str.replace("^chr", "", regex=True)
-    gdf = gdf[gdf["chr"].isin(chr_order)].copy()
-
-    gchunk = None
-    if gene_chunk_df is not None and not gene_chunk_df.empty:
-        gchunk = gene_chunk_df.copy()
-        if "chr" not in gchunk.columns:
-            raise ValueError("gene_chunk_df must contain a 'chr' column.")
-        gchunk["chr"] = gchunk["chr"].astype(str).str.replace("^chr", "", regex=True)
-        gchunk = gchunk[gchunk["chr"].isin(chr_order)].copy()
-
-    has_chunk_data = gchunk is not None and not gchunk.empty
-    return gdf, gchunk, has_chunk_data
-
-
 def _normalize_targets_col(gdf: pd.DataFrame) -> tuple[pd.DataFrame, str | None]:
     """
     Normalize gene target count column naming.
@@ -1123,11 +1087,11 @@ def _output_png_path(outdir: Path, chr_name: str, focus_genes_chr: list[str]) ->
 def plot_chromosomes(
     cnr_path: Path,
     vcf_path: Path,
-    gene_seg_df: pd.DataFrame,
+    gdf: pd.DataFrame,
     outdir: Path,
     case_id: str,
     pon_path: Optional[Path] = None,
-    gene_chunk_df: Optional[pd.DataFrame] = None,
+    gchunk: Optional[pd.DataFrame] = None,
     include_y: bool = False,
     weight_thresh: float = 0.1,
     pct_spread: float = 0.95,
@@ -1157,10 +1121,8 @@ def plot_chromosomes(
 
     chr_order = _as_chr_order(include_y)
 
-    # Normalize gene dfs
-    gdf, gchunk, has_chunk_data = _normalize_gene_tables(
-        gene_seg_df, chr_order, gene_chunk_df
-    )
+    has_chunk_data = gchunk is not None and not gchunk.empty
+
     gdf, targets_col = _normalize_targets_col(gdf)
     gdf = _normalize_is_cancer_gene(gdf)
 
