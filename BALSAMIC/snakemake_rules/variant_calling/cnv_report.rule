@@ -15,7 +15,7 @@ rule create_cnv_html_report:
         Path(benchmark_dir, "cnvkit.targets.tsv").as_posix()
     params:
         cnv_report_script = get_script_path("cnv_qc_report.py"),
-        pon = pon_cnn,
+        pon_cnn = lambda wildcards, pon_cnn=pon_cnn: f"--pon {pon_cnn}" if pon_cnn else "",
         gender = config_model.get_gender,
         cytoband = config_model.analysis.cytoband,
         is_exome = lambda wildcards, is_exome=config_model.panel.exome: f"--is-exome" if is_exome else "",
@@ -28,7 +28,6 @@ python {params.cnv_report_script} \
 --loh-genes {input.loh_genes} \
 --cnr {input.cnr} \
 --cns {input.cns} \
---pon {params.pon} \
 --vcf {input.germline_vcf} \
 --refgene {input.refgene_flat} \
 --cytoband {params.cytoband} \
@@ -39,6 +38,7 @@ python {params.cnv_report_script} \
 --out-prefix {output.cnv_report_html} \
 --cancer-genes {params.cancergenes} \
 --sex {params.gender} \
+{params.pon_cnn} \
 {params.is_exome} \
 {params.cust_case_id}
         """
