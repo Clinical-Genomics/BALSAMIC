@@ -243,7 +243,7 @@ REFERENCE_FILES: Dict[GenomeVersion, Dict[str, dict]] = {
             "gzip": False,
             "file_name": "hg19.simple_repeat.txt.gz",
             "dir_name": "variants",
-        }
+        },
     },
     GenomeVersion.HG38: {
         "reference_genome": {
