@@ -84,7 +84,11 @@ def test_bin_denoised_segments_multichrom_and_skips_invalid():
     outfile.seek(0)
     # Output is TSV with no header, columns: chrom start end value
     df = pd.read_csv(
-        outfile, sep="\t", header=None, names=["chrom", "start", "end", "value"]
+        outfile,
+        sep="\t",
+        header=None,
+        names=["chrom", "start", "end", "value"],
+        dtype={"chrom": "string"},
     )
 
     expected = pd.DataFrame(
@@ -135,7 +139,11 @@ def test_cli_happy_path_writes_output(tmp_path):
     assert res.exit_code == 0, res.output
 
     df = pd.read_csv(
-        out_path, sep="\t", header=None, names=["chrom", "start", "end", "value"]
+        out_path,
+        sep="\t",
+        header=None,
+        names=["chrom", "start", "end", "value"],
+        dtype={"chrom": "string"},
     )
     expected = pd.DataFrame(
         [
