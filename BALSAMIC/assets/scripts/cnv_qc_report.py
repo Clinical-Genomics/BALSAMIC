@@ -1130,7 +1130,7 @@ def main(
     # ----------------------------
     # Create per chunk table
     # ----------------------------
-    chunks_df = build_gene_chunk_table(cnr_path=cnr, gene_seg_df=genes_df, pon_path=pon, refgene_path=refgene,)
+    chunks_df = build_gene_chunk_table(cnr_path=cnr, gene_seg_df=genes_df, pon_path=pon, refgene_path=refgene)
 
     # --- 1) PureCN summary (from purity_csv) ---
     purecn_summary_df = _read_purecn_summary(purity_csv)

@@ -1541,8 +1541,7 @@ def build_gene_chunk_table(
         chunks_df = _add_exons_hit_column(
             chunks_df,
             exon_map,
-            # default uses region_start/region_end already
-            out_col="exons_hit",
+            out_col="exons_overlapping_chunk",
         )
     else:
         if "exons_hit" not in chunks_df.columns:
@@ -1640,6 +1639,7 @@ def build_gene_chunk_table(
         "loh_flag",
         "is_cancer_gene",
         "exons_hit",
+        "exons_overlapping_chunk",
         "pon_mean_log2",
         "pon_mean_spread",
         "pon_chunk_effect",
