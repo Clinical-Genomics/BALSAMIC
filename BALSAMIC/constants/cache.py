@@ -69,6 +69,13 @@ REFERENCE_FILES: Dict[GenomeVersion, Dict[str, dict]] = {
             "file_name": "human_g1k_v37.fasta",
             "dir_name": "genome",
         },
+        "cytoband_coordinates_file": {
+            "url": "https://hgdownload.cse.ucsc.edu/goldenpath/hg19/database/cytoBand.txt.gz",
+            "file_type": FileType.TSV,
+            "gzip": True,
+            "file_name": "cytoBand.txt.gz",
+            "dir_name": "variants",
+        },
         "dbsnp": {
             "url": "gs://gatk-legacy-bundles/b37/dbsnp_138.b37.vcf.gz",
             "file_type": FileType.VCF,
@@ -145,13 +152,6 @@ REFERENCE_FILES: Dict[GenomeVersion, Dict[str, dict]] = {
             "gzip": True,
             "file_name": "refGene.txt",
             "dir_name": "genome",
-        },
-        "cytoband_coordinates_file": {
-            "url": "https://hgdownload.cse.ucsc.edu/goldenpath/hg19/database/cytoBand.txt.gz",
-            "file_type": FileType.TSV,
-            "gzip": True,
-            "file_name": "cytoBand.txt.gz",
-            "dir_name": "variants",
         },
         "refgene_sql": {
             "url": "https://hgdownload.cse.ucsc.edu/goldenPath/hg19/database/refGene.sql",
