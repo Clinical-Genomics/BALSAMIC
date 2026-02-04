@@ -424,7 +424,6 @@ def classify_cnv_from_total_cn_sex_aware(
 
 def load_refgene_exons(
     refgene_path: str | Path,
-    transcript_selection: str = "longest_tx",
 ) -> Dict[Tuple[str, str], dict]:
     cols = [
         "gene_symbol",
@@ -448,12 +447,9 @@ def load_refgene_exons(
     exon_map: Dict[Tuple[str, str], dict] = {}
 
     for (chrom, gene), sub in rg.groupby(["chrom", "gene_symbol"], sort=False):
-        if transcript_selection == "longest_tx":
-            sub = sub.copy()
-            sub["tx_len"] = sub["txEnd"] - sub["txStart"]
-            best = sub.loc[sub["tx_len"].idxmax()]
-        else:
-            best = sub.iloc[0]
+        sub = sub.copy()
+        sub["tx_len"] = sub["txEnd"] - sub["txStart"]
+        best = sub.loc[sub["tx_len"].idxmax()]
 
         starts = [int(x) for x in str(best["exonStarts"]).split(",") if x != ""]
         ends = [int(x) for x in str(best["exonEnds"]).split(",") if x != ""]
@@ -1016,7 +1012,6 @@ def build_gene_segment_table(
     cns_path: str | Path,
     cancer_genes: Optional[Set[str]] = None,
     refgene_path: str | Path | None = None,
-    transcript_selection: str = "longest_tx",
     loh_path: str | Path | None = None,
     cytoband_path: str | Path | None = None,
     sex: Gender = None,
@@ -1197,7 +1192,7 @@ def build_gene_segment_table(
 
     # 10) exon annotations
     if refgene_path is not None and Path(refgene_path).is_file():
-        exon_map = load_refgene_exons(refgene_path, transcript_selection=transcript_selection)
+        exon_map = load_refgene_exons(refgene_path)
 
         def _segment_is_cnv(row: pd.Series) -> bool:
             seg_cn = row.get("seg_cn", np.nan)
@@ -1542,7 +1537,7 @@ def build_gene_chunk_table(
 
     # 6b) Chunk-specific exon overlap
     if refgene_path is not None and Path(refgene_path).is_file():
-        exon_map = load_refgene_exons(refgene_path, transcript_selection=transcript_selection)
+        exon_map = load_refgene_exons(refgene_path)
         chunks_df = _add_exons_hit_column(
             chunks_df,
             exon_map,
