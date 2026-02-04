@@ -17,6 +17,7 @@ from BALSAMIC.commands.options import (
     OPTION_BALSAMIC_CACHE,
     OPTION_CACHE_VERSION,
     OPTION_CADD_ANNOTATIONS,
+    OPTION_CANCER_GENELIST,
     OPTION_CANCER_GERMLINE_SNV_OBSERVATIONS,
     OPTION_CANCER_SOMATIC_SNV_OBSERVATIONS,
     OPTION_CANCER_SOMATIC_SNV_PANEL_OBSERVATIONS,
@@ -58,8 +59,7 @@ from BALSAMIC.constants.paths import (
     SENTIEON_DNASCOPE_MODEL,
     SENTIEON_TNSCOPE_MODEL,
     RESCUE_SNVS,
-    CYTOBAND,
-    CANCERGENES,
+    CYTOBAND
 )
 from BALSAMIC.constants.workflow_params import VCF_DICT
 from BALSAMIC.models.config import ConfigModel
@@ -88,6 +88,7 @@ LOG = logging.getLogger(__name__)
 @OPTION_BALSAMIC_CACHE
 @OPTION_CACHE_VERSION
 @OPTION_CADD_ANNOTATIONS
+@OPTION_CANCER_GENELIST
 @OPTION_CANCER_GERMLINE_SNV_OBSERVATIONS
 @OPTION_CANCER_SOMATIC_SNV_OBSERVATIONS
 @OPTION_CANCER_SOMATIC_SNV_PANEL_OBSERVATIONS
@@ -125,6 +126,7 @@ def case_config(
     balsamic_cache: Path,
     cache_version: str,
     cadd_annotations: Path,
+    cancer_genelist: Path,
     cancer_germline_snv_observations: Path,
     cancer_somatic_snv_observations: Path,
     cancer_somatic_snv_panel_observations: Path,
@@ -265,7 +267,7 @@ def case_config(
             "config_creation_date": datetime.now().strftime("%Y-%m-%d %H:%M"),
             "rescue_snvs": rescue_snvs if rescue_snvs else RESCUE_SNVS.as_posix(),
             "cytoband": CYTOBAND.as_posix(),
-            "cancergenes": CANCERGENES.as_posix(),
+            "cancergenes": cancer_genelist.as_posix(),
         },
         custom_filters={"umi_min_reads": umi_min_reads if umi_min_reads else None},
         reference=references,

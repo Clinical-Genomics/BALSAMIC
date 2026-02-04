@@ -2,7 +2,6 @@ from __future__ import annotations
 
 # Standard library
 import math
-from collections.abc import Collection
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
@@ -431,83 +430,6 @@ def _compute_gene_level_highlights(
     return gene_level
 
 
-def _focus_genes_set(focus_genes: Optional[Collection[str]]) -> set[str] | None:
-    """
-    Normalize focus_genes collection into a string set.
-
-    Returns None if focus_genes is None.
-    """
-
-    if focus_genes is None:
-        return None
-    return {str(g) for g in focus_genes}
-
-
-def _restrict_to_focus_window(
-    *,
-    sub_bins: pd.DataFrame,
-    g_chr: pd.DataFrame,
-    focus_genes_set: set[str],
-    focus_padding_bp: int,
-) -> tuple[pd.DataFrame, pd.DataFrame, list[str]]:
-    """
-    Restrict bins and gene rows to genomic window surrounding focus genes.
-
-    Priority coordinate sources:
-      1. region_start / region_end
-      2. seg_start / seg_end
-      3. fallback to CNR bin positions
-
-    Returns:
-      restricted_bins_df
-      restricted_gene_rows_df
-      list_of_focus_genes_present_on_chromosome
-    """
-
-    if g_chr.empty or "gene.symbol" not in g_chr.columns:
-        return pd.DataFrame(), pd.DataFrame(), []
-
-    g_focus_chr = g_chr[g_chr["gene.symbol"].isin(focus_genes_set)].copy()
-    if g_focus_chr.empty:
-        return pd.DataFrame(), pd.DataFrame(), []
-
-    focus_genes_chr = sorted(set(g_focus_chr["gene.symbol"].astype(str).tolist()))
-
-    # choose coordinate source
-    if {"region_start", "region_end"}.issubset(g_focus_chr.columns):
-        start_min = g_focus_chr["region_start"].min()
-        end_max = g_focus_chr["region_end"].max()
-    elif {"seg_start", "seg_end"}.issubset(g_focus_chr.columns):
-        start_min = g_focus_chr["seg_start"].min()
-        end_max = g_focus_chr["seg_end"].max()
-    else:
-        bins_focus = sub_bins[sub_bins["gene"].isin(focus_genes_chr)]
-        if bins_focus.empty:
-            return pd.DataFrame(), pd.DataFrame(), []
-        start_min = bins_focus["start"].min()
-        end_max = bins_focus["end"].max()
-
-    start_min = max(0, int(start_min) - int(focus_padding_bp))
-    end_max = int(end_max) + int(focus_padding_bp)
-
-    sub_bins = sub_bins[
-        (sub_bins["end"] >= start_min) & (sub_bins["start"] <= end_max)
-    ].copy()
-    if sub_bins.empty:
-        return pd.DataFrame(), pd.DataFrame(), []
-
-    if {"region_start", "region_end"}.issubset(g_chr.columns):
-        g_chr = g_chr[
-            (g_chr["region_end"] >= start_min) & (g_chr["region_start"] <= end_max)
-        ].copy()
-    elif {"seg_start", "seg_end"}.issubset(g_chr.columns):
-        g_chr = g_chr[
-            (g_chr["seg_end"] >= start_min) & (g_chr["seg_start"] <= end_max)
-        ].copy()
-
-    return sub_bins, g_chr, focus_genes_chr
-
-
 def _compute_variable_x(
     sub: pd.DataFrame,
     highlighted_genes: np.ndarray,
@@ -541,44 +463,6 @@ def _compute_variable_x(
     out["bin_width"] = out.apply(_bin_width, axis=1)
     out["x_coord"] = out["bin_width"].cumsum() - out["bin_width"] / 2
     return out
-
-
-def _trim_pseudo_position_for_focus(
-    sub: pd.DataFrame,
-    focus_genes_chr: list[str],
-    pseudo_pad: float,
-) -> pd.DataFrame:
-    """
-    Restrict pseudo-position domain around focus genes.
-
-    If multiple focus genes:
-      Keep bins inside bounding window ± pseudo_pad.
-
-    If single focus gene:
-      Keep bins within pseudo distance threshold.
-
-    Returns trimmed dataframe.
-    """
-
-    if not focus_genes_chr:
-        return sub
-
-    focus_bins = sub[sub["gene"].isin(focus_genes_chr)]
-    if focus_bins.empty:
-        return sub
-
-    all_x = sub["x_coord"].to_numpy()
-    if len(focus_genes_chr) >= 2:
-        x_min = float(focus_bins["x_coord"].min()) - pseudo_pad
-        x_max = float(focus_bins["x_coord"].max()) + pseudo_pad
-        mask = (all_x >= x_min) & (all_x <= x_max)
-    else:
-        focus_x = focus_bins["x_coord"].to_numpy()
-        dist = np.min(np.abs(all_x[:, None] - focus_x[None, :]), axis=1)
-        mask = dist <= pseudo_pad
-
-    return sub.loc[mask].copy()
-
 
 def _add_smoothing(sub: pd.DataFrame, use_pon: bool, window: int) -> pd.DataFrame:
     """
@@ -1066,19 +950,6 @@ def _plot_baf_panel(ax, baf_chr: pd.DataFrame):
     ax.set_ylim(0, 1)
     ax.set_ylabel("BAF")
 
-
-def _output_png_path(outdir: Path, chr_name: str, focus_genes_chr: list[str]) -> Path:
-    """
-    Construct output PNG path for chromosome plot.
-
-    Includes focus gene tag in filename if focus genes are active.
-    """
-    if focus_genes_chr:
-        tag = "genes_" + "_".join(focus_genes_chr)
-        return outdir / f"cnv_chr{chr_name}_{tag}_segments.png"
-    return outdir / f"cnv_chr{chr_name}_segments.png"
-
-
 # =============================================================================
 # Main plotting function (now much thinner)
 # =============================================================================
@@ -1101,8 +972,6 @@ def plot_chromosomes(
     neutral_target_factor: float = 0.3,
     highlight_only_cancer: bool = False,
     y_abs_max: float = 3.0,
-    focus_genes: Optional[Collection[str]] = None,
-    focus_padding_bp: int = 0,
 ) -> None:
     """
     Create one PNG per chromosome with:
@@ -1116,8 +985,7 @@ def plot_chromosomes(
     outdir.mkdir(parents=True, exist_ok=True)
 
     MIN_GENE_TARGETS = 3
-    MIN_GENE_TARGETS_CANCER = 5
-    PSEUDO_PAD = 50.0
+    MIN_GENE_TARGETS_CANCER = 3
 
     chr_order = _as_chr_order(include_y)
 
@@ -1155,7 +1023,6 @@ def plot_chromosomes(
         min_gene_targets_cancer=MIN_GENE_TARGETS_CANCER,
     )
 
-    focus_set = _focus_genes_set(focus_genes)
     stable_color = _stable_gene_color_fn()
 
     y_clip = float(y_abs_max)
@@ -1178,17 +1045,6 @@ def plot_chromosomes(
             if (gchunk is not None and not gchunk.empty)
             else pd.DataFrame()
         )
-
-        focus_genes_chr: list[str] = []
-        if focus_set is not None:
-            sub, g_chr, focus_genes_chr = _restrict_to_focus_window(
-                sub_bins=sub,
-                g_chr=g_chr,
-                focus_genes_set=focus_set,
-                focus_padding_bp=focus_padding_bp,
-            )
-            if sub.empty:
-                continue
 
         # Determine highlighted genes
         if gene_level is not None and "gene.symbol" in g_chr.columns:
@@ -1213,11 +1069,6 @@ def plot_chromosomes(
                 else np.array([])
             )
 
-        if focus_genes_chr:
-            highlighted = np.union1d(
-                highlighted, np.array(focus_genes_chr, dtype=object)
-            )
-
         gene_to_color = _make_gene_colors(highlighted)
 
         # Build pseudo-x
@@ -1227,7 +1078,6 @@ def plot_chromosomes(
             anti_factor=anti_factor,
             neutral_target_factor=neutral_target_factor,
         )
-        sub = _trim_pseudo_position_for_focus(sub, focus_genes_chr, PSEUDO_PAD)
         if sub.empty:
             continue
 
@@ -1240,11 +1090,7 @@ def plot_chromosomes(
 
         # BAF chr (restricted to span if focus)
         baf_chr = vcf[vcf["CHROM"] == chr_name].sort_values("POS").copy()
-        if focus_genes_chr and not baf_chr.empty:
-            baf_chr = baf_chr[
-                (baf_chr["POS"] >= sub["start"].min())
-                & (baf_chr["POS"] <= sub["end"].max())
-            ].copy()
+
         if not baf_chr.empty:
             baf_chr["x_coord"] = baf_chr["POS"].apply(lambda p: pos_to_xcoord(int(p)))
 
@@ -1307,8 +1153,7 @@ def plot_chromosomes(
 
         title_suffix = "log2 vs PON spread" if use_pon else "log2 (no PON available)"
         title = f"Chr {chr_name} – {title_suffix}: {case_id}"
-        if focus_genes_chr:
-            title += f"  (genes: {', '.join(focus_genes_chr)})"
+
         ax1.set_title(title + "\n")
         ax1.legend(loc="upper right", fontsize=8)
 
@@ -1332,6 +1177,6 @@ def plot_chromosomes(
         )
 
         plt.tight_layout()
-        out_png = _output_png_path(outdir, chr_name, focus_genes_chr)
+        out_png = outdir / f"cnv_chr{chr_name}_segments.png"
         plt.savefig(out_png, dpi=150)
         plt.close(fig)

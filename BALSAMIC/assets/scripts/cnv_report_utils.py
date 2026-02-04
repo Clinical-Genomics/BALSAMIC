@@ -4,7 +4,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Dict, List, Optional, Set, Tuple, Any, Callable
 
 # Third-party
 import numpy as np
@@ -707,71 +707,9 @@ def compute_pon_spread_summaries(
         "pon_spread_q90_target": float(cnn["spread"].quantile(0.90)),
     }
 
-
-def compute_gene_cnv_summaries(gene_seg_df: pd.DataFrame) -> dict[str, float]:
-    """
-    Summaries from the gene-chunk table built by build_gene_segment_table.
-
-    Expected columns (if present):
-      - cnvkit_cnv_call, purecn_cnv_call, pon_cnv_call
-      - loh_flag
-      - gene.symbol
-    """
-    if gene_seg_df is None or gene_seg_df.empty:
-        return {
-            "n_genes_cnvkit_cnv": 0,
-            "n_genes_purecn_cnv": 0,
-            "n_genes_pon_cnv": 0,
-            "n_genes_loh": 0,
-        }
-
-    df = gene_seg_df.copy()
-
-    # Gene-level: any chunk of the gene satisfies the condition
-    if "gene.symbol" in df.columns:
-        gene_grp = df.groupby("gene.symbol")
-        genes_cnvkit = int(
-            (
-                gene_grp["cnvkit_cnv_call"].apply(
-                    lambda s: s.astype(str)
-                    .str.upper()
-                    .isin(["DELETION", "AMPLIFICATION"])
-                    .any()
-                )
-            ).sum()
-        )
-        genes_purecn = int(
-            (
-                gene_grp["purecn_cnv_call"].apply(
-                    lambda s: s.astype(str)
-                    .str.upper()
-                    .isin(["DELETION", "AMPLIFICATION"])
-                    .any()
-                )
-            ).sum()
-        )
-        genes_loh = int(
-            (
-                gene_grp["loh_flag"].apply(
-                    lambda s: s.astype(str).str.upper().eq("TRUE").any()
-                )
-            ).sum()
-        )
-    else:
-        genes_cnvkit = genes_purecn = genes_loh = 0
-
-    return {
-        # gene-level
-        "n_genes_cnvkit_cnv": genes_cnvkit,
-        "n_genes_purecn_cnv": genes_purecn,
-        "n_genes_loh": genes_loh,
-    }
-
-
 def compute_summary_metrics(
     cnr_path: str | Path,
     cnn_path: str | Path | None,
-    gene_seg_df: pd.DataFrame | None,
 ) -> pd.DataFrame:
     """
     Build a 1-row DataFrame with QC / burden summaries.
@@ -807,10 +745,6 @@ def compute_summary_metrics(
     else:
         metrics["pon_spread_median_target"] = float("nan")
         metrics["pon_spread_q90_target"] = float("nan")
-
-    # 3) Gene-level CNV / LOH summaries
-    gene_stats = compute_gene_cnv_summaries(gene_seg_df)
-    metrics.update(gene_stats)
 
     return pd.DataFrame([metrics])
 
@@ -974,10 +908,108 @@ def _finalize_gene_table_order(genes_df: pd.DataFrame) -> pd.DataFrame:
     return _stable_sort_by_chr_interval(out, "chr", "region_start", "region_end")
 
 
+
 # =============================================================================
-# build_gene_segment_table (refactored)
+# add overlapping exon information
 # =============================================================================
 
+def _compute_exons_hit_for_region(
+    exon_map: dict[tuple[str, str], dict[str, Any]],
+    chrom: str,
+    gene: str,
+    region_start: float | int | None,
+    region_end: float | int | None,
+) -> str:
+    """
+    Return which exons overlap [region_start, region_end) for (chrom, gene).
+
+    Output:
+      - "" if no overlap / no exon model
+      - "whole_gene" if the region fully covers the gene span
+      - otherwise a compact string like "1-3,6,8-10"
+    """
+    if region_start is None or region_end is None:
+        return ""
+    if pd.isna(region_start) or pd.isna(region_end):
+        return ""
+
+    key = (str(chrom), str(gene))
+    info = exon_map.get(key)
+    if not info:
+        return ""
+
+    exons = info.get("exons") or []
+    if not exons:
+        return ""
+
+    # Gene span
+    gene_start = min(s for s, _e in exons)
+    gene_end = max(e for _s, e in exons)
+
+    # Whole-gene coverage
+    if float(region_start) <= float(gene_start) and float(region_end) >= float(gene_end):
+        return "whole_gene"
+
+    # Overlapping exon indices (1-based)
+    rs = float(region_start)
+    re = float(region_end)
+    hit = [i for i, (s, e) in enumerate(exons, start=1) if e > rs and s < re]
+    if not hit:
+        return ""
+
+    # Compress consecutive indices
+    ranges: list[tuple[int, int]] = []
+    a = b = hit[0]
+    for i in hit[1:]:
+        if i == b + 1:
+            b = i
+        else:
+            ranges.append((a, b))
+            a = b = i
+    ranges.append((a, b))
+
+    return ",".join(str(x) if x == y else f"{x}-{y}" for x, y in ranges)
+
+
+def _add_exons_hit_column(
+    df: pd.DataFrame,
+    exon_map: dict[tuple[str, str], dict[str, Any]],
+    *,
+    chr_col: str = "chr",
+    gene_col: str = "gene.symbol",
+    start_col: str = "region_start",
+    end_col: str = "region_end",
+    pick_region: Callable[[pd.Series], tuple[float | int | None, float | int | None]] | None = None,
+    out_col: str = "exons_hit",
+) -> pd.DataFrame:
+    """
+    Add/overwrite df[out_col] by computing exon overlaps.
+
+    If pick_region is provided, it will be called per row and should return
+    (region_start, region_end) to use for overlap (e.g. segment span vs row span).
+    """
+    def _one(row: pd.Series) -> str:
+        if pick_region is None:
+            rs = row.get(start_col)
+            re = row.get(end_col)
+        else:
+            rs, re = pick_region(row)
+
+        return _compute_exons_hit_for_region(
+            exon_map=exon_map,
+            chrom=str(row.get(chr_col, "")),
+            gene=str(row.get(gene_col, "")),
+            region_start=rs,
+            region_end=re,
+        )
+
+    df[out_col] = df.apply(_one, axis=1)
+    return df
+
+
+# =============================================================================
+# build_gene_segment_table
+# =============================================================================
 
 def build_gene_segment_table(
     cnr_path: str | Path,
@@ -1163,11 +1195,9 @@ def build_gene_segment_table(
     # 9) CNV calls
     genes_df = _add_cnv_calls_from_total_cn(genes_df, sex)
 
-    # 10) exon annotations (kept behavior: writes exons_hit)
+    # 10) exon annotations
     if refgene_path is not None and Path(refgene_path).is_file():
-        exon_map = load_refgene_exons(
-            refgene_path, transcript_selection=transcript_selection
-        )
+        exon_map = load_refgene_exons(refgene_path, transcript_selection=transcript_selection)
 
         def _segment_is_cnv(row: pd.Series) -> bool:
             seg_cn = row.get("seg_cn", np.nan)
@@ -1182,59 +1212,22 @@ def build_gene_segment_table(
                     return True
             return False
 
-        def _exons_hit(row: pd.Series) -> str:
-            key = (str(row["chr"]), str(row["gene.symbol"]))
-            info = exon_map.get(key)
-            if info is None:
-                return ""
+        def _pick_region(row: pd.Series) -> tuple[float | int | None, float | int | None]:
+            # Preserve your original behavior:
+            # if CNV -> use seg_start/seg_end when present, else use row region_start/region_end
+            if _segment_is_cnv(row):
+                ss = row.get("seg_start")
+                se = row.get("seg_end")
+                if pd.notna(ss) and pd.notna(se):
+                    return ss, se
+            return row.get("region_start"), row.get("region_end")
 
-            use_segment_span = _segment_is_cnv(row)
-
-            seg_start = row.get("seg_start")
-            seg_end = row.get("seg_end")
-            chunk_start = row.get("region_start")
-            chunk_end = row.get("region_end")
-
-            if use_segment_span and pd.notna(seg_start) and pd.notna(seg_end):
-                region_start = seg_start
-                region_end = seg_end
-            else:
-                region_start = chunk_start
-                region_end = chunk_end
-
-            if pd.isna(region_start) or pd.isna(region_end):
-                return ""
-
-            exons = info["exons"]
-            gene_start = min(s for s, _e in exons)
-            gene_end = max(e for _s, e in exons)
-
-            if region_start <= gene_start and region_end >= gene_end:
-                return "whole_gene"
-
-            hit = [
-                i
-                for i, (s, e) in enumerate(exons, start=1)
-                if e > region_start and s < region_end
-            ]
-            if not hit:
-                return ""
-
-            # compress consecutive indices
-            ranges = []
-            a = b = hit[0]
-            for i in hit[1:]:
-                if i == b + 1:
-                    b = i
-                else:
-                    ranges.append((a, b))
-                    a = b = i
-            ranges.append((a, b))
-
-            parts = [str(x) if x == y else f"{x}-{y}" for x, y in ranges]
-            return ",".join(parts)
-
-        genes_df["exons_hit"] = genes_df.apply(_exons_hit, axis=1)
+        genes_df = _add_exons_hit_column(
+            genes_df,
+            exon_map,
+            pick_region=_pick_region,
+            out_col="exons_hit",
+        )
 
     # 11) attach gene-level PON stats
     if gene_pon is not None and not gene_pon.empty:
@@ -1252,6 +1245,7 @@ def build_gene_chunk_table(
     cnr_path: str | Path,
     gene_seg_df: pd.DataFrame,
     pon_path: str | Path | None = None,
+    refgene_path: str | Path | None = None
 ) -> pd.DataFrame:
     """
     Build per-gene, per-chunk table using CNR + PON (required),
@@ -1545,6 +1539,19 @@ def build_gene_chunk_table(
         (str(ch), str(g)): df.reset_index(drop=True)
         for (ch, g), df in gseg.groupby(["chr", "gene.symbol"], sort=False)
     }
+
+    # 6b) Chunk-specific exon overlap
+    if refgene_path is not None and Path(refgene_path).is_file():
+        exon_map = load_refgene_exons(refgene_path, transcript_selection=transcript_selection)
+        chunks_df = _add_exons_hit_column(
+            chunks_df,
+            exon_map,
+            # default uses region_start/region_end already
+            out_col="exons_hit",
+        )
+    else:
+        if "exons_hit" not in chunks_df.columns:
+            chunks_df["exons_hit"] = ""
 
     protected_cols = {
         "region_start",

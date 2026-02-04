@@ -84,6 +84,13 @@ OPTION_CADD_ANNOTATIONS = click.option(
     help="Path of CADD annotations",
 )
 
+OPTION_CANCER_GENELIST = click.option(
+    "--cancer-genelist",
+    type=click.Path(exists=True, resolve_path=True),
+    required=False,
+    help="Tab-delimited file with cancer-genes downloaded from OncoKB",
+)
+
 OPTION_CANCER_GERMLINE_SNV_OBSERVATIONS = click.option(
     "--cancer-germline-snv-observations",
     type=click.Path(exists=True, resolve_path=True),

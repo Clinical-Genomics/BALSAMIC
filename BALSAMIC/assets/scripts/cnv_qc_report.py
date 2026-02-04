@@ -22,6 +22,16 @@ from cnv_report_plotting import plot_chromosomes
 from BALSAMIC.constants.analysis import Gender
 
 
+CURATED_CANCER_GENES: set[str] = {
+    "TP53",  # <--- requested by cust087
+    "DLEU1",  # <--- requested by cust087
+    "DLEU2",
+    "RB1",  # <--- requested by cust087
+    "KMT2D",
+    "KMT2A",
+    "ATM" # <--- requested by cust087
+}
+
 def round_float_columns(
     df: pd.DataFrame,
     columns: Iterable[str],
@@ -1092,15 +1102,15 @@ def main(
     # ----------------------------
     # Load cancer gene list (optional)
     # ----------------------------
-    cancer_gene_set = None
     if cancer_genes:
-        # You can tune min_occurrence depending on exome/panel if you like
-        min_occ = 3
         cancer_gene_set = load_cancer_gene_set(
             cancer_genes,
-            min_occurrence=min_occ,
+            min_occurrence=3,
             only_annotated=True,
         )
+    else:
+        cancer_gene_set = set()
+    cancer_gene_set |= CURATED_CANCER_GENES
 
     # ----------------------------
     # Create per-gene CNV table
@@ -1121,7 +1131,7 @@ def main(
     # ----------------------------
     # Create per chunk table
     # ----------------------------
-    chunks_df = build_gene_chunk_table(cnr_path=cnr, gene_seg_df=genes_df, pon_path=pon)
+    chunks_df = build_gene_chunk_table(cnr_path=cnr, gene_seg_df=genes_df, pon_path=pon, refgene_path=refgene,)
 
     # --- 1) PureCN summary (from purity_csv) ---
     purecn_summary_df = _read_purecn_summary(purity_csv)
@@ -1130,7 +1140,6 @@ def main(
     qc_summary_df = compute_summary_metrics(
         cnr_path=cnr,
         cnn_path=pon,  # CNVkit .cnn PON, or None
-        gene_seg_df=genes_df,  # from build_gene_segment_table
     )
 
     # ----------------------------
@@ -1156,21 +1165,6 @@ def main(
         include_y=True,
         neutral_target_factor=neutral_target_factor,
         highlight_only_cancer=highlight_only_cancer,
-    )
-
-    plot_chromosomes(
-        cnr_path=cnr,
-        vcf_path=vcf,
-        gdf=genes_df,
-        gchunk=chunks_df,
-        outdir=chr_plots_dir,
-        case_id=plot_case_id,
-        pon_path=pon,
-        include_y=True,
-        neutral_target_factor=neutral_target_factor,
-        highlight_only_cancer=highlight_only_cancer,
-        focus_genes=["RB1", "DLEU1", "TP53", "KMT2D"],
-        focus_padding_bp=100_000,
     )
 
     if is_exome:
