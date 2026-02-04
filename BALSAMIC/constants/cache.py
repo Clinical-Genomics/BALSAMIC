@@ -146,6 +146,13 @@ REFERENCE_FILES: Dict[GenomeVersion, Dict[str, dict]] = {
             "file_name": "refGene.txt",
             "dir_name": "genome",
         },
+        "cytoband_coordinates_file": {
+            "url": "https://hgdownload.cse.ucsc.edu/goldenpath/hg19/database/cytoBand.txt.gz",
+            "file_type": FileType.TSV,
+            "gzip": True,
+            "file_name": "cytoBand.txt.gz",
+            "dir_name": "variants",
+        },
         "refgene_sql": {
             "url": "https://hgdownload.cse.ucsc.edu/goldenPath/hg19/database/refGene.sql",
             "file_type": FileType.TXT,
@@ -235,13 +242,6 @@ REFERENCE_FILES: Dict[GenomeVersion, Dict[str, dict]] = {
             "file_type": FileType.TSV,
             "gzip": False,
             "file_name": "hg19.simple_repeat.txt.gz",
-            "dir_name": "variants",
-        },
-        "cytoband_coordinates_file": {
-            "url": "https://hgdownload.cse.ucsc.edu/goldenpath/hg19/database/cytoBand.txt.gz",
-            "file_type": FileType.TSV,
-            "gzip": True,
-            "file_name": "cytoBand.txt.gz",
             "dir_name": "variants",
         }
     },
