@@ -6,7 +6,7 @@ import sys
 import shlex
 from datetime import datetime
 from pathlib import Path
-from typing import List, Optional, Union
+from typing import List, Optional, Union, Dict
 
 import click
 from pydantic.config import ExtraValues
