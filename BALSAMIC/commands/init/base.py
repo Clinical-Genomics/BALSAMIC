@@ -117,10 +117,12 @@ def initialize(
     for dir_path in [references_dir, log_dir, script_dir]:
         dir_path.mkdir(parents=True, exist_ok=True)
 
-    references: Dict[str, dict] = REFERENCE_FILES[genome_version]
+    references_dict: Dict[str, dict] = REFERENCE_FILES[genome_version]
 
-    union_model = Union[ReferencesHg, ReferencesCanFam]
-    union_model.model_validate(references, extra="forbid")
+    if genome_version == GenomeVersion.CanFam3:
+        references: ReferencesCanFam = ReferencesCanFam.model_validate(references_dict)
+    else:
+        references: ReferencesHg = ReferencesHg.model_validate(references_dict)
 
     cache_config: CacheConfig = CacheConfig(
         analysis={"case_id": f"reference.{genome_version}.{cache_version}"},
