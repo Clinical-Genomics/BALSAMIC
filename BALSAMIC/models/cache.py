@@ -97,6 +97,7 @@ class ReferencesCanFam(References):
 
     model_config = ConfigDict(extra="forbid")
 
+
 class ReferencesHg(References):
     """
     Human reference genome files model.
