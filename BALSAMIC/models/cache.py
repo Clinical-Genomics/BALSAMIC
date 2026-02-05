@@ -123,6 +123,7 @@ class ReferencesHg(References):
         somalier_sites (ReferenceUrl)           : Somalier sites VCF.
         vcf_1kg (ReferenceUrl)                  : 1000 Genome all SNPs.
         wgs_calling_regions (ReferenceUrl)      : WGS calling intervals.
+
     """
 
     access_regions: ReferenceUrl
@@ -146,6 +147,7 @@ class ReferencesHg(References):
     somalier_sites: ReferenceUrl
     vcf_1kg: ReferenceUrl
     wgs_calling_regions: ReferenceUrl
+    cytoband_coordinates_file: ReferenceUrl
 
     model_config = ConfigDict(extra="forbid")
 
