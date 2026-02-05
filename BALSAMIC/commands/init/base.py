@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import List, Optional, Union
 
 import click
+from pydantic.config import ExtraValues
 
 from BALSAMIC.commands.options import (
     OPTION_WORKFLOW_PARTITION,
@@ -117,6 +118,10 @@ def initialize(
         dir_path.mkdir(parents=True, exist_ok=True)
 
     references: Union[ReferencesHg, ReferencesCanFam] = REFERENCE_FILES[genome_version]
+
+    union_model = Union[ReferencesHg, ReferencesCanFam]
+    union_model.model_validate(dict, extra="forbid")
+
     cache_config: CacheConfig = CacheConfig(
         analysis={"case_id": f"reference.{genome_version}.{cache_version}"},
         references_dir=references_dir.as_posix(),
