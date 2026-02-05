@@ -4,6 +4,7 @@
 Added:
 ^^^^^^
 * add AT_DROPOUT to all panel analyses QC deliverables https://github.com/Clinical-Genomics/BALSAMIC/pull/1646
+* add automatic download of  download of cytoband coordinates file via init command https://github.com/Clinical-Genomics/BALSAMIC/pull/1651
 
 Changed:
 ^^^^^^^^
