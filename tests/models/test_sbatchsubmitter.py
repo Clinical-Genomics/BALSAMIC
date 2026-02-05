@@ -107,7 +107,7 @@ def test_build_sbatch_header_includes_partition(submitter_with_partition):
         in header
     )
     assert "#SBATCH --ntasks=1" in header
-    assert "#SBATCH --mem=5G" in header
+    assert "#SBATCH --mem=500M" in header
     assert f"#SBATCH --time={s.max_run_hours}:00:00" in header
     assert f"#SBATCH --qos={s.qos}" in header
     assert "#SBATCH --cpus-per-task=1" in header
