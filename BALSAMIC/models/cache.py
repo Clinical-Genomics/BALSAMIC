@@ -10,7 +10,8 @@ from pydantic import (
     DirectoryPath,
     FilePath,
     field_validator,
-    ValidationInfo, ConfigDict,
+    ValidationInfo,
+    ConfigDict,
 )
 
 from BALSAMIC.constants.cache import GenomeVersion, GRCHVersion
