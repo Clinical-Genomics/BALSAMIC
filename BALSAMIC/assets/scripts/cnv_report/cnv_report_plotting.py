@@ -188,6 +188,7 @@ def _norm_chr_inplace(df: pd.DataFrame, col: str) -> pd.DataFrame:
     out[col] = out[col].astype(str).str.replace("^chr", "", regex=True)
     return out
 
+
 def _normalize_targets_col(gdf: pd.DataFrame) -> tuple[pd.DataFrame, str | None]:
     """
     Normalize gene target count column naming.
@@ -463,6 +464,7 @@ def _compute_variable_x(
     out["bin_width"] = out.apply(_bin_width, axis=1)
     out["x_coord"] = out["bin_width"].cumsum() - out["bin_width"] / 2
     return out
+
 
 def _add_smoothing(sub: pd.DataFrame, use_pon: bool, window: int) -> pd.DataFrame:
     """
@@ -949,6 +951,7 @@ def _plot_baf_panel(ax, baf_chr: pd.DataFrame):
         ax.axhline(frac, color="lightgray", linewidth=0.6, linestyle=":")
     ax.set_ylim(0, 1)
     ax.set_ylabel("BAF")
+
 
 # =============================================================================
 # Main plotting function (now much thinner)

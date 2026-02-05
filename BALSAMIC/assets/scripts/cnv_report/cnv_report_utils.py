@@ -703,6 +703,26 @@ def compute_pon_spread_summaries(
         "pon_spread_q90_target": float(cnn["spread"].quantile(0.90)),
     }
 
+
+def read_purecn_summary(purity_csv: str | Path | None) -> pd.DataFrame | None:
+    if not purity_csv:
+        return None
+    df = pd.read_csv(purity_csv)
+    wanted_cols = [
+        "Sampleid",
+        "Purity",
+        "Ploidy",
+        "Sex",
+        "Contamination",
+        "Flagged",
+        "Failed",
+        "Curated",
+        "Comment",
+    ]
+    keep = [c for c in wanted_cols if c in df.columns]
+    return df[keep] if keep else df
+
+
 def compute_summary_metrics(
     cnr_path: str | Path,
     cnn_path: str | Path | None,
@@ -904,10 +924,10 @@ def _finalize_gene_table_order(genes_df: pd.DataFrame) -> pd.DataFrame:
     return _stable_sort_by_chr_interval(out, "chr", "region_start", "region_end")
 
 
-
 # =============================================================================
 # add overlapping exon information
 # =============================================================================
+
 
 def _compute_exons_hit_for_region(
     exon_map: dict[tuple[str, str], dict[str, Any]],
@@ -943,7 +963,9 @@ def _compute_exons_hit_for_region(
     gene_end = max(e for _s, e in exons)
 
     # Whole-gene coverage
-    if float(region_start) <= float(gene_start) and float(region_end) >= float(gene_end):
+    if float(region_start) <= float(gene_start) and float(region_end) >= float(
+        gene_end
+    ):
         return "whole_gene"
 
     # Overlapping exon indices (1-based)
@@ -975,7 +997,8 @@ def _add_exons_hit_column(
     gene_col: str = "gene.symbol",
     start_col: str = "region_start",
     end_col: str = "region_end",
-    pick_region: Callable[[pd.Series], tuple[float | int | None, float | int | None]] | None = None,
+    pick_region: Callable[[pd.Series], tuple[float | int | None, float | int | None]]
+    | None = None,
     out_col: str = "exons_overlapping_segment",
 ) -> pd.DataFrame:
     """
@@ -984,6 +1007,7 @@ def _add_exons_hit_column(
     If pick_region is provided, it will be called per row and should return
     (region_start, region_end) to use for overlap (e.g. segment span vs row span).
     """
+
     def _one(row: pd.Series) -> str:
         if pick_region is None:
             rs = row.get(start_col)
@@ -1018,7 +1042,9 @@ def _compute_cnvkit_segment_target_means(
     required = {"chr", "segment_id", "log2"}
     missing = required - set(bins.columns)
     if missing:
-        raise ValueError(f"bins missing required columns for target mean calc: {missing}")
+        raise ValueError(
+            f"bins missing required columns for target mean calc: {missing}"
+        )
 
     # Treat bins with gene == 'Antitarget' as antitarget; keep everything else as target.
     if target_gene_col in bins.columns:
@@ -1027,15 +1053,17 @@ def _compute_cnvkit_segment_target_means(
         # If gene column isn't present, best-effort fallback: treat all as targets.
         is_target = pd.Series(True, index=bins.index)
 
-    sub = bins.loc[is_target & bins["segment_id"].notna(), ["chr", "segment_id", "log2"]].copy()
+    sub = bins.loc[
+        is_target & bins["segment_id"].notna(), ["chr", "segment_id", "log2"]
+    ].copy()
     if sub.empty:
         return pd.DataFrame(columns=["chr", "segment_id", "mean_log2_cnvkit_targets"])
 
-    out = (
-        sub.groupby(["chr", "segment_id"], as_index=False)
-        .agg(mean_log2_cnvkit_targets=("log2", "mean"))
+    out = sub.groupby(["chr", "segment_id"], as_index=False).agg(
+        mean_log2_cnvkit_targets=("log2", "mean")
     )
     return out
+
 
 # =============================================================================
 # build_gene_segment_table
@@ -1082,7 +1110,9 @@ def build_gene_segment_table(
 
     # 4) assign CNVkit segments to bins (vectorized)
     bins = _assign_segments_all_chrom(bins, segs)
-    bins = bins.sort_values(["chr", "gene.symbol", "start"], kind="stable").reset_index(drop=True)
+    bins = bins.sort_values(["chr", "gene.symbol", "start"], kind="stable").reset_index(
+        drop=True
+    )
 
     # 4b) compute CNVkit segment-level TARGET-only mean log2 and attach later
     seg_target_means = _compute_cnvkit_segment_target_means(bins)
@@ -1114,7 +1144,9 @@ def build_gene_segment_table(
         if col in bins.columns:
             agg_dict[col] = ["first"]
 
-    genes_df = bins.groupby(["chr", "gene.symbol", "segment_id"], as_index=False).agg(agg_dict)
+    genes_df = bins.groupby(["chr", "gene.symbol", "segment_id"], as_index=False).agg(
+        agg_dict
+    )
     genes_df = _flatten_agg_columns(genes_df).rename(
         columns={
             "start_min": "region_start",
@@ -1243,13 +1275,17 @@ def build_gene_segment_table(
             # If you consider PureCN C as “CN” for this decision:
             purecn_C = row.get("purecn_C", np.nan)
             if pd.notna(purecn_C):
-                call = classify_cnv_from_total_cn_sex_aware(purecn_C, row.get("chr"), sex)
+                call = classify_cnv_from_total_cn_sex_aware(
+                    purecn_C, row.get("chr"), sex
+                )
                 if str(call).upper() in ("AMPLIFICATION", "DELETION"):
                     return True
 
             return False
 
-        def _pick_region(row: pd.Series) -> tuple[float | int | None, float | int | None]:
+        def _pick_region(
+            row: pd.Series,
+        ) -> tuple[float | int | None, float | int | None]:
             # If CNV, prefer CNVkit segment span; else per-row region span
             if _segment_is_cnv(row):
                 ss = row.get("seg_start")
@@ -1280,7 +1316,9 @@ def build_gene_segment_table(
         "seg_cn1": "cnvkit_seg_cn1",
         "seg_cn2": "cnvkit_seg_cn2",
     }
-    genes_df = genes_df.rename(columns={k: v for k, v in rename_cnvkit.items() if k in genes_df.columns})
+    genes_df = genes_df.rename(
+        columns={k: v for k, v in rename_cnvkit.items() if k in genes_df.columns}
+    )
 
     # segment_id is internal; drop it after all merges are done
     genes_df = genes_df.drop(columns=["segment_id"], errors="ignore")
@@ -1297,7 +1335,7 @@ def build_gene_chunk_table(
     cnr_path: str | Path,
     gene_seg_df: pd.DataFrame,
     pon_path: str | Path | None = None,
-    refgene_path: str | Path | None = None
+    refgene_path: str | Path | None = None,
 ) -> pd.DataFrame:
     """
     Build per-gene, per-chunk table using CNR + PON (required),

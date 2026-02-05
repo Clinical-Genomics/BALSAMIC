@@ -1,0 +1,164 @@
+body {
+  font-family: system-ui, sans-serif;
+  margin: 24px;
+}
+
+h1, h2, h3 {
+  font-weight: 600;
+}
+
+.muted {
+  color: #666;
+  font-size: 13px;
+}
+
+.controls {
+  margin-bottom: 12px;
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  background: #fafafa;
+}
+
+.control-group {
+  margin-bottom: 6px;
+}
+
+input[type="text"], input[type="number"] {
+  padding: 4px 6px;
+  font-size: 13px;
+}
+
+button {
+  padding: 4px 10px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+label {
+  font-size: 13px;
+}
+
+/* Tables */
+table.dataframe {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+table.dataframe th, table.dataframe td {
+  border: 1px solid #ddd;
+  padding: 6px 8px;
+}
+
+table.dataframe th {
+  background: #f4f4f4;
+  text-align: left;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+table.dataframe tr:nth-child(even) {
+  background: #fafafa;
+}
+
+/* Plot cards */
+.plot-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.plot-card {
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  padding: 8px;
+  background: #fff;
+  flex: 0 0 320px;
+  max-width: 380px;
+}
+
+.plot-card-cnv {
+  border-color: #c0392b;
+  box-shadow: 0 0 4px rgba(192, 57, 43, 0.4);
+}
+
+.plot-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.plot-title {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.plot-badge {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 12px;
+  background: #c0392b;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* Genome-wide plot frames */
+.plot-frame {
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin-top: 10px;
+  width: 100%;
+}
+
+.plot-fullwidth {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  cursor: pointer;
+}
+
+/* Modal */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  z-index: 9999;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.85);
+}
+
+.modal-content-wrapper {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  max-width: 98vw;
+  max-height: 98vh;
+}
+
+.modal-image {
+  max-width: 98vw;
+  max-height: 98vh;
+  width: auto;
+  height: auto;
+  display: block;
+  border-radius: 4px;
+  box-shadow: 0 0 12px rgba(0,0,0,0.7);
+}
+
+.modal-close {
+  position: absolute;
+  top: -32px;
+  right: 0;
+  color: #fff;
+  font-size: 24px;
+  font-weight: 700;
+  cursor: pointer;
+}

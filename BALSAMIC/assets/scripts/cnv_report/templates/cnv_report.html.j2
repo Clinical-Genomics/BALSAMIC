@@ -1,0 +1,192 @@
+{% macro plot_card(card) -%}
+  <div class="plot-card {{ 'plot-card-cnv' if card.has_cnv else 'plot-card-normal' }}">
+    <div class="plot-header">
+      <span class="plot-title">{{ card.title }}</span>
+      {% if card.has_cnv %}
+        <span class="plot-badge">CNV</span>
+      {% endif %}
+    </div>
+    <img
+      src="{{ card.data_uri }}"
+      alt="QC plot {{ card.stem }}"
+      class="clickable-plot"
+      style="max-width:100%; height:auto; display:block; cursor:pointer;"
+    />
+  </div>
+{%- endmacro %}
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>{{ title }}</title>
+  <style>
+{{ css_text }}
+  </style>
+</head>
+<body>
+
+  <h1>{{ title }}</h1>
+
+  <h2>PureCN sample summary</h2>
+  {{ purecn_summary_html | safe }}
+
+  <h2>CNV / QC summary</h2>
+  <p class="muted">
+    Additional metrics derived from CNVkit CNR/CNN and gene-level segments,
+    including DLR-like noise, standard deviation of adjacent Target Log2-ratios, and PON spread summaries.
+  </p>
+  {{ qc_summary_html | safe }}
+
+  {# --------------------- Genome-wide plots --------------------- #}
+  {% if scatter_data_uri or diagram_data_uri %}
+    <h2>Genome-wide CNVkit plots</h2>
+
+    {% if scatter_data_uri %}
+      <h3>CNVkit scatter</h3>
+      <div class="plot-frame">
+        <img src="{{ scatter_data_uri }}" alt="CNVkit scatter" class="clickable-plot plot-fullwidth" />
+      </div>
+    {% endif %}
+
+    {% if diagram_data_uri %}
+      <h3>CNVkit diagram</h3>
+      <div class="plot-frame">
+        <img src="{{ diagram_data_uri }}" alt="CNVkit diagram" class="clickable-plot plot-fullwidth" />
+      </div>
+    {% endif %}
+  {% endif %}
+
+  {# --------------------- Chromosome plots only --------------------- #}
+  {% set chr_with = plot_groups.get("chr_with_cnv", []) %}
+  {% set chr_no   = plot_groups.get("chr_no_cnv", []) %}
+
+  {% if chr_with or chr_no %}
+    <h2>Per-chromosome CNV plots</h2>
+    <p class="muted">
+      These plots show log2 coverage, PON spread (if available), BAF and segments/genes per chromosome.
+      Plots containing CNV / LOH genes are highlighted. Click any plot to view it in a larger overlay.
+    </p>
+
+    {% if chr_with %}
+      <h3>Chromosomes with CNV / LOH</h3>
+      <div class="plot-grid">
+        {% for card in chr_with %}
+          {{ plot_card(card) }}
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    {% if chr_no %}
+      <h3>Chromosomes without CNV / LOH</h3>
+      <div class="plot-grid">
+        {% for card in chr_no %}
+          {{ plot_card(card) }}
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endif %}
+
+  {# --------------------- Gene table --------------------- #}
+  <h1>LOH / CNV Genes (gene-level)</h1>
+  <button id="toggle-gene-table" type="button">Hide gene-level table</button>
+
+  <div id="gene-table-container" style="margin-top:10px;">
+    <div class="controls">
+      <div class="control-group">
+        <label>
+          <input type="checkbox" id="hide-non-cnv">
+          Show only LOH / CNV genes (loh_flag TRUE or CNV call ≠ NEUTRAL)
+        </label>
+        <label style="margin-left:12px;">
+          <input type="checkbox" id="only-cancer-genes">
+          Show only cancer genes (is_cancer_gene TRUE)
+        </label>
+      </div>
+
+      <div class="control-group">
+        <label>
+          Min n.targets:
+          <input type="number" id="min-targets" min="0" step="1" value="0">
+        </label>
+      </div>
+
+      <div class="control-group">
+        <label>
+          Gene filter (comma-separated gene.symbol list):
+          <input type="text" id="gene-filter" placeholder="TP53,EGFR,MYC">
+        </label>
+      </div>
+    </div>
+
+    {{ gene_table_html | safe }}
+  </div>
+
+  {# --------------------- Chunk section --------------------- #}
+  {% if has_chunk_table %}
+    <h2>Within-gene PON-driven chunks (optional detail)</h2>
+    <p class="muted">
+      These rows represent sub-gene chunks defined by PON-based deviation (log2 vs panel-of-normals),
+      for genes in the main table. Filters below apply only to this chunk-level table.
+    </p>
+
+    <button id="toggle-chunk-table" type="button">Show chunk-level table</button>
+
+    <div id="chunk-table-container" style="display:none; margin-top:10px;">
+      <div class="controls">
+        <div class="control-group">
+          <label>
+            <input type="checkbox" id="hide-non-cnv-chunk">
+            Show only LOH / CNV chunks (loh_flag TRUE or CNV call ≠ NEUTRAL)
+          </label>
+          <label style="margin-left:12px;">
+            <input type="checkbox" id="show-pon-cnv-chunk">
+            Also include chunks with PON-based CNV call (pon_cnv_call ≠ "")
+          </label>
+          <label style="margin-left:12px;">
+            <input type="checkbox" id="only-cancer-genes-chunk">
+            Show only cancer genes (is_cancer_gene TRUE)
+          </label>
+          <label style="margin-left:12px;">
+            <input type="checkbox" id="only-split-genes-chunk">
+            Show only split genes (is_gene_split TRUE)
+          </label>
+        </div>
+
+        <div class="control-group">
+          <label>
+            Min n.targets:
+            <input type="number" id="min-targets-chunk" min="0" step="1" value="0">
+          </label>
+        </div>
+
+        <div class="control-group">
+          <label>
+            Gene filter (comma-separated gene.symbol list):
+            <input type="text" id="gene-filter-chunk" placeholder="TP53,EGFR,MYC">
+          </label>
+        </div>
+      </div>
+
+      {{ chunk_table_html | safe }}
+    </div>
+  {% endif %}
+
+  {# --------------------- Modal --------------------- #}
+  <div id="plot-modal" class="modal-overlay">
+    <div class="modal-content-wrapper">
+      <span class="modal-close" id="plot-modal-close">&times;</span>
+      <img id="plot-modal-image" class="modal-image" src="" alt="Enlarged plot">
+    </div>
+  </div>
+
+  <script>
+    // Injected from Python
+    const colIndexGene  = {{ col_idx_gene_json | safe }};
+    const colIndexChunk = {{ col_idx_chunk_json | safe }};
+
+{{ js_text | safe }}
+  </script>
+
+</body>
+</html>

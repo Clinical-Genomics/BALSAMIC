@@ -59,7 +59,7 @@ from BALSAMIC.constants.paths import (
     SENTIEON_DNASCOPE_MODEL,
     SENTIEON_TNSCOPE_MODEL,
     RESCUE_SNVS,
-    CYTOBAND
+    CYTOBAND,
 )
 from BALSAMIC.constants.workflow_params import VCF_DICT
 from BALSAMIC.models.config import ConfigModel
