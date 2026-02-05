@@ -364,7 +364,7 @@ def get_pon_sample_list(fastq_path: str) -> List[SampleInstanceModel]:
     sample_names = set()
 
     for fastq in Path(fastq_path).glob(f"*.{FileType.FASTQ}.{FileType.GZ}"):
-        sample_names.add(fastq.name.split("_")[-4])
+        sample_names.add(fastq.name.split("_")[-5])
 
     if len(sample_names) < PonParams.MIN_PON_SAMPLES:
         error_message = (

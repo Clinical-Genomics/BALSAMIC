@@ -16,6 +16,7 @@ Removed:
 
 Fixed:
 ^^^^^^
+* PON samplename parsing 
 
 [18.0.1]
 --------
