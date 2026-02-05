@@ -74,7 +74,7 @@ REFERENCE_FILES: Dict[GenomeVersion, Dict[str, dict]] = {
             "file_type": FileType.TSV,
             "gzip": True,
             "file_name": "cytoBand.txt.gz",
-            "dir_name": "variants",
+            "dir_name": "genome",
         },
         "dbsnp": {
             "url": "gs://gatk-legacy-bundles/b37/dbsnp_138.b37.vcf.gz",
