@@ -120,9 +120,9 @@ def initialize(
     references_dict: Dict[str, dict] = REFERENCE_FILES[genome_version]
 
     if genome_version == GenomeVersion.CanFam3:
-        references: ReferencesCanFam = ReferencesCanFam.model_validate(references_dict)
+        references: ReferencesCanFam = ReferencesCanFam.model_validate(references_dict, extra="forbid")
     else:
-        references: ReferencesHg = ReferencesHg.model_validate(references_dict)
+        references: ReferencesHg = ReferencesHg.model_validate(references_dict, extra="forbid")
 
     cache_config: CacheConfig = CacheConfig(
         analysis={"case_id": f"reference.{genome_version}.{cache_version}"},
