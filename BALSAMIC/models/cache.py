@@ -10,7 +10,7 @@ from pydantic import (
     DirectoryPath,
     FilePath,
     field_validator,
-    ValidationInfo,
+    ValidationInfo, ConfigDict,
 )
 
 from BALSAMIC.constants.cache import GenomeVersion, GRCHVersion
@@ -94,6 +94,7 @@ class References(BaseModel):
 class ReferencesCanFam(References):
     """Canine reference genome files model."""
 
+    model_config = ConfigDict(extra="forbid")
 
 class ReferencesHg(References):
     """
@@ -144,6 +145,8 @@ class ReferencesHg(References):
     somalier_sites: ReferenceUrl
     vcf_1kg: ReferenceUrl
     wgs_calling_regions: ReferenceUrl
+
+    model_config = ConfigDict(extra="forbid")
 
     def get_cadd_snv_file_paths(self) -> List[str]:
         """Return CADD SNV reference output files."""
