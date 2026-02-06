@@ -234,9 +234,7 @@ def test_bioinfo_tool_version_conda():
     # GIVEN that one of the items is itself a dict of dependencies
     packages[-1] = packages
 
-    bioinfo_tools_version = {
-        **bioinfo_tool_version_conda(packages, bioinfo_tools, bioinfo_tools_version)
-    }
+    bioinfo_tools_version = bioinfo_tool_version_conda(packages, bioinfo_tools, bioinfo_tools_version)
 
     # THEN assert that the versions are correctly retrieved from conda
     assert set(bioinfo_tools_version["picard"]).issubset({"2.27.1"})
