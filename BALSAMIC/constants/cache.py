@@ -240,8 +240,8 @@ REFERENCE_FILES: Dict[GenomeVersion, Dict[str, dict]] = {
         "cytoband_coordinates_file": {
             "url": "https://hgdownload.cse.ucsc.edu/goldenpath/hg19/database/cytoBand.txt.gz",
             "file_type": FileType.TSV,
-            "gzip": False,
-            "file_name": "cytoBand.txt.gz",
+            "gzip": True,
+            "file_name": "cytoBand.txt",
             "dir_name": "genome",
         },
     },
