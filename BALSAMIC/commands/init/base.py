@@ -6,7 +6,7 @@ import sys
 import shlex
 from datetime import datetime
 from pathlib import Path
-from typing import List, Optional, Dict
+from typing import List, Optional, Union, Dict
 
 import click
 
