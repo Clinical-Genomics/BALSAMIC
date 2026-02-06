@@ -183,3 +183,36 @@ def test_init_hg_submit_no_jobid_logs_warning(
     mock_write_yaml.assert_not_called()
     mock_log.warning.assert_any_call("Could not retrieve job id from SLURM.")
     assert result.exit_code == EXIT_SUCCESS
+
+
+def test_init_CanFam(
+    invoke_cli: partial,
+    tmp_path: Path,
+    cosmic_key: str,
+    config_json: str,
+    reference_graph: str,
+):
+    """Test Balsamic init command."""
+
+    # GIVEN a temporary output directory and a COSMIC key
+
+    # WHEN invoking the init command
+    result: Result = invoke_cli(
+        [
+            "init",
+            "--out-dir",
+            tmp_path.as_posix(),
+            "--genome-version",
+            GenomeVersion.CanFam3,
+            "--cosmic-key",
+            cosmic_key,
+            "--run-interactively",
+        ]
+    )
+
+    # THEN the human reference generation workflow should have successfully started
+    assert Path(tmp_path, balsamic_version, GenomeVersion.CanFam3, config_json).exists()
+    assert Path(
+        tmp_path, balsamic_version, GenomeVersion.CanFam3, reference_graph
+    ).exists()
+    assert result.exit_code == EXIT_SUCCESS
