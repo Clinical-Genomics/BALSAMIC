@@ -178,7 +178,7 @@ def test_init_hg_submit_no_jobid_logs_warning(
     assert result.exit_code == EXIT_SUCCESS
 
 
-def test_init_CanFam(
+def test_init_canfam(
     invoke_cli: partial,
     tmp_path: Path,
     cosmic_key: str,

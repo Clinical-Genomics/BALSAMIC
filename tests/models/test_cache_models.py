@@ -590,7 +590,7 @@ def test_get_reference_output_paths(cache_config: CacheConfig):
     assert len(reference_output_paths) == 46
 
 
-def test_get_reference_output_paths_CanFam(cache_config: CacheConfig):
+def test_get_reference_output_paths_canfam(cache_config: CacheConfig):
     """Test get reference list to be downloaded."""
 
     # GIVEN a cache config model with genome_version = CanFam3
