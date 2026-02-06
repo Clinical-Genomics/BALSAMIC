@@ -38,6 +38,7 @@ from BALSAMIC.utils.cli import (
     get_snakefile,
     validate_cache_version,
     validate_umi_min_reads,
+    bioinfo_tool_version_conda,
 )
 from BALSAMIC.utils.exc import BalsamicError, WorkflowRunError
 from BALSAMIC.utils.io import (
@@ -208,6 +209,36 @@ def test_get_variant_callers_wrong_mutation_class(tumor_normal_config: Dict):
             mutation_class=wrong_mutation_class,
             sequencing_type=sequencing_type,
         )
+
+
+def test_bioinfo_tool_version_conda():
+    # GIVEN a tools dictionary
+    bioinfo_tools: dict = BIOINFO_TOOL_ENV
+    container_conda_env_path: Path = CONTAINERS_DIR
+
+    # WHEN calling bioinfo_tool_version_conda with the same logic as get_bioinfo_tools_version
+    bioinfo_tools_version = {}
+    for container_conda_env_name in set(bioinfo_tools.values()):
+        yaml_file = Path(
+            container_conda_env_path,
+            container_conda_env_name,
+            container_conda_env_name + ".yaml",
+        )
+        with open(yaml_file, "r") as f:
+            conda_yaml = yaml.safe_load(f)
+            if isinstance(conda_yaml, dict):
+                packages = conda_yaml.get("dependencies")
+                bioinfo_tools_version = {
+                    **bioinfo_tool_version_conda(
+                        packages, bioinfo_tools, bioinfo_tools_version
+                    )
+                }
+
+    # THEN assert that the versions are correctly retrieved from conda
+    assert set(bioinfo_tools_version["picard"]).issubset({"2.27.1"})
+    assert set(bioinfo_tools_version["samtools"]).issubset(
+        {"1.15.1", "1.12", "1.15", "1.9"}
+    )
 
 
 def test_get_variant_callers_wrong_sequencing_type(tumor_normal_config: Dict):
