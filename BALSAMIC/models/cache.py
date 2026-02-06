@@ -60,6 +60,8 @@ class References(BaseModel):
     refgene_sql: ReferenceUrl
     refgene_txt: ReferenceUrl
 
+    model_config = ConfigDict(extra="forbid")
+
     def get_reference_genome_file_paths(self) -> List[str]:
         """Return output reference genome files."""
         return [
@@ -94,8 +96,6 @@ class References(BaseModel):
 
 class ReferencesCanFam(References):
     """Canine reference genome files model."""
-
-    model_config = ConfigDict(extra="forbid")
 
 
 class ReferencesHg(References):
@@ -147,8 +147,6 @@ class ReferencesHg(References):
     somalier_sites: ReferenceUrl
     vcf_1kg: ReferenceUrl
     wgs_calling_regions: ReferenceUrl
-
-    model_config = ConfigDict(extra="forbid")
 
     def get_cadd_snv_file_paths(self) -> List[str]:
         """Return CADD SNV reference output files."""
