@@ -97,6 +97,7 @@ class References(BaseModel):
 class ReferencesCanFam(References):
     """Canine reference genome files model."""
 
+
 class ReferencesHg(References):
     """
     Human reference genome files model.
