@@ -589,6 +589,7 @@ def test_get_reference_output_paths(cache_config: CacheConfig):
     # THEN all the reference paths should be returned
     assert len(reference_output_paths) == 46
 
+
 def test_get_reference_output_paths_CanFam(cache_config: CacheConfig):
     """Test get reference list to be downloaded."""
 
