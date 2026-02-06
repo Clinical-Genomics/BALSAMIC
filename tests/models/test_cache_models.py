@@ -589,6 +589,18 @@ def test_get_reference_output_paths(cache_config: CacheConfig):
     # THEN all the reference paths should be returned
     assert len(reference_output_paths) == 46
 
+def test_get_reference_output_paths_CanFam(cache_config: CacheConfig):
+    """Test get reference list to be downloaded."""
+
+    # GIVEN a cache config model with genome_version = CanFam3
+    cache_config.genome_version = GenomeVersion.CanFam3
+
+    # WHEN retrieving the reference output paths
+    reference_output_paths: List[str] = cache_config.get_reference_output_paths()
+
+    # THEN all the reference paths should be returned
+    assert len(reference_output_paths) == 46
+
 
 def test_get_analysis_references_hg(
     cache_config: CacheConfig,
