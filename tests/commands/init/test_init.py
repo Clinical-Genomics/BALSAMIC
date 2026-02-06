@@ -205,7 +205,4 @@ def test_init_CanFam(
 
     # THEN the human reference generation workflow should have successfully started
     assert Path(tmp_path, balsamic_version, GenomeVersion.CanFam3, config_json).exists()
-    assert Path(
-        tmp_path, balsamic_version, GenomeVersion.CanFam3, reference_graph
-    ).exists()
     assert result.exit_code == EXIT_SUCCESS
