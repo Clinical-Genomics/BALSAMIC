@@ -1,4 +1,6 @@
 """Balsamic reference cache models."""
+from __future__ import annotations
+
 import re
 import logging
 from pathlib import Path
@@ -279,18 +281,18 @@ class CacheConfig(BaseModel):
     Reference build configuration model.
 
     Attributes:
-        analysis (CacheAnalysis)                           : Reference analysis model.
-        references_dir (DirectoryPath)                     : Output directory for the downloaded reference.
-        containers_dir (Path)                              : Output directory for the downloaded singularity containers.
-        genome_dir (Path)                                  : Genome references output directory.
-        variants_dir (Path)                                : Variant references output directory.
-        vep_dir (Path)                                     : VEP annotations output directory.
-        genome_version (GenomeVersion)                     : Genome version associated with the balsamic cache.
-        cosmic_key (str, optional)                         : COSMIC database key.
-        bioinfo_tools (dict)                               : Dictionary of bioinformatics software and containers.
-        containers (Dict[str, str])                        : Dictionary linking container names and dockerhub images.
-        references (Union[ReferencesHg, ReferencesCanFam]) : Reference files model.
-        references_date (str)                              : Reference access date.
+        analysis (CacheAnalysis)                     : Reference analysis model.
+        references_dir (DirectoryPath)               : Output directory for the downloaded reference.
+        containers_dir (Path)                        : Output directory for the downloaded singularity containers.
+        genome_dir (Path)                            : Genome references output directory.
+        variants_dir (Path)                          : Variant references output directory.
+        vep_dir (Path)                               : VEP annotations output directory.
+        genome_version (GenomeVersion)               : Genome version associated with the balsamic cache.
+        cosmic_key (str, optional)                   : COSMIC database key.
+        bioinfo_tools (dict)                         : Dictionary of bioinformatics software and containers.
+        containers (Dict[str, str])                  : Dictionary linking container names and dockerhub images.
+        references (ReferencesHg | ReferencesCanFam) : Reference files model.
+        references_date (str)                        : Reference access date.
     """
 
     analysis: CacheAnalysis
@@ -303,7 +305,7 @@ class CacheConfig(BaseModel):
     cosmic_key: Optional[str] = None
     bioinfo_tools: dict
     containers: Dict[str, str]
-    references: Union[ReferencesHg, ReferencesCanFam]
+    references: ReferencesHg | ReferencesCanFam
     references_date: str
 
     @field_validator("references")
