@@ -600,7 +600,7 @@ def test_get_reference_output_paths_CanFam(cache_config: CacheConfig):
     reference_output_paths: List[str] = cache_config.get_reference_output_paths()
 
     # THEN all the reference paths should be returned
-    assert len(reference_output_paths) == 46
+    assert len(reference_output_paths) == 3
 
 
 def test_get_analysis_references_hg(
