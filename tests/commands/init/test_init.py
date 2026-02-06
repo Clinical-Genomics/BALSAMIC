@@ -109,18 +109,14 @@ def test_init_hg_submit_succeeds(
     mock_sbatch.stdout = "Submitted batch job 12345"
     mock_sbatch.returncode = 0
 
-    with (
-        # IMPORTANT: skip the pre-step graph generation that shells out
-        patch("BALSAMIC.commands.init.base.generate_graph") as mock_gen_graph,
-        # Patch the *submitter* subprocess.run (this is where 'sbatch' is called)
-        patch(
-            "BALSAMIC.models.sbatchsubmitter.subprocess.run", return_value=mock_sbatch
-        ) as mock_submit_run,
-        # Optional: if you want to assert write_job_id_yaml call
-        patch(
-            "BALSAMIC.commands.init.base.SbatchSubmitter.write_job_id_yaml"
-        ) as mock_write_yaml,
-    ):
+    # mock_gen_graph - IMPORTANT: skip the pre-step graph generation that shells out
+    # mock_submit_run - Patch the *submitter* subprocess.run (this is where 'sbatch' is called)
+    # mock_write_yaml - Optional: if you want to assert write_job_id_yaml call
+    with patch("BALSAMIC.commands.init.base.generate_graph") as mock_gen_graph, patch(
+        "BALSAMIC.models.sbatchsubmitter.subprocess.run", return_value=mock_sbatch
+    ) as mock_submit_run, patch(
+        "BALSAMIC.commands.init.base.SbatchSubmitter.write_job_id_yaml"
+    ) as mock_write_yaml:
         result: Result = invoke_cli(
             [
                 "init",
@@ -158,16 +154,13 @@ def test_init_hg_submit_no_jobid_logs_warning(
     mock_sbatch.stdout = "weird output without job id"
     mock_sbatch.returncode = 0
 
-    with (
-        patch("BALSAMIC.commands.init.base.generate_graph"),
-        patch(
-            "BALSAMIC.models.sbatchsubmitter.subprocess.run", return_value=mock_sbatch
-        ),
-        patch(
-            "BALSAMIC.commands.init.base.SbatchSubmitter.write_job_id_yaml"
-        ) as mock_write_yaml,
-        patch("BALSAMIC.commands.init.base.LOG") as mock_log,
-    ):
+    with patch("BALSAMIC.commands.init.base.generate_graph"), patch(
+        "BALSAMIC.models.sbatchsubmitter.subprocess.run", return_value=mock_sbatch
+    ), patch(
+        "BALSAMIC.commands.init.base.SbatchSubmitter.write_job_id_yaml"
+    ) as mock_write_yaml, patch(
+        "BALSAMIC.commands.init.base.LOG"
+    ) as mock_log:
         result = invoke_cli(
             [
                 "init",
