@@ -37,7 +37,8 @@ from BALSAMIC.utils.cli import (
     get_sample_list,
     get_snakefile,
     validate_cache_version,
-    validate_umi_min_reads, bioinfo_tool_version_conda,
+    validate_umi_min_reads,
+    bioinfo_tool_version_conda,
 )
 from BALSAMIC.utils.exc import BalsamicError, WorkflowRunError
 from BALSAMIC.utils.io import (
@@ -209,6 +210,7 @@ def test_get_variant_callers_wrong_mutation_class(tumor_normal_config: Dict):
             sequencing_type=sequencing_type,
         )
 
+
 def test_bioinfo_tool_version_conda():
     # GIVEN a tools dictionary
     bioinfo_tools: dict = BIOINFO_TOOL_ENV
@@ -237,6 +239,7 @@ def test_bioinfo_tool_version_conda():
     assert set(bioinfo_tools_version["samtools"]).issubset(
         {"1.15.1", "1.12", "1.15", "1.9"}
     )
+
 
 def test_get_variant_callers_wrong_sequencing_type(tumor_normal_config: Dict):
     # GIVEN a wrong workflow name
