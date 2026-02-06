@@ -235,9 +235,7 @@ def test_bioinfo_tool_version_conda():
     packages[-1] = packages
 
     bioinfo_tools_version = {
-        **bioinfo_tool_version_conda(
-            packages, bioinfo_tools, bioinfo_tools_version
-        )
+        **bioinfo_tool_version_conda(packages, bioinfo_tools, bioinfo_tools_version)
     }
 
     # THEN assert that the versions are correctly retrieved from conda
