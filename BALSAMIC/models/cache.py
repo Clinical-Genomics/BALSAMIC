@@ -97,9 +97,6 @@ class References(BaseModel):
 class ReferencesCanFam(References):
     """Canine reference genome files model."""
 
-    model_config = ConfigDict(extra="forbid")
-
-
 class ReferencesHg(References):
     """
     Human reference genome files model.
@@ -151,8 +148,6 @@ class ReferencesHg(References):
     vcf_1kg: ReferenceUrl
     wgs_calling_regions: ReferenceUrl
     cytoband_coordinates_file: ReferenceUrl
-
-    model_config = ConfigDict(extra="forbid")
 
     def get_cadd_snv_file_paths(self) -> List[str]:
         """Return CADD SNV reference output files."""
