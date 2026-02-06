@@ -183,7 +183,6 @@ def test_init_CanFam(
     tmp_path: Path,
     cosmic_key: str,
     config_json: str,
-    reference_graph: str,
 ):
     """Test Balsamic init command."""
 
@@ -203,6 +202,8 @@ def test_init_CanFam(
         ]
     )
 
-    # THEN the human reference generation workflow should have successfully started
+    # THEN the config_json should be created
     assert Path(tmp_path, balsamic_version, GenomeVersion.CanFam3, config_json).exists()
-    assert result.exit_code == EXIT_SUCCESS
+
+    # THEN the command should fail as no CanFam3 genome reference file is given or retrieved
+    assert result.exit_code == EXIT_FAIL
