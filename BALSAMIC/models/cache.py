@@ -233,6 +233,7 @@ class AnalysisReferencesHg(AnalysisReferences):
         vcf_1kg (FilePath)                   : 1000 Genome all SNPs.
         vep_dir (DirectoryPath)              : VEP annotations output directory.
         wgs_calling_regions (FilePath)       : WGS calling intervals.
+        cytoband_coordinates_file (FilePath) : Cytoband coordinates file path.
     """
 
     access_regions: FilePath
@@ -255,6 +256,7 @@ class AnalysisReferencesHg(AnalysisReferences):
     vcf_1kg: FilePath
     vep_dir: DirectoryPath
     wgs_calling_regions: FilePath
+    cytoband_coordinates_file: FilePath
 
 
 class CacheAnalysis(BaseModel):
@@ -462,4 +464,5 @@ class CacheConfig(BaseModel):
             vcf_1kg=f"{self.references.vcf_1kg.file_path}.{FileType.GZ}",
             vep_dir=self.vep_dir.as_posix(),
             wgs_calling_regions=self.references.wgs_calling_regions.file_path,
+            cytoband_coordinates_file=self.references.cytoband_coordinates_file.file_path,
         )
