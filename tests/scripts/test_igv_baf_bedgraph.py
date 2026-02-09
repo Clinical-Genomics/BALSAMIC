@@ -1,4 +1,3 @@
-import gzip
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Optional
@@ -308,6 +307,38 @@ def test_convert_vcf_to_bedgraph_writes_track_header(tmp_path: Path):
     text = out.read_text(encoding="utf-8").splitlines()
     assert text[0] == 'track type=bedGraph name="MyTrack"'
     assert text[1] == "1\t99\t100\t0.250000"
+
+
+def test_convert_vcf_to_bedgraph_dash_output_does_not_close_stdout(
+    tmp_path: Path, capsys
+):
+    # Important regression test: open_output('-') must NOT close sys.stdout.
+    vcf = tmp_path / "in.vcf"
+    write_text(
+        vcf,
+        "\n".join(
+            [
+                "##fileformat=VCFv4.2",
+                "##contig=<ID=1>",
+                '##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">',
+                '##FORMAT=<ID=AD,Number=R,Type=Integer,Description="Allelic depths">',
+                '##FORMAT=<ID=DP,Number=1,Type=Integer,Description="Read depth">',
+                "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tsample1",
+                "1\t100\t.\tA\tC\t.\t.\t.\tGT:AD:DP\t0/1:10,5:20",
+            ]
+        )
+        + "\n",
+    )
+
+    n = m.convert_vcf_to_bedgraph(vcf_path=str(vcf), bedgraph_path="-", track_name=None)
+    assert n == 1
+
+    # If stdout was closed, this would raise ValueError: I/O operation on closed file.
+    print("still-open")
+
+    captured = capsys.readouterr()
+    assert "1\t99\t100\t0.250000" in captured.out
+    assert "still-open" in captured.out
 
 
 def test_cli_end_to_end(tmp_path: Path):
