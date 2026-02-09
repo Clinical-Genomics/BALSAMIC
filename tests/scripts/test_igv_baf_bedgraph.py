@@ -312,7 +312,7 @@ def test_convert_vcf_to_bedgraph_writes_track_header(tmp_path: Path):
 def test_convert_vcf_to_bedgraph_dash_output_does_not_close_stdout(
     tmp_path: Path, capsys
 ):
-    # Important regression test: open_output('-') must NOT close sys.stdout.
+    # open_output('-') must NOT close sys.stdout.
     vcf = tmp_path / "in.vcf"
     write_text(
         vcf,

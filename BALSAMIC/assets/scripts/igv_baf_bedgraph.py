@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import sys
-import tempfile
 from contextlib import closing, nullcontext
 from dataclasses import dataclass
 from pathlib import Path
@@ -118,30 +117,6 @@ def _variant_to_bedgraph_record(variant) -> Optional[BedGraphRecord]:
     )
 
 
-def convert_vcf_to_bedgraph(
-    vcf_path: str | Path,
-    bedgraph_path: str | Path,
-    track_name: Optional[str] = None,
-) -> int:
-    """
-    Convert a VCF into a bedGraph of AF from AD/DP.
-    Assumes exactly one sample is present.
-    """
-    p = str(vcf_path)
-
-    if p == "-":
-        # cyvcf2 expects a filename; buffer stdin to a temporary VCF file
-        with tempfile.NamedTemporaryFile(mode="wb", suffix=".vcf") as tmp:
-            tmp.write(sys.stdin.buffer.read())
-            tmp.flush()
-
-            with closing(VCF(tmp.name)) as vcf, open_output(bedgraph_path) as fout:
-                return _stream_write_bedgraph(vcf, fout, track_name)
-
-    with closing(VCF(p)) as vcf, open_output(bedgraph_path) as fout:
-        return _stream_write_bedgraph(vcf, fout, track_name)
-
-
 def _stream_write_bedgraph(vcf: VCF, fout: TextIO, track_name: Optional[str]) -> int:
     """Write bedGraph records from an open cyvcf2 VCF reader to fout."""
     n_written = 0
@@ -158,8 +133,21 @@ def _stream_write_bedgraph(vcf: VCF, fout: TextIO, track_name: Optional[str]) ->
     return n_written
 
 
+def convert_vcf_to_bedgraph(
+    vcf_path: str | Path,
+    bedgraph_path: str | Path,
+    track_name: Optional[str] = None,
+) -> int:
+    """
+    Convert a VCF into a bedGraph of AF from AD/DP.
+    Assumes exactly one sample is present.
+    """
+    with closing(VCF(str(vcf_path))) as vcf, open_output(bedgraph_path) as fout:
+        return _stream_write_bedgraph(vcf, fout, track_name)
+
+
 @click.command(context_settings={"show_default": True})
-@click.argument("vcf", type=click.Path(exists=True, dir_okay=False, allow_dash=True))
+@click.argument("vcf", type=click.Path(exists=True, dir_okay=False, allow_dash=False))
 @click.argument("bedgraph", type=click.Path(dir_okay=False, allow_dash=True))
 @click.option("--track-name", help='Optional bedGraph "track" name header.')
 def cli(vcf: str, bedgraph: str, track_name: Optional[str]) -> None:
