@@ -36,6 +36,18 @@ def test_variant_to_record_basic():
     assert line == "1\t100\t101\t0.25\n"
 
 
+def test_variant_to_record_returns_none_when_ad_is_none():
+    v = FakeVariant(
+        CHROM="1",
+        POS=100,
+        _formats={
+            "AD": None,
+            "DP": np.array([[20]], dtype=int),
+        },
+    )
+    assert m.variant_to_record(v) is None
+
+
 def test_convert_vcf_to_bedgraph_writes_expected_rows(tmp_path: Path):
     vcf = tmp_path / "in.vcf"
     out = tmp_path / "out.bedgraph"
@@ -51,7 +63,7 @@ def test_convert_vcf_to_bedgraph_writes_expected_rows(tmp_path: Path):
                 '##FORMAT=<ID=DP,Number=1,Type=Integer,Description="Read depth">',
                 "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tsample1",
                 "1\t100\t.\tA\tC\t.\t.\t.\tGT:AD:DP\t0/1:10,5:20",  # 0.25
-                "1\t101\t.\tA\tC\t.\t.\t.\tGT:AD:DP\t0/1:3,3:6",    # 0.5
+                "1\t101\t.\tA\tC\t.\t.\t.\tGT:AD:DP\t0/1:3,3:6",  # 0.5
             ]
         )
         + "\n",
@@ -118,7 +130,10 @@ def test_cli_end_to_end(tmp_path: Path):
     res = runner.invoke(m.cli, [str(vcf), str(out), "--track-name", "T"])
     assert res.exit_code == 0, res.output
     assert "Done. Wrote 1 rows" in res.output
-    assert out.read_text(encoding="utf-8").splitlines()[0] == 'track type=bedGraph name="T"'
+    assert (
+        out.read_text(encoding="utf-8").splitlines()[0]
+        == 'track type=bedGraph name="T"'
+    )
 
 
 def test_bedgraph_dash_output_does_not_close_stdout(tmp_path: Path, capsys):

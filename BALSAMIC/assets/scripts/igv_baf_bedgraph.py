@@ -19,31 +19,37 @@ def open_output(path: str | Path) -> ContextManager[TextIO]:
     return open(p, "w", encoding="utf-8")
 
 
-def variant_to_record(variant) -> str:
+def variant_to_record(variant) -> Optional[str]:
     """
-    Convert a cyvcf2 Variant to a BedGraphRecord.
+    Convert a cyvcf2 Variant to a bedGraph line.
 
     Assumptions:
       - exactly one sample
       - FORMAT/AD exists and has at least ref+alt counts
-      - FORMAT/DP exists and is > 0
+      - FORMAT/DP exists
     """
-
-    chrom = str(variant.CHROM)
-
     ad = variant.format("AD")
-    dp = variant.format("DP")
+    if ad is None:
+        return None
 
     counts = ad[0]
     alt_sum = int(np.sum(counts[1:]))
 
+    dp = variant.format("DP")
     dp_val = int(np.asarray(dp).reshape(-1)[0])
-    af = round(float(alt_sum / dp_val), 5)
+
+    # Compute AF safely
+    if dp_val <= 0:
+        af = 1.0
+    elif alt_sum == 0:
+        af = 0.0
+    else:
+        af = round(alt_sum / dp_val, 5)
 
     start = int(variant.POS)
     end = start + 1
 
-    return f"{chrom}\t{start}\t{end}\t{af}\n"
+    return f"{variant.CHROM}\t{start}\t{end}\t{af}\n"
 
 
 def convert_vcf_to_bedgraph(
@@ -58,7 +64,10 @@ def convert_vcf_to_bedgraph(
             fout.write(f'track type=bedGraph name="{track_name}"\n')
 
         for variant in vcf:
-            fout.write(variant_to_record(variant))
+            record = variant_to_record(variant)
+            if record == None:
+                continue
+            fout.write(record)
             n_written += 1
 
     return n_written
