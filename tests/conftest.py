@@ -2424,7 +2424,7 @@ def fixture_analysis_references_hg_data(
         "wgs_calling_regions": Path(
             cache_config.references.wgs_calling_regions.file_path
         ),
-        "cytoband_coordinates_file": Path(
+        "cytoband_coordinates": Path(
             cache_config.references.cytoband_coordinates.file_path
         ),
     }
