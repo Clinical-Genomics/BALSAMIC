@@ -16,7 +16,7 @@ from _pytest.tmpdir import TempPathFactory
 
 from BALSAMIC.commands.config.case import case_config
 from BALSAMIC.constants.analysis import BIOINFO_TOOL_ENV, SampleType, SequencingType
-from BALSAMIC.constants.cache import CacheVersion, DockerContainers
+from BALSAMIC.constants.cache import CacheVersion
 from BALSAMIC.constants.constants import FileType
 from BALSAMIC.constants.paths import CONTAINERS_DIR
 from BALSAMIC.models.config import ConfigModel, FastqInfoModel, SampleInstanceModel
@@ -38,7 +38,6 @@ from BALSAMIC.utils.cli import (
     get_snakefile,
     validate_cache_version,
     validate_umi_min_reads,
-    bioinfo_tool_version_conda,
 )
 from BALSAMIC.utils.exc import BalsamicError, WorkflowRunError
 from BALSAMIC.utils.io import (
@@ -209,6 +208,7 @@ def test_get_variant_callers_wrong_mutation_class(tumor_normal_config: Dict):
             mutation_class=wrong_mutation_class,
             sequencing_type=sequencing_type,
         )
+
 
 def test_get_variant_callers_wrong_sequencing_type(tumor_normal_config: Dict):
     # GIVEN a wrong workflow name
