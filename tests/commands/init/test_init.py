@@ -109,18 +109,14 @@ def test_init_hg_submit_succeeds(
     mock_sbatch.stdout = "Submitted batch job 12345"
     mock_sbatch.returncode = 0
 
-    with (
-        # IMPORTANT: skip the pre-step graph generation that shells out
-        patch("BALSAMIC.commands.init.base.generate_graph") as mock_gen_graph,
-        # Patch the *submitter* subprocess.run (this is where 'sbatch' is called)
-        patch(
-            "BALSAMIC.models.sbatchsubmitter.subprocess.run", return_value=mock_sbatch
-        ) as mock_submit_run,
-        # Optional: if you want to assert write_job_id_yaml call
-        patch(
-            "BALSAMIC.commands.init.base.SbatchSubmitter.write_job_id_yaml"
-        ) as mock_write_yaml,
-    ):
+    # mock_gen_graph - IMPORTANT: skip the pre-step graph generation that shells out
+    # mock_submit_run - Patch the *submitter* subprocess.run (this is where 'sbatch' is called)
+    # mock_write_yaml - Optional: if you want to assert write_job_id_yaml call
+    with patch("BALSAMIC.commands.init.base.generate_graph") as mock_gen_graph, patch(
+        "BALSAMIC.models.sbatchsubmitter.subprocess.run", return_value=mock_sbatch
+    ) as mock_submit_run, patch(
+        "BALSAMIC.commands.init.base.SbatchSubmitter.write_job_id_yaml"
+    ) as mock_write_yaml:
         result: Result = invoke_cli(
             [
                 "init",
@@ -158,16 +154,13 @@ def test_init_hg_submit_no_jobid_logs_warning(
     mock_sbatch.stdout = "weird output without job id"
     mock_sbatch.returncode = 0
 
-    with (
-        patch("BALSAMIC.commands.init.base.generate_graph"),
-        patch(
-            "BALSAMIC.models.sbatchsubmitter.subprocess.run", return_value=mock_sbatch
-        ),
-        patch(
-            "BALSAMIC.commands.init.base.SbatchSubmitter.write_job_id_yaml"
-        ) as mock_write_yaml,
-        patch("BALSAMIC.commands.init.base.LOG") as mock_log,
-    ):
+    with patch("BALSAMIC.commands.init.base.generate_graph"), patch(
+        "BALSAMIC.models.sbatchsubmitter.subprocess.run", return_value=mock_sbatch
+    ), patch(
+        "BALSAMIC.commands.init.base.SbatchSubmitter.write_job_id_yaml"
+    ) as mock_write_yaml, patch(
+        "BALSAMIC.commands.init.base.LOG"
+    ) as mock_log:
         result = invoke_cli(
             [
                 "init",
@@ -183,3 +176,34 @@ def test_init_hg_submit_no_jobid_logs_warning(
     mock_write_yaml.assert_not_called()
     mock_log.warning.assert_any_call("Could not retrieve job id from SLURM.")
     assert result.exit_code == EXIT_SUCCESS
+
+
+def test_init_canfam(
+    invoke_cli: partial,
+    tmp_path: Path,
+    cosmic_key: str,
+    config_json: str,
+):
+    """Test Balsamic init command."""
+
+    # GIVEN a temporary output directory and a COSMIC key
+
+    # WHEN invoking the init command
+    result: Result = invoke_cli(
+        [
+            "init",
+            "--out-dir",
+            tmp_path.as_posix(),
+            "--genome-version",
+            GenomeVersion.CanFam3,
+            "--cosmic-key",
+            cosmic_key,
+            "--run-interactively",
+        ]
+    )
+
+    # THEN the config_json should be created
+    assert Path(tmp_path, balsamic_version, GenomeVersion.CanFam3, config_json).exists()
+
+    # THEN the command should fail as no CanFam3 genome reference file is given or retrieved
+    assert result.exit_code == EXIT_FAIL

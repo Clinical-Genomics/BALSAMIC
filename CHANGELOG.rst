@@ -4,6 +4,7 @@
 Added:
 ^^^^^^
 * add AT_DROPOUT to all panel analyses QC deliverables https://github.com/Clinical-Genomics/BALSAMIC/pull/1646
+* add model validation for reference files in init command https://github.com/Clinical-Genomics/BALSAMIC/pull/1654
 
 Changed:
 ^^^^^^^^
