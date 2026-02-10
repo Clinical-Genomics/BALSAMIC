@@ -17,7 +17,7 @@ rule create_cnv_html_report:
         cnv_report_script = get_script_path("cnv_report/cnv_qc_report.py"),
         pon_cnn = lambda wildcards, pon_cnn=pon_cnn: f"--pon {pon_cnn}" if pon_cnn else "",
         gender = config_model.get_gender,
-        cytoband = config_model.analysis.cytoband,
+        cytoband = cytoband,
         is_exome = lambda wildcards, is_exome=config_model.panel.exome: f"--is-exome" if is_exome else "",
         cancergenes = config_model.analysis.cancergenes,
         case_id = config["analysis"]["case_id"],
