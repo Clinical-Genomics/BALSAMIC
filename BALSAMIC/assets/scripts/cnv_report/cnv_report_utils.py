@@ -73,7 +73,7 @@ GENE_TABLE_SPEC = TableSpec(
         "pon_mean_spread",
         "pon_chunk_effect",
         "pon_chunk_z",
-        "exons_overlapping_gene_region",
+        "pon_chunk_significance" "pon_chunk_indication" "exons_overlapping_gene_region",
     ],
     float_columns=[
         "seg_baf",
@@ -1634,24 +1634,41 @@ def create_gene_chunks(cnr_path: str | Path, pon_path: str | Path | None = None)
     chunks_df["n.targets"] = chunks_df["n_targets"]
 
     # -------------------- 5) PON deviation per chunk -------------------- #
-    min_n_for_pon = 2
+    MIN_CHUNK_TARGETS_FOR_CALL = 5
+
     chunks_df["pon_chunk_effect"] = chunks_df["mean_log2"] - chunks_df["pon_mean_log2"]
+
+    # Compute z with min_n=5 so small chunks naturally become NaN/0 depending on _pon_abs_z
     chunks_df["pon_chunk_z"] = chunks_df.apply(
         lambda r: _pon_abs_z(
             r["pon_chunk_effect"],
             r["pon_mean_spread"],
             r.get("n_targets", r.get("n.targets", np.nan)),
-            min_n=min_n_for_pon,
+            min_n=MIN_CHUNK_TARGETS_FOR_CALL,  # <-- change from 2 to 5
         ),
         axis=1,
     )
+
     chunks_df["pon_chunk_direction"] = chunks_df["pon_chunk_effect"].apply(
         _pon_direction
     )
+
     chunks_df["pon_chunk_significance"] = chunks_df["pon_chunk_z"].apply(
         lambda z: _pon_significance(z, noise_lt=2.0, borderline_lt=5.0)
     )
-    chunks_df["pon_chunk_indication"] = chunks_df.apply(
+
+    # Hard gate: never allow calls for chunks with too few targets
+    too_small = (
+        chunks_df["n_targets"].fillna(0).astype(int) < MIN_CHUNK_TARGETS_FOR_CALL
+    )
+    chunks_df.loc[
+        too_small, "pon_chunk_significance"
+    ] = "noise"  # or "not_significant" if that's what you use
+    chunks_df.loc[too_small, "pon_chunk_indication"] = "NEUTRAL"
+
+    # Only compute indication for eligible chunks
+    eligible = ~too_small
+    chunks_df.loc[eligible, "pon_chunk_indication"] = chunks_df.loc[eligible].apply(
         lambda r: _pon_cnv_call_from_log2(
             is_significant=str(r.get("pon_chunk_significance", "")).strip().lower()
             == "significant",
@@ -1663,6 +1680,7 @@ def create_gene_chunks(cnr_path: str | Path, pon_path: str | Path | None = None)
         ),
         axis=1,
     )
+
     return chunks_df
 
 
