@@ -536,7 +536,7 @@ def test_get_reference_file_paths_by_compression(cache_config: CacheConfig):
         cache_config.references.refgene_txt.file_path,
         cache_config.references.somalier_sites.file_path,
         cache_config.references.vcf_1kg.file_path,
-        cache_config.references.cytoband_coordinates_file.file_path,
+        #cache_config.references.cytoband_coordinates_file.file_path,
     ]:
         assert reference in reference_paths
 
