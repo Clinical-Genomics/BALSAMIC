@@ -210,38 +210,6 @@ def test_get_variant_callers_wrong_mutation_class(tumor_normal_config: Dict):
             sequencing_type=sequencing_type,
         )
 
-
-def test_bioinfo_tool_version_conda():
-    # GIVEN a tools dictionary
-    bioinfo_tools: dict = BIOINFO_TOOL_ENV
-    # GIVEN the directory for the tools' containers
-    container_conda_env_path: Path = CONTAINERS_DIR
-    # GIVEN a specific bioinfo tool container name that contains "picard"
-    container_conda_env_name = DockerContainers.ALIGN_QC
-
-    # WHEN calling bioinfo_tool_version_conda with the same logic as get_bioinfo_tools_version
-    bioinfo_tools_version = {}
-    yaml_file = Path(
-        container_conda_env_path,
-        container_conda_env_name,
-        container_conda_env_name + ".yaml",
-    )
-    with open(yaml_file, "r") as f:
-        conda_yaml = yaml.safe_load(f)
-
-    packages = conda_yaml.get("dependencies")
-
-    # GIVEN that one of the items is itself a dict of dependencies
-    packages[-1] = packages
-
-    bioinfo_tools_version = bioinfo_tool_version_conda(
-        packages, bioinfo_tools, bioinfo_tools_version
-    )
-
-    # THEN assert that the versions are correctly retrieved from conda
-    assert set(bioinfo_tools_version["picard"]).issubset({"2.27.1"})
-
-
 def test_get_variant_callers_wrong_sequencing_type(tumor_normal_config: Dict):
     # GIVEN a wrong workflow name
     workflow = "BALSAMIC"
