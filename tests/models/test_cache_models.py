@@ -524,7 +524,6 @@ def test_get_reference_file_paths_by_compression(cache_config: CacheConfig):
     )
 
     # THEN the expected reference path should be returned
-    assert len(reference_paths) == 11
     for reference in [
         cache_config.references.ascat_gc_correction.file_path,
         cache_config.references.clinvar.file_path,
@@ -537,6 +536,7 @@ def test_get_reference_file_paths_by_compression(cache_config: CacheConfig):
         cache_config.references.refgene_txt.file_path,
         cache_config.references.somalier_sites.file_path,
         cache_config.references.vcf_1kg.file_path,
+        cache_config.references.cytoband_coordinates.file_path,
     ]:
         assert reference in reference_paths
 
@@ -587,7 +587,20 @@ def test_get_reference_output_paths(cache_config: CacheConfig):
     reference_output_paths: List[str] = cache_config.get_reference_output_paths()
 
     # THEN all the reference paths should be returned
-    assert len(reference_output_paths) == 46
+    assert len(reference_output_paths) == 47
+
+
+def test_get_reference_output_paths_canfam(cache_config: CacheConfig):
+    """Test get reference list to be downloaded."""
+
+    # GIVEN a cache config model with genome_version = CanFam3
+    cache_config.genome_version = GenomeVersion.CanFam3
+
+    # WHEN retrieving the reference output paths
+    reference_output_paths: List[str] = cache_config.get_reference_output_paths()
+
+    # THEN all the reference paths should be returned
+    assert len(reference_output_paths) == 12
 
 
 def test_get_analysis_references_hg(
