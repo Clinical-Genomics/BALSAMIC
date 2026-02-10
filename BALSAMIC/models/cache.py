@@ -424,6 +424,7 @@ class CacheConfig(BaseModel):
             *self.references.get_delly_file_paths(),
             *self.references.get_gnomad_file_paths(),
             self.vep_dir.as_posix(),
+            self.references.cytoband_coordinates_file.file_path,
         ]
         return reference_paths
 
