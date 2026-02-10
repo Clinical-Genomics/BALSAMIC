@@ -212,30 +212,30 @@ class AnalysisReferencesCanFam(AnalysisReferences):
 
 class AnalysisReferencesHg(AnalysisReferences):
     """
-    Human reference genome files model.
+        Human reference genome files model.
 
-    Attributes:
-        access_regions (FilePath)            : Accessible genome regions.
-        ascat_chr_y_loci (FilePath)          : Chromosome Y loci.
-        ascat_gc_correction (FilePath)       : Genome GC correction bins.
-        cadd_snv (FilePath)                  : CADD SNV annotation file.
-        simple_repeat (FilePath)             : Simple repeats.
-        clinvar (FilePath)                   : ClinVar reference.
-        cosmic (FilePath)                    : COSMIC database's variants as VCF.
-        dbsnp (FilePath)                     : dbSNP VCF file.
-        delly_exclusion (FilePath)           : Genome exclusion regions.
-        delly_exclusion_converted (FilePath) : Genome exclusion regions without "chr" field.
-        delly_mappability (FilePath)         : Genome mappability.
-        gnomad_variant (FilePath)            : gnomAD variants (non SV) as VCF.
-        hc_vcf_1kg (FilePath)                : High confidence 1000 Genome VCF.
-        known_indel_1kg (FilePath)           : 1000 Genome known InDels VCF.
-        mills_1kg (FilePath)                 : Mills' high confidence InDels VCF.
-        rank_score (FilePath)                : Rank score model.
-        somalier_sites (FilePath)            : Somalier sites VCF.
-        vcf_1kg (FilePath)                   : 1000 Genome all SNPs.
-        vep_dir (DirectoryPath)              : VEP annotations output directory.
-        wgs_calling_regions (FilePath)       : WGS calling intervals.
-#        cytoband_coordinates_file (FilePath) : Cytoband coordinates file path.
+        Attributes:
+            access_regions (FilePath)            : Accessible genome regions.
+            ascat_chr_y_loci (FilePath)          : Chromosome Y loci.
+            ascat_gc_correction (FilePath)       : Genome GC correction bins.
+            cadd_snv (FilePath)                  : CADD SNV annotation file.
+            simple_repeat (FilePath)             : Simple repeats.
+            clinvar (FilePath)                   : ClinVar reference.
+            cosmic (FilePath)                    : COSMIC database's variants as VCF.
+            dbsnp (FilePath)                     : dbSNP VCF file.
+            delly_exclusion (FilePath)           : Genome exclusion regions.
+            delly_exclusion_converted (FilePath) : Genome exclusion regions without "chr" field.
+            delly_mappability (FilePath)         : Genome mappability.
+            gnomad_variant (FilePath)            : gnomAD variants (non SV) as VCF.
+            hc_vcf_1kg (FilePath)                : High confidence 1000 Genome VCF.
+            known_indel_1kg (FilePath)           : 1000 Genome known InDels VCF.
+            mills_1kg (FilePath)                 : Mills' high confidence InDels VCF.
+            rank_score (FilePath)                : Rank score model.
+            somalier_sites (FilePath)            : Somalier sites VCF.
+            vcf_1kg (FilePath)                   : 1000 Genome all SNPs.
+            vep_dir (DirectoryPath)              : VEP annotations output directory.
+            wgs_calling_regions (FilePath)       : WGS calling intervals.
+    #        cytoband_coordinates_file (FilePath) : Cytoband coordinates file path.
     """
 
     access_regions: FilePath
@@ -258,6 +258,8 @@ class AnalysisReferencesHg(AnalysisReferences):
     vcf_1kg: FilePath
     vep_dir: DirectoryPath
     wgs_calling_regions: FilePath
+
+
 #    cytoband_coordinates_file: FilePath
 
 
