@@ -124,7 +124,7 @@ class ReferencesHg(References):
         somalier_sites (ReferenceUrl)            : Somalier sites VCF.
         vcf_1kg (ReferenceUrl)                   : 1000 Genome all SNPs.
         wgs_calling_regions (ReferenceUrl)       : WGS calling intervals.
-        cytoband_coordinates_file (ReferenceUrl) : Cytoband coordinates file.
+        cytoband_coordinates (ReferenceUrl) : Cytoband coordinates file.
     """
 
     access_regions: ReferenceUrl
@@ -148,7 +148,7 @@ class ReferencesHg(References):
     somalier_sites: ReferenceUrl
     vcf_1kg: ReferenceUrl
     wgs_calling_regions: ReferenceUrl
-    cytoband_coordinates_file: ReferenceUrl
+    cytoband_coordinates: ReferenceUrl
 
     def get_cadd_snv_file_paths(self) -> List[str]:
         """Return CADD SNV reference output files."""
@@ -427,7 +427,7 @@ class CacheConfig(BaseModel):
             *self.references.get_delly_file_paths(),
             *self.references.get_gnomad_file_paths(),
             self.vep_dir.as_posix(),
-            self.references.cytoband_coordinates_file.file_path,
+            self.references.cytoband_coordinates.file_path,
         ]
         return reference_paths
 
@@ -470,5 +470,5 @@ class CacheConfig(BaseModel):
             vcf_1kg=f"{self.references.vcf_1kg.file_path}.{FileType.GZ}",
             vep_dir=self.vep_dir.as_posix(),
             wgs_calling_regions=self.references.wgs_calling_regions.file_path,
-            cytoband_coordinates_file=self.references.cytoband_coordinates_file.file_path,
+            cytoband_coordinates_file=self.references.cytoband_coordinates.file_path,
         )
