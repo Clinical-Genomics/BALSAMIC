@@ -103,6 +103,29 @@
           Show only cancer genes (is_cancer_gene TRUE)
         </label>
       </div>
+      <div class="control-group">
+  <span class="control-label">Column detail:</span>
+
+  <label style="margin-left:12px;">
+    <input type="checkbox" id="cols-qc-gene">
+    QC details
+  </label>
+
+  <label style="margin-left:12px;">
+    <input type="checkbox" id="cols-pon-gene">
+    PON details
+  </label>
+
+  <label style="margin-left:12px;">
+    <input type="checkbox" id="cols-cnvkit-extra-gene">
+    CNVkit extra
+  </label>
+
+    <label style="margin-left:12px;">
+    <input type="checkbox" id="cols-purecn-extra-gene">
+    PureCN extra
+  </label>
+</div>
 
       <div class="control-group">
         <label>
@@ -140,10 +163,6 @@
             Show only LOH / CNV chunks (loh_flag TRUE or CNV call ≠ NEUTRAL)
           </label>
           <label style="margin-left:12px;">
-            <input type="checkbox" id="show-pon-cnv-chunk">
-            Also include chunks with PON-based CNV call (pon_cnv_call ≠ "")
-          </label>
-          <label style="margin-left:12px;">
             <input type="checkbox" id="only-cancer-genes-chunk">
             Show only cancer genes (is_cancer_gene TRUE)
           </label>
@@ -159,6 +178,30 @@
             <input type="number" id="min-targets-chunk" min="0" step="1" value="0">
           </label>
         </div>
+
+        <div class="control-group">
+  <span class="control-label">Column detail:</span>
+
+  <label style="margin-left:12px;">
+    <input type="checkbox" id="cols-qc-chunk">
+    QC details
+  </label>
+
+  <label style="margin-left:12px;">
+    <input type="checkbox" id="cols-pon-chunk">
+    PON details
+  </label>
+
+  <label style="margin-left:12px;">
+    <input type="checkbox" id="cols-cnvkit-extra-chunk">
+    CNVkit extra
+  </label>
+
+    <label style="margin-left:12px;">
+    <input type="checkbox" id="cols-purecn-extra-chunk">
+    PureCN extra
+  </label>
+</div>
 
         <div class="control-group">
           <label>

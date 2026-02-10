@@ -333,26 +333,26 @@ def _compute_row_flags(gdf: pd.DataFrame) -> pd.DataFrame:
         ):
             return str(row["pon_chunk_significance"]).strip().lower() == "significant"
 
-        if "pon_chunk_call" in row.index and pd.notna(row["pon_chunk_call"]):
-            val = str(row["pon_chunk_call"]).strip().upper()
+        if "pon_chunk_indication" in row.index and pd.notna(
+            row["pon_chunk_indication"]
+        ):
+            val = str(row["pon_chunk_indication"]).strip().upper()
             if val in ("AMPLIFICATION", "DELETION"):
                 return True
 
-        if "pon_gene_call" in row.index and pd.notna(row["pon_gene_call"]):
-            return str(row["pon_gene_call"]).strip().lower() == "significant"
+        if "pon_gene_log2_significance" in row.index and pd.notna(
+            row["pon_gene_log2_significance"]
+        ):
+            return (
+                str(row["pon_gene_log2_significance"]).strip().lower() == "significant"
+            )
 
-        if "pon_gene_cnv_call" in row.index and pd.notna(row["pon_gene_cnv_call"]):
-            val = str(row["pon_gene_cnv_call"]).strip().upper()
-            if val in ("AMPLIFICATION", "DELETION"):
+        if "pon_gene_log2_indication" in row.index and pd.notna(
+            row["pon_gene_log2_indication"]
+        ):
+            val = str(row["pon_gene_log2_indication"]).strip().upper()
+            if val in ("GAIN", "LOSS"):
                 return True
-
-        if "pon_cnv_call" in row.index and pd.notna(row["pon_cnv_call"]):
-            val = str(row["pon_cnv_call"]).strip().upper()
-            if val in ("AMPLIFICATION", "DELETION"):
-                return True
-
-        if "pon_call" in row.index and pd.notna(row["pon_call"]):
-            return str(row["pon_call"]).strip().lower() == "significant"
 
         return False
 
@@ -823,11 +823,11 @@ def _draw_chunk_pon_segments(
         & (g_chunks_chr["region_start"] <= end_span)
     ].copy()
 
-    if "pon_chunk_call" not in chunks_span.columns:
+    if "pon_chunk_indication" not in chunks_span.columns:
         return pon_cnv_genes, label_added
 
     chunks_span["pon_chunk_call_norm"] = (
-        chunks_span["pon_chunk_call"].astype(str).str.strip().str.upper()
+        chunks_span["pon_chunk_indication"].astype(str).str.strip().str.upper()
     )
     chunks_span = chunks_span[
         chunks_span["pon_chunk_call_norm"].isin(["AMPLIFICATION", "DELETION"])

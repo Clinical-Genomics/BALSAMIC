@@ -17,7 +17,6 @@ from cnv_report_utils import (
     compute_summary_metrics,
     read_purecn_summary,
     pdf_first_page_to_png,
-    FINAL_FLOAT_COLUMNS,
 )
 from cnv_report_plotting import plot_chromosomes
 
@@ -160,22 +159,6 @@ def render_cnv_report_html(
 # =============================================================================
 # Helpers
 # =============================================================================
-
-
-def round_float_columns(
-    df: pd.DataFrame,
-    columns: Iterable[str],
-    decimals: int = 3,
-    inplace: bool = False,
-) -> pd.DataFrame:
-    """Round specified numeric columns to a fixed number of decimals if they exist."""
-    target = df if inplace else df.copy()
-    existing = [c for c in columns if c in target.columns]
-    if not existing:
-        return target
-    target[existing] = target[existing].apply(pd.to_numeric, errors="coerce")
-    target[existing] = target[existing].round(decimals)
-    return target
 
 
 def _read_text(path: Path) -> str:
@@ -351,6 +334,12 @@ def _collect_chr_plot_groups(
     help="CNVkit tumor .cns file.",
 )
 @click.option(
+    "--cns-init",
+    type=click.Path(exists=True),
+    required=True,
+    help="CNVkit tumor .cns initial file. (not adjusted for purity and ploidy)",
+)
+@click.option(
     "--pon",
     type=click.Path(exists=True),
     required=False,  # <- NOW OPTIONAL
@@ -431,6 +420,7 @@ def main(
     loh_genes: str,
     cnr: str,
     cns: str,
+    cns_init: str,
     pon: Optional[str],
     vcf: str,
     refgene: str,
@@ -485,6 +475,7 @@ def main(
     genes_df = build_gene_segment_table(
         cnr_path=cnr,
         cns_path=cns,
+        cns_init_path=cns_init,
         cancer_genes=cancer_gene_set,
         refgene_path=refgene,
         loh_path=loh_genes,
@@ -497,7 +488,15 @@ def main(
     # Create per chunk table
     # ----------------------------
     chunks_df = build_gene_chunk_table(
-        cnr_path=cnr, gene_seg_df=genes_df, pon_path=pon, refgene_path=refgene
+        cnr_path=cnr,
+        cns_path=cns,
+        cns_init_path=cns_init,
+        cancer_genes=cancer_gene_set,
+        refgene_path=refgene,
+        loh_path=loh_genes,
+        cytoband_path=cytoband,
+        sex=sex,
+        pon_path=pon,
     )
 
     # --- 1) PureCN summary (from purity_csv) ---
@@ -545,9 +544,6 @@ def main(
             chunks_df = chunks_df[
                 chunks_df["is_cancer_gene"].fillna(False).astype(bool)
             ]
-
-    genes_df = round_float_columns(genes_df, FINAL_FLOAT_COLUMNS)
-    chunks_df = round_float_columns(chunks_df, FINAL_FLOAT_COLUMNS)
 
     # ----------------------------
     # HTML report

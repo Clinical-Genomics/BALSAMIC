@@ -162,3 +162,7 @@ table.dataframe tr:nth-child(even) {
   font-weight: 700;
   cursor: pointer;
 }
+
+.control-label {
+  font-weight: 600;
+}

@@ -4,7 +4,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Tuple, Any, Callable
+from typing import Dict, List, Optional, Set, Tuple, Any, Mapping, Sequence
 
 # Third-party
 import numpy as np
@@ -15,28 +15,141 @@ import fitz
 # Local
 from BALSAMIC.constants.analysis import Gender
 
-
-FINAL_FLOAT_COLUMNS = [
-    "seg_baf",
-    "mean_log2",
-    "min_log2",
-    "max_log2",
-    "mean_weight",
-    "pon_gene_mean_log2",
-    "pon_gene_mean_spread",
-    "pon_gene_effect",
-    "pon_gene_z",
-    "depth_mean",
-    "pon_mean_log2",
-    "pon_mean_spread",
-    "pon_chunk_effect",
-    "pon_chunk_z",
-]
-
-
 # =============================================================================
 # Generic helpers
 # =============================================================================
+
+
+@dataclass(frozen=True)
+class TableSpec:
+    column_order: Sequence[str]
+    float_columns: Sequence[str]
+    decimals: int = 3
+    renames: Mapping[str, str] = None
+    sort_keys: tuple[str, str, str] = ("chr", "region_start", "region_end")
+
+
+GENE_TABLE_SPEC = TableSpec(
+    column_order=[
+        "chr",
+        "region_start",
+        "region_end",
+        "cytoband",
+        "gene.symbol",
+        "n.targets",
+        "mean_log2",
+        "min_log2",
+        "max_log2",
+        "cnvkit_cnv_call",
+        "purecn_cnv_call",
+        "purecn_loh_flag",
+        "cnvkit_seg_start",
+        "cnvkit_seg_end",
+        "cnvkit_seg_log2",
+        "cnvkit_seg_raw_log2",
+        "cnvkit_seg_baf",
+        "purecn_seg_start",
+        "purecn_seg_end",
+        "purecn_seg_mean",
+        "purecn_num_snps",
+        "cnvkit_seg_cn",
+        "cnvkit_seg_cn1",
+        "cnvkit_seg_cn2",
+        "purecn_C",
+        "purecn_M",
+        "purecn_M_flagged",
+        "exons_overlapping_cnvkit_segment",
+        "is_cancer_gene",
+        "depth_mean",
+        "mean_weight",
+        "pon_gene_mean_log2",
+        "pon_gene_mean_spread",
+        "pon_gene_effect",
+        "pon_gene_z",
+        "pon_gene_direction",
+        "pon_gene_significance",
+        "pon_gene_indication",
+        "pon_mean_log2",
+        "pon_mean_spread",
+        "pon_chunk_effect",
+        "pon_chunk_z",
+        "exons_overlapping_gene_region",
+    ],
+    float_columns=[
+        "seg_baf",
+        "mean_log2",
+        "min_log2",
+        "max_log2",
+        "mean_weight",
+        "pon_gene_mean_log2",
+        "pon_gene_mean_spread",
+        "pon_gene_effect",
+        "pon_gene_z",
+        "depth_mean",
+        "pon_mean_log2",
+        "pon_mean_spread",
+        "pon_chunk_effect",
+        "pon_chunk_z",
+        "cnvkit_seg_log2",
+        "cnvkit_seg_raw_log2",
+        "cnvkit_seg_baf",
+        "purecn_seg_mean",
+    ],
+    decimals=3,
+    renames={"n_targets": "n.targets"},
+)
+
+
+def finalize_gene_table(
+    genes_df: pd.DataFrame, spec: TableSpec = GENE_TABLE_SPEC
+) -> pd.DataFrame:
+    """
+    Finalize the gene-level table: rename legacy columns, reorder, round floats, and stable-sort by interval.
+    """
+    out = genes_df.copy()
+
+    # 1) Rename (only if present)
+    if spec.renames:
+        present = {
+            k: v
+            for k, v in spec.renames.items()
+            if k in out.columns and v not in out.columns
+        }
+        if present:
+            out = out.rename(columns=present)
+
+    # 2) Reorder columns (keeps extras at end if your _reorder_columns does that)
+    out = _reorder_columns(out, list(spec.column_order))
+
+    # 3) Round floats (only existing)
+    existing_floats = [c for c in spec.float_columns if c in out.columns]
+    if existing_floats:
+        out[existing_floats] = (
+            out[existing_floats]
+            .apply(pd.to_numeric, errors="coerce")
+            .round(spec.decimals)
+        )
+
+    # 4) Sort
+    chr_col, start_col, end_col = spec.sort_keys
+    if all(c in out.columns for c in (chr_col, start_col, end_col)):
+        out = _stable_sort_by_chr_interval(out, chr_col, start_col, end_col)
+
+    return out
+
+
+def pdf_first_page_to_png(
+    pdf_path: str | Path, png_path: str | Path, dpi: int = 300
+) -> None:
+    """
+    Render the first page of a PDF to a PNG image using PyMuPDF.
+    """
+    doc = fitz.open(str(pdf_path))
+    try:
+        page = doc[0]
+        page.get_pixmap(dpi=dpi).save(str(png_path))
+    finally:
+        doc.close()
 
 
 def safe_read_csv(path: str | Path, **kwargs) -> pd.DataFrame:
@@ -88,6 +201,13 @@ def _reorder_columns(df: pd.DataFrame, preferred: list[str]) -> pd.DataFrame:
     return df[preferred_present + [c for c in df.columns if c not in preferred_present]]
 
 
+def _detect_chr_col(df: pd.DataFrame, candidates: list[str]) -> str:
+    for c in candidates:
+        if c in df.columns:
+            return c
+    raise ValueError(f"Could not find chromosome column among: {candidates}")
+
+
 def _flatten_agg_columns(df: pd.DataFrame) -> pd.DataFrame:
     """Flatten MultiIndex columns produced by pandas .agg()."""
     df = df.copy()
@@ -98,124 +218,56 @@ def _flatten_agg_columns(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def _pon_abs_z(effect: float, spread: float, n_targets: float, *, min_n: int) -> float:
-    """Compute abs(effect) / (spread / sqrt(n)) with defensive checks."""
-    if pd.isna(effect) or pd.isna(spread) or spread <= 0:
-        return np.nan
-    if pd.isna(n_targets) or n_targets < min_n:
-        return np.nan
-    sigma_eff = spread / np.sqrt(float(n_targets))
-    if sigma_eff <= 0:
-        return np.nan
-    return abs(effect) / sigma_eff
-
-
-def _pon_direction(effect: float) -> str:
-    """Map effect sign to 'gain'/'loss'/'neutral' (or '' when missing)."""
-    if pd.isna(effect):
-        return ""
-    if effect > 0:
-        return "gain"
-    if effect < 0:
-        return "loss"
-    return "neutral"
-
-
-def _pon_significance(z: float, *, noise_lt: float, borderline_lt: float) -> str:
-    """Map z-score to 'noise'/'borderline'/'significant' (or '' when missing)."""
-    if pd.isna(z):
-        return ""
-    if z < noise_lt:
-        return "noise"
-    if z < borderline_lt:
-        return "borderline"
-    return "significant"
-
-
-def _pon_cnv_call_from_log2(
-    *,
-    is_significant: bool,
-    mean_log2: float,
-    gain_gt: float,
-    loss_lt: float,
-    non_significant_value: str,
-    neutral_value: str,
-) -> str:
-    """Return AMPLIFICATION/DELETION/neutral/nonsignificant depending on thresholds."""
-    if not is_significant or pd.isna(mean_log2):
-        return non_significant_value
-    if mean_log2 > gain_gt:
-        return "AMPLIFICATION"
-    if mean_log2 < loss_lt:
-        return "DELETION"
-    return neutral_value
-
-
-# =============================================================================
-# Shared IO / normalization (removes duplication)
-# =============================================================================
-
-
-@dataclass(frozen=True)
-class CnrMeta:
-    has_depth: bool
-    has_weight: bool
-
-
-def _detect_chr_col(df: pd.DataFrame, candidates: list[str]) -> str:
-    for c in candidates:
-        if c in df.columns:
-            return c
-    raise ValueError(f"Could not find chromosome column among: {candidates}")
-
-
 def _explode_multigene_bins(
     cnr: pd.DataFrame, *, gene_col: str = "gene"
 ) -> pd.DataFrame:
-    """
-    Drop pseudo genes and explode multi-gene bins into one row per gene.symbol.
-    """
+    """Drop pseudo genes and explode multi-gene bins into one row per gene.symbol."""
     cnr = cnr.copy()
+
+    # drop NA and pseudo-genes
     cnr = cnr[cnr[gene_col].notna()]
     cnr = cnr[~cnr[gene_col].isin(["Antitarget", "-"])]
 
-    cnr["gene.symbol"] = (
-        cnr[gene_col]
-        .astype(str)
-        .str.split(",")
-        .apply(lambda xs: [g.strip() for g in xs if g and g.strip()])
-    )
-    cnr = cnr.explode("gene.symbol")
+    # split on commas, strip whitespace
+    gene_series = cnr[gene_col].astype(str).str.split(r"\s*,\s*", regex=True)
+
+    cnr = cnr.assign(gene_symbol=gene_series).explode("gene_symbol")
+    cnr = cnr[
+        cnr["gene_symbol"].notna() & (cnr["gene_symbol"].astype(str).str.len() > 0)
+    ]
+    cnr = cnr.rename(columns={"gene_symbol": "gene.symbol"})
     return cnr
 
 
-def _load_cnr_bins(cnr_path: str | Path) -> tuple[pd.DataFrame, CnrMeta]:
-    """
-    Load CNVkit CNR, normalize chr, validate required columns, explode genes.
+def _left_merge_pon(cnr_bins: pd.DataFrame, pon_bins: pd.DataFrame) -> pd.DataFrame:
+    """Left-merge PON columns onto bins by (chr,start,end)."""
+    if pon_bins is None or pon_bins.empty:
+        return cnr_bins
+    return cnr_bins.merge(pon_bins, how="left", on=["chr", "start", "end"])
 
-    Returns:
-      bins_df with canonical 'chr' column and 'gene.symbol' column,
-      plus metadata flags (depth/weight availability).
-    """
+
+# =============================================================================
+# Read input files
+# =============================================================================
+
+
+def _load_cnr_bins(cnr_path: str | Path) -> pd.DataFrame:
+    """Load CNVkit CNR, normalize chr, validate columns, explode genes."""
     cnr = safe_read_csv(cnr_path, sep="\t").copy()
     if cnr.empty:
-        return pd.DataFrame(), CnrMeta(False, False)
+        return pd.DataFrame()
 
     chr_col = _detect_chr_col(cnr, ["chromosome", "chr", "CHROM"])
     cnr[chr_col] = _strip_chr_prefix(cnr[chr_col])
 
-    required = {"start", "end", "log2", "gene"}
+    required = {"start", "end", "log2", "gene", "depth", "weight"}
     missing = required - set(cnr.columns)
     if missing:
-        raise ValueError(f"CNR missing required columns: {missing}")
-
-    meta = CnrMeta(
-        has_depth=("depth" in cnr.columns), has_weight=("weight" in cnr.columns)
-    )
+        raise ValueError(f"CNR missing required columns: {sorted(missing)}")
 
     cnr = _explode_multigene_bins(cnr, gene_col="gene")
     cnr = cnr.rename(columns={chr_col: "chr"})
-    return cnr, meta
+    return cnr
 
 
 def _load_pon_bins(pon_path: str | Path) -> pd.DataFrame:
@@ -244,14 +296,73 @@ def _load_pon_bins(pon_path: str | Path) -> pd.DataFrame:
     return pon[["chr", "start", "end", "pon_log2", "pon_spread"]]
 
 
-def _left_merge_pon(cnr_bins: pd.DataFrame, pon_bins: pd.DataFrame) -> pd.DataFrame:
-    """Left-merge PON columns onto bins by (chr,start,end)."""
-    if pon_bins is None or pon_bins.empty:
-        return cnr_bins
-    return cnr_bins.merge(pon_bins, how="left", on=["chr", "start", "end"])
+def load_purecn_lohgenes_table(loh_path: str | Path) -> pd.DataFrame:
+    """
+    Load PureCN LOHgenes.csv and normalize columns + naming to purecn_*.
+    """
+    loh = safe_read_csv(loh_path, sep=",").copy()
+    if loh.empty:
+        return loh
+
+    loh_chr_col = "chr"
+    loh[loh_chr_col] = _strip_chr_prefix(loh[loh_chr_col]).astype(str)
+    loh = loh.rename(columns={loh_chr_col: "chr"})
+
+    keep = [
+        "chr",
+        "start",
+        "end",
+        "gene.symbol",
+        "C",
+        "M",
+        "M.flagged",
+        "loh",
+        "seg.mean",
+        "num.snps",
+    ]
+
+    out = loh[keep].rename(
+        columns={
+            "C": "purecn_C",
+            "start": "purecn_seg_start",
+            "end": "purecn_seg_end",
+            "M": "purecn_M",
+            "M.flagged": "purecn_M_flagged",
+            "loh": "purecn_loh_flag",
+            "seg.mean": "purecn_seg_mean",
+            "num.snps": "purecn_num_snps",
+        }
+    )
+
+    # numeric coercions
+    for c in [
+        "purecn_seg_start",
+        "purecn_seg_end",
+        "purecn_C",
+        "purecn_M",
+        "purecn_seg_mean",
+        "purecn_num_snps",
+    ]:
+        if c in out.columns:
+            out[c] = pd.to_numeric(out[c], errors="coerce")
+
+    # strict TRUE/FALSE/NA -> nullable boolean
+    def _tfna_to_bool(s: pd.Series) -> pd.Series:
+        x = s.astype("string").str.strip().str.upper()
+        # normalize NA-like
+        x = x.replace({"": pd.NA, "NA": pd.NA, "NAN": pd.NA, "NONE": pd.NA})
+        # map TRUE/FALSE; everything else -> <NA>
+        mapped = x.map({"TRUE": True, "FALSE": False})
+        return mapped.astype("boolean")
+
+    for c in ["purecn_loh_flag", "purecn_M_flagged"]:
+        if c in out.columns:
+            out[c] = _tfna_to_bool(out[c])
+
+    return out
 
 
-def _load_cns_segments(cns_path: str | Path) -> pd.DataFrame:
+def _load_cns_segments(cns_path: str | Path, cns_file_type: str) -> pd.DataFrame:
     """
     Load CNVkit CNS, normalize chr, keep available segment columns,
     and assign stable segment_id within each file.
@@ -266,7 +377,10 @@ def _load_cns_segments(cns_path: str | Path) -> pd.DataFrame:
     if not {"start", "end"}.issubset(cns.columns):
         raise ValueError("CNS file must contain 'start' and 'end' columns.")
 
-    base_cols = ["start", "end", "log2", "baf", "cn", "cn1", "cn2", "depth"]
+    if cns_file_type == "calls":
+        base_cols = ["start", "end", "log2", "baf", "cn", "cn1", "cn2", "depth"]
+    else:
+        base_cols = ["start", "end", "log2"]
     keep = [c for c in base_cols if c in cns.columns]
     cns = cns[[chr_col] + keep].rename(columns={chr_col: "chr"}).copy()
     cns = cns.sort_values(["chr", "start"], kind="stable").reset_index(drop=True)
@@ -274,157 +388,29 @@ def _load_cns_segments(cns_path: str | Path) -> pd.DataFrame:
     return cns
 
 
-# =============================================================================
-# Vectorized bin->segment assignment (replaces per-row scan)
-# =============================================================================
-
-_SEG_OUT_COLS = [
-    "segment_id",
-    "seg_start",
-    "seg_end",
-    "seg_log2",
-    "seg_baf",
-    "seg_cn",
-    "seg_cn1",
-    "seg_cn2",
-]
-
-
-def _assign_segments_by_center(
-    bins_chr: pd.DataFrame, segs_chr: pd.DataFrame
+def load_cnvkit_segments_with_raw(
+    cns_path: str | Path,
+    cns_init_path: str | Path,
 ) -> pd.DataFrame:
-    """
-    Assign a segment to each bin by bin-center, for a single chromosome.
+    """Load CNVkit called segments and attach raw_log2 from the init segments file."""
+    segs = _load_cns_segments(cns_path, "calls").copy()
+    segs_init = _load_cns_segments(cns_init_path, "raw").copy()
 
-    - Uses searchsorted on seg start positions.
-    - Expected segments are non-overlapping and sorted by start.
-    """
-    out = bins_chr.copy()
+    # normalize column names expected downstream
+    segs["chr"] = _strip_chr_prefix(segs["chr"]).astype(str)
+    segs_init["chr"] = _strip_chr_prefix(segs_init["chr"]).astype(str)
 
-    if segs_chr is None or segs_chr.empty or out.empty:
-        out["segment_id"] = "no_segment"
-        for col in _SEG_OUT_COLS[1:]:
-            out[col] = np.nan
-        return out
-
-    segs = segs_chr.sort_values("start", kind="stable").reset_index(drop=True)
-
-    centers = ((out["start"].to_numpy() + out["end"].to_numpy()) // 2).astype(int)
-
-    starts = segs["start"].to_numpy()
-    ends = segs["end"].to_numpy()
-
-    # Find candidate segment index: rightmost segment with start <= center
-    idx = np.searchsorted(starts, centers, side="right") - 1
-    valid = (idx >= 0) & (centers < ends[np.clip(idx, 0, len(ends) - 1)])
-
-    # Defaults
-    out["segment_id"] = "no_segment"
-    out["seg_start"] = np.nan
-    out["seg_end"] = np.nan
-    out["seg_log2"] = np.nan
-    out["seg_baf"] = np.nan
-    out["seg_cn"] = np.nan
-    out["seg_cn1"] = np.nan
-    out["seg_cn2"] = np.nan
-
-    if not valid.any():
-        return out
-
-    vidx = idx[valid]
-    out.loc[valid, "segment_id"] = segs.loc[vidx, "segment_id"].to_numpy()
-    out.loc[valid, "seg_start"] = segs.loc[vidx, "start"].to_numpy()
-    out.loc[valid, "seg_end"] = segs.loc[vidx, "end"].to_numpy()
-
-    if "log2" in segs.columns:
-        out.loc[valid, "seg_log2"] = segs.loc[vidx, "log2"].to_numpy()
-    if "baf" in segs.columns:
-        out.loc[valid, "seg_baf"] = segs.loc[vidx, "baf"].to_numpy()
-    if "cn" in segs.columns:
-        out.loc[valid, "seg_cn"] = segs.loc[vidx, "cn"].to_numpy()
-    if "cn1" in segs.columns:
-        out.loc[valid, "seg_cn1"] = segs.loc[vidx, "cn1"].to_numpy()
-    if "cn2" in segs.columns:
-        out.loc[valid, "seg_cn2"] = segs.loc[vidx, "cn2"].to_numpy()
-
-    return out
+    segs_init = segs_init.rename(columns={"log2": "raw_log2"})
+    segs = segs.merge(
+        segs_init[["chr", "start", "end", "raw_log2"]],
+        on=["chr", "start", "end"],
+        how="left",
+        validate="one_to_one",
+    )
+    return segs
 
 
-def _assign_segments_all_chrom(bins: pd.DataFrame, segs: pd.DataFrame) -> pd.DataFrame:
-    """
-    Apply bin->segment assignment per chromosome; keeps original bins order stable.
-    """
-    if bins.empty:
-        return bins
-
-    if segs is None or segs.empty:
-        out = bins.copy()
-        out["segment_id"] = "no_segment"
-        for col in _SEG_OUT_COLS[1:]:
-            out[col] = np.nan
-        return out
-
-    segs_by_chr = {c: d for c, d in segs.groupby("chr", sort=False)}
-
-    annotated = []
-    for chrom, bins_chr in bins.groupby("chr", sort=False):
-        annotated.append(
-            _assign_segments_by_center(bins_chr, segs_by_chr.get(chrom, pd.DataFrame()))
-        )
-    return pd.concat(annotated, ignore_index=True)
-
-
-# =============================================================================
-# CNV classification
-# =============================================================================
-
-
-def classify_cnv_from_total_cn_sex_aware(
-    cn: float | int | None,
-    chrom: str | int,
-    sex: Gender,
-) -> str:
-    """
-    Sex-aware classifier based on absolute total copy number.
-
-    - Autosomes (1–22): baseline = 2
-    - Chr X: baseline = 2 (female), 1 (male)
-    - Chr Y: baseline = 1 (male), 0 (female)
-
-    Returns: 'DELETION', 'AMPLIFICATION', or 'NEUTRAL'
-    """
-    if pd.isna(cn):
-        return ""
-
-    chrom_str = re.sub(r"^chr", "", str(chrom), flags=re.IGNORECASE)
-
-    if chrom_str.isdigit():
-        expected = 2
-    elif chrom_str.upper() == "X":
-        expected = 2 if sex == Gender.FEMALE else 1
-    elif chrom_str.upper() == "Y":
-        expected = 1 if sex == Gender.MALE else 0
-    else:
-        expected = 2
-
-    cn_int = int(round(float(cn)))
-    exp_int = int(round(expected))
-
-    if cn_int < exp_int:
-        return "DELETION"
-    if cn_int > exp_int:
-        return "AMPLIFICATION"
-    return "NEUTRAL"
-
-
-# =============================================================================
-# refGene / exon coverage (unchanged API; just reused)
-# =============================================================================
-
-
-def load_refgene_exons(
-    refgene_path: str | Path,
-) -> Dict[Tuple[str, str], dict]:
+def load_refgene_exons(refgene_path: str | Path) -> Dict[Tuple[str, str], dict]:
     cols = [
         "gene_symbol",
         "transcript",
@@ -464,15 +450,12 @@ def load_refgene_exons(
         exon_map[(chrom, gene)] = {
             "transcript": best["transcript"],
             "strand": best["strand"],
+            "txStart": int(best["txStart"]),
+            "txEnd": int(best["txEnd"]),
             "exons": exons,
         }
 
     return exon_map
-
-
-# =============================================================================
-# Cytoband (kept as-is except tiny reuse of _strip_chr_prefix)
-# =============================================================================
 
 
 def load_cytobands(path: str | Path) -> pd.DataFrame:
@@ -483,70 +466,6 @@ def load_cytobands(path: str | Path) -> pd.DataFrame:
     cyto["start_int"] = cyto["chromStart"].astype(int)
     cyto["end_int"] = cyto["chromEnd"].astype(int)
     return cyto
-
-
-def annotate_genes_with_cytoband(
-    df_genes: pd.DataFrame, cyto: pd.DataFrame
-) -> pd.DataFrame:
-    """
-    Add 'cytoband' based on (seg_start, seg_end), fallback to (start, end).
-    """
-    df = df_genes.copy()
-    if "chr" not in df.columns:
-        raise ValueError("df_genes must contain a 'chr' column.")
-    df["chr"] = _strip_chr_prefix(df["chr"])
-    df["cytoband"] = pd.Series(pd.NA, index=df.index, dtype="string")
-    if "seg_start" not in df.columns:
-        df["seg_start"] = np.nan
-    if "seg_end" not in df.columns:
-        df["seg_end"] = np.nan
-
-    for chrom, genes_chr in df.groupby("chr", sort=False):
-        cyto_chr = cyto[cyto["chrom"] == chrom]
-        if cyto_chr.empty:
-            continue
-
-        cyto_chr = cyto_chr.sort_values("start_int", kind="stable")
-        band_starts = cyto_chr["start_int"].to_numpy()
-        band_ends = cyto_chr["end_int"].to_numpy()
-        band_names = cyto_chr["name"].to_numpy()
-
-        for idx, row in genes_chr.iterrows():
-            if pd.notna(row["seg_start"]) and pd.notna(row["seg_end"]):
-                s_start = int(row["seg_start"])
-                s_end = int(row["seg_end"])
-            else:
-                if "start" not in df.columns or "end" not in df.columns:
-                    continue
-                s_start = int(row["start"])
-                s_end = int(row["end"])
-
-            mask = (band_starts <= s_end) & (band_ends >= s_start)
-            if not mask.any():
-                continue
-
-            names = band_names[mask]
-            if len(names) == 1:
-                label = f"{chrom}{names[0]}"
-            else:
-                label = f"{chrom}{names[0]}-{chrom}{names[-1]}"
-            df.at[idx, "cytoband"] = label
-
-    return df
-
-
-def pdf_first_page_to_png(
-    pdf_path: str | Path, png_path: str | Path, dpi: int = 300
-) -> None:
-    """
-    Render the first page of a PDF to a PNG image using PyMuPDF.
-    """
-    doc = fitz.open(str(pdf_path))
-    try:
-        page = doc[0]
-        page.get_pixmap(dpi=dpi).save(str(png_path))
-    finally:
-        doc.close()
 
 
 def load_cancer_gene_set(
@@ -599,6 +518,166 @@ def load_cancer_gene_set(
     selected = df.loc[mask, symbol_col].astype(str).str.strip()
     selected = selected[selected != ""]
     return set(selected)
+
+
+# =============================================================================
+# Vectorized bin->segment assignment (replaces per-row scan)
+# =============================================================================
+
+DEFAULT_SEGMENT_ID = "no_segment"
+
+SEG_VALUE_COLS = {
+    "start": "seg_start",
+    "end": "seg_end",
+    "log2": "seg_log2",
+    "raw_log2": "seg_raw_log2",
+    "baf": "seg_baf",
+    "cn": "seg_cn",
+    "cn1": "seg_cn1",
+    "cn2": "seg_cn2",
+}
+
+SEG_OUT_COLS = ["segment_id", *SEG_VALUE_COLS.values()]
+
+
+def _assign_segments_by_center(
+    bins_chr: pd.DataFrame, segs_chr: pd.DataFrame
+) -> pd.DataFrame:
+    """
+    Assign a CNVkit segment to each bin using the bin midpoint (single chromosome).
+
+    Assumptions:
+      - segs_chr segments are non-overlapping; assignment is based on: start <= center < end
+      - segs_chr is sorted by start (we sort defensively)
+    """
+    out = bins_chr.copy()
+
+    # Ensure stable output schema + defaults
+    out["segment_id"] = DEFAULT_SEGMENT_ID
+    for col in SEG_OUT_COLS[1:]:
+        out[col] = np.nan
+
+    if segs_chr is None or segs_chr.empty or out.empty:
+        return out
+
+    segs = segs_chr.sort_values("start", kind="stable").reset_index(drop=True)
+
+    # Use integer arrays for searchsorted correctness
+    bin_starts = out["start"].to_numpy(dtype=np.int64, copy=False)
+    bin_ends = out["end"].to_numpy(dtype=np.int64, copy=False)
+    centers = (bin_starts + bin_ends) // 2
+
+    seg_starts = segs["start"].to_numpy(dtype=np.int64, copy=False)
+    seg_ends = segs["end"].to_numpy(dtype=np.int64, copy=False)
+
+    idx = np.searchsorted(seg_starts, centers, side="right") - 1
+    in_bounds = idx >= 0
+    if not in_bounds.any():
+        return out
+
+    # Only evaluate end-bound where idx is valid
+    valid = in_bounds.copy()
+    valid[in_bounds] &= centers[in_bounds] < seg_ends[idx[in_bounds]]
+    if not valid.any():
+        return out
+
+    vidx = idx[valid]
+
+    # Always fill segment_id if present; otherwise keep default
+    if "segment_id" in segs.columns:
+        out.loc[valid, "segment_id"] = segs.loc[vidx, "segment_id"].to_numpy(copy=False)
+
+    # Bulk-assign available segment attributes
+    for seg_col, out_col in SEG_VALUE_COLS.items():
+        if seg_col in segs.columns:
+            out.loc[valid, out_col] = segs.loc[vidx, seg_col].to_numpy(copy=False)
+
+    return out
+
+
+def _assign_segments_all_chrom(bins: pd.DataFrame, segs: pd.DataFrame) -> pd.DataFrame:
+    """
+    Apply bin->segment assignment per chromosome; keeps original bins order stable.
+    """
+    if bins.empty:
+        return bins
+
+    if segs is None or segs.empty:
+        out = bins.copy()
+        out["segment_id"] = "no_segment"
+        for col in SEG_OUT_COLS[1:]:
+            out[col] = np.nan
+        return out
+
+    segs_by_chr = {c: d for c, d in segs.groupby("chr", sort=False)}
+
+    annotated = []
+    for chrom, bins_chr in bins.groupby("chr", sort=False):
+        annotated.append(
+            _assign_segments_by_center(bins_chr, segs_by_chr.get(chrom, pd.DataFrame()))
+        )
+    return pd.concat(annotated, ignore_index=True)
+
+
+# =============================================================================
+# CNV classification
+# =============================================================================
+
+
+# =============================================================================
+# Cytoband
+# =============================================================================
+
+
+def annotate_genes_with_cytoband(
+    df_genes: pd.DataFrame, cyto: pd.DataFrame
+) -> pd.DataFrame:
+    """
+    Add 'cytoband' based on (seg_start, seg_end), fallback to (start, end).
+    """
+    df = df_genes.copy()
+    if "chr" not in df.columns:
+        raise ValueError("df_genes must contain a 'chr' column.")
+    df["chr"] = _strip_chr_prefix(df["chr"])
+    df["cytoband"] = pd.Series(pd.NA, index=df.index, dtype="string")
+
+    for chrom, genes_chr in df.groupby("chr", sort=False):
+        cyto_chr = cyto[cyto["chrom"] == chrom]
+        if cyto_chr.empty:
+            continue
+
+        cyto_chr = cyto_chr.sort_values("start_int", kind="stable")
+        band_starts = cyto_chr["start_int"].to_numpy()
+        band_ends = cyto_chr["end_int"].to_numpy()
+        band_names = cyto_chr["name"].to_numpy()
+
+        for idx, row in genes_chr.iterrows():
+            if pd.notna(row["cnvkit_seg_start"]) and pd.notna(row["cnvkit_seg_end"]):
+                s_start = int(row["cnvkit_seg_start"])
+                s_end = int(row["cnvkit_seg_end"])
+            else:
+                if "start" not in df.columns or "end" not in df.columns:
+                    continue
+                s_start = int(row["start"])
+                s_end = int(row["end"])
+
+            mask = (band_starts <= s_end) & (band_ends >= s_start)
+            if not mask.any():
+                continue
+
+            names = band_names[mask]
+            if len(names) == 1:
+                label = f"{chrom}{names[0]}"
+            else:
+                label = f"{chrom}{names[0]}-{chrom}{names[-1]}"
+            df.at[idx, "cytoband"] = label
+
+    return df
+
+
+# =============================================================================
+# Summary metrics functions
+# =============================================================================
 
 
 def compute_dlr_spread_from_cnr(
@@ -770,6 +849,59 @@ def compute_summary_metrics(
 # =============================================================================
 
 
+def _pon_abs_z(effect: float, spread: float, n_targets: float, *, min_n: int) -> float:
+    """Compute abs(effect) / (spread / sqrt(n)) with defensive checks."""
+    if pd.isna(effect) or pd.isna(spread) or spread <= 0:
+        return np.nan
+    if pd.isna(n_targets) or n_targets < min_n:
+        return np.nan
+    sigma_eff = spread / np.sqrt(float(n_targets))
+    if sigma_eff <= 0:
+        return np.nan
+    return abs(effect) / sigma_eff
+
+
+def _pon_direction(effect: float) -> str:
+    """Map effect sign to 'gain'/'loss'/'neutral' (or '' when missing)."""
+    if pd.isna(effect):
+        return ""
+    if effect > 0:
+        return "gain"
+    if effect < 0:
+        return "loss"
+    return "neutral"
+
+
+def _pon_significance(z: float, *, noise_lt: float, borderline_lt: float) -> str:
+    """Map z-score to 'noise'/'borderline'/'significant' (or '' when missing)."""
+    if pd.isna(z):
+        return ""
+    if z < noise_lt:
+        return "noise"
+    if z < borderline_lt:
+        return "borderline"
+    return "significant"
+
+
+def _pon_cnv_call_from_log2(
+    *,
+    is_significant: bool,
+    mean_log2: float,
+    gain_gt: float,
+    loss_lt: float,
+    non_significant_value: str,
+    neutral_value: str,
+) -> str:
+    """Return AMPLIFICATION/DELETION/neutral/nonsignificant depending on thresholds."""
+    if not is_significant or pd.isna(mean_log2):
+        return non_significant_value
+    if mean_log2 > gain_gt:
+        return "GAIN"
+    if mean_log2 < loss_lt:
+        return "LOSS"
+    return neutral_value
+
+
 def _compute_gene_level_pon_from_bins(bins: pd.DataFrame) -> pd.DataFrame | None:
     """
     Gene-level PON stats computed from per-bin data (independent of segments/chunks).
@@ -808,13 +940,13 @@ def _compute_gene_level_pon_from_bins(bins: pd.DataFrame) -> pd.DataFrame | None
     )
 
     gene_agg["pon_gene_direction"] = gene_agg["pon_gene_effect"].apply(_pon_direction)
-    gene_agg["pon_gene_call"] = gene_agg["pon_gene_z"].apply(
+    gene_agg["pon_gene_significance"] = gene_agg["pon_gene_z"].apply(
         lambda z: _pon_significance(z, noise_lt=1.5, borderline_lt=3.0)
     )
 
-    gene_agg["pon_gene_cnv_call"] = gene_agg.apply(
+    gene_agg["pon_gene_indication"] = gene_agg.apply(
         lambda r: _pon_cnv_call_from_log2(
-            is_significant=str(r.get("pon_gene_call", "")).strip().lower()
+            is_significant=str(r.get("pon_gene_significance", "")).strip().lower()
             == "significant",
             mean_log2=r.get("gene_mean_log2", np.nan),
             gain_gt=0.08,
@@ -834,94 +966,101 @@ def _compute_gene_level_pon_from_bins(bins: pd.DataFrame) -> pd.DataFrame | None
             "pon_gene_effect",
             "pon_gene_z",
             "pon_gene_direction",
-            "pon_gene_call",
-            "pon_gene_cnv_call",
+            "pon_gene_significance",
+            "pon_gene_indication",
         ]
     ]
 
 
+# =============================================================================
+# Segment CNV classification
+# =============================================================================
+
+
+def classify_cnv_from_total_cn_sex_aware(
+    cn: float | int | None,
+    chrom: str | int,
+    sex: Gender,
+) -> str:
+    """
+    Sex-aware classifier based on absolute total copy number.
+
+    - Autosomes (1–22): baseline = 2
+    - Chr X: baseline = 2 (female), 1 (male)
+    - Chr Y: baseline = 1 (male), 0 (female)
+
+    Returns: 'DELETION', 'AMPLIFICATION', or 'NEUTRAL'
+    """
+    if pd.isna(cn):
+        return ""
+
+    chrom_str = re.sub(r"^chr", "", str(chrom), flags=re.IGNORECASE)
+
+    if chrom_str.isdigit():
+        expected = 2
+    elif chrom_str.upper() == "X":
+        expected = 2 if sex == Gender.FEMALE else 1
+    elif chrom_str.upper() == "Y":
+        expected = 1 if sex == Gender.MALE else 0
+    else:
+        expected = 2
+
+    cn_int = int(round(float(cn)))
+    exp_int = int(round(expected))
+
+    if cn_int < exp_int:
+        return "DELETION"
+    if cn_int > exp_int:
+        return "AMPLIFICATION"
+    return "NEUTRAL"
+
+
 def _add_cnv_calls_from_total_cn(genes_df: pd.DataFrame, sex: Gender) -> pd.DataFrame:
     """
-    Add cnvkit_cnv_call and purecn_cnv_call with the same "AMP_EPS" sanity check logic.
+    Add cnvkit_cnv_call and purecn_cnv_call with an AMP_EPS sanity check:
+    if a call is AMP/DEL but |cnvkit_seg_log2| is tiny, downgrade to NEUTRAL.
     """
     AMP_EPS = 0.05
     out = genes_df.copy()
 
-    def _call_with_sanity(total_cn_col: str, sanity_log2_col: str) -> pd.Series:
-        if not {"chr", total_cn_col}.issubset(out.columns):
-            return pd.Series(index=out.index, dtype="object")
+    # CNVkit is required
+    required_cnvkit = {"chr", "cnvkit_seg_cn", "cnvkit_seg_log2"}
+    missing = required_cnvkit - set(out.columns)
+    if missing:
+        raise ValueError(
+            f"Missing required CNVkit columns for CNV calling: {sorted(missing)}"
+        )
 
-        def _row_call(r: pd.Series) -> str:
-            base = classify_cnv_from_total_cn_sex_aware(r[total_cn_col], r["chr"], sex)
+    def _row_call_cnvkit(r: pd.Series):
+        base = classify_cnv_from_total_cn_sex_aware(r["cnvkit_seg_cn"], r["chr"], sex)
+        base_u = str(base).strip().upper()
+        if base_u not in ("AMPLIFICATION", "DELETION"):
+            return base
+
+        v = r["cnvkit_seg_log2"]
+        if pd.notna(v) and abs(float(v)) < AMP_EPS:
+            return "NEUTRAL"
+        return base
+
+    out["cnvkit_cnv_call"] = out.apply(_row_call_cnvkit, axis=1)
+
+    # PureCN is optional
+    if {"purecn_C", "purecn_seg_mean", "chr"}.issubset(out.columns):
+
+        def _row_call_purecn(r: pd.Series):
+            base = classify_cnv_from_total_cn_sex_aware(r["purecn_C"], r["chr"], sex)
             base_u = str(base).strip().upper()
             if base_u not in ("AMPLIFICATION", "DELETION"):
                 return base
-            v = r.get(sanity_log2_col, np.nan)
+
+            v = r["purecn_seg_mean"]
             if pd.notna(v) and abs(float(v)) < AMP_EPS:
                 return "NEUTRAL"
             return base
 
-        return out.apply(_row_call, axis=1)
-
-    if {"seg_cn", "chr"}.issubset(out.columns):
-        out["cnvkit_cnv_call"] = _call_with_sanity("seg_cn", "seg_log2")
-
-    if {"loh_C", "chr"}.issubset(out.columns):
-        out["purecn_cnv_call"] = _call_with_sanity("loh_C", "loh_seg_mean")
+        out["purecn_cnv_call"] = out.apply(_row_call_purecn, axis=1)
 
     return out
-
-
-def _finalize_gene_table_order(genes_df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Shared final ordering/sorting.
-    """
-    out = genes_df.copy()
-    if "n_targets" in out.columns and "n.targets" not in out.columns:
-        out = out.rename(columns={"n_targets": "n.targets"})
-
-    cols_order = [
-        "chr",
-        "region_start",
-        "region_end",
-        "seg_start",
-        "seg_end",
-        "cytoband",
-        "gene.symbol",
-        "n.targets",
-        "seg_log2",
-        "loh_seg_mean",
-        "loh_num_snps",
-        "seg_baf",
-        "mean_log2",
-        "min_log2",
-        "max_log2",
-        "mean_weight",
-        "seg_cn",
-        "seg_cn1",
-        "seg_cn2",
-        "loh_C",
-        "loh_M",
-        "loh_M_flagged",
-        "loh_flag",
-        "is_cancer_gene",
-        "exons_overlapping_segment",
-        "cnvkit_cnv_call",
-        "purecn_cnv_call",
-        "pon_gene_mean_log2",
-        "pon_gene_mean_spread",
-        "pon_gene_effect",
-        "pon_gene_z",
-        "pon_gene_direction",
-        "pon_gene_call",
-        "pon_gene_cnv_call",
-        "pon_mean_log2",
-        "pon_mean_spread",
-        "pon_chunk_effect",
-        "pon_chunk_z",
-    ]
-    out = _reorder_columns(out, cols_order)
-    return _stable_sort_by_chr_interval(out, "chr", "region_start", "region_end")
 
 
 # =============================================================================
@@ -989,365 +1128,279 @@ def _compute_exons_hit_for_region(
     return ",".join(str(x) if x == y else f"{x}-{y}" for x, y in ranges)
 
 
+def _compute_exons_hit_for_region(
+    exon_map: dict[tuple[str, str], dict[str, Any]],
+    *,
+    chrom: str,
+    gene: str,
+    region_start: float | int | None,
+    region_end: float | int | None,
+) -> str:
+    # Missing region -> no exon annotation
+    if (
+        region_start is None
+        or region_end is None
+        or pd.isna(region_start)
+        or pd.isna(region_end)
+    ):
+        return ""
+
+    key = (str(chrom), str(gene))
+    info = exon_map.get(key)
+    if not info:
+        return ""
+
+    s = int(region_start)
+    e = int(region_end)
+    if e <= s:
+        return ""
+
+    tx_start = int(info["txStart"])
+    tx_end = int(info["txEnd"])
+
+    # If region fully spans the transcript, report whole gene
+    if s <= tx_start and e >= tx_end:
+        return "whole gene"
+
+    exons: list[tuple[int, int]] = info["exons"]
+
+    hit_idxs: list[int] = []
+    for i, (xs, xe) in enumerate(exons, start=1):
+        # half-open overlap: [xs, xe) overlaps [s, e)
+        if max(xs, s) < min(xe, e):
+            hit_idxs.append(i)
+
+    if not hit_idxs:
+        return ""
+
+    return "exon " + ",".join(map(str, hit_idxs))
+
+
 def _add_exons_hit_column(
     df: pd.DataFrame,
     exon_map: dict[tuple[str, str], dict[str, Any]],
     *,
     chr_col: str = "chr",
     gene_col: str = "gene.symbol",
-    start_col: str = "region_start",
-    end_col: str = "region_end",
-    pick_region: Callable[[pd.Series], tuple[float | int | None, float | int | None]]
-    | None = None,
-    out_col: str = "exons_overlapping_segment",
+    start_col: str,
+    end_col: str,
+    out_col: str,
 ) -> pd.DataFrame:
-    """
-    Add/overwrite df[out_col] by computing exon overlaps.
-
-    If pick_region is provided, it will be called per row and should return
-    (region_start, region_end) to use for overlap (e.g. segment span vs row span).
-    """
+    """Add/overwrite df[out_col] by computing exon overlaps vs [start_col, end_col]."""
 
     def _one(row: pd.Series) -> str:
-        if pick_region is None:
-            rs = row.get(start_col)
-            re = row.get(end_col)
-        else:
-            rs, re = pick_region(row)
-
         return _compute_exons_hit_for_region(
             exon_map=exon_map,
             chrom=str(row.get(chr_col, "")),
             gene=str(row.get(gene_col, "")),
-            region_start=rs,
-            region_end=re,
+            region_start=row.get(start_col),
+            region_end=row.get(end_col),
         )
 
     df[out_col] = df.apply(_one, axis=1)
     return df
 
 
-def _compute_cnvkit_segment_target_means(
-    bins: pd.DataFrame,
+# =============================================================================
+# add overlapping cnvkit segments
+# =============================================================================
+
+
+def annotate_regions_with_cnvkit_segments(
+    regions_df: pd.DataFrame,
+    segs: pd.DataFrame,
     *,
-    target_gene_col: str = "gene",
-    antitarget_label: str = "Antitarget",
+    region_chr_col: str = "chr",
+    region_start_col: str = "region_start",
+    region_end_col: str = "region_end",
+    prefix: str = "cnvkit_seg_",
+    overwrite: bool = True,
 ) -> pd.DataFrame:
     """
-    Compute per-(chr, segment_id) mean log2 using TARGET bins only (exclude Antitarget).
-
-    Requires bins to have: chr, segment_id, log2, and a gene label column (default 'gene').
-    Returns a dataframe with: chr, segment_id, mean_log2_cnvkit_targets
+    Annotate a region table (genes or chunks) with best-overlapping CNVkit segment fields.
+    Writes columns like cnvkit_seg_start/end/log2/raw_log2/baf/cn/cn1/cn2 if present.
     """
-    required = {"chr", "segment_id", "log2"}
-    missing = required - set(bins.columns)
-    if missing:
-        raise ValueError(
-            f"bins missing required columns for target mean calc: {missing}"
+    if regions_df.empty or segs.empty:
+        return regions_df
+
+    out = regions_df.copy()
+    out[region_chr_col] = _strip_chr_prefix(out[region_chr_col]).astype(str)
+
+    s = segs.copy()
+    s["chr"] = _strip_chr_prefix(s["chr"]).astype(str)
+
+    # per-chrom map for speed
+    segs_by_chr: dict[str, pd.DataFrame] = {
+        str(ch): df.reset_index(drop=True) for ch, df in s.groupby("chr", sort=False)
+    }
+
+    # which segment fields do we have?
+    seg_field_map = {
+        "start": f"{prefix}start",
+        "end": f"{prefix}end",
+        "log2": f"{prefix}log2",
+        "raw_log2": f"{prefix}raw_log2",
+        "baf": f"{prefix}baf",
+        "cn": f"{prefix}cn",
+        "cn1": f"{prefix}cn1",
+        "cn2": f"{prefix}cn2",
+    }
+    seg_field_map = {k: v for k, v in seg_field_map.items() if k in s.columns}
+
+    # ensure output columns exist
+    for outcol in seg_field_map.values():
+        if outcol not in out.columns:
+            out[outcol] = np.nan
+
+    for i, row in out.iterrows():
+        ch = str(row.get(region_chr_col, ""))
+        segs_chr = segs_by_chr.get(ch)
+        picked = _pick_best_overlapping_segment(
+            segs_chr,
+            row.get(region_start_col, np.nan),
+            row.get(region_end_col, np.nan),
         )
+        if picked is None:
+            continue
 
-    # Treat bins with gene == 'Antitarget' as antitarget; keep everything else as target.
-    if target_gene_col in bins.columns:
-        is_target = bins[target_gene_col].astype(str) != antitarget_label
-    else:
-        # If gene column isn't present, best-effort fallback: treat all as targets.
-        is_target = pd.Series(True, index=bins.index)
+        for seg_col, out_col in seg_field_map.items():
+            if overwrite or pd.isna(out.at[i, out_col]):
+                out.at[i, out_col] = picked.get(seg_col, np.nan)
 
-    sub = bins.loc[
-        is_target & bins["segment_id"].notna(), ["chr", "segment_id", "log2"]
-    ].copy()
-    if sub.empty:
-        return pd.DataFrame(columns=["chr", "segment_id", "mean_log2_cnvkit_targets"])
+    return out
 
-    out = sub.groupby(["chr", "segment_id"], as_index=False).agg(
-        mean_log2_cnvkit_targets=("log2", "mean")
-    )
+
+def _pick_best_overlapping_segment(
+    segs_chr: pd.DataFrame,
+    region_start: float,
+    region_end: float,
+) -> pd.Series | None:
+    """Return the segment row (Series) with max bp overlap vs region, or None."""
+    if segs_chr is None or segs_chr.empty:
+        return None
+    if pd.isna(region_start) or pd.isna(region_end):
+        return None
+
+    mask = (segs_chr["end"] > region_start) & (segs_chr["start"] < region_end)
+    if not mask.any():
+        return None
+
+    ssub = segs_chr.loc[mask]
+    ov0 = np.maximum(ssub["start"].to_numpy(), region_start)
+    ov1 = np.minimum(ssub["end"].to_numpy(), region_end)
+    best = int((ov1 - ov0).argmax())
+    return ssub.iloc[best]
+
+
+# =============================================================================
+# add overlapping purecn segments
+# =============================================================================
+
+
+def annotate_regions_with_purecn_loh(
+    regions_df: pd.DataFrame,
+    loh_df: pd.DataFrame,
+    *,
+    region_chr_col: str = "chr",
+    region_gene_col: str = "gene.symbol",
+    region_start_col: str = "region_start",
+    region_end_col: str = "region_end",
+    overwrite: bool = True,
+) -> pd.DataFrame:
+    """
+    Annotate regions (genes OR chunks) with PureCN LOH info.
+
+    Behavior:
+    - If loh_df has purecn_seg_start/purecn_seg_end, pick the best-overlapping LOH row
+      within (chr, gene.symbol) and copy purecn_* fields (segment-aware).
+    - Otherwise, do a simple merge on (chr, gene.symbol) (gene-level LOHgenes).
+    """
+    if regions_df.empty or loh_df.empty:
+        return regions_df
+
+    out = regions_df.copy()
+    out[region_chr_col] = _strip_chr_prefix(out[region_chr_col]).astype(str)
+
+    loh = loh_df.copy()
+    loh["chr"] = _strip_chr_prefix(loh["chr"]).astype(str)
+
+    have_seg = {"purecn_seg_start", "purecn_seg_end"}.issubset(loh.columns)
+
+    # columns to transfer
+    loh_value_cols = [c for c in loh.columns if c.startswith("purecn_")]
+
+    # Ensure destination columns exist
+    for c in loh_value_cols:
+        if c not in out.columns:
+            if c in loh.columns and pd.api.types.is_bool_dtype(loh[c]):
+                out[c] = pd.array([pd.NA] * len(out), dtype="boolean")
+            else:
+                out[c] = np.nan
+
+    if not have_seg:
+        # simple gene-level merge
+        merged = out.merge(
+            loh[["chr", "gene.symbol"] + loh_value_cols],
+            how="left",
+            left_on=[region_chr_col, region_gene_col],
+            right_on=["chr", "gene.symbol"],
+            suffixes=("", "_lohdup"),
+        )
+        # drop duplicate join columns from right side if they appear
+        merged = merged.drop(
+            columns=["chr_lohdup", "gene.symbol_lohdup"], errors="ignore"
+        )
+        return merged
+
+    # Segment-aware: pre-split LOH rows by (chr, gene)
+    key_cols = ["chr", "gene.symbol"]
+    loh_map: dict[tuple[str, str], pd.DataFrame] = {
+        (str(ch), str(g)): df.reset_index(drop=True)
+        for (ch, g), df in loh.groupby(key_cols, sort=False)
+    }
+
+    for i, row in out.iterrows():
+        ch = str(row.get(region_chr_col, ""))
+        g = str(row.get(region_gene_col, ""))
+        cand = loh_map.get((ch, g))
+        if cand is None or cand.empty:
+            continue
+
+        rs = row.get(region_start_col, np.nan)
+        re = row.get(region_end_col, np.nan)
+        if pd.isna(rs) or pd.isna(re):
+            continue
+
+        # overlap vs purecn seg boundaries
+        mask = (cand["purecn_seg_end"] > rs) & (cand["purecn_seg_start"] < re)
+        if not mask.any():
+            continue
+
+        sub = cand.loc[mask]
+        ov0 = np.maximum(sub["purecn_seg_start"].to_numpy(), rs)
+        ov1 = np.minimum(sub["purecn_seg_end"].to_numpy(), re)
+        best = int((ov1 - ov0).argmax())
+        picked = sub.iloc[best]
+
+        for c in loh_value_cols:
+            if overwrite or pd.isna(out.at[i, c]):
+                out.at[i, c] = picked.get(c, np.nan)
+
     return out
 
 
 # =============================================================================
-# build_gene_segment_table
-# =============================================================================
-def build_gene_segment_table(
-    cnr_path: str | Path,
-    cns_path: str | Path,
-    cytoband_path: str | Path,
-    cancer_genes: Optional[Set[str]] = None,
-    refgene_path: str | Path | None = None,
-    loh_path: str | Path | None = None,
-    sex: Gender = None,
-    pon_path: str | Path | None = None,
-) -> pd.DataFrame:
-    """
-    Build a per-gene × CNVkit-segment table.
-
-    Inputs / provenance:
-      - CNVkit:
-          * CNR bins -> region_start/region_end + per-gene log2 summary stats
-          * CNS segments -> cnvkit_seg_* columns (segment boundaries, log2, BAF, total CN, cn1/cn2)
-      - PureCN (optional):
-          * LOHgenes CSV -> purecn_* columns (LOH metrics and (if present) PureCN segment boundaries)
-      - Cytoband (REQUIRED):
-          * adds cytoband annotation
-      - refGene (optional):
-          * exon overlap string in 'exons_overlapping_segment' (computed against CNVkit segment span if CNV)
-      - PON (optional):
-          * merged into bins and gene-level stats attached at end
-    """
-
-    # 1) CNR bins (+ explode genes)
-    bins, meta = _load_cnr_bins(cnr_path)
-    if bins.empty:
-        return pd.DataFrame()
-
-    # 2) optional PON -> bins
-    if pon_path is not None and Path(pon_path).is_file():
-        pon = _load_pon_bins(pon_path)
-        bins = _left_merge_pon(bins, pon)
-
-    # 3) CNS segments
-    segs = _load_cns_segments(cns_path)
-
-    # 4) assign CNVkit segments to bins (vectorized)
-    bins = _assign_segments_all_chrom(bins, segs)
-    bins = bins.sort_values(["chr", "gene.symbol", "start"], kind="stable").reset_index(
-        drop=True
-    )
-
-    # 4b) compute CNVkit segment-level TARGET-only mean log2 and attach later
-    seg_target_means = _compute_cnvkit_segment_target_means(bins)
-
-    # 5) gene-level PON stats (independent of segments)
-    gene_pon = _compute_gene_level_pon_from_bins(bins)
-
-    # 6) collapse bins -> (chr, gene.symbol, CNVkit segment)
-    agg_dict: dict[str, list[str]] = {
-        "start": ["min"],
-        "end": ["max"],
-        "log2": ["count", "mean", "min", "max"],
-    }
-    if meta.has_depth and "depth" in bins.columns:
-        agg_dict["depth"] = ["mean"]
-    if meta.has_weight and "weight" in bins.columns:
-        agg_dict["weight"] = ["mean"]
-
-    # CNVkit segment fields as first() (these were created in bins by _assign_segments_all_chrom)
-    for col in [
-        "seg_start",
-        "seg_end",
-        "seg_log2",
-        "seg_baf",
-        "seg_cn",
-        "seg_cn1",
-        "seg_cn2",
-    ]:
-        if col in bins.columns:
-            agg_dict[col] = ["first"]
-
-    genes_df = bins.groupby(["chr", "gene.symbol", "segment_id"], as_index=False).agg(
-        agg_dict
-    )
-    genes_df = _flatten_agg_columns(genes_df).rename(
-        columns={
-            "start_min": "region_start",
-            "end_max": "region_end",
-            "log2_count": "n_targets",
-            "log2_mean": "mean_log2",
-            "log2_min": "min_log2",
-            "log2_max": "max_log2",
-            "weight_mean": "mean_weight",
-            "seg_start_first": "seg_start",
-            "seg_end_first": "seg_end",
-            "seg_log2_first": "seg_log2",
-            "seg_baf_first": "seg_baf",
-            "seg_cn_first": "seg_cn",
-            "seg_cn1_first": "seg_cn1",
-            "seg_cn2_first": "seg_cn2",
-            "depth_mean": "depth_mean",
-        }
-    )
-
-    # Attach CNVkit segment target-only mean log2 using segment_id
-    if seg_target_means is not None and not seg_target_means.empty:
-        genes_df = genes_df.merge(
-            seg_target_means,
-            how="left",
-            on=["chr", "segment_id"],
-        )
-    else:
-        genes_df["mean_log2_cnvkit_targets"] = np.nan
-
-    if cancer_genes is not None:
-        genes_df["is_cancer_gene"] = genes_df["gene.symbol"].isin(cancer_genes)
-
-    # 7) PureCN LOHgenes attach (rename to purecn_* for clarity)
-    if loh_path is not None and Path(loh_path).is_file():
-        loh = safe_read_csv(loh_path, sep=",").copy()
-        if not loh.empty:
-            loh_chr_col = "chr" if "chr" in loh.columns else "chromosome"
-            loh[loh_chr_col] = _strip_chr_prefix(loh[loh_chr_col])
-            loh = loh.rename(columns={loh_chr_col: "chr"})
-
-            if "Sampleid" in loh.columns and loh["Sampleid"].nunique() > 1:
-                raise ValueError(
-                    "LOHgenes file contains multiple Sampleid values; "
-                    "subset to a single sample before calling build_gene_segment_table."
-                )
-
-            required_loh = {
-                "gene.symbol",
-                "chr",
-                "C",
-                "M",
-                "M.flagged",
-                "loh",
-                "seg.mean",
-                "num.snps",
-            }
-            missing = required_loh - set(loh.columns)
-            if missing:
-                raise ValueError(f"LOHgenes file missing columns: {missing}")
-
-            # Optional PureCN segment boundaries (if present in your LOHgenes export)
-            purecn_seg_start_col = None
-            purecn_seg_end_col = None
-            for cand in ("seg.start", "seg_start", "start", "seg_begin"):
-                if cand in loh.columns:
-                    purecn_seg_start_col = cand
-                    break
-            for cand in ("seg.end", "seg_end", "end", "seg_finish"):
-                if cand in loh.columns:
-                    purecn_seg_end_col = cand
-                    break
-
-            keep = [
-                "chr",
-                "gene.symbol",
-                "C",
-                "M",
-                "M.flagged",
-                "loh",
-                "seg.mean",
-                "num.snps",
-            ]
-            if purecn_seg_start_col is not None and purecn_seg_end_col is not None:
-                keep += [purecn_seg_start_col, purecn_seg_end_col]
-
-            loh_small = loh[keep].rename(
-                columns={
-                    "C": "purecn_C",
-                    "M": "purecn_M",
-                    "M.flagged": "purecn_M_flagged",
-                    "loh": "purecn_loh_flag",
-                    "seg.mean": "purecn_seg_mean",
-                    "num.snps": "purecn_num_snps",
-                }
-            )
-
-            if purecn_seg_start_col and purecn_seg_end_col:
-                loh_small = loh_small.rename(
-                    columns={
-                        purecn_seg_start_col: "purecn_seg_start",
-                        purecn_seg_end_col: "purecn_seg_end",
-                    }
-                )
-
-            genes_df = genes_df.merge(loh_small, how="left", on=["chr", "gene.symbol"])
-
-    # 8) cytoband
-    cyto = load_cytobands(cytoband_path)
-    genes_df = annotate_genes_with_cytoband(genes_df, cyto)
-
-    # 9) CNV calls (uses seg_cn / chr / sex)
-    genes_df = _add_cnv_calls_from_total_cn(genes_df, sex)
-
-    # 10) exon annotations (column name clarified)
-    if refgene_path is not None and Path(refgene_path).is_file():
-        exon_map = load_refgene_exons(refgene_path)
-
-        def _segment_is_cnv(row: pd.Series) -> bool:
-            seg_cn = row.get("seg_cn", np.nan)
-            if pd.notna(seg_cn):
-                call = classify_cnv_from_total_cn_sex_aware(seg_cn, row.get("chr"), sex)
-                if str(call).upper() in ("AMPLIFICATION", "DELETION"):
-                    return True
-
-            # If you consider PureCN C as “CN” for this decision:
-            purecn_C = row.get("purecn_C", np.nan)
-            if pd.notna(purecn_C):
-                call = classify_cnv_from_total_cn_sex_aware(
-                    purecn_C, row.get("chr"), sex
-                )
-                if str(call).upper() in ("AMPLIFICATION", "DELETION"):
-                    return True
-
-            return False
-
-        def _pick_region(
-            row: pd.Series,
-        ) -> tuple[float | int | None, float | int | None]:
-            # If CNV, prefer CNVkit segment span; else per-row region span
-            if _segment_is_cnv(row):
-                ss = row.get("seg_start")
-                se = row.get("seg_end")
-                if pd.notna(ss) and pd.notna(se):
-                    return ss, se
-            return row.get("region_start"), row.get("region_end")
-
-        genes_df = _add_exons_hit_column(
-            genes_df,
-            exon_map,
-            pick_region=_pick_region,
-            out_col="exons_overlapping_segment",
-        )
-
-    # 11) attach gene-level PON stats
-    if gene_pon is not None and not gene_pon.empty:
-        genes_df = genes_df.merge(gene_pon, how="left", on=["chr", "gene.symbol"])
-
-    # 12) Rename CNVkit segment-derived columns to make provenance explicit
-    # (Keep existing downstream call columns like cnvkit_cnv_call as-is.)
-    rename_cnvkit = {
-        "seg_start": "cnvkit_seg_start",
-        "seg_end": "cnvkit_seg_end",
-        "seg_log2": "cnvkit_seg_log2",
-        "seg_baf": "cnvkit_seg_baf",
-        "seg_cn": "cnvkit_seg_cn",
-        "seg_cn1": "cnvkit_seg_cn1",
-        "seg_cn2": "cnvkit_seg_cn2",
-    }
-    genes_df = genes_df.rename(
-        columns={k: v for k, v in rename_cnvkit.items() if k in genes_df.columns}
-    )
-
-    # segment_id is internal; drop it after all merges are done
-    genes_df = genes_df.drop(columns=["segment_id"], errors="ignore")
-
-    return _finalize_gene_table_order(genes_df)
-
-
-# =============================================================================
-# build_gene_chunk_table (refactored)
+# build_gene_chunk_table
 # =============================================================================
 
 
-def build_gene_chunk_table(
-    cnr_path: str | Path,
-    gene_seg_df: pd.DataFrame,
-    pon_path: str | Path | None = None,
-    refgene_path: str | Path | None = None,
-) -> pd.DataFrame:
-    """
-    Build per-gene, per-chunk table using CNR + PON (required),
-    then annotate chunks using existing gene-segment table by overlap.
-    """
-
+def create_gene_chunks(cnr_path: str | Path, pon_path: str | Path | None = None):
     # 0) PON required
     if pon_path is None or not Path(pon_path).is_file():
         return pd.DataFrame()
 
     # 1) CNR bins (exploded)
-    bins, meta = _load_cnr_bins(cnr_path)
+    bins = _load_cnr_bins(cnr_path)
     if bins.empty:
         return pd.DataFrame()
 
@@ -1561,10 +1614,6 @@ def build_gene_chunk_table(
         "pon_log2": ["mean"],
         "pon_spread": ["mean"],
     }
-    if meta.has_depth and "depth" in bins.columns:
-        agg_dict["depth"] = ["mean"]
-    if meta.has_weight and "weight" in bins.columns:
-        agg_dict["weight"] = ["mean"]
 
     chunks_df = bins.groupby(["chr", "gene.symbol", "chunk_id"], as_index=False).agg(
         agg_dict
@@ -1602,7 +1651,7 @@ def build_gene_chunk_table(
     chunks_df["pon_chunk_significance"] = chunks_df["pon_chunk_z"].apply(
         lambda z: _pon_significance(z, noise_lt=2.0, borderline_lt=5.0)
     )
-    chunks_df["pon_chunk_call"] = chunks_df.apply(
+    chunks_df["pon_chunk_indication"] = chunks_df.apply(
         lambda r: _pon_cnv_call_from_log2(
             is_significant=str(r.get("pon_chunk_significance", "")).strip().lower()
             == "significant",
@@ -1614,138 +1663,192 @@ def build_gene_chunk_table(
         ),
         axis=1,
     )
+    return chunks_df
 
-    # -------------------- 6) Annotate from gene_seg_df by overlap -------------------- #
-    required = {"chr", "gene.symbol", "region_start", "region_end"}
-    if not required.issubset(gene_seg_df.columns):
-        raise ValueError(
-            "gene_seg_df must contain 'chr', 'gene.symbol', 'region_start', 'region_end'."
+
+# =============================================================================
+# build_gene_segment_table
+# =============================================================================
+def build_gene_segment_table(
+    cnr_path: str,
+    cns_path: str,
+    cns_init_path: str,
+    cytoband_path: str,
+    cancer_genes: Optional[Set[str]] = None,
+    refgene_path: str | None = None,
+    loh_path: str | None = None,
+    sex: Gender = None,
+    pon_path: str | None = None,
+) -> pd.DataFrame:
+    # 1) bins
+    bins = _load_cnr_bins(cnr_path)
+    if bins.empty:
+        return pd.DataFrame()
+
+    # 2) optional PON
+    if pon_path is not None and Path(pon_path).is_file():
+        pon = _load_pon_bins(pon_path)
+        bins = _left_merge_pon(bins, pon)
+
+    # 3) CNVkit segments (calls + raw)
+    segs = load_cnvkit_segments_with_raw(cns_path, cns_init_path)
+
+    bins = bins.sort_values(["chr", "gene.symbol", "start"], kind="stable").reset_index(
+        drop=True
+    )
+
+    # 4) gene-level PON stats
+    gene_pon = _compute_gene_level_pon_from_bins(bins)
+
+    # 5) collapse bins -> gene-level regions (no segment_id needed if you want pure gene-level)
+    genes_df = (
+        bins.groupby(["chr", "gene.symbol"], sort=False)
+        .agg(
+            region_start=("start", "min"),
+            region_end=("end", "max"),
+            n_targets=("log2", "count"),
+            mean_log2=("log2", "mean"),
+            min_log2=("log2", "min"),
+            max_log2=("log2", "max"),
+            depth_mean=("depth", "mean"),
+            mean_weight=("weight", "mean"),
+        )
+        .reset_index()
+    )
+
+    # 6) annotate gene regions with best-overlapping CNVkit segment
+    genes_df = annotate_regions_with_cnvkit_segments(
+        genes_df,
+        segs,
+        region_chr_col="chr",
+        region_start_col="region_start",
+        region_end_col="region_end",
+        prefix="cnvkit_seg_",
+        overwrite=True,
+    )
+
+    # 7) PureCN LOHgenes attach (rename to purecn_* for clarity)
+    if loh_path is not None and Path(loh_path).is_file():
+        loh_df = load_purecn_lohgenes_table(loh_path)
+        genes_df = annotate_regions_with_purecn_loh(
+            genes_df,
+            loh_df,
+            region_chr_col="chr",
+            region_gene_col="gene.symbol",
+            region_start_col="region_start",
+            region_end_col="region_end",
+            overwrite=True,
         )
 
-    gseg = gene_seg_df.copy()
-    gseg["chr"] = _strip_chr_prefix(gseg["chr"])
+    if cancer_genes is not None:
+        genes_df["is_cancer_gene"] = genes_df["gene.symbol"].isin(cancer_genes)
 
-    seg_map: dict[tuple[str, str], pd.DataFrame] = {
-        (str(ch), str(g)): df.reset_index(drop=True)
-        for (ch, g), df in gseg.groupby(["chr", "gene.symbol"], sort=False)
-    }
+    # 8) cytoband
+    cyto = load_cytobands(cytoband_path)
+    genes_df = annotate_genes_with_cytoband(genes_df, cyto)
 
-    # 6b) Chunk-specific exon overlap
+    # 9) CNV calls (uses cnvkit_seg_cn etc if present)
+    genes_df = _add_cnv_calls_from_total_cn(genes_df, sex)
+
+    # 10) exon annotations
+    if refgene_path is not None and Path(refgene_path).is_file():
+        exon_map = load_refgene_exons(refgene_path)
+        genes_df = _add_exons_hit_column(
+            genes_df,
+            exon_map,
+            start_col="cnvkit_seg_start",
+            end_col="cnvkit_seg_end",
+            out_col="exons_overlapping_cnvkit_segment",
+        )
+        genes_df = _add_exons_hit_column(
+            genes_df,
+            exon_map,
+            start_col="region_start",
+            end_col="region_end",
+            out_col="exons_overlapping_gene_region",
+        )
+
+    # 11) attach gene-level PON stats
+    if gene_pon is not None and not gene_pon.empty:
+        genes_df = genes_df.merge(gene_pon, how="left", on=["chr", "gene.symbol"])
+
+    # segment_id is internal; drop it after all merges are done
+    genes_df = genes_df.drop(
+        columns=["segment_id", "pon_gene_direction"], errors="ignore"
+    )
+
+    return finalize_gene_table(genes_df)
+
+
+def build_gene_chunk_table(
+    cnr_path: str,
+    cns_path: str,
+    cns_init_path: str,
+    cytoband_path: str,
+    cancer_genes: Optional[Set[str]] = None,
+    refgene_path: str | None = None,
+    loh_path: str | None = None,
+    sex: Gender = None,
+    pon_path: str | None = None,
+) -> pd.DataFrame:
+    """
+    Build per-gene, per-chunk table using CNR + PON (required),
+    then annotate chunks using existing gene-segment table by overlap.
+    """
+
+    # Create base chunk table
+    chunks_df = create_gene_chunks(cnr_path=cnr_path, pon_path=pon_path)
+
+    if chunks_df.empty:
+        return chunks_df
+
+    # Load segments once
+    segs = load_cnvkit_segments_with_raw(cns_path, cns_init_path)
+
+    # Annotate chunk regions with best-overlapping CNVkit segment
+    chunks_df = annotate_regions_with_cnvkit_segments(
+        chunks_df,
+        segs,
+        region_chr_col="chr",
+        region_start_col="region_start",
+        region_end_col="region_end",
+        prefix="cnvkit_seg_",
+        overwrite=True,
+    )
+
+    # cytoband
+    cyto = load_cytobands(cytoband_path)
+    chunks_df = annotate_genes_with_cytoband(chunks_df, cyto)
+
+    # cancer genes flag (optional)
+    if cancer_genes is not None:
+        chunks_df["is_cancer_gene"] = chunks_df["gene.symbol"].isin(cancer_genes)
+
+    # exon overlap vs chunk region
     if refgene_path is not None and Path(refgene_path).is_file():
         exon_map = load_refgene_exons(refgene_path)
         chunks_df = _add_exons_hit_column(
             chunks_df,
             exon_map,
+            start_col="region_start",
+            end_col="region_end",
             out_col="exons_overlapping_chunk",
         )
 
-    protected_cols = {
-        "region_start",
-        "region_end",
-        "n_targets",
-        "n.targets",
-        "mean_log2",
-        "min_log2",
-        "max_log2",
-        "mean_weight",
-        "pon_mean_log2",
-        "pon_mean_spread",
-        "pon_chunk_effect",
-        "pon_chunk_z",
-        "pon_chunk_direction",
-        "pon_chunk_significance",
-        "pon_chunk_call",
-    }
+    if loh_path is not None and Path(loh_path).is_file():
+        loh_df = load_purecn_lohgenes_table(loh_path)
+        chunks_df = annotate_regions_with_purecn_loh(
+            chunks_df,
+            loh_df,
+            region_chr_col="chr",
+            region_gene_col="gene.symbol",
+            region_start_col="region_start",
+            region_end_col="region_end",
+            overwrite=True,
+        )
 
-    annot_cols = [
-        c
-        for c in gseg.columns
-        if c
-        not in ({"chr", "gene.symbol", "region_start", "region_end"} | protected_cols)
-    ]
+    # CNV calls (now based on cnvkit_seg_cn etc if present)
+    chunks_df = _add_cnv_calls_from_total_cn(chunks_df, sex)
+    chunks_df = chunks_df.drop(columns=["chunk_id", "n_targets", "pon_chunk_direction"])
 
-    def _annotate_one(row: pd.Series) -> pd.Series:
-        segs = seg_map.get((str(row["chr"]), str(row["gene.symbol"])))
-        if segs is None or segs.empty:
-            return row
-
-        c0, c1 = row["region_start"], row["region_end"]
-        if pd.isna(c0) or pd.isna(c1):
-            return row
-
-        mask = (segs["region_end"] > c0) & (segs["region_start"] < c1)
-        if not mask.any():
-            return row
-
-        ssub = segs.loc[mask]
-        ov0 = np.maximum(ssub["region_start"].to_numpy(), c0)
-        ov1 = np.minimum(ssub["region_end"].to_numpy(), c1)
-        best = int((ov1 - ov0).argmax())
-        picked = ssub.iloc[best]
-
-        for c in annot_cols:
-            row[c] = picked[c]
-        return row
-
-    chunks_df = chunks_df.apply(_annotate_one, axis=1)
-
-    # Drop any gene-level PON columns if they came in from gene_seg_df
-    chunks_df = chunks_df.drop(
-        columns=[
-            "pon_gene_mean_log2",
-            "pon_gene_mean_spread",
-            "pon_gene_effect",
-            "pon_gene_z",
-            "pon_gene_direction",
-            "pon_gene_call",
-            "pon_gene_cnv_call",
-            "pon_cnv_call",
-        ],
-        errors="ignore",
-    )
-
-    # -------------------- 7) Final sort/order -------------------- #
-    cols_order = [
-        "chr",
-        "region_start",
-        "region_end",
-        "seg_start",
-        "seg_end",
-        "cytoband",
-        "gene.symbol",
-        "n.targets",
-        "seg_log2",
-        "loh_seg_mean",
-        "loh_num_snps",
-        "seg_baf",
-        "mean_log2",
-        "min_log2",
-        "max_log2",
-        "mean_weight",
-        "seg_cn",
-        "seg_cn1",
-        "seg_cn2",
-        "loh_C",
-        "loh_M",
-        "loh_M_flagged",
-        "loh_flag",
-        "is_cancer_gene",
-        "exons_overlapping_segment",
-        "exons_overlapping_chunk",
-        "pon_mean_log2",
-        "pon_mean_spread",
-        "pon_chunk_effect",
-        "pon_chunk_z",
-        "pon_chunk_direction",
-        "pon_chunk_significance",
-        "pon_chunk_call",
-        "cnvkit_cnv_call",
-        "purecn_cnv_call",
-    ]
-    chunks_df = _reorder_columns(chunks_df, cols_order)
-    chunks_df = _stable_sort_by_chr_interval(
-        chunks_df, "chr", "region_start", "region_end"
-    )
-    chunks_df = chunks_df.drop(columns=["chunk_id", "n_targets"], errors="ignore")
-
-    return chunks_df
+    return finalize_gene_table(chunks_df)
