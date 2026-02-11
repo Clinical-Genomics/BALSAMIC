@@ -224,12 +224,12 @@
   </div>
 
   <script>
-    // Injected from Python
-    const colIndexGene  = {{ col_idx_gene_json | safe }};
-    const colIndexChunk = {{ col_idx_chunk_json | safe }};
+  // Injected from Python (make them properties so refactored JS can read them)
+  globalThis.colIndexGene  = {{ col_idx_gene_json | safe }};
+  globalThis.colIndexChunk = {{ col_idx_chunk_json | safe }};
 
-{{ js_text | safe }}
-  </script>
+  {{ js_text | safe }}
+</script>
 
 </body>
 </html>

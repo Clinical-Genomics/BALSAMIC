@@ -1067,7 +1067,6 @@ def _add_cnv_calls_from_total_cn(genes_df: pd.DataFrame, sex: Gender) -> pd.Data
 # add overlapping exon information
 # =============================================================================
 
-
 def _compute_exons_hit_for_region(
     exon_map: dict[tuple[str, str], dict[str, Any]],
     chrom: str,
@@ -1081,7 +1080,7 @@ def _compute_exons_hit_for_region(
     Output:
       - "" if no overlap / no exon model
       - "whole_gene" if the region fully covers the gene span
-      - otherwise a compact string like "1-3,6,8-10"
+      - otherwise: "exon N" or "exon N-M" (span of hit exons)
     """
     if region_start is None or region_end is None:
         return ""
@@ -1102,79 +1101,19 @@ def _compute_exons_hit_for_region(
     gene_end = max(e for _s, e in exons)
 
     # Whole-gene coverage
-    if float(region_start) <= float(gene_start) and float(region_end) >= float(
-        gene_end
-    ):
+    rs = float(region_start)
+    re = float(region_end)
+    if rs <= float(gene_start) and re >= float(gene_end):
         return "whole_gene"
 
     # Overlapping exon indices (1-based)
-    rs = float(region_start)
-    re = float(region_end)
-    hit = [i for i, (s, e) in enumerate(exons, start=1) if e > rs and s < re]
+    hit = [i for i, (s, e) in enumerate(exons, start=1) if float(e) > rs and float(s) < re]
     if not hit:
         return ""
 
-    # Compress consecutive indices
-    ranges: list[tuple[int, int]] = []
-    a = b = hit[0]
-    for i in hit[1:]:
-        if i == b + 1:
-            b = i
-        else:
-            ranges.append((a, b))
-            a = b = i
-    ranges.append((a, b))
-
-    return ",".join(str(x) if x == y else f"{x}-{y}" for x, y in ranges)
-
-
-def _compute_exons_hit_for_region(
-    exon_map: dict[tuple[str, str], dict[str, Any]],
-    *,
-    chrom: str,
-    gene: str,
-    region_start: float | int | None,
-    region_end: float | int | None,
-) -> str:
-    # Missing region -> no exon annotation
-    if (
-        region_start is None
-        or region_end is None
-        or pd.isna(region_start)
-        or pd.isna(region_end)
-    ):
-        return ""
-
-    key = (str(chrom), str(gene))
-    info = exon_map.get(key)
-    if not info:
-        return ""
-
-    s = int(region_start)
-    e = int(region_end)
-    if e <= s:
-        return ""
-
-    tx_start = int(info["txStart"])
-    tx_end = int(info["txEnd"])
-
-    # If region fully spans the transcript, report whole gene
-    if s <= tx_start and e >= tx_end:
-        return "whole gene"
-
-    exons: list[tuple[int, int]] = info["exons"]
-
-    hit_idxs: list[int] = []
-    for i, (xs, xe) in enumerate(exons, start=1):
-        # half-open overlap: [xs, xe) overlaps [s, e)
-        if max(xs, s) < min(xe, e):
-            hit_idxs.append(i)
-
-    if not hit_idxs:
-        return ""
-
-    return "exon " + ",".join(map(str, hit_idxs))
-
+    lo = min(hit)
+    hi = max(hit)
+    return f"{lo}" if lo == hi else f"{lo}-{hi}"
 
 def _add_exons_hit_column(
     df: pd.DataFrame,

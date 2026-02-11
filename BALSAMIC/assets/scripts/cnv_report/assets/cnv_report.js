@@ -1,412 +1,393 @@
 (function () {
-  const geneTable = document.getElementById("report-table");
-  const chunkTable = document.getElementById("chunk-table");
-
-  // Gene-level controls
-  const gHideNonCnv = document.getElementById("hide-non-cnv");
-  const gOnlyCancer = document.getElementById("only-cancer-genes");
-  const gGeneInput = document.getElementById("gene-filter");
-  const gMinTargets = document.getElementById("min-targets");
-
-  // Chunk-level controls
-  const cHideNonCnv = document.getElementById("hide-non-cnv-chunk");
-  const cIncludePonCnv = document.getElementById("show-pon-cnv-chunk");
-  const cOnlyCancer = document.getElementById("only-cancer-genes-chunk");
-  const cOnlySplit = document.getElementById("only-split-genes-chunk");
-  const cGeneInput = document.getElementById("gene-filter-chunk");
-  const cMinTargets = document.getElementById("min-targets-chunk");
-
   // ---------------------------------------------------------------------------
-  // Column group toggles (Option 2)
-  // Hidden by default; shown when group checkbox is checked.
+  // Small DOM / utility helpers
   // ---------------------------------------------------------------------------
 
-  // Edit these lists/prefixes to match your dataframes.
-  // Keep the PON group as prefix-based so new pon_* columns auto-follow.
-  const COL_GROUP_QC = [
-    "depth_mean",
-    "mean_weight",
-    // add more QC-ish columns here if desired
-  ];
+  const $ = (id) => document.getElementById(id);
 
-  // PON group: any columns starting with these prefixes are treated as "PON details"
-  const COL_GROUP_PON_PREFIXES = ["pon_"];
+  const textOf = (cell) => (cell?.textContent ?? "").trim().toLowerCase();
 
-  // Optional extra PON cols not following prefix convention (leave empty if none)
-  const COL_GROUP_PON_EXPLICIT = [
-    // e.g. "ponChunkZ"
-  ];
+  const isTruthyText = (v) => v === "true" || v === "1" || v === "yes";
 
-  // CNVkit group (optional)
-  const COL_GROUP_CNVKIT_EXTRA = [
-      "cnvkit_seg_log2", "cnvkit_seg_cn", "cnvkit_seg_cn1", "cnvkit_seg_cn2"
-  ];
+  const parseIntSafe = (v) => {
+    const n = parseInt(v, 10);
+    return Number.isFinite(n) ? n : 0;
+  };
 
-    // PureCN group (optional)
-  const COL_GROUP_PURECN_EXTRA = [
-      "purecn_C", "purecn_M", "purecn_M_flagged",
-  ];
+  const unique = (arr) => Array.from(new Set(arr));
 
-  // Default visibility per table
-  const DEFAULT_GROUP_STATE = {
-    "report-table": {
-      qc: false,
-      pon: false,
-      cnvkit: false,
-      purecn: false,
+  // Prefer globalThis to avoid typeof checks + Sonar negated condition warning
+  function getColIndex(tableId) {
+    const map = {
+      "report-table": globalThis.colIndexGene,
+      "chunk-table": globalThis.colIndexChunk,
+    };
+    return map[tableId] ?? {};
+  }
+
+  function getTable(tableId) {
+    return $(tableId);
+  }
+
+  function bindEvents(pairs, handler) {
+    for (const [el, ev] of pairs) {
+      if (el) el.addEventListener(ev, handler);
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Tables + controls
+  // ---------------------------------------------------------------------------
+
+  const geneTable = getTable("report-table");
+  const chunkTable = getTable("chunk-table");
+
+  const controls = {
+    gene: {
+      hideNonCnv: $("hide-non-cnv"),
+      onlyCancer: $("only-cancer-genes"),
+      geneInput: $("gene-filter"),
+      minTargets: $("min-targets"),
     },
-    "chunk-table": {
-      qc: false,
-      pon: true,     // <-- PON columns shown by default here
-      cnvkit: false,
-      purecn: false,
+    chunk: {
+      hideNonCnv: $("hide-non-cnv-chunk"),
+      includePonCnv: $("show-pon-cnv-chunk"),
+      onlyCancer: $("only-cancer-genes-chunk"),
+      onlySplit: $("only-split-genes-chunk"),
+      geneInput: $("gene-filter-chunk"),
+      minTargets: $("min-targets-chunk"),
     },
   };
 
-  function getColIndexForTableId(tableId) {
-    if (tableId === "report-table") {
-      return (typeof colIndexGene !== "undefined" ? colIndexGene : {});
-    }
-    if (tableId === "chunk-table") {
-      return (typeof colIndexChunk !== "undefined" ? colIndexChunk : {});
-    }
-    return {};
-  }
+  // ---------------------------------------------------------------------------
+  // Column group toggles
+  // ---------------------------------------------------------------------------
 
-  function getTableById(tableId) {
-    return document.getElementById(tableId);
-  }
+  const COL_GROUP_QC = ["depth_mean", "mean_weight"];
 
-  function setColumnVisibility(table, colIndex, colName, visible) {
-    if (!table) return;
+  const COL_GROUP_PON_PREFIXES = ["pon_"];
+  const COL_GROUP_PON_EXPLICIT = [];
 
-    const idx = (colIndex && (colName in colIndex)) ? colIndex[colName] : -1;
-    if (idx === -1) return;
+  const COL_GROUP_CNVKIT_EXTRA = [
+    "cnvkit_seg_log2",
+    "cnvkit_seg_cn",
+    "cnvkit_seg_cn1",
+    "cnvkit_seg_cn2",
+  ];
 
-    const displayValue = visible ? "" : "none";
+  const COL_GROUP_PURECN_EXTRA = ["purecn_C", "purecn_M", "purecn_M_flagged"];
 
-    // Header cells
-    if (table.tHead && table.tHead.rows) {
-      for (const hr of Array.from(table.tHead.rows)) {
-        if (hr.cells && hr.cells[idx]) {
-          hr.cells[idx].style.display = displayValue;
-        }
-      }
-    }
-
-    // Body cells
-    if (table.tBodies) {
-      for (const tb of Array.from(table.tBodies)) {
-        for (const row of Array.from(tb.rows)) {
-          if (row.cells && row.cells[idx]) {
-            row.cells[idx].style.display = displayValue;
-          }
-        }
-      }
-    }
-  }
+  const DEFAULT_GROUP_STATE = {
+    "report-table": { qc: false, pon: false, cnvkit: false, purecn: false },
+    "chunk-table": { qc: false, pon: true, cnvkit: false, purecn: false },
+  };
 
   function columnsMatchingPrefixes(colIndex, prefixes) {
-    const cols = Object.keys(colIndex || {});
-    const out = [];
-    for (const c of cols) {
-      for (const p of prefixes) {
-        if (c.startsWith(p)) {
-          out.push(c);
-          break;
-        }
-      }
-    }
-    return out;
-  }
-
-  function unique(arr) {
-    return Array.from(new Set(arr));
+    const cols = Object.keys(colIndex ?? {});
+    return cols.filter((c) => prefixes.some((p) => c.startsWith(p)));
   }
 
   function getGroupColumns(colIndex, groupName) {
     if (!colIndex) return [];
 
-    if (groupName === "qc") {
-      return COL_GROUP_QC.filter((c) => c in colIndex);
+    const groupDefs = {
+      qc: () => COL_GROUP_QC.filter((c) => c in colIndex),
+      pon: () => {
+        const prefixCols = columnsMatchingPrefixes(colIndex, COL_GROUP_PON_PREFIXES);
+        const explicitCols = COL_GROUP_PON_EXPLICIT.filter((c) => c in colIndex);
+        return unique([...prefixCols, ...explicitCols]);
+      },
+      cnvkit: () => COL_GROUP_CNVKIT_EXTRA.filter((c) => c in colIndex),
+      purecn: () => COL_GROUP_PURECN_EXTRA.filter((c) => c in colIndex),
+    };
+
+    return (groupDefs[groupName]?.() ?? []);
+  }
+
+  function setColumnVisibility(table, colIndex, colName, visible) {
+    if (!table) return;
+    const idx = colIndex?.[colName];
+    if (!Number.isInteger(idx)) return;
+
+    const displayValue = visible ? "" : "none";
+
+    // header
+    for (const hr of Array.from(table.tHead?.rows ?? [])) {
+      const cell = hr.cells?.[idx];
+      if (cell) cell.style.display = displayValue;
     }
 
-    if (groupName === "pon") {
-      const prefixCols = columnsMatchingPrefixes(colIndex, COL_GROUP_PON_PREFIXES);
-      const explicitCols = COL_GROUP_PON_EXPLICIT.filter((c) => c in colIndex);
-      return unique([...prefixCols, ...explicitCols]);
+    // body
+    for (const tb of Array.from(table.tBodies ?? [])) {
+      for (const row of Array.from(tb.rows ?? [])) {
+        const cell = row.cells?.[idx];
+        if (cell) cell.style.display = displayValue;
+      }
     }
-
-    if (groupName === "cnvkit") {
-      return COL_GROUP_CNVKIT_EXTRA.filter((c) => c in colIndex);
-    }
-
-    if (groupName === "purecn") {
-      return COL_GROUP_PURECN_EXTRA.filter((c) => c in colIndex);
-    }
-
-    return [];
   }
 
   function applyColumnGroupsForTable(tableId, toggles) {
-    const table = getTableById(tableId);
+    const table = getTable(tableId);
     if (!table) return;
 
-    const colIndex = getColIndexForTableId(tableId);
+    const colIndex = getColIndex(tableId);
 
-    const qcCols = getGroupColumns(colIndex, "qc");
-    const ponCols = getGroupColumns(colIndex, "pon");
-    const cnvkitCols = getGroupColumns(colIndex, "cnvkit");
-    const purecnCols = getGroupColumns(colIndex, "purecn");
+    const groups = [
+      ["qc", toggles.qc],
+      ["pon", toggles.pon],
+      ["cnvkit", toggles.cnvkit],
+      ["purecn", toggles.purecn],
+    ];
 
-    // Hidden by default: show only if the toggle is checked
-    for (const c of qcCols) setColumnVisibility(table, colIndex, c, !!toggles.qc);
-    for (const c of ponCols) setColumnVisibility(table, colIndex, c, !!toggles.pon);
-    for (const c of cnvkitCols) setColumnVisibility(table, colIndex, c, !!toggles.cnvkit);
-    for (const c of purecnCols) setColumnVisibility(table, colIndex, c, !!toggles.purecn);
+    for (const [groupName, enabled] of groups) {
+      const cols = getGroupColumns(colIndex, groupName);
+      for (const c of cols) setColumnVisibility(table, colIndex, c, Boolean(enabled));
+    }
   }
 
   function hookColumnGroupToggles() {
-    // Gene toggles
-    const gQc = document.getElementById("cols-qc-gene");
-    const gPon = document.getElementById("cols-pon-gene");
-    const gCnvkit = document.getElementById("cols-cnvkit-extra-gene");
-    const gPurecn = document.getElementById("cols-purecn-extra-gene");
+    const toggleEls = {
+      "report-table": {
+        qc: $("cols-qc-gene"),
+        pon: $("cols-pon-gene"),
+        cnvkit: $("cols-cnvkit-extra-gene"),
+        purecn: $("cols-purecn-extra-gene"),
+      },
+      "chunk-table": {
+        qc: $("cols-qc-chunk"),
+        pon: $("cols-pon-chunk"),
+        cnvkit: $("cols-cnvkit-extra-chunk"),
+        purecn: $("cols-purecn-extra-chunk"),
+      },
+    };
 
-    // Chunk toggles
-    const cQc = document.getElementById("cols-qc-chunk");
-    const cPon = document.getElementById("cols-pon-chunk");
-    const cCnvkit = document.getElementById("cols-cnvkit-extra-chunk");
-    const cPurecn = document.getElementById("cols-purecn-extra-chunk");
+    // apply defaults
+    for (const [tableId, toggles] of Object.entries(toggleEls)) {
+      const defaults = DEFAULT_GROUP_STATE[tableId];
+      if (!defaults) continue;
 
-    function applyAll() {
-      applyColumnGroupsForTable("report-table", {
-        qc: gQc && gQc.checked,
-        pon: gPon && gPon.checked,
-        cnvkit: gCnvkit && gCnvkit.checked,
-        purecn: gPurecn && gPurecn.checked,
-      });
-
-      applyColumnGroupsForTable("chunk-table", {
-        qc: cQc && cQc.checked,
-        pon: cPon && cPon.checked,
-        cnvkit: cCnvkit && cCnvkit.checked,
-        purecn: cPurecn && cPurecn.checked,
-      });
+      for (const [k, el] of Object.entries(toggles)) {
+        if (el) el.checked = Boolean(defaults[k]);
+      }
     }
 
-    // --- Apply default states
-    const geneDefaults = DEFAULT_GROUP_STATE["report-table"];
-    if (gQc && geneDefaults) gQc.checked = geneDefaults.qc;
-    if (gPon && geneDefaults) gPon.checked = geneDefaults.pon;
-    if (gCnvkit && geneDefaults) gCnvkit.checked = geneDefaults.cnvkit;
-    if (gPurecn && geneDefaults) gPurecn.checked = geneDefaults.purecn;
+    function applyAll() {
+      for (const [tableId, toggles] of Object.entries(toggleEls)) {
+        applyColumnGroupsForTable(tableId, {
+          qc: toggles.qc?.checked,
+          pon: toggles.pon?.checked,
+          cnvkit: toggles.cnvkit?.checked,
+          purecn: toggles.purecn?.checked,
+        });
+      }
+    }
 
-    const chunkDefaults = DEFAULT_GROUP_STATE["chunk-table"];
-    if (cQc && chunkDefaults) cQc.checked = chunkDefaults.qc;
-    if (cPon && chunkDefaults) cPon.checked = chunkDefaults.pon;
-    if (cCnvkit && chunkDefaults) cCnvkit.checked = chunkDefaults.cnvkit;
-    if (cPurecn && chunkDefaults) cPurecn.checked = chunkDefaults.purecn;
-
-    // Apply initial state
     applyAll();
 
-    // Events
-    if (gQc) gQc.addEventListener("change", applyAll);
-    if (gPon) gPon.addEventListener("change", applyAll);
-    if (gCnvkit) gCnvkit.addEventListener("change", applyAll);
-    if (gPurecn) gPurecn.addEventListener("change", applyAll);
-
-    if (cQc) cQc.addEventListener("change", applyAll);
-    if (cPon) cPon.addEventListener("change", applyAll);
-    if (cCnvkit) cCnvkit.addEventListener("change", applyAll);
-    if (cPurecn) cPurecn.addEventListener("change", applyAll);
+    // bind events
+    const events = [];
+    for (const toggles of Object.values(toggleEls)) {
+      for (const el of Object.values(toggles)) {
+        if (el) events.push([el, "change"]);
+      }
+    }
+    bindEvents(events, applyAll);
   }
 
   // ---------------------------------------------------------------------------
-  // Existing row-filter logic
+  // Row filtering (split into small predicates)
   // ---------------------------------------------------------------------------
 
-  function normalizeCellText(td) {
-    return (td && td.textContent ? td.textContent : "").trim().toLowerCase();
+  function parseGeneList(value) {
+    return (value ?? "")
+      .split(",")
+      .map((g) => g.trim().toLowerCase())
+      .filter(Boolean);
   }
 
-  function isCnvRow(row, colIndex) {
-  const lohColIdx = (colIndex["purecn_loh_flag"] ?? colIndex["loh_flag"] ?? -1);
-  const cnvkitColIdx = (colIndex["cnvkit_cnv_call"] ?? -1);
-  const purecnColIdx = (colIndex["purecn_cnv_call"] ?? -1);
-
-  // LOH: keep if true/1/yes
-  if (lohColIdx !== -1) {
-    const lohVal = normalizeCellText(row.cells[lohColIdx]);
-    if (lohVal === "true" || lohVal === "1" || lohVal === "yes") return true;
+  function getIdx(colIndex, ...names) {
+    for (const n of names) {
+      const idx = colIndex?.[n];
+      if (Number.isInteger(idx)) return idx;
+    }
+    return -1;
   }
 
-  // CNV calls: keep if present and not NEUTRAL/empty/na
   function isNonNeutralCall(cell) {
-    const v = normalizeCellText(cell);
+    const v = textOf(cell);
     if (!v) return false;
     if (v === "neutral") return false;
     if (v === "na" || v === "nan" || v === ".") return false;
     return true;
   }
 
-  if (cnvkitColIdx !== -1 && isNonNeutralCall(row.cells[cnvkitColIdx])) return true;
-  if (purecnColIdx !== -1 && isNonNeutralCall(row.cells[purecnColIdx])) return true;
+  function rowHasCnvOrLoh(row, colIndex) {
+    const lohIdx = getIdx(colIndex, "purecn_loh_flag", "loh_flag");
+    const cnvkitIdx = getIdx(colIndex, "cnvkit_cnv_call");
+    const purecnIdx = getIdx(colIndex, "purecn_cnv_call");
 
-  return false;
-}
+    if (lohIdx !== -1 && isTruthyText(textOf(row.cells[lohIdx]))) return true;
+    if (cnvkitIdx !== -1 && isNonNeutralCall(row.cells[cnvkitIdx])) return true;
+    if (purecnIdx !== -1 && isNonNeutralCall(row.cells[purecnIdx])) return true;
 
-  function isCancerGeneRow(row, colIndex) {
-    const idx = colIndex["is_cancer_gene"] ?? -1;
+    return false;
+  }
+
+  function rowIsCancerGene(row, colIndex) {
+    const idx = getIdx(colIndex, "is_cancer_gene");
+    return idx !== -1 && isTruthyText(textOf(row.cells[idx]));
+  }
+
+  function rowIsSplitGene(row, colIndex) {
+    const idx = getIdx(colIndex, "is_gene_split");
+    return idx !== -1 && isTruthyText(textOf(row.cells[idx]));
+  }
+
+  function rowHasMinTargets(row, colIndex, minTargets) {
+    if (!minTargets) return true;
+    const idx = getIdx(colIndex, "n.targets");
+    if (idx === -1) return true;
+
+    const nText = textOf(row.cells[idx]);
+    if (!nText) return true;
+
+    const nVal = parseFloat(nText);
+    return Number.isNaN(nVal) ? true : nVal >= minTargets;
+  }
+
+  function rowMatchesGeneList(row, colIndex, geneList) {
+    if (!geneList?.length) return true;
+    const idx = getIdx(colIndex, "gene.symbol");
+    if (idx === -1) return true;
+    const gene = textOf(row.cells[idx]);
+    return geneList.includes(gene);
+  }
+
+  function rowHasPonCnvCall(row, colIndex) {
+    const idx = getIdx(colIndex, "pon_cnv_call");
     if (idx === -1) return false;
-    const val = normalizeCellText(row.cells[idx]);
-    return val === "true" || val === "1" || val === "yes";
+    const v = textOf(row.cells[idx]);
+    return v === "amplification" || v === "deletion";
   }
 
-  function isSplitGeneRow(row, colIndex) {
-    const idx = colIndex["is_gene_split"] ?? -1;
-    if (idx === -1) return false;
-    const val = normalizeCellText(row.cells[idx]);
-    return val === "true" || val === "1" || val === "yes";
+  function shouldHideRow(row, colIndex, cfg) {
+    // CNV filter
+    if (cfg.hideNonCnv) {
+      const cnv = rowHasCnvOrLoh(row, colIndex);
+      const pon = cfg.includePonCnv ? rowHasPonCnvCall(row, colIndex) : false;
+      if (!cnv && !pon) return true;
+    }
+
+    if (cfg.onlyCancer && !rowIsCancerGene(row, colIndex)) return true;
+    if (cfg.onlySplit && !rowIsSplitGene(row, colIndex)) return true;
+    if (!rowHasMinTargets(row, colIndex, cfg.minTargets)) return true;
+    if (!rowMatchesGeneList(row, colIndex, cfg.geneList)) return true;
+
+    return false;
   }
 
-  function parseGeneList(value) {
-    return (value || "")
-      .split(",")
-      .map((g) => g.trim().toLowerCase())
-      .filter((g) => g.length > 0);
-  }
-
-  function filterTable(table, colIndex, cfg) {
+  function filterTable(tableId, table, cfg) {
     if (!table) return;
-    const body = table.tBodies[0];
+    const body = table.tBodies?.[0];
     if (!body) return;
 
-    const geneColIdx = colIndex["gene.symbol"] ?? -1;
-    const nTargetsColIdx = colIndex["n.targets"] ?? -1;
-    const ponCnvColIdx = (colIndex["pon_cnv_call"] ?? -1);
+    const colIndex = getColIndex(tableId);
 
-    const rows = Array.from(body.rows);
-
-    for (const row of rows) {
-      let hideRow = false;
-
-      if (!hideRow && cfg.hideNonCnv) {
-        const cnv = isCnvRow(row, colIndex);
-
-        let isPonCnv = false;
-        if (ponCnvColIdx !== -1) {
-          const ponVal = normalizeCellText(row.cells[ponCnvColIdx]);
-          if (ponVal === "amplification" || ponVal === "deletion") isPonCnv = true;
-        }
-
-        const treatedAsCnv = cnv || (cfg.includePonCnv && isPonCnv);
-        if (!treatedAsCnv) hideRow = true;
-      }
-
-      if (!hideRow && cfg.onlyCancer) {
-        if (!isCancerGeneRow(row, colIndex)) hideRow = true;
-      }
-
-      if (!hideRow && cfg.onlySplit) {
-        if (!isSplitGeneRow(row, colIndex)) hideRow = true;
-      }
-
-      if (!hideRow && nTargetsColIdx !== -1 && cfg.minTargets > 0) {
-        const nText = normalizeCellText(row.cells[nTargetsColIdx]);
-        if (nText.length > 0) {
-          const nVal = parseFloat(nText);
-          if (!Number.isNaN(nVal) && nVal < cfg.minTargets) hideRow = true;
-        }
-      }
-
-      if (!hideRow && geneColIdx !== -1 && cfg.geneList.length > 0) {
-        const geneText = normalizeCellText(row.cells[geneColIdx]);
-        const matches = cfg.geneList.some((g) => geneText === g);
-        if (!matches) hideRow = true;
-      }
-
-      row.style.display = hideRow ? "none" : "";
+    for (const row of Array.from(body.rows)) {
+      row.style.display = shouldHideRow(row, colIndex, cfg) ? "none" : "";
     }
   }
 
-  function filterGeneTable() {
-    if (!geneTable) return;
-    const cfg = {
-      hideNonCnv: !!(gHideNonCnv && gHideNonCnv.checked),
+  function buildGeneCfg() {
+    const c = controls.gene;
+    return {
+      hideNonCnv: Boolean(c.hideNonCnv?.checked),
       includePonCnv: false,
-      onlyCancer: !!(gOnlyCancer && gOnlyCancer.checked),
+      onlyCancer: Boolean(c.onlyCancer?.checked),
       onlySplit: false,
-      geneList: parseGeneList(gGeneInput && gGeneInput.value),
-      minTargets: gMinTargets ? parseInt(gMinTargets.value, 10) || 0 : 0,
+      geneList: parseGeneList(c.geneInput?.value),
+      minTargets: parseIntSafe(c.minTargets?.value),
     };
-    filterTable(geneTable, (typeof colIndexGene !== "undefined" ? colIndexGene : {}), cfg);
   }
 
-  function filterChunkTable() {
-    if (!chunkTable) return;
-    const cfg = {
-      hideNonCnv: !!(cHideNonCnv && cHideNonCnv.checked),
-      includePonCnv: !!(cIncludePonCnv && cIncludePonCnv.checked),
-      onlyCancer: !!(cOnlyCancer && cOnlyCancer.checked),
-      onlySplit: !!(cOnlySplit && cOnlySplit.checked),
-      geneList: parseGeneList(cGeneInput && cGeneInput.value),
-      minTargets: cMinTargets ? parseInt(cMinTargets.value, 10) || 0 : 0,
+  function buildChunkCfg() {
+    const c = controls.chunk;
+    return {
+      hideNonCnv: Boolean(c.hideNonCnv?.checked),
+      includePonCnv: Boolean(c.includePonCnv?.checked),
+      onlyCancer: Boolean(c.onlyCancer?.checked),
+      onlySplit: Boolean(c.onlySplit?.checked),
+      geneList: parseGeneList(c.geneInput?.value),
+      minTargets: parseIntSafe(c.minTargets?.value),
     };
-    filterTable(chunkTable, (typeof colIndexChunk !== "undefined" ? colIndexChunk : {}), cfg);
   }
 
   function applyFilter() {
-    filterGeneTable();
-    filterChunkTable();
+    filterTable("report-table", geneTable, buildGeneCfg());
+    filterTable("chunk-table", chunkTable, buildChunkCfg());
   }
 
-  if (gHideNonCnv) gHideNonCnv.addEventListener("change", applyFilter);
-  if (gOnlyCancer) gOnlyCancer.addEventListener("change", applyFilter);
-  if (gGeneInput) gGeneInput.addEventListener("input", applyFilter);
-  if (gMinTargets) gMinTargets.addEventListener("input", applyFilter);
+  // bind filter events
+  bindEvents(
+    [
+      [controls.gene.hideNonCnv, "change"],
+      [controls.gene.onlyCancer, "change"],
+      [controls.gene.geneInput, "input"],
+      [controls.gene.minTargets, "input"],
 
-  if (cHideNonCnv) cHideNonCnv.addEventListener("change", applyFilter);
-  if (cIncludePonCnv) cIncludePonCnv.addEventListener("change", applyFilter);
-  if (cOnlyCancer) cOnlyCancer.addEventListener("change", applyFilter);
-  if (cOnlySplit) cOnlySplit.addEventListener("change", applyFilter);
-  if (cGeneInput) cGeneInput.addEventListener("input", applyFilter);
-  if (cMinTargets) cMinTargets.addEventListener("input", applyFilter);
+      [controls.chunk.hideNonCnv, "change"],
+      [controls.chunk.includePonCnv, "change"],
+      [controls.chunk.onlyCancer, "change"],
+      [controls.chunk.onlySplit, "change"],
+      [controls.chunk.geneInput, "input"],
+      [controls.chunk.minTargets, "input"],
+    ],
+    applyFilter
+  );
 
   // ---------------------------------------------------------------------------
   // Table show/hide toggles
   // ---------------------------------------------------------------------------
 
-  const geneToggleBtn = document.getElementById("toggle-gene-table");
-  const geneContainer = document.getElementById("gene-table-container");
-  if (geneToggleBtn && geneContainer) {
-    let geneVisible = true;
-    geneToggleBtn.addEventListener("click", () => {
-      geneVisible = !geneVisible;
-      geneContainer.style.display = geneVisible ? "block" : "none";
-      geneToggleBtn.textContent = geneVisible ? "Hide gene-level table" : "Show gene-level table";
+  function hookShowHide(buttonId, containerId, initialVisible, textWhenVisible, textWhenHidden) {
+    const btn = $(buttonId);
+    const container = $(containerId);
+    if (!btn || !container) return;
+
+    let visible = Boolean(initialVisible);
+    container.style.display = visible ? "block" : "none";
+    btn.textContent = visible ? textWhenVisible : textWhenHidden;
+
+    btn.addEventListener("click", () => {
+      visible = !visible;
+      container.style.display = visible ? "block" : "none";
+      btn.textContent = visible ? textWhenVisible : textWhenHidden;
     });
   }
 
-  const chunkToggleBtn = document.getElementById("toggle-chunk-table");
-  const chunkContainer = document.getElementById("chunk-table-container");
-  if (chunkToggleBtn && chunkContainer) {
-    let chunkVisible = false;
-    chunkToggleBtn.addEventListener("click", () => {
-      chunkVisible = !chunkVisible;
-      chunkContainer.style.display = chunkVisible ? "block" : "none";
-      chunkToggleBtn.textContent = chunkVisible ? "Hide chunk-level table" : "Show chunk-level table";
-    });
-  }
+  hookShowHide(
+    "toggle-gene-table",
+    "gene-table-container",
+    true,
+    "Hide gene-level table",
+    "Show gene-level table"
+  );
+
+  hookShowHide(
+    "toggle-chunk-table",
+    "chunk-table-container",
+    false,
+    "Hide chunk-level table",
+    "Show chunk-level table"
+  );
 
   // ---------------------------------------------------------------------------
   // Plot modal viewer
   // ---------------------------------------------------------------------------
 
-  const modal = document.getElementById("plot-modal");
-  const modalImg = document.getElementById("plot-modal-image");
-  const modalClose = document.getElementById("plot-modal-close");
+  const modal = $("plot-modal");
+  const modalImg = $("plot-modal-image");
+  const modalClose = $("plot-modal-close");
 
   function openModal(src) {
     if (!modal || !modalImg) return;
@@ -421,10 +402,9 @@
   }
 
   function hookClickablePlots() {
-    const imgs = document.querySelectorAll(".clickable-plot");
-    imgs.forEach((img) => {
+    for (const img of document.querySelectorAll(".clickable-plot")) {
       img.addEventListener("click", () => openModal(img.src));
-    });
+    }
   }
 
   hookClickablePlots();
@@ -442,12 +422,9 @@
   });
 
   // ---------------------------------------------------------------------------
-  // Init order
+  // Init
   // ---------------------------------------------------------------------------
 
-  // 1) Hook and apply column group toggles (unchecked => hidden)
   hookColumnGroupToggles();
-
-  // 2) Apply row filters once
   applyFilter();
 })();
