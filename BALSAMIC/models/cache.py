@@ -103,7 +103,6 @@ class ReferencesHg(References):
         Human reference genome files model.
 
         Attributes:
-    <<<<<<< HEAD
             access_regions (ReferenceUrl)           : Accessible genome regions.
             ascat_chr_y_loci (ReferenceUrl)         : Chromosome Y loci.
             ascat_gc_correction (ReferenceUrl)      : Genome GC correction bins.
