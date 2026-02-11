@@ -327,58 +327,46 @@ def _compute_gene_level_highlights(
     gdf: pd.DataFrame,
     targets_col: str,
     highlight_only_cancer: bool,
-    has_chunk_data: bool,
     min_gene_targets: int = 5,
     min_gene_targets_cancer: int = 5,
 ) -> pd.DataFrame:
     """
-    Aggregate gene-level signal and determine highlighting eligibility.
+    Decide which genes should be highlighted.
 
-    Computes per gene:
-      - LOH/CNV presence
-      - Cancer gene flag
-      - Total target count
-      - highlight_gene decision
-
-    Respects:
-      - highlight_only_cancer mode
-      - stricter target thresholds for cancer-only highlighting
-      - fallback highlighting when chunk-level PON data is absent
-
-    Returns gene-level summary dataframe or None if gene symbols unavailable.
+    Rules:
+      1) Cancer genes are ALWAYS highlighted if they meet the cancer target threshold.
+      2) If highlight_only_cancer is False, also highlight non-cancer genes with LOH/CNV
+         if they meet the non-cancer target threshold.
     """
 
     grouped = gdf.groupby(["chr", "gene.symbol"], as_index=False)
-    agg = {
-        "has_loh_or_cnv": ("is_loh_or_cnv", "any"),
-        "is_cancer_gene": ("is_cancer_gene_bool", "any"),
-    }
-
-    agg["total_targets"] = (targets_col, "sum")
-
-    gene_level = grouped.agg(**agg)
-    if "total_targets" not in gene_level.columns:
-        gene_level["total_targets"] = 0.0
+    gene_level = grouped.agg(
+        has_loh_or_cnv=("is_loh_or_cnv", "any"),
+        is_cancer_gene=("is_cancer_gene_bool", "any"),
+        total_targets=(targets_col, "sum"),
+    )
 
     gene_level["total_targets"] = gene_level["total_targets"].fillna(0.0)
     gene_level["is_cancer_gene"] = (
         gene_level["is_cancer_gene"].fillna(False).astype(bool)
     )
 
-    min_req = min_gene_targets_cancer if highlight_only_cancer else min_gene_targets
+    # 1) Cancer genes: always highlight if enough targets
+    cancer_ok = gene_level["is_cancer_gene"] & (
+        gene_level["total_targets"] >= min_gene_targets_cancer
+    )
 
-    mask_highlight = gene_level["has_loh_or_cnv"] & (
-        gene_level["total_targets"] >= min_req
+    # 2) Non-cancer CNV/LOH genes: optionally highlight if enough targets
+    noncancer_cnv_ok = (
+        (~gene_level["is_cancer_gene"])
+        & gene_level["has_loh_or_cnv"]
+        & (gene_level["total_targets"] >= min_gene_targets)
     )
 
     if highlight_only_cancer:
-        mask_highlight &= gene_level["is_cancer_gene"]
-
-    # If there is no chunk data to determine hightlighting, in other chromosomes, mark all cancer genes with at least > targets
-    if not has_chunk_data:
-        mask_highlight = mask_highlight | (
-            gene_level["is_cancer_gene"] & (gene_level["total_targets"] >= min_req)
-        )
+        mask_highlight = cancer_ok
+    else:
+        mask_highlight = cancer_ok | noncancer_cnv_ok
 
     gene_level["highlight_gene"] = mask_highlight
     return gene_level
@@ -963,8 +951,6 @@ def plot_chromosomes(
 
     chr_order = _as_chr_order(include_y)
 
-    has_chunk_data = gchunk is not None and not gchunk.empty
-
     gdf = _normalize_is_cancer_gene(gdf)
 
     # Load VCF BAF
@@ -991,7 +977,6 @@ def plot_chromosomes(
         gdf,
         targets_col=targets_col,
         highlight_only_cancer=highlight_only_cancer,
-        has_chunk_data=has_chunk_data,
         min_gene_targets=MIN_GENE_TARGETS,
         min_gene_targets_cancer=MIN_GENE_TARGETS_CANCER,
     )
