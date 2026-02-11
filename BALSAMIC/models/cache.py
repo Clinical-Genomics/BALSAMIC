@@ -100,31 +100,31 @@ class ReferencesCanFam(References):
 
 class ReferencesHg(References):
     """
-    Human reference genome files model.
+        Human reference genome files model.
 
-    Attributes:
-<<<<<<< HEAD
-        access_regions (ReferenceUrl)           : Accessible genome regions.
-        ascat_chr_y_loci (ReferenceUrl)         : Chromosome Y loci.
-        ascat_gc_correction (ReferenceUrl)      : Genome GC correction bins.
-        cadd_snv (ReferenceUrl)                 : CADD SNV annotation file.
-        simple_repeat (ReferenceUrl)            : Simple repeats
-        clinvar (ReferenceUrl)                  : ClinVar reference.
-        dbsnp (ReferenceUrl)                    : dbSNP VCF file.
-        delly_exclusion (ReferenceUrl)          : Genome exclusion regions.
-        delly_mappability (ReferenceUrl)        : Genome mappability.
-        delly_mappability_findex (ReferenceUrl) : Genome mappability fasta index.
-        delly_mappability_gindex (ReferenceUrl) : Genome mappability index.
-        gnomad_variant (ReferenceUrl)           : gnomAD variants (non SV) as VCF.
-        gnomad_variant_index (ReferenceUrl)     : gnomAD variants VCF index.
-        hc_vcf_1kg (ReferenceUrl)               : High confidence 1000 Genome VCF.
-        known_indel_1kg (ReferenceUrl)          : 1000 Genome known InDels VCF.
-        mills_1kg (ReferenceUrl)                : Mills' high confidence InDels VCF.
-        rank_score (ReferenceUrl)               : Rank score model.
-        somalier_sites (ReferenceUrl)           : Somalier sites VCF.
-        vcf_1kg (ReferenceUrl)                  : 1000 Genome all SNPs.
-        wgs_calling_regions (ReferenceUrl)      : WGS calling intervals.
-        cytoband_coordinates (ReferenceUrl) : Cytoband coordinates file.
+        Attributes:
+    <<<<<<< HEAD
+            access_regions (ReferenceUrl)           : Accessible genome regions.
+            ascat_chr_y_loci (ReferenceUrl)         : Chromosome Y loci.
+            ascat_gc_correction (ReferenceUrl)      : Genome GC correction bins.
+            cadd_snv (ReferenceUrl)                 : CADD SNV annotation file.
+            simple_repeat (ReferenceUrl)            : Simple repeats
+            clinvar (ReferenceUrl)                  : ClinVar reference.
+            dbsnp (ReferenceUrl)                    : dbSNP VCF file.
+            delly_exclusion (ReferenceUrl)          : Genome exclusion regions.
+            delly_mappability (ReferenceUrl)        : Genome mappability.
+            delly_mappability_findex (ReferenceUrl) : Genome mappability fasta index.
+            delly_mappability_gindex (ReferenceUrl) : Genome mappability index.
+            gnomad_variant (ReferenceUrl)           : gnomAD variants (non SV) as VCF.
+            gnomad_variant_index (ReferenceUrl)     : gnomAD variants VCF index.
+            hc_vcf_1kg (ReferenceUrl)               : High confidence 1000 Genome VCF.
+            known_indel_1kg (ReferenceUrl)          : 1000 Genome known InDels VCF.
+            mills_1kg (ReferenceUrl)                : Mills' high confidence InDels VCF.
+            rank_score (ReferenceUrl)               : Rank score model.
+            somalier_sites (ReferenceUrl)           : Somalier sites VCF.
+            vcf_1kg (ReferenceUrl)                  : 1000 Genome all SNPs.
+            wgs_calling_regions (ReferenceUrl)      : WGS calling intervals.
+            cytoband_coordinates (ReferenceUrl) : Cytoband coordinates file.
     """
 
     access_regions: ReferenceUrl
