@@ -318,7 +318,7 @@ def _collect_chr_plot_groups(
 @click.option(
     "--loh-genes",
     type=click.Path(exists=True),
-    required=True,  # PureCN genes CSV (can be empty but must exist)
+    required=False,
     help="PureCN LOH genes CSV (…_genes.csv).",
 )
 @click.option(

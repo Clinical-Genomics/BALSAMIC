@@ -77,8 +77,6 @@ rule purecn_call_CNV_research:
         cnr = cnv_dir + "tumor.merged.cnr",
     output:
         purecn_purity = cnv_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".purecn.purity.csv",
-        loh_regions= cnv_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".purecn.LOHregions.csv",
-        loh_genes= cnv_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".purecn.LOHgenes.csv"
     benchmark:
         Path(f"{benchmark_dir}/purecn_call_{config['analysis']['case_id']}.tsv").as_posix()
     singularity:
@@ -145,8 +143,6 @@ if [ "$exit_status" = "true" ]; then
 else
 echo '"Sampleid","Purity","Ploidy","Sex","Contamination","Flagged","Failed","Curated","Comment"
 "tumor.initial",0.02,2,"?",0,FALSE,FALSE,FALSE,"FAILED PURITY ESTIMATION"' > {output.purecn_purity};
-echo '' > {output.loh_genes} ;
-echo '' > {output.loh_regions} ;
 fi;
 
 rm -rf {params.tmpdir};
