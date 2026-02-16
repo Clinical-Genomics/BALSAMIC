@@ -81,7 +81,7 @@ def cli(vcf: str, bedgraph: str, track_name: Optional[str]) -> None:
     """Convert VCF (1 sample) to bedGraph of AF from AD/DP."""
     n_written, n_skipped = convert_vcf_to_bedgraph(vcf, bedgraph, track_name=track_name)
     click.echo(
-        f"Done. Wrote {n_written} rows → {bedgraph} " f"({n_skipped} variants skipped)",
+        f"Done. Wrote {n_written} rows → {bedgraph}, ({n_skipped} variants skipped)",
         err=True,
     )
 
