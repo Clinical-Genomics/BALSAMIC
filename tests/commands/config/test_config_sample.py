@@ -149,6 +149,7 @@ def test_run_without_permissions(
     balsamic_cache: str,
     sentieon_license: str,
     sentieon_install_dir: str,
+    config_case_cli_tga: list[str],
 ):
     """Test balsamic config case with no write permissions to the analysis directory."""
 
@@ -175,7 +176,8 @@ def test_run_without_permissions(
             sentieon_install_dir,
             "--sentieon-license",
             sentieon_license,
-        ],
+        ]
+        + config_case_cli_tga,
     )
 
     # THEN program exits before completion
@@ -341,6 +343,7 @@ def test_config_graph_failed(
     panel_bed_file: str,
     sentieon_license: str,
     sentieon_install_dir: str,
+    config_case_cli_tga: list[str],
 ):
     """Test DAG graph building failure."""
 
@@ -369,9 +372,9 @@ def test_config_graph_failed(
                 sentieon_install_dir,
                 "--sentieon-license",
                 sentieon_license,
-            ],
+            ]
+            + config_case_cli_tga,
         )
-
     # THEN the graph should not have been built
     assert case_result.exit_code == 1
 
@@ -387,6 +390,7 @@ def test_missing_required_gens_arguments_wgs(
     gens_min_5_af_gnomad_file: str,
     sentieon_license: str,
     sentieon_install_dir: str,
+    cosmic_file: str,
 ):
     """Test balsamic config case with 2 out of 3 required GENS arguments."""
 
@@ -415,6 +419,8 @@ def test_missing_required_gens_arguments_wgs(
             sentieon_install_dir,
             "--sentieon-license",
             sentieon_license,
+            "--cosmic",
+            cosmic_file,
         ],
     )
     # THEN the CLI should exit code 2 and display an informative error message
@@ -435,6 +441,7 @@ def test_missing_gens_arguments_tga(
     case_id_tumor_only: str,
     sentieon_license: str,
     sentieon_install_dir: str,
+    cosmic_file: str,
 ):
     """Test balsamic config case without required GENS arguments."""
 
@@ -459,6 +466,8 @@ def test_missing_gens_arguments_tga(
             sentieon_install_dir,
             "--sentieon-license",
             sentieon_license,
+            "--cosmic",
+            cosmic_file,
         ],
     )
     # THEN the CLI should exit code 0
@@ -477,6 +486,7 @@ def test_config_with_gens_arguments(
     gens_hg19_interval_list: str,
     sentieon_license: str,
     sentieon_install_dir: str,
+    cosmic_file: str,
 ):
     """Test balsamic config case with GENS arguments."""
 
@@ -507,6 +517,8 @@ def test_config_with_gens_arguments(
             sentieon_install_dir,
             "--sentieon-license",
             sentieon_license,
+            "--cosmic",
+            cosmic_file,
         ],
     )
     # THEN a config should be created and exist
@@ -529,6 +541,7 @@ def test_config_with_gens_arguments_for_tga(
     panel_bed_file: str,
     sentieon_license: str,
     sentieon_install_dir: str,
+    cosmic_file: str,
 ):
     """Test balsamic config case with GENS arguments for TGA."""
 
@@ -557,6 +570,8 @@ def test_config_with_gens_arguments_for_tga(
             sentieon_install_dir,
             "--sentieon-license",
             sentieon_license,
+            "--cosmic",
+            cosmic_file,
         ],
     )
     # THEN a config should be created and exist
@@ -575,6 +590,7 @@ def test_config_wgs_with_exome(
     case_id_tumor_only: str,
     sentieon_license: str,
     sentieon_install_dir: str,
+    cosmic_file: str,
 ):
     """Test balsamic config case with --exome argument for WGS."""
 
@@ -600,6 +616,8 @@ def test_config_wgs_with_exome(
             sentieon_install_dir,
             "--sentieon-license",
             sentieon_license,
+            "--cosmic",
+            cosmic_file,
         ],
     )
     # THEN config should fail with error message
