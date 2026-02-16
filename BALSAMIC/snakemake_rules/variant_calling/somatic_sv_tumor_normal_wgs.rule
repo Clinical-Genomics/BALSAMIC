@@ -157,7 +157,7 @@ rule ascat_tumor_normal_wgs:
         plot_tumor = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.tumor.png",
         plot_germline = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.germline.png",
         plot_sunrise = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.sunrise.png",
-        namemap = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.sample_name_map"
+        namemap = vcf_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".ascat.sample_name_map",
     benchmark:
         benchmark_dir + 'ascat_tumor_normal_' + config["analysis"]["case_id"] + "_ascat.tsv"
     singularity:
