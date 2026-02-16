@@ -249,6 +249,47 @@ To config BALSAMIC to run with GENS activated you supply these files like this:
     --gnomad-min-af5 </path/population_vcf.vcf.gz>
 
 
+**Visualising WGS GATK denoised CR and and BAF files in IGV**
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The same files referred to in `Using GENS for WGS <https://balsamic.readthedocs.io/en/latest/balsamic_sv_cnv.html#using-gens-for-wgs>`_ are post-processed into bedgraph files.
+
+BAF file from force-called variants on gnomad >0.05AF:
+
+::
+
+  track type=bedGraph name="samplename BAF"
+  1       10146   10147   0.5
+  1       10177   10178   0.0
+  1       10178   10179   0.05882
+  1       10327   10328   0.41667
+  1       10329   10330   0.0
+  1       10403   10404   0.0
+  1       10415   10416   0.0
+  1       10816   10817   0.0
+  1       13417   13418   0.0
+  1       14464   14465   0.456
+
+
+Denoised CR from GATK collect read counts (these are merged by default into 500bp bins by taking the mean log2 of 5 adjacent 100bp regions):
+
+::
+
+  track type=bedGraph name="samplename CR"
+  1       10001   10500   -0.45347279999999995
+  1       13401   15400   -0.7393533999999999
+  1       15501   17400   -0.24010579999999998
+  1       17401   20400   -0.009681199999999996
+  1       98901   108800  -0.28374980000000005
+  1       109001  128700  -0.6282676
+  1       129501  139000  -0.3833502
+  1       139201  233000  0.0346842
+  1       234201  235100  0.13343460000000001
+  1       235101  235800  0.3808742
+
+
+
+
 **Genome Reference Files**
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
