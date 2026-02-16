@@ -237,6 +237,13 @@ REFERENCE_FILES: Dict[GenomeVersion, Dict[str, dict]] = {
             "file_name": "hg19.simple_repeat.txt.gz",
             "dir_name": "variants",
         },
+        "cytoband_coordinates": {
+            "url": "https://hgdownload.cse.ucsc.edu/goldenpath/hg19/database/cytoBand.txt.gz",
+            "file_type": FileType.TSV,
+            "gzip": True,
+            "file_name": "cytoBand.txt",
+            "dir_name": "genome",
+        },
     },
     GenomeVersion.HG38: {
         "reference_genome": {
