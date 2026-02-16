@@ -100,29 +100,30 @@ class ReferencesCanFam(References):
 
 class ReferencesHg(References):
     """
-    Human reference genome files model.
+        Human reference genome files model.
 
-    Attributes:
-        access_regions (ReferenceUrl)           : Accessible genome regions.
-        ascat_chr_y_loci (ReferenceUrl)         : Chromosome Y loci.
-        ascat_gc_correction (ReferenceUrl)      : Genome GC correction bins.
-        cadd_snv (ReferenceUrl)                 : CADD SNV annotation file.
-        simple_repeat (ReferenceUrl)            : Simple repeats
-        clinvar (ReferenceUrl)                  : ClinVar reference.
-        dbsnp (ReferenceUrl)                    : dbSNP VCF file.
-        delly_exclusion (ReferenceUrl)          : Genome exclusion regions.
-        delly_mappability (ReferenceUrl)        : Genome mappability.
-        delly_mappability_findex (ReferenceUrl) : Genome mappability fasta index.
-        delly_mappability_gindex (ReferenceUrl) : Genome mappability index.
-        gnomad_variant (ReferenceUrl)           : gnomAD variants (non SV) as VCF.
-        gnomad_variant_index (ReferenceUrl)     : gnomAD variants VCF index.
-        hc_vcf_1kg (ReferenceUrl)               : High confidence 1000 Genome VCF.
-        known_indel_1kg (ReferenceUrl)          : 1000 Genome known InDels VCF.
-        mills_1kg (ReferenceUrl)                : Mills' high confidence InDels VCF.
-        rank_score (ReferenceUrl)               : Rank score model.
-        somalier_sites (ReferenceUrl)           : Somalier sites VCF.
-        vcf_1kg (ReferenceUrl)                  : 1000 Genome all SNPs.
-        wgs_calling_regions (ReferenceUrl)      : WGS calling intervals.
+        Attributes:
+            access_regions (ReferenceUrl)           : Accessible genome regions.
+            ascat_chr_y_loci (ReferenceUrl)         : Chromosome Y loci.
+            ascat_gc_correction (ReferenceUrl)      : Genome GC correction bins.
+            cadd_snv (ReferenceUrl)                 : CADD SNV annotation file.
+            simple_repeat (ReferenceUrl)            : Simple repeats
+            clinvar (ReferenceUrl)                  : ClinVar reference.
+            dbsnp (ReferenceUrl)                    : dbSNP VCF file.
+            delly_exclusion (ReferenceUrl)          : Genome exclusion regions.
+            delly_mappability (ReferenceUrl)        : Genome mappability.
+            delly_mappability_findex (ReferenceUrl) : Genome mappability fasta index.
+            delly_mappability_gindex (ReferenceUrl) : Genome mappability index.
+            gnomad_variant (ReferenceUrl)           : gnomAD variants (non SV) as VCF.
+            gnomad_variant_index (ReferenceUrl)     : gnomAD variants VCF index.
+            hc_vcf_1kg (ReferenceUrl)               : High confidence 1000 Genome VCF.
+            known_indel_1kg (ReferenceUrl)          : 1000 Genome known InDels VCF.
+            mills_1kg (ReferenceUrl)                : Mills' high confidence InDels VCF.
+            rank_score (ReferenceUrl)               : Rank score model.
+            somalier_sites (ReferenceUrl)           : Somalier sites VCF.
+            vcf_1kg (ReferenceUrl)                  : 1000 Genome all SNPs.
+            wgs_calling_regions (ReferenceUrl)      : WGS calling intervals.
+            cytoband_coordinates (ReferenceUrl) : Cytoband coordinates file.
     """
 
     access_regions: ReferenceUrl
@@ -145,6 +146,7 @@ class ReferencesHg(References):
     somalier_sites: ReferenceUrl
     vcf_1kg: ReferenceUrl
     wgs_calling_regions: ReferenceUrl
+    cytoband_coordinates: ReferenceUrl
 
     def get_cadd_snv_file_paths(self) -> List[str]:
         """Return CADD SNV reference output files."""
@@ -233,6 +235,7 @@ class AnalysisReferencesHg(AnalysisReferences):
         vcf_1kg (FilePath)                   : 1000 Genome all SNPs.
         vep_dir (DirectoryPath)              : VEP annotations output directory.
         wgs_calling_regions (FilePath)       : WGS calling intervals.
+        cytoband_coordinates (FilePath)      : Cytoband coordinates file path.
     """
 
     access_regions: FilePath
@@ -254,6 +257,7 @@ class AnalysisReferencesHg(AnalysisReferences):
     vcf_1kg: FilePath
     vep_dir: DirectoryPath
     wgs_calling_regions: FilePath
+    cytoband_coordinates: FilePath
 
 
 class CacheAnalysis(BaseModel):
@@ -413,6 +417,7 @@ class CacheConfig(BaseModel):
             *self.references.get_delly_file_paths(),
             *self.references.get_gnomad_file_paths(),
             self.vep_dir.as_posix(),
+            self.references.cytoband_coordinates.file_path,
         ]
         return reference_paths
 
@@ -454,4 +459,5 @@ class CacheConfig(BaseModel):
             vcf_1kg=f"{self.references.vcf_1kg.file_path}.{FileType.GZ}",
             vep_dir=self.vep_dir.as_posix(),
             wgs_calling_regions=self.references.wgs_calling_regions.file_path,
+            cytoband_coordinates=self.references.cytoband_coordinates.file_path,
         )
