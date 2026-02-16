@@ -214,12 +214,12 @@ OPTION_CLUSTER_QOS = click.option(
     help="QOS for cluster jobs",
 )
 
-OPTION_COSMIC_KEY = click.option(
+OPTION_COSMIC = click.option(
     "-c",
-    "--cosmic-key",
-    required=False,
-    type=click.STRING,
-    help="Cosmic DB authentication key",
+    "--cosmic",
+    required=True,
+    type=click.Path(exists=True, resolve_path=True),
+    help="Cosmic VCF path",
 )
 
 OPTION_DRAGEN = click.option(

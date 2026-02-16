@@ -357,7 +357,6 @@ def reference():
         "known_indel_1kg": "variants/1kg_known_indels_b37.vcf.gz",
         "mills_1kg": "variants/mills_1kg_index.vcf.gz",
         "gnomad_variant": "variants/gnomad.genomes.r2.1.1.sites.vcf.bgz",
-        "cosmic": "variants/cosmic_coding_muts_v89.vcf.gz",
         "vep_dir": "vep/",
         "refgene_flat": "genome/refseq.flat",
         "refgene_txt": "genome/refGene.txt",

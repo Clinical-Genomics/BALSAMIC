@@ -22,6 +22,7 @@ from BALSAMIC.commands.options import (
     OPTION_CANCER_SOMATIC_SNV_OBSERVATIONS,
     OPTION_CANCER_SOMATIC_SNV_PANEL_OBSERVATIONS,
     OPTION_CANCER_SOMATIC_SV_OBSERVATIONS,
+    OPTION_COSMIC,
     OPTION_CASE_ID,
     OPTION_CUSTOMER_CASE_ID,
     OPTION_CLINICAL_SNV_OBSERVATIONS,
@@ -92,6 +93,7 @@ LOG = logging.getLogger(__name__)
 @OPTION_CANCER_SOMATIC_SNV_OBSERVATIONS
 @OPTION_CANCER_SOMATIC_SNV_PANEL_OBSERVATIONS
 @OPTION_CANCER_SOMATIC_SV_OBSERVATIONS
+@OPTION_COSMIC
 @OPTION_CASE_ID
 @OPTION_CUSTOMER_CASE_ID
 @OPTION_CLINICAL_SNV_OBSERVATIONS
@@ -130,6 +132,7 @@ def case_config(
     cancer_somatic_snv_observations: Path,
     cancer_somatic_snv_panel_observations: Path,
     cancer_somatic_sv_observations: Path,
+    cosmic: str,
     case_id: str,
     cust_case_id: str,
     clinical_snv_observations: Path,
@@ -177,6 +180,9 @@ def case_config(
         base_path=references_path,
         data=read_json(Path(references_path, f"reference.{FileType.JSON}").as_posix()),
     )
+
+    references.update({"cosmic": cosmic})
+
     cadd_annotations_path = {"cadd_annotations": cadd_annotations}
     if cadd_annotations:
         references.update(cadd_annotations_path)
