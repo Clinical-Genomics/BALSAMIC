@@ -82,7 +82,6 @@ def test_bin_denoised_segments_multichrom_and_skips_invalid():
     m.bin_denoised_segments(infile=infile, outfile=outfile, bin_size=2)
 
     outfile.seek(0)
-    # Output is TSV with no header, columns: chrom start end value
     df = pd.read_csv(
         outfile,
         sep="\t",
@@ -93,10 +92,8 @@ def test_bin_denoised_segments_multichrom_and_skips_invalid():
 
     expected = pd.DataFrame(
         [
-            # chr1: (0-20 mean 2), (20-40 mean 6)
             ("1", 0, 20, 2.0),
             ("1", 20, 40, 6.0),
-            # chr2: (0-20 mean 3), (20-40 mean 7), (40-50 mean 10)  (since 50-60 invalid)
             ("2", 0, 20, 3.0),
             ("2", 20, 40, 7.0),
             ("2", 40, 50, 10.0),
@@ -104,8 +101,30 @@ def test_bin_denoised_segments_multichrom_and_skips_invalid():
         columns=["chrom", "start", "end", "value"],
     )
 
-    # Ensure same rows and numeric equality
     pd.testing.assert_frame_equal(df, expected, check_dtype=False)
+
+
+def test_bin_denoised_segments_writes_track_header_when_requested():
+    text = (
+        "\n".join(
+            [
+                "1\t0\t10\t1.0",
+                "1\t10\t20\t3.0",
+            ]
+        )
+        + "\n"
+    )
+    infile = io.StringIO(text)
+    outfile = io.StringIO()
+
+    m.bin_denoised_segments(
+        infile=infile, outfile=outfile, bin_size=2, track_name="MyTrack"
+    )
+
+    outfile.seek(0)
+    lines = outfile.read().splitlines()
+    assert lines[0] == 'track type=bedGraph name="MyTrack"'
+    assert lines[1:] == ["1\t0\t20\t2.0"]
 
 
 def test_bin_denoised_segments_empty_input_produces_empty_output():
@@ -134,12 +153,53 @@ def test_cli_happy_path_writes_output(tmp_path):
         encoding="utf-8",
     )
 
-    # NOTE: option name is --bins-per-window / -b in your script
     res = runner.invoke(m.cli, [str(in_path), str(out_path), "-b", "2"])
     assert res.exit_code == 0, res.output
 
     df = pd.read_csv(
         out_path,
+        sep="\t",
+        header=None,
+        names=["chrom", "start", "end", "value"],
+        dtype={"chrom": "string"},
+    )
+    expected = pd.DataFrame(
+        [
+            ("1", 0, 20, 2.0),
+            ("1", 20, 30, 5.0),
+        ],
+        columns=["chrom", "start", "end", "value"],
+    )
+    pd.testing.assert_frame_equal(df, expected, check_dtype=False)
+
+
+def test_cli_happy_path_with_track_name_writes_header_and_output(tmp_path):
+    runner = CliRunner()
+
+    in_path = tmp_path / "in.tsv"
+    out_path = tmp_path / "out.tsv"
+    in_path.write_text(
+        "\n".join(
+            [
+                "1\t0\t10\t1.0",
+                "1\t10\t20\t3.0",
+                "1\t20\t30\t5.0",
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    res = runner.invoke(
+        m.cli, [str(in_path), str(out_path), "-b", "2", "--track-name", "T"]
+    )
+    assert res.exit_code == 0, res.output
+
+    lines = out_path.read_text(encoding="utf-8").splitlines()
+    assert lines[0] == 'track type=bedGraph name="T"'
+
+    df = pd.read_csv(
+        io.StringIO("\n".join(lines[1:]) + "\n"),
         sep="\t",
         header=None,
         names=["chrom", "start", "end", "value"],
