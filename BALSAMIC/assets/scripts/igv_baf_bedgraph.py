@@ -1,22 +1,12 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
-import sys
-from contextlib import closing, nullcontext
-from pathlib import Path
-from typing import ContextManager, Optional, TextIO
+from contextlib import closing
+from typing import Optional, Tuple
 
 import click
 import numpy as np
 from cyvcf2 import VCF
-
-
-def open_output(path: str | Path) -> ContextManager[TextIO]:
-    """Open output file; '-' means stdout (not closed)."""
-    p = str(path)
-    if p == "-":
-        return nullcontext(sys.stdout)
-    return open(p, "w", encoding="utf-8")
 
 
 def variant_to_record(variant) -> Optional[str]:
@@ -53,34 +43,47 @@ def variant_to_record(variant) -> Optional[str]:
 
 
 def convert_vcf_to_bedgraph(
-    vcf_path: str | Path,
-    bedgraph_path: str | Path,
+    vcf_path: str,
+    bedgraph_path: str,
     track_name: Optional[str] = None,
-) -> int:
-    """Convert a VCF into a bedGraph of AF computed from AD/DP."""
+) -> Tuple[int, int]:
+    """
+    Convert a VCF into a bedGraph of AF computed from AD/DP.
+
+    Returns:
+        (n_written, n_skipped)
+    """
     n_written = 0
-    with closing(VCF(str(vcf_path))) as vcf, open_output(bedgraph_path) as fout:
+    n_skipped = 0
+
+    with closing(VCF(str(vcf_path))) as vcf, open(
+        bedgraph_path, "w", encoding="utf-8"
+    ) as fout:
         if track_name:
             fout.write(f'track type=bedGraph name="{track_name}"\n')
 
         for variant in vcf:
             record = variant_to_record(variant)
-            if record == None:
+            if record is None:
+                n_skipped += 1
                 continue
             fout.write(record)
             n_written += 1
 
-    return n_written
+    return n_written, n_skipped
 
 
 @click.command(context_settings={"show_default": True})
-@click.argument("vcf", type=click.Path(exists=True, dir_okay=False, allow_dash=False))
-@click.argument("bedgraph", type=click.Path(dir_okay=False, allow_dash=True))
+@click.argument("vcf", type=click.Path(exists=True, dir_okay=False))
+@click.argument("bedgraph", type=click.Path(dir_okay=False))
 @click.option("--track-name", help='Optional bedGraph "track" name header.')
 def cli(vcf: str, bedgraph: str, track_name: Optional[str]) -> None:
     """Convert VCF (1 sample) to bedGraph of AF from AD/DP."""
-    n = convert_vcf_to_bedgraph(vcf, bedgraph, track_name=track_name)
-    click.echo(f"Done. Wrote {n} rows → {bedgraph}", err=True)
+    n_written, n_skipped = convert_vcf_to_bedgraph(vcf, bedgraph, track_name=track_name)
+    click.echo(
+        f"Done. Wrote {n_written} rows → {bedgraph} " f"({n_skipped} variants skipped)",
+        err=True,
+    )
 
 
 if __name__ == "__main__":

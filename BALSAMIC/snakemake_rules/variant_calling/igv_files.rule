@@ -33,5 +33,5 @@ rule cnr_binning_igv_bedgraphs:
         "Converting the noise corrected collect read counts to bedgraph for viewing in IGV, and binning {params.bins_per_window} adjacent regions, for sample {params.sample_id}"
     shell:
         """
-python {params.igv_cnr_script} --bins-per-window {params.bins_per_window} {input.denoised_cr} {output.denoised_cr_bedgraph} ; 
+python {params.igv_cnr_script} --track-name {params.sample_id}_denoisedCR --bins-per-window {params.bins_per_window} {input.denoised_cr} {output.denoised_cr_bedgraph} ; 
         """
