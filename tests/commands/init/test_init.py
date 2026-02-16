@@ -18,7 +18,7 @@ def test_init_hg(
 ):
     """Test Balsamic init command."""
 
-    # GIVEN a temporary output directory and a COSMIC key
+    # GIVEN a temporary output directory
 
     # WHEN invoking the init command
     result: Result = invoke_cli(
