@@ -6,7 +6,7 @@ rule sentieon_DNAscope_tga:
         bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_type = wildcards.sample_type),
         ref = reference_genome,
         dbsnp = dbsnp,
-        interval = config["panel"]["capture_kit"]
+        interval = cnv_dir + "capture_kit_expanded_merged.bed"
     output:
         vcf = vcf_dir + "SNV.germline.{sample_type}.dnascope_multiallelic.vcf.gz",
     benchmark:
