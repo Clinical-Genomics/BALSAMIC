@@ -1372,6 +1372,7 @@ def config_case_cli_wgs(
     balsamic_cache: str,
     background_variant_file: str,
     cadd_annotations: str,
+    cosmic_file: str,
     swegen_snv_frequency_path: str,
     swegen_sv_frequency_path: str,
     clinical_snv_observations_path: str,
@@ -1397,6 +1398,8 @@ def config_case_cli_wgs(
         swegen_snv_frequency_path,
         "--swegen-sv",
         swegen_sv_frequency_path,
+        "--cosmic",
+        cosmic_file,
         "--clinical-snv-observations",
         clinical_snv_observations_path,
         "--clinical-sv-observations",
@@ -1425,6 +1428,7 @@ def config_case_cli_tga(
     balsamic_cache: str,
     background_variant_file: str,
     cadd_annotations: str,
+    cosmic_file: str,
     swegen_snv_frequency_path: str,
     swegen_sv_frequency_path: str,
     clinical_snv_observations_path: str,
@@ -1444,6 +1448,8 @@ def config_case_cli_tga(
         background_variant_file,
         "--cadd-annotations",
         cadd_annotations,
+        "--cosmic",
+        cosmic_file,
         "--swegen-snv",
         swegen_snv_frequency_path,
         "--swegen-sv",
@@ -2176,12 +2182,6 @@ def fixture_timestamp_now() -> datetime:
     return datetime.now()
 
 
-@pytest.fixture(scope="session", name="cosmic_key")
-def fixture_cosmic_key() -> str:
-    """Return a mocked COSMIC key."""
-    return "ZW1haWxAZXhhbXBsZS5jb206bXljb3NtaWNwYXNzd29yZAo="
-
-
 @pytest.fixture(scope="session", name="develop_containers")
 def fixture_develop_containers() -> Dict[str, str]:
     """Return a dictionary of docker hub containers for develop branch."""
@@ -2210,7 +2210,6 @@ def fixture_develop_containers() -> Dict[str, str]:
 def fixture_cache_config_data(
     cache_analysis: CacheAnalysis,
     develop_containers: Dict[str, str],
-    cosmic_key: str,
     timestamp_now: datetime,
     session_tmp_path: Path,
 ) -> Dict[str, Any]:
@@ -2224,7 +2223,6 @@ def fixture_cache_config_data(
         "vep_dir": session_tmp_path,
         "containers_dir": session_tmp_path,
         "genome_version": GenomeVersion.HG19,
-        "cosmic_key": cosmic_key,
         "bioinfo_tools": BIOINFO_TOOL_ENV,
         "containers": develop_containers,
         "references": REFERENCE_FILES[GenomeVersion.HG19],
@@ -2320,9 +2318,8 @@ def fixture_clinvar_file(session_tmp_path: Path) -> Path:
 @pytest.fixture(scope="session", name="cosmic_file")
 def fixture_cosmic_file(session_tmp_path: Path) -> Path:
     """Return dummy cosmic file."""
-    cosmic_file: Path = Path(
-        session_tmp_path, "variants", "cosmic_coding_muts_v97.vcf.gz"
-    )
+    cosmic_file: Path = session_tmp_path / "variants" / "cosmic_coding_muts_v97.vcf.gz"
+    cosmic_file.parent.mkdir(parents=True, exist_ok=True)
     cosmic_file.touch()
     return cosmic_file
 
@@ -2455,7 +2452,8 @@ def fixture_reference_file(session_tmp_path: Path) -> Path:
 
 @pytest.fixture(scope="session", name="reference_url_data")
 def fixture_reference_url_data(
-    reference_url: Url, reference_file: Path, cosmic_key: str
+    reference_url: Url,
+    reference_file: Path,
 ) -> Dict[str, Any]:
     """return reference url model data."""
     return {
@@ -2465,7 +2463,6 @@ def fixture_reference_url_data(
         "file_name": "reference.vcf",
         "dir_name": "variants",
         "file_path": reference_file.as_posix(),
-        "secret": cosmic_key,
     }
 
 

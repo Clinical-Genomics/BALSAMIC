@@ -3,21 +3,16 @@ from functools import partial
 from pathlib import Path
 from unittest.mock import patch, MagicMock
 from click.testing import Result
-from graphviz import Source
 
 from BALSAMIC import __version__ as balsamic_version
 from BALSAMIC.constants.analysis import RunMode
 from BALSAMIC.constants.cache import GenomeVersion
-from BALSAMIC.constants.cluster import ClusterAccount
 from BALSAMIC.constants.constants import EXIT_SUCCESS, EXIT_FAIL
-from BALSAMIC.utils.exc import BalsamicError
-from BALSAMIC.models.sbatchsubmitter import SbatchSubmitter
 
 
 def test_init_hg(
     invoke_cli: partial,
     tmp_path: Path,
-    cosmic_key: str,
     config_json: str,
     reference_graph: str,
 ):
@@ -33,8 +28,6 @@ def test_init_hg(
             tmp_path.as_posix(),
             "--genome-version",
             GenomeVersion.HG19,
-            "--cosmic-key",
-            cosmic_key,
             "--run-interactively",
         ]
     )
@@ -47,32 +40,9 @@ def test_init_hg(
     assert result.exit_code == EXIT_SUCCESS
 
 
-def test_init_hg_no_cosmic_key(invoke_cli: partial, tmp_path: Path, cosmic_key: str):
-    """Test Balsamic init command when a COSMIC key is not provided."""
-
-    # GIVEN a temporary output directory and a COSMIC key
-
-    # WHEN invoking the init command
-    result: Result = invoke_cli(
-        [
-            "init",
-            "--out-dir",
-            tmp_path.as_posix(),
-            "--genome-version",
-            GenomeVersion.HG19,
-        ]
-    )
-
-    # THEN an exception should have been raised
-    assert (
-        f"No COSMIC authentication key specified. It is required when using {GenomeVersion.HG19} reference"
-        in result.output
-    )
-    assert result.exit_code == EXIT_FAIL
-
-
 def test_init_hg_run_analysis_no_account(
-    invoke_cli: partial, tmp_path: Path, cosmic_key: str
+    invoke_cli: partial,
+    tmp_path: Path,
 ):
     """Test Balsamic init command when actually running the analysis without specifying a cluster account."""
 
@@ -86,8 +56,6 @@ def test_init_hg_run_analysis_no_account(
             tmp_path.as_posix(),
             "--genome-version",
             GenomeVersion.HG19,
-            "--cosmic-key",
-            cosmic_key,
             "--run-mode",
             RunMode.CLUSTER,
             "--run-analysis",
@@ -102,7 +70,6 @@ def test_init_hg_run_analysis_no_account(
 def test_init_hg_submit_succeeds(
     invoke_cli: partial,
     tmp_path: Path,
-    cosmic_key: str,
 ):
     # Mock sbatch returning a job id
     mock_sbatch = MagicMock()
@@ -124,8 +91,6 @@ def test_init_hg_submit_succeeds(
                 tmp_path.as_posix(),
                 "--genome-version",
                 GenomeVersion.HG19,
-                "--cosmic-key",
-                cosmic_key,
                 # Do NOT pass any flag that turns on interactive mode
             ]
         )
@@ -147,7 +112,6 @@ def test_init_hg_submit_succeeds(
 def test_init_hg_submit_no_jobid_logs_warning(
     invoke_cli: partial,
     tmp_path: Path,
-    cosmic_key: str,
 ):
     # Simulate sbatch output that does NOT contain a job id
     mock_sbatch = MagicMock()
@@ -168,8 +132,6 @@ def test_init_hg_submit_no_jobid_logs_warning(
                 tmp_path.as_posix(),
                 "--genome-version",
                 GenomeVersion.HG19,
-                "--cosmic-key",
-                cosmic_key,
             ]
         )
 
@@ -181,7 +143,6 @@ def test_init_hg_submit_no_jobid_logs_warning(
 def test_init_canfam(
     invoke_cli: partial,
     tmp_path: Path,
-    cosmic_key: str,
     config_json: str,
 ):
     """Test Balsamic init command."""
@@ -196,8 +157,6 @@ def test_init_canfam(
             tmp_path.as_posix(),
             "--genome-version",
             GenomeVersion.CanFam3,
-            "--cosmic-key",
-            cosmic_key,
             "--run-interactively",
         ]
     )

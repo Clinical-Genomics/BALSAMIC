@@ -7,7 +7,6 @@
         "known_indel_1kg": "tests/test_data/references/variants/1kg_known_indels_b37.vcf.gz",
         "mills_1kg": "tests/test_data/references/variants/mills_1kg_index.vcf.gz",
         "gnomad_variant": "tests/test_data/reference/variants/gnomad.genomes.r2.1.1.sites.vcf.bgz",
-        "cosmic": "tests/test_data/references/variants/cosmic_coding_muts_v89.vcf.gz",
         "vep_dir": "tests/test_data/references/vep/",
         "refgene_flat": "tests/test_data/references/genome/refseq.flat",
         "refgene_txt": "tests/test_data/references/genome/refGene.txt",
