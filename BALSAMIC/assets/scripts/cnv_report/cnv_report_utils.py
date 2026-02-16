@@ -1067,6 +1067,7 @@ def _add_cnv_calls_from_total_cn(genes_df: pd.DataFrame, sex: Gender) -> pd.Data
 # add overlapping exon information
 # =============================================================================
 
+
 def _compute_exons_hit_for_region(
     exon_map: dict[tuple[str, str], dict[str, Any]],
     chrom: str,
@@ -1107,13 +1108,16 @@ def _compute_exons_hit_for_region(
         return "whole_gene"
 
     # Overlapping exon indices (1-based)
-    hit = [i for i, (s, e) in enumerate(exons, start=1) if float(e) > rs and float(s) < re]
+    hit = [
+        i for i, (s, e) in enumerate(exons, start=1) if float(e) > rs and float(s) < re
+    ]
     if not hit:
         return ""
 
     lo = min(hit)
     hi = max(hit)
     return f"{lo}" if lo == hi else f"{lo}-{hi}"
+
 
 def _add_exons_hit_column(
     df: pd.DataFrame,
