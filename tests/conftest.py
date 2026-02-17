@@ -2318,7 +2318,7 @@ def fixture_clinvar_file(session_tmp_path: Path) -> Path:
 @pytest.fixture(scope="session", name="cosmic_file")
 def fixture_cosmic_file(session_tmp_path: Path) -> Path:
     """Return dummy cosmic file."""
-    cosmic_file: Path = session_tmp_path / "variants" / "cosmic_coding_muts_v97.vcf.gz"
+    cosmic_file: Path = session_tmp_path / "cosmic_coding_muts_v97.vcf.gz"
     cosmic_file.parent.mkdir(parents=True, exist_ok=True)
     cosmic_file.touch()
     return cosmic_file
