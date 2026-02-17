@@ -103,27 +103,26 @@ class ReferencesHg(References):
     Human reference genome files model.
 
     Attributes:
-        access_regions (ReferenceUrl)            : Accessible genome regions.
-        ascat_chr_y_loci (ReferenceUrl)          : Chromosome Y loci.
-        ascat_gc_correction (ReferenceUrl)       : Genome GC correction bins.
-        cadd_snv (ReferenceUrl)                  : CADD SNV annotation file.
-        simple_repeat (ReferenceUrl)             : Simple repeats
-        clinvar (ReferenceUrl)                   : ClinVar reference.
-        cosmic (ReferenceUrl)                    : COSMIC database's variants as VCF.
-        dbsnp (ReferenceUrl)                     : dbSNP VCF file.
-        delly_exclusion (ReferenceUrl)           : Genome exclusion regions.
-        delly_mappability (ReferenceUrl)         : Genome mappability.
-        delly_mappability_findex (ReferenceUrl)  : Genome mappability fasta index.
-        delly_mappability_gindex (ReferenceUrl)  : Genome mappability index.
-        gnomad_variant (ReferenceUrl)            : gnomAD variants (non SV) as VCF.
-        gnomad_variant_index (ReferenceUrl)      : gnomAD variants VCF index.
-        hc_vcf_1kg (ReferenceUrl)                : High confidence 1000 Genome VCF.
-        known_indel_1kg (ReferenceUrl)           : 1000 Genome known InDels VCF.
-        mills_1kg (ReferenceUrl)                 : Mills' high confidence InDels VCF.
-        rank_score (ReferenceUrl)                : Rank score model.
-        somalier_sites (ReferenceUrl)            : Somalier sites VCF.
-        vcf_1kg (ReferenceUrl)                   : 1000 Genome all SNPs.
-        wgs_calling_regions (ReferenceUrl)       : WGS calling intervals.
+        access_regions (ReferenceUrl)           : Accessible genome regions.
+        ascat_chr_y_loci (ReferenceUrl)         : Chromosome Y loci.
+        ascat_gc_correction (ReferenceUrl)      : Genome GC correction bins.
+        cadd_snv (ReferenceUrl)                 : CADD SNV annotation file.
+        simple_repeat (ReferenceUrl)            : Simple repeats
+        clinvar (ReferenceUrl)                  : ClinVar reference.
+        dbsnp (ReferenceUrl)                    : dbSNP VCF file.
+        delly_exclusion (ReferenceUrl)          : Genome exclusion regions.
+        delly_mappability (ReferenceUrl)        : Genome mappability.
+        delly_mappability_findex (ReferenceUrl) : Genome mappability fasta index.
+        delly_mappability_gindex (ReferenceUrl) : Genome mappability index.
+        gnomad_variant (ReferenceUrl)           : gnomAD variants (non SV) as VCF.
+        gnomad_variant_index (ReferenceUrl)     : gnomAD variants VCF index.
+        hc_vcf_1kg (ReferenceUrl)               : High confidence 1000 Genome VCF.
+        known_indel_1kg (ReferenceUrl)          : 1000 Genome known InDels VCF.
+        mills_1kg (ReferenceUrl)                : Mills' high confidence InDels VCF.
+        rank_score (ReferenceUrl)               : Rank score model.
+        somalier_sites (ReferenceUrl)           : Somalier sites VCF.
+        vcf_1kg (ReferenceUrl)                  : 1000 Genome all SNPs.
+        wgs_calling_regions (ReferenceUrl)      : WGS calling intervals.
         cytoband_coordinates (ReferenceUrl) : Cytoband coordinates file.
     """
 
@@ -133,7 +132,6 @@ class ReferencesHg(References):
     cadd_snv: ReferenceUrl
     simple_repeat: ReferenceUrl
     clinvar: ReferenceUrl
-    cosmic: ReferenceUrl
     dbsnp: ReferenceUrl
     delly_exclusion: ReferenceUrl
     delly_mappability: ReferenceUrl
@@ -224,7 +222,6 @@ class AnalysisReferencesHg(AnalysisReferences):
         cadd_snv (FilePath)                  : CADD SNV annotation file.
         simple_repeat (FilePath)             : Simple repeats.
         clinvar (FilePath)                   : ClinVar reference.
-        cosmic (FilePath)                    : COSMIC database's variants as VCF.
         dbsnp (FilePath)                     : dbSNP VCF file.
         delly_exclusion (FilePath)           : Genome exclusion regions.
         delly_exclusion_converted (FilePath) : Genome exclusion regions without "chr" field.
@@ -247,7 +244,6 @@ class AnalysisReferencesHg(AnalysisReferences):
     cadd_snv: FilePath
     simple_repeat: FilePath
     clinvar: FilePath
-    cosmic: FilePath
     dbsnp: FilePath
     delly_exclusion: FilePath
     delly_exclusion_converted: FilePath
@@ -288,7 +284,6 @@ class CacheConfig(BaseModel):
         variants_dir (Path)                          : Variant references output directory.
         vep_dir (Path)                               : VEP annotations output directory.
         genome_version (GenomeVersion)               : Genome version associated with the balsamic cache.
-        cosmic_key (str, optional)                   : COSMIC database key.
         bioinfo_tools (dict)                         : Dictionary of bioinformatics software and containers.
         containers (Dict[str, str])                  : Dictionary linking container names and dockerhub images.
         references (ReferencesHg | ReferencesCanFam) : Reference files model.
@@ -302,7 +297,6 @@ class CacheConfig(BaseModel):
     variants_dir: Path
     vep_dir: Path
     genome_version: GenomeVersion
-    cosmic_key: Optional[str] = None
     bioinfo_tools: dict
     containers: Dict[str, str]
     references: ReferencesHg | ReferencesCanFam
@@ -325,9 +319,6 @@ class CacheConfig(BaseModel):
                 ).as_posix()
                 if reference
                 else None
-            )
-            reference.secret = (
-                info.data.get("cosmic_key") if "cosmic" in reference_key else None
             )
         return references
 
@@ -414,7 +405,6 @@ class CacheConfig(BaseModel):
             self.references.ascat_gc_correction.file_path,
             self.references.cadd_snv.file_path,
             self.references.simple_repeat.file_path,
-            f"{self.references.cosmic.file_path}.{FileType.GZ}",
             f"{self.references.dbsnp.file_path}.{FileType.GZ}",
             self.references.rank_score.file_path,
             f"{self.references.somalier_sites.file_path}.{FileType.GZ}",
@@ -451,7 +441,6 @@ class CacheConfig(BaseModel):
             cadd_snv=self.references.cadd_snv.file_path,
             simple_repeat=self.references.simple_repeat.file_path,
             clinvar=self.references.get_processed_clinvar_file_path(),
-            cosmic=f"{self.references.cosmic.file_path}.{FileType.GZ}",
             dbsnp=f"{self.references.dbsnp.file_path}.{FileType.GZ}",
             delly_exclusion=self.references.delly_exclusion.file_path,
             delly_exclusion_converted=self.references.get_delly_exclusion_converted_file_path(),
