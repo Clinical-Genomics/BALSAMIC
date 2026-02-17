@@ -528,7 +528,6 @@ def main(
         outdir=chr_plots_dir,
         case_id=plot_case_id,
         pon_path=pon,
-        include_y=True,
         neutral_target_factor=neutral_target_factor,
         highlight_only_cancer=highlight_only_cancer,
     )

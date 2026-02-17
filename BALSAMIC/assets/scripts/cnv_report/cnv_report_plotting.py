@@ -126,33 +126,21 @@ def merge_cnr_pon(
     spread_col: str = "spread",
 ) -> pd.DataFrame:
     """
-    Merge CNVkit tumor CNR with PON on (chr, start, end) and keep only rows
-    with non-null PON spread (inner join behavior).
+    Merge CNVkit tumor CNR with PON on (chr, start, end)
     """
     cnr = df_cnr.copy()
     pon = df_pon.copy()
 
-    if chr_col not in cnr.columns or chr_col not in pon.columns:
-        raise ValueError(f"Both cnr and pon must contain chromosome column '{chr_col}'")
-
-    if spread_col not in pon.columns:
-        raise ValueError(f"PON is missing required column '{spread_col}'")
-
     cnr[chr_col] = cnr[chr_col].astype(str).str.replace("^chr", "", regex=True)
     pon[chr_col] = pon[chr_col].astype(str).str.replace("^chr", "", regex=True)
 
-    pon = pon.dropna(subset=[spread_col]).copy()
-
     merged = pd.merge(
         cnr,
-        pon[[chr_col, "start", "end", spread_col]],
+        pon[[chr_col, "start", "end", "log2", spread_col]],
         on=[chr_col, "start", "end"],
         how="inner",
         suffixes=("_cnr", "_pon"),
     )
-
-    if spread_col + "_pon" in merged.columns:
-        merged[spread_col] = merged[spread_col + "_pon"]
 
     return merged
 
@@ -162,18 +150,16 @@ def merge_cnr_pon(
 # =============================================================================
 
 
-def _as_chr_order(include_y: bool) -> list[str]:
+def _as_chr_order() -> list[str]:
     """
     Build canonical chromosome ordering list.
 
     Returns:
-      ['1'..'22', 'X'] plus 'Y' if include_y is True.
+      ['1'..'22', 'X', 'Y']
 
     Used to standardize filtering and plotting chromosome iteration.
     """
-    order = [str(i) for i in range(1, 23)] + ["X"]
-    if include_y:
-        order.append("Y")
+    order = [str(i) for i in range(1, 23)] + ["X", "Y"]
     return order
 
 
@@ -211,8 +197,6 @@ def _load_cnr_and_optional_pon(
     cnr_path: Path,
     chr_order: list[str],
     pon_path: Optional[Path],
-    pct_spread: float,
-    weight_thresh: float,
 ) -> tuple[pd.DataFrame, str, bool, float]:
     """
     Load CNR bins and optionally merge with PON spread information.
@@ -221,14 +205,12 @@ def _load_cnr_and_optional_pon(
       - Chromosome normalization
       - Chromosome filtering
       - Optional PON merge (inner join behaviour)
-      - Optional weight filtering
-      - Global spread quantile threshold calculation
+
 
     Returns:
       merged_bins_df
       chromosome_column_name
       use_pon_flag
-      spread_threshold_value
 
     Merged dataframe always contains a 'spread' column.
     """
@@ -241,42 +223,23 @@ def _load_cnr_and_optional_pon(
     cnr[chr_col] = cnr[chr_col].astype(str).str.replace("^chr", "", regex=True)
     cnr = cnr[cnr[chr_col].isin(chr_order)].copy()
 
-    required = {"start", "end", "log2"}
-    missing = required - set(cnr.columns)
-    if missing:
-        raise ValueError(f"CNR missing required columns: {missing}")
-
     if "gene" not in cnr.columns:
         cnr["gene"] = ""
 
-    use_pon = False
-    merged = None
-
     if pon_path is not None and Path(pon_path).is_file():
+        use_pon = True
         pon = safe_read_csv(pon_path, sep="\t")
-        if not pon.empty and "spread" in pon.columns:
-            try:
-                merged = merge_cnr_pon(cnr, pon, chr_col=chr_col, spread_col="spread")
-                if merged is not None and not merged.empty:
-                    use_pon = True
-            except Exception:
-                use_pon = False
+        merged = merge_cnr_pon(cnr, pon, chr_col=chr_col, spread_col="spread")
 
-    if not use_pon:
+    else:
+        use_pon = False
         merged = cnr.copy()
         if "spread" not in merged.columns:
             merged["spread"] = np.nan
 
     merged = merged[merged[chr_col].isin(chr_order)].copy()
 
-    # Apply global weight filter now if present (so spread quantile reflects used bins)
-    if "weight" in merged.columns:
-        merged = merged[merged["weight"] > weight_thresh].copy()
-
-    spread_thresh = (
-        float(merged["spread"].quantile(pct_spread)) if use_pon else float("inf")
-    )
-    return merged, chr_col, use_pon, spread_thresh
+    return merged, chr_col, use_pon
 
 
 def _compute_row_flags(gdf: pd.DataFrame) -> pd.DataFrame:
@@ -377,29 +340,19 @@ def _compute_variable_x(
     highlighted_genes: np.ndarray,
     anti_factor: float,
     neutral_target_factor: float,
+    highlight_target_factor: float = 3.0,
 ) -> pd.DataFrame:
-    """
-    Construct pseudo-position x coordinate using variable bin widths.
-
-    Width rules:
-      - Antitarget bins → anti_factor
-      - Highlighted gene bins → 1.0
-      - Other target bins → neutral_target_factor
-
-    Adds:
-      type
-      bin_width
-      x_coord
-    """
-
     out = sub.copy()
+    hi = set(map(str, highlighted_genes))
+
     out["type"] = np.where(out["gene"] == "Antitarget", "Antitarget", "Target")
 
     def _bin_width(row: pd.Series) -> float:
+        g = row["gene"]
         if row["type"] == "Antitarget":
             return anti_factor
-        if row["gene"] in highlighted_genes:
-            return 1.0
+        if isinstance(g, str) and g in hi:
+            return highlight_target_factor
         return neutral_target_factor
 
     out["bin_width"] = out.apply(_bin_width, axis=1)
@@ -407,7 +360,26 @@ def _compute_variable_x(
     return out
 
 
-def _add_smoothing(sub: pd.DataFrame, use_pon: bool, window: int) -> pd.DataFrame:
+def _add_smoothing(sub: pd.DataFrame, window: int) -> pd.DataFrame:
+    """
+    Add rolling median smoothing to log2
+
+    Adds:
+      log2_smooth
+
+    Uses centered rolling window.
+    """
+
+    out = sub.sort_values("x_coord").copy()
+    out["log2_cnr_smooth"] = (
+        out["log2_cnr"].rolling(window=window, center=True).median()
+    )
+    return out
+
+
+def _add_smoothing_Backup(
+    sub: pd.DataFrame, use_pon: bool, window: int
+) -> pd.DataFrame:
     """
     Add rolling median smoothing to log2 and optional PON metrics.
 
@@ -607,64 +579,18 @@ def _draw_highlighted_bins(
         )
 
 
-def _draw_density_bar(ax, sub: pd.DataFrame, y_min: float, y_max: float):
+def _draw_pon_bars(ax, sub: pd.DataFrame, x: pd.Series, y_clip: float):
     """
-    Draw target / antitarget density bar at top of plot.
+    Draw PON noise bars around PON smoothed log2 baseline.
 
-    Represents bin type distribution across pseudo-position axis.
-    """
-
-    bar_height = 0.07 * (y_max - y_min)
-    bar_bottom = y_max - bar_height
-
-    mask_t = sub["type"] == "Target"
-    if mask_t.any():
-        ax.bar(
-            sub.loc[mask_t, "x_coord"],
-            bar_height,
-            bottom=bar_bottom,
-            width=sub.loc[mask_t, "bin_width"],
-            align="center",
-            color="tab:blue",
-            alpha=0.6,
-            linewidth=0,
-            zorder=1,
-        )
-
-    mask_a = sub["type"] == "Antitarget"
-    if mask_a.any():
-        ax.bar(
-            sub.loc[mask_a, "x_coord"],
-            bar_height,
-            bottom=bar_bottom,
-            width=sub.loc[mask_a, "bin_width"],
-            align="center",
-            color="lightgrey",
-            alpha=0.6,
-            linewidth=0,
-            zorder=1,
-        )
-
-
-def _draw_pon_band(ax, sub: pd.DataFrame, x: pd.Series, y_clip: float):
-    """
-    Draw PON noise band around PON smoothed log2 baseline.
-
-    Band = PON mean ± PON spread.
+    Bar = PON mean ± PON spread.
     Clipped to plotting y-range.
     """
 
-    if (
-        "spread_smooth" not in sub.columns
-        or "pon_log2_smooth" not in sub.columns
-        or not sub["spread_smooth"].notna().any()
-    ):
-        return
-
-    band_center = sub["pon_log2_smooth"].fillna(0.0)
-    band_half = sub["spread_smooth"].fillna(0.0)
-    band_bottom = (band_center - band_half).clip(-y_clip, y_clip)
-    band_top = (band_center + band_half).clip(-y_clip, y_clip)
+    band_center = sub["log2_pon"].fillna(0.0)
+    band_spread = sub["spread"].fillna(0.0)
+    band_bottom = (band_center - band_spread).clip(-y_clip, y_clip)
+    band_top = (band_center + band_spread).clip(-y_clip, y_clip)
 
     ax.fill_between(
         x,
@@ -672,7 +598,7 @@ def _draw_pon_band(ax, sub: pd.DataFrame, x: pd.Series, y_clip: float):
         band_top,
         alpha=0.4,
         step="mid",
-        label="PON noise band",
+        label="PON target spread",
     )
 
 
@@ -914,13 +840,11 @@ def plot_chromosomes(
     case_id: str,
     pon_path: Optional[Path] = None,
     gchunk: Optional[pd.DataFrame] = None,
-    include_y: bool = False,
-    weight_thresh: float = 0.1,
-    pct_spread: float = 0.95,
     window: int = 5,
     anti_factor: float = 0.15,
     base_label_offset: float = 1.5,
     neutral_target_factor: float = 0.3,
+    highlight_target_factor: float = 2,
     highlight_only_cancer: bool = False,
     y_abs_max: float = 3.0,
 ) -> None:
@@ -949,7 +873,7 @@ def plot_chromosomes(
     MIN_GENE_TARGETS = 5
     MIN_GENE_TARGETS_CANCER = 5
 
-    chr_order = _as_chr_order(include_y)
+    chr_order = _as_chr_order()
 
     gdf = _normalize_is_cancer_gene(gdf)
 
@@ -957,19 +881,16 @@ def plot_chromosomes(
     vcf = load_vcf_with_baf(vcf_path=vcf_path, chr_order=chr_order)
 
     # Load CNR and optional PON
-    merged, chr_col, use_pon, spread_thresh = _load_cnr_and_optional_pon(
+    merged, chr_col, use_pon = _load_cnr_and_optional_pon(
         cnr_path=cnr_path,
         chr_order=chr_order,
         pon_path=pon_path,
-        pct_spread=pct_spread,
-        weight_thresh=weight_thresh,
     )
+
+    merged = merged[merged["gene"] != "Antitarget"]
+
     if merged.empty:
         return
-
-    # Spread filter (applied per-chr later as well); keep spread col always
-    if use_pon:
-        merged = merged[merged["spread"] <= spread_thresh].copy()
 
     # Compute gene flags & gene-level highlight decisions
     gdf = _compute_row_flags(gdf)
@@ -992,10 +913,6 @@ def plot_chromosomes(
             continue
 
         sub = sub.sort_values("start", kind="stable")
-        if "weight" in sub.columns:
-            sub = sub[sub["weight"] > weight_thresh].copy()
-            if sub.empty:
-                continue
 
         g_chr = gdf[gdf["chr"] == chr_name].copy()
         g_chunks_chr = (
@@ -1024,14 +941,15 @@ def plot_chromosomes(
             highlighted_genes=highlighted,
             anti_factor=anti_factor,
             neutral_target_factor=neutral_target_factor,
+            highlight_target_factor=highlight_target_factor,
         )
         if sub.empty:
             continue
 
         # Smooth + clip
-        sub = _add_smoothing(sub, use_pon=use_pon, window=window)
-        sub["log2_clipped"] = sub["log2"].clip(-y_clip, y_clip)
-        sub["log2_smooth_clipped"] = sub["log2_smooth"].clip(-y_clip, y_clip)
+        sub = _add_smoothing(sub, window=window)
+        sub["log2_clipped"] = sub["log2_cnr"].clip(-y_clip, y_clip)
+        sub["log2_smooth_clipped"] = sub["log2_cnr_smooth"].clip(-y_clip, y_clip)
 
         pos_to_xcoord = _pos_to_xcoord_fn(sub)
 
@@ -1066,10 +984,9 @@ def plot_chromosomes(
             )
 
         y_min, y_max = y_lim_chr
-        _draw_density_bar(ax1, sub, y_min, y_max)
 
         if use_pon:
-            _draw_pon_band(ax1, sub, x, y_clip=y_clip)
+            _draw_pon_bars(ax1, sub, x, y_clip=y_clip)
 
         ax1.plot(
             x,
