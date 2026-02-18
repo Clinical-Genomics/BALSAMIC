@@ -461,8 +461,8 @@ def main(
     if cancer_genes:
         cancer_gene_set = load_cancer_gene_set(
             cancer_genes,
-            min_occurrence=3,
-            only_annotated=True,
+            min_occurrence=1,
+            only_annotated=False,
         )
     else:
         cancer_gene_set = set()
