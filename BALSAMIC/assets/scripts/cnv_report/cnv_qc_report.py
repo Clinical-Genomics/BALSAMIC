@@ -4,18 +4,28 @@ import base64
 import json
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional, Iterable, Any
+from typing import Optional, Any
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 import click
 import numpy as np
 import pandas as pd
+from typing import Dict, Tuple
 
-from cnv_report_utils import (
+from cnv_summary_metrics import read_purecn_summary, compute_summary_metrics
+
+from cnv_io import (
+    load_cancer_gene_set,
+    load_cnr_bins,
+    load_pon_bins,
+    load_refgene_exons,
+    load_purecn_segments,
+    load_cnvkit_segments_with_raw,
+    load_cytobands,
+)
+
+from cnv_tables import (
     build_gene_segment_table,
     build_gene_chunk_table,
-    load_cancer_gene_set,
-    compute_summary_metrics,
-    read_purecn_summary,
     pdf_first_page_to_png,
 )
 from cnv_report_plotting import plot_chromosomes
@@ -316,10 +326,10 @@ def _collect_chr_plot_groups(
 
 @click.command()
 @click.option(
-    "--loh-genes",
+    "--loh-regions",
     type=click.Path(exists=True),
     required=False,
-    help="PureCN LOH genes CSV (…_genes.csv).",
+    help="PureCN LOH regions CSV",
 )
 @click.option(
     "--cnr",
@@ -417,7 +427,7 @@ def _collect_chr_plot_groups(
     default=None,
 )
 def main(
-    loh_genes: str,
+    loh_regions: Optional[str],
     cnr: str,
     cns: str,
     cns_init: str,
@@ -469,35 +479,48 @@ def main(
     cancer_gene_set |= CURATED_CANCER_GENES
 
     # ----------------------------
+    # Read files into dataframes
+    # ----------------------------
+    cnr_df = load_cnr_bins(cnr)
+    cns_df = load_cnvkit_segments_with_raw(cns, cns_init)
+    loh_regions_df = None
+    if loh_regions:
+        loh_regions_df = load_purecn_segments(loh_regions)
+    pon_df = None
+    if pon:
+        pon_df = load_pon_bins(pon)
+    cytoband_df = load_cytobands(cytoband)
+    exon_map: Dict[Tuple[str, str], dict] = load_refgene_exons(refgene)
+
+    # ----------------------------
     # Create per-gene CNV table
     # ----------------------------
     # pon can be None (no PON file); build_gene_segment_table handles that
     genes_df = build_gene_segment_table(
-        cnr_path=cnr,
-        cns_path=cns,
-        cns_init_path=cns_init,
+        cnr_df=cnr_df,
+        cns_df=cns_df,
+        cytoband_df=cytoband_df,
+        exon_map=exon_map,
         cancer_genes=cancer_gene_set,
-        refgene_path=refgene,
-        loh_path=loh_genes,
-        cytoband_path=cytoband,
+        loh_regions_df=loh_regions_df,
         sex=sex,
-        pon_path=pon,
+        pon_df=pon_df,
     )
 
     # ----------------------------
     # Create per chunk table
     # ----------------------------
-    chunks_df = build_gene_chunk_table(
-        cnr_path=cnr,
-        cns_path=cns,
-        cns_init_path=cns_init,
-        cancer_genes=cancer_gene_set,
-        refgene_path=refgene,
-        loh_path=loh_genes,
-        cytoband_path=cytoband,
-        sex=sex,
-        pon_path=pon,
-    )
+    if pon_df:
+        chunks_df = build_gene_chunk_table(
+            cnr_df=cnr_df,
+            cns_df=cns_df,
+            cytoband_df=cytoband_df,
+            exon_map=exon_map,
+            pon_df=pon_df,
+            cancer_genes=cancer_gene_set,
+            loh_regions_df=loh_regions_df,
+            sex=sex,
+        )
 
     # --- 1) PureCN summary (from purity_csv) ---
     purecn_summary_df = read_purecn_summary(purity_csv)
