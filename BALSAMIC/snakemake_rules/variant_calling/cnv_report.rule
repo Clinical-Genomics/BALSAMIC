@@ -4,6 +4,7 @@ rule create_cnv_html_report:
         refgene_flat = refgene_flat,
         cnr = cnv_dir + "tumor.merged.cnr",
         cns = cnv_dir + "tumor.merged.cns",
+        cns_init = cnv_dir + "tumor.initial.cns",
         germline_vcf = vcf_dir + "SNV.germline.tumor.dnascope.vcf.gz",
         diagram = cnv_dir + "tumor.merged-diagram.pdf",
         scatter = cnv_dir + "tumor.merged-scatter.pdf",
@@ -29,6 +30,7 @@ python {params.cnv_report_script} \
 --loh-genes {params.loh_genes} \
 --cnr {input.cnr} \
 --cns {input.cns} \
+--cns-init {input.cns_init} \
 --vcf {input.germline_vcf} \
 --refgene {input.refgene_flat} \
 --cytoband {params.cytoband} \
