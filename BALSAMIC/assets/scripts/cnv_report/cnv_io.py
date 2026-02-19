@@ -2,44 +2,110 @@ from __future__ import annotations
 
 # Standard library
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Mapping, Iterable
 
 # Third-party
 import pandas as pd
 
 
-from cnv_report_utils import strip_chr_prefix, explode_multigene_bins
+from cnv_report_utils import strip_chr_prefix
 from cnv_constants import CHR
 
 
+
+def _load_bins_tsv(
+    path: str | Path,
+    *,
+    chr_col: str = "chromosome",
+    gene_col: str = "gene",
+    explode_genes: bool = True,
+    rename: Mapping[str, str] | None = None,
+    out_cols: Iterable[str] | None = None,
+) -> pd.DataFrame:
+    """
+    Generic loader for CNVkit-style bin tables (.cnr, .cnn, etc).
+
+    - Normalizes chromosome column to CHR ("chr").
+    - Creates/normalizes "gene.symbol".
+    - Drops Antitarget bins.
+    - Renames "-" bins to "backbone".
+    - Optionally explodes multi-gene bins.
+    - Optional renaming + column selection.
+    """
+    df = pd.read_csv(path, sep="\t")
+
+    # base renames (chromosome -> chr)
+    df = df.rename(columns={chr_col: CHR})
+
+    if gene_col in df.columns:
+        gene = df[gene_col].astype("string")
+
+        # Drop only Antitarget and NA genes
+        mask_keep = gene.notna() & ~gene.isin(["Antitarget"])
+        df = df.loc[mask_keep].copy()
+        gene = gene.loc[mask_keep]
+
+        # Rename "-" to "backbone"
+        gene = gene.replace("-", "backbone")
+
+        df["gene.symbol"] = gene
+    else:
+        df["gene.symbol"] = pd.Series(
+            [pd.NA] * len(df), dtype="string", index=df.index
+        )
+
+    if explode_genes and gene_col in df.columns:
+        df["gene.symbol"] = (
+            df["gene.symbol"]
+            .astype("string")
+            .str.split(r"\s*,\s*", regex=True)
+        )
+        df = df.explode("gene.symbol", ignore_index=True)
+        df["gene.symbol"] = df["gene.symbol"].astype("string").str.strip()
+
+    # drop empty symbols from malformed inputs like "TP53,,RB1"
+    df = df[df["gene.symbol"].notna() & df["gene.symbol"].ne("")].copy()
+
+    # apply optional renames (e.g. log2->pon_log2, spread->pon_spread)
+    if rename:
+        df = df.rename(columns=dict(rename))
+
+    if out_cols is not None:
+        out_cols = list(out_cols)
+        missing = [c for c in out_cols if c not in df.columns]
+        if missing:
+            raise KeyError(f"Missing required columns in {path}: {missing}")
+        df = df[out_cols].copy()
+
+    return df
+
+
 def load_cnr_bins(cnr_path: str | Path) -> pd.DataFrame:
-    """Load CNVkit CNR, normalize chr, validate columns, explode genes."""
-    cnr = pd.read_csv(cnr_path, sep="\t").copy()
-
-    chr_col = "chromosome"
-
-    cnr = explode_multigene_bins(cnr)
-    cnr = cnr.rename(columns={chr_col: CHR})
-    return cnr
+    return _load_bins_tsv(
+        cnr_path,
+        explode_genes=True,
+        out_cols=[CHR, "start", "end", "gene.symbol", "log2", "depth", "weight"],
+    )
 
 
 def load_pon_bins(pon_path: str | Path) -> pd.DataFrame:
-    """
-    Load CNVkit PON .cnn, normalize chr, validate required columns,
-    rename log2/spread -> pon_log2/pon_spread.
-    """
-    pon = pd.read_csv(pon_path, sep="\t").copy()
-
-    chr_col = "chromosome"
-
-    pon = pon.rename(columns={chr_col: CHR, "log2": "pon_log2", "spread": "pon_spread"})
-    return pon[["chr", "start", "end", "pon_log2", "pon_spread"]]
+    return _load_bins_tsv(
+        pon_path,
+        explode_genes=True,  # keep behavior consistent with CNR (safe either way)
+        rename={"log2": "pon_log2", "spread": "pon_spread"},
+        out_cols=[CHR, "start", "end", "pon_log2", "pon_spread", "gene.symbol"],
+    )
 
 
 def load_purecn_segments(pure_cn: str | Path) -> pd.DataFrame:
     """
-    Load CNVkit CNS, normalize chr, keep available segment columns,
-    and assign stable segment_id within each file.
+    Load PureCN segment file, keep relevant columns,
+    assign stable ordering, and derive LOH flag.
+
+    The loh_flag column:
+        - True  -> if type contains "LOH"
+        - False -> if type present but not LOH
+        - <NA>  -> if type is missing
     """
     cns = pd.read_csv(pure_cn, sep=",").copy()
 
@@ -57,9 +123,24 @@ def load_purecn_segments(pure_cn: str | Path) -> pd.DataFrame:
     ]
 
     keep = [c for c in keep_columns if c in cns.columns]
-
     cns = cns[keep].copy()
+
     cns = cns.sort_values(["chr", "start"], kind="stable").reset_index(drop=True)
+
+    # ------------------------------------------------------------------
+    # Derive LOH flag from the type column
+    # ------------------------------------------------------------------
+    loh_flag_col = "loh_flag"
+    cns[loh_flag_col] = pd.array([pd.NA] * len(cns), dtype="boolean")
+
+    if "type" in cns.columns:
+        loh_mask = (
+            cns["type"]
+            .astype("string")          # preserves <NA>
+            .str.upper()
+            .str.contains("LOH", na=pd.NA)
+        )
+        cns[loh_flag_col] = loh_mask.astype("boolean")
 
     return cns
 

@@ -28,7 +28,7 @@ def read_purecn_summary(purity_csv: str | Path | None) -> pd.DataFrame | None:
 
 
 def compute_dlr_spread_from_cnr(
-    cnr_path: str | Path,
+    cnr_df: pd.DataFrame,
     exclude_sex_chromosomes: bool = True,
 ) -> float:
     """
@@ -40,24 +40,21 @@ def compute_dlr_spread_from_cnr(
 
     Returns np.nan if fewer than 3 usable bins.
     """
-    cnr = pd.read_csv(cnr_path, sep="\t")
 
-    chr_col = "chromosome"
+    cnr_df["type"] = np.where(cnr_df["gene.symbol"] == "Antitarget", "Antitarget", "Target")
 
-    cnr["type"] = np.where(cnr["gene"] == "Antitarget", "Antitarget", "Target")
-
-    cnr = cnr[cnr["type"] == "Target"]
+    cnr_df = cnr_df[cnr_df["type"] == "Target"]
 
     if exclude_sex_chromosomes:
-        cnr = cnr[~cnr[chr_col].isin(["X", "Y"])]
+        cnr_df = cnr_df[~cnr_df["chr"].isin(["X", "Y"])]
 
-    cnr = cnr.dropna(subset=["log2"])
-    if cnr.empty:
+    cnr_df = cnr_df.dropna(subset=["log2"])
+    if cnr_df.empty:
         return float("nan")
 
-    cnr["chr_sort"] = cnr[chr_col].map(chrom_sort_key)
-    cnr = cnr.sort_values(["chr_sort", "start"]).reset_index(drop=True)
-    log2_vals = cnr["log2"].to_numpy()
+    cnr_df["chr_sort"] = cnr_df["chr"].map(chrom_sort_key)
+    cnr_df = cnr_df.sort_values(["chr_sort", "start"]).reset_index(drop=True)
+    log2_vals = cnr_df["log2"].to_numpy()
 
     if log2_vals.size < 3:
         return float("nan")
@@ -68,8 +65,7 @@ def compute_dlr_spread_from_cnr(
 
 
 def compute_pon_spread_summaries(
-    cnn_path: str | Path,
-    targets_only: bool = True,
+    pon_df: pd.DataFrame,
     exclude_sex_chromosomes: bool = True,
 ) -> dict[str, float]:
     """
@@ -81,39 +77,33 @@ def compute_pon_spread_summaries(
 
     (np.nan if not available)
     """
-    cnn = pd.read_csv(cnn_path, sep="\t")
-    if cnn.empty or "spread" not in cnn.columns:
-        return {
-            "pon_spread_median_target": float("nan"),
-            "pon_spread_q90_target": float("nan"),
-        }
 
-    chr_col = "chromosome"
+    chr_col = "chr"
 
     # mark Target / Antitarget
-    cnn["type"] = np.where(cnn["gene"] == "Antitarget", "Antitarget", "Target")
+    pon_df["type"] = np.where(pon_df["gene.symbol"] == "Antitarget", "Antitarget", "Target")
 
-    cnn = cnn[cnn["type"] == "Target"]
+    pon_df = pon_df[pon_df["type"] == "Target"]
 
     if exclude_sex_chromosomes:
-        cnn = cnn[~cnn[chr_col].isin(["X", "Y"])]
+        pon_df = pon_df[~pon_df[chr_col].isin(["X", "Y"])]
 
-    cnn = cnn.dropna(subset=["spread"])
-    if cnn.empty:
+    pon_df = pon_df.dropna(subset=["pon_spread"])
+    if pon_df.empty:
         return {
             "pon_spread_median_target": float("nan"),
             "pon_spread_q90_target": float("nan"),
         }
 
     return {
-        "pon_spread_median_target": float(cnn["spread"].median()),
-        "pon_spread_q90_target": float(cnn["spread"].quantile(0.90)),
+        "pon_spread_median_target": float(pon_df["pon_spread"].median()),
+        "pon_spread_q90_target": float(pon_df["pon_spread"].quantile(0.90)),
     }
 
 
 def compute_summary_metrics(
-    cnr_path: str | Path,
-    cnn_path: str | Path | None,
+    cnr_df: pd.DataFrame,
+    pon_df: pd.DataFrame | None,
 ) -> pd.DataFrame:
     """
     Build a 1-row DataFrame with QC / burden summaries.
@@ -121,16 +111,12 @@ def compute_summary_metrics(
     Includes:
       - Log2-spread (DLR-like) from the CNVkit .cnr file
       - PON spread summaries from the CNVkit .cnn file (targets only)
-      - Gene-level CNV/LOH counts from the gene-segment table (if provided)
 
     Parameters
     ----------
-    cnr_path : str | Path
-        Path to CNVkit .cnr file.
-    cnn_path : str | Path | None
-        Path to CNVkit PON .cnn file (optional).
-    gene_seg_df : pd.DataFrame | None
-        Gene-segment table (optional).
+    cnr_df
+    pon_df
+
 
     Returns
     -------
@@ -140,11 +126,11 @@ def compute_summary_metrics(
     metrics: dict[str, float | int] = {}
 
     # 1) DLR-like spread
-    metrics["Log2-spread"] = compute_dlr_spread_from_cnr(cnr_path)
+    metrics["Log2-spread"] = compute_dlr_spread_from_cnr(cnr_df)
 
     # 2) PON spread summaries
-    if cnn_path is not None and Path(cnn_path).is_file():
-        pon_stats = compute_pon_spread_summaries(cnn_path)
+    if pon_df is not None:
+        pon_stats = compute_pon_spread_summaries(pon_df)
         metrics.update(pon_stats)
     else:
         metrics["pon_spread_median_target"] = float("nan")

@@ -527,8 +527,8 @@ def main(
 
     # --- 2) Extra QC / CNV metrics (DLR, PON spread, chunk stats) ---
     qc_summary_df = compute_summary_metrics(
-        cnr_path=cnr,
-        cnn_path=pon,  # CNVkit .cnn PON, or None
+        cnr_df=cnr_df,
+        pon_df=pon_df,
     )
 
     # ----------------------------
@@ -581,7 +581,7 @@ def main(
         diagram_png=diagram_png_path,  # optional
         chr_plots_dir=chr_plots_dir,
         out_html=out_html_path,
-        title=f"CNV Report – {case_id}",
+        title=f"CNV Report – {plot_case_id}",
     )
 
     click.echo(f"[CNV QC] Finished report for {case_id}: {out_html_path}")

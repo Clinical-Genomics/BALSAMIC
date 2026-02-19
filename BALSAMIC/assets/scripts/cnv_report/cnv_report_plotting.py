@@ -256,25 +256,31 @@ def _compute_gene_level_highlights(
 def _compute_variable_x(
     sub: pd.DataFrame,
     highlighted_genes: np.ndarray,
-    anti_factor: float,
     neutral_target_factor: float,
-    highlight_target_factor: float = 3.0,
+    backbone_factor: float = 0.15,
+    backbone_label: str = "backbone",
 ) -> pd.DataFrame:
     out = sub.copy()
+
+    # Ensure string dtype for consistent comparisons
+    gene = out["gene.symbol"].astype("string")
+
     hi = set(map(str, highlighted_genes))
 
-    out["type"] = np.where(out["gene"] == "Antitarget", "Antitarget", "Target")
+    # "type" used only for plotting style/legend
+    out["type"] = np.where(gene == backbone_label, "Backbone", "Target")
 
-    def _bin_width(row: pd.Series) -> float:
-        g = row["gene"]
-        if row["type"] == "Antitarget":
-            return anti_factor
-        if isinstance(g, str) and g in hi:
-            return highlight_target_factor
-        return neutral_target_factor
+    # Default width for normal targets
+    width = np.full(len(out), float(neutral_target_factor), dtype=float)
 
-    out["bin_width"] = out.apply(_bin_width, axis=1)
-    out["x_coord"] = out["bin_width"].cumsum() - out["bin_width"] / 2
+    # Backbone compressed
+    width[gene.eq(backbone_label).to_numpy()] = float(backbone_factor)
+
+    # Highlighted expanded (override backbone if ever present, though we’ll exclude it too)
+    width[gene.isin(list(hi)).to_numpy()] = 1.0
+
+    out["bin_width"] = width
+    out["x_coord"] = np.cumsum(width) - (width / 2.0)
     return out
 
 
@@ -289,8 +295,8 @@ def _add_smoothing(sub: pd.DataFrame, window: int) -> pd.DataFrame:
     """
 
     out = sub.sort_values("x_coord").copy()
-    out["log2_cnr_smooth"] = (
-        out["log2_cnr"].rolling(window=window, center=True).median()
+    out["log2_smooth"] = (
+        out["log2"].rolling(window=window, center=True).median()
     )
     return out
 
@@ -422,9 +428,8 @@ def _make_gene_colors(highlighted_genes: np.ndarray) -> dict[str, tuple]:
     return gene_to_color
 
 
-def _draw_background_bins(
-    ax, sub: pd.DataFrame, highlighted_genes: np.ndarray, y_col: str
-):
+
+def _draw_background_bins(ax, sub: pd.DataFrame, highlighted_genes: np.ndarray, y_col: str):
     """
     Draw background bin scatter layer for non-highlighted bins.
 
@@ -436,23 +441,22 @@ def _draw_background_bins(
     """
 
     if highlighted_genes.size > 0:
-        non_cnv = sub[~sub["gene"].isin(highlighted_genes)]
+        non_hi = sub[~sub["gene.symbol"].isin(highlighted_genes)]
     else:
-        non_cnv = sub
+        non_hi = sub
 
-    bg_targets = non_cnv[non_cnv["type"] == "Target"]
-    bg_antis = non_cnv[non_cnv["type"] == "Antitarget"]
+    bg_backbone = non_hi[non_hi["type"] == "Backbone"]
+    bg_targets  = non_hi[non_hi["type"] == "Target"]
 
-    if not bg_antis.empty:
+    if not bg_backbone.empty:
         ax.scatter(
-            bg_antis["x_coord"],
-            bg_antis[y_col],
-            s=3,
-            alpha=0.38,
+            bg_backbone["x_coord"],
+            bg_backbone[y_col],
+            s=2,
+            alpha=0.25,
             color="lightgrey",
-            edgecolors="black",
-            linewidths=0.2,
-            label="Antitarget bins",
+            edgecolors="none",
+            label="Backbone bins",
         )
 
     if not bg_targets.empty:
@@ -464,9 +468,8 @@ def _draw_background_bins(
             color="tab:blue",
             edgecolors="black",
             linewidths=0.25,
-            label="Target bins (no highlighted CNV gene)",
+            label="Target bins (not highlighted)",
         )
-
 
 def _draw_highlighted_bins(
     ax,
@@ -482,7 +485,7 @@ def _draw_highlighted_bins(
     """
 
     for gene in highlighted_genes:
-        gsub = sub[sub["gene"] == gene]
+        gsub = sub[sub["gene.symbol"] == gene]
         if gsub.empty:
             continue
         color = gene_to_color.get(str(gene), "black")
@@ -505,8 +508,8 @@ def _draw_pon_bars(ax, sub: pd.DataFrame, x: pd.Series, y_clip: float):
     Clipped to plotting y-range.
     """
 
-    band_center = sub["log2_pon"].fillna(0.0)
-    band_spread = sub["spread"].fillna(0.0)
+    band_center = sub["pon_log2"].fillna(0.0)
+    band_spread = sub["pon_spread"].fillna(0.0)
     band_bottom = (band_center - band_spread).clip(-y_clip, y_clip)
     band_top = (band_center + band_spread).clip(-y_clip, y_clip)
 
@@ -700,7 +703,7 @@ def _draw_gene_labels(
             g_start = int(g_rows["seg_start"].min())
             g_end = int(g_rows["seg_end"].max())
         else:
-            bins_gene = sub[sub["gene"] == gname]
+            bins_gene = sub[sub["gene.symbol"] == gname]
             if bins_gene.empty:
                 continue
             g_start = int(bins_gene["start"].min())
@@ -759,10 +762,9 @@ def plot_chromosomes(
     pon_df: Optional[pd.DataFrame] = None,
     gchunk: Optional[pd.DataFrame] = None,
     window: int = 5,
-    anti_factor: float = 0.15,
+    backbone_factor: float = 0.15,
     base_label_offset: float = 1.5,
     neutral_target_factor: float = 0.3,
-    highlight_target_factor: float = 2,
     highlight_only_cancer: bool = False,
     y_abs_max: float = 3.0,
 ) -> None:
@@ -803,11 +805,12 @@ def plot_chromosomes(
     if pon_df is not None:
         merged = pd.merge(
             cnr_df,
-            pon_df[["chr", "start", "end", "log2", "spread"]],
+            pon_df[["chr", "start", "end", "pon_log2", "pon_spread"]],
             on=["chr", "start", "end"],
             how="inner",
             suffixes=("_cnr", "_pon"),
         )
+        use_pon = True
     else:
         use_pon = False
         merged = cnr_df.copy()
@@ -815,8 +818,6 @@ def plot_chromosomes(
             merged["spread"] = np.nan
 
     merged = merged[merged["chr"].isin(chr_order)].copy()
-    merged = merged[merged["gene"] != "Antitarget"]
-
 
     # Compute gene flags & gene-level highlight decisions
     gdf = _compute_row_flags(gdf)
@@ -858,6 +859,7 @@ def plot_chromosomes(
             .astype(str)
             .unique()
         )
+        highlighted = highlighted[highlighted != "backbone"]
 
         gene_to_color = _make_gene_colors(highlighted)
 
@@ -865,17 +867,17 @@ def plot_chromosomes(
         sub = _compute_variable_x(
             sub,
             highlighted_genes=highlighted,
-            anti_factor=anti_factor,
             neutral_target_factor=neutral_target_factor,
-            highlight_target_factor=highlight_target_factor,
+            backbone_factor=backbone_factor,
+            backbone_label="backbone",
         )
         if sub.empty:
             continue
 
         # Smooth + clip
         sub = _add_smoothing(sub, window=window)
-        sub["log2_clipped"] = sub["log2_cnr"].clip(-y_clip, y_clip)
-        sub["log2_smooth_clipped"] = sub["log2_cnr_smooth"].clip(-y_clip, y_clip)
+        sub["log2_clipped"] = sub["log2"].clip(-y_clip, y_clip)
+        sub["log2_smooth_clipped"] = sub["log2_smooth"].clip(-y_clip, y_clip)
 
         pos_to_xcoord = _pos_to_xcoord_fn(sub)
 
@@ -948,6 +950,7 @@ def plot_chromosomes(
         ax1.legend(loc="upper right", fontsize=8)
 
         label_genes = sorted(set(map(str, highlighted)) | set(map(str, pon_cnv_genes)))
+        label_genes = [g for g in label_genes if g != "backbone"]
         if label_genes:
             _draw_gene_labels(
                 ax1,

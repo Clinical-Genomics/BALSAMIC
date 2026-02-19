@@ -829,31 +829,14 @@ def annotate_regions_with_purecn_lohregions(
         "M.flagged": f"{prefix}M_flagged",
         "C": f"{prefix}C",
         "maf.observed": f"{prefix}maf_observed",
-        "type": f"{prefix}type",
+        "loh_fag": f"{prefix}loh_flag",
     }
-    loh_flag_col = f"{prefix}loh_flag"
-    type_col = f"{prefix}type"
 
     annotated_df = annotate_regions_with_overlapping_segments(
         regions_df,
         lohregions_df,
         field_map=field_map,
     )
-
-    # Derive LOH flag from the annotated type column.
-    # Keep <NA> if there was no overlapping segment (type missing).
-
-    annotated_df[loh_flag_col] = pd.array([pd.NA] * len(annotated_df), dtype="boolean")
-
-    if type_col in annotated_df.columns:
-        loh_mask = (
-            annotated_df[type_col]
-            .astype("string")  # preserves <NA>
-            .str.upper()
-            .str.contains("LOH", na=pd.NA)
-        )
-
-        annotated_df[loh_flag_col] = loh_mask.astype("boolean")
 
     return annotated_df
 
@@ -864,10 +847,20 @@ def annotate_regions_with_purecn_lohregions(
 
 
 def create_gene_chunks(cnr_df: pd.DataFrame, pon_df: pd.DataFrame):
-    bins = cnr_df.merge(pon_df, how="left", on=["chr", "start", "end"])
 
-    bins = bins.sort_values(["chr", "gene.symbol", "start"], kind="stable").reset_index(
-        drop=True
+    # --- Drop backbone bins ---
+    if "gene.symbol" in cnr_df.columns:
+        cnr_df = cnr_df.loc[cnr_df["gene.symbol"] != "backbone"].copy()
+
+    if pon_df is not None and "gene.symbol" in pon_df.columns:
+        pon_df = pon_df.loc[pon_df["gene.symbol"] != "backbone"].copy()
+        pon_df = pon_df.drop(columns=["gene.symbol"], errors="ignore")
+
+    # --- Merge ---
+    bins = cnr_df.merge(
+        pon_df,
+        how="left",
+        on=["chr", "start", "end"],
     )
 
     # CREATE INITIAL CHUNKS
@@ -1153,10 +1146,24 @@ def build_gene_segment_table(
     pon_df: pd.DataFrame | None = None,
 ) -> pd.DataFrame:
 
-    bins = cnr_df.merge(pon_df, how="left", on=["chr", "start", "end"])
+    # --- Drop backbone bins ---
+    if "gene.symbol" in cnr_df.columns:
+        cnr_df = cnr_df.loc[cnr_df["gene.symbol"] != "backbone"].copy()
 
-    bins = bins.sort_values(["chr", "gene.symbol", "start"], kind="stable").reset_index(
-        drop=True
+    if pon_df is not None and "gene.symbol" in pon_df.columns:
+        pon_df = pon_df.loc[pon_df["gene.symbol"] != "backbone"].copy()
+        pon_df = pon_df.drop(columns=["gene.symbol"], errors="ignore")
+
+    # --- Merge ---
+    bins = cnr_df.merge(
+        pon_df,
+        how="left",
+        on=["chr", "start", "end"],
+    )
+
+    bins = (
+        bins.sort_values(["chr", "gene.symbol", "start"], kind="stable")
+        .reset_index(drop=True)
     )
 
     # Gene-level PON stats

@@ -93,27 +93,6 @@ def flatten_agg_columns(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def explode_multigene_bins(cnr: pd.DataFrame) -> pd.DataFrame:
-    """Drop pseudo genes and explode multi-gene bins into one row per gene.symbol."""
-    cnr = cnr.copy()
-
-    gene_col = "gene"
-
-    # drop NA and pseudo-genes
-    cnr = cnr[cnr[gene_col].notna()]
-    cnr = cnr[~cnr[gene_col].isin(["Antitarget", "-"])]
-
-    # split on commas, strip whitespace
-    gene_series = cnr[gene_col].astype(str).str.split(r"\s*,\s*", regex=True)
-
-    cnr = cnr.assign(gene_symbol=gene_series).explode("gene_symbol")
-    cnr = cnr[
-        cnr["gene_symbol"].notna() & (cnr["gene_symbol"].astype(str).str.len() > 0)
-    ]
-    cnr = cnr.rename(columns={"gene_symbol": "gene.symbol"})
-    return cnr
-
-
 def _left_merge_pon(cnr_bins: pd.DataFrame, pon_bins: pd.DataFrame) -> pd.DataFrame:
     """Left-merge PON columns onto bins by (chr,start,end)."""
     if pon_bins is None or pon_bins.empty:
