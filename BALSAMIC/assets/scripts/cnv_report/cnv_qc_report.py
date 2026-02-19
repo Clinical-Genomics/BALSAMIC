@@ -510,7 +510,7 @@ def main(
     # ----------------------------
     # Create per chunk table
     # ----------------------------
-    if pon_df:
+    if pon_df is not None:
         chunks_df = build_gene_chunk_table(
             cnr_df=cnr_df,
             cns_df=cns_df,
@@ -544,13 +544,13 @@ def main(
 
     # pon may be None; plot_chromosomes is written to handle that
     plot_chromosomes(
-        cnr_path=cnr,
+        cnr_df=cnr_df,
         vcf_path=vcf,
         gdf=genes_df,
         gchunk=chunks_df,
         outdir=chr_plots_dir,
         case_id=plot_case_id,
-        pon_path=pon,
+        pon_df=pon_df,
         neutral_target_factor=neutral_target_factor,
         highlight_only_cancer=highlight_only_cancer,
     )

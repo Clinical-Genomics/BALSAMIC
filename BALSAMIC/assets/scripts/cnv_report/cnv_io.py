@@ -154,9 +154,9 @@ def load_refgene_exons(refgene_path: str | Path) -> Dict[Tuple[str, str], dict]:
 
 def load_cytobands(path: str | Path) -> pd.DataFrame:
     """Load cytoband UCSC file; return normalized df with integer coords."""
-    cols = ["chrom", "chromStart", "chromEnd", "name", "gieStain"]
+    cols = ["chr", "chromStart", "chromEnd", "name", "gieStain"]
     cyto = pd.read_csv(path, sep="\t", header=None, names=cols)
-    cyto["chrom"] = strip_chr_prefix(cyto["chrom"])
+    cyto["chr"] = strip_chr_prefix(cyto["chr"])
     cyto["start_int"] = cyto["chromStart"].astype(int)
     cyto["end_int"] = cyto["chromEnd"].astype(int)
     return cyto

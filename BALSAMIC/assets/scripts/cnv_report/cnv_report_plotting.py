@@ -13,9 +13,6 @@ import pandas as pd
 from matplotlib import colormaps
 from matplotlib import patheffects as pe
 
-from cnv_report_utils import safe_read_csv
-
-
 # =============================================================================
 # VCF parsing / BAF
 # =============================================================================
@@ -31,7 +28,7 @@ def parse_sample_fields(format_str: str, sample_str: str) -> tuple[float, None, 
     """
     Parse AD and DP from FORMAT/TUMOR and compute BAF = alt / (ref + alt).
 
-    Returns (BAF, dummy_GT, DP_sample).
+    Returns (BAF, dummy_GT, DP_sample).cnv_report_plotting
     """
     parsed = _parse_sample_fields(format_str, sample_str)
     return parsed.baf, None, parsed.dp
@@ -115,37 +112,6 @@ def load_vcf_with_baf(vcf_path: str | Path, chr_order: list[str]) -> pd.DataFram
 
 
 # =============================================================================
-# CNR + PON merge (dataframe-based)
-# =============================================================================
-
-
-def merge_cnr_pon(
-    df_cnr: pd.DataFrame,
-    df_pon: pd.DataFrame,
-    chr_col: str = "chromosome",
-    spread_col: str = "spread",
-) -> pd.DataFrame:
-    """
-    Merge CNVkit tumor CNR with PON on (chr, start, end)
-    """
-    cnr = df_cnr.copy()
-    pon = df_pon.copy()
-
-    cnr[chr_col] = cnr[chr_col].astype(str).str.replace("^chr", "", regex=True)
-    pon[chr_col] = pon[chr_col].astype(str).str.replace("^chr", "", regex=True)
-
-    merged = pd.merge(
-        cnr,
-        pon[[chr_col, "start", "end", "log2", spread_col]],
-        on=[chr_col, "start", "end"],
-        how="inner",
-        suffixes=("_cnr", "_pon"),
-    )
-
-    return merged
-
-
-# =============================================================================
 # Plotting helpers (refactor plot_chromosomes)
 # =============================================================================
 
@@ -192,54 +158,6 @@ def _normalize_is_cancer_gene(gdf: pd.DataFrame) -> pd.DataFrame:
         out["is_cancer_gene_bool"] = False
     return out
 
-
-def _load_cnr_and_optional_pon(
-    cnr_path: Path,
-    chr_order: list[str],
-    pon_path: Optional[Path],
-) -> tuple[pd.DataFrame, str, bool, float]:
-    """
-    Load CNR bins and optionally merge with PON spread information.
-
-    Applies:
-      - Chromosome normalization
-      - Chromosome filtering
-      - Optional PON merge (inner join behaviour)
-
-
-    Returns:
-      merged_bins_df
-      chromosome_column_name
-      use_pon_flag
-
-    Merged dataframe always contains a 'spread' column.
-    """
-
-    cnr = safe_read_csv(cnr_path, sep="\t")
-    if cnr.empty:
-        return pd.DataFrame(), "chromosome", False, float("inf")
-
-    chr_col = "chromosome" if "chromosome" in cnr.columns else "chr"
-    cnr[chr_col] = cnr[chr_col].astype(str).str.replace("^chr", "", regex=True)
-    cnr = cnr[cnr[chr_col].isin(chr_order)].copy()
-
-    if "gene" not in cnr.columns:
-        cnr["gene"] = ""
-
-    if pon_path is not None and Path(pon_path).is_file():
-        use_pon = True
-        pon = safe_read_csv(pon_path, sep="\t")
-        merged = merge_cnr_pon(cnr, pon, chr_col=chr_col, spread_col="spread")
-
-    else:
-        use_pon = False
-        merged = cnr.copy()
-        if "spread" not in merged.columns:
-            merged["spread"] = np.nan
-
-    merged = merged[merged[chr_col].isin(chr_order)].copy()
-
-    return merged, chr_col, use_pon
 
 
 def _compute_row_flags(gdf: pd.DataFrame) -> pd.DataFrame:
@@ -833,12 +751,12 @@ def _plot_baf_panel(ax, baf_chr: pd.DataFrame):
 
 
 def plot_chromosomes(
-    cnr_path: Path,
+    cnr_df: pd.DataFrame,
     vcf_path: Path,
     gdf: pd.DataFrame,
     outdir: Path,
     case_id: str,
-    pon_path: Optional[Path] = None,
+    pon_df: Optional[pd.DataFrame] = None,
     gchunk: Optional[pd.DataFrame] = None,
     window: int = 5,
     anti_factor: float = 0.15,
@@ -880,17 +798,25 @@ def plot_chromosomes(
     # Load VCF BAF
     vcf = load_vcf_with_baf(vcf_path=vcf_path, chr_order=chr_order)
 
-    # Load CNR and optional PON
-    merged, chr_col, use_pon = _load_cnr_and_optional_pon(
-        cnr_path=cnr_path,
-        chr_order=chr_order,
-        pon_path=pon_path,
-    )
+    # Optionally merge PON bins
 
+    if pon_df is not None:
+        merged = pd.merge(
+            cnr_df,
+            pon_df[["chr", "start", "end", "log2", "spread"]],
+            on=["chr", "start", "end"],
+            how="inner",
+            suffixes=("_cnr", "_pon"),
+        )
+    else:
+        use_pon = False
+        merged = cnr_df.copy()
+        if "spread" not in merged.columns:
+            merged["spread"] = np.nan
+
+    merged = merged[merged["chr"].isin(chr_order)].copy()
     merged = merged[merged["gene"] != "Antitarget"]
 
-    if merged.empty:
-        return
 
     # Compute gene flags & gene-level highlight decisions
     gdf = _compute_row_flags(gdf)
@@ -908,7 +834,7 @@ def plot_chromosomes(
     y_lim_chr = (-y_clip, y_clip)
 
     for chr_name in chr_order:
-        sub = merged[merged[chr_col] == chr_name].copy()
+        sub = merged[merged["chr"] == chr_name].copy()
         if sub.empty:
             continue
 

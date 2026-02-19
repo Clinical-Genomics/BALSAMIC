@@ -1152,6 +1152,7 @@ def build_gene_segment_table(
     sex: Gender = None,
     pon_df: pd.DataFrame | None = None,
 ) -> pd.DataFrame:
+
     bins = cnr_df.merge(pon_df, how="left", on=["chr", "start", "end"])
 
     bins = bins.sort_values(["chr", "gene.symbol", "start"], kind="stable").reset_index(
@@ -1184,7 +1185,7 @@ def build_gene_segment_table(
     )
 
     # PureCN LOHregions attach (rename to purecn_* for clarity)
-    if loh_regions_df:
+    if loh_regions_df is not None:
         genes_df = annotate_regions_with_purecn_lohregions(
             genes_df,
             loh_regions_df,
@@ -1253,7 +1254,7 @@ def build_gene_chunk_table(
     )
 
     # PureCN LOHregions attach (rename to purecn_* for clarity)
-    if loh_regions_df:
+    if loh_regions_df is not None:
         chunks_df = annotate_regions_with_purecn_lohregions(
             chunks_df,
             loh_regions_df,
