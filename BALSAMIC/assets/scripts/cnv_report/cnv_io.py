@@ -12,7 +12,6 @@ from cnv_report_utils import strip_chr_prefix
 from cnv_constants import CHR
 
 
-
 def _load_bins_tsv(
     path: str | Path,
     *,
@@ -50,15 +49,11 @@ def _load_bins_tsv(
 
         df["gene.symbol"] = gene
     else:
-        df["gene.symbol"] = pd.Series(
-            [pd.NA] * len(df), dtype="string", index=df.index
-        )
+        df["gene.symbol"] = pd.Series([pd.NA] * len(df), dtype="string", index=df.index)
 
     if explode_genes and gene_col in df.columns:
         df["gene.symbol"] = (
-            df["gene.symbol"]
-            .astype("string")
-            .str.split(r"\s*,\s*", regex=True)
+            df["gene.symbol"].astype("string").str.split(r"\s*,\s*", regex=True)
         )
         df = df.explode("gene.symbol", ignore_index=True)
         df["gene.symbol"] = df["gene.symbol"].astype("string").str.strip()
@@ -136,7 +131,7 @@ def load_purecn_segments(pure_cn: str | Path) -> pd.DataFrame:
     if "type" in cns.columns:
         loh_mask = (
             cns["type"]
-            .astype("string")          # preserves <NA>
+            .astype("string")  # preserves <NA>
             .str.upper()
             .str.contains("LOH", na=pd.NA)
         )

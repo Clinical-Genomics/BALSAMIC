@@ -847,7 +847,6 @@ def annotate_regions_with_purecn_lohregions(
 
 
 def create_gene_chunks(cnr_df: pd.DataFrame, pon_df: pd.DataFrame):
-
     # --- Drop backbone bins ---
     if "gene.symbol" in cnr_df.columns:
         cnr_df = cnr_df.loc[cnr_df["gene.symbol"] != "backbone"].copy()
@@ -1145,7 +1144,6 @@ def build_gene_segment_table(
     sex: Gender = None,
     pon_df: pd.DataFrame | None = None,
 ) -> pd.DataFrame:
-
     # --- Drop backbone bins ---
     if "gene.symbol" in cnr_df.columns:
         cnr_df = cnr_df.loc[cnr_df["gene.symbol"] != "backbone"].copy()
@@ -1161,9 +1159,8 @@ def build_gene_segment_table(
         on=["chr", "start", "end"],
     )
 
-    bins = (
-        bins.sort_values(["chr", "gene.symbol", "start"], kind="stable")
-        .reset_index(drop=True)
+    bins = bins.sort_values(["chr", "gene.symbol", "start"], kind="stable").reset_index(
+        drop=True
     )
 
     # Gene-level PON stats

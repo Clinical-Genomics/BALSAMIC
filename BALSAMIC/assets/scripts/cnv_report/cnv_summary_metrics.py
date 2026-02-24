@@ -41,7 +41,9 @@ def compute_dlr_spread_from_cnr(
     Returns np.nan if fewer than 3 usable bins.
     """
 
-    cnr_df["type"] = np.where(cnr_df["gene.symbol"] == "Antitarget", "Antitarget", "Target")
+    cnr_df["type"] = np.where(
+        cnr_df["gene.symbol"] == "Antitarget", "Antitarget", "Target"
+    )
 
     cnr_df = cnr_df[cnr_df["type"] == "Target"]
 
@@ -81,7 +83,9 @@ def compute_pon_spread_summaries(
     chr_col = "chr"
 
     # mark Target / Antitarget
-    pon_df["type"] = np.where(pon_df["gene.symbol"] == "Antitarget", "Antitarget", "Target")
+    pon_df["type"] = np.where(
+        pon_df["gene.symbol"] == "Antitarget", "Antitarget", "Target"
+    )
 
     pon_df = pon_df[pon_df["type"] == "Target"]
 

@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Optional
 
 # Third-party
+import hashlib
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -22,16 +23,6 @@ from matplotlib import patheffects as pe
 class ParsedSample:
     baf: float
     dp: float  # dp as float to allow NaN
-
-
-def parse_sample_fields(format_str: str, sample_str: str) -> tuple[float, None, float]:
-    """
-    Parse AD and DP from FORMAT/TUMOR and compute BAF = alt / (ref + alt).
-
-    Returns (BAF, dummy_GT, DP_sample).cnv_report_plotting
-    """
-    parsed = _parse_sample_fields(format_str, sample_str)
-    return parsed.baf, None, parsed.dp
 
 
 def _parse_sample_fields(format_str: str, sample_str: str) -> ParsedSample:
@@ -116,31 +107,6 @@ def load_vcf_with_baf(vcf_path: str | Path, chr_order: list[str]) -> pd.DataFram
 # =============================================================================
 
 
-def _as_chr_order() -> list[str]:
-    """
-    Build canonical chromosome ordering list.
-
-    Returns:
-      ['1'..'22', 'X', 'Y']
-
-    Used to standardize filtering and plotting chromosome iteration.
-    """
-    order = [str(i) for i in range(1, 23)] + ["X", "Y"]
-    return order
-
-
-def _norm_chr_inplace(df: pd.DataFrame, col: str) -> pd.DataFrame:
-    """
-    Normalize chromosome column to string and strip leading 'chr'.
-
-    Returns a copy of the dataframe with normalized chromosome values.
-    Safe to call repeatedly.
-    """
-    out = df.copy()
-    out[col] = out[col].astype(str).str.replace("^chr", "", regex=True)
-    return out
-
-
 def _normalize_is_cancer_gene(gdf: pd.DataFrame) -> pd.DataFrame:
     """
     Normalize cancer gene annotation to boolean column.
@@ -157,7 +123,6 @@ def _normalize_is_cancer_gene(gdf: pd.DataFrame) -> pd.DataFrame:
     else:
         out["is_cancer_gene_bool"] = False
     return out
-
 
 
 def _compute_row_flags(gdf: pd.DataFrame) -> pd.DataFrame:
@@ -186,17 +151,20 @@ def _compute_row_flags(gdf: pd.DataFrame) -> pd.DataFrame:
         return False
 
     def _is_pon_signif_row(row: pd.Series) -> bool:
+        # Newer column: explicit significance label
         if "pon_chunk_significance" in row.index and pd.notna(
             row["pon_chunk_significance"]
         ):
             return str(row["pon_chunk_significance"]).strip().lower() == "significant"
 
+        # Legacy/alternate column: gain/loss indication
         if "pon_chunk_indication" in row.index and pd.notna(
             row["pon_chunk_indication"]
         ):
             val = str(row["pon_chunk_indication"]).strip().upper()
-            if val in ("GAIN", "LOSS"):
-                return True
+            return val in ("GAIN", "LOSS")
+
+        return False
 
     out["is_loh_or_cnv"] = out.apply(_is_loh_or_cnv_row, axis=1)
     out["is_pon_signif"] = out.apply(_is_pon_signif_row, axis=1)
@@ -253,86 +221,6 @@ def _compute_gene_level_highlights(
     return gene_level
 
 
-def _compute_variable_x(
-    sub: pd.DataFrame,
-    highlighted_genes: np.ndarray,
-    neutral_target_factor: float,
-    backbone_factor: float = 0.15,
-    backbone_label: str = "backbone",
-) -> pd.DataFrame:
-    out = sub.copy()
-
-    # Ensure string dtype for consistent comparisons
-    gene = out["gene.symbol"].astype("string")
-
-    hi = set(map(str, highlighted_genes))
-
-    # "type" used only for plotting style/legend
-    out["type"] = np.where(gene == backbone_label, "Backbone", "Target")
-
-    # Default width for normal targets
-    width = np.full(len(out), float(neutral_target_factor), dtype=float)
-
-    # Backbone compressed
-    width[gene.eq(backbone_label).to_numpy()] = float(backbone_factor)
-
-    # Highlighted expanded (override backbone if ever present, though we’ll exclude it too)
-    width[gene.isin(list(hi)).to_numpy()] = 1.0
-
-    out["bin_width"] = width
-    out["x_coord"] = np.cumsum(width) - (width / 2.0)
-    return out
-
-
-def _add_smoothing(sub: pd.DataFrame, window: int) -> pd.DataFrame:
-    """
-    Add rolling median smoothing to log2
-
-    Adds:
-      log2_smooth
-
-    Uses centered rolling window.
-    """
-
-    out = sub.sort_values("x_coord").copy()
-    out["log2_smooth"] = (
-        out["log2"].rolling(window=window, center=True).median()
-    )
-    return out
-
-
-def _add_smoothing_Backup(
-    sub: pd.DataFrame, use_pon: bool, window: int
-) -> pd.DataFrame:
-    """
-    Add rolling median smoothing to log2 and optional PON metrics.
-
-    Adds:
-      log2_smooth
-      spread_smooth (if PON available)
-      pon_log2_smooth (if available, else zero baseline)
-
-    Uses centered rolling window.
-    """
-
-    out = sub.sort_values("x_coord").copy()
-    out["log2_smooth"] = out["log2"].rolling(window=window, center=True).median()
-    if use_pon:
-        out["spread_smooth"] = (
-            out["spread"].rolling(window=window, center=True).median()
-        )
-        if "pon_log2" in out.columns:
-            out["pon_log2_smooth"] = (
-                out["pon_log2"].rolling(window=window, center=True).median()
-            )
-        else:
-            out["pon_log2_smooth"] = 0.0
-    else:
-        out["spread_smooth"] = np.nan
-        out["pon_log2_smooth"] = 0.0
-    return out
-
-
 def _pos_to_xcoord_fn(sub: pd.DataFrame) -> callable:
     """
     Build genomic position → pseudo-position mapping function.
@@ -378,7 +266,7 @@ def _collect_segments_for_chr(
     if "seg_log2" in g_chr.columns:
         agg["seg_log2"] = ("seg_log2", "first")
     if "cnvkit_cnv_call" in g_chr.columns:
-        agg["cnvkit_cnv_call"] = ("cnvkit_cnv_call", "first")  # <-- FIX
+        agg["cnvkit_cnv_call"] = ("cnvkit_cnv_call", "first")
 
     segs = (
         g_chr.dropna(subset=["seg_start", "seg_end"])
@@ -393,19 +281,19 @@ def _collect_segments_for_chr(
     return segs
 
 
-def _stable_gene_color_fn():
+def _stable_gene_color_fn(cmap_name: str = "tab20"):
     """
-    Create deterministic gene → color mapping function.
+    Deterministic gene → color mapping, stable across runs and machines.
 
-    Uses tab20 colormap hashed by gene name to ensure stable
-    color assignment across plots and runs.
+    Uses md5(gene_name) → integer → colormap index.
     """
-
-    cmap_all = colormaps.get_cmap("tab20")
+    cmap = colormaps.get_cmap(cmap_name)
 
     def _stable_gene_color(gname: str):
-        h = abs(hash(str(gname)))
-        return cmap_all(h % cmap_all.N)
+        s = str(gname).encode("utf-8")
+        h = hashlib.md5(s).hexdigest()  # 32 hex chars
+        idx = int(h[:8], 16) % cmap.N  # use first 32 bits
+        return cmap(idx)
 
     return _stable_gene_color
 
@@ -428,33 +316,21 @@ def _make_gene_colors(highlighted_genes: np.ndarray) -> dict[str, tuple]:
     return gene_to_color
 
 
-
-def _draw_background_bins(ax, sub: pd.DataFrame, highlighted_genes: np.ndarray, y_col: str):
+def _draw_background_bins(ax, bins: pd.DataFrame, y_col: str):
     """
-    Draw background bin scatter layer for non-highlighted bins.
-
-    Separates:
-      - Target bins
-      - Antitarget bins
-
-    Used to provide visual density context behind highlighted genes.
+    Draw background scatter for NON-highlighted bins (bin-level).
+    Requires columns: x_coord, type, and y_col.
     """
-
-    if highlighted_genes.size > 0:
-        non_hi = sub[~sub["gene.symbol"].isin(highlighted_genes)]
-    else:
-        non_hi = sub
-
-    bg_backbone = non_hi[non_hi["type"] == "Backbone"]
-    bg_targets  = non_hi[non_hi["type"] == "Target"]
+    bg_backbone = bins[bins["type"] == "Backbone"]
+    bg_targets = bins[bins["type"] == "Target"]
 
     if not bg_backbone.empty:
         ax.scatter(
             bg_backbone["x_coord"],
             bg_backbone[y_col],
-            s=2,
-            alpha=0.25,
-            color="lightgrey",
+            s=6,
+            alpha=0.5,
+            color="black",
             edgecolors="none",
             label="Backbone bins",
         )
@@ -463,13 +339,14 @@ def _draw_background_bins(ax, sub: pd.DataFrame, highlighted_genes: np.ndarray, 
         ax.scatter(
             bg_targets["x_coord"],
             bg_targets[y_col],
-            s=4,
-            alpha=0.5,
-            color="tab:blue",
+            s=7,
+            alpha=0.6,
+            color="blue",
             edgecolors="black",
-            linewidths=0.25,
+            linewidths=0.3,
             label="Target bins (not highlighted)",
         )
+
 
 def _draw_highlighted_bins(
     ax,
@@ -496,7 +373,7 @@ def _draw_highlighted_bins(
             alpha=0.9,
             color=color,
             edgecolors="black",
-            linewidths=0.3,
+            linewidths=0.6,
         )
 
 
@@ -748,6 +625,82 @@ def _plot_baf_panel(ax, baf_chr: pd.DataFrame):
     ax.set_ylabel("BAF")
 
 
+def _compute_variable_x_binlevel(
+    sub: pd.DataFrame,
+    highlighted_genes: np.ndarray,
+    neutral_target_factor: float,
+    backbone_factor: float = 0.3,
+    backbone_label: str = "backbone",
+    key_cols: tuple[str, str, str] = ("chr", "start", "end"),
+) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """
+    Compute pseudo-x on UNIQUE bins (chr,start,end) so exploded multi-gene rows
+    do not inflate width.
+
+    Returns:
+      sub_full: original sub with x_coord/bin_width/type/is_highlight_bin merged in
+      bins:     unique-bin dataframe (one row per bin) with x_coord/bin_width/etc
+               (use this for smoothing/lines/background bins)
+
+    Requirements in `sub`:
+      - key_cols (default chr/start/end)
+      - gene.symbol
+      - log2
+    Optional in `sub`:
+      - pon_log2
+      - pon_spread
+    """
+    out = sub.copy()
+
+    # Ensure gene is a string dtype (may contain <NA>)
+    gene = out["gene.symbol"].astype("string")
+
+    # Set of highlighted gene names (string)
+    hi = set(map(str, highlighted_genes))
+
+    # Add per-row helper flags
+    tmp = out.assign(
+        _is_backbone=gene.eq(backbone_label),
+        _is_hi=gene.fillna("").astype(str).isin(hi),
+    )
+
+    # Build aggregation dictionary safely (only include PON fields if present)
+    agg: dict[str, tuple[str, str]] = {
+        "is_backbone_bin": ("_is_backbone", "any"),
+        "is_highlight_bin": ("_is_hi", "any"),
+        "log2": ("log2", "first"),
+    }
+    if "pon_log2" in tmp.columns:
+        agg["pon_log2"] = ("pon_log2", "first")
+    if "pon_spread" in tmp.columns:
+        agg["pon_spread"] = ("pon_spread", "first")
+
+    # Aggregate to one row per unique bin
+    g = tmp.groupby(list(key_cols), as_index=False).agg(**agg)
+
+    # Bin-level plotting type
+    g["type"] = np.where(g["is_backbone_bin"], "Backbone", "Target")
+
+    # Bin-level width: neutral by default, compress backbone, expand highlighted bins
+    width = np.full(len(g), float(neutral_target_factor), dtype=float)
+    width[g["is_backbone_bin"].to_numpy()] = float(backbone_factor)
+    width[g["is_highlight_bin"].to_numpy()] = 1.0
+
+    g["bin_width"] = width
+    g["x_coord"] = np.cumsum(width) - (width / 2.0)
+
+    # Merge bin-level x back to the exploded table
+    merge_cols = list(key_cols)
+    out = out.merge(
+        g[merge_cols + ["x_coord", "bin_width", "type", "is_highlight_bin"]],
+        on=merge_cols,
+        how="left",
+        validate="many_to_one",
+    )
+
+    return out, g
+
+
 # =============================================================================
 # Main plotting function (now much thinner)
 # =============================================================================
@@ -762,9 +715,9 @@ def plot_chromosomes(
     pon_df: Optional[pd.DataFrame] = None,
     gchunk: Optional[pd.DataFrame] = None,
     window: int = 5,
-    backbone_factor: float = 0.15,
+    backbone_factor: float = 0.4,
     base_label_offset: float = 1.5,
-    neutral_target_factor: float = 0.3,
+    neutral_target_factor: float = 0.4,
     highlight_only_cancer: bool = False,
     y_abs_max: float = 3.0,
 ) -> None:
@@ -788,16 +741,16 @@ def plot_chromosomes(
     targets_col = "n.targets"
 
     gdf = gdf.rename(columns=rename_map)
-    gchunk = gchunk.rename(columns=rename_map)
+    if gchunk is not None:
+        gchunk = gchunk.rename(columns=rename_map)
 
     MIN_GENE_TARGETS = 5
     MIN_GENE_TARGETS_CANCER = 5
 
-    chr_order = _as_chr_order()
-
     gdf = _normalize_is_cancer_gene(gdf)
 
     # Load VCF BAF
+    chr_order = [str(i) for i in range(1, 23)] + ["X", "Y"]
     vcf = load_vcf_with_baf(vcf_path=vcf_path, chr_order=chr_order)
 
     # Optionally merge PON bins
@@ -863,23 +816,31 @@ def plot_chromosomes(
 
         gene_to_color = _make_gene_colors(highlighted)
 
-        # Build pseudo-x
-        sub = _compute_variable_x(
+        # Build pseudo-x BIN-LEVEL (prevents exploded bins from inflating space)
+        sub, bins = _compute_variable_x_binlevel(
             sub,
             highlighted_genes=highlighted,
             neutral_target_factor=neutral_target_factor,
             backbone_factor=backbone_factor,
             backbone_label="backbone",
         )
+        if bins.empty:
+            continue
+
+        # Smooth + clip on UNIQUE bins (not exploded)
+        bins = bins.sort_values("x_coord", kind="stable").copy()
+        bins["log2_smooth"] = bins["log2"].rolling(window=window, center=True).median()
+
+        bins["log2_clipped"] = bins["log2"].clip(-y_clip, y_clip)
+        bins["log2_smooth_clipped"] = bins["log2_smooth"].clip(-y_clip, y_clip)
+
+        # Map function should use UNIQUE bins (stable mapping)
+        pos_to_xcoord = _pos_to_xcoord_fn(bins)
+
         if sub.empty:
             continue
 
-        # Smooth + clip
-        sub = _add_smoothing(sub, window=window)
         sub["log2_clipped"] = sub["log2"].clip(-y_clip, y_clip)
-        sub["log2_smooth_clipped"] = sub["log2_smooth"].clip(-y_clip, y_clip)
-
-        pos_to_xcoord = _pos_to_xcoord_fn(sub)
 
         # BAF chr (restricted to span if focus)
         baf_chr = vcf[vcf["CHROM"] == chr_name].sort_values("POS").copy()
@@ -903,9 +864,12 @@ def plot_chromosomes(
             2, 1, figsize=(14, 6), sharex=True, gridspec_kw={"height_ratios": [2, 1]}
         )
 
-        x = sub["x_coord"]
+        x = bins["x_coord"]
 
-        _draw_background_bins(ax1, sub, highlighted, y_col="log2_clipped")
+        # background should be BIN-LEVEL and exclude bins that have any highlighted gene
+        bg_bins = bins[~bins["is_highlight_bin"]].copy()
+        _draw_background_bins(ax1, bg_bins, y_col="log2_clipped")
+
         if highlighted.size > 0:
             _draw_highlighted_bins(
                 ax1, sub, highlighted, gene_to_color, y_col="log2_clipped"
@@ -914,11 +878,11 @@ def plot_chromosomes(
         y_min, y_max = y_lim_chr
 
         if use_pon:
-            _draw_pon_bars(ax1, sub, x, y_clip=y_clip)
+            _draw_pon_bars(ax1, bins, x, y_clip=y_clip)
 
         ax1.plot(
             x,
-            sub["log2_smooth_clipped"],
+            bins["log2_smooth_clipped"],
             linewidth=1.5,
             alpha=0.9,
             color="tab:green",
@@ -949,7 +913,8 @@ def plot_chromosomes(
         ax1.set_title(title + "\n")
         ax1.legend(loc="upper right", fontsize=8)
 
-        label_genes = sorted(set(map(str, highlighted)) | set(map(str, pon_cnv_genes)))
+        # label_genes = sorted(set(map(str, highlighted)) | set(map(str, pon_cnv_genes)))
+        label_genes = sorted(set(map(str, highlighted)))
         label_genes = [g for g in label_genes if g != "backbone"]
         if label_genes:
             _draw_gene_labels(
