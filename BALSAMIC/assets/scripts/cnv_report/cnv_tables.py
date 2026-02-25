@@ -827,7 +827,7 @@ def annotate_regions_with_purecn_lohregions(
         "M.flagged": f"{prefix}M_flagged",
         "C": f"{prefix}C",
         "maf.observed": f"{prefix}maf_observed",
-        "loh_fag": f"{prefix}loh_flag",
+        "loh_flag": f"{prefix}loh_flag",
     }
 
     annotated_df = annotate_regions_with_overlapping_segments(
@@ -1190,6 +1190,12 @@ def build_gene_segment_table(
             genes_df,
             loh_regions_df,
         )
+        if "purecn_loh_flag" in genes_df.columns:
+            genes_df["purecn_loh_flag"] = (
+                genes_df.astype("string")["purecn_loh_flag"]
+                .astype("string")
+                .replace({"nan": pd.NA, "NaN": pd.NA, "": pd.NA})
+            )
 
     if cancer_genes is not None:
         genes_df["is_cancer_gene"] = genes_df["gene.symbol"].isin(cancer_genes)
@@ -1261,6 +1267,12 @@ def build_gene_chunk_table(
             chunks_df,
             loh_regions_df,
         )
+        if "purecn_loh_flag" in chunks_df.columns:
+            chunks_df["purecn_loh_flag"] = (
+                chunks_df.astype("string")["purecn_loh_flag"]
+                .astype("string")
+                .replace({"nan": pd.NA, "NaN": pd.NA, "": pd.NA})
+            )
 
     if cancer_genes is not None:
         chunks_df["is_cancer_gene"] = chunks_df["gene.symbol"].isin(cancer_genes)

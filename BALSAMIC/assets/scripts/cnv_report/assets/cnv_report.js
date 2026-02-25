@@ -35,6 +35,12 @@
     }
   }
 
+  const isPresentText = (v) => {
+  v = (v ?? "").trim().toLowerCase();
+  if (!v) return false;
+  return !["na", "nan", "<na>", ".", "none", "null"].includes(v);
+  };
+
   // ---------------------------------------------------------------------------
   // Tables + controls
   // ---------------------------------------------------------------------------
@@ -222,15 +228,16 @@
   }
 
   function rowHasCnvOrLoh(row, colIndex) {
-    const lohIdx = getIdx(colIndex, "purecn_loh_flag", "loh_flag");
-    const cnvkitIdx = getIdx(colIndex, "cnvkit_cnv_call");
-    const purecnIdx = getIdx(colIndex, "purecn_cnv_call");
+  const lohIdx = getIdx(colIndex, "purecn_loh_flag");
+  const cnvkitIdx = getIdx(colIndex, "cnvkit_cnv_call");
+  const purecnIdx = getIdx(colIndex, "purecn_cnv_call");
 
-    if (lohIdx !== -1 && isTruthyText(textOf(row.cells[lohIdx]))) return true;
-    if (cnvkitIdx !== -1 && isNonNeutralCall(row.cells[cnvkitIdx])) return true;
-    if (purecnIdx !== -1 && isNonNeutralCall(row.cells[purecnIdx])) return true;
+  if (lohIdx !== -1 && isPresentText(textOf(row.cells[lohIdx]))) return true;
 
-    return false;
+  if (cnvkitIdx !== -1 && isNonNeutralCall(row.cells[cnvkitIdx])) return true;
+  if (purecnIdx !== -1 && isNonNeutralCall(row.cells[purecnIdx])) return true;
+
+  return false;
   }
 
   function rowIsCancerGene(row, colIndex) {

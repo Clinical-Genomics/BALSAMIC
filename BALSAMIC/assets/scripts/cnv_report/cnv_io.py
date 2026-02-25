@@ -75,13 +75,9 @@ def load_pon_bins(pon_path: str | Path) -> pd.DataFrame:
 
 def load_purecn_segments(pure_cn: str | Path) -> pd.DataFrame:
     """
-    Load PureCN segment file, keep relevant columns,
-    assign stable ordering, and derive LOH flag.
+    Load PureCN segment CSV, keep relevant columns, and assign stable ordering.
 
-    The loh_flag column:
-        - True  -> if type contains "LOH"
-        - False -> if type present but not LOH
-        - <NA>  -> if type is missing
+    Keeps the original `type` column as-is (no derived boolean LOH flag).
     """
     cns = pd.read_csv(pure_cn, sep=",").copy()
 
@@ -101,23 +97,9 @@ def load_purecn_segments(pure_cn: str | Path) -> pd.DataFrame:
     keep = [c for c in keep_columns if c in cns.columns]
     cns = cns[keep].copy()
 
+    cns["loh_flag"] = cns["type"].astype("string")
+
     cns = cns.sort_values(["chr", "start"], kind="stable").reset_index(drop=True)
-
-    # ------------------------------------------------------------------
-    # Derive LOH flag from the type column
-    # ------------------------------------------------------------------
-    loh_flag_col = "loh_flag"
-    cns[loh_flag_col] = pd.array([pd.NA] * len(cns), dtype="boolean")
-
-    if "type" in cns.columns:
-        loh_mask = (
-            cns["type"]
-            .astype("string")  # preserves <NA>
-            .str.upper()
-            .str.contains("LOH", na=pd.NA)
-        )
-        cns[loh_flag_col] = loh_mask.astype("boolean")
-
     return cns
 
 

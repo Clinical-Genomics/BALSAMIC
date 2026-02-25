@@ -100,46 +100,77 @@ def _compute_row_flags(gdf: pd.DataFrame) -> pd.DataFrame:
     """
     Compute per-row CNV / LOH / PON significance flags.
 
-    Adds:
-      is_loh_or_cnv
-      is_pon_signif
-      cnv_flag = union of above
+    Logic:
+      - is_loh_or_cnv:
+            True if:
+                * purecn 'type' column is non-empty
+                OR
+                * cnvkit_cnv_call in {"DELETION", "AMPLIFICATION"}
+                OR
+                * purecn_cnv_call in {"DELETION", "AMPLIFICATION"}
 
-    Supports legacy and current column naming conventions.
+      - is_pon_signif:
+            True if pon_chunk_significance == "significant"
+            OR pon_chunk_indication in {"GAIN", "LOSS"}
+
+      - cnv_flag = union of the above
     """
 
     out = gdf.copy()
 
-    def _is_loh_or_cnv_row(row: pd.Series) -> bool:
-        if "loh_flag" in row.index and pd.notna(row["loh_flag"]):
-            if str(row["loh_flag"]).strip().upper() == "TRUE":
-                return True
-        for col in ("cnvkit_cnv_call", "purecn_cnv_call"):
-            if col in row.index and pd.notna(row[col]):
-                val = str(row[col]).strip().upper()
-                if val in ("DELETION", "AMPLIFICATION"):
-                    return True
-        return False
+    # ---------------------------------------------------------
+    # LOH / CNV logic
+    # ---------------------------------------------------------
 
-    def _is_pon_signif_row(row: pd.Series) -> bool:
-        # Newer column: explicit significance label
-        if "pon_chunk_significance" in row.index and pd.notna(
-            row["pon_chunk_significance"]
-        ):
-            return str(row["pon_chunk_significance"]).strip().lower() == "significant"
+    is_loh_or_cnv = pd.Series(False, index=out.index)
 
-        # Legacy/alternate column: gain/loss indication
-        if "pon_chunk_indication" in row.index and pd.notna(
-            row["pon_chunk_indication"]
-        ):
-            val = str(row["pon_chunk_indication"]).strip().upper()
-            return val in ("GAIN", "LOSS")
+    # PureCN type present (non-empty)
+    if "loh_flag" in out.columns:
+        type_series = out["loh_flag"].astype("string").fillna("").str.strip()
+        is_loh_or_cnv |= type_series.ne("")
 
-        return False
+    # CNVkit or PureCN explicit CNV calls
+    for col in ("cnvkit_cnv_call", "purecn_cnv_call"):
+        if col in out.columns:
+            call_series = out[col].astype("string").fillna("").str.strip().str.upper()
+            is_loh_or_cnv |= call_series.isin({"DELETION", "AMPLIFICATION"})
 
-    out["is_loh_or_cnv"] = out.apply(_is_loh_or_cnv_row, axis=1)
-    out["is_pon_signif"] = out.apply(_is_pon_signif_row, axis=1)
+    out["is_loh_or_cnv"] = is_loh_or_cnv
+
+    # ---------------------------------------------------------
+    # PON significance logic
+    # ---------------------------------------------------------
+
+    is_pon_signif = pd.Series(False, index=out.index)
+
+    if "pon_chunk_significance" in out.columns:
+        signif_series = (
+            out["pon_chunk_significance"]
+            .astype("string")
+            .fillna("")
+            .str.strip()
+            .str.lower()
+        )
+        is_pon_signif |= signif_series.eq("significant")
+
+    if "pon_chunk_indication" in out.columns:
+        indication_series = (
+            out["pon_chunk_indication"]
+            .astype("string")
+            .fillna("")
+            .str.strip()
+            .str.upper()
+        )
+        is_pon_signif |= indication_series.isin({"GAIN", "LOSS"})
+
+    out["is_pon_signif"] = is_pon_signif
+
+    # ---------------------------------------------------------
+    # Combined flag
+    # ---------------------------------------------------------
+
     out["cnv_flag"] = out["is_loh_or_cnv"] | out["is_pon_signif"]
+
     return out
 
 
