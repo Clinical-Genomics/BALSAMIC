@@ -63,7 +63,7 @@
   // Column group toggles
   // ---------------------------------------------------------------------------
 
-  const COL_GROUP_QC = ["depth_mean", "mean_weight"];
+  const COL_GROUP_QC = ["depth_mean"];
 
   const COL_GROUP_PON_PREFIXES = ["pon_"];
   const COL_GROUP_PON_EXPLICIT = [];

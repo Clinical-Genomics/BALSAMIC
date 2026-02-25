@@ -12,6 +12,23 @@ h1, h2, h3 {
   font-size: 13px;
 }
 
+.report-meta {
+  margin: 12px 0 18px 0;
+  padding: 10px 14px;
+  border-left: 4px solid #2b6cb0;
+  background-color: #f4f7fb;
+  font-size: 14px;
+}
+
+.meta-label {
+  font-weight: 600;
+  margin-right: 6px;
+}
+
+.meta-value {
+  font-family: monospace;
+}
+
 .controls {
   margin-bottom: 12px;
   padding: 8px 10px;

@@ -30,18 +30,8 @@ from cnv_tables import (
 )
 from cnv_report_plotting import plot_chromosomes
 
-from BALSAMIC.constants.analysis import Gender
+from BALSAMIC.constants.analysis import Gender, AnalysisType
 
-
-CURATED_CANCER_GENES: set[str] = {
-    "TP53",  # <--- requested by cust087
-    "DLEU1",  # <--- requested by cust087
-    "DLEU2",
-    "RB1",  # <--- requested by cust087
-    "KMT2D",
-    "KMT2A",
-    "ATM",  # <--- requested by cust087
-}
 
 # =============================================================================
 # Public API
@@ -59,6 +49,7 @@ def render_cnv_report_html(
     diagram_png: str | Path | None = None,
     chr_plots_dir: str | Path | None = None,
     title: str = "CNV Report",
+    normalisation_method: str,
 ) -> None:
     """
     Render a standalone CNV QC HTML report using a Jinja2 template + embedded CSS/JS assets.
@@ -145,6 +136,7 @@ def render_cnv_report_html(
 
     html = template.render(
         title=title,
+        normalisation_method=normalisation_method,
         css_text=css_text,
         js_text=js_text,
         # Tables (already HTML)
@@ -352,7 +344,7 @@ def _collect_chr_plot_groups(
 @click.option(
     "--pon",
     type=click.Path(exists=True),
-    required=False,  # <- NOW OPTIONAL
+    required=False,
     help="CNVkit PON .cnn file (optional; if absent, plots and table are built without PON spread).",
 )
 @click.option(
@@ -380,12 +372,6 @@ def _collect_chr_plot_groups(
     help="Case ID for labels / outputs.",
 )
 @click.option(
-    "--cust-case-id",
-    type=str,
-    required=False,
-    help="Cust Case ID for labels / outputs.",
-)
-@click.option(
     "--cnvkit-scatter",
     type=click.Path(exists=True),
     required=False,
@@ -398,10 +384,10 @@ def _collect_chr_plot_groups(
     help="cnvkit diagram PDF file.",
 )
 @click.option(
-    "--out-prefix",
+    "--output-file",
     type=click.Path(),
     required=True,
-    help="Output prefix (e.g. /path/to/sample_cnv_qc.html).",
+    help="Output (e.g. /path/to/sample_cnv_qc.html).",
 )
 @click.option(
     "--purity-csv",
@@ -425,6 +411,13 @@ def _collect_chr_plot_groups(
     "--sex",
     type=click.Choice([Gender.FEMALE, Gender.MALE]),
     default=None,
+    help="Sample sex",
+)
+@click.option(
+    "--analysis-type",
+    type=str,
+    required=True,
+    help="Paired / Single",
 )
 def main(
     loh_regions: Optional[str],
@@ -436,21 +429,28 @@ def main(
     refgene: str,
     cytoband: str,
     case_id: str,
-    cust_case_id: Optional[str],
     cnvkit_scatter: Optional[str],
     cnvkit_diagram: Optional[str],
-    out_prefix: str,
+    output_file: str,
     purity_csv: Optional[str],
     cancer_genes: Optional[str],
     is_exome: bool,
     sex: Optional[Gender],
+    analysis_type: str,
 ):
     """
     Build CNV QC plots + HTML report from CNVkit outputs, optionally
     annotated with PureCN segments/genes and PON spread.
     """
 
-    out_prefix = Path(out_prefix)
+    if pon:
+        normalisation_method = f"Panel of Normal: {Path(pon).stem}"
+    elif analysis_type == AnalysisType.PAIRED:
+        normalisation_method = "Matched Normal"
+    else:
+        normalisation_method = "Flat reference (tumor only)"
+
+    out_prefix = Path(output_file)
     outdir = out_prefix.parent
     outdir.mkdir(parents=True, exist_ok=True)
 
@@ -468,15 +468,11 @@ def main(
     # ----------------------------
     # Load cancer gene list (optional)
     # ----------------------------
-    if cancer_genes:
-        cancer_gene_set = load_cancer_gene_set(
-            cancer_genes,
-            min_occurrence=1,
-            only_annotated=False,
-        )
-    else:
-        cancer_gene_set = set()
-    cancer_gene_set |= CURATED_CANCER_GENES
+
+    cancer_gene_set = load_cancer_gene_set(
+        cancer_genes,
+        min_occurrence=1,
+    )
 
     # ----------------------------
     # Read files into dataframes
@@ -536,7 +532,6 @@ def main(
     # ----------------------------
     chr_plots_dir = outdir / f"{case_id}_chr_plots"
     chr_plots_dir.mkdir(exist_ok=True, parents=True)
-    plot_case_id = cust_case_id if cust_case_id else case_id
 
     # Different compression for exome vs panel
     neutral_target_factor = 0.1 if is_exome else 0.6
@@ -549,7 +544,7 @@ def main(
         gdf=genes_df,
         gchunk=chunks_df,
         outdir=chr_plots_dir,
-        case_id=plot_case_id,
+        case_id=case_id,
         pon_df=pon_df,
         neutral_target_factor=neutral_target_factor,
         highlight_only_cancer=highlight_only_cancer,
@@ -570,7 +565,7 @@ def main(
     # ----------------------------
     # HTML report
     # ----------------------------
-    out_html_path = str(out_prefix)
+    out_html_path = str(output_file)
 
     render_cnv_report_html(
         df_gene=genes_df,
@@ -581,7 +576,8 @@ def main(
         diagram_png=diagram_png_path,  # optional
         chr_plots_dir=chr_plots_dir,
         out_html=out_html_path,
-        title=f"CNV Report – {plot_case_id}",
+        title=f"CNV Report – {case_id}",
+        normalisation_method=normalisation_method,
     )
 
     click.echo(f"[CNV QC] Finished report for {case_id}: {out_html_path}")

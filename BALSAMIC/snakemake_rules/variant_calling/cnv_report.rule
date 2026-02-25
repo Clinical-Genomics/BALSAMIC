@@ -1,4 +1,13 @@
 
+def case_id_param(wildcards):
+    cust_case_id = config_model.analysis.cust_case_id
+    case_id = config_model.analysis.case_id
+
+    if cust_case_id:
+        return f"--case-id {cust_case_id}"
+    return f"--cust-case-id {case_id}"
+
+
 rule create_cnv_html_report:
     input:
         refgene_flat = refgene_flat,
@@ -19,11 +28,11 @@ rule create_cnv_html_report:
         pon_cnn = lambda wildcards, pon_cnn=pon_cnn: f"--pon {pon_cnn}" if pon_cnn else "",
         gender = config_model.get_gender,
         cytoband = cytoband,
-        is_exome = lambda wildcards, is_exome=config_model.panel.exome: f"--is-exome" if is_exome else "",
+        is_exome = lambda wildcards, is_exome=config_model.panel.exome: "--is-exome" if is_exome else "",
         cancergenes = config_model.analysis.cancergenes,
-        case_id = config["analysis"]["case_id"],
-        cust_case_id = lambda wildcards, cust_case_id=config_model.analysis.cust_case_id: f"--cust-case-id {cust_case_id}" if cust_case_id else "",
-        loh_regions = cnv_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".purecn.LOHregions.csv"
+        case_id = lambda wildcards, cust_case_id=config_model.analysis.cust_case_id: f"--case-id {cust_case_id}" if cust_case_id else f"--case-id {config_model.analysis.case_id}",
+        loh_regions = cnv_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".purecn.LOHregions.csv",
+        analysis_type = config["analysis"]["analysis_type"]
     shell:
         """
 python {params.cnv_report_script} \
@@ -34,14 +43,14 @@ python {params.cnv_report_script} \
 --vcf {input.germline_vcf} \
 --refgene {input.refgene_flat} \
 --cytoband {params.cytoband} \
---case-id {params.case_id} \
 --cnvkit-scatter {input.scatter} \
 --cnvkit-diagram {input.diagram} \
 --purity-csv {input.purity} \
---out-prefix {output.cnv_report_html} \
+--output-file {output.cnv_report_html} \
 --cancer-genes {params.cancergenes} \
 --sex {params.gender} \
+--analysis-type {params.analysis_type} \
 {params.pon_cnn} \
 {params.is_exome} \
-{params.cust_case_id}
+{params.case_id}
         """

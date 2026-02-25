@@ -63,7 +63,6 @@ GENE_TABLE_SPEC = TableSpec(
         "exons_overlapping_cnvkit_segment",
         "is_cancer_gene",
         "depth_mean",
-        "mean_weight",
         "pon_gene_mean_log2",
         "pon_gene_mean_spread",
         "pon_gene_effect",
@@ -82,7 +81,6 @@ GENE_TABLE_SPEC = TableSpec(
         "mean_log2",
         "min_log2",
         "max_log2",
-        "mean_weight",
         "pon_gene_mean_log2",
         "pon_gene_mean_spread",
         "pon_gene_effect",
@@ -1071,7 +1069,6 @@ def create_gene_chunks(cnr_df: pd.DataFrame, pon_df: pd.DataFrame):
             "log2_mean": "mean_log2",
             "log2_min": "min_log2",
             "log2_max": "max_log2",
-            "weight_mean": "mean_weight",
             "pon_log2_mean": "pon_mean_log2",
             "pon_spread_mean": "pon_mean_spread",
         }
@@ -1177,7 +1174,6 @@ def build_gene_segment_table(
             min_log2=("log2", "min"),
             max_log2=("log2", "max"),
             depth_mean=("depth", "mean"),
-            mean_weight=("weight", "mean"),
         )
         .reset_index()
     )
@@ -1205,6 +1201,8 @@ def build_gene_segment_table(
     genes_df = _add_cnv_calls_from_total_cn(genes_df, sex)
 
     # Exon annotations
+    # COMMENTED OUT DUE TO NOT KNOWING WHICH IS THE CLINICALLY RELEVANT TRANSCRIPT
+    """
     if exon_map:
         genes_df = _add_exons_hit_column(
             genes_df,
@@ -1220,7 +1218,7 @@ def build_gene_segment_table(
             end_col="region_end",
             out_col="exons_overlapping_gene_region",
         )
-
+    """
     # Attach gene-level PON stats
     if gene_pon is not None and not gene_pon.empty:
         genes_df = genes_df.merge(gene_pon, how="left", on=["chr", "gene.symbol"])
@@ -1271,6 +1269,8 @@ def build_gene_chunk_table(
     chunks_df = annotate_genes_with_cytoband(chunks_df, cytoband_df)
 
     # exon overlap vs chunk region
+    # COMMENTED OUT DUE TO NOT KNOWING WHICH IS THE CLINICALLY RELEVANT TRANSCRIPT
+    """
     if exon_map:
         chunks_df = _add_exons_hit_column(
             chunks_df,
@@ -1279,7 +1279,7 @@ def build_gene_chunk_table(
             end_col="region_end",
             out_col="exons_overlapping_chunk",
         )
-
+    """
     # CNV calls (now based on cnvkit_seg_cn etc if present)
     chunks_df = _add_cnv_calls_from_total_cn(chunks_df, sex)
     chunks_df = chunks_df.drop(columns=["chunk_id", "n_targets", "pon_chunk_direction"])
@@ -1328,7 +1328,6 @@ GENE_TABLE_SPEC = TableSpec(
         "exons_overlapping_cnvkit_segment",
         "is_cancer_gene",
         "depth_mean",
-        "mean_weight",
         "pon_gene_mean_log2",
         "pon_gene_mean_spread",
         "pon_gene_effect",
@@ -1347,7 +1346,6 @@ GENE_TABLE_SPEC = TableSpec(
         "mean_log2",
         "min_log2",
         "max_log2",
-        "mean_weight",
         "pon_gene_mean_log2",
         "pon_gene_mean_spread",
         "pon_gene_effect",

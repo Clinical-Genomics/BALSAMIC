@@ -13,93 +13,64 @@ import numpy as np
 import pandas as pd
 from matplotlib import colormaps
 from matplotlib import patheffects as pe
+import vcfpy
 
 # =============================================================================
 # VCF parsing / BAF
 # =============================================================================
 
 
-@dataclass(frozen=True)
-class ParsedSample:
-    baf: float
-    dp: float  # dp as float to allow NaN
-
-
-def _parse_sample_fields(format_str: str, sample_str: str) -> ParsedSample:
-    """Internal parser returning a structured result."""
-    if pd.isna(format_str) or pd.isna(sample_str):
-        return ParsedSample(baf=math.nan, dp=math.nan)
-
-    keys = str(format_str).split(":")
-    vals = str(sample_str).split(":")
-    fmt = dict(zip(keys, vals))
-
-    # DP
-    dp_str = fmt.get("DP", None)
-    try:
-        dp = int(dp_str) if dp_str not in (None, ".", "") else math.nan
-    except ValueError:
-        dp = math.nan
-
-    # AD
-    ad = fmt.get("AD", None)
-    if ad is None or ad in (".", ""):
-        return ParsedSample(baf=math.nan, dp=dp)
-
-    try:
-        counts = [int(x) for x in str(ad).split(",")]
-    except ValueError:
-        return ParsedSample(baf=math.nan, dp=dp)
-
-    if len(counts) < 2:
-        return ParsedSample(baf=math.nan, dp=dp)
-
-    ref_c, alt_c = counts[0], counts[1]  # first alt only
-    total = ref_c + alt_c
-    if total <= 0:
-        return ParsedSample(baf=math.nan, dp=dp)
-
-    return ParsedSample(baf=alt_c / total, dp=dp)
-
-
-def load_vcf_with_baf(vcf_path: str | Path, chr_order: list[str]) -> pd.DataFrame:
+def load_vcf_with_vaf(
+    vcf_path: str | Path,
+    chr_order: list[str],
+) -> pd.DataFrame:
     """
-    Load a VCF (single tumor sample column) and compute:
-      - BAF (alt / (ref+alt))
-      - DP_sample
+    Load a single-sample VCF and compute VAF from AD (first ALT only).
+
+    Returns:
+        CHROM, POS, VAF
     """
-    vcf_cols = [
-        "CHROM",
-        "POS",
-        "ID",
-        "REF",
-        "ALT",
-        "QUAL",
-        "FILTER",
-        "INFO",
-        "FORMAT",
-        "TUMOR",
-    ]
-    vcf = pd.read_csv(vcf_path, sep="\t", comment="#", header=None, names=vcf_cols)
-    if vcf.empty:
-        vcf["BAF"] = []
-        vcf["DP_sample"] = []
-        return vcf
 
-    vcf["CHROM"] = vcf["CHROM"].astype(str).str.replace("^chr", "", regex=True)
-    vcf = vcf[vcf["CHROM"].isin(chr_order)].copy()
-    if vcf.empty:
-        vcf["BAF"] = []
-        vcf["DP_sample"] = []
-        return vcf
+    chr_set = set(map(str, chr_order))
+    rows = []
 
-    parsed = [
-        _parse_sample_fields(fmt, sample)
-        for fmt, sample in zip(vcf["FORMAT"].tolist(), vcf["TUMOR"].tolist())
-    ]
-    vcf["BAF"] = [p.baf for p in parsed]
-    vcf["DP_sample"] = [p.dp for p in parsed]
-    return vcf
+    reader = vcfpy.Reader.from_path(str(vcf_path))
+
+    # Assert exactly one sample (fail fast if assumption breaks)
+    if len(reader.header.samples.names) != 1:
+        raise ValueError("VCF must contain exactly one sample.")
+
+    for rec in reader:
+        chrom = str(rec.CHROM)
+        if chrom.startswith("chr"):
+            chrom = chrom[3:]
+
+        if chrom not in chr_set:
+            continue
+
+        call = rec.calls[0]  # safe: single-sample assumption
+
+        ad = call.data.get("AD")
+        if ad and len(ad) >= 2:
+            try:
+                ref_c = int(ad[0])
+                alt_c = int(ad[1])
+                total = ref_c + alt_c
+                vaf = alt_c / total if total > 0 else math.nan
+            except (TypeError, ValueError):
+                vaf = math.nan
+        else:
+            vaf = math.nan
+
+        rows.append(
+            {
+                "CHROM": chrom,
+                "POS": int(rec.POS),
+                "VAF": float(vaf),
+            }
+        )
+
+    return pd.DataFrame(rows)
 
 
 # =============================================================================
@@ -607,22 +578,22 @@ def _draw_gene_labels(
         )
 
 
-def _plot_baf_panel(ax, baf_chr: pd.DataFrame):
+def _plot_vaf_panel(ax, vaf_chr: pd.DataFrame):
     """
-    Draw BAF scatter panel and expected allele fraction reference lines.
+    Draw VAF scatter panel and expected allele fraction reference lines.
 
     Includes:
       - 0.5 heterozygous reference
       - 1/3 and 2/3 optional imbalance references
     """
 
-    if not baf_chr.empty:
-        ax.scatter(baf_chr["x_coord"], baf_chr["BAF"], s=6, alpha=0.5)
+    if not vaf_chr.empty:
+        ax.scatter(vaf_chr["x_coord"], vaf_chr["VAF"], s=6, alpha=0.5)
     ax.axhline(0.5, color="gray", linewidth=0.8, linestyle="--")
     for frac in [1 / 3, 2 / 3]:
         ax.axhline(frac, color="lightgray", linewidth=0.6, linestyle=":")
     ax.set_ylim(0, 1)
-    ax.set_ylabel("BAF")
+    ax.set_ylabel("VAF")
 
 
 def _compute_variable_x_binlevel(
@@ -744,14 +715,14 @@ def plot_chromosomes(
     if gchunk is not None:
         gchunk = gchunk.rename(columns=rename_map)
 
-    MIN_GENE_TARGETS = 5
-    MIN_GENE_TARGETS_CANCER = 5
+    MIN_GENE_TARGETS = 3
+    MIN_GENE_TARGETS_CANCER = 3
 
     gdf = _normalize_is_cancer_gene(gdf)
 
-    # Load VCF BAF
+    # Load VCF
     chr_order = [str(i) for i in range(1, 23)] + ["X", "Y"]
-    vcf = load_vcf_with_baf(vcf_path=vcf_path, chr_order=chr_order)
+    vcf = load_vcf_with_vaf(vcf_path=vcf_path, chr_order=chr_order)
 
     # Optionally merge PON bins
 
@@ -842,11 +813,11 @@ def plot_chromosomes(
 
         sub["log2_clipped"] = sub["log2"].clip(-y_clip, y_clip)
 
-        # BAF chr (restricted to span if focus)
-        baf_chr = vcf[vcf["CHROM"] == chr_name].sort_values("POS").copy()
+        # VAF chr (restricted to span if focus)
+        vaf_chr = vcf[vcf["CHROM"] == chr_name].sort_values("POS").copy()
 
-        if not baf_chr.empty:
-            baf_chr["x_coord"] = baf_chr["POS"].apply(lambda p: pos_to_xcoord(int(p)))
+        if not vaf_chr.empty:
+            vaf_chr["x_coord"] = vaf_chr["POS"].apply(lambda p: pos_to_xcoord(int(p)))
 
         # Segments from g_chr
         segs_chr = _collect_segments_for_chr(g_chr, chr_name, y_clip=y_clip)
@@ -929,7 +900,7 @@ def plot_chromosomes(
                 base_label_offset=base_label_offset,
             )
 
-        _plot_baf_panel(ax2, baf_chr)
+        _plot_vaf_panel(ax2, vaf_chr)
         ax2.set_xlabel(
             "Pseudo-position (highlighted genes expanded, other bins compressed)"
         )

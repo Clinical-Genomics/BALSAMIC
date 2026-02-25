@@ -105,6 +105,78 @@ def compute_pon_spread_summaries(
     }
 
 
+def compute_filtered_out_bin_metrics(
+    cnr_df: pd.DataFrame,
+    pon_df: pd.DataFrame,
+    *,
+    pon_gc_col: str = "gc",
+    pon_spread_col: str = "pon_spread",
+    key_cols: tuple[str, str, str] = ("chr", "start", "end"),
+) -> dict[str, float | int]:
+    """
+    Summarize bins present in PON but missing from CNR ("filtered out").
+
+    All calculations use UNIQUE (chr, start, end) bins.
+    """
+
+    # Unique bin definitions
+    cnr_keys = cnr_df[list(key_cols)].drop_duplicates()
+    pon_unique = pon_df.drop_duplicates(subset=list(key_cols)).copy()
+    pon_keys = pon_unique[list(key_cols)]
+
+    # Missing (filtered out) bins
+    missing_keys = (
+        pon_keys.merge(cnr_keys, on=list(key_cols), how="left", indicator=True)
+        .query('_merge == "left_only"')
+        .drop(columns="_merge")
+    )
+
+    # Kept bins
+    kept_keys = pon_keys.merge(cnr_keys, on=list(key_cols), how="inner")
+
+    # Attach unique PON rows
+    missing_pon = pon_unique.merge(missing_keys, on=list(key_cols), how="inner")
+    kept_pon = pon_unique.merge(kept_keys, on=list(key_cols), how="inner")
+
+    # Numeric coercion
+    gc_missing = pd.to_numeric(missing_pon[pon_gc_col], errors="coerce")
+    spread_missing = pd.to_numeric(missing_pon[pon_spread_col], errors="coerce")
+    spread_kept = pd.to_numeric(kept_pon[pon_spread_col], errors="coerce")
+
+    n_total = int(len(pon_unique))
+    n_filtered = int(len(missing_keys))
+
+    pct_filtered = float(n_filtered / n_total * 100.0) if n_total else float("nan")
+
+    pct_gc_lt_03 = (
+        float((gc_missing < 0.3).sum() / n_filtered * 100.0)
+        if n_filtered
+        else float("nan")
+    )
+
+    pct_gc_gt_07 = (
+        float((gc_missing > 0.7).sum() / n_filtered * 100.0)
+        if n_filtered
+        else float("nan")
+    )
+
+    return {
+        "targets_total": n_total,
+        "targets_filtered": n_filtered,
+        "targets_filtered_pct": pct_filtered,
+        "targets_filtered_gc_lt_0.3_pct": pct_gc_lt_03,
+        "targets_filtered_gc_gt_0.7_pct": pct_gc_gt_07,
+        "targets_filtered_spread_median": (
+            float(spread_missing.median())
+            if spread_missing.notna().any()
+            else float("nan")
+        ),
+        "targets_not_filtered_spread_median": (
+            float(spread_kept.median()) if spread_kept.notna().any() else float("nan")
+        ),
+    }
+
+
 def compute_summary_metrics(
     cnr_df: pd.DataFrame,
     pon_df: pd.DataFrame | None,
@@ -139,5 +211,9 @@ def compute_summary_metrics(
     else:
         metrics["pon_spread_median_target"] = float("nan")
         metrics["pon_spread_q90_target"] = float("nan")
+
+    # 3) Add dropped bins summary
+    if pon_df is not None:
+        metrics.update(compute_filtered_out_bin_metrics(cnr_df, pon_df))
 
     return pd.DataFrame([metrics])

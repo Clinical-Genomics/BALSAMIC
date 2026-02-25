@@ -28,6 +28,12 @@
 
   <h1>{{ title }}</h1>
 
+
+  <div class="report-meta">
+  <span class="meta-label">Normalisation method</span>
+  <span class="meta-value">{{ normalisation_method }}</span>
+  </div>
+
   <h2>PureCN sample summary</h2>
   {{ purecn_summary_html | safe }}
 

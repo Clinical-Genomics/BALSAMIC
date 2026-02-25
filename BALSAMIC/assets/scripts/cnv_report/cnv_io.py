@@ -17,78 +17,59 @@ def _load_bins_tsv(
     *,
     chr_col: str = "chromosome",
     gene_col: str = "gene",
-    explode_genes: bool = True,
     rename: Mapping[str, str] | None = None,
-    out_cols: Iterable[str] | None = None,
+    out_cols: Iterable[str],
 ) -> pd.DataFrame:
     """
-    Generic loader for CNVkit-style bin tables (.cnr, .cnn, etc).
+    Load CNVkit-style bin table (.cnr/.cnn).
 
-    - Normalizes chromosome column to CHR ("chr").
-    - Creates/normalizes "gene.symbol".
-    - Drops Antitarget bins.
-    - Renames "-" bins to "backbone".
-    - Optionally explodes multi-gene bins.
-    - Optional renaming + column selection.
+    - Rename chromosome column -> CHR ("chr")
+    - Drop Antitarget bins and NA genes
+    - Rename "-" -> "backbone"
+    - Apply optional column renames
+    - Select required out_cols (must all exist)
     """
     df = pd.read_csv(path, sep="\t")
 
-    # base renames (chromosome -> chr)
+    # normalize chromosome column name
     df = df.rename(columns={chr_col: CHR})
 
-    if gene_col in df.columns:
-        gene = df[gene_col].astype("string")
+    # gene.symbol cleanup
+    gene = df[gene_col].astype("string")
+    mask_keep = gene.notna() & ~gene.isin(["Antitarget"])
+    df = df.loc[mask_keep].copy()
+    df["gene.symbol"] = gene.loc[mask_keep].replace("-", "backbone")
 
-        # Drop only Antitarget and NA genes
-        mask_keep = gene.notna() & ~gene.isin(["Antitarget"])
-        df = df.loc[mask_keep].copy()
-        gene = gene.loc[mask_keep]
+    # explode multi-gene bins
+    df["gene.symbol"] = df["gene.symbol"].str.split(r"\s*,\s*", regex=True)
+    df = df.explode("gene.symbol", ignore_index=True)
+    df["gene.symbol"] = df["gene.symbol"].astype("string").str.strip()
 
-        # Rename "-" to "backbone"
-        gene = gene.replace("-", "backbone")
-
-        df["gene.symbol"] = gene
-    else:
-        df["gene.symbol"] = pd.Series([pd.NA] * len(df), dtype="string", index=df.index)
-
-    if explode_genes and gene_col in df.columns:
-        df["gene.symbol"] = (
-            df["gene.symbol"].astype("string").str.split(r"\s*,\s*", regex=True)
-        )
-        df = df.explode("gene.symbol", ignore_index=True)
-        df["gene.symbol"] = df["gene.symbol"].astype("string").str.strip()
-
-    # drop empty symbols from malformed inputs like "TP53,,RB1"
-    df = df[df["gene.symbol"].notna() & df["gene.symbol"].ne("")].copy()
-
-    # apply optional renames (e.g. log2->pon_log2, spread->pon_spread)
-    if rename:
+    # optional renames (e.g. log2->pon_log2, spread->pon_spread)
+    if rename is not None:
         df = df.rename(columns=dict(rename))
 
-    if out_cols is not None:
-        out_cols = list(out_cols)
-        missing = [c for c in out_cols if c not in df.columns]
-        if missing:
-            raise KeyError(f"Missing required columns in {path}: {missing}")
-        df = df[out_cols].copy()
+    # select required columns
+    out_cols = list(out_cols)
+    missing = [c for c in out_cols if c not in df.columns]
+    if missing:
+        raise KeyError(f"Missing required columns in {path}: {missing}")
 
-    return df
+    return df[out_cols].copy()
 
 
 def load_cnr_bins(cnr_path: str | Path) -> pd.DataFrame:
     return _load_bins_tsv(
         cnr_path,
-        explode_genes=True,
-        out_cols=[CHR, "start", "end", "gene.symbol", "log2", "depth", "weight"],
+        out_cols=[CHR, "start", "end", "gene.symbol", "log2", "depth"],
     )
 
 
 def load_pon_bins(pon_path: str | Path) -> pd.DataFrame:
     return _load_bins_tsv(
         pon_path,
-        explode_genes=True,  # keep behavior consistent with CNR (safe either way)
         rename={"log2": "pon_log2", "spread": "pon_spread"},
-        out_cols=[CHR, "start", "end", "pon_log2", "pon_spread", "gene.symbol"],
+        out_cols=[CHR, "start", "end", "pon_log2", "pon_spread", "gene.symbol", "gc"],
     )
 
 
@@ -239,52 +220,51 @@ def load_cytobands(path: str | Path) -> pd.DataFrame:
 
 
 def load_cancer_gene_set(
-    path: str | Path, min_occurrence: int = 1, only_annotated: bool = True
+    path: str | Path,
+    min_occurrence: int = 1,
+    oncokb_source: str = "ONCOKB",
 ) -> set[str]:
     """
-    Load and filter a cancer gene list TSV into a set of gene symbols.
+    Load cancer gene list TSV (GENE / OCCURRENCE / SOURCE) into a set of gene symbols.
 
-    Applies an occurrence threshold, optional OncoKB annotation filter,
-    and optional restriction to classic cancer gene types (ONCOGENE / TSG)
-    when the relevant columns exist.
+    Rules
+    -----
+    - Always include non-empty genes from non-ONCOKB sources (e.g. cust000), regardless of OCCURRENCE.
+    - For ONCOKB rows only, require OCCURRENCE >= min_occurrence (numeric; non-numeric treated as 0).
 
     Parameters
     ----------
-    path : str | Path
-        Path to cancer gene list TSV file.
-    min_occurrence : int, optional
-        Minimum occurrence count required to include a gene (default: 1).
-    only_annotated : bool, optional
-        If True, require OncoKB annotation = YES when the column is present
-        (default: True).
+    path
+        Path to TSV with columns: GENE, OCCURRENCE, SOURCE
+    min_occurrence
+        Minimum occurrence threshold applied only to ONCOKB source rows.
+    oncokb_source
+        Source label used for OncoKB rows (default "ONCOKB").
 
     Returns
     -------
     set[str]
-        Gene symbols passing filters.
+        Selected gene symbols.
     """
     df = pd.read_csv(path, sep="\t", dtype=str)
     df.columns = df.columns.str.strip()
 
-    symbol_col = "Hugo Symbol"
-    occ_col = "# of occurrence within resources (Column J-P)"
-    onco_col = "OncoKB Annotated"
-    type_col = "Gene Type"
+    gene_col = "GENE"
+    occ_col = "OCCURRENCE"
+    src_col = "SOURCE"
 
-    if symbol_col not in df.columns or occ_col not in df.columns:
-        missing = [c for c in (symbol_col, occ_col) if c not in df.columns]
-        raise ValueError(f"Cancer gene TSV missing required columns: {missing}")
+    # Normalize
+    df[gene_col] = df[gene_col].astype(str).str.strip()
+    df[src_col] = df[src_col].astype(str).str.strip().str.upper()
 
-    df[occ_col] = pd.to_numeric(df[occ_col], errors="coerce").fillna(0).astype(int)
+    # Parse occurrence (NA/non-numeric -> 0)
+    occ = pd.to_numeric(df[occ_col], errors="coerce").fillna(0).astype(int)
 
-    mask = df[occ_col] >= int(min_occurrence)
+    is_oncokb = df[src_col].eq(str(oncokb_source).strip().upper())
 
-    if only_annotated and onco_col in df.columns:
-        mask &= df[onco_col].astype(str).str.upper().eq("YES")
+    # ONCOKB: apply threshold; non-ONCOKB: always keep
+    keep = (~is_oncokb) | (occ >= int(min_occurrence))
 
-    if type_col in df.columns:
-        mask &= df[type_col].isin(["ONCOGENE", "TSG"])
-
-    selected = df.loc[mask, symbol_col].astype(str).str.strip()
+    selected = df.loc[keep, gene_col]
     selected = selected[selected != ""]
     return set(selected)
