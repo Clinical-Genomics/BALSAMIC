@@ -517,6 +517,8 @@ def main(
             loh_regions_df=loh_regions_df,
             sex=sex,
         )
+    else:
+        chunks_df = None
 
     # --- 1) PureCN summary (from purity_csv) ---
     purecn_summary_df = read_purecn_summary(purity_csv)

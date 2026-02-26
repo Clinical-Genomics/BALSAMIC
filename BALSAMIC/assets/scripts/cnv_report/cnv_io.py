@@ -7,8 +7,6 @@ from typing import Dict, List, Tuple, Mapping, Iterable
 # Third-party
 import pandas as pd
 
-
-from cnv_report_utils import strip_chr_prefix
 from cnv_constants import CHR
 
 
@@ -51,10 +49,6 @@ def _load_bins_tsv(
 
     # select required columns
     out_cols = list(out_cols)
-    missing = [c for c in out_cols if c not in df.columns]
-    if missing:
-        raise KeyError(f"Missing required columns in {path}: {missing}")
-
     return df[out_cols].copy()
 
 
@@ -159,7 +153,6 @@ def load_refgene_exons(refgene_path: str | Path) -> Dict[Tuple[str, str], dict]:
     ]
     rg = pd.read_csv(refgene_path, sep="\t", header=None, names=cols)
 
-    rg["chrom"] = rg["chrom"].astype(str).str.replace("^chr", "", regex=True)
     rg["txStart"] = rg["txStart"].astype(int)
     rg["txEnd"] = rg["txEnd"].astype(int)
 
@@ -195,7 +188,7 @@ def load_cytobands(path: str | Path) -> pd.DataFrame:
     """Load cytoband UCSC file; return normalized df with integer coords."""
     cols = ["chr", "chromStart", "chromEnd", "name", "gieStain"]
     cyto = pd.read_csv(path, sep="\t", header=None, names=cols)
-    cyto["chr"] = strip_chr_prefix(cyto["chr"])
+    cyto["chr"] = cyto["chr"].astype(str).str.replace("^chr", "", regex=True)
     cyto["start_int"] = cyto["chromStart"].astype(int)
     cyto["end_int"] = cyto["chromEnd"].astype(int)
     return cyto

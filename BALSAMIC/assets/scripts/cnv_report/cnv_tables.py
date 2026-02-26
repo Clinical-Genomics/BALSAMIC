@@ -54,7 +54,8 @@ GENE_TABLE_SPEC = TableSpec(
         "purecn_seg_end",
         "purecn_seg_mean",
         "purecn_num_snps",
-        "purecn_maf_observed" "cnvkit_seg_cn",
+        "purecn_maf_observed",
+        "cnvkit_seg_cn",
         "cnvkit_seg_cn1",
         "cnvkit_seg_cn2",
         "purecn_C",
@@ -74,7 +75,9 @@ GENE_TABLE_SPEC = TableSpec(
         "pon_mean_spread",
         "pon_chunk_effect",
         "pon_chunk_z",
-        "pon_chunk_significance" "pon_chunk_indication" "exons_overlapping_gene_region",
+        "pon_chunk_significance",
+        "pon_chunk_indication",
+        "exons_overlapping_gene_region",
     ],
     float_columns=[
         "seg_baf",
@@ -834,8 +837,8 @@ def annotate_regions_with_purecn_lohregions(
         Remains <NA> if no overlap (i.e., purecn_type is missing).
     """
     field_map = {
-        "start": f"{prefix}start",
-        "end": f"{prefix}end",
+        "start": f"{prefix}seg_start",
+        "end": f"{prefix}seg_end",
         "seg.mean": f"{prefix}seg_mean",
         "num.snps": f"{prefix}num_snps",
         "M": f"{prefix}M",
@@ -854,25 +857,70 @@ def annotate_regions_with_purecn_lohregions(
     return annotated_df
 
 
+def merge_cnr_with_pon(
+    cnr_df: pd.DataFrame,
+    pon_df: pd.DataFrame | None,
+    *,
+    key_cols: tuple[str, str, str, str] = ("chr", "start", "end", "gene.symbol"),
+    pon_cols: list[str] | None = None,
+) -> pd.DataFrame:
+    """
+    Merge exploded CNR bins with exploded PON bins on (chr,start,end,gene.symbol).
+
+    - Drops backbone rows from both.
+    - De-duplicates PON on the merge key to avoid many-to-many inflation.
+    - Keeps CNR rows even if PON is missing (left join).
+
+    If pon_cols is given, only those PON columns (plus the key) are merged in.
+    """
+    cnr = cnr_df.copy()
+    pon = pon_df.copy() if pon_df is not None else None
+
+    g_cnr = cnr["gene.symbol"].astype("string").str.strip()
+    cnr = cnr.loc[g_cnr.ne("backbone")].copy()
+
+    if pon is None:
+        return cnr
+
+    g_pon = pon["gene.symbol"].astype("string").str.strip()
+    pon = pon.loc[g_pon.ne("backbone")].copy()
+
+    # Choose which PON columns to bring (prevents collisions like log2/depth/etc.)
+    key = list(key_cols)
+    if pon_cols is not None:
+        keep = [c for c in (key + pon_cols) if c in pon.columns]
+        pon = pon[keep].copy()
+
+    # Ensure PON is unique per key (critical for stable merge)
+    pon = pon.drop_duplicates(subset=key)
+
+    return cnr.merge(
+        pon,
+        how="left",
+        on=key,
+        validate="many_to_one",  # cnr may repeat; pon must be unique per key
+    )
+
+
 # =============================================================================
 # build_gene_chunk_table
 # =============================================================================
 
 
 def create_gene_chunks(cnr_df: pd.DataFrame, pon_df: pd.DataFrame):
-    # --- Drop backbone bins ---
-    if "gene.symbol" in cnr_df.columns:
-        cnr_df = cnr_df.loc[cnr_df["gene.symbol"] != "backbone"].copy()
+    # ------------------------------------------------------------------
+    # Merge bins with PON (exploded on the same gene.symbol scheme)
+    # ------------------------------------------------------------------
+    # Choose the PON columns you want to carry into bins (avoid collisions)
+    bins = merge_cnr_with_pon(
+        cnr_df=cnr_df,
+        pon_df=pon_df,
+        key_cols=("chr", "start", "end", "gene.symbol"),
+        pon_cols=["pon_log2", "pon_spread"],  # add "gc" etc if you have it
+    )
 
-    if pon_df is not None and "gene.symbol" in pon_df.columns:
-        pon_df = pon_df.loc[pon_df["gene.symbol"] != "backbone"].copy()
-        pon_df = pon_df.drop(columns=["gene.symbol"], errors="ignore")
-
-    # --- Merge ---
-    bins = cnr_df.merge(
-        pon_df,
-        how="left",
-        on=["chr", "start", "end"],
+    bins = bins.sort_values(["chr", "gene.symbol", "start"], kind="stable").reset_index(
+        drop=True
     )
 
     # CREATE INITIAL CHUNKS
@@ -1150,25 +1198,21 @@ def build_gene_segment_table(
     cnr_df: pd.DataFrame,
     cns_df: pd.DataFrame,
     cytoband_df: pd.DataFrame,
-    exon_map: Dict[Tuple[str, str], dict],
+    exon_map: dict[tuple[str, str], dict],
     cancer_genes: set[str] | None = None,
     loh_regions_df: pd.DataFrame | None = None,
     sex: Gender = None,
     pon_df: pd.DataFrame | None = None,
 ) -> pd.DataFrame:
-    # --- Drop backbone bins ---
-    if "gene.symbol" in cnr_df.columns:
-        cnr_df = cnr_df.loc[cnr_df["gene.symbol"] != "backbone"].copy()
-
-    if pon_df is not None and "gene.symbol" in pon_df.columns:
-        pon_df = pon_df.loc[pon_df["gene.symbol"] != "backbone"].copy()
-        pon_df = pon_df.drop(columns=["gene.symbol"], errors="ignore")
-
-    # --- Merge ---
-    bins = cnr_df.merge(
-        pon_df,
-        how="left",
-        on=["chr", "start", "end"],
+    # ------------------------------------------------------------------
+    # Merge bins with PON (exploded on the same gene.symbol scheme)
+    # ------------------------------------------------------------------
+    # Choose the PON columns you want to carry into bins (avoid collisions)
+    bins = merge_cnr_with_pon(
+        cnr_df=cnr_df,
+        pon_df=pon_df,
+        key_cols=("chr", "start", "end", "gene.symbol"),
+        pon_cols=["pon_log2", "pon_spread"],  # add "gc" etc if you have it
     )
 
     bins = bins.sort_values(["chr", "gene.symbol", "start"], kind="stable").reset_index(
@@ -1312,120 +1356,3 @@ def build_gene_chunk_table(
     chunks_df = chunks_df.drop(columns=["chunk_id", "n_targets", "pon_chunk_direction"])
 
     return finalize_gene_table(chunks_df)
-
-
-@dataclass(frozen=True)
-class TableSpec:
-    column_order: Sequence[str]
-    float_columns: Sequence[str]
-    decimals: int = 3
-    renames: Mapping[str, str] = None
-    sort_keys: tuple[str, str, str] = ("chr", "region_start", "region_end")
-
-
-GENE_TABLE_SPEC = TableSpec(
-    column_order=[
-        "chr",
-        "region_start",
-        "region_end",
-        "cytoband",
-        "gene.symbol",
-        "n.targets",
-        "mean_log2",
-        "min_log2",
-        "max_log2",
-        "cnvkit_cnv_call",
-        "purecn_cnv_call",
-        "purecn_loh_flag",
-        "cnvkit_seg_start",
-        "cnvkit_seg_end",
-        "cnvkit_seg_log2",
-        "cnvkit_seg_raw_log2",
-        "cnvkit_seg_baf",
-        "purecn_seg_start",
-        "purecn_seg_end",
-        "purecn_seg_mean",
-        "purecn_num_snps",
-        "purecn_maf_observed" "cnvkit_seg_cn",
-        "cnvkit_seg_cn1",
-        "cnvkit_seg_cn2",
-        "purecn_C",
-        "purecn_M",
-        "purecn_M_flagged",
-        "exons_overlapping_cnvkit_segment",
-        "is_cancer_gene",
-        "depth_mean",
-        "pon_gene_mean_log2",
-        "pon_gene_mean_spread",
-        "pon_gene_effect",
-        "pon_gene_z",
-        "pon_gene_direction",
-        "pon_gene_significance",
-        "pon_gene_indication",
-        "pon_mean_log2",
-        "pon_mean_spread",
-        "pon_chunk_effect",
-        "pon_chunk_z",
-        "pon_chunk_significance" "pon_chunk_indication" "exons_overlapping_gene_region",
-    ],
-    float_columns=[
-        "seg_baf",
-        "mean_log2",
-        "min_log2",
-        "max_log2",
-        "pon_gene_mean_log2",
-        "pon_gene_mean_spread",
-        "pon_gene_effect",
-        "pon_gene_z",
-        "depth_mean",
-        "pon_mean_log2",
-        "pon_mean_spread",
-        "pon_chunk_effect",
-        "pon_chunk_z",
-        "cnvkit_seg_log2",
-        "cnvkit_seg_raw_log2",
-        "cnvkit_seg_baf",
-        "purecn_seg_mean",
-        "purecn_maf_observed",
-    ],
-    decimals=3,
-    renames={"n_targets": "n.targets"},
-)
-
-
-def finalize_gene_table(
-    genes_df: pd.DataFrame, spec: TableSpec = GENE_TABLE_SPEC
-) -> pd.DataFrame:
-    """
-    Finalize the gene-level table: rename legacy columns, reorder, round floats, and stable-sort by interval.
-    """
-    out = genes_df.copy()
-
-    # 1) Rename (only if present)
-    if spec.renames:
-        present = {
-            k: v
-            for k, v in spec.renames.items()
-            if k in out.columns and v not in out.columns
-        }
-        if present:
-            out = out.rename(columns=present)
-
-    # 2) Reorder columns (keeps extras at end if your _reorder_columns does that)
-    out = reorder_columns(out, list(spec.column_order))
-
-    # 3) Round floats (only existing)
-    existing_floats = [c for c in spec.float_columns if c in out.columns]
-    if existing_floats:
-        out[existing_floats] = (
-            out[existing_floats]
-            .apply(pd.to_numeric, errors="coerce")
-            .round(spec.decimals)
-        )
-
-    # 4) Sort
-    chr_col, start_col, end_col = spec.sort_keys
-    if all(c in out.columns for c in (chr_col, start_col, end_col)):
-        out = stable_sort_by_chr_interval(out, chr_col, start_col, end_col)
-
-    return out

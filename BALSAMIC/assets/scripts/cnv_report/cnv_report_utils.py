@@ -9,12 +9,7 @@ from typing import Dict, List, Optional, Set, Tuple, Any, Mapping, Sequence
 # Third-party
 import numpy as np
 import pandas as pd
-from pandas.errors import EmptyDataError
 import fitz
-
-# Local
-from BALSAMIC.constants.analysis import Gender
-
 
 # =============================================================================
 # Generic helpers
@@ -33,11 +28,6 @@ def pdf_first_page_to_png(
         page.get_pixmap(dpi=dpi).save(str(png_path))
     finally:
         doc.close()
-
-
-def strip_chr_prefix(series: pd.Series) -> pd.Series:
-    """Normalize chromosome values by stripping a leading 'chr' prefix."""
-    return series.astype(str).str.replace("^chr", "", regex=True)
 
 
 def chrom_sort_key(chrom: str) -> tuple[int, int | str]:
