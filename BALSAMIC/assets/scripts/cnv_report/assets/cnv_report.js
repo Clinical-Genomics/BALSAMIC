@@ -126,6 +126,7 @@
       rangeChr: $("range-chr-chunk"),
       rangeStart: $("range-start-chunk"),
       rangeEnd: $("range-end-chunk"),
+      onlyPonIndication: $("only-pon-indication-chunk"),
     },
   };
 
@@ -309,6 +310,18 @@
     return idx !== -1 && isTruthyText(textOf(row.cells[idx]));
   }
 
+  function rowHasPonIndication(row, colIndex) {
+    const idx = getIdx(colIndex, "pon_chunk_indication");
+    if (idx === -1) return false;
+
+    const v = textOf(row.cells[idx]);
+    if (!v) return false;
+    if (v === "neutral") return false;
+    if (v === "na" || v === "nan" || v === "<na>" || v === ".") return false;
+
+    return true; // any non-neutral indication counts
+  }
+
 
   function rowHasMinTargets(row, colIndex, minTargets) {
     if (!minTargets) return true;
@@ -338,19 +351,35 @@
   }
 
   function shouldHideRow(row, colIndex, cfg) {
-  if (cfg.hideNonCnv) {
-    const cnv = rowHasCnvOrLoh(row, colIndex);
-    const pon = cfg.includePonCnv ? rowHasPonCnvCall(row, colIndex) : false;
-    if (!cnv && !pon) return true;
-  }
+    // Additive "OR" gate for chunk table:
+    // If either checkbox is enabled, keep row if it matches ANY enabled condition.
+    if (cfg.isChunkTable) {
+      const wantCnv = Boolean(cfg.hideNonCnv);
+      const wantPonInd = Boolean(cfg.onlyPonIndication);
 
-  if (cfg.onlyCancer && !rowIsCancerGene(row, colIndex)) return true;
-  if (!rowHasMinTargets(row, colIndex, cfg.minTargets)) return true;
-  if (!rowMatchesGeneList(row, colIndex, cfg.geneList)) return true;
+      if (wantCnv || wantPonInd) {
+        const matchCnv = wantCnv ? (rowHasCnvOrLoh(row, colIndex) ||
+                                   (cfg.includePonCnv ? rowHasPonCnvCall(row, colIndex) : false))
+                                 : false;
 
-  if (!rowInRange(row, colIndex, cfg.range)) return true;
+        const matchPonInd = wantPonInd ? rowHasPonIndication(row, colIndex) : false;
 
-  return false;
+        if (!matchCnv && !matchPonInd) return true;
+      }
+    } else {
+      // Gene table keeps old behavior
+      if (cfg.hideNonCnv) {
+        const cnv = rowHasCnvOrLoh(row, colIndex);
+        const pon = cfg.includePonCnv ? rowHasPonCnvCall(row, colIndex) : false;
+        if (!cnv && !pon) return true;
+      }
+    }
+
+    if (cfg.onlyCancer && !rowIsCancerGene(row, colIndex)) return true;
+    if (!rowHasMinTargets(row, colIndex, cfg.minTargets)) return true;
+    if (!rowMatchesGeneList(row, colIndex, cfg.geneList)) return true;
+
+    return false;
   }
 
   function filterTable(tableId, table, cfg) {
@@ -368,6 +397,7 @@
   function buildGeneCfg() {
     const c = controls.gene;
     return {
+      isChunkTable: false,
       hideNonCnv: Boolean(c.hideNonCnv?.checked),
       includePonCnv: false,
       onlyCancer: Boolean(c.onlyCancer?.checked),
@@ -385,8 +415,10 @@
   function buildChunkCfg() {
     const c = controls.chunk;
     return {
+      isChunkTable: true,
       hideNonCnv: Boolean(c.hideNonCnv?.checked),
       includePonCnv: Boolean(c.includePonCnv?.checked),
+      onlyPonIndication: Boolean(c.onlyPonIndication?.checked),
       onlyCancer: Boolean(c.onlyCancer?.checked),
       geneList: parseGeneList(c.geneInput?.value),
       minTargets: parseIntSafe(c.minTargets?.value),
@@ -422,6 +454,7 @@
       [controls.chunk.rangeChr, "input"],
       [controls.chunk.rangeStart, "input"],
       [controls.chunk.rangeEnd, "input"],
+      [controls.chunk.onlyPonIndication, "change"],
     ],
     applyFilter
   );
