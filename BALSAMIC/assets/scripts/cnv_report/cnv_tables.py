@@ -720,10 +720,24 @@ def annotate_regions_with_overlapping_segments(
     # Filter to only fields present in s
     field_map = {src: dst for src, dst in field_map.items() if src in segs_df.columns}
 
-    # Ensure destination columns exist
-    for dst in field_map.values():
-        if dst not in out.columns:
-            out[dst] = np.nan
+    # Ensure destination columns exist (dtype-aware)
+    for src, dst in field_map.items():
+        if dst in out.columns:
+            continue
+
+        # Decide dtype based on source column dtype in segs_df
+        if src in segs_df.columns:
+            s = segs_df[src]
+            if pd.api.types.is_bool_dtype(s):
+                out[dst] = pd.Series(pd.NA, index=out.index, dtype="boolean")
+            elif pd.api.types.is_numeric_dtype(s):
+                out[dst] = np.nan  # float dtype is fine
+            else:
+                # strings / mixed / categorical -> use pandas nullable string
+                out[dst] = pd.Series(pd.NA, index=out.index, dtype="string")
+        else:
+            # fallback: nullable string (safe for most metadata)
+            out[dst] = pd.Series(pd.NA, index=out.index, dtype="string")
 
     # Per-chrom map for speed
     segs_by_chr: dict[str, pd.DataFrame] = {
@@ -747,8 +761,9 @@ def annotate_regions_with_overlapping_segments(
             continue
 
         for src, dst in field_map.items():
+            val = picked.get(src, pd.NA)
             if pd.isna(out.at[i, dst]):
-                out.at[i, dst] = picked.get(src, np.nan)
+                out.at[i, dst] = val
 
     return out
 

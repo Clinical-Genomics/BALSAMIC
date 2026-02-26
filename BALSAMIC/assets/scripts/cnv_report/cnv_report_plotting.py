@@ -13,7 +13,7 @@ import numpy as np
 import pandas as pd
 from matplotlib import colormaps
 from matplotlib import patheffects as pe
-import vcfpy
+from cyvcf2 import VCF
 
 # =============================================================================
 # VCF parsing / BAF
@@ -25,22 +25,17 @@ def load_vcf_with_vaf(
     chr_order: list[str],
 ) -> pd.DataFrame:
     """
-    Load a single-sample VCF and compute VAF from AD (first ALT only).
+    Load a single-sample VCF using cyvcf2 and compute VAF from AD (first ALT only).
 
-    Returns:
-        CHROM, POS, VAF
+    Returns DataFrame columns:
+      CHROM, POS, VAF
     """
-
     chr_set = set(map(str, chr_order))
-    rows = []
+    rows: list[dict[str, float | int | str]] = []
 
-    reader = vcfpy.Reader.from_path(str(vcf_path))
+    vcf = VCF(str(vcf_path))
 
-    # Assert exactly one sample (fail fast if assumption breaks)
-    if len(reader.header.samples.names) != 1:
-        raise ValueError("VCF must contain exactly one sample.")
-
-    for rec in reader:
+    for rec in vcf:
         chrom = str(rec.CHROM)
         if chrom.startswith("chr"):
             chrom = chrom[3:]
@@ -48,29 +43,25 @@ def load_vcf_with_vaf(
         if chrom not in chr_set:
             continue
 
-        call = rec.calls[0]  # safe: single-sample assumption
+        pos = int(rec.POS)
 
-        ad = call.data.get("AD")
-        if ad and len(ad) >= 2:
+        vaf = math.nan
+        ad = rec.format("AD")  # typically shape (n_samples, n_alleles) or None
+        if ad is not None and len(ad) > 0:
             try:
-                ref_c = int(ad[0])
-                alt_c = int(ad[1])
-                total = ref_c + alt_c
-                vaf = alt_c / total if total > 0 else math.nan
-            except (TypeError, ValueError):
+                ad0 = ad[0]  # first/only sample
+                # ad0 should be like [ref, alt1, alt2, ...]
+                if ad0 is not None and len(ad0) >= 2:
+                    ref_c = int(ad0[0])
+                    alt_c = int(ad0[1])
+                    total = ref_c + alt_c
+                    vaf = (alt_c / total) if total > 0 else math.nan
+            except (TypeError, ValueError, IndexError):
                 vaf = math.nan
-        else:
-            vaf = math.nan
 
-        rows.append(
-            {
-                "CHROM": chrom,
-                "POS": int(rec.POS),
-                "VAF": float(vaf),
-            }
-        )
+        rows.append({"CHROM": chrom, "POS": pos, "VAF": float(vaf)})
 
-    return pd.DataFrame(rows)
+    return pd.DataFrame(rows, columns=["CHROM", "POS", "VAF"])
 
 
 # =============================================================================
