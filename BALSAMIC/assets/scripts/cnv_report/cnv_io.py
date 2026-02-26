@@ -27,7 +27,15 @@ def _load_bins_tsv(
     - Apply optional column renames
     - Select required out_cols (must all exist)
     """
-    df = pd.read_csv(path, sep="\t")
+    df = pd.read_csv(
+        path,
+        sep="\t",
+        dtype={
+            chr_col: "string",
+            gene_col: "string",
+        },
+        low_memory=False,
+    )
 
     # normalize chromosome column name
     df = df.rename(columns={chr_col: CHR})
