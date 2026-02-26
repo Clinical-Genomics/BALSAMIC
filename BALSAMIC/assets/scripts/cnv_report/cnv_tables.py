@@ -2,9 +2,8 @@ from __future__ import annotations
 
 # Standard library
 import re
-from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, Mapping, Tuple, Any, Sequence
+from typing import Dict, Mapping, Tuple, Any
 
 # Third-party
 import numpy as np
@@ -13,129 +12,45 @@ from pandas.errors import EmptyDataError
 import fitz
 
 # Local
-from cnv_report_utils import stable_sort_by_chr_interval, reorder_columns
+
 from BALSAMIC.constants.analysis import Gender
-from cnv_constants import CHR
+from cnv_constants import CHR, GENE_TABLE_SPEC
 
 # =============================================================================
 # Generic helpers
 # =============================================================================
 
 
-@dataclass(frozen=True)
-class TableSpec:
-    column_order: Sequence[str]
-    float_columns: Sequence[str]
-    decimals: int = 3
-    renames: Mapping[str, str] = None
-    sort_keys: tuple[str, str, str] = ("chr", "region_start", "region_end")
-
-
-GENE_TABLE_SPEC = TableSpec(
-    column_order=[
-        "chr",
-        "region_start",
-        "region_end",
-        "cytoband",
-        "gene.symbol",
-        "n.targets",
-        "mean_log2",
-        "min_log2",
-        "max_log2",
-        "cnvkit_cnv_call",
-        "purecn_cnv_call",
-        "purecn_loh_flag",
-        "cnvkit_seg_start",
-        "cnvkit_seg_end",
-        "cnvkit_seg_log2",
-        "cnvkit_seg_raw_log2",
-        "cnvkit_seg_baf",
-        "purecn_seg_start",
-        "purecn_seg_end",
-        "purecn_seg_mean",
-        "purecn_num_snps",
-        "purecn_maf_observed",
-        "cnvkit_seg_cn",
-        "cnvkit_seg_cn1",
-        "cnvkit_seg_cn2",
-        "purecn_C",
-        "purecn_M",
-        "purecn_M_flagged",
-        "exons_overlapping_cnvkit_segment",
-        "is_cancer_gene",
-        "depth_mean",
-        "pon_gene_mean_log2",
-        "pon_gene_mean_spread",
-        "pon_gene_effect",
-        "pon_gene_z",
-        "pon_gene_direction",
-        "pon_gene_significance",
-        "pon_gene_indication",
-        "pon_mean_log2",
-        "pon_mean_spread",
-        "pon_chunk_effect",
-        "pon_chunk_z",
-        "pon_chunk_significance",
-        "pon_chunk_indication",
-        "exons_overlapping_gene_region",
-    ],
-    float_columns=[
-        "seg_baf",
-        "mean_log2",
-        "min_log2",
-        "max_log2",
-        "pon_gene_mean_log2",
-        "pon_gene_mean_spread",
-        "pon_gene_effect",
-        "pon_gene_z",
-        "depth_mean",
-        "pon_mean_log2",
-        "pon_mean_spread",
-        "pon_chunk_effect",
-        "pon_chunk_z",
-        "cnvkit_seg_log2",
-        "cnvkit_seg_raw_log2",
-        "cnvkit_seg_baf",
-        "purecn_seg_mean",
-        "purecn_maf_observed",
-    ],
-    decimals=3,
-    renames={"n_targets": "n.targets"},
-)
-
-
-def finalize_gene_table(
-    genes_df: pd.DataFrame, spec: TableSpec = GENE_TABLE_SPEC
-) -> pd.DataFrame:
+def finalize_gene_table(genes_df: pd.DataFrame) -> pd.DataFrame:
     """
     Finalize the gene-level table: rename legacy columns, reorder, round floats, and stable-sort by interval.
     """
     out = genes_df.copy()
 
     # 1) Rename (only if present)
-    if spec.renames:
+    if GENE_TABLE_SPEC.renames:
         present = {
             k: v
-            for k, v in spec.renames.items()
+            for k, v in GENE_TABLE_SPEC.renames.items()
             if k in out.columns and v not in out.columns
         }
         if present:
             out = out.rename(columns=present)
 
     # 2) Reorder columns (keeps extras at end if your _reorder_columns does that)
-    out = _reorder_columns(out, list(spec.column_order))
+    out = _reorder_columns(out, list(GENE_TABLE_SPEC.column_order))
 
     # 3) Round floats (only existing)
-    existing_floats = [c for c in spec.float_columns if c in out.columns]
+    existing_floats = [c for c in GENE_TABLE_SPEC.float_columns if c in out.columns]
     if existing_floats:
         out[existing_floats] = (
             out[existing_floats]
             .apply(pd.to_numeric, errors="coerce")
-            .round(spec.decimals)
+            .round(GENE_TABLE_SPEC.decimals)
         )
 
     # 4) Sort
-    chr_col, start_col, end_col = spec.sort_keys
+    chr_col, start_col, end_col = GENE_TABLE_SPEC.sort_keys
     if all(c in out.columns for c in (chr_col, start_col, end_col)):
         out = _stable_sort_by_chr_interval(out, chr_col, start_col, end_col)
 
@@ -1149,7 +1064,7 @@ def create_gene_chunks(cnr_df: pd.DataFrame, pon_df: pd.DataFrame):
             r["pon_chunk_effect"],
             r["pon_mean_spread"],
             r.get("n_targets", r.get("n.targets", np.nan)),
-            min_n=MIN_CHUNK_TARGETS_FOR_CALL,  # <-- change from 2 to 5
+            min_n=MIN_CHUNK_TARGETS_FOR_CALL,
         ),
         axis=1,
     )

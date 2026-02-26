@@ -93,6 +93,18 @@
     {% endif %}
   {% endif %}
 
+  {# --------------------- Column glossary --------------------- #}
+  <h2>Column glossary</h2>
+  <p class="muted">
+    Descriptions of columns shown in the gene/chunk tables. Use this as a quick reference.
+  </p>
+
+  <button id="toggle-col-glossary" type="button">Show column glossary</button>
+
+  <div id="col-glossary-container" style="display:none; margin-top:10px;">
+    {{ column_glossary_html | safe }}
+  </div>
+
   {# --------------------- Gene table --------------------- #}
   <h1>LOH / CNV Genes (gene-level)</h1>
   <button id="toggle-gene-table" type="button">Hide gene-level table</button>

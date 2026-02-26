@@ -29,6 +29,7 @@ from cnv_tables import (
     pdf_first_page_to_png,
 )
 from cnv_report_plotting import plot_chromosomes
+from cnv_constants import GENE_TABLE_SPEC, TableSpec
 
 from BALSAMIC.constants.analysis import Gender, AnalysisType
 
@@ -97,6 +98,13 @@ def render_cnv_report_html(
             index=False, border=0, classes="dataframe", table_id="qc-summary-table"
         )
 
+    # ---- Add column glossary
+    column_glossary_html = build_column_glossary_html(
+        df_gene=df_gene,
+        df_chunk=df_chunk,
+        spec=GENE_TABLE_SPEC,
+    )
+
     # ---- Main gene table
     gene_table_html = df_gene.to_html(
         index=False, border=0, classes="dataframe", table_id="report-table"
@@ -140,6 +148,7 @@ def render_cnv_report_html(
         css_text=css_text,
         js_text=js_text,
         # Tables (already HTML)
+        column_glossary_html=column_glossary_html,
         purecn_summary_html=purecn_summary_html,
         qc_summary_html=qc_summary_html,
         gene_table_html=gene_table_html,
@@ -252,6 +261,55 @@ def _compute_cnv_sets(df: pd.DataFrame) -> tuple[set[str], set[str], str | None]
         cnv_gene_set = set(df_chr.loc[cnv_mask, "gene.symbol"].astype(str).tolist())
 
     return cnv_chr_set, cnv_gene_set, chr_col
+
+
+def _ordered_glossary_columns(
+    *,
+    df_gene: pd.DataFrame,
+    df_chunk: pd.DataFrame | None,
+    spec: TableSpec,
+) -> list[str]:
+    """Return glossary column names in TableSpec order, then extras."""
+    # columns we actually need to describe (present in either table)
+    present: set[str] = set(df_gene.columns)
+    if df_chunk is not None and not df_chunk.empty:
+        present |= set(df_chunk.columns)
+
+    # 1) spec order (only those that exist)
+    ordered = [c for c in spec.column_order if c in present]
+
+    # 2) extras (present but not in spec), append deterministically
+    extras = sorted(present - set(spec.column_order))
+    return ordered + extras
+
+
+def build_column_glossary_html(
+    *,
+    df_gene: pd.DataFrame,
+    df_chunk: pd.DataFrame | None,
+    spec: TableSpec,
+) -> str:
+    """
+    Build an HTML table describing columns in the same order as TableSpec.column_order,
+    then any extra columns found in df_gene/df_chunk appended at the end.
+    """
+    cols = _ordered_glossary_columns(df_gene=df_gene, df_chunk=df_chunk, spec=spec)
+
+    rows = []
+    for c in cols:
+        desc = spec.descriptions.get(c, "")
+        rows.append({"column": c, "description": desc})
+
+    glossary_df = pd.DataFrame(rows, columns=["column", "description"])
+
+    # Use to_html for consistent styling; pick classes you already use
+    return glossary_df.to_html(
+        index=False,
+        border=0,
+        classes="dataframe glossary-table",
+        table_id="column-glossary-table",
+        escape=False,
+    )
 
 
 @dataclass(frozen=True)

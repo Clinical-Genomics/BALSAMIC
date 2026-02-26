@@ -561,6 +561,14 @@
     "Show chunk-level table"
   );
 
+  hookShowHide(
+  "toggle-col-glossary",
+  "col-glossary-container",
+  false,
+  "Hide column glossary",
+  "Show column glossary"
+);
+
   // ---------------------------------------------------------------------------
   // Plot modal viewer
   // ---------------------------------------------------------------------------

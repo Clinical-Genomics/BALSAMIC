@@ -55,6 +55,16 @@ label {
   font-size: 13px;
 }
 
+#column-glossary-table td:nth-child(1),
+#column-glossary-table th:nth-child(1) {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  white-space: nowrap;
+}
+
+#column-glossary-table td:nth-child(2) {
+  white-space: normal;
+}
+
 /* Tables */
 table.dataframe {
   border-collapse: collapse;
