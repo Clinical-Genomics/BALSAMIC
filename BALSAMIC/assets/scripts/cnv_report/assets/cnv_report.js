@@ -36,10 +36,69 @@
   }
 
   const isPresentText = (v) => {
-  v = (v ?? "").trim().toLowerCase();
-  if (!v) return false;
-  return !["na", "nan", "<na>", ".", "none", "null"].includes(v);
+    v = (v ?? "").trim().toLowerCase();
+    if (!v) return false;
+    return !["na", "nan", "<na>", ".", "none", "null"].includes(v);
   };
+
+  function getVisibleColumnIndexes(table) {
+    if (!table?.tHead?.rows?.length) return [];
+    const headerCells = Array.from(table.tHead.rows[0].cells);
+    const idxs = [];
+    for (let i = 0; i < headerCells.length; i++) {
+      // If a column group toggle hid it, display will be "none"
+      if (headerCells[i].style.display !== "none") idxs.push(i);
+    }
+    return idxs;
+  }
+
+  function tableToTSVVisible(table) {
+    if (!table) return "";
+
+    const body = table.tBodies?.[0];
+    if (!body) return "";
+
+    const colIdxs = getVisibleColumnIndexes(table);
+    if (!colIdxs.length) return "";
+
+    const lines = [];
+
+    // header row
+    const headerCells = Array.from(table.tHead.rows[0].cells);
+    lines.push(colIdxs.map((i) => (headerCells[i]?.textContent ?? "").trim()).join("\t"));
+
+    // visible body rows
+    for (const row of Array.from(body.rows)) {
+      if (row.style.display === "none") continue;
+
+      const cells = Array.from(row.cells);
+      lines.push(colIdxs.map((i) => (cells[i]?.textContent ?? "").trim()).join("\t"));
+    }
+
+    return lines.join("\n");
+  }
+
+  async function copyTextToClipboard(text) {
+    if (!text) return;
+
+    // Prefer async clipboard API
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(text);
+      return;
+    }
+
+    // Fallback for older browsers / stricter contexts
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.style.position = "fixed";
+    ta.style.left = "-9999px";
+    ta.style.top = "0";
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    document.execCommand("copy");
+    document.body.removeChild(ta);
+  }
 
   // ---------------------------------------------------------------------------
   // Tables + controls
@@ -54,14 +113,19 @@
       onlyCancer: $("only-cancer-genes"),
       geneInput: $("gene-filter"),
       minTargets: $("min-targets"),
+      rangeChr: $("range-chr"),
+      rangeStart: $("range-start"),
+      rangeEnd: $("range-end"),
     },
     chunk: {
       hideNonCnv: $("hide-non-cnv-chunk"),
       includePonCnv: $("show-pon-cnv-chunk"),
       onlyCancer: $("only-cancer-genes-chunk"),
-      onlySplit: $("only-split-genes-chunk"),
       geneInput: $("gene-filter-chunk"),
       minTargets: $("min-targets-chunk"),
+      rangeChr: $("range-chr-chunk"),
+      rangeStart: $("range-start-chunk"),
+      rangeEnd: $("range-end-chunk"),
     },
   };
 
@@ -245,10 +309,6 @@
     return idx !== -1 && isTruthyText(textOf(row.cells[idx]));
   }
 
-  function rowIsSplitGene(row, colIndex) {
-    const idx = getIdx(colIndex, "is_gene_split");
-    return idx !== -1 && isTruthyText(textOf(row.cells[idx]));
-  }
 
   function rowHasMinTargets(row, colIndex, minTargets) {
     if (!minTargets) return true;
@@ -278,19 +338,19 @@
   }
 
   function shouldHideRow(row, colIndex, cfg) {
-    // CNV filter
-    if (cfg.hideNonCnv) {
-      const cnv = rowHasCnvOrLoh(row, colIndex);
-      const pon = cfg.includePonCnv ? rowHasPonCnvCall(row, colIndex) : false;
-      if (!cnv && !pon) return true;
-    }
+  if (cfg.hideNonCnv) {
+    const cnv = rowHasCnvOrLoh(row, colIndex);
+    const pon = cfg.includePonCnv ? rowHasPonCnvCall(row, colIndex) : false;
+    if (!cnv && !pon) return true;
+  }
 
-    if (cfg.onlyCancer && !rowIsCancerGene(row, colIndex)) return true;
-    if (cfg.onlySplit && !rowIsSplitGene(row, colIndex)) return true;
-    if (!rowHasMinTargets(row, colIndex, cfg.minTargets)) return true;
-    if (!rowMatchesGeneList(row, colIndex, cfg.geneList)) return true;
+  if (cfg.onlyCancer && !rowIsCancerGene(row, colIndex)) return true;
+  if (!rowHasMinTargets(row, colIndex, cfg.minTargets)) return true;
+  if (!rowMatchesGeneList(row, colIndex, cfg.geneList)) return true;
 
-    return false;
+  if (!rowInRange(row, colIndex, cfg.range)) return true;
+
+  return false;
   }
 
   function filterTable(tableId, table, cfg) {
@@ -314,6 +374,11 @@
       onlySplit: false,
       geneList: parseGeneList(c.geneInput?.value),
       minTargets: parseIntSafe(c.minTargets?.value),
+      range: {
+        chr: c.rangeChr?.value ?? "",
+        start: parseFloatSafe(c.rangeStart?.value),
+        end: parseFloatSafe(c.rangeEnd?.value),
+      },
     };
   }
 
@@ -323,9 +388,13 @@
       hideNonCnv: Boolean(c.hideNonCnv?.checked),
       includePonCnv: Boolean(c.includePonCnv?.checked),
       onlyCancer: Boolean(c.onlyCancer?.checked),
-      onlySplit: Boolean(c.onlySplit?.checked),
       geneList: parseGeneList(c.geneInput?.value),
       minTargets: parseIntSafe(c.minTargets?.value),
+      range: {
+        chr: c.rangeChr?.value ?? "",
+        start: parseFloatSafe(c.rangeStart?.value),
+        end: parseFloatSafe(c.rangeEnd?.value),
+      },
     };
   }
 
@@ -341,16 +410,87 @@
       [controls.gene.onlyCancer, "change"],
       [controls.gene.geneInput, "input"],
       [controls.gene.minTargets, "input"],
+      [controls.gene.rangeChr, "input"],
+      [controls.gene.rangeStart, "input"],
+      [controls.gene.rangeEnd, "input"],
 
       [controls.chunk.hideNonCnv, "change"],
       [controls.chunk.includePonCnv, "change"],
       [controls.chunk.onlyCancer, "change"],
-      [controls.chunk.onlySplit, "change"],
       [controls.chunk.geneInput, "input"],
       [controls.chunk.minTargets, "input"],
+      [controls.chunk.rangeChr, "input"],
+      [controls.chunk.rangeStart, "input"],
+      [controls.chunk.rangeEnd, "input"],
     ],
     applyFilter
   );
+
+  const copyGeneBtn = $("copy-gene-table");
+  if (copyGeneBtn) {
+    copyGeneBtn.addEventListener("click", async () => {
+      const tsv = tableToTSVVisible(geneTable);
+      await copyTextToClipboard(tsv);
+      copyGeneBtn.textContent = "Copied!";
+      setTimeout(() => (copyGeneBtn.textContent = "Copy visible rows"), 1000);
+    });
+  }
+
+  const copyChunkBtn = $("copy-chunk-table");
+  if (copyChunkBtn) {
+    copyChunkBtn.addEventListener("click", async () => {
+      const tsv = tableToTSVVisible(chunkTable);
+      await copyTextToClipboard(tsv);
+      copyChunkBtn.textContent = "Copied!";
+      setTimeout(() => (copyChunkBtn.textContent = "Copy visible rows"), 1000);
+    });
+  }
+
+  function normChr(s) {
+  s = (s ?? "").trim().toLowerCase();
+  if (s.startsWith("chr")) s = s.slice(3);
+  return s;
+  }
+
+  function parseFloatSafe(v) {
+    const n = parseFloat(v);
+    return Number.isFinite(n) ? n : null;
+  }
+
+  function rowInRange(row, colIndex, range) {
+    const wantChr = normChr(range.chr);
+    const wantStart = range.start;
+    const wantEnd = range.end;
+
+  // no range filter set
+  if (!wantChr && wantStart == null && wantEnd == null) return true;
+
+  // find columns
+  const chrIdx = getIdx(colIndex, "chr", "chromosome");
+  const startIdx = getIdx(colIndex, "region_start", "start");
+  const endIdx = getIdx(colIndex, "region_end", "end");
+
+  if (chrIdx === -1 || startIdx === -1 || endIdx === -1) {
+    // can't apply range if columns aren't available
+    return true;
+  }
+
+  const rowChr = normChr(textOf(row.cells[chrIdx]));
+  const rowStart = parseFloatSafe(textOf(row.cells[startIdx]));
+  const rowEnd = parseFloatSafe(textOf(row.cells[endIdx]));
+
+  if (!rowChr || rowStart == null || rowEnd == null) return true;
+
+  // chr must match if specified
+  if (wantChr && rowChr !== wantChr) return false;
+
+  // overlap check:
+  // keep row if it overlaps [wantStart, wantEnd]
+  const qStart = wantStart != null ? wantStart : -Infinity;
+  const qEnd = wantEnd != null ? wantEnd : Infinity;
+
+  return rowEnd >= qStart && rowStart <= qEnd;
+  }
 
   // ---------------------------------------------------------------------------
   // Table show/hide toggles

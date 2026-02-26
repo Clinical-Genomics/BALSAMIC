@@ -110,28 +110,47 @@
         </label>
       </div>
       <div class="control-group">
-  <span class="control-label">Column detail:</span>
-
+  <span class="control-label">Genomic range:</span>
   <label style="margin-left:12px;">
-    <input type="checkbox" id="cols-qc-gene">
-    QC details
+    Chr:
+    <input type="text" id="range-chr" placeholder="1" style="width:60px;">
   </label>
-
   <label style="margin-left:12px;">
-    <input type="checkbox" id="cols-pon-gene">
-    PON details
+    Start:
+    <input type="number" id="range-start" min="0" step="1" placeholder="0">
   </label>
-
   <label style="margin-left:12px;">
-    <input type="checkbox" id="cols-cnvkit-extra-gene">
-    CNVkit extra
-  </label>
-
-    <label style="margin-left:12px;">
-    <input type="checkbox" id="cols-purecn-extra-gene">
-    PureCN extra
+    End:
+    <input type="number" id="range-end" min="0" step="1" placeholder="250000000">
   </label>
 </div>
+
+  <button id="copy-gene-table" type="button">Copy visible rows</button>
+
+  <div class="control-group">
+
+    <span class="control-label">Column detail:</span>
+
+    <label style="margin-left:12px;">
+      <input type="checkbox" id="cols-qc-gene">
+      QC details
+    </label>
+
+    <label style="margin-left:12px;">
+      <input type="checkbox" id="cols-pon-gene">
+      PON details
+    </label>
+
+    <label style="margin-left:12px;">
+      <input type="checkbox" id="cols-cnvkit-extra-gene">
+      CNVkit extra
+    </label>
+
+      <label style="margin-left:12px;">
+      <input type="checkbox" id="cols-purecn-extra-gene">
+      PureCN extra
+    </label>
+  </div>
 
       <div class="control-group">
         <label>
@@ -172,12 +191,22 @@
             <input type="checkbox" id="only-cancer-genes-chunk">
             Show only cancer genes (is_cancer_gene TRUE)
           </label>
-          <label style="margin-left:12px;">
-            <input type="checkbox" id="only-split-genes-chunk">
-            Show only split genes (is_gene_split TRUE)
-          </label>
         </div>
-
+        <div class="control-group">
+        <span class="control-label">Genomic range:</span>
+        <label style="margin-left:12px;">
+          Chr:
+          <input type="text" id="range-chr-chunk" placeholder="1" style="width:60px;">
+        </label>
+        <label style="margin-left:12px;">
+          Start:
+          <input type="number" id="range-start-chunk" min="0" step="1" placeholder="0">
+        </label>
+        <label style="margin-left:12px;">
+          End:
+          <input type="number" id="range-end-chunk" min="0" step="1" placeholder="250000000">
+        </label>
+      </div>
         <div class="control-group">
           <label>
             Min n.targets:
@@ -185,7 +214,10 @@
           </label>
         </div>
 
-        <div class="control-group">
+  <button id="copy-chunk-table" type="button">Copy visible rows</button>
+
+  <div class="control-group">
+
   <span class="control-label">Column detail:</span>
 
   <label style="margin-left:12px;">
