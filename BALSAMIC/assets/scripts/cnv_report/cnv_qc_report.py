@@ -12,7 +12,7 @@ import pandas as pd
 from typing import Dict, Tuple
 
 from cnv_summary_metrics import read_purecn_summary, compute_summary_metrics
-
+from cnv_report_utils import pdf_first_page_to_png
 from cnv_io import (
     load_cancer_gene_set,
     load_cnr_bins,
@@ -26,17 +26,11 @@ from cnv_io import (
 from cnv_tables import (
     build_gene_segment_table,
     build_gene_chunk_table,
-    pdf_first_page_to_png,
 )
 from cnv_report_plotting import plot_chromosomes
 from cnv_constants import GENE_TABLE_SPEC, TableSpec
 
 from BALSAMIC.constants.analysis import Gender, AnalysisType
-
-
-# =============================================================================
-# Public API
-# =============================================================================
 
 
 def render_cnv_report_html(
@@ -468,7 +462,7 @@ def _collect_chr_plot_groups(
 @click.option(
     "--sex",
     type=click.Choice([Gender.FEMALE, Gender.MALE]),
-    default=None,
+    required=True,
     help="Sample sex",
 )
 @click.option(
@@ -482,18 +476,18 @@ def main(
     cnr: str,
     cns: str,
     cns_init: str,
-    pon: Optional[str],
+    pon: str | None,
     vcf: str,
     refgene: str,
     cytoband: str,
     case_id: str,
-    cnvkit_scatter: Optional[str],
-    cnvkit_diagram: Optional[str],
+    cnvkit_scatter: str | None,
+    cnvkit_diagram: str | None,
     output_file: str,
-    purity_csv: Optional[str],
-    cancer_genes: Optional[str],
+    purity_csv: str | None,
+    cancer_genes: str | None,
     is_exome: bool,
-    sex: Optional[Gender],
+    sex: Gender,
     analysis_type: str,
 ):
     """
@@ -555,9 +549,9 @@ def main(
         cns_df=cns_df,
         cytoband_df=cytoband_df,
         exon_map=exon_map,
+        sex=sex,
         cancer_genes=cancer_gene_set,
         loh_regions_df=loh_regions_df,
-        sex=sex,
         pon_df=pon_df,
     )
 
@@ -570,10 +564,10 @@ def main(
             cns_df=cns_df,
             cytoband_df=cytoband_df,
             exon_map=exon_map,
+            sex=sex,
             pon_df=pon_df,
             cancer_genes=cancer_gene_set,
             loh_regions_df=loh_regions_df,
-            sex=sex,
         )
     else:
         chunks_df = None
@@ -594,7 +588,8 @@ def main(
     chr_plots_dir.mkdir(exist_ok=True, parents=True)
 
     # Different compression for exome vs panel
-    neutral_target_factor = 0.1 if is_exome else 0.6
+    neutral_target_factor = 0.07 if is_exome else 0.4
+    backbone_factor = 0.07 if is_exome else 0.4
     highlight_only_cancer = True if is_exome else False
 
     # pon may be None; plot_chromosomes is written to handle that
@@ -606,6 +601,7 @@ def main(
         outdir=chr_plots_dir,
         case_id=case_id,
         pon_df=pon_df,
+        backbone_factor=backbone_factor,
         neutral_target_factor=neutral_target_factor,
         highlight_only_cancer=highlight_only_cancer,
     )

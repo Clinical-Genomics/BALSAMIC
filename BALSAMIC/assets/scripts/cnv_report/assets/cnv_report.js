@@ -144,6 +144,7 @@
     "cnvkit_seg_cn",
     "cnvkit_seg_cn1",
     "cnvkit_seg_cn2",
+    "cnvkit_seg_depth",
   ];
 
   const COL_GROUP_PURECN_EXTRA = ["purecn_C", "purecn_M", "purecn_M_flagged"];
@@ -293,7 +294,7 @@
   }
 
   function rowHasCnvOrLoh(row, colIndex) {
-  const lohIdx = getIdx(colIndex, "purecn_loh_flag");
+  const lohIdx = getIdx(colIndex, "purecn_type");
   const cnvkitIdx = getIdx(colIndex, "cnvkit_cnv_call");
   const purecnIdx = getIdx(colIndex, "purecn_cnv_call");
 
@@ -351,23 +352,25 @@
   }
 
   function shouldHideRow(row, colIndex, cfg) {
+    // apply genomic range filter
+    if (cfg.range && !rowInRange(row, colIndex, cfg.range)) return true;
+
     // Additive "OR" gate for chunk table:
-    // If either checkbox is enabled, keep row if it matches ANY enabled condition.
     if (cfg.isChunkTable) {
       const wantCnv = Boolean(cfg.hideNonCnv);
       const wantPonInd = Boolean(cfg.onlyPonIndication);
 
       if (wantCnv || wantPonInd) {
-        const matchCnv = wantCnv ? (rowHasCnvOrLoh(row, colIndex) ||
-                                   (cfg.includePonCnv ? rowHasPonCnvCall(row, colIndex) : false))
-                                 : false;
+        const matchCnv = wantCnv
+          ? (rowHasCnvOrLoh(row, colIndex) ||
+             (cfg.includePonCnv ? rowHasPonCnvCall(row, colIndex) : false))
+          : false;
 
         const matchPonInd = wantPonInd ? rowHasPonIndication(row, colIndex) : false;
 
         if (!matchCnv && !matchPonInd) return true;
       }
     } else {
-      // Gene table keeps old behavior
       if (cfg.hideNonCnv) {
         const cnv = rowHasCnvOrLoh(row, colIndex);
         const pon = cfg.includePonCnv ? rowHasPonCnvCall(row, colIndex) : false;

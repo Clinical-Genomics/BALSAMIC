@@ -1,10 +1,8 @@
 from __future__ import annotations
 
 # Standard library
-import math
-from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
+from typing import Iterable
 
 # Third-party
 import hashlib
@@ -13,78 +11,9 @@ import numpy as np
 import pandas as pd
 from matplotlib import colormaps
 from matplotlib import patheffects as pe
-from cyvcf2 import VCF
-
-# =============================================================================
-# VCF parsing / BAF
-# =============================================================================
 
 
-def load_vcf_with_vaf(
-    vcf_path: str | Path,
-    chr_order: list[str],
-) -> pd.DataFrame:
-    """
-    Load a single-sample VCF using cyvcf2 and compute VAF from AD (first ALT only).
-
-    Returns DataFrame columns:
-      CHROM, POS, VAF
-    """
-    chr_set = set(map(str, chr_order))
-    rows: list[dict[str, float | int | str]] = []
-
-    vcf = VCF(str(vcf_path))
-
-    for rec in vcf:
-        chrom = str(rec.CHROM)
-        if chrom.startswith("chr"):
-            chrom = chrom[3:]
-
-        if chrom not in chr_set:
-            continue
-
-        pos = int(rec.POS)
-
-        vaf = math.nan
-        ad = rec.format("AD")  # typically shape (n_samples, n_alleles) or None
-        if ad is not None and len(ad) > 0:
-            try:
-                ad0 = ad[0]  # first/only sample
-                # ad0 should be like [ref, alt1, alt2, ...]
-                if ad0 is not None and len(ad0) >= 2:
-                    ref_c = int(ad0[0])
-                    alt_c = int(ad0[1])
-                    total = ref_c + alt_c
-                    vaf = (alt_c / total) if total > 0 else math.nan
-            except (TypeError, ValueError, IndexError):
-                vaf = math.nan
-
-        rows.append({"CHROM": chrom, "POS": pos, "VAF": float(vaf)})
-
-    return pd.DataFrame(rows, columns=["CHROM", "POS", "VAF"])
-
-
-# =============================================================================
-# Plotting helpers (refactor plot_chromosomes)
-# =============================================================================
-
-
-def _normalize_is_cancer_gene(gdf: pd.DataFrame) -> pd.DataFrame:
-    """
-    Normalize cancer gene annotation to boolean column.
-
-    Creates:
-      is_cancer_gene_bool
-
-    Missing or null values default to False.
-    """
-
-    out = gdf.copy()
-    if "is_cancer_gene" in out.columns:
-        out["is_cancer_gene_bool"] = out["is_cancer_gene"].fillna(False).astype(bool)
-    else:
-        out["is_cancer_gene_bool"] = False
-    return out
+from cnv_io import load_vcf_with_vaf
 
 
 def _compute_row_flags(gdf: pd.DataFrame) -> pd.DataFrame:
@@ -252,24 +181,19 @@ def _collect_segments_for_chr(
     Returns per-segment dataframe.
     """
 
-    if g_chr.empty or not {"seg_start", "seg_end"}.issubset(g_chr.columns):
-        return pd.DataFrame()
-
     agg: dict[str, tuple[str, str]] = {}
-    if "seg_log2" in g_chr.columns:
-        agg["seg_log2"] = ("seg_log2", "first")
-    if "cnvkit_cnv_call" in g_chr.columns:
-        agg["cnvkit_cnv_call"] = ("cnvkit_cnv_call", "first")
+
+    agg["cnvkit_seg_raw_log2"] = ("cnvkit_seg_raw_log2", "first")
+    agg["cnvkit_cnv_call"] = ("cnvkit_cnv_call", "first")
 
     segs = (
-        g_chr.dropna(subset=["seg_start", "seg_end"])
-        .groupby(["chr", "seg_start", "seg_end"], as_index=False)
+        g_chr.dropna(subset=["cnvkit_seg_start", "cnvkit_seg_end"])
+        .groupby(["chr", "cnvkit_seg_start", "cnvkit_seg_end"], as_index=False)
         .agg(**agg)
     )
-    segs = segs[segs["chr"] == chr_name].sort_values("seg_start").copy()
+    segs = segs[segs["chr"] == chr_name].sort_values("cnvkit_seg_start").copy()
 
-    if "seg_log2" in segs.columns:
-        segs["seg_log2_clipped"] = segs["seg_log2"].clip(-y_clip, y_clip)
+    segs["cnvkit_seg_log2_clipped"] = segs["cnvkit_seg_raw_log2"].clip(-y_clip, y_clip)
 
     return segs
 
@@ -343,30 +267,76 @@ def _draw_background_bins(ax, bins: pd.DataFrame, y_col: str):
 
 def _draw_highlighted_bins(
     ax,
-    sub: pd.DataFrame,
+    *,
+    bins: pd.DataFrame,
     highlighted_genes: np.ndarray,
     gene_to_color: dict[str, tuple],
-    y_col: str,
-):
+    genes_col: str = "genes",
+    y_col_bins: str = "log2_clipped",
+) -> None:
     """
-    Draw highlighted gene bin scatter layer.
+    Draw highlighted bins ONCE per unique bin (bins-only).
 
-    Uses gene-specific colors and heavier styling than background bins.
+    Coloring rule:
+      - If a bin contains exactly ONE highlighted gene → use that gene's color.
+      - If a bin contains >1 highlighted genes → draw as neutral gray.
+      - Bins with 0 highlighted genes are not drawn here.
+
+    Requirements:
+      - bins contains: x_coord, y_col_bins, genes_col (list[str]), is_highlight_bin
     """
+    if bins is None or bins.empty:
+        return
+    if "is_highlight_bin" not in bins.columns:
+        return
 
-    for gene in highlighted_genes:
-        gsub = sub[sub["gene.symbol"] == gene]
-        if gsub.empty:
-            continue
-        color = gene_to_color.get(str(gene), "black")
+    hi_set = set(map(str, highlighted_genes))
+    if not hi_set:
+        return
+
+    # Only consider bins that are flagged as highlighted (fast path)
+    b = bins[bins["is_highlight_bin"]].copy()
+    if b.empty:
+        return
+
+    def hi_genes_in_bin(glist) -> list[str]:
+        if not isinstance(glist, list) or not glist:
+            return []
+        # only genes that are in highlighted set
+        return [g for g in glist if str(g) in hi_set]
+
+    b["hi_genes"] = b[genes_col].apply(hi_genes_in_bin)
+
+    single = b[b["hi_genes"].apply(len) == 1].copy()
+    multi = b[b["hi_genes"].apply(len) > 1].copy()
+
+    # --- single highlighted gene: color by that gene ---
+    if not single.empty:
+        single["sole_gene"] = single["hi_genes"].apply(lambda lst: str(lst[0]))
+        for gene, df_g in single.groupby("sole_gene", sort=False):
+            color = gene_to_color.get(gene, "black")
+            ax.scatter(
+                df_g["x_coord"],
+                df_g[y_col_bins],
+                s=9,
+                alpha=0.9,
+                color=color,
+                edgecolors="black",
+                linewidths=0.6,
+                label=None,
+            )
+
+    # --- multiple highlighted genes: neutral ---
+    if not multi.empty:
         ax.scatter(
-            gsub["x_coord"],
-            gsub[y_col],
-            s=8,
+            multi["x_coord"],
+            multi[y_col_bins],
+            s=9,
             alpha=0.9,
-            color=color,
+            color="gray",
             edgecolors="black",
             linewidths=0.6,
+            label=None,
         )
 
 
@@ -410,12 +380,10 @@ def _draw_segments(ax, segs_chr: pd.DataFrame):
         xs = srow["x_start"]
         xe = srow["x_end"]
 
-        if "seg_log2_clipped" in srow.index and pd.notna(srow["seg_log2_clipped"]):
-            y_seg = srow["seg_log2_clipped"]
-        elif "loh_seg_mean_clipped" in srow.index and pd.notna(
-            srow["loh_seg_mean_clipped"]
+        if "cnvkit_seg_log2_clipped" in srow.index and pd.notna(
+            srow["cnvkit_seg_log2_clipped"]
         ):
-            y_seg = srow["loh_seg_mean_clipped"]
+            y_seg = srow["cnvkit_seg_log2_clipped"]
         else:
             continue
 
@@ -539,45 +507,49 @@ def _draw_gene_labels(
     ax,
     *,
     g_chr: pd.DataFrame,
-    sub: pd.DataFrame,
     label_genes: list[str],
     gene_to_color: dict[str, tuple],
     stable_color_fn: callable,
     pos_to_xcoord: callable,
     y_max: float,
     base_label_offset: float,
-):
+) -> None:
     """
     Draw gene boundary markers and rotated gene name labels.
 
-    Determines genomic span using:
-      region coordinates → preferred
-      segment coordinates → fallback
-      bin extents → final fallback
+    Requires `g_chr` to contain, per gene:
+      - gene.symbol
+      - region_start
+      - region_end
+
+    If a gene is missing coordinates, it is skipped.
     """
+    if g_chr is None or g_chr.empty:
+        return
+
+    spans = g_chr.loc[
+        g_chr["gene.symbol"].notna(), ["gene.symbol", "region_start", "region_end"]
+    ].copy()
+    # Ensure numeric-ish (won't crash if already int)
+    spans["region_start"] = pd.to_numeric(spans["region_start"], errors="coerce")
+    spans["region_end"] = pd.to_numeric(spans["region_end"], errors="coerce")
+
+    gene_span = (
+        spans.dropna(subset=["region_start", "region_end"])
+        .groupby("gene.symbol", as_index=True)
+        .agg(region_start=("region_start", "min"), region_end=("region_end", "max"))
+    )
 
     for gname in label_genes:
-        color = gene_to_color.get(gname) or stable_color_fn(gname)
+        if gname not in gene_span.index:
+            continue
 
-        g_rows = (
-            g_chr[g_chr["gene.symbol"] == gname]
-            if "gene.symbol" in g_chr.columns
-            else pd.DataFrame()
-        )
-        if (not g_rows.empty) and {"region_start", "region_end"}.issubset(
-            g_rows.columns
-        ):
-            g_start = int(g_rows["region_start"].min())
-            g_end = int(g_rows["region_end"].max())
-        elif (not g_rows.empty) and {"seg_start", "seg_end"}.issubset(g_rows.columns):
-            g_start = int(g_rows["seg_start"].min())
-            g_end = int(g_rows["seg_end"].max())
-        else:
-            bins_gene = sub[sub["gene.symbol"] == gname]
-            if bins_gene.empty:
-                continue
-            g_start = int(bins_gene["start"].min())
-            g_end = int(bins_gene["end"].max())
+        g_start = int(gene_span.at[gname, "region_start"])
+        g_end = int(gene_span.at[gname, "region_end"])
+        if g_end < g_start:
+            continue
+
+        color = gene_to_color.get(gname) or stable_color_fn(gname)
 
         xs = pos_to_xcoord(g_start)
         xe = pos_to_xcoord(g_end)
@@ -618,7 +590,7 @@ def _plot_vaf_panel(ax, vaf_chr: pd.DataFrame):
     ax.set_ylabel("VAF")
 
 
-def _compute_variable_x_binlevel(
+def _compute_variable_x_binlevel_OLD(
     sub: pd.DataFrame,
     highlighted_genes: np.ndarray,
     neutral_target_factor: float,
@@ -694,9 +666,96 @@ def _compute_variable_x_binlevel(
     return out, g
 
 
-# =============================================================================
-# Main plotting function (now much thinner)
-# =============================================================================
+def _compute_variable_x_on_bins(
+    bins: pd.DataFrame,
+    *,
+    neutral_target_factor: float,
+    backbone_factor: float,
+    backbone_label: str = "backbone",
+    genes_col: str = "genes",
+) -> pd.DataFrame:
+    """
+    Compute bin_width/x_coord/type on a collapsed bin table where `genes` is a list per bin,
+    and `is_highlight_bin` already exists.
+    """
+    out = bins.copy()
+
+    def is_backbone(glist) -> bool:
+        return isinstance(glist, list) and (backbone_label in glist)
+
+    out["is_backbone_bin"] = out[genes_col].apply(is_backbone)
+    out["type"] = np.where(out["is_backbone_bin"], "Backbone", "Target")
+
+    width = np.full(len(out), float(neutral_target_factor), dtype=float)
+    width[out["is_backbone_bin"].to_numpy()] = float(backbone_factor)
+    width[out["is_highlight_bin"].to_numpy()] = 1.0
+
+    out["bin_width"] = width
+    out["x_coord"] = np.cumsum(width) - (width / 2.0)
+    return out
+
+
+def _collapse_bins_to_unique(
+    df: pd.DataFrame,
+    *,
+    key_cols: tuple[str, str, str] = ("chr", "start", "end"),
+    gene_col: str = "gene.symbol",
+    value_aggs: dict[str, str] | None = None,
+    out_gene_col: str = "genes",
+) -> pd.DataFrame:
+    """
+    Collapse exploded bin table to one row per (chr,start,end).
+
+    - Aggregates gene symbols into a sorted unique list (column `out_gene_col`)
+    - Aggregates requested value columns using `value_aggs` (default: "first")
+
+    Assumption: for a given bin, numeric values like log2/depth are identical across exploded rows.
+    """
+    if value_aggs is None:
+        value_aggs = {}
+
+    keys = list(key_cols)
+
+    # gene list per bin
+    genes = (
+        df.groupby(keys, as_index=False)[gene_col]
+        .agg(lambda s: sorted(set(s.dropna().astype(str))))
+        .rename(columns={gene_col: out_gene_col})
+    )
+
+    # numeric / other columns per bin
+    if value_aggs:
+        vals = df.groupby(keys, as_index=False).agg(
+            **{k: (k, v) for k, v in value_aggs.items()}
+        )
+        out = vals.merge(genes, on=keys, how="left", validate="one_to_one")
+    else:
+        out = genes
+
+    return out
+
+
+def _annotate_highlight_bins(
+    bins: pd.DataFrame,
+    *,
+    highlighted_genes: Iterable[str],
+    genes_col: str = "genes",
+    out_col: str = "is_highlight_bin",
+) -> pd.DataFrame:
+    """
+    Add boolean out_col indicating whether any gene in bins[genes_col] is in highlighted_genes.
+    """
+    hi = set(map(str, highlighted_genes))
+
+    def has_hi(glist) -> bool:
+        if not isinstance(glist, list) or not glist:
+            return False
+        # intersection
+        return any((g in hi) for g in glist)
+
+    out = bins.copy()
+    out[out_col] = out[genes_col].apply(has_hi)
+    return out
 
 
 def plot_chromosomes(
@@ -705,13 +764,13 @@ def plot_chromosomes(
     gdf: pd.DataFrame,
     outdir: Path,
     case_id: str,
-    pon_df: Optional[pd.DataFrame] = None,
-    gchunk: Optional[pd.DataFrame] = None,
-    window: int = 5,
+    pon_df: pd.DataFrame | None = None,
+    gchunk: pd.DataFrame | None = None,
     backbone_factor: float = 0.4,
-    base_label_offset: float = 1.5,
     neutral_target_factor: float = 0.4,
     highlight_only_cancer: bool = False,
+    window: int = 5,
+    base_label_offset: float = 1.5,
     y_abs_max: float = 3.0,
 ) -> None:
     """
@@ -726,42 +785,52 @@ def plot_chromosomes(
     outdir.mkdir(parents=True, exist_ok=True)
 
     # Rename columns for plotting:
-    rename_map = {
-        "cnvkit_seg_start": "seg_start",
-        "cnvkit_seg_end": "seg_end",
-        "cnvkit_seg_raw_log2": "seg_log2",
-    }
     targets_col = "n.targets"
 
-    gdf = gdf.rename(columns=rename_map)
-    if gchunk is not None:
-        gchunk = gchunk.rename(columns=rename_map)
+    MIN_GENE_TARGETS = 4
+    MIN_GENE_TARGETS_CANCER = 4
 
-    MIN_GENE_TARGETS = 3
-    MIN_GENE_TARGETS_CANCER = 3
+    KEY = ("chr", "start", "end")
 
-    gdf = _normalize_is_cancer_gene(gdf)
+    # --- collapse CNR to unique bins with gene list ---
+    cnr_bins = _collapse_bins_to_unique(
+        cnr_df,
+        key_cols=KEY,
+        value_aggs={
+            "log2": "first",
+            "depth": "first",
+        },
+        out_gene_col="genes",
+    )
+
+    # --- collapse PON to unique bins (no need for genes for PON, but harmless if present) ---
+    if pon_df is not None:
+        pon_bins = _collapse_bins_to_unique(
+            pon_df,
+            key_cols=KEY,
+            value_aggs={
+                "pon_log2": "first",
+                "pon_spread": "first",
+            },
+            out_gene_col="pon_genes",  # keep separate if you want; you can also omit entirely
+        )
+
+        merged = cnr_bins.merge(
+            pon_bins[list(KEY) + ["pon_log2", "pon_spread"]],
+            on=list(KEY),
+            how="left",
+            validate="one_to_one",
+        )
+        use_pon = True
+    else:
+        merged = cnr_bins.copy()
+        merged["pon_log2"] = np.nan
+        merged["pon_spread"] = np.nan
+        use_pon = False
 
     # Load VCF
     chr_order = [str(i) for i in range(1, 23)] + ["X", "Y"]
     vcf = load_vcf_with_vaf(vcf_path=vcf_path, chr_order=chr_order)
-
-    # Optionally merge PON bins
-
-    if pon_df is not None:
-        merged = pd.merge(
-            cnr_df,
-            pon_df[["chr", "start", "end", "pon_log2", "pon_spread"]],
-            on=["chr", "start", "end"],
-            how="inner",
-            suffixes=("_cnr", "_pon"),
-        )
-        use_pon = True
-    else:
-        use_pon = False
-        merged = cnr_df.copy()
-        if "spread" not in merged.columns:
-            merged["spread"] = np.nan
 
     merged = merged[merged["chr"].isin(chr_order)].copy()
 
@@ -781,11 +850,11 @@ def plot_chromosomes(
     y_lim_chr = (-y_clip, y_clip)
 
     for chr_name in chr_order:
-        sub = merged[merged["chr"] == chr_name].copy()
-        if sub.empty:
+        # collapsed bin-level table for this chromosome
+        sub_bins = merged[merged["chr"] == chr_name].copy()
+        if sub_bins.empty:
             continue
-
-        sub = sub.sort_values("start", kind="stable")
+        sub_bins = sub_bins.sort_values("start", kind="stable")
 
         g_chr = gdf[gdf["chr"] == chr_name].copy()
         g_chunks_chr = (
@@ -794,7 +863,7 @@ def plot_chromosomes(
             else pd.DataFrame()
         )
 
-        # Determine highlighted genes
+        # --- Determine highlighted genes (unchanged logic) ---
         genes_in_view = g_chr["gene.symbol"].dropna().astype(str).unique()
         gene_level_chr = gene_level[
             (gene_level["chr"] == chr_name)
@@ -806,38 +875,38 @@ def plot_chromosomes(
             .unique()
         )
         highlighted = highlighted[highlighted != "backbone"]
-
         gene_to_color = _make_gene_colors(highlighted)
 
-        # Build pseudo-x BIN-LEVEL (prevents exploded bins from inflating space)
-        sub, bins = _compute_variable_x_binlevel(
-            sub,
+        # Mark which collapsed bins contain any highlighted gene
+        sub_bins = _annotate_highlight_bins(
+            sub_bins,
             highlighted_genes=highlighted,
+            genes_col="genes",
+            out_col="is_highlight_bin",
+        )
+
+        # Compute variable x-coordinates on collapsed bins
+        bins = _compute_variable_x_on_bins(
+            sub_bins,
             neutral_target_factor=neutral_target_factor,
             backbone_factor=backbone_factor,
             backbone_label="backbone",
+            genes_col="genes",
         )
         if bins.empty:
             continue
 
-        # Smooth + clip on UNIQUE bins (not exploded)
+        # Smooth + clip on UNIQUE bins
         bins = bins.sort_values("x_coord", kind="stable").copy()
         bins["log2_smooth"] = bins["log2"].rolling(window=window, center=True).median()
-
         bins["log2_clipped"] = bins["log2"].clip(-y_clip, y_clip)
         bins["log2_smooth_clipped"] = bins["log2_smooth"].clip(-y_clip, y_clip)
 
         # Map function should use UNIQUE bins (stable mapping)
         pos_to_xcoord = _pos_to_xcoord_fn(bins)
 
-        if sub.empty:
-            continue
-
-        sub["log2_clipped"] = sub["log2"].clip(-y_clip, y_clip)
-
-        # VAF chr (restricted to span if focus)
+        # VAF chr
         vaf_chr = vcf[vcf["CHROM"] == chr_name].sort_values("POS").copy()
-
         if not vaf_chr.empty:
             vaf_chr["x_coord"] = vaf_chr["POS"].apply(lambda p: pos_to_xcoord(int(p)))
 
@@ -845,10 +914,10 @@ def plot_chromosomes(
         segs_chr = _collect_segments_for_chr(g_chr, chr_name, y_clip=y_clip)
         if not segs_chr.empty:
             segs_chr = segs_chr.copy()
-            segs_chr["x_start"] = segs_chr["seg_start"].apply(
+            segs_chr["x_start"] = segs_chr["cnvkit_seg_start"].apply(
                 lambda p: pos_to_xcoord(int(p))
             )
-            segs_chr["x_end"] = segs_chr["seg_end"].apply(
+            segs_chr["x_end"] = segs_chr["cnvkit_seg_end"].apply(
                 lambda p: pos_to_xcoord(int(p))
             )
 
@@ -863,9 +932,15 @@ def plot_chromosomes(
         bg_bins = bins[~bins["is_highlight_bin"]].copy()
         _draw_background_bins(ax1, bg_bins, y_col="log2_clipped")
 
+        # highlighted bins: one point per BIN, gene-colored if unique highlighted gene else neutral
         if highlighted.size > 0:
             _draw_highlighted_bins(
-                ax1, sub, highlighted, gene_to_color, y_col="log2_clipped"
+                ax1,
+                bins=bins,
+                highlighted_genes=highlighted,
+                gene_to_color=gene_to_color,
+                genes_col="genes",
+                y_col_bins="log2_clipped",
             )
 
         y_min, y_max = y_lim_chr
@@ -882,12 +957,10 @@ def plot_chromosomes(
             label=f"log2 (median {window} bins)",
         )
 
-        _draw_segments(ax1, segs_chr)
-
         pon_cnv_genes, _ = _draw_chunk_pon_segments(
             ax1,
             g_chunks_chr=g_chunks_chr,
-            sub=sub,
+            sub=bins,  # span_start/end should be based on bins
             pos_to_xcoord=pos_to_xcoord,
             chr_name=chr_name,
             y_clip=y_clip,
@@ -902,18 +975,15 @@ def plot_chromosomes(
 
         title_suffix = "log2 vs PON spread" if use_pon else "log2 (no PON available)"
         title = f"Chr {chr_name} – {title_suffix}: {case_id}"
-
         ax1.set_title(title + "\n")
         ax1.legend(loc="upper right", fontsize=8)
 
-        # label_genes = sorted(set(map(str, highlighted)) | set(map(str, pon_cnv_genes)))
         label_genes = sorted(set(map(str, highlighted)))
         label_genes = [g for g in label_genes if g != "backbone"]
         if label_genes:
             _draw_gene_labels(
                 ax1,
                 g_chr=g_chr,
-                sub=sub,
                 label_genes=label_genes,
                 gene_to_color=gene_to_color,
                 stable_color_fn=stable_color,
@@ -922,6 +992,7 @@ def plot_chromosomes(
                 base_label_offset=base_label_offset,
             )
 
+        _draw_segments(ax1, segs_chr)
         _plot_vaf_panel(ax2, vaf_chr)
         ax2.set_xlabel(
             "Pseudo-position (highlighted genes expanded, other bins compressed)"

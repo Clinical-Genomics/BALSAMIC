@@ -2,12 +2,63 @@ from __future__ import annotations
 
 # Standard library
 from pathlib import Path
-from typing import Dict, List, Tuple, Mapping, Iterable
+from typing import Dict, List, Tuple, Mapping, Iterable, Sequence, Literal
+import math
+from dataclasses import dataclass
 
 # Third-party
 import pandas as pd
+from cyvcf2 import VCF
+
 
 from cnv_constants import CHR
+
+
+def coerce_columns(
+    df: pd.DataFrame,
+    *,
+    ints: Sequence[str] = (),
+    floats: Sequence[str] = (),
+    strings: Sequence[str] = (),
+    booleans: Sequence[str] = (),
+    bool_map: Mapping[str, Mapping[object, object]] | None = None,
+    required: Sequence[str] = (),
+) -> pd.DataFrame:
+    """
+    Coerce dataframe columns to predictable dtypes if present.
+
+    - ints: nullable Int64
+    - floats: numeric float (NaN allowed)
+    - strings: pandas StringDtype
+    - booleans: pandas BooleanDtype (nullable)
+    - bool_map: per-column replacement map before boolean casting
+    - required: raise ValueError if missing
+    """
+    missing = [c for c in required if c not in df.columns]
+    if missing:
+        raise ValueError(f"Missing required columns: {missing}")
+
+    df = df.copy()
+
+    for c in strings:
+        if c in df.columns:
+            df[c] = df[c].astype("string")
+
+    for c in ints:
+        if c in df.columns:
+            df[c] = pd.to_numeric(df[c], errors="coerce").astype("Int64")
+
+    for c in floats:
+        if c in df.columns:
+            df[c] = pd.to_numeric(df[c], errors="coerce").astype("Float64")
+
+    for c in booleans:
+        if c in df.columns:
+            if bool_map and c in bool_map:
+                df[c] = df[c].replace(bool_map[c])
+            df[c] = df[c].astype("boolean")
+
+    return df
 
 
 def _load_bins_tsv(
@@ -51,23 +102,29 @@ def _load_bins_tsv(
     df = df.explode("gene.symbol", ignore_index=True)
     df["gene.symbol"] = df["gene.symbol"].astype("string").str.strip()
 
-    # optional renames (e.g. log2->pon_log2, spread->pon_spread)
     if rename is not None:
         df = df.rename(columns=dict(rename))
 
-    # select required columns
+    df = coerce_columns(
+        df,
+        ints=("start", "end"),
+        floats=("log2", "gc", "depth", "pon_log2", "pon_spread"),
+        strings=(CHR, "gene.symbol"),
+    )
+
     out_cols = list(out_cols)
+    df = coerce_columns(df, required=out_cols)  # nice error message
     return df[out_cols].copy()
 
 
-def load_cnr_bins(cnr_path: str | Path) -> pd.DataFrame:
+def load_cnr_bins(cnr_path: str) -> pd.DataFrame:
     return _load_bins_tsv(
         cnr_path,
         out_cols=[CHR, "start", "end", "gene.symbol", "log2", "depth"],
     )
 
 
-def load_pon_bins(pon_path: str | Path) -> pd.DataFrame:
+def load_pon_bins(pon_path: str) -> pd.DataFrame:
     return _load_bins_tsv(
         pon_path,
         rename={"log2": "pon_log2", "spread": "pon_spread"},
@@ -75,13 +132,22 @@ def load_pon_bins(pon_path: str | Path) -> pd.DataFrame:
     )
 
 
-def load_purecn_segments(pure_cn: str | Path) -> pd.DataFrame:
+def load_purecn_segments(
+    pure_cn: str,
+    *,
+    prefix: str = "purecn_",
+) -> pd.DataFrame:
     """
-    Load PureCN segment CSV, keep relevant columns, and assign stable ordering.
+    Load PureCN LOHregions/segments CSV and return a table with prefixed columns
+    suitable for direct annotation merges.
 
-    Keeps the original `type` column as-is (no derived boolean LOH flag).
+    Outputs (when present in input):
+      - chr, purecn_seg_start, purecn_seg_end
+      - purecn_seg_mean, purecn_num_snps, purecn_M, purecn_M_flagged, purecn_C,
+        purecn_maf_observed, purecn_type
+      - purecn_type (nullable boolean): type contains 'LOH'
     """
-    cns = pd.read_csv(pure_cn, sep=",").copy()
+    cns = pd.read_csv(pure_cn, sep=",", low_memory=False)
 
     keep_columns = [
         "chr",
@@ -95,56 +161,132 @@ def load_purecn_segments(pure_cn: str | Path) -> pd.DataFrame:
         "maf.observed",
         "type",
     ]
-
     keep = [c for c in keep_columns if c in cns.columns]
     cns = cns[keep].copy()
 
-    cns["loh_flag"] = cns["type"].astype("string")
+    cns = coerce_columns(
+        cns,
+        strings=("chr", "type"),
+        ints=("start", "end", "num.snps"),
+        floats=("seg.mean", "maf.observed", "M", "C"),
+        booleans=("M.flagged",),
+        bool_map={"M.flagged": {"TRUE": True, "FALSE": False, "NA": pd.NA}},
+    )
 
-    cns = cns.sort_values(["chr", "start"], kind="stable").reset_index(drop=True)
-    return cns
+    # Rename columns into your prefixed schema
+    rename_map = {
+        "start": f"{prefix}seg_start",
+        "end": f"{prefix}seg_end",
+        "seg.mean": f"{prefix}seg_mean_log2",
+        "num.snps": f"{prefix}num_snps",
+        "M": f"{prefix}M",
+        "M.flagged": f"{prefix}M_flagged",
+        "C": f"{prefix}C",
+        "maf.observed": f"{prefix}maf_observed",
+        "type": f"{prefix}type",
+    }
+    cns = cns.rename(columns={k: v for k, v in rename_map.items() if k in cns.columns})
+
+    return cns.sort_values(["chr", f"{prefix}seg_start"], kind="stable").reset_index(
+        drop=True
+    )
 
 
-def _load_cns_segments(cns_path: str | Path, cns_file_type: str) -> pd.DataFrame:
+CnsType = Literal["calls", "raw"]
+
+
+def _load_cns_segments(
+    cns_path: str | Path,
+    cns_file_type: CnsType,
+    *,
+    prefix: str = "cnvkit_",
+) -> pd.DataFrame:
     """
-    Load CNVkit CNS, normalize chr, keep available segment columns,
-    and assign stable segment_id within each file.
+    Load CNVkit CNS and return prefixed segment columns.
+
+    Output columns (depending on file type / availability):
+      - chr
+      - {prefix}seg_start, {prefix}seg_end
+      - {prefix}seg_log2
+      - (calls only, if present) {prefix}seg_baf, {prefix}seg_cn, {prefix}seg_cn1, {prefix}seg_cn2, {prefix}seg_depth
     """
-    cns = pd.read_csv(cns_path, sep="\t").copy()
+    df = pd.read_csv(cns_path, sep="\t", low_memory=False)
 
     chr_col = "chromosome"
 
-    if cns_file_type == "calls":
-        base_cols = ["start", "end", "log2", "baf", "cn", "cn1", "cn2", "depth"]
-    else:
-        base_cols = ["start", "end", "log2"]
-    keep = [c for c in base_cols if c in cns.columns]
-    cns = cns[[chr_col] + keep].rename(columns={chr_col: "chr"}).copy()
-    cns = cns.sort_values(["chr", "start"], kind="stable").reset_index(drop=True)
-    cns["segment_id"] = cns.index.astype(str)
-    return cns
+    base_cols = (
+        ["start", "end", "log2", "baf", "cn", "cn1", "cn2", "depth"]
+        if cns_file_type == "calls"
+        else ["start", "end", "log2"]
+    )
+    keep = [c for c in base_cols if c in df.columns]
+
+    df = df[[chr_col] + keep].rename(columns={chr_col: "chr"}).copy()
+
+    # dtype normalization (unprefixed, while easy)
+    df = coerce_columns(
+        df,
+        strings=("chr",),
+        ints=("start", "end"),
+        floats=("log2", "baf", "cn", "cn1", "cn2", "depth"),
+        required=("chr", "start", "end", "log2"),
+    )
+
+    df = df.sort_values(["chr", "start"], kind="stable").reset_index(drop=True)
+
+    # Rename into prefixed schema
+    rename_map = {
+        "start": f"{prefix}seg_start",
+        "end": f"{prefix}seg_end",
+        "log2": f"{prefix}seg_log2",
+        "baf": f"{prefix}seg_baf",
+        "cn": f"{prefix}seg_cn",
+        "cn1": f"{prefix}seg_cn1",
+        "cn2": f"{prefix}seg_cn2",
+        "depth": f"{prefix}seg_depth",
+    }
+    df = df.rename(columns={k: v for k, v in rename_map.items() if k in df.columns})
+
+    return df
 
 
 def load_cnvkit_segments_with_raw(
-    cns_path: str | Path,
-    cns_init_path: str | Path,
+    cns_path: str,
+    cns_init_path: str,
+    *,
+    prefix: str = "cnvkit_",
 ) -> pd.DataFrame:
-    """Load CNVkit called segments and attach raw_log2 from the init segments file."""
+    """
+    Load CNVkit called segments and attach raw log2 from init segments.
 
-    segs = _load_cns_segments(cns_path, "calls").copy()
-    segs_init = _load_cns_segments(cns_init_path, "raw").copy()
+    Output includes (if present):
+      - chr
+      - {prefix}seg_start, {prefix}seg_end
+      - {prefix}seg_log2 (called)
+      - {prefix}raw_log2 (from init)
+    """
+    segs = _load_cns_segments(cns_path, "calls", prefix=prefix)
+    init = _load_cns_segments(cns_init_path, "raw", prefix=prefix)
 
-    segs_init = segs_init.rename(columns={"log2": "raw_log2"})
-    segs = segs.merge(
-        segs_init[["chr", "start", "end", "raw_log2"]],
-        on=["chr", "start", "end"],
+    # init has {prefix}seg_log2; rename that to {prefix}raw_log2 for clarity
+    seg_log2_col = f"{prefix}seg_log2"
+    raw_log2_col = f"{prefix}seg_raw_log2"
+    init = init.rename(columns={seg_log2_col: raw_log2_col})
+
+    # Merge on chr + prefixed coords
+    on_cols = ["chr", f"{prefix}seg_start", f"{prefix}seg_end"]
+    init_cols = on_cols + ([raw_log2_col] if raw_log2_col in init.columns else [])
+
+    out = segs.merge(
+        init[init_cols],
+        on=on_cols,
         how="left",
         validate="one_to_one",
     )
-    return segs
+    return out
 
 
-def load_refgene_exons(refgene_path: str | Path) -> Dict[Tuple[str, str], dict]:
+def load_refgene_exons(refgene_path: str) -> Dict[Tuple[str, str], dict]:
     """Load refgene and create an exon map from the longest transcript of a gene."""
     cols = [
         "gene_symbol",
@@ -192,7 +334,7 @@ def load_refgene_exons(refgene_path: str | Path) -> Dict[Tuple[str, str], dict]:
     return exon_map
 
 
-def load_cytobands(path: str | Path) -> pd.DataFrame:
+def load_cytobands(path: str) -> pd.DataFrame:
     """Load cytoband UCSC file; return normalized df with integer coords."""
     cols = ["chr", "chromStart", "chromEnd", "name", "gieStain"]
     cyto = pd.read_csv(path, sep="\t", header=None, names=cols)
@@ -203,7 +345,7 @@ def load_cytobands(path: str | Path) -> pd.DataFrame:
 
 
 def load_cancer_gene_set(
-    path: str | Path,
+    path: str,
     min_occurrence: int = 1,
     oncokb_source: str = "ONCOKB",
 ) -> set[str]:
@@ -251,3 +393,47 @@ def load_cancer_gene_set(
     selected = df.loc[keep, gene_col]
     selected = selected[selected != ""]
     return set(selected)
+
+
+def load_vcf_with_vaf(
+    vcf_path: str | Path,
+    chr_order: list[str],
+) -> pd.DataFrame:
+    """
+    Load a single-sample VCF using cyvcf2 and compute VAF from AD (first ALT only).
+
+    Returns DataFrame columns:
+      CHROM, POS, VAF
+    """
+    chr_set = set(map(str, chr_order))
+    rows: list[dict[str, float | int | str]] = []
+
+    vcf = VCF(str(vcf_path))
+
+    for rec in vcf:
+        chrom = str(rec.CHROM)
+        if chrom.startswith("chr"):
+            chrom = chrom[3:]
+
+        if chrom not in chr_set:
+            continue
+
+        pos = int(rec.POS)
+
+        vaf = math.nan
+        ad = rec.format("AD")  # typically shape (n_samples, n_alleles) or None
+        if ad is not None and len(ad) > 0:
+            try:
+                ad0 = ad[0]  # first/only sample
+                # ad0 should be like [ref, alt1, alt2, ...]
+                if ad0 is not None and len(ad0) >= 2:
+                    ref_c = int(ad0[0])
+                    alt_c = int(ad0[1])
+                    total = ref_c + alt_c
+                    vaf = (alt_c / total) if total > 0 else math.nan
+            except (TypeError, ValueError, IndexError):
+                vaf = math.nan
+
+        rows.append({"CHROM": chrom, "POS": pos, "VAF": float(vaf)})
+
+    return pd.DataFrame(rows, columns=["CHROM", "POS", "VAF"])

@@ -1,24 +1,15 @@
 from __future__ import annotations
 
 # Standard library
-import re
-from dataclasses import dataclass
+
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Tuple, Any, Mapping, Sequence
 
 # Third-party
-import numpy as np
 import pandas as pd
 import fitz
 
-# =============================================================================
-# Generic helpers
-# =============================================================================
 
-
-def pdf_first_page_to_png(
-    pdf_path: str | Path, png_path: str | Path, dpi: int = 300
-) -> None:
+def pdf_first_page_to_png(pdf_path: str, png_path: str, dpi: int = 300) -> None:
     """
     Render the first page of a PDF to a PNG image using PyMuPDF.
     """
