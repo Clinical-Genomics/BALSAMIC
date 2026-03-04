@@ -11,6 +11,7 @@ import numpy as np
 import pandas as pd
 from matplotlib import colormaps
 from matplotlib import patheffects as pe
+from matplotlib.lines import Line2D
 
 
 from cnv_io import load_vcf_with_vaf
@@ -113,7 +114,7 @@ def _compute_gene_level_highlights(
     grouped = gdf.groupby(["chr", "gene.symbol"], as_index=False)
     gene_level = grouped.agg(
         has_loh_or_cnv=("is_loh_or_cnv", "any"),
-        is_cancer_gene=("is_cancer_gene_bool", "any"),
+        is_cancer_gene=("is_cancer_gene", "any"),
         total_targets=(targets_col, "sum"),
     )
 
@@ -735,6 +736,49 @@ def _collapse_bins_to_unique(
     return out
 
 
+def _add_cnvkit_segment_stub_legend(ax, segs_chr: pd.DataFrame | None) -> None:
+    """
+    Add a compact bottom-right legend with colored CNVkit segment stubs.
+    Only shows entries that actually exist on this chromosome.
+    """
+
+    if segs_chr is None or segs_chr.empty or "cnvkit_cnv_call" not in segs_chr.columns:
+        return
+
+    calls = (
+        segs_chr["cnvkit_cnv_call"].astype("string").fillna("").str.strip().str.upper()
+    )
+
+    handles = []
+
+    if calls.eq("AMPLIFICATION").any():
+        handles.append(Line2D([0], [0], color="red", lw=2.0, label="CNVKIT:Amp"))
+
+    if calls.eq("DELETION").any():
+        handles.append(Line2D([0], [0], color="royalblue", lw=2.0, label="CNVKIT:Del"))
+
+    # Neutral/other segments
+    if (~calls.isin(["AMPLIFICATION", "DELETION"]) | calls.eq("")).any():
+        handles.append(Line2D([0], [0], color="black", lw=2.0, label="CNVKIT:Neutral"))
+
+    if not handles:
+        return
+
+    legend = ax.legend(
+        handles=handles,
+        loc="lower right",
+        fontsize=7,
+        frameon=True,
+        borderpad=0.3,
+        labelspacing=0.3,
+        handlelength=1.4,
+        handletextpad=0.6,
+    )
+
+    # Ensure it stays even if you later add another legend
+    ax.add_artist(legend)
+
+
 def _annotate_highlight_bins(
     bins: pd.DataFrame,
     *,
@@ -993,6 +1037,7 @@ def plot_chromosomes(
             )
 
         _draw_segments(ax1, segs_chr)
+        _add_cnvkit_segment_stub_legend(ax1, segs_chr)
         _plot_vaf_panel(ax2, vaf_chr)
         ax2.set_xlabel(
             "Pseudo-position (highlighted genes expanded, other bins compressed)"

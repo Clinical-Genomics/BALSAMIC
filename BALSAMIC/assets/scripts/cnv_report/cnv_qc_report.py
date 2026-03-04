@@ -26,6 +26,7 @@ from cnv_io import (
 from cnv_tables import (
     build_gene_segment_table,
     build_gene_chunk_table,
+    build_segment_table,
 )
 from cnv_report_plotting import plot_chromosomes
 from cnv_constants import GENE_TABLE_SPEC, TableSpec
@@ -541,9 +542,22 @@ def main(
     exon_map: Dict[Tuple[str, str], dict] = load_refgene_exons(refgene)
 
     # ----------------------------
+    # Create segment table
+    # ----------------------------
+    segments_df = build_segment_table(
+        cnr_df=cnr_df,
+        cns_df=cns_df,
+        cytoband_df=cytoband_df,
+        sex=sex,
+        cancer_genes=cancer_gene_set,
+        loh_regions_df=loh_regions_df,
+    )
+
+    # ----------------------------
     # Create per-gene CNV table
     # ----------------------------
     # pon can be None (no PON file); build_gene_segment_table handles that
+    """
     genes_df = build_gene_segment_table(
         cnr_df=cnr_df,
         cns_df=cns_df,
@@ -554,7 +568,7 @@ def main(
         loh_regions_df=loh_regions_df,
         pon_df=pon_df,
     )
-
+    """
     # ----------------------------
     # Create per chunk table
     # ----------------------------
@@ -596,7 +610,7 @@ def main(
     plot_chromosomes(
         cnr_df=cnr_df,
         vcf_path=vcf,
-        gdf=genes_df,
+        gdf=segments_df,
         gchunk=chunks_df,
         outdir=chr_plots_dir,
         case_id=case_id,
@@ -607,8 +621,6 @@ def main(
     )
 
     if is_exome:
-        if "is_cancer_gene" in genes_df.columns:
-            genes_df = genes_df[genes_df["is_cancer_gene"].fillna(False).astype(bool)]
         if (
             chunks_df is not None
             and not chunks_df.empty
@@ -624,7 +636,7 @@ def main(
     out_html_path = str(output_file)
 
     render_cnv_report_html(
-        df_gene=genes_df,
+        df_segments=segments_df,
         df_chunk=chunks_df,  # optional
         df_purecn_summary=purecn_summary_df,  # optional
         df_qc_summary=qc_summary_df,  # optional
