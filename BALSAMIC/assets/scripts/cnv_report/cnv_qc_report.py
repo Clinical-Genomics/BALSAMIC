@@ -553,22 +553,6 @@ def main(
     )
 
     # ----------------------------
-    # Create per-gene CNV table
-    # ----------------------------
-    # pon can be None (no PON file); build_gene_segment_table handles that
-    """
-    genes_df = build_gene_segment_table(
-        cnr_df=cnr_df,
-        cns_df=cns_df,
-        cytoband_df=cytoband_df,
-        exon_map=exon_map,
-        sex=sex,
-        cancer_genes=cancer_gene_set,
-        loh_regions_df=loh_regions_df,
-        pon_df=pon_df,
-    )
-    """
-    # ----------------------------
     # Create per chunk table
     # ----------------------------
     chunks_df = build_gene_chunk_table(

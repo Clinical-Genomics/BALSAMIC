@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 # Standard library
-from typing import Dict, Mapping, Tuple
+from typing import Mapping
 
 # Third-party
 import numpy as np
@@ -145,76 +145,6 @@ def _pon_cnv_call_from_log2(
     if mean_log2 < loss_lt:
         return "LOSS"
     return neutral_value
-
-
-def _compute_gene_level_pon_from_bins(bins: pd.DataFrame) -> pd.DataFrame | None:
-    """
-    Gene-level PON stats computed from per-bin data (independent of segments/chunks).
-    """
-    if not {"pon_log2", "pon_spread"}.issubset(bins.columns):
-        return None
-
-    has_pon = bins["pon_spread"].notna()
-    if not has_pon.any():
-        return None
-
-    gene_agg = (
-        bins.loc[has_pon]
-        .groupby(["chr", "gene.symbol"], as_index=False)
-        .agg(
-            gene_n_targets=("log2", "count"),
-            gene_mean_log2=("log2", "mean"),
-            pon_gene_mean_log2=("pon_log2", "mean"),
-            pon_gene_mean_spread=("pon_spread", "mean"),
-        )
-    )
-
-    MIN_N_FOR_PON = 2
-    gene_agg["pon_gene_effect"] = (
-        gene_agg["gene_mean_log2"] - gene_agg["pon_gene_mean_log2"]
-    )
-
-    gene_agg["pon_gene_z"] = gene_agg.apply(
-        lambda r: _pon_abs_z(
-            r["pon_gene_effect"],
-            r["pon_gene_mean_spread"],
-            r["gene_n_targets"],
-            min_n=MIN_N_FOR_PON,
-        ),
-        axis=1,
-    )
-
-    gene_agg["pon_gene_direction"] = gene_agg["pon_gene_effect"].apply(_pon_direction)
-    gene_agg["pon_gene_significance"] = gene_agg["pon_gene_z"].apply(
-        lambda z: _pon_significance(z, noise_lt=1.5, borderline_lt=3.0)
-    )
-
-    gene_agg["pon_gene_indication"] = gene_agg.apply(
-        lambda r: _pon_cnv_call_from_log2(
-            is_significant=str(r.get("pon_gene_significance", "")).strip().lower()
-            == "significant",
-            mean_log2=r.get("gene_mean_log2", np.nan),
-            gain_gt=0.08,
-            loss_lt=-0.08,
-            non_significant_value="",
-            neutral_value="",
-        ),
-        axis=1,
-    )
-
-    return gene_agg[
-        [
-            "chr",
-            "gene.symbol",
-            "pon_gene_mean_log2",
-            "pon_gene_mean_spread",
-            "pon_gene_effect",
-            "pon_gene_z",
-            "pon_gene_direction",
-            "pon_gene_significance",
-            "pon_gene_indication",
-        ]
-    ]
 
 
 def classify_cnv_from_total_cn_sex_aware(
