@@ -1,9 +1,7 @@
 from __future__ import annotations
 
 # Standard library
-import re
-from pathlib import Path
-from typing import Dict, Mapping, Tuple, Any
+from typing import Dict, Mapping, Tuple
 
 # Third-party
 import numpy as np
@@ -11,7 +9,7 @@ import pandas as pd
 
 # Local
 from BALSAMIC.constants.analysis import Gender
-from cnv_constants import CHR, TableSpec, GENE_TABLE_SPEC, SEGMENT_TABLE_SPEC
+from cnv_constants import TableSpec, GENE_TABLE_SPEC, SEGMENT_TABLE_SPEC
 
 
 def finalize_table(df: pd.DataFrame, spec: TableSpec) -> pd.DataFrame:
@@ -536,21 +534,75 @@ def merge_cnr_with_pon(
     )
 
 
-def create_gene_chunks(cnr_df: pd.DataFrame, pon_df: pd.DataFrame):
-    # ------------------------------------------------------------------
-    # Merge bins with PON (exploded on the same gene.symbol scheme)
-    # ------------------------------------------------------------------
-    # Choose the PON columns you want to carry into bins (avoid collisions)
-    bins = merge_cnr_with_pon(
-        cnr_df=cnr_df,
-        pon_df=pon_df,
-        key_cols=("chr", "start", "end", "gene.symbol"),
-        pon_cols=["pon_log2", "pon_spread"],  # add "gc" etc if you have it
-    )
+def create_gene_chunks(cnr_df: pd.DataFrame, pon_df: pd.DataFrame | None = None):
+    """
+    Always returns a gene/chunk table.
+
+    If pon_df is provided:
+      - run PON-based chunking (your existing logic)
+    If pon_df is None/empty:
+      - return one row per gene ("genelevel") without PON-derived chunking
+    """
+
+    has_pon = pon_df is not None and not pon_df.empty
+
+    if has_pon:
+        # --- your existing path ---
+        bins = merge_cnr_with_pon(
+            cnr_df=cnr_df,
+            pon_df=pon_df,
+            key_cols=("chr", "start", "end", "gene.symbol"),
+            pon_cols=["pon_log2", "pon_spread"],
+        )
+    else:
+        # --- no PON: bins are just the sample bins ---
+        bins = cnr_df.copy()
+        # Ensure columns exist so later code can be uniform
+        bins["pon_log2"] = np.nan
+        bins["pon_spread"] = np.nan
 
     bins = bins.sort_values(["chr", "gene.symbol", "start"], kind="stable").reset_index(
         drop=True
     )
+
+    # ------------------------------------------------------------------
+    # If NO PON: do NOT assign chunks. Just one "chunk" per gene.
+    # ------------------------------------------------------------------
+    if not has_pon:
+        bins["chunk_id"] = "genelevel"
+
+        agg_dict: dict[str, list[str]] = {
+            "start": ["min"],
+            "end": ["max"],
+            "log2": ["count", "mean", "min", "max"],
+            "pon_log2": ["mean"],
+            "pon_spread": ["mean"],
+        }
+
+        chunks_df = bins.groupby(
+            ["chr", "gene.symbol", "chunk_id"], as_index=False
+        ).agg(agg_dict)
+        chunks_df = _flatten_agg_columns(chunks_df).rename(
+            columns={
+                "start_min": "region_start",
+                "end_max": "region_end",
+                "log2_count": "n_targets",
+                "log2_mean": "mean_log2",
+                "log2_min": "min_log2",
+                "log2_max": "max_log2",
+                "pon_log2_mean": "pon_mean_log2",
+                "pon_spread_mean": "pon_mean_spread",
+            }
+        )
+        chunks_df["n.targets"] = chunks_df["n_targets"]
+
+        # PON-derived outputs: keep columns but make them empty/neutral
+        chunks_df["pon_chunk_effect"] = np.nan
+        chunks_df["pon_chunk_z"] = np.nan
+        chunks_df["pon_chunk_significance"] = ""
+        chunks_df["pon_chunk_indication"] = "NEUTRAL"
+
+        return chunks_df
 
     # CREATE INITIAL CHUNKS
     MIN_GENE_TARGETS = 8
@@ -821,50 +873,42 @@ def create_gene_chunks(cnr_df: pd.DataFrame, pon_df: pd.DataFrame):
 def build_gene_chunk_table(
     cnr_df: pd.DataFrame,
     cns_df: pd.DataFrame,
-    exon_map: Dict[Tuple[str, str], dict],
     sex: Gender,
-    pon_df: pd.DataFrame,
-    cancer_genes: set[str] = None,
+    pon_df: pd.DataFrame | None = None,
+    cancer_genes: set[str] | None = None,
     loh_regions_df: pd.DataFrame | None = None,
 ) -> pd.DataFrame:
     """
-    Build per-gene, per-chunk table using CNR + PON (required),
-    then annotate chunks using existing gene-segment table by overlap.
+    Build per-gene table always.
+    If pon_df exists -> chunked
+    Else -> one-row-per-gene 'genelevel' chunks.
     """
 
-    # Create base chunk table
+    cancer_genes = cancer_genes or set()
+
+    # Always create something
     chunks_df = create_gene_chunks(cnr_df=cnr_df, pon_df=pon_df)
 
-    # Annotate gene regions with best-overlapping CNVkit segment
-    chunks_df = annotate_regions_with_cnvkit_segments(
-        chunks_df,
-        cns_df,
-    )
+    # Annotate with CNVkit segments
+    chunks_df = annotate_regions_with_cnvkit_segments(chunks_df, cns_df)
 
-    # PureCN LOHregions attach (rename to purecn_* for clarity)
-    if loh_regions_df is not None:
-        chunks_df = annotate_regions_with_purecn_lohregions(
-            chunks_df,
-            loh_regions_df,
-        )
+    # Attach PureCN LOHregions (optional)
+    if loh_regions_df is not None and not loh_regions_df.empty:
+        chunks_df = annotate_regions_with_purecn_lohregions(chunks_df, loh_regions_df)
 
     chunks_df["is_cancer_gene"] = chunks_df["gene.symbol"].isin(cancer_genes)
 
-    # exon overlap vs chunk region
-    # COMMENTED OUT DUE TO NOT KNOWING WHICH IS THE CLINICALLY RELEVANT TRANSCRIPT
-    """
-    if exon_map:
-        chunks_df = _add_exons_hit_column(
-            chunks_df,
-            exon_map,
-            start_col="region_start",
-            end_col="region_end",
-            out_col="exons_overlapping_chunk",
-        )
-    """
-    # CNV calls (now based on cnvkit_seg_cn etc if present)
-    chunks_df = add_cnv_calls_wide(chunks_df, sex)
-    chunks_df = chunks_df.drop(columns=["chunk_id", "n_targets", "pon_chunk_direction"])
+    # CNV calls
+    chunks_df = add_cnv_calls_wide(chunks_df, sex=sex)
+
+    # Drop columns if present
+    drop_cols = [
+        c
+        for c in ["chunk_id", "n_targets", "pon_chunk_direction"]
+        if c in chunks_df.columns
+    ]
+    if drop_cols:
+        chunks_df = chunks_df.drop(columns=drop_cols)
 
     return finalize_table(chunks_df, GENE_TABLE_SPEC)
 
@@ -872,27 +916,32 @@ def build_gene_chunk_table(
 ############################
 # SEGMENT LEVEL
 ############################
-
-
 def add_overlapping_genes_from_bins(
     seg_df: pd.DataFrame,
     cnr_df: pd.DataFrame,
     *,
-    genes_col: str = "gene.symbols",
+    genes_col: str = "gene.symbol",
+    out_targets_col: str = "n.targets",
     min_targets: int = 2,
     cancer_genes: set[str] | None = None,
+    drop_genes: set[str] | None = None,
+    # which bins count as "targets" for n.targets
+    target_drop_genes: set[str] | None = None,
 ) -> pd.DataFrame:
     """
-    For each segment row (chr/start/end), find overlapping CNVkit bins in cnr_df and
-    add a comma-separated gene list in `genes_col`.
+    For each segment row (chr/start/end), find overlapping CNVkit bins in cnr_df and:
+      1) add comma-separated gene list in `genes_col` (genes w/ >= min_targets bins)
+      2) add `out_targets_col` = number of UNIQUE overlapping *target* bins
 
-    A gene is included only if it has >= min_targets overlapping bins in that segment.
-
-    If cancer_genes is provided (non-empty), restrict to those genes.
+    Notes:
+      - cnr_df is typically exploded by gene.symbol, so `out_targets_col` counts unique bins
+        by (chr,start,end) to avoid overcounting.
+      - `drop_genes` affects the gene list.
+      - `target_drop_genes` affects counting targets (defaults to drop_genes if not provided).
     """
     out = seg_df.copy()
 
-    # Normalize types
+    # Normalize segment types
     out["chr"] = out["chr"].astype("string")
     out["start"] = pd.to_numeric(out["start"], errors="coerce").astype("Int64")
     out["end"] = pd.to_numeric(out["end"], errors="coerce").astype("Int64")
@@ -907,61 +956,101 @@ def add_overlapping_genes_from_bins(
     out = out.dropna(subset=["chr", "start", "end"]).copy()
     bins = bins.dropna(subset=["chr", "start", "end", "gene.symbol"]).copy()
 
-    # Optional cancer gene restriction
-    if cancer_genes:
-        cancer_genes_s = pd.Series(list(cancer_genes), dtype="string")
-        cancer_set = set(cancer_genes_s.dropna().tolist())
-        bins = bins[bins["gene.symbol"].isin(cancer_set)].copy()
+    # normalize drop sets (lowercase)
+    drop_set: set[str] = set()
+    if drop_genes:
+        drop_set = {str(g).strip().lower() for g in drop_genes if str(g).strip()}
 
-    # Prepare output column
+    target_drop_set: set[str] = set(drop_set)
+    if target_drop_genes is not None:
+        target_drop_set = {
+            str(g).strip().lower() for g in target_drop_genes if str(g).strip()
+        }
+
+    # Prepare output columns
     out[genes_col] = ""
+    out[out_targets_col] = 0
 
-    # Work per chromosome to keep it fast
+    # Work per chromosome
     for chrom, seg_g in out.groupby("chr", sort=False):
         bins_g = bins[bins["chr"] == chrom].copy()
         if bins_g.empty:
             continue
 
-        # Sort bins by start for efficient candidate selection
         bins_g = bins_g.sort_values("start", kind="stable").reset_index(drop=True)
+
         b_start = bins_g["start"].to_numpy(dtype=np.int64, copy=False)
         b_end = bins_g["end"].to_numpy(dtype=np.int64, copy=False)
         b_gene = bins_g["gene.symbol"].to_numpy(dtype=object, copy=False)
+        # for unique-bin counting (avoid exploded overcount)
+        b_key_start = b_start
+        b_key_end = b_end
 
         seg_idx = seg_g.index.to_numpy()
         s_start = seg_g["start"].to_numpy(dtype=np.int64, copy=False)
         s_end = seg_g["end"].to_numpy(dtype=np.int64, copy=False)
 
-        # For each segment, bins with start < seg_end are possible overlaps.
-        # Then filter by bin_end > seg_start to confirm overlap.
         for i, row_idx in enumerate(seg_idx):
             lo = s_start[i]
             hi = s_end[i]
             if hi <= lo:
                 continue
 
-            # candidates: bin.start < seg.end
             cut = np.searchsorted(b_start, hi, side="left")
             if cut == 0:
                 continue
 
             cand_ends = b_end[:cut]
-            cand_genes = b_gene[:cut]
-
             mask = cand_ends > lo
             if not np.any(mask):
                 continue
 
-            genes = cand_genes[mask]
+            # ----------------------------
+            # (A) n.targets = unique bins overlapping, excluding backbone etc
+            # ----------------------------
+            genes_overlap = (
+                pd.Series(b_gene[:cut][mask], dtype="string").fillna("").astype(str)
+            )
+            if target_drop_set:
+                keep_targets = (
+                    ~genes_overlap.str.strip().str.lower().isin(target_drop_set)
+                )
+            else:
+                keep_targets = genes_overlap.ne("")
 
-            # Count bins per gene within this segment
-            # (genes are exploded already in cnr_df, which is what you want here)
-            vc = pd.Series(genes, dtype="string").value_counts(dropna=True)
+            if keep_targets.any():
+                # (A) n.targets = number of UNIQUE bins overlapping this segment (no exclusions)
+                starts = b_key_start[:cut][mask]
+                ends = b_key_end[:cut][mask]
+
+                # unique (start,end) pairs => unique bins
+                uniq = np.unique(np.stack([starts, ends], axis=1), axis=0)
+                out.at[row_idx, out_targets_col] = int(uniq.shape[0])
+
+            # ----------------------------
+            # (B) gene list (>= min_targets bins per gene) with optional cancer restriction
+            # ----------------------------
+            genes_for_list = genes_overlap
+
+            if drop_set:
+                genes_for_list = genes_for_list[
+                    ~genes_for_list.str.strip().str.lower().isin(drop_set)
+                ]
+
+            if cancer_genes:
+                cancer_set = {str(g).strip() for g in cancer_genes if str(g).strip()}
+                if cancer_set:
+                    genes_for_list = genes_for_list[genes_for_list.isin(cancer_set)]
+
+            if genes_for_list.empty:
+                continue
+
+            vc = genes_for_list.value_counts(dropna=True)
             vc = vc[vc >= min_targets]
             if vc.empty:
                 continue
 
-            gene_list = sorted(vc.index.tolist())
+            gene_list = sorted(vc.index.astype(str).tolist())
             out.at[row_idx, genes_col] = ",".join(gene_list)
 
     return out
@@ -1069,7 +1158,7 @@ def build_segment_table(
     cnv = cnv.rename(columns={"cnvkit_seg_end": "end"})
     cnv = cnv.rename(columns={"cnvkit_seg_log2": "cnvkit_adjusted_log2"})
     cnv = cnv.rename(columns={"cnvkit_seg_raw_log2": "log2"})
-    cnv = cnv.rename(columns={"cnvkit_seg_baf": "baf"})
+    cnv = cnv.rename(columns={"cnvkit_seg_baf": "baf_maf"})
 
     cnv["caller"] = "CNVkit"
     out_parts.append(cnv)
@@ -1081,29 +1170,40 @@ def build_segment_table(
         pc = pc.rename(columns={"purecn_seg_start": "start"})
         pc = pc.rename(columns={"purecn_seg_end": "end"})
         pc = pc.rename(columns={"purecn_seg_mean_log2": "log2"})
-        pc = pc.rename(columns={"purecn_maf_observed": "baf"})
+        pc = pc.rename(columns={"purecn_maf_observed": "baf_maf"})
 
         pc["caller"] = "PureCN"
 
         out_parts.append(pc)
 
-    stacked = pd.concat(out_parts, axis=0, ignore_index=True, sort=False)
-    stacked = stacked.sort_values(
+    segments = pd.concat(out_parts, axis=0, ignore_index=True, sort=False)
+    segments = segments.sort_values(
         ["chr", "start", "end", "caller"], kind="stable"
     ).reset_index(drop=True)
 
     # Add overlapping genes (limit to cancer genes only if provided)
-    stacked = add_overlapping_genes_from_bins(
-        stacked,
+    segments = add_overlapping_genes_from_bins(
+        segments,
         cnr_df,
-        genes_col="gene.symbols",
+        genes_col="gene.symbol",
         min_targets=2,
         cancer_genes=cancer_genes if is_exome else None,
         drop_genes={"backbone"},
     )
-    stacked = add_cnv_calls_wide(
-        stacked, sex=sex, out_cnvkit_col="cnv_call", out_purecn_col="cnv_call"
-    )
-    stacked = annotate_segments_with_cytoband(stacked, cytoband_df)
+    segments = add_cnv_calls_wide(
+        segments, sex=sex
+    )  # makes cnvkit_cnv_call and purecn_cnv_call
 
-    return finalize_table(stacked, SEGMENT_TABLE_SPEC)
+    # Then unify
+    segments["cnv_call"] = pd.NA
+    mask_cnv = segments["caller"].astype("string").str.upper().eq("CNVKIT")
+    mask_pc = segments["caller"].astype("string").str.upper().eq("PURECN")
+
+    segments.loc[mask_cnv, "cnv_call"] = segments.loc[mask_cnv, "cnvkit_cnv_call"]
+    segments.loc[mask_pc, "cnv_call"] = segments.loc[mask_pc, "purecn_cnv_call"]
+
+    segments = annotate_segments_with_cytoband(segments, cytoband_df)
+    segments["segment_size"] = segments["end"] - segments["start"]
+
+    segments = segments.drop(columns=["cnvkit_cnv_call", "purecn_cnv_call"])
+    return finalize_table(segments, SEGMENT_TABLE_SPEC)

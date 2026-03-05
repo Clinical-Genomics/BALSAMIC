@@ -17,16 +17,16 @@ class TableSpec:
 
 SEGMENT_TABLE_SPEC = TableSpec(
     column_order=[
-        "caller",
         "chr",
         "start",
         "end",
         "cytoband",
-        "gene.symbols",
         "cnv_call",
         "purecn_type",
         "log2",
-        "baf",
+        "baf_maf",
+        "n.targets",
+        "segment_size",
         "cnvkit_adjusted_log2",
         "cnvkit_seg_cn",
         "cnvkit_seg_cn1",
@@ -36,10 +36,12 @@ SEGMENT_TABLE_SPEC = TableSpec(
         "purecn_M",
         "purecn_M_flagged",
         "purecn_num_snps",
+        "caller",
+        "gene.symbol",
     ],
     float_columns=[
         "log2",
-        "baf",
+        "baf_maf",
         "cnvkit_adjusted_log2",
         "cnvkit_seg_cn",
         "cnvkit_seg_cn1",
@@ -51,6 +53,34 @@ SEGMENT_TABLE_SPEC = TableSpec(
     decimals=3,
     renames=None,
     sort_keys=("chr", "start", "end"),
+    descriptions={
+        # --- Genomic coordinates ---
+        "chr": "Chromosome identifier.",
+        "start": "Start coordinate (bp) of the CN segment.",
+        "end": "End coordinate (bp) of the CN segment.",
+        "cytoband": "Cytogenetic band annotation for the gene region.",
+        "segment_size": "Size of the segment: [end - start]",
+        "caller": "The caller which determined the segment, CNVkit / PureCN",
+        # --- Gene identity ---
+        "gene.symbol": "HGNC gene symbols overlapping segment (minimum 2 probe targets required for a gene to be listed)",
+        # --- Bin aggregation metrics ---
+        "n.targets": "Number of target bins overlapping with CN segment.",
+        "log2": "log2 copy-ratio from CNVkit or PureCN (not adjusted for purity or ploidy).",
+        "baf_maf": "Mean B-allele frequency (BAF) for the CNVkit segment / Observed minor allele frequency (MAF) in the PureCN segment.",
+        "cnv_call": "CNV call from PureCN or CNVkit (AMPLIFICATION / DELETION / NEUTRAL) determined based on total copy-numbers predicted from each tool.",
+        "purecn_type": "PureCN call annotation string for the segment.",
+        # --- CNVkit segment details ---
+        "cnvkit_seg_depth": "Mean sequencing read depth across all targets belonging to the CNVkit segment.",
+        "cnvkit_adjusted_log2": "Segment-level log2 copy-ratio from CNVkit, adjusted for purity and ploidy.",
+        "cnvkit_seg_cn": "Total copy number estimate from CNVkit.",
+        "cnvkit_seg_cn1": "Estimated minor allele copy number from CNVkit.",
+        "cnvkit_seg_cn2": "Estimated major allele copy number from CNVkit.",
+        # --- PureCN segment details --
+        "purecn_num_snps": "Number of SNPs used by PureCN in the segment.",
+        "purecn_C": "Total copy number estimate from PureCN.",
+        "purecn_M": "Minor allele copy number estimate from PureCN.",
+        "purecn_M_flagged": "True if PureCN flagged the minor allele estimate as unreliable or special case.",
+    },
 )
 
 GENE_TABLE_SPEC = TableSpec(
@@ -109,7 +139,7 @@ GENE_TABLE_SPEC = TableSpec(
         "purecn_maf_observed",
     ],
     decimals=3,
-    renames={"n_targets": "n.targets"},
+    renames=None,
     descriptions={
         # --- Genomic coordinates ---
         "chr": "Chromosome identifier (without 'chr' prefix).",
@@ -142,7 +172,7 @@ GENE_TABLE_SPEC = TableSpec(
         # --- PureCN segment details ---
         "purecn_seg_start": "Start coordinate (bp) of the overlapping PureCN segment.",
         "purecn_seg_end": "End coordinate (bp) of the overlapping PureCN segment.",
-        "purecn_seg_mean": "Segment-level log2 copy-ratio from PureCN.",
+        "purecn_seg_mean_log2": "Segment-level log2 copy-ratio from PureCN.",
         "purecn_num_snps": "Number of SNPs used by PureCN in the segment.",
         "purecn_maf_observed": "Observed minor allele frequency (MAF) in the PureCN segment.",
         "purecn_C": "Total copy number estimate from PureCN.",
@@ -151,14 +181,6 @@ GENE_TABLE_SPEC = TableSpec(
         # --- Exon overlap ---
         "exons_overlapping_cnvkit_segment": "Number of exons overlapping the CNVkit segment for this gene.",
         "exons_overlapping_gene_region": "Number of exons overlapping the aggregated gene region.",
-        # --- PON gene-level statistics ---
-        "pon_gene_mean_log2": "Mean PON log2 value across bins overlapping the gene region.",
-        "pon_gene_mean_spread": "Mean PON spread (variability) across bins overlapping the gene region.",
-        "pon_gene_effect": "Difference between sample log2 and PON mean at gene level.",
-        "pon_gene_z": "Z-score of the gene-level effect relative to PON variability.",
-        "pon_gene_direction": "Direction of deviation relative to PON (e.g., GAIN or LOSS).",
-        "pon_gene_significance": "Significance classification of the gene-level PON deviation.",
-        "pon_gene_indication": "Interpretation of gene-level deviation based on PON (e.g., GAIN/LOSS/NEUTRAL).",
         # --- PON bin/chunk-level statistics ---
         "pon_mean_log2": "Mean PON log2 value across bins in the chunk or region.",
         "pon_mean_spread": "Mean PON spread across bins in the chunk or region.",

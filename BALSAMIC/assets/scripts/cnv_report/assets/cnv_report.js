@@ -19,7 +19,7 @@
   // Prefer globalThis to avoid typeof checks + Sonar negated condition warning
   function getColIndex(tableId) {
     const map = {
-      "report-table": globalThis.colIndexGene,
+      "report-table": globalThis.colIndexSegments,
       "chunk-table": globalThis.colIndexChunk,
     };
     return map[tableId] ?? {};
@@ -103,19 +103,16 @@
   // ---------------------------------------------------------------------------
   // Tables + controls
   // ---------------------------------------------------------------------------
-
-  const geneTable = getTable("report-table");
+  const segTable = getTable("report-table");
   const chunkTable = getTable("chunk-table");
 
   const controls = {
-    gene: {
-      hideNonCnv: $("hide-non-cnv"),
-      onlyCancer: $("only-cancer-genes"),
-      geneInput: $("gene-filter"),
-      minTargets: $("min-targets"),
-      rangeChr: $("range-chr"),
-      rangeStart: $("range-start"),
-      rangeEnd: $("range-end"),
+    seg: {
+      hideNonCnv: $("hide-non-cnv-seg"),
+      geneInput: $("gene-filter-seg"),
+      rangeChr: $("range-chr-seg"),
+      rangeStart: $("range-start-seg"),
+      rangeEnd: $("range-end-seg"),
     },
     chunk: {
       hideNonCnv: $("hide-non-cnv-chunk"),
@@ -140,14 +137,14 @@
   const COL_GROUP_PON_EXPLICIT = [];
 
   const COL_GROUP_CNVKIT_EXTRA = [
-    "cnvkit_seg_log2",
+    "cnvkit_adjusted_log2",
     "cnvkit_seg_cn",
     "cnvkit_seg_cn1",
     "cnvkit_seg_cn2",
     "cnvkit_seg_depth",
   ];
 
-  const COL_GROUP_PURECN_EXTRA = ["purecn_C", "purecn_M", "purecn_M_flagged"];
+  const COL_GROUP_PURECN_EXTRA = ["purecn_C", "purecn_M", "purecn_M_flagged", "purecn_num_snps"];
 
   const DEFAULT_GROUP_STATE = {
     "report-table": { qc: false, pon: false, cnvkit: false, purecn: false },
@@ -220,8 +217,6 @@
   function hookColumnGroupToggles() {
     const toggleEls = {
       "report-table": {
-        qc: $("cols-qc-gene"),
-        pon: $("cols-pon-gene"),
         cnvkit: $("cols-cnvkit-extra-gene"),
         purecn: $("cols-purecn-extra-gene"),
       },
@@ -294,17 +289,22 @@
   }
 
   function rowHasCnvOrLoh(row, colIndex) {
+  // LOH for both tables: PureCN type present (non-empty)
   const lohIdx = getIdx(colIndex, "purecn_type");
-  const cnvkitIdx = getIdx(colIndex, "cnvkit_cnv_call");
-  const purecnIdx = getIdx(colIndex, "purecn_cnv_call");
-
   if (lohIdx !== -1 && isPresentText(textOf(row.cells[lohIdx]))) return true;
 
+  // Segments table: unified call column
+  const cnvIdx = getIdx(colIndex, "cnv_call");
+  if (cnvIdx !== -1 && isNonNeutralCall(row.cells[cnvIdx])) return true;
+
+  // Chunk table (or legacy): separate call columns
+  const cnvkitIdx = getIdx(colIndex, "cnvkit_cnv_call");
+  const purecnIdx = getIdx(colIndex, "purecn_cnv_call");
   if (cnvkitIdx !== -1 && isNonNeutralCall(row.cells[cnvkitIdx])) return true;
   if (purecnIdx !== -1 && isNonNeutralCall(row.cells[purecnIdx])) return true;
 
   return false;
-  }
+}
 
   function rowIsCancerGene(row, colIndex) {
     const idx = getIdx(colIndex, "is_cancer_gene");
@@ -337,12 +337,31 @@
   }
 
   function rowMatchesGeneList(row, colIndex, geneList) {
-    if (!geneList?.length) return true;
-    const idx = getIdx(colIndex, "gene.symbol");
-    if (idx === -1) return true;
-    const gene = textOf(row.cells[idx]);
-    return geneList.includes(gene);
+  if (!geneList?.length) return true;
+
+  // prefer segment column if present
+  const idxList = getIdx(colIndex, "gene.symbol");
+  if (idxList !== -1) {
+    const s = (row.cells[idxList]?.textContent ?? "").trim().toLowerCase();
+    if (!s) return false;
+
+    // "TP53,EGFR,MYC" -> ["tp53","egfr","myc"]
+    const genesInRow = s
+      .split(",")
+      .map((g) => g.trim().toLowerCase())
+      .filter(Boolean);
+
+    // any match is enough
+    return genesInRow.some((g) => geneList.includes(g));
   }
+
+  // fallback to old single-gene column
+  const idxOne = getIdx(colIndex, "gene.symbol");
+  if (idxOne === -1) return true;
+
+  const gene = textOf(row.cells[idxOne]);
+  return geneList.includes(gene);
+}
 
   function rowHasPonCnvCall(row, colIndex) {
     const idx = getIdx(colIndex, "pon_cnv_call");
@@ -397,16 +416,15 @@
     }
   }
 
-  function buildGeneCfg() {
-    const c = controls.gene;
+  function buildSegCfg() {
+    const c = controls.seg;
     return {
       isChunkTable: false,
       hideNonCnv: Boolean(c.hideNonCnv?.checked),
       includePonCnv: false,
-      onlyCancer: Boolean(c.onlyCancer?.checked),
-      onlySplit: false,
+      onlyCancer: false,          // segment UI doesn’t have this right now
       geneList: parseGeneList(c.geneInput?.value),
-      minTargets: parseIntSafe(c.minTargets?.value),
+      minTargets: 0,              // segment UI doesn’t have this right now
       range: {
         chr: c.rangeChr?.value ?? "",
         start: parseFloatSafe(c.rangeStart?.value),
@@ -434,20 +452,18 @@
   }
 
   function applyFilter() {
-    filterTable("report-table", geneTable, buildGeneCfg());
+    filterTable("report-table", segTable, buildSegCfg());
     filterTable("chunk-table", chunkTable, buildChunkCfg());
   }
 
   // bind filter events
   bindEvents(
     [
-      [controls.gene.hideNonCnv, "change"],
-      [controls.gene.onlyCancer, "change"],
-      [controls.gene.geneInput, "input"],
-      [controls.gene.minTargets, "input"],
-      [controls.gene.rangeChr, "input"],
-      [controls.gene.rangeStart, "input"],
-      [controls.gene.rangeEnd, "input"],
+      [controls.seg.hideNonCnv, "change"],
+      [controls.seg.geneInput, "input"],
+      [controls.seg.rangeChr, "input"],
+      [controls.seg.rangeStart, "input"],
+      [controls.seg.rangeEnd, "input"],
 
       [controls.chunk.hideNonCnv, "change"],
       [controls.chunk.includePonCnv, "change"],
@@ -462,13 +478,13 @@
     applyFilter
   );
 
-  const copyGeneBtn = $("copy-gene-table");
-  if (copyGeneBtn) {
-    copyGeneBtn.addEventListener("click", async () => {
-      const tsv = tableToTSVVisible(geneTable);
+  const copySegBtn = $("copy-segment-table");
+  if (copySegBtn) {
+    copySegBtn.addEventListener("click", async () => {
+      const tsv = tableToTSVVisible(segTable);
       await copyTextToClipboard(tsv);
-      copyGeneBtn.textContent = "Copied!";
-      setTimeout(() => (copyGeneBtn.textContent = "Copy visible rows"), 1000);
+      copySegBtn.textContent = "Copied!";
+      setTimeout(() => (copySegBtn.textContent = "Copy visible rows"), 1000);
     });
   }
 
@@ -549,11 +565,11 @@
   }
 
   hookShowHide(
-    "toggle-gene-table",
-    "gene-table-container",
+    "toggle-segment-table",
+    "segment-table-container",
     true,
-    "Hide gene-level table",
-    "Show gene-level table"
+    "Hide segment table",
+    "Show segment table"
   );
 
   hookShowHide(
@@ -565,12 +581,20 @@
   );
 
   hookShowHide(
-  "toggle-col-glossary",
-  "col-glossary-container",
-  false,
-  "Hide column glossary",
-  "Show column glossary"
-);
+    "toggle-seg-col-glossary",
+    "seg-col-glossary-container",
+    false,
+    "Hide segment glossary",
+    "Show segment glossary"
+  );
+
+  hookShowHide(
+    "toggle-chunk-col-glossary",
+    "chunk-col-glossary-container",
+    false,
+    "Hide chunk glossary",
+    "Show chunk glossary"
+  );
 
   // ---------------------------------------------------------------------------
   // Plot modal viewer

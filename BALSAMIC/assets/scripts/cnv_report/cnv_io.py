@@ -187,6 +187,16 @@ def load_purecn_segments(
     }
     cns = cns.rename(columns={k: v for k, v in rename_map.items() if k in cns.columns})
 
+    # Append "(unreliable)" if PureCN flagged the M estimate
+    type_col = f"{prefix}type"
+    flag_col = f"{prefix}M_flagged"
+
+    flagged = cns[flag_col].fillna(False)
+    cns[type_col] = cns[type_col].astype("string")
+    cns.loc[flagged & cns[type_col].notna(), type_col] = (
+        cns.loc[flagged & cns[type_col].notna(), type_col] + " (unreliable)"
+    )
+
     return cns.sort_values(["chr", f"{prefix}seg_start"], kind="stable").reset_index(
         drop=True
     )

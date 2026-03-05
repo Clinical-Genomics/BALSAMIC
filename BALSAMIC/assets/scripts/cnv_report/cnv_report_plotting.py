@@ -12,87 +12,9 @@ import pandas as pd
 from matplotlib import colormaps
 from matplotlib import patheffects as pe
 from matplotlib.lines import Line2D
-
+from matplotlib.patches import Patch
 
 from cnv_io import load_vcf_with_vaf
-
-
-def _compute_row_flags(gdf: pd.DataFrame) -> pd.DataFrame:
-    """
-    Compute per-row CNV / LOH / PON significance flags.
-
-    Logic:
-      - is_loh_or_cnv:
-            True if:
-                * purecn 'type' column is non-empty
-                OR
-                * cnvkit_cnv_call in {"DELETION", "AMPLIFICATION"}
-                OR
-                * purecn_cnv_call in {"DELETION", "AMPLIFICATION"}
-
-      - is_pon_signif:
-            True if pon_chunk_significance == "significant"
-            OR pon_chunk_indication in {"GAIN", "LOSS"}
-
-      - cnv_flag = union of the above
-    """
-
-    out = gdf.copy()
-
-    # ---------------------------------------------------------
-    # LOH / CNV logic
-    # ---------------------------------------------------------
-
-    is_loh_or_cnv = pd.Series(False, index=out.index)
-
-    # PureCN type present (non-empty)
-    if "loh_flag" in out.columns:
-        type_series = out["loh_flag"].astype("string").fillna("").str.strip()
-        is_loh_or_cnv |= type_series.ne("")
-
-    # CNVkit or PureCN explicit CNV calls
-    for col in ("cnvkit_cnv_call", "purecn_cnv_call"):
-        if col in out.columns:
-            call_series = out[col].astype("string").fillna("").str.strip().str.upper()
-            is_loh_or_cnv |= call_series.isin({"DELETION", "AMPLIFICATION"})
-
-    out["is_loh_or_cnv"] = is_loh_or_cnv
-
-    # ---------------------------------------------------------
-    # PON significance logic
-    # ---------------------------------------------------------
-
-    is_pon_signif = pd.Series(False, index=out.index)
-
-    if "pon_chunk_significance" in out.columns:
-        signif_series = (
-            out["pon_chunk_significance"]
-            .astype("string")
-            .fillna("")
-            .str.strip()
-            .str.lower()
-        )
-        is_pon_signif |= signif_series.eq("significant")
-
-    if "pon_chunk_indication" in out.columns:
-        indication_series = (
-            out["pon_chunk_indication"]
-            .astype("string")
-            .fillna("")
-            .str.strip()
-            .str.upper()
-        )
-        is_pon_signif |= indication_series.isin({"GAIN", "LOSS"})
-
-    out["is_pon_signif"] = is_pon_signif
-
-    # ---------------------------------------------------------
-    # Combined flag
-    # ---------------------------------------------------------
-
-    out["cnv_flag"] = out["is_loh_or_cnv"] | out["is_pon_signif"]
-
-    return out
 
 
 def _compute_gene_level_highlights(
@@ -364,43 +286,74 @@ def _draw_pon_bars(ax, sub: pd.DataFrame, x: pd.Series, y_clip: float):
     )
 
 
-def _draw_segments(ax, segs_chr: pd.DataFrame):
+def _draw_segments(
+    ax,
+    segs_chr: pd.DataFrame,
+    *,
+    caller_col: str = "caller",
+    call_col: str = "cnv_call",
+    y_col: str = "log2_clipped",
+    x_start_col: str = "x_start",
+    x_end_col: str = "x_end",
+) -> None:
     """
-    Draw CNVkit / LOH segment horizontal lines.
+    Draw CNV segments as horizontal lines for BOTH CNVkit and PureCN.
 
-    Segment color determined by CNV call:
+    Expected columns in segs_chr:
+      - caller (CNVkit/PureCN)
+      - cnv_call (AMPLIFICATION/DELETION/NEUTRAL)
+      - log2_clipped
+      - x_start, x_end
+
+    Color by cnv_call:
       Amplification → red
-      Deletion → blue
+      Deletion → royalblue
       Otherwise → black
-    """
 
-    if segs_chr.empty:
+    Caller style:
+      CNVkit → solid, thicker
+      PureCN → dashed, thinner
+    """
+    if segs_chr is None or segs_chr.empty:
         return
 
-    for _, srow in segs_chr.iterrows():
-        xs = srow["x_start"]
-        xe = srow["x_end"]
+    df = segs_chr.copy()
 
-        if "cnvkit_seg_log2_clipped" in srow.index and pd.notna(
-            srow["cnvkit_seg_log2_clipped"]
-        ):
-            y_seg = srow["cnvkit_seg_log2_clipped"]
+    # Normalize caller values
+    df[caller_col] = df[caller_col].astype("string").fillna("").str.strip().str.upper()
+
+    # Normalize call values
+    calls = df[call_col].astype("string").fillna("").str.strip().str.upper()
+
+    # Compute colors vectorized
+    colors = np.where(
+        calls.eq("AMPLIFICATION"),
+        "red",
+        np.where(calls.eq("DELETION"), "royalblue", "black"),
+    )
+    df["_seg_color"] = colors
+
+    # Styles per caller
+    style_map = {
+        "CNVKIT": dict(linestyle="solid", linewidth=1.8, alpha=0.9, zorder=3),
+        "PURECN": dict(linestyle=(0, (4, 2)), linewidth=1.2, alpha=0.9, zorder=3),
+    }
+
+    # Draw caller-by-caller so styles are consistent
+    for caller, sub in df.groupby(caller_col, sort=False):
+        if caller not in style_map:
+            style = dict(linestyle="solid", linewidth=1.2, alpha=0.8, zorder=3)
         else:
-            continue
+            style = style_map[caller]
 
-        call_val = srow.get("cnvkit_cnv_call", np.nan)
-        if pd.isna(call_val):
-            seg_color = "black"
-        else:
-            c = str(call_val).strip().upper()
-            if c == "AMPLIFICATION":
-                seg_color = "red"
-            elif c == "DELETION":
-                seg_color = "royalblue"
-            else:
-                seg_color = "black"
+        for _, srow in sub.iterrows():
+            xs = srow[x_start_col]
+            xe = srow[x_end_col]
+            y = srow[y_col]
+            if pd.isna(xs) or pd.isna(xe) or pd.isna(y):
+                continue
 
-        ax.hlines(y_seg, xs, xe, colors=seg_color, linewidth=1.8, alpha=0.9)
+            ax.hlines(y, xs, xe, colors=srow["_seg_color"], **style)
 
 
 def _draw_chunk_pon_segments(
@@ -412,58 +365,87 @@ def _draw_chunk_pon_segments(
     chr_name: str,
     y_clip: float,
     highlight_only_cancer: bool,
-    gene_level: pd.DataFrame,
-    min_gene_targets_cancer: int,
+    gene_level: pd.DataFrame | None = None,
+    min_gene_targets_cancer: int = 4,
+    # column names (so you can change later without rewriting logic)
+    start_col: str = "region_start",
+    end_col: str = "region_end",
+    y_col: str = "mean_log2",
+    gene_col: str = "gene.symbol",
+    pon_ind_col: str = "pon_chunk_indication",
+    pon_sig_col: str = "pon_chunk_significance",
 ) -> tuple[set[str], bool]:
     """
-    Draw PON-driven CNV chunk segments (gain/loss) as yellow horizontal lines.
+    Draw PON-driven chunk segments if (and only if) PON columns exist.
 
-    Returns:
-      (pon_cnv_genes, label_added)
+    Draw condition:
+      - pon_chunk_indication in {"GAIN","LOSS"} OR
+      - pon_chunk_significance == "significant"  (if that column exists)
 
-    Notes:
-      - A chunk is drawn if it overlaps the plotted genomic span and has pon_chunk_indication in {"GAIN","LOSS"}.
-      - If highlight_only_cancer=True, returned genes are restricted to cancer genes with enough targets
-        (drawing is unchanged; this only affects which genes may be labeled later).
+    Returns: (pon_cnv_genes, label_added)
     """
     empty_result: tuple[set[str], bool] = (set(), False)
 
-    if g_chunks_chr is None or g_chunks_chr.empty:
-        return empty_result
-    if sub.empty:
+    if g_chunks_chr is None or g_chunks_chr.empty or sub is None or sub.empty:
         return empty_result
 
-    # 1) Keep only chunks that overlap the span of the bins we are plotting
-    span_start = int(sub["start"].min())
-    span_end = int(sub["end"].max())
+    # If there's no PON info at all, do nothing.
+    has_ind = pon_ind_col in g_chunks_chr.columns
+    has_sig = pon_sig_col in g_chunks_chr.columns
+    if not (has_ind or has_sig):
+        return empty_result
 
-    chunks = g_chunks_chr.loc[
-        (g_chunks_chr["region_end"] >= span_start)
-        & (g_chunks_chr["region_start"] <= span_end)
+    # Need coordinates + y column to draw
+    required = {start_col, end_col, y_col}
+    missing_req = [c for c in required if c not in g_chunks_chr.columns]
+    if missing_req:
+        return empty_result
+
+    # Span of plotted bins
+    span_start = int(pd.to_numeric(sub["start"], errors="coerce").min())
+    span_end = int(pd.to_numeric(sub["end"], errors="coerce").max())
+
+    chunks = g_chunks_chr.copy()
+
+    # numeric coords
+    chunks[start_col] = pd.to_numeric(chunks[start_col], errors="coerce")
+    chunks[end_col] = pd.to_numeric(chunks[end_col], errors="coerce")
+    chunks[y_col] = pd.to_numeric(chunks[y_col], errors="coerce")
+
+    chunks = chunks.dropna(subset=[start_col, end_col, y_col]).copy()
+    if chunks.empty:
+        return empty_result
+
+    # overlap filter
+    chunks = chunks.loc[
+        (chunks[end_col] >= span_start) & (chunks[start_col] <= span_end)
     ].copy()
-
     if chunks.empty:
         return empty_result
 
-    # 2) Keep only chunks with a PON gain/loss call
-    pon_col = "pon_chunk_indication"
-    if pon_col not in chunks.columns:
-        return empty_result
+    # PON significance filter
+    keep_mask = pd.Series(False, index=chunks.index)
 
-    chunks[pon_col] = chunks[pon_col].astype(str).str.strip().str.upper()
-    chunks = chunks[chunks[pon_col].isin({"GAIN", "LOSS"})]
+    if has_ind:
+        ind = chunks[pon_ind_col].astype("string").fillna("").str.strip().str.upper()
+        keep_mask |= ind.isin({"GAIN", "LOSS"})
 
+    if has_sig:
+        sig = chunks[pon_sig_col].astype("string").fillna("").str.strip().str.lower()
+        keep_mask |= sig.eq("significant")
+
+    chunks = chunks.loc[keep_mask].copy()
     if chunks.empty:
         return empty_result
 
-    # 3) Draw all matching chunks
+    # Draw
     label_text = "PON-based gain/loss indicator"
     label_added = False
 
     for _, crow in chunks.iterrows():
-        xs = pos_to_xcoord(int(crow["region_start"]))
-        xe = pos_to_xcoord(int(crow["region_end"]))
-        y = float(np.clip(float(crow["mean_log2"]), -y_clip, y_clip))
+        xs = pos_to_xcoord(int(crow[start_col]))
+        xe = pos_to_xcoord(int(crow[end_col]))
+        y = float(np.clip(float(crow[y_col]), -y_clip, y_clip))
 
         line = ax.hlines(
             y,
@@ -480,73 +462,62 @@ def _draw_chunk_pon_segments(
         )
         label_added = True
 
-    # 4) Collect genes represented by these chunks (used later for labeling)
+    # Genes represented (optional)
     pon_cnv_genes: set[str] = set()
-    if "gene.symbol" in chunks.columns:
-        pon_cnv_genes = set(chunks["gene.symbol"].dropna().astype(str).tolist())
+    if gene_col in chunks.columns:
+        pon_cnv_genes = set(chunks[gene_col].dropna().astype(str).tolist())
 
-    # 5) Optionally restrict returned gene set (does NOT affect drawing)
-    if highlight_only_cancer:
-        if pon_cnv_genes:
-            allowed = (
-                gene_level.loc[
-                    (gene_level["chr"] == chr_name)
-                    & (gene_level["is_cancer_gene"])
-                    & (gene_level["total_targets"] >= min_gene_targets_cancer),
-                    "gene.symbol",
-                ]
-                .dropna()
-                .astype(str)
-            )
-
-            pon_cnv_genes &= set(allowed.tolist())
+    # Optional restriction for labeling
+    if (
+        highlight_only_cancer
+        and gene_level is not None
+        and not gene_level.empty
+        and pon_cnv_genes
+    ):
+        allowed = (
+            gene_level.loc[
+                (gene_level["chr"] == chr_name)
+                & (gene_level["is_cancer_gene"])
+                & (gene_level["total_targets"] >= min_gene_targets_cancer),
+                "gene.symbol",
+            ]
+            .dropna()
+            .astype(str)
+        )
+        pon_cnv_genes &= set(allowed.tolist())
 
     return pon_cnv_genes, label_added
 
 
-def _draw_gene_labels(
+def draw_gene_labels_from_spans(
     ax,
     *,
-    g_chr: pd.DataFrame,
+    gene_spans: pd.DataFrame,
     label_genes: list[str],
     gene_to_color: dict[str, tuple],
     stable_color_fn: callable,
     pos_to_xcoord: callable,
     y_max: float,
     base_label_offset: float,
+    gene_col: str = "gene.symbol",
+    start_col: str = "region_start",
+    end_col: str = "region_end",
 ) -> None:
-    """
-    Draw gene boundary markers and rotated gene name labels.
-
-    Requires `g_chr` to contain, per gene:
-      - gene.symbol
-      - region_start
-      - region_end
-
-    If a gene is missing coordinates, it is skipped.
-    """
-    if g_chr is None or g_chr.empty:
+    if gene_spans is None or gene_spans.empty or not label_genes:
         return
 
-    spans = g_chr.loc[
-        g_chr["gene.symbol"].notna(), ["gene.symbol", "region_start", "region_end"]
-    ].copy()
-    # Ensure numeric-ish (won't crash if already int)
-    spans["region_start"] = pd.to_numeric(spans["region_start"], errors="coerce")
-    spans["region_end"] = pd.to_numeric(spans["region_end"], errors="coerce")
-
-    gene_span = (
-        spans.dropna(subset=["region_start", "region_end"])
-        .groupby("gene.symbol", as_index=True)
-        .agg(region_start=("region_start", "min"), region_end=("region_end", "max"))
-    )
+    # index for fast lookup
+    gs = gene_spans.copy()
+    gs[gene_col] = gs[gene_col].astype("string").str.strip()
+    gs = gs.set_index(gene_col, drop=True)
 
     for gname in label_genes:
-        if gname not in gene_span.index:
+        gname = str(gname).strip()
+        if gname not in gs.index:
             continue
 
-        g_start = int(gene_span.at[gname, "region_start"])
-        g_end = int(gene_span.at[gname, "region_end"])
+        g_start = int(gs.at[gname, start_col])
+        g_end = int(gs.at[gname, end_col])
         if g_end < g_start:
             continue
 
@@ -589,82 +560,6 @@ def _plot_vaf_panel(ax, vaf_chr: pd.DataFrame):
         ax.axhline(frac, color="lightgray", linewidth=0.6, linestyle=":")
     ax.set_ylim(0, 1)
     ax.set_ylabel("VAF")
-
-
-def _compute_variable_x_binlevel_OLD(
-    sub: pd.DataFrame,
-    highlighted_genes: np.ndarray,
-    neutral_target_factor: float,
-    backbone_factor: float = 0.3,
-    backbone_label: str = "backbone",
-    key_cols: tuple[str, str, str] = ("chr", "start", "end"),
-) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """
-    Compute pseudo-x on UNIQUE bins (chr,start,end) so exploded multi-gene rows
-    do not inflate width.
-
-    Returns:
-      sub_full: original sub with x_coord/bin_width/type/is_highlight_bin merged in
-      bins:     unique-bin dataframe (one row per bin) with x_coord/bin_width/etc
-               (use this for smoothing/lines/background bins)
-
-    Requirements in `sub`:
-      - key_cols (default chr/start/end)
-      - gene.symbol
-      - log2
-    Optional in `sub`:
-      - pon_log2
-      - pon_spread
-    """
-    out = sub.copy()
-
-    # Ensure gene is a string dtype (may contain <NA>)
-    gene = out["gene.symbol"].astype("string")
-
-    # Set of highlighted gene names (string)
-    hi = set(map(str, highlighted_genes))
-
-    # Add per-row helper flags
-    tmp = out.assign(
-        _is_backbone=gene.eq(backbone_label),
-        _is_hi=gene.fillna("").astype(str).isin(hi),
-    )
-
-    # Build aggregation dictionary safely (only include PON fields if present)
-    agg: dict[str, tuple[str, str]] = {
-        "is_backbone_bin": ("_is_backbone", "any"),
-        "is_highlight_bin": ("_is_hi", "any"),
-        "log2": ("log2", "first"),
-    }
-    if "pon_log2" in tmp.columns:
-        agg["pon_log2"] = ("pon_log2", "first")
-    if "pon_spread" in tmp.columns:
-        agg["pon_spread"] = ("pon_spread", "first")
-
-    # Aggregate to one row per unique bin
-    g = tmp.groupby(list(key_cols), as_index=False).agg(**agg)
-
-    # Bin-level plotting type
-    g["type"] = np.where(g["is_backbone_bin"], "Backbone", "Target")
-
-    # Bin-level width: neutral by default, compress backbone, expand highlighted bins
-    width = np.full(len(g), float(neutral_target_factor), dtype=float)
-    width[g["is_backbone_bin"].to_numpy()] = float(backbone_factor)
-    width[g["is_highlight_bin"].to_numpy()] = 1.0
-
-    g["bin_width"] = width
-    g["x_coord"] = np.cumsum(width) - (width / 2.0)
-
-    # Merge bin-level x back to the exploded table
-    merge_cols = list(key_cols)
-    out = out.merge(
-        g[merge_cols + ["x_coord", "bin_width", "type", "is_highlight_bin"]],
-        on=merge_cols,
-        how="left",
-        validate="many_to_one",
-    )
-
-    return out, g
 
 
 def _compute_variable_x_on_bins(
@@ -736,46 +631,28 @@ def _collapse_bins_to_unique(
     return out
 
 
-def _add_cnvkit_segment_stub_legend(ax, segs_chr: pd.DataFrame | None) -> None:
+def _add_cnv_call_color_legend(ax, segs_chr: pd.DataFrame | None) -> None:
     """
-    Add a compact bottom-right legend with colored CNVkit segment stubs.
-    Only shows entries that actually exist on this chromosome.
+    Legend for CNV call colors (Amp/Del/Neutral), independent of caller.
+    Only shows entries present on this chromosome.
     """
-
-    if segs_chr is None or segs_chr.empty or "cnvkit_cnv_call" not in segs_chr.columns:
+    if segs_chr is None or segs_chr.empty or "cnv_call" not in segs_chr.columns:
         return
 
-    calls = (
-        segs_chr["cnvkit_cnv_call"].astype("string").fillna("").str.strip().str.upper()
-    )
+    calls = segs_chr["cnv_call"].astype("string").fillna("").str.strip().str.upper()
 
     handles = []
-
     if calls.eq("AMPLIFICATION").any():
-        handles.append(Line2D([0], [0], color="red", lw=2.0, label="CNVKIT:Amp"))
-
+        handles.append(Line2D([0], [0], color="red", lw=2.0, label="Amp"))
     if calls.eq("DELETION").any():
-        handles.append(Line2D([0], [0], color="royalblue", lw=2.0, label="CNVKIT:Del"))
-
-    # Neutral/other segments
+        handles.append(Line2D([0], [0], color="royalblue", lw=2.0, label="Del"))
     if (~calls.isin(["AMPLIFICATION", "DELETION"]) | calls.eq("")).any():
-        handles.append(Line2D([0], [0], color="black", lw=2.0, label="CNVKIT:Neutral"))
+        handles.append(Line2D([0], [0], color="black", lw=2.0, label="Neutral"))
 
     if not handles:
         return
 
-    legend = ax.legend(
-        handles=handles,
-        loc="lower right",
-        fontsize=7,
-        frameon=True,
-        borderpad=0.3,
-        labelspacing=0.3,
-        handlelength=1.4,
-        handletextpad=0.6,
-    )
-
-    # Ensure it stays even if you later add another legend
+    legend = ax.legend(handles=handles, loc="lower right", fontsize=7, frameon=True)
     ax.add_artist(legend)
 
 
@@ -802,14 +679,213 @@ def _annotate_highlight_bins(
     return out
 
 
+def compute_highlighted_genes_from_chunks(
+    gchunk: pd.DataFrame,
+    *,
+    chr_name: str,
+    highlight_only_cancer: bool,
+    min_gene_targets: int = 4,
+    min_gene_targets_cancer: int = 4,
+    chr_col: str = "chr",
+    gene_col: str = "gene.symbol",
+    targets_col: str = "n.targets",
+    cancer_col: str = "is_cancer_gene",
+    cnvkit_call_col: str = "cnvkit_cnv_call",
+    purecn_call_col: str = "purecn_cnv_call",
+    purecn_type_col: str = "purecn_type",  # NEW
+) -> tuple[np.ndarray, pd.DataFrame]:
+    """
+    Decide which genes should be highlighted on a given chromosome using chunk-level annotations.
+
+    Highlighting evidence:
+      - CNV: cnvkit_cnv_call or purecn_cnv_call in {AMPLIFICATION, DELETION}
+      - LOH: purecn_type contains substring "LOH" (case-insensitive)
+
+    Returns:
+      highlighted_genes: np.ndarray[str]
+      gene_level: per-gene summary (useful for debugging)
+    """
+    df = gchunk[gchunk[chr_col].astype("string") == str(chr_name)].copy()
+    if df.empty:
+        return np.array([], dtype=object), pd.DataFrame()
+
+    df[gene_col] = df[gene_col].astype("string").str.strip()
+    df = df[df[gene_col].notna() & df[gene_col].ne("")].copy()
+    df = df[df[gene_col].ne("backbone")].copy()
+
+    if targets_col in df.columns:
+        df[targets_col] = pd.to_numeric(df[targets_col], errors="coerce").fillna(0.0)
+    else:
+        df[targets_col] = 0.0
+
+    if cancer_col in df.columns:
+        df[cancer_col] = df[cancer_col].fillna(False).astype(bool)
+    else:
+        df[cancer_col] = False
+
+    def _is_amp_del(s: pd.Series) -> pd.Series:
+        v = s.astype("string").fillna("").str.strip().str.upper()
+        return v.isin({"AMPLIFICATION", "DELETION"})
+
+    def _has_loh_type(s: pd.Series) -> pd.Series:
+        v = s.astype("string").fillna("").str.strip().str.upper()
+        # "LOH", "LOH;...", "something LOH something"
+        return v.str.contains("LOH", regex=False)
+
+    has_cnv = pd.Series(False, index=df.index)
+    if cnvkit_call_col in df.columns:
+        has_cnv |= _is_amp_del(df[cnvkit_call_col])
+    if purecn_call_col in df.columns:
+        has_cnv |= _is_amp_del(df[purecn_call_col])
+
+    has_loh = pd.Series(False, index=df.index)
+    if purecn_type_col in df.columns:
+        has_loh |= _has_loh_type(df[purecn_type_col])
+
+    df["_has_cnv"] = has_cnv
+    df["_has_loh"] = has_loh
+    df["_has_cnv_or_loh"] = df["_has_cnv"] | df["_has_loh"]
+
+    gene_level = (
+        df.groupby([chr_col, gene_col], as_index=False)
+        .agg(
+            total_targets=(targets_col, "sum"),
+            is_cancer_gene=(cancer_col, "any"),
+            has_cnv=("_has_cnv", "any"),
+            has_loh=("_has_loh", "any"),
+            has_cnv_or_loh=("_has_cnv_or_loh", "any"),
+        )
+        .copy()
+    )
+
+    cancer_ok = gene_level["is_cancer_gene"] & (
+        gene_level["total_targets"] >= float(min_gene_targets_cancer)
+    )
+
+    noncancer_ok = (
+        (~gene_level["is_cancer_gene"])
+        & gene_level["has_cnv_or_loh"]
+        & (gene_level["total_targets"] >= float(min_gene_targets))
+    )
+
+    highlight_mask = cancer_ok if highlight_only_cancer else (cancer_ok | noncancer_ok)
+
+    highlighted = gene_level.loc[highlight_mask, gene_col].astype(str).dropna().unique()
+    highlighted = np.array(sorted(set(highlighted) - {"backbone"}), dtype=object)
+
+    gene_level["highlight_gene"] = highlight_mask
+    return highlighted, gene_level
+
+
+def compute_gene_spans_from_chunks(
+    g_chunks_chr: pd.DataFrame,
+    *,
+    gene_col: str = "gene.symbol",
+    start_col: str = "region_start",
+    end_col: str = "region_end",
+) -> pd.DataFrame:
+    """
+    Return one row per gene with full-span coordinates:
+      region_start = min(chunk starts)
+      region_end   = max(chunk ends)
+    """
+    if g_chunks_chr is None or g_chunks_chr.empty:
+        return pd.DataFrame(columns=[gene_col, start_col, end_col])
+
+    spans = g_chunks_chr[[gene_col, start_col, end_col]].copy()
+    spans[gene_col] = spans[gene_col].astype("string").str.strip()
+
+    spans[start_col] = pd.to_numeric(spans[start_col], errors="coerce")
+    spans[end_col] = pd.to_numeric(spans[end_col], errors="coerce")
+    spans = spans.dropna(subset=[gene_col, start_col, end_col]).copy()
+
+    gene_span = spans.groupby(gene_col, as_index=False).agg(
+        **{start_col: (start_col, "min"), end_col: (end_col, "max")}
+    )
+
+    # ensure start <= end
+    gene_span = gene_span[gene_span[end_col] >= gene_span[start_col]].copy()
+    return gene_span
+
+
+def get_loh_segments_for_chr(
+    segments_df: pd.DataFrame,
+    *,
+    chr_name: str,
+    chr_col: str = "chr",
+    caller_col: str = "caller",
+    start_col: str = "start",
+    end_col: str = "end",
+    purecn_type_col: str = "purecn_type",
+) -> pd.DataFrame:
+    df = segments_df.copy()
+
+    df = df[df[chr_col].astype("string") == str(chr_name)]
+    if df.empty or purecn_type_col not in df.columns or caller_col not in df.columns:
+        return df.iloc[0:0].copy()
+
+    is_purecn = df[caller_col].astype("string").str.upper().eq("PURECN")
+
+    t = df[purecn_type_col].astype("string").fillna("").str.strip().str.upper()
+    is_loh = t.str.contains("LOH", regex=False)
+
+    # exclude unreliable LOH segments (determined by M.flagged)
+    is_reliable = ~t.str.contains("UNRELIABLE", regex=False)
+
+    out = df.loc[is_purecn & is_loh & is_reliable, [start_col, end_col]].copy()
+    out[start_col] = pd.to_numeric(out[start_col], errors="coerce")
+    out[end_col] = pd.to_numeric(out[end_col], errors="coerce")
+    out = out.dropna(subset=[start_col, end_col])
+    out = out.sort_values(start_col, kind="stable")
+    return out
+
+
+def draw_loh_spans_on_vaf(
+    ax,
+    loh_segs: pd.DataFrame,
+    *,
+    pos_to_xcoord: callable,
+    start_col: str = "start",
+    end_col: str = "end",
+) -> bool:
+    """
+    Draw LOH intervals as translucent vertical shading on the VAF panel.
+
+    Returns True if at least one interval was drawn.
+    """
+    if loh_segs is None or loh_segs.empty:
+        return False
+
+    drew = False
+    for _, r in loh_segs.iterrows():
+        xs = pos_to_xcoord(int(r[start_col]))
+        xe = pos_to_xcoord(int(r[end_col]))
+        if xe < xs:
+            xs, xe = xe, xs
+
+        ax.axvspan(xs, xe, alpha=0.12)
+        drew = True
+
+    return drew
+
+
+def _add_segment_caller_style_legend(ax) -> None:
+    handles = [
+        Line2D([0], [0], color="black", lw=1.8, linestyle="solid", label="CNVkit"),
+        Line2D([0], [0], color="black", lw=1.2, linestyle=(0, (4, 2)), label="PureCN"),
+    ]
+    leg = ax.legend(handles=handles, loc="lower left", fontsize=7, frameon=True)
+    ax.add_artist(leg)
+
+
 def plot_chromosomes(
     cnr_df: pd.DataFrame,
     vcf_path: Path,
-    gdf: pd.DataFrame,
+    segments_df: pd.DataFrame,
+    gchunk: pd.DataFrame,
     outdir: Path,
     case_id: str,
     pon_df: pd.DataFrame | None = None,
-    gchunk: pd.DataFrame | None = None,
     backbone_factor: float = 0.4,
     neutral_target_factor: float = 0.4,
     highlight_only_cancer: bool = False,
@@ -827,9 +903,6 @@ def plot_chromosomes(
       - BAF from VCF
     """
     outdir.mkdir(parents=True, exist_ok=True)
-
-    # Rename columns for plotting:
-    targets_col = "n.targets"
 
     MIN_GENE_TARGETS = 4
     MIN_GENE_TARGETS_CANCER = 4
@@ -878,52 +951,33 @@ def plot_chromosomes(
 
     merged = merged[merged["chr"].isin(chr_order)].copy()
 
-    # Compute gene flags & gene-level highlight decisions
-    gdf = _compute_row_flags(gdf)
-    gene_level = _compute_gene_level_highlights(
-        gdf,
-        targets_col=targets_col,
-        highlight_only_cancer=highlight_only_cancer,
-        min_gene_targets=MIN_GENE_TARGETS,
-        min_gene_targets_cancer=MIN_GENE_TARGETS_CANCER,
-    )
-
     stable_color = _stable_gene_color_fn()
 
     y_clip = float(y_abs_max)
     y_lim_chr = (-y_clip, y_clip)
 
     for chr_name in chr_order:
+        highlighted, gene_level = compute_highlighted_genes_from_chunks(
+            gchunk,
+            chr_name=chr_name,
+            highlight_only_cancer=highlight_only_cancer,
+            min_gene_targets=MIN_GENE_TARGETS,
+            min_gene_targets_cancer=MIN_GENE_TARGETS_CANCER,
+        )
+
         # collapsed bin-level table for this chromosome
-        sub_bins = merged[merged["chr"] == chr_name].copy()
-        if sub_bins.empty:
+        chr_bins = merged[merged["chr"] == chr_name].copy()
+        if chr_bins.empty:
             continue
-        sub_bins = sub_bins.sort_values("start", kind="stable")
+        chr_bins = chr_bins.sort_values("start", kind="stable")
 
-        g_chr = gdf[gdf["chr"] == chr_name].copy()
-        g_chunks_chr = (
-            gchunk[gchunk["chr"] == chr_name].copy()
-            if (gchunk is not None and not gchunk.empty)
-            else pd.DataFrame()
-        )
+        g_chunks_chr = gchunk[gchunk["chr"] == chr_name].copy()
 
-        # --- Determine highlighted genes (unchanged logic) ---
-        genes_in_view = g_chr["gene.symbol"].dropna().astype(str).unique()
-        gene_level_chr = gene_level[
-            (gene_level["chr"] == chr_name)
-            & (gene_level["gene.symbol"].astype(str).isin(genes_in_view))
-        ]
-        highlighted = (
-            gene_level_chr[gene_level_chr["highlight_gene"]]["gene.symbol"]
-            .astype(str)
-            .unique()
-        )
-        highlighted = highlighted[highlighted != "backbone"]
         gene_to_color = _make_gene_colors(highlighted)
 
         # Mark which collapsed bins contain any highlighted gene
-        sub_bins = _annotate_highlight_bins(
-            sub_bins,
+        chr_bins = _annotate_highlight_bins(
+            chr_bins,
             highlighted_genes=highlighted,
             genes_col="genes",
             out_col="is_highlight_bin",
@@ -931,7 +985,7 @@ def plot_chromosomes(
 
         # Compute variable x-coordinates on collapsed bins
         bins = _compute_variable_x_on_bins(
-            sub_bins,
+            chr_bins,
             neutral_target_factor=neutral_target_factor,
             backbone_factor=backbone_factor,
             backbone_label="backbone",
@@ -955,15 +1009,16 @@ def plot_chromosomes(
             vaf_chr["x_coord"] = vaf_chr["POS"].apply(lambda p: pos_to_xcoord(int(p)))
 
         # Segments from g_chr
-        segs_chr = _collect_segments_for_chr(g_chr, chr_name, y_clip=y_clip)
+        segs_chr = segments_df[
+            segments_df["chr"].astype("string") == str(chr_name)
+        ].copy()
+        segs_chr["log2_clipped"] = segs_chr["log2"].clip(-y_clip, y_clip)
         if not segs_chr.empty:
             segs_chr = segs_chr.copy()
-            segs_chr["x_start"] = segs_chr["cnvkit_seg_start"].apply(
+            segs_chr["x_start"] = segs_chr["start"].apply(
                 lambda p: pos_to_xcoord(int(p))
             )
-            segs_chr["x_end"] = segs_chr["cnvkit_seg_end"].apply(
-                lambda p: pos_to_xcoord(int(p))
-            )
+            segs_chr["x_end"] = segs_chr["end"].apply(lambda p: pos_to_xcoord(int(p)))
 
         # --- figure ---
         fig, (ax1, ax2) = plt.subplots(
@@ -1004,7 +1059,7 @@ def plot_chromosomes(
         pon_cnv_genes, _ = _draw_chunk_pon_segments(
             ax1,
             g_chunks_chr=g_chunks_chr,
-            sub=bins,  # span_start/end should be based on bins
+            sub=bins,
             pos_to_xcoord=pos_to_xcoord,
             chr_name=chr_name,
             y_clip=y_clip,
@@ -1020,14 +1075,15 @@ def plot_chromosomes(
         title_suffix = "log2 vs PON spread" if use_pon else "log2 (no PON available)"
         title = f"Chr {chr_name} – {title_suffix}: {case_id}"
         ax1.set_title(title + "\n")
-        ax1.legend(loc="upper right", fontsize=8)
+        main_leg = ax1.legend(loc="upper right", fontsize=8)
 
+        gene_spans_chr = compute_gene_spans_from_chunks(g_chunks_chr)
         label_genes = sorted(set(map(str, highlighted)))
         label_genes = [g for g in label_genes if g != "backbone"]
         if label_genes:
-            _draw_gene_labels(
+            draw_gene_labels_from_spans(
                 ax1,
-                g_chr=g_chr,
+                gene_spans=gene_spans_chr,
                 label_genes=label_genes,
                 gene_to_color=gene_to_color,
                 stable_color_fn=stable_color,
@@ -1037,8 +1093,30 @@ def plot_chromosomes(
             )
 
         _draw_segments(ax1, segs_chr)
-        _add_cnvkit_segment_stub_legend(ax1, segs_chr)
+        _add_segment_caller_style_legend(ax1)  # dashed vs solid
+        _add_cnv_call_color_legend(ax1, segs_chr)  # red/blue/black
+
+        ax1.add_artist(main_leg)
+        loh_chr = get_loh_segments_for_chr(segments_df, chr_name=chr_name)
+        # draw shading behind points:
+        drew_loh = draw_loh_spans_on_vaf(ax2, loh_chr, pos_to_xcoord=pos_to_xcoord)
+
         _plot_vaf_panel(ax2, vaf_chr)
+
+        # Add LOH legend handle if any LOH was drawn
+        if drew_loh:
+            loh_handle = Patch(
+                alpha=0.12,
+                label="PureCN LOH segment (reduced allelic balance expected)",
+            )
+            handles, labels = ax2.get_legend_handles_labels()
+            ax2.legend(
+                handles + [loh_handle],
+                labels + [loh_handle.get_label()],
+                loc="upper right",
+                fontsize=7,
+            )
+
         ax2.set_xlabel(
             "Pseudo-position (highlighted genes expanded, other bins compressed)"
         )

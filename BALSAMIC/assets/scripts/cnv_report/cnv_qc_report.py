@@ -24,19 +24,18 @@ from cnv_io import (
 )
 
 from cnv_tables import (
-    build_gene_segment_table,
     build_gene_chunk_table,
     build_segment_table,
 )
 from cnv_report_plotting import plot_chromosomes
-from cnv_constants import GENE_TABLE_SPEC, TableSpec
+from cnv_constants import GENE_TABLE_SPEC, SEGMENT_TABLE_SPEC, TableSpec
 
 from BALSAMIC.constants.analysis import Gender, AnalysisType
 
 
 def render_cnv_report_html(
     *,
-    df_gene: pd.DataFrame,
+    df_segments: pd.DataFrame,
     out_html: str | Path,
     df_chunk: pd.DataFrame | None = None,
     df_purecn_summary: pd.DataFrame | None = None,
@@ -67,12 +66,11 @@ def render_cnv_report_html(
     diagram_data_uri = _png_to_data_uri(diagram_png)
 
     # ---- CNV/LOH sets used to badge chromosome plots
-    cnv_chr_set, _cnv_gene_set_unused, chr_col = _compute_cnv_sets(df_gene)
+    cnv_chr_set = _compute_cnv_sets(df_segments)
 
     # ---- Collect chromosome plot cards only
     plot_groups = _collect_chr_plot_groups(
         chr_plots_dir=chr_plots_dir,
-        chr_col=chr_col,
         cnv_chr_set=cnv_chr_set,
     )
 
@@ -94,28 +92,36 @@ def render_cnv_report_html(
         )
 
     # ---- Add column glossary
-    column_glossary_html = build_column_glossary_html(
-        df_gene=df_gene,
-        df_chunk=df_chunk,
+    segment_column_glossary_html = build_column_glossary_html(
+        table_df=df_segments,
+        spec=SEGMENT_TABLE_SPEC,
+    )
+
+    chunk_column_glossary_html = build_column_glossary_html(
+        table_df=df_chunk,
         spec=GENE_TABLE_SPEC,
     )
 
-    # ---- Main gene table
-    gene_table_html = df_gene.to_html(
-        index=False, border=0, classes="dataframe", table_id="report-table"
+    # ---- Main segments table
+    segments_table_html = df_for_html(df_segments).to_html(
+        index=False, border=0, classes="dataframe", table_id="report-table", na_rep=""
     )
 
     # ---- Optional chunk table
     has_chunk_table = df_chunk is not None and not df_chunk.empty
     chunk_table_html = ""
     if has_chunk_table:
-        chunk_table_html = df_chunk.to_html(
-            index=False, border=0, classes="dataframe", table_id="chunk-table"
+        chunk_table_html = df_for_html(df_chunk).to_html(
+            index=False,
+            border=0,
+            classes="dataframe",
+            table_id="chunk-table",
+            na_rep="",
         )
 
     # ---- Column index JSON maps for JS filtering
-    col_idx_gene_json = json.dumps(
-        {name: idx for idx, name in enumerate(df_gene.columns)}
+    col_idx_segments_json = json.dumps(
+        {name: idx for idx, name in enumerate(df_segments.columns)}
     )
     col_idx_chunk_json = (
         json.dumps({name: idx for idx, name in enumerate(df_chunk.columns)})
@@ -143,10 +149,11 @@ def render_cnv_report_html(
         css_text=css_text,
         js_text=js_text,
         # Tables (already HTML)
-        column_glossary_html=column_glossary_html,
+        segment_column_glossary_html=segment_column_glossary_html,
+        chunk_column_glossary_html=chunk_column_glossary_html,
         purecn_summary_html=purecn_summary_html,
         qc_summary_html=qc_summary_html,
-        gene_table_html=gene_table_html,
+        segments_table_html=segments_table_html,
         has_chunk_table=has_chunk_table,
         chunk_table_html=chunk_table_html,
         # Genome-wide plots
@@ -155,7 +162,7 @@ def render_cnv_report_html(
         # Chromosome plot cards only
         plot_groups=plot_groups,
         # JSON for JS
-        col_idx_gene_json=col_idx_gene_json,
+        col_idx_segments_json=col_idx_segments_json,
         col_idx_chunk_json=col_idx_chunk_json,
     )
 
@@ -165,6 +172,22 @@ def render_cnv_report_html(
 # =============================================================================
 # Helpers
 # =============================================================================
+
+
+def df_for_html(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Create a display-only copy where all missing values render as empty cells.
+    Does not modify the original DataFrame.
+    """
+    out = df.copy().astype("object")
+
+    # Replace true missing values
+    out = out.where(pd.notna(out), "")
+
+    # Remove literal "<NA>" strings if they exist
+    out[out == "<NA>"] = ""
+
+    return out
 
 
 def _read_text(path: Path) -> str:
@@ -216,7 +239,7 @@ def _is_amp_del(x: Any) -> bool:
     return _as_upper_str(x) in {"DELETION", "AMPLIFICATION"}
 
 
-def _compute_cnv_sets(df: pd.DataFrame) -> tuple[set[str], set[str], str | None]:
+def _compute_cnv_sets(df: pd.DataFrame) -> set[str]:
     """
     Return:
       - cnv_chr_set: chromosomes that have LOH/CNV calls
@@ -225,50 +248,26 @@ def _compute_cnv_sets(df: pd.DataFrame) -> tuple[set[str], set[str], str | None]
     """
     df_chr = df.copy()
 
-    if "chr" in df_chr.columns:
-        chr_col: str | None = "chr"
-    elif "chromosome" in df_chr.columns:
-        chr_col = "chromosome"
-    else:
-        chr_col = None
-
-    cnv_chr_set: set[str] = set()
-    cnv_gene_set: set[str] = set()
-
-    if chr_col is None:
-        return cnv_chr_set, cnv_gene_set, chr_col
-
-    if "gene.symbol" in df_chr.columns:
-        df_chr = df_chr[~df_chr["gene.symbol"].isin(["Antitarget", "-"])]
-
     cnv_mask = pd.Series(False, index=df_chr.index)
 
-    if "loh_flag" in df_chr.columns:
-        cnv_mask |= df_chr["loh_flag"].apply(_is_true_str)
-    if "cnvkit_cnv_call" in df_chr.columns:
-        cnv_mask |= df_chr["cnvkit_cnv_call"].apply(_is_amp_del)
-    if "purecn_cnv_call" in df_chr.columns:
-        cnv_mask |= df_chr["purecn_cnv_call"].apply(_is_amp_del)
+    if "purecn_type" in df_chr.columns:
+        cnv_mask |= df_chr["purecn_type"].notna()
+    if "cnv_call" in df_chr.columns:
+        cnv_mask |= df_chr["cnv_call"].apply(_is_amp_del)
 
-    cnv_chr_set = set(df_chr.loc[cnv_mask, chr_col].astype(str).tolist())
+    cnv_chr_set = set(df_chr.loc[cnv_mask, "chr"].astype(str).tolist())
 
-    if "gene.symbol" in df_chr.columns:
-        cnv_gene_set = set(df_chr.loc[cnv_mask, "gene.symbol"].astype(str).tolist())
-
-    return cnv_chr_set, cnv_gene_set, chr_col
+    return cnv_chr_set
 
 
 def _ordered_glossary_columns(
     *,
-    df_gene: pd.DataFrame,
-    df_chunk: pd.DataFrame | None,
+    df_chunk: pd.DataFrame,
     spec: TableSpec,
 ) -> list[str]:
     """Return glossary column names in TableSpec order, then extras."""
     # columns we actually need to describe (present in either table)
-    present: set[str] = set(df_gene.columns)
-    if df_chunk is not None and not df_chunk.empty:
-        present |= set(df_chunk.columns)
+    present: set[str] = set(df_chunk.columns)
 
     # 1) spec order (only those that exist)
     ordered = [c for c in spec.column_order if c in present]
@@ -280,15 +279,14 @@ def _ordered_glossary_columns(
 
 def build_column_glossary_html(
     *,
-    df_gene: pd.DataFrame,
-    df_chunk: pd.DataFrame | None,
+    table_df: pd.DataFrame | None,
     spec: TableSpec,
 ) -> str:
     """
     Build an HTML table describing columns in the same order as TableSpec.column_order,
     then any extra columns found in df_gene/df_chunk appended at the end.
     """
-    cols = _ordered_glossary_columns(df_gene=df_gene, df_chunk=df_chunk, spec=spec)
+    cols = _ordered_glossary_columns(df_chunk=table_df, spec=spec)
 
     rows = []
     for c in cols:
@@ -318,7 +316,6 @@ class PlotCard:
 def _collect_chr_plot_groups(
     *,
     chr_plots_dir: str | Path | None,
-    chr_col: str | None,
     cnv_chr_set: set[str],
 ) -> dict[str, list[dict[str, Any]]]:
     """
@@ -360,7 +357,7 @@ def _collect_chr_plot_groups(
             continue
 
         chr_label = _extract_chr_label_from_stem(stem)
-        has_cnv = bool(chr_col is not None and chr_label in cnv_chr_set)
+        has_cnv = bool(chr_label in cnv_chr_set)
         title = f"Chr {chr_label}"
 
         card = PlotCard(title=title, data_uri=data_uri, stem=stem, has_cnv=has_cnv)
@@ -539,7 +536,8 @@ def main(
     if pon:
         pon_df = load_pon_bins(pon)
     cytoband_df = load_cytobands(cytoband)
-    exon_map: Dict[Tuple[str, str], dict] = load_refgene_exons(refgene)
+
+    # exon_map: Dict[Tuple[str, str], dict] = load_refgene_exons(refgene)
 
     # ----------------------------
     # Create segment table
@@ -550,6 +548,7 @@ def main(
         cytoband_df=cytoband_df,
         sex=sex,
         cancer_genes=cancer_gene_set,
+        is_exome=is_exome,
         loh_regions_df=loh_regions_df,
     )
 
@@ -572,19 +571,14 @@ def main(
     # ----------------------------
     # Create per chunk table
     # ----------------------------
-    if pon_df is not None:
-        chunks_df = build_gene_chunk_table(
-            cnr_df=cnr_df,
-            cns_df=cns_df,
-            cytoband_df=cytoband_df,
-            exon_map=exon_map,
-            sex=sex,
-            pon_df=pon_df,
-            cancer_genes=cancer_gene_set,
-            loh_regions_df=loh_regions_df,
-        )
-    else:
-        chunks_df = None
+    chunks_df = build_gene_chunk_table(
+        cnr_df=cnr_df,
+        cns_df=cns_df,
+        sex=sex,
+        pon_df=pon_df,
+        cancer_genes=cancer_gene_set,
+        loh_regions_df=loh_regions_df,
+    )
 
     # --- 1) PureCN summary (from purity_csv) ---
     purecn_summary_df = read_purecn_summary(purity_csv)
@@ -610,7 +604,7 @@ def main(
     plot_chromosomes(
         cnr_df=cnr_df,
         vcf_path=vcf,
-        gdf=segments_df,
+        segments_df=segments_df,
         gchunk=chunks_df,
         outdir=chr_plots_dir,
         case_id=case_id,
@@ -621,14 +615,7 @@ def main(
     )
 
     if is_exome:
-        if (
-            chunks_df is not None
-            and not chunks_df.empty
-            and "is_cancer_gene" in chunks_df.columns
-        ):
-            chunks_df = chunks_df[
-                chunks_df["is_cancer_gene"].fillna(False).astype(bool)
-            ]
+        chunks_df = chunks_df[chunks_df["is_cancer_gene"].fillna(False).astype(bool)]
 
     # ----------------------------
     # HTML report

@@ -94,97 +94,88 @@
   {% endif %}
 
   {# --------------------- Column glossary --------------------- #}
-  <h2>Column glossary</h2>
+  <h2>Segment column glossary</h2>
   <p class="muted">
-    Descriptions of columns shown in the gene/chunk tables. Use this as a quick reference.
+    Descriptions of columns shown in the segment table. Use this as a quick reference.
   </p>
 
-  <button id="toggle-col-glossary" type="button">Show column glossary</button>
+  <button id="toggle-seg-col-glossary" type="button">Show segment column glossary</button>
 
-  <div id="col-glossary-container" style="display:none; margin-top:10px;">
-    {{ column_glossary_html | safe }}
+  <div id="seg-col-glossary-container" style="display:none; margin-top:10px;">
+    {{ segment_column_glossary_html | safe }}
   </div>
 
-  {# --------------------- Gene table --------------------- #}
-  <h1>LOH / CNV Genes (gene-level)</h1>
-  <button id="toggle-gene-table" type="button">Hide gene-level table</button>
+  {# --------------------- Segment table --------------------- #}
+<h1>CNV / LOH Segments</h1>
+<button id="toggle-segment-table" type="button">Hide segment table</button>
 
-  <div id="gene-table-container" style="margin-top:10px;">
-    <div class="controls">
-      <div class="control-group">
-        <label>
-          <input type="checkbox" id="hide-non-cnv">
-          Show only LOH / CNV genes (loh_flag not NA or CNV call ≠ NEUTRAL)
-        </label>
-        <label style="margin-left:12px;">
-          <input type="checkbox" id="only-cancer-genes">
-          Show only cancer genes (is_cancer_gene TRUE)
-        </label>
-      </div>
-      <div class="control-group">
-  <span class="control-label">Genomic range:</span>
-  <label style="margin-left:12px;">
-    Chr:
-    <input type="text" id="range-chr" placeholder="1" style="width:60px;">
-  </label>
-  <label style="margin-left:12px;">
-    Start:
-    <input type="number" id="range-start" min="0" step="1" placeholder="0">
-  </label>
-  <label style="margin-left:12px;">
-    End:
-    <input type="number" id="range-end" min="0" step="1" placeholder="250000000">
-  </label>
-</div>
+<div id="segment-table-container" style="margin-top:10px;">
+  <div class="controls">
+    <div class="control-group">
+      <label>
+        <input type="checkbox" id="hide-non-cnv-seg">
+        Show only CNV / LOH segments (purecn_type not NA or cnv_call ≠ NEUTRAL)
+      </label>
+    </div>
 
-  <button id="copy-gene-table" type="button">Copy visible rows</button>
+    <div class="control-group">
+      <span class="control-label">Genomic range:</span>
+      <label style="margin-left:12px;">
+        Chr:
+        <input type="text" id="range-chr-seg" placeholder="1" style="width:60px;">
+      </label>
+      <label style="margin-left:12px;">
+        Start:
+        <input type="number" id="range-start-seg" min="0" step="1" placeholder="0">
+      </label>
+      <label style="margin-left:12px;">
+        End:
+        <input type="number" id="range-end-seg" min="0" step="1" placeholder="250000000">
+      </label>
+    </div>
 
-  <div class="control-group">
-
-    <span class="control-label">Column detail:</span>
-
-    <label style="margin-left:12px;">
-      <input type="checkbox" id="cols-qc-gene">
-      QC details
-    </label>
-
-    <label style="margin-left:12px;">
-      <input type="checkbox" id="cols-pon-gene">
-      PON details
-    </label>
+    <div class="control-group">
+  <span class="control-label">Column detail:</span>
 
     <label style="margin-left:12px;">
       <input type="checkbox" id="cols-cnvkit-extra-gene">
       CNVkit extra
     </label>
 
-      <label style="margin-left:12px;">
+    <label style="margin-left:12px;">
       <input type="checkbox" id="cols-purecn-extra-gene">
       PureCN extra
     </label>
   </div>
 
-      <div class="control-group">
-        <label>
-          Min n.targets:
-          <input type="number" id="min-targets" min="0" step="1" value="0">
-        </label>
-      </div>
+    <button id="copy-segment-table" type="button">Copy visible rows</button>
 
-      <div class="control-group">
-        <label>
-          Gene filter (comma-separated gene.symbol list):
-          <input type="text" id="gene-filter" placeholder="TP53,EGFR,MYC">
-        </label>
-      </div>
+    <div class="control-group">
+      <label>
+        Gene filter (comma-separated):
+        <input type="text" id="gene-filter-seg" placeholder="TP53,EGFR,MYC">
+      </label>
     </div>
+  </div>
 
-    {{ gene_table_html | safe }}
+  {{ segments_table_html | safe }}
+</div>
+
+  <h2>Chunk column glossary</h2>
+  <p class="muted">
+    Descriptions of columns shown in the chunk table. Use this as a quick reference.
+  </p>
+
+  <button id="toggle-chunk-col-glossary" type="button" style="margin-top:8px;">
+    Show chunk glossary
+  </button>
+  <div id="chunk-col-glossary-container" style="display:none; margin-top:10px;">
+    {{ chunk_column_glossary_html | safe }}
   </div>
 
   {# --------------------- Chunk section --------------------- #}
   {% if has_chunk_table %}
-    <h2>Within-gene PON-driven chunks (optional detail)</h2>
+    <h2>Within-gene PON-driven chunks</h2>
     <p class="muted">
       These rows represent sub-gene chunks defined by PON-based deviation (log2 vs panel-of-normals),
       for genes in the main table. Filters below apply only to this chunk-level table.
@@ -278,8 +269,8 @@
   </div>
 
   <script>
-  // Injected from Python (make them properties so refactored JS can read them)
-  globalThis.colIndexGene  = {{ col_idx_gene_json | safe }};
+  // Injected from Python (make them properties so JS can read them)
+  globalThis.colIndexSegments  = {{ col_idx_segments_json | safe }};
   globalThis.colIndexChunk = {{ col_idx_chunk_json | safe }};
 
   {{ js_text | safe }}
