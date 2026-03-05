@@ -17,55 +17,6 @@ from matplotlib.patches import Patch
 from cnv_io import load_vcf_with_vaf
 
 
-def _compute_gene_level_highlights(
-    gdf: pd.DataFrame,
-    targets_col: str,
-    highlight_only_cancer: bool,
-    min_gene_targets: int = 5,
-    min_gene_targets_cancer: int = 5,
-) -> pd.DataFrame:
-    """
-    Decide which genes should be highlighted.
-
-    Rules:
-      1) Cancer genes are ALWAYS highlighted if they meet the cancer target threshold.
-      2) If highlight_only_cancer is False, also highlight non-cancer genes with LOH/CNV
-         if they meet the non-cancer target threshold.
-    """
-
-    grouped = gdf.groupby(["chr", "gene.symbol"], as_index=False)
-    gene_level = grouped.agg(
-        has_loh_or_cnv=("is_loh_or_cnv", "any"),
-        is_cancer_gene=("is_cancer_gene", "any"),
-        total_targets=(targets_col, "sum"),
-    )
-
-    gene_level["total_targets"] = gene_level["total_targets"].fillna(0.0)
-    gene_level["is_cancer_gene"] = (
-        gene_level["is_cancer_gene"].fillna(False).astype(bool)
-    )
-
-    # 1) Cancer genes: always highlight if enough targets
-    cancer_ok = gene_level["is_cancer_gene"] & (
-        gene_level["total_targets"] >= min_gene_targets_cancer
-    )
-
-    # 2) Non-cancer CNV/LOH genes: optionally highlight if enough targets
-    noncancer_cnv_ok = (
-        (~gene_level["is_cancer_gene"])
-        & gene_level["has_loh_or_cnv"]
-        & (gene_level["total_targets"] >= min_gene_targets)
-    )
-
-    if highlight_only_cancer:
-        mask_highlight = cancer_ok
-    else:
-        mask_highlight = cancer_ok | noncancer_cnv_ok
-
-    gene_level["highlight_gene"] = mask_highlight
-    return gene_level
-
-
 def _pos_to_xcoord_fn(sub: pd.DataFrame) -> callable:
     """
     Build genomic position → pseudo-position mapping function.
@@ -87,38 +38,6 @@ def _pos_to_xcoord_fn(sub: pd.DataFrame) -> callable:
         return float(x_coords[idx])
 
     return pos_to_xcoord
-
-
-def _collect_segments_for_chr(
-    g_chr: pd.DataFrame, chr_name: str, y_clip: float
-) -> pd.DataFrame:
-    """
-    Aggregate unique CNV segments from gene-level rows for plotting.
-
-    Supports:
-      - seg_log2
-      - CNVkit calls
-
-    Adds clipped values for plotting stability.
-
-    Returns per-segment dataframe.
-    """
-
-    agg: dict[str, tuple[str, str]] = {}
-
-    agg["cnvkit_seg_raw_log2"] = ("cnvkit_seg_raw_log2", "first")
-    agg["cnvkit_cnv_call"] = ("cnvkit_cnv_call", "first")
-
-    segs = (
-        g_chr.dropna(subset=["cnvkit_seg_start", "cnvkit_seg_end"])
-        .groupby(["chr", "cnvkit_seg_start", "cnvkit_seg_end"], as_index=False)
-        .agg(**agg)
-    )
-    segs = segs[segs["chr"] == chr_name].sort_values("cnvkit_seg_start").copy()
-
-    segs["cnvkit_seg_log2_clipped"] = segs["cnvkit_seg_raw_log2"].clip(-y_clip, y_clip)
-
-    return segs
 
 
 def _stable_gene_color_fn(cmap_name: str = "tab20"):
