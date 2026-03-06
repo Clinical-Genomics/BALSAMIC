@@ -12,11 +12,23 @@ h1, h2, h3 {
   font-size: 13px;
 }
 
+.warning-box {
+  background: #fff4e5;
+  border-left: 4px solid #f59e0b;
+  padding: 10px 14px;
+  margin: 12px 0;
+  border-radius: 4px;
+}
+
+.warning-box strong {
+  color: #92400e;
+}
+
 .report-meta {
   margin: 12px 0 18px 0;
   padding: 10px 14px;
   border-left: 4px solid #2b6cb0;
-  background-color: #f4f7fb;
+  background-color: #ecfdf3;
   font-size: 14px;
 }
 
@@ -53,6 +65,15 @@ button {
 
 label {
   font-size: 13px;
+}
+
+.note-box {
+  background: #f0f6ff;
+  border-left: 4px solid #3b82f6;
+  padding: 10px 14px;
+  margin-top: 10px;
+  border-radius: 4px;
+  font-size: 0.95rem;
 }
 
 #column-glossary-table td:nth-child(1),

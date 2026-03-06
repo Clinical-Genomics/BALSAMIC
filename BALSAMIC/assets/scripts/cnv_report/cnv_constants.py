@@ -1,8 +1,7 @@
-CHR = "chr"
-
-
 from dataclasses import dataclass, field
 from typing import Mapping, Sequence
+
+CHR = "chr"
 
 
 @dataclass(frozen=True)
@@ -189,4 +188,12 @@ GENE_TABLE_SPEC = TableSpec(
         "pon_chunk_significance": "Significance classification of chunk-level PON deviation.",
         "pon_chunk_indication": "Interpretation of chunk-level deviation based on PON (e.g., GAIN/LOSS/NEUTRAL).",
     },
+)
+
+PURECN_WARNING_TEXT = (
+    "PureCN failed to identify a reliable final purity/ploidy model for this sample. "
+    "The displayed purity and ploidy values are default fallback values and should not "
+    "be interpreted as inferred sample-specific estimates. "
+    "Furthermore, CNVkit Copy Number determination which is based on PureCN purity is also unreliable. "
+    "Finally; PureCN CNV segments will not be produced, and LOH will not be indicated. "
 )

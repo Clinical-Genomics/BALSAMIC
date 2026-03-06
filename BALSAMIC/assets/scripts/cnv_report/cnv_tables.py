@@ -18,20 +18,10 @@ def finalize_table(df: pd.DataFrame, spec: TableSpec) -> pd.DataFrame:
     """
     out = df.copy()
 
-    # 1) Rename (only if present)
-    if spec.renames:
-        present = {
-            k: v
-            for k, v in spec.renames.items()
-            if k in out.columns and v not in out.columns
-        }
-        if present:
-            out = out.rename(columns=present)
-
-    # 2) Reorder columns (keep extras at end)
+    # 1) Reorder columns (keep extras at end)
     out = _reorder_columns(out, list(spec.column_order))
 
-    # 3) Round floats
+    # 2) Round floats
     existing_floats = [c for c in spec.float_columns if c in out.columns]
     if existing_floats:
         out[existing_floats] = (
@@ -40,7 +30,7 @@ def finalize_table(df: pd.DataFrame, spec: TableSpec) -> pd.DataFrame:
             .round(spec.decimals)
         )
 
-    # 4) Sort
+    # 3) Sort
     chr_col, start_col, end_col = spec.sort_keys
     if all(c in out.columns for c in (chr_col, start_col, end_col)):
         out = _stable_sort_by_chr_interval(out, chr_col, start_col, end_col)
@@ -194,6 +184,10 @@ def add_cnv_calls_wide(
     out_purecn_col: str = "purecn_cnv_call",
 ) -> pd.DataFrame:
     out = df.copy()
+
+    # Always create output columns so downstream code can rely on them
+    out[out_cnvkit_col] = pd.NA
+    out[out_purecn_col] = pd.NA
 
     if cnvkit_total_cn_col in out.columns:
         out[out_cnvkit_col] = out.apply(

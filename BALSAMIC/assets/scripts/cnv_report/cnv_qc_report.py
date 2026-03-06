@@ -9,7 +9,6 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 import click
 import numpy as np
 import pandas as pd
-from typing import Dict, Tuple
 
 from cnv_summary_metrics import read_purecn_summary, compute_summary_metrics
 from cnv_report_utils import pdf_first_page_to_png
@@ -28,7 +27,12 @@ from cnv_tables import (
     build_segment_table,
 )
 from cnv_report_plotting import plot_chromosomes
-from cnv_constants import GENE_TABLE_SPEC, SEGMENT_TABLE_SPEC, TableSpec
+from cnv_constants import (
+    GENE_TABLE_SPEC,
+    SEGMENT_TABLE_SPEC,
+    TableSpec,
+    PURECN_WARNING_TEXT,
+)
 
 from BALSAMIC.constants.analysis import Gender, AnalysisType
 
@@ -48,16 +52,6 @@ def render_cnv_report_html(
 ) -> None:
     """
     Render a standalone CNV QC HTML report using a Jinja2 template + embedded CSS/JS assets.
-
-    Includes:
-      - Optional genome-wide CNVkit scatter/diagram PNGs (embedded as base64 data URIs)
-      - Optional per-chromosome plot cards (cnv_chr*segments.png) (NO gene-level plots)
-      - Gene-level and optional chunk-level DataFrame tables (Pandas to_html)
-      - Client-side filtering and plot modal viewer
-
-    Notes:
-      - Column index maps are injected as JSON for JS filtering logic.
-      - Plot cards are structured data; template loops and renders the HTML.
     """
     out_path = Path(out_html)
 
@@ -74,13 +68,44 @@ def render_cnv_report_html(
         cnv_chr_set=cnv_chr_set,
     )
 
-    # ---- Summary tables (optional)
+    # ---- PureCN summary table + warning state
     purecn_summary_html = ""
+    purecn_failed = False
+    purecn_failed_warning_text = ""
+
     if df_purecn_summary is not None and not df_purecn_summary.empty:
-        purecn_summary_html = df_purecn_summary.to_html(
-            index=False, border=0, classes="dataframe", table_id="purecn-summary-table"
+        purecn_display = df_purecn_summary.copy()
+
+        if "Comment" in purecn_display.columns:
+            failed_mask = (
+                purecn_display["Comment"]
+                .astype("string")
+                .str.contains("FAILED PURITY ESTIMATION", case=False, na=False)
+            )
+
+        purecn_failed = bool(failed_mask.any())
+
+        if purecn_failed:
+            if "Purity" in purecn_display.columns:
+                purecn_display.loc[failed_mask, "Purity"] = purecn_display.loc[
+                    failed_mask, "Purity"
+                ].map(lambda x: f"{x} (default fallback 20% purity)")
+
+            if "Ploidy" in purecn_display.columns:
+                purecn_display.loc[failed_mask, "Ploidy"] = purecn_display.loc[
+                    failed_mask, "Ploidy"
+                ].map(lambda x: f"{x} (default fallback 2 ploidy)")
+
+            purecn_failed_warning_text = PURECN_WARNING_TEXT
+
+        purecn_summary_html = purecn_display.to_html(
+            index=False,
+            border=0,
+            classes="dataframe",
+            table_id="purecn-summary-table",
         )
 
+    # ---- QC summary table
     qc_summary_html = ""
     if df_qc_summary is not None and not df_qc_summary.empty:
         qc_display = df_qc_summary.copy()
@@ -148,7 +173,6 @@ def render_cnv_report_html(
         normalisation_method=normalisation_method,
         css_text=css_text,
         js_text=js_text,
-        # Tables (already HTML)
         segment_column_glossary_html=segment_column_glossary_html,
         chunk_column_glossary_html=chunk_column_glossary_html,
         purecn_summary_html=purecn_summary_html,
@@ -156,14 +180,13 @@ def render_cnv_report_html(
         segments_table_html=segments_table_html,
         has_chunk_table=has_chunk_table,
         chunk_table_html=chunk_table_html,
-        # Genome-wide plots
         scatter_data_uri=scatter_data_uri,
         diagram_data_uri=diagram_data_uri,
-        # Chromosome plot cards only
         plot_groups=plot_groups,
-        # JSON for JS
         col_idx_segments_json=col_idx_segments_json,
         col_idx_chunk_json=col_idx_chunk_json,
+        purecn_failed=purecn_failed,
+        purecn_warning_text=purecn_failed_warning_text,
     )
 
     out_path.write_text(html, encoding="utf-8")
@@ -369,7 +392,7 @@ def _collect_chr_plot_groups(
 @click.command()
 @click.option(
     "--loh-regions",
-    type=click.Path(exists=True),
+    type=click.Path(exists=False),
     required=False,
     help="PureCN LOH regions CSV",
 )
@@ -470,7 +493,7 @@ def _collect_chr_plot_groups(
     help="Paired / Single",
 )
 def main(
-    loh_regions: Optional[str],
+    loh_regions: str,
     cnr: str,
     cns: str,
     cns_init: str,
@@ -530,7 +553,7 @@ def main(
     cnr_df = load_cnr_bins(cnr)
     cns_df = load_cnvkit_segments_with_raw(cns, cns_init)
     loh_regions_df = None
-    if loh_regions:
+    if Path(loh_regions).is_file():
         loh_regions_df = load_purecn_segments(loh_regions)
     pon_df = None
     if pon:

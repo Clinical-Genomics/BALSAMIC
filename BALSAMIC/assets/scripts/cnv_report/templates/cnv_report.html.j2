@@ -1,280 +1,289 @@
 {% macro plot_card(card) -%}
-  <div class="plot-card {{ 'plot-card-cnv' if card.has_cnv else 'plot-card-normal' }}">
-    <div class="plot-header">
-      <span class="plot-title">{{ card.title }}</span>
-      {% if card.has_cnv %}
-        <span class="plot-badge">CNV</span>
-      {% endif %}
+    <div class="plot-card {{ 'plot-card-cnv' if card.has_cnv else 'plot-card-normal' }}">
+        <div class="plot-header">
+            <span class="plot-title">{{ card.title }}</span>
+            {% if card.has_cnv %}<span class="plot-badge">CNV</span>{% endif %}
+        </div>
+        <img src="{{ card.data_uri }}"
+             alt="QC plot {{ card.stem }}"
+             class="clickable-plot"
+             style="max-width:100%;
+                    height:auto;
+                    display:block;
+                    cursor:pointer" />
     </div>
-    <img
-      src="{{ card.data_uri }}"
-      alt="QC plot {{ card.stem }}"
-      class="clickable-plot"
-      style="max-width:100%; height:auto; display:block; cursor:pointer;"
-    />
-  </div>
 {%- endmacro %}
-
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>{{ title }}</title>
-  <style>
-{{ css_text }}
-  </style>
-</head>
-<body>
-
-  <h1>{{ title }}</h1>
-
-
-  <div class="report-meta">
-  <span class="meta-label">Normalisation method</span>
-  <span class="meta-value">{{ normalisation_method }}</span>
-  </div>
-
-  <h2>PureCN sample summary</h2>
-  {{ purecn_summary_html | safe }}
-
-  <h2>CNV / QC summary</h2>
-  <p class="muted">
-    Additional metrics derived from CNVkit CNR/CNN and gene-level segments,
-    including DLR-like noise, standard deviation of adjacent Target Log2-ratios, and PON spread summaries.
-  </p>
-  {{ qc_summary_html | safe }}
-
-  {# --------------------- Genome-wide plots --------------------- #}
-  {% if scatter_data_uri or diagram_data_uri %}
-    <h2>Genome-wide CNVkit plots</h2>
-
-    {% if scatter_data_uri %}
-      <h3>CNVkit scatter</h3>
-      <div class="plot-frame">
-        <img src="{{ scatter_data_uri }}" alt="CNVkit scatter" class="clickable-plot plot-fullwidth" />
-      </div>
-    {% endif %}
-
-    {% if diagram_data_uri %}
-      <h3>CNVkit diagram</h3>
-      <div class="plot-frame">
-        <img src="{{ diagram_data_uri }}" alt="CNVkit diagram" class="clickable-plot plot-fullwidth" />
-      </div>
-    {% endif %}
-  {% endif %}
-
-  {# --------------------- Chromosome plots only --------------------- #}
-  {% set chr_with = plot_groups.get("chr_with_cnv", []) %}
-  {% set chr_no   = plot_groups.get("chr_no_cnv", []) %}
-
-  {% if chr_with or chr_no %}
-    <h2>Per-chromosome CNV plots</h2>
-    <p class="muted">
-      These plots show log2 coverage, PON spread (if available), BAF and segments/genes per chromosome.
-      Plots containing CNV / LOH genes are highlighted. Click any plot to view it in a larger overlay.
-    </p>
-
-    {% if chr_with %}
-      <h3>Chromosomes with CNV / LOH</h3>
-      <div class="plot-grid">
-        {% for card in chr_with %}
-          {{ plot_card(card) }}
-        {% endfor %}
-      </div>
-    {% endif %}
-
-    {% if chr_no %}
-      <h3>Chromosomes without CNV / LOH</h3>
-      <div class="plot-grid">
-        {% for card in chr_no %}
-          {{ plot_card(card) }}
-        {% endfor %}
-      </div>
-    {% endif %}
-  {% endif %}
-
-  {# --------------------- Column glossary --------------------- #}
-  <h2>Segment column glossary</h2>
-  <p class="muted">
-    Descriptions of columns shown in the segment table. Use this as a quick reference.
-  </p>
-
-  <button id="toggle-seg-col-glossary" type="button">Show segment column glossary</button>
-
-  <div id="seg-col-glossary-container" style="display:none; margin-top:10px;">
-    {{ segment_column_glossary_html | safe }}
-  </div>
-
-  {# --------------------- Segment table --------------------- #}
-<h1>CNV / LOH Segments</h1>
-<button id="toggle-segment-table" type="button">Hide segment table</button>
-
-<div id="segment-table-container" style="margin-top:10px;">
-  <div class="controls">
-    <div class="control-group">
-      <label>
-        <input type="checkbox" id="hide-non-cnv-seg">
-        Show only CNV / LOH segments (purecn_type not NA or cnv_call ≠ NEUTRAL)
-      </label>
-    </div>
-
-    <div class="control-group">
-      <span class="control-label">Genomic range:</span>
-      <label style="margin-left:12px;">
-        Chr:
-        <input type="text" id="range-chr-seg" placeholder="1" style="width:60px;">
-      </label>
-      <label style="margin-left:12px;">
-        Start:
-        <input type="number" id="range-start-seg" min="0" step="1" placeholder="0">
-      </label>
-      <label style="margin-left:12px;">
-        End:
-        <input type="number" id="range-end-seg" min="0" step="1" placeholder="250000000">
-      </label>
-    </div>
-
-    <div class="control-group">
-  <span class="control-label">Column detail:</span>
-
-    <label style="margin-left:12px;">
-      <input type="checkbox" id="cols-cnvkit-extra-gene">
-      CNVkit extra
-    </label>
-
-    <label style="margin-left:12px;">
-      <input type="checkbox" id="cols-purecn-extra-gene">
-      PureCN extra
-    </label>
-  </div>
-
-    <button id="copy-segment-table" type="button">Copy visible rows</button>
-
-    <div class="control-group">
-      <label>
-        Gene filter (comma-separated):
-        <input type="text" id="gene-filter-seg" placeholder="TP53,EGFR,MYC">
-      </label>
-    </div>
-  </div>
-
-  {{ segments_table_html | safe }}
-</div>
-
-  <h2>Chunk column glossary</h2>
-  <p class="muted">
-    Descriptions of columns shown in the chunk table. Use this as a quick reference.
-  </p>
-
-  <button id="toggle-chunk-col-glossary" type="button" style="margin-top:8px;">
-    Show chunk glossary
-  </button>
-  <div id="chunk-col-glossary-container" style="display:none; margin-top:10px;">
-    {{ chunk_column_glossary_html | safe }}
-  </div>
-
-  {# --------------------- Chunk section --------------------- #}
-  {% if has_chunk_table %}
-    <h2>Within-gene PON-driven chunks</h2>
-    <p class="muted">
-      These rows represent sub-gene chunks defined by PON-based deviation (log2 vs panel-of-normals),
-      for genes in the main table. Filters below apply only to this chunk-level table.
-    </p>
-
-    <button id="toggle-chunk-table" type="button">Show chunk-level table</button>
-
-    <div id="chunk-table-container" style="display:none; margin-top:10px;">
-      <div class="controls">
-        <div class="control-group">
-          <label>
-            <input type="checkbox" id="hide-non-cnv-chunk">
-            Show only LOH / CNV chunks (loh_flag not NA or CNV call ≠ NEUTRAL)
-          </label>
-          <label style="margin-left:12px;">
-          <input type="checkbox" id="only-pon-indication-chunk">
-          Include PON-indicated chunks (pon_chunk_indication ≠ NEUTRAL)
-        </label>
-          <label style="margin-left:12px;">
-            <input type="checkbox" id="only-cancer-genes-chunk">
-            Show only cancer genes (is_cancer_gene TRUE)
-          </label>
+    <head>
+        <meta charset="utf-8">
+        <title>{{ title }}</title>
+        <style>{{ css_text }}</style>
+    </head>
+    <body>
+        <h1>{{ title }}</h1>
+        <div class="report-meta">
+            <span class="meta-label">Normalisation method</span>
+            <span class="meta-value">{{ normalisation_method }}</span>
         </div>
-        <div class="control-group">
-        <span class="control-label">Genomic range:</span>
-        <label style="margin-left:12px;">
-          Chr:
-          <input type="text" id="range-chr-chunk" placeholder="1" style="width:60px;">
-        </label>
-        <label style="margin-left:12px;">
-          Start:
-          <input type="number" id="range-start-chunk" min="0" step="1" placeholder="0">
-        </label>
-        <label style="margin-left:12px;">
-          End:
-          <input type="number" id="range-end-chunk" min="0" step="1" placeholder="250000000">
-        </label>
-      </div>
-        <div class="control-group">
-          <label>
-            Min n.targets:
-            <input type="number" id="min-targets-chunk" min="0" step="1" value="0">
-          </label>
+        <h2>PureCN sample summary</h2>
+
+        {% if purecn_failed %}
+          <div class="warning-box">
+            <strong>Warning:</strong>
+            {{ purecn_warning_text }}
+          </div>
+        {% endif %}
+
+        {{ purecn_summary_html | safe }}
+        <div class="note-box">
+            <p>
+                <strong>Purity:</strong>
+                Estimated Purity based on best fitting model.
+            </p>
+            <p>
+                <strong>Ploidy:</strong>
+                Estimated Ploidy based on best fitting model.
+            </p>
+            <p>
+                <strong>Sex:</strong>
+                Predicted Sex based on relative coverage of X and Y compared to autosomal chromosomes. (M = Male, F = Female)
+            </p>
+            <p>
+                <strong>Contamination:</strong>
+                Estimated sample cross-contamination.
+            </p>
+            <p>
+                <strong>Flagged:</strong>
+                Set to True if PureCN has flagged the analysis due to some quality control metric. See comment.
+            </p>
+            <p>
+                <strong>Failed:</strong>
+                Set to True if PureCN failed to find a reliable final purity and ploidy model for the sample.
+            </p>
+            <p>
+              <strong>Comment:</strong>
+              Quality control comment reported by PureCN, such as <em>Low purity</em> or
+              <em>Noisy log-ratio</em>. See Table 5 in the
+              <a href="https://mirror.accum.se/mirror/bioconductor.org/packages/3.21/bioc/vignettes/PureCN/inst/doc/PureCN.pdf" target="_blank" rel="noopener">
+                PureCN manual
+              </a>.
+            </p>
         </div>
-
-  <button id="copy-chunk-table" type="button">Copy visible rows</button>
-
-  <div class="control-group">
-
-  <span class="control-label">Column detail:</span>
-
-  <label style="margin-left:12px;">
-    <input type="checkbox" id="cols-qc-chunk">
-    QC details
-  </label>
-
-  <label style="margin-left:12px;">
-    <input type="checkbox" id="cols-pon-chunk">
-    PON details
-  </label>
-
-  <label style="margin-left:12px;">
-    <input type="checkbox" id="cols-cnvkit-extra-chunk">
-    CNVkit extra
-  </label>
-
-    <label style="margin-left:12px;">
-    <input type="checkbox" id="cols-purecn-extra-chunk">
-    PureCN extra
-  </label>
-</div>
-
-        <div class="control-group">
-          <label>
-            Gene filter (comma-separated gene.symbol list):
-            <input type="text" id="gene-filter-chunk" placeholder="TP53,EGFR,MYC">
-          </label>
+        <h2>CNV / QC summary</h2>
+        {{ qc_summary_html | safe }}
+        <div class="note-box">
+            <p>
+                <strong>Log2 noise (DLR-like):</strong>
+                Estimate of local CNV noise calculated from log2 differences between adjacent bins within each chromosome.
+            </p>
+            <p>
+                <strong>Targets total:</strong>
+                Total number of targets  <em>(probes in panel design)</em> kept for the CNV analysis.
+            </p>
+            <p>
+                <strong>Targets filtered:</strong>
+                Number of targets  <em>(probes in panel design)</em> filtered out due to quality issues such as extreme GC or high log2 spread in normal samples used to construct the PON.
+            </p>
         </div>
-      </div>
-
-      {{ chunk_table_html | safe }}
-    </div>
-  {% endif %}
-
-  {# --------------------- Modal --------------------- #}
-  <div id="plot-modal" class="modal-overlay">
-    <div class="modal-content-wrapper">
-      <span class="modal-close" id="plot-modal-close">&times;</span>
-      <img id="plot-modal-image" class="modal-image" src="" alt="Enlarged plot">
-    </div>
-  </div>
-
-  <script>
+        {# --------------------- Genome-wide plots --------------------- #}
+        {% if scatter_data_uri or diagram_data_uri %}
+            <h2>Genome-wide CNVkit plots</h2>
+            {% if scatter_data_uri %}
+                <h3>CNVkit scatter</h3>
+                <div class="plot-frame">
+                    <img src="{{ scatter_data_uri }}"
+                         alt="CNVkit scatter"
+                         class="clickable-plot plot-fullwidth" />
+                </div>
+            {% endif %}
+            {% if diagram_data_uri %}
+                <h3>CNVkit diagram</h3>
+                <div class="plot-frame">
+                    <img src="{{ diagram_data_uri }}"
+                         alt="CNVkit diagram"
+                         class="clickable-plot plot-fullwidth" />
+                </div>
+            {% endif %}
+        {% endif %}
+        {# --------------------- Chromosome plots only --------------------- #}
+        {% set chr_with = plot_groups.get("chr_with_cnv", []) %}
+        {% set chr_no = plot_groups.get("chr_no_cnv", []) %}
+        {% if chr_with or chr_no %}
+            <h2>Per-chromosome CNV plots</h2>
+            <div class="note-box">
+                These plots show log2 coverage, PON spread (if available), VAF and segments/genes per chromosome.
+                Plots containing CNV / LOH genes are highlighted. Click any plot to view it in a larger overlay.
+            </div>
+            {% if chr_with %}
+                <h3>Chromosomes with CNV / LOH</h3>
+                <div class="plot-grid">
+                    {% for card in chr_with %}{{ plot_card(card) }}{% endfor %}
+                </div>
+            {% endif %}
+            {% if chr_no %}
+                <h3>Chromosomes without CNV / LOH</h3>
+                <div class="plot-grid">
+                    {% for card in chr_no %}{{ plot_card(card) }}{% endfor %}
+                </div>
+            {% endif %}
+        {% endif %}
+        {# --------------------- Column glossary --------------------- #}
+        <h2>Segment column glossary</h2>
+        <div class="note-box">Descriptions of columns shown in the segment table. Use this as a quick reference.</div>
+        <button id="toggle-seg-col-glossary" type="button">Show segment column glossary</button>
+        <div id="seg-col-glossary-container"
+             style="display:none;
+                    margin-top:10px">{{ segment_column_glossary_html | safe }}</div>
+        {# --------------------- Segment table --------------------- #}
+        <h1>CNV / LOH Segments</h1>
+        <button id="toggle-segment-table" type="button">Hide segment table</button>
+        <div id="segment-table-container" style="margin-top:10px;">
+            <div class="controls">
+                <div class="control-group">
+                    <label>
+                        <input type="checkbox" id="hide-non-cnv-seg">
+                        Show only CNV / LOH segments (purecn_type not NA or cnv_call ≠ NEUTRAL)
+                    </label>
+                </div>
+                <div class="control-group">
+                    <span class="control-label">Genomic range:</span>
+                    <label style="margin-left:12px;">
+                        Chr:
+                        <input type="text" id="range-chr-seg" placeholder="1" style="width:60px;">
+                    </label>
+                    <label style="margin-left:12px;">
+                        Start:
+                        <input type="number" id="range-start-seg" min="0" step="1" placeholder="0">
+                    </label>
+                    <label style="margin-left:12px;">
+                        End:
+                        <input type="number"
+                               id="range-end-seg"
+                               min="0"
+                               step="1"
+                               placeholder="250000000">
+                    </label>
+                </div>
+                <div class="control-group">
+                    <span class="control-label">Column detail:</span>
+                    <label style="margin-left:12px;">
+                        <input type="checkbox" id="cols-cnvkit-extra-gene">
+                        CNVkit extra
+                    </label>
+                    <label style="margin-left:12px;">
+                        <input type="checkbox" id="cols-purecn-extra-gene">
+                        PureCN extra
+                    </label>
+                </div>
+                <button id="copy-segment-table" type="button">Copy visible rows</button>
+                <div class="control-group">
+                    <label>
+                        Gene filter (comma-separated):
+                        <input type="text" id="gene-filter-seg" placeholder="TP53,EGFR,MYC">
+                    </label>
+                </div>
+            </div>
+            {{ segments_table_html | safe }}
+        </div>
+        <h2>Chunk column glossary</h2>
+        <div class="note-box">Descriptions of columns shown in the chunk table. Use this as a quick reference.</div>
+        <button id="toggle-chunk-col-glossary" type="button" style="margin-top:8px;">Show chunk glossary</button>
+        <div id="chunk-col-glossary-container"
+             style="display:none;
+                    margin-top:10px">{{ chunk_column_glossary_html | safe }}</div>
+        {# --------------------- Chunk section --------------------- #}
+        {% if has_chunk_table %}
+            <h2>Within-gene PON-driven chunks</h2>
+            <div class="note-box">
+                These rows represent sub-gene chunks defined by PON-based deviation (log2 vs panel-of-normals),
+                for genes in the main table. Filters below apply only to this chunk-level table.
+            </div>
+            <button id="toggle-chunk-table" type="button">Show chunk-level table</button>
+            <div id="chunk-table-container" style="display:none; margin-top:10px;">
+                <div class="controls">
+                    <div class="control-group">
+                        <label>
+                            <input type="checkbox" id="hide-non-cnv-chunk">
+                            Show only LOH / CNV chunks (loh_flag not NA or CNV call ≠ NEUTRAL)
+                        </label>
+                        <label style="margin-left:12px;">
+                            <input type="checkbox" id="only-pon-indication-chunk">
+                            Include PON-indicated chunks (pon_chunk_indication ≠ NEUTRAL)
+                        </label>
+                        <label style="margin-left:12px;">
+                            <input type="checkbox" id="only-cancer-genes-chunk">
+                            Show only cancer genes (is_cancer_gene TRUE)
+                        </label>
+                    </div>
+                    <div class="control-group">
+                        <span class="control-label">Genomic range:</span>
+                        <label style="margin-left:12px;">
+                            Chr:
+                            <input type="text" id="range-chr-chunk" placeholder="1" style="width:60px;">
+                        </label>
+                        <label style="margin-left:12px;">
+                            Start:
+                            <input type="number" id="range-start-chunk" min="0" step="1" placeholder="0">
+                        </label>
+                        <label style="margin-left:12px;">
+                            End:
+                            <input type="number"
+                                   id="range-end-chunk"
+                                   min="0"
+                                   step="1"
+                                   placeholder="250000000">
+                        </label>
+                    </div>
+                    <div class="control-group">
+                        <label>
+                            Min n.targets:
+                            <input type="number" id="min-targets-chunk" min="0" step="1" value="0">
+                        </label>
+                    </div>
+                    <button id="copy-chunk-table" type="button">Copy visible rows</button>
+                    <div class="control-group">
+                        <span class="control-label">Column detail:</span>
+                        <label style="margin-left:12px;">
+                            <input type="checkbox" id="cols-qc-chunk">
+                            QC details
+                        </label>
+                        <label style="margin-left:12px;">
+                            <input type="checkbox" id="cols-pon-chunk">
+                            PON details
+                        </label>
+                        <label style="margin-left:12px;">
+                            <input type="checkbox" id="cols-cnvkit-extra-chunk">
+                            CNVkit extra
+                        </label>
+                        <label style="margin-left:12px;">
+                            <input type="checkbox" id="cols-purecn-extra-chunk">
+                            PureCN extra
+                        </label>
+                    </div>
+                    <div class="control-group">
+                        <label>
+                            Gene filter (comma-separated gene.symbol list):
+                            <input type="text" id="gene-filter-chunk" placeholder="TP53,EGFR,MYC">
+                        </label>
+                    </div>
+                </div>
+                {{ chunk_table_html | safe }}
+            </div>
+        {% endif %}
+        {# --------------------- Modal --------------------- #}
+        <div id="plot-modal" class="modal-overlay">
+            <div class="modal-content-wrapper">
+                <span class="modal-close" id="plot-modal-close">&times;</span>
+                <img id="plot-modal-image" class="modal-image" src="" alt="Enlarged plot">
+            </div>
+        </div>
+        <script>
   // Injected from Python (make them properties so JS can read them)
   globalThis.colIndexSegments  = {{ col_idx_segments_json | safe }};
   globalThis.colIndexChunk = {{ col_idx_chunk_json | safe }};
 
   {{ js_text | safe }}
-</script>
-
-</body>
+        </script>
+    </body>
 </html>
