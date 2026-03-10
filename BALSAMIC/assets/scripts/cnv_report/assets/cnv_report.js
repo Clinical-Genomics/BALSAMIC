@@ -148,7 +148,7 @@
 
   const DEFAULT_GROUP_STATE = {
     "report-table": { qc: false, pon: false, cnvkit: false, purecn: false },
-    "region-table": { qc: false, pon: true, cnvkit: false, purecn: false },
+    "region-table": { qc: false, pon: false, cnvkit: false, purecn: false },
   };
 
   function columnsMatchingPrefixes(colIndex, prefixes) {
@@ -290,7 +290,7 @@
 
   function rowHasCnvOrLoh(row, colIndex) {
   // LOH for both tables: PureCN type present (non-empty)
-  const lohIdx = getIdx(colIndex, "purecn_type");
+  const lohIdx = getIdx(colIndex, "PureCN segment LOH-type");
   if (lohIdx !== -1 && isPresentText(textOf(row.cells[lohIdx]))) return true;
 
   // Segments table: unified call column
@@ -298,8 +298,8 @@
   if (cnvIdx !== -1 && isNonNeutralCall(row.cells[cnvIdx])) return true;
 
   // region table (or legacy): separate call columns
-  const cnvkitIdx = getIdx(colIndex, "cnvkit_cnv_call");
-  const purecnIdx = getIdx(colIndex, "purecn_cnv_call");
+  const cnvkitIdx = getIdx(colIndex, "CNVkit segment call");
+  const purecnIdx = getIdx(colIndex, "PureCN segment call");
   if (cnvkitIdx !== -1 && isNonNeutralCall(row.cells[cnvkitIdx])) return true;
   if (purecnIdx !== -1 && isNonNeutralCall(row.cells[purecnIdx])) return true;
 
@@ -312,7 +312,7 @@
   }
 
   function rowHasPonIndication(row, colIndex) {
-    const idx = getIdx(colIndex, "pon_region_indication");
+    const idx = getIdx(colIndex, "PON-based indication");
     if (idx === -1) return false;
 
     const v = textOf(row.cells[idx]);
@@ -340,7 +340,7 @@
   if (!geneList?.length) return true;
 
   // prefer segment column if present
-  const idxList = getIdx(colIndex, "gene.symbol");
+  const idxList = getIdx(colIndex, "Gene");
   if (idxList !== -1) {
     const s = (row.cells[idxList]?.textContent ?? "").trim().toLowerCase();
     if (!s) return false;
@@ -356,7 +356,7 @@
   }
 
   // fallback to old single-gene column
-  const idxOne = getIdx(colIndex, "gene.symbol");
+  const idxOne = getIdx(colIndex, "Gene");
   if (idxOne === -1) return true;
 
   const gene = textOf(row.cells[idxOne]);
@@ -518,9 +518,9 @@
   if (!wantChr && wantStart == null && wantEnd == null) return true;
 
   // find columns
-  const chrIdx = getIdx(colIndex, "chr", "chromosome");
-  const startIdx = getIdx(colIndex, "region_start", "start");
-  const endIdx = getIdx(colIndex, "region_end", "end");
+  const chrIdx = getIdx(colIndex, "Chr");
+  const startIdx = getIdx(colIndex, "Start");
+  const endIdx = getIdx(colIndex, "End");
 
   if (chrIdx === -1 || startIdx === -1 || endIdx === -1) {
     // can't apply range if columns aren't available

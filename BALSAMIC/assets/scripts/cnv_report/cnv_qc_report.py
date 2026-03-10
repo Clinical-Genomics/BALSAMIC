@@ -4,7 +4,7 @@ import base64
 import json
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional, Any
+from typing import Mapping, Any
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 import click
 import numpy as np
@@ -16,7 +16,6 @@ from cnv_io import (
     load_cancer_gene_set,
     load_cnr_bins,
     load_pon_bins,
-    load_refgene_exons,
     load_purecn_segments,
     load_cnvkit_segments_with_raw,
     load_cytobands,
@@ -73,7 +72,6 @@ def render_cnv_report_html(
     purecn_failed = False
     purecn_failed_warning_text = ""
 
-
     if df_purecn_summary is not None and not df_purecn_summary.empty:
         purecn_display = df_purecn_summary.copy()
 
@@ -118,42 +116,45 @@ def render_cnv_report_html(
             index=False, border=0, classes="dataframe", table_id="qc-summary-table"
         )
 
-    # ---- Add column glossary
+    # ---- Segment glossary table
     segment_column_glossary_html = build_column_glossary_html(
         table_df=df_segments,
         spec=SEGMENT_TABLE_SPEC,
+        table_id="segment-column-glossary-table",
     )
 
+    # ---- Gene region glossary table
     region_column_glossary_html = build_column_glossary_html(
         table_df=df_regions,
         spec=GENE_TABLE_SPEC,
+        table_id="region-column-glossary-table",
     )
 
-    # ---- Main segments table
-    segments_table_html = df_for_html(df_segments).to_html(
-        index=False, border=0, classes="dataframe", table_id="report-table", na_rep=""
+    df_segments_display = rename_for_display(df_segments, SEGMENT_TABLE_SPEC)
+    df_regions_display = rename_for_display(df_regions, GENE_TABLE_SPEC)
+
+    # ---- Segment table
+    segments_table_html = df_for_html(df_segments_display).to_html(
+        index=False,
+        border=0,
+        classes="dataframe",
+        table_id="report-table",
+        na_rep="",
     )
 
-    # ---- Gene regions table
-    has_region_table = df_regions is not None and not df_regions.empty
-    region_table_html = ""
-    if has_region_table:
-        region_table_html = df_for_html(df_regions).to_html(
-            index=False,
-            border=0,
-            classes="dataframe",
-            table_id="region-table",
-            na_rep="",
-        )
+    region_table_html = df_for_html(df_regions_display).to_html(
+        index=False,
+        border=0,
+        classes="dataframe",
+        table_id="region-table",
+        na_rep="",
+    )
 
-    # ---- Column index JSON maps for JS filtering
     col_idx_segments_json = json.dumps(
-        {name: idx for idx, name in enumerate(df_segments.columns)}
+        {name: idx for idx, name in enumerate(df_segments_display.columns)}
     )
-    col_idx_regions_json = (
-        json.dumps({name: idx for idx, name in enumerate(df_regions.columns)})
-        if has_region_table and df_regions is not None
-        else "{}"
+    col_idx_regions_json = json.dumps(
+        {name: idx for idx, name in enumerate(df_regions_display.columns)}
     )
 
     # ---- Load template + assets
@@ -180,7 +181,6 @@ def render_cnv_report_html(
         purecn_summary_html=purecn_summary_html,
         qc_summary_html=qc_summary_html,
         segments_table_html=segments_table_html,
-        has_region_table=has_region_table,
         region_table_html=region_table_html,
         scatter_data_uri=scatter_data_uri,
         diagram_data_uri=diagram_data_uri,
@@ -197,6 +197,11 @@ def render_cnv_report_html(
 # =============================================================================
 # Helpers
 # =============================================================================
+
+
+def rename_for_display(df: pd.DataFrame, spec: TableSpec) -> pd.DataFrame:
+    """Return a display copy with spec-based column renames applied."""
+    return df.rename(columns=spec.renames or {})
 
 
 def df_for_html(df: pd.DataFrame) -> pd.DataFrame:
@@ -285,47 +290,43 @@ def _compute_cnv_sets(df: pd.DataFrame) -> set[str]:
     return cnv_chr_set
 
 
-def _ordered_glossary_columns(
-    *,
-    df_region: pd.DataFrame,
-    spec: TableSpec,
-) -> list[str]:
-    """Return glossary column names in TableSpec order, then extras."""
-    # columns we actually need to describe (present in either table)
-    present: set[str] = set(df_region.columns)
-
-    # 1) spec order (only those that exist)
-    ordered = [c for c in spec.column_order if c in present]
-
-    # 2) extras (present but not in spec), append deterministically
-    extras = sorted(present - set(spec.column_order))
-    return ordered + extras
-
-
 def build_column_glossary_html(
     *,
     table_df: pd.DataFrame | None,
     spec: TableSpec,
+    table_id: str,
 ) -> str:
     """
-    Build an HTML table describing columns in the same order as TableSpec.column_order,
-    then any extra columns found in dataframes appended at the end.
+    Build an HTML glossary table in TableSpec order, then extras.
+    Uses raw column names for lookup and display labels from spec.renames.
     """
-    cols = _ordered_glossary_columns(df_region=table_df, spec=spec)
+    if table_df is None or table_df.empty:
+        return ""
+
+    present = set(table_df.columns)
+    renames = spec.renames or {}
+    descriptions = spec.descriptions or {}
+
+    ordered_raw = [c for c in spec.column_order if c in present]
+    extras_raw = sorted(present - set(spec.column_order))
+    cols_raw = ordered_raw + extras_raw
 
     rows = []
-    for c in cols:
-        desc = spec.descriptions.get(c, "")
-        rows.append({"column": c, "description": desc})
+    for raw_col in cols_raw:
+        rows.append(
+            {
+                "column": renames.get(raw_col, raw_col),
+                "description": descriptions.get(raw_col, ""),
+            }
+        )
 
     glossary_df = pd.DataFrame(rows, columns=["column", "description"])
 
-    # Use to_html for consistent styling; pick classes you already use
     return glossary_df.to_html(
         index=False,
         border=0,
         classes="dataframe glossary-table",
-        table_id="column-glossary-table",
+        table_id=table_id,
         escape=False,
     )
 
@@ -624,7 +625,14 @@ def main(
     )
 
     if is_exome:
-        generegions_df = generegions_df[generegions_df["is_cancer_gene"].fillna(False).astype(bool)]
+        generegions_df = generegions_df[
+            generegions_df["is_cancer_gene"].fillna(False).astype(bool)
+        ]
+
+    if pon == None:
+        generegions_df = generegions_df.drop(
+            columns=[c for c in generegions_df.columns if c.startswith("pon")]
+        )
 
     # ----------------------------
     # HTML report

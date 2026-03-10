@@ -624,7 +624,9 @@ def compute_highlighted_genes_from_generegions(
       highlighted_genes: np.ndarray[str]
       gene_level: per-gene summary (useful for debugging)
     """
-    df = generegions_df[generegions_df[chr_col].astype("string") == str(chr_name)].copy()
+    df = generegions_df[
+        generegions_df[chr_col].astype("string") == str(chr_name)
+    ].copy()
     if df.empty:
         return np.array([], dtype=object), pd.DataFrame()
 

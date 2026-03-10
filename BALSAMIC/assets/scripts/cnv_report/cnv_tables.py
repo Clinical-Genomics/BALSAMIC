@@ -746,7 +746,9 @@ def create_generegions(cnr_df: pd.DataFrame, pon_df: pd.DataFrame | None = None)
     # PON deviation per gene region
     MIN_REGION_TARGETS_FOR_CALL = 5
 
-    regions_df["pon_region_effect"] = regions_df["mean_log2"] - regions_df["pon_mean_log2"]
+    regions_df["pon_region_effect"] = (
+        regions_df["mean_log2"] - regions_df["pon_mean_log2"]
+    )
 
     # Compute z with min_n=5 so small regions naturally become NaN/0 depending on _pon_abs_z
     regions_df["pon_region_z"] = regions_df.apply(
@@ -780,8 +782,7 @@ def create_generegions(cnr_df: pd.DataFrame, pon_df: pd.DataFrame | None = None)
     eligible = ~too_small
     regions_df.loc[eligible, "pon_region_indication"] = regions_df.loc[eligible].apply(
         lambda r: _pon_cnv_call_from_log2(
-            is_strong=str(r.get("pon_region_signal", "")).strip().lower()
-            == "strong",
+            is_strong=str(r.get("pon_region_signal", "")).strip().lower() == "strong",
             mean_log2=r.get("mean_log2", np.nan),
             gain_gt=0.07,
             loss_lt=-0.07,
@@ -818,7 +819,9 @@ def build_generegion_table(
 
     # Attach PureCN LOHregions (optional)
     if loh_segments_df is not None and not loh_segments_df.empty:
-        regions_df = annotate_regions_with_purecn_lohregions(regions_df, loh_segments_df)
+        regions_df = annotate_regions_with_purecn_lohregions(
+            regions_df, loh_segments_df
+        )
 
     regions_df["is_cancer_gene"] = regions_df["gene.symbol"].isin(cancer_genes)
 
@@ -845,7 +848,7 @@ def build_generegion_table(
             "purecn_M",
             "purecn_M_flagged",
             "pon_region_effect",
-            "cnvkit_seg_depth"
+            "cnvkit_seg_depth",
         ]
         if c in regions_df.columns
     ]

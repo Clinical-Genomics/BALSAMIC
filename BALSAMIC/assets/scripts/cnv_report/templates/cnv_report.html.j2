@@ -143,7 +143,7 @@
                 <div class="control-group">
                     <label>
                         <input type="checkbox" id="hide-non-cnv-seg">
-                        Show only CNV / LOH segments (purecn_type not NA or cnv_call ≠ NEUTRAL)
+                        Show only CNV / LOH segments (PureCN LOH-type not empty or cnv_call ≠ NEUTRAL)
                     </label>
                 </div>
                 <div class="control-group">
@@ -193,7 +193,7 @@
              style="display:none;
                     margin-top:10px">{{ region_column_glossary_html | safe }}</div>
         {# --------------------- Region section --------------------- #}
-        {% if has_region_table %}
+
             <h2>Within-gene PON-driven regions</h2>
             <div class="note-box">
                 These rows represent sub-gene regions defined by PON-based deviation (log2 vs panel-of-normals),
@@ -205,7 +205,7 @@
                     <div class="control-group">
                         <label>
                             <input type="checkbox" id="hide-non-cnv-region">
-                            Show only LOH / CNV regions (loh_flag not NA or CNV call ≠ NEUTRAL)
+                            Show only LOH / CNV regions (PureCN LOH-type not empty or cnv_call ≠ NEUTRAL)
                         </label>
                         <label style="margin-left:12px;">
                             <input type="checkbox" id="only-pon-indication-region">
@@ -270,7 +270,7 @@
                 </div>
                 {{ region_table_html | safe }}
             </div>
-        {% endif %}
+
         {# --------------------- Modal --------------------- #}
         <div id="plot-modal" class="modal-overlay">
             <div class="modal-content-wrapper">
