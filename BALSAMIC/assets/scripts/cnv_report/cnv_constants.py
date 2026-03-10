@@ -71,9 +71,9 @@ GENE_REGION_COLUMN_DESCRIPTIONS = {
     "is_cancer_gene": "True if the gene is included in the configured cancer gene set.",
     # --- Bin aggregation metrics ---
     "n.targets": "Number of target bins contributing to this gene region. (genes may be split up across multiple rows if PON indicates the presence of within gene GAIN or LOSS)",
-    "mean_log2": "Mean log2 copy-ratio across bins overlapping the gene region.",
-    "min_log2": "Minimum log2 copy-ratio observed among bins in the gene region.",
-    "max_log2": "Maximum log2 copy-ratio observed among bins in the gene region.",
+    "mean_log2": "Mean log2 copy number log2 ratio across bins overlapping the gene region. (not adjusted for purity and ploidy)",
+    "min_log2": "Minimum log2 copy number log2 ratio observed among bins in the gene region. (not adjusted for purity and ploidy)",
+    "max_log2": "Maximum log2 copy number log2-ratio observed among bins in the gene region. (not adjusted for purity and ploidy)",
     "depth_mean": "Mean sequencing depth across bins in the gene region.",
     # --- CNVkit gene-level call ---
     "cnvkit_cnv_call": "Gene-level CNV classification derived from CNVkit segmentation (e.g., DELETION, AMPLIFICATION, NEUTRAL).",
