@@ -20,7 +20,7 @@
   function getColIndex(tableId) {
     const map = {
       "report-table": globalThis.colIndexSegments,
-      "chunk-table": globalThis.colIndexChunk,
+      "region-table": globalThis.colIndexRegions,
     };
     return map[tableId] ?? {};
   }
@@ -104,7 +104,7 @@
   // Tables + controls
   // ---------------------------------------------------------------------------
   const segTable = getTable("report-table");
-  const chunkTable = getTable("chunk-table");
+  const regionTable = getTable("region-table");
 
   const controls = {
     seg: {
@@ -114,16 +114,16 @@
       rangeStart: $("range-start-seg"),
       rangeEnd: $("range-end-seg"),
     },
-    chunk: {
-      hideNonCnv: $("hide-non-cnv-chunk"),
-      includePonCnv: $("show-pon-cnv-chunk"),
-      onlyCancer: $("only-cancer-genes-chunk"),
-      geneInput: $("gene-filter-chunk"),
-      minTargets: $("min-targets-chunk"),
-      rangeChr: $("range-chr-chunk"),
-      rangeStart: $("range-start-chunk"),
-      rangeEnd: $("range-end-chunk"),
-      onlyPonIndication: $("only-pon-indication-chunk"),
+    region: {
+      hideNonCnv: $("hide-non-cnv-region"),
+      includePonCnv: $("show-pon-cnv-region"),
+      onlyCancer: $("only-cancer-genes-region"),
+      geneInput: $("gene-filter-region"),
+      minTargets: $("min-targets-region"),
+      rangeChr: $("range-chr-region"),
+      rangeStart: $("range-start-region"),
+      rangeEnd: $("range-end-region"),
+      onlyPonIndication: $("only-pon-indication-region"),
     },
   };
 
@@ -131,7 +131,7 @@
   // Column group toggles
   // ---------------------------------------------------------------------------
 
-  const COL_GROUP_QC = ["depth_mean"];
+  const COL_GROUP_QC = ["depth_mean", "min_log2", "max_log2"];
 
   const COL_GROUP_PON_PREFIXES = ["pon_"];
   const COL_GROUP_PON_EXPLICIT = [];
@@ -148,7 +148,7 @@
 
   const DEFAULT_GROUP_STATE = {
     "report-table": { qc: false, pon: false, cnvkit: false, purecn: false },
-    "chunk-table": { qc: false, pon: true, cnvkit: false, purecn: false },
+    "region-table": { qc: false, pon: true, cnvkit: false, purecn: false },
   };
 
   function columnsMatchingPrefixes(colIndex, prefixes) {
@@ -220,11 +220,11 @@
         cnvkit: $("cols-cnvkit-extra-gene"),
         purecn: $("cols-purecn-extra-gene"),
       },
-      "chunk-table": {
-        qc: $("cols-qc-chunk"),
-        pon: $("cols-pon-chunk"),
-        cnvkit: $("cols-cnvkit-extra-chunk"),
-        purecn: $("cols-purecn-extra-chunk"),
+      "region-table": {
+        qc: $("cols-qc-region"),
+        pon: $("cols-pon-region"),
+        cnvkit: $("cols-cnvkit-extra-region"),
+        purecn: $("cols-purecn-extra-region"),
       },
     };
 
@@ -297,7 +297,7 @@
   const cnvIdx = getIdx(colIndex, "cnv_call");
   if (cnvIdx !== -1 && isNonNeutralCall(row.cells[cnvIdx])) return true;
 
-  // Chunk table (or legacy): separate call columns
+  // region table (or legacy): separate call columns
   const cnvkitIdx = getIdx(colIndex, "cnvkit_cnv_call");
   const purecnIdx = getIdx(colIndex, "purecn_cnv_call");
   if (cnvkitIdx !== -1 && isNonNeutralCall(row.cells[cnvkitIdx])) return true;
@@ -312,7 +312,7 @@
   }
 
   function rowHasPonIndication(row, colIndex) {
-    const idx = getIdx(colIndex, "pon_chunk_indication");
+    const idx = getIdx(colIndex, "pon_region_indication");
     if (idx === -1) return false;
 
     const v = textOf(row.cells[idx]);
@@ -374,8 +374,8 @@
     // apply genomic range filter
     if (cfg.range && !rowInRange(row, colIndex, cfg.range)) return true;
 
-    // Additive "OR" gate for chunk table:
-    if (cfg.isChunkTable) {
+    // Additive "OR" gate for region table:
+    if (cfg.isRegionTable) {
       const wantCnv = Boolean(cfg.hideNonCnv);
       const wantPonInd = Boolean(cfg.onlyPonIndication);
 
@@ -419,7 +419,7 @@
   function buildSegCfg() {
     const c = controls.seg;
     return {
-      isChunkTable: false,
+      isRegionTable: false,
       hideNonCnv: Boolean(c.hideNonCnv?.checked),
       includePonCnv: false,
       onlyCancer: false,          // segment UI doesn’t have this right now
@@ -433,10 +433,10 @@
     };
   }
 
-  function buildChunkCfg() {
-    const c = controls.chunk;
+  function buildRegionCfg() {
+    const c = controls.region;
     return {
-      isChunkTable: true,
+      isRegionTable: true,
       hideNonCnv: Boolean(c.hideNonCnv?.checked),
       includePonCnv: Boolean(c.includePonCnv?.checked),
       onlyPonIndication: Boolean(c.onlyPonIndication?.checked),
@@ -453,7 +453,7 @@
 
   function applyFilter() {
     filterTable("report-table", segTable, buildSegCfg());
-    filterTable("chunk-table", chunkTable, buildChunkCfg());
+    filterTable("region-table", regionTable, buildRegionCfg());
   }
 
   // bind filter events
@@ -465,15 +465,15 @@
       [controls.seg.rangeStart, "input"],
       [controls.seg.rangeEnd, "input"],
 
-      [controls.chunk.hideNonCnv, "change"],
-      [controls.chunk.includePonCnv, "change"],
-      [controls.chunk.onlyCancer, "change"],
-      [controls.chunk.geneInput, "input"],
-      [controls.chunk.minTargets, "input"],
-      [controls.chunk.rangeChr, "input"],
-      [controls.chunk.rangeStart, "input"],
-      [controls.chunk.rangeEnd, "input"],
-      [controls.chunk.onlyPonIndication, "change"],
+      [controls.region.hideNonCnv, "change"],
+      [controls.region.includePonCnv, "change"],
+      [controls.region.onlyCancer, "change"],
+      [controls.region.geneInput, "input"],
+      [controls.region.minTargets, "input"],
+      [controls.region.rangeChr, "input"],
+      [controls.region.rangeStart, "input"],
+      [controls.region.rangeEnd, "input"],
+      [controls.region.onlyPonIndication, "change"],
     ],
     applyFilter
   );
@@ -488,13 +488,13 @@
     });
   }
 
-  const copyChunkBtn = $("copy-chunk-table");
-  if (copyChunkBtn) {
-    copyChunkBtn.addEventListener("click", async () => {
-      const tsv = tableToTSVVisible(chunkTable);
+  const copyRegionBtn = $("copy-region-table");
+  if (copyRegionBtn) {
+    copyRegionBtn.addEventListener("click", async () => {
+      const tsv = tableToTSVVisible(regionTable);
       await copyTextToClipboard(tsv);
-      copyChunkBtn.textContent = "Copied!";
-      setTimeout(() => (copyChunkBtn.textContent = "Copy visible rows"), 1000);
+      copyRegionBtn.textContent = "Copied!";
+      setTimeout(() => (copyRegionBtn.textContent = "Copy visible rows"), 1000);
     });
   }
 
@@ -573,11 +573,11 @@
   );
 
   hookShowHide(
-    "toggle-chunk-table",
-    "chunk-table-container",
+    "toggle-region-table",
+    "region-table-container",
     false,
-    "Hide chunk-level table",
-    "Show chunk-level table"
+    "Hide region-level table",
+    "Show region-level table"
   );
 
   hookShowHide(
@@ -589,11 +589,11 @@
   );
 
   hookShowHide(
-    "toggle-chunk-col-glossary",
-    "chunk-col-glossary-container",
+    "toggle-region-col-glossary",
+    "region-col-glossary-container",
     false,
-    "Hide chunk glossary",
-    "Show chunk glossary"
+    "Hide region glossary",
+    "Show region glossary"
   );
 
   // ---------------------------------------------------------------------------

@@ -116,10 +116,10 @@ GENE_TABLE_SPEC = TableSpec(
         "depth_mean",
         "pon_mean_log2",
         "pon_mean_spread",
-        "pon_chunk_effect",
-        "pon_chunk_z",
-        "pon_chunk_significance",
-        "pon_chunk_indication",
+        "pon_region_effect",
+        "pon_region_z",
+        "pon_region_signal",
+        "pon_region_indication",
     ],
     float_columns=[
         "seg_baf",
@@ -129,8 +129,8 @@ GENE_TABLE_SPEC = TableSpec(
         "depth_mean",
         "pon_mean_log2",
         "pon_mean_spread",
-        "pon_chunk_effect",
-        "pon_chunk_z",
+        "pon_region_effect",
+        "pon_region_z",
         "cnvkit_seg_log2",
         "cnvkit_seg_raw_log2",
         "cnvkit_seg_baf",
@@ -180,13 +180,13 @@ GENE_TABLE_SPEC = TableSpec(
         # --- Exon overlap ---
         "exons_overlapping_cnvkit_segment": "Number of exons overlapping the CNVkit segment for this gene.",
         "exons_overlapping_gene_region": "Number of exons overlapping the aggregated gene region.",
-        # --- PON bin/chunk-level statistics ---
-        "pon_mean_log2": "Mean PON log2 value across bins in the chunk or region.",
-        "pon_mean_spread": "Mean PON spread across bins in the chunk or region.",
-        "pon_chunk_effect": "Difference between sample log2 and PON mean at chunk level.",
-        "pon_chunk_z": "Z-score of chunk-level deviation relative to PON variability.",
-        "pon_chunk_significance": "Significance classification of chunk-level PON deviation.",
-        "pon_chunk_indication": "Interpretation of chunk-level deviation based on PON (e.g., GAIN/LOSS/NEUTRAL).",
+        # --- PON bin/region-level statistics ---
+        "pon_mean_log2": "Mean PON log2 value across bins in the gene-region.",
+        "pon_mean_spread": "Mean PON spread across bins in the gene-region.",
+        "pon_region_effect": "Difference between sample log2 and PON mean at gene region level.",
+        "pon_region_z": "Z-score of gene region-level deviation relative to PON variability.",
+        "pon_region_signal": "Signal classification of region-level PON deviation (noisy / borderline / strong).",
+        "pon_region_indication": "Interpretation of gene regionp-level deviation based on PON (e.g., GAIN/LOSS/NEUTRAL).",
     },
 )
 

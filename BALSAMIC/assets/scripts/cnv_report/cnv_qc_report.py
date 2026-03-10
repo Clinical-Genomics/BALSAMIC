@@ -23,7 +23,7 @@ from cnv_io import (
 )
 
 from cnv_tables import (
-    build_gene_chunk_table,
+    build_generegion_table,
     build_segment_table,
 )
 from cnv_report_plotting import plot_chromosomes
@@ -41,12 +41,12 @@ def render_cnv_report_html(
     *,
     df_segments: pd.DataFrame,
     out_html: str | Path,
-    df_chunk: pd.DataFrame | None = None,
-    df_purecn_summary: pd.DataFrame | None = None,
-    df_qc_summary: pd.DataFrame | None = None,
-    scatter_png: str | Path | None = None,
-    diagram_png: str | Path | None = None,
-    chr_plots_dir: str | Path | None = None,
+    df_regions: pd.DataFrame,
+    df_purecn_summary: pd.DataFrame,
+    df_qc_summary: pd.DataFrame,
+    scatter_png: str,
+    diagram_png: str,
+    chr_plots_dir: str,
     title: str = "CNV Report",
     normalisation_method: str,
 ) -> None:
@@ -73,9 +73,11 @@ def render_cnv_report_html(
     purecn_failed = False
     purecn_failed_warning_text = ""
 
+
     if df_purecn_summary is not None and not df_purecn_summary.empty:
         purecn_display = df_purecn_summary.copy()
 
+        failed_mask = pd.Series(False, index=purecn_display.index)
         if "Comment" in purecn_display.columns:
             failed_mask = (
                 purecn_display["Comment"]
@@ -122,8 +124,8 @@ def render_cnv_report_html(
         spec=SEGMENT_TABLE_SPEC,
     )
 
-    chunk_column_glossary_html = build_column_glossary_html(
-        table_df=df_chunk,
+    region_column_glossary_html = build_column_glossary_html(
+        table_df=df_regions,
         spec=GENE_TABLE_SPEC,
     )
 
@@ -132,15 +134,15 @@ def render_cnv_report_html(
         index=False, border=0, classes="dataframe", table_id="report-table", na_rep=""
     )
 
-    # ---- Optional chunk table
-    has_chunk_table = df_chunk is not None and not df_chunk.empty
-    chunk_table_html = ""
-    if has_chunk_table:
-        chunk_table_html = df_for_html(df_chunk).to_html(
+    # ---- Gene regions table
+    has_region_table = df_regions is not None and not df_regions.empty
+    region_table_html = ""
+    if has_region_table:
+        region_table_html = df_for_html(df_regions).to_html(
             index=False,
             border=0,
             classes="dataframe",
-            table_id="chunk-table",
+            table_id="region-table",
             na_rep="",
         )
 
@@ -148,9 +150,9 @@ def render_cnv_report_html(
     col_idx_segments_json = json.dumps(
         {name: idx for idx, name in enumerate(df_segments.columns)}
     )
-    col_idx_chunk_json = (
-        json.dumps({name: idx for idx, name in enumerate(df_chunk.columns)})
-        if has_chunk_table and df_chunk is not None
+    col_idx_regions_json = (
+        json.dumps({name: idx for idx, name in enumerate(df_regions.columns)})
+        if has_region_table and df_regions is not None
         else "{}"
     )
 
@@ -174,17 +176,17 @@ def render_cnv_report_html(
         css_text=css_text,
         js_text=js_text,
         segment_column_glossary_html=segment_column_glossary_html,
-        chunk_column_glossary_html=chunk_column_glossary_html,
+        region_column_glossary_html=region_column_glossary_html,
         purecn_summary_html=purecn_summary_html,
         qc_summary_html=qc_summary_html,
         segments_table_html=segments_table_html,
-        has_chunk_table=has_chunk_table,
-        chunk_table_html=chunk_table_html,
+        has_region_table=has_region_table,
+        region_table_html=region_table_html,
         scatter_data_uri=scatter_data_uri,
         diagram_data_uri=diagram_data_uri,
         plot_groups=plot_groups,
         col_idx_segments_json=col_idx_segments_json,
-        col_idx_chunk_json=col_idx_chunk_json,
+        col_idx_regions_json=col_idx_regions_json,
         purecn_failed=purecn_failed,
         purecn_warning_text=purecn_failed_warning_text,
     )
@@ -285,12 +287,12 @@ def _compute_cnv_sets(df: pd.DataFrame) -> set[str]:
 
 def _ordered_glossary_columns(
     *,
-    df_chunk: pd.DataFrame,
+    df_region: pd.DataFrame,
     spec: TableSpec,
 ) -> list[str]:
     """Return glossary column names in TableSpec order, then extras."""
     # columns we actually need to describe (present in either table)
-    present: set[str] = set(df_chunk.columns)
+    present: set[str] = set(df_region.columns)
 
     # 1) spec order (only those that exist)
     ordered = [c for c in spec.column_order if c in present]
@@ -307,9 +309,9 @@ def build_column_glossary_html(
 ) -> str:
     """
     Build an HTML table describing columns in the same order as TableSpec.column_order,
-    then any extra columns found in df_gene/df_chunk appended at the end.
+    then any extra columns found in dataframes appended at the end.
     """
-    cols = _ordered_glossary_columns(df_chunk=table_df, spec=spec)
+    cols = _ordered_glossary_columns(df_region=table_df, spec=spec)
 
     rows = []
     for c in cols:
@@ -552,9 +554,9 @@ def main(
     # ----------------------------
     cnr_df = load_cnr_bins(cnr)
     cns_df = load_cnvkit_segments_with_raw(cns, cns_init)
-    loh_regions_df = None
+    loh_segments_df = None
     if Path(loh_regions).is_file():
-        loh_regions_df = load_purecn_segments(loh_regions)
+        loh_segments_df = load_purecn_segments(loh_regions)
     pon_df = None
     if pon:
         pon_df = load_pon_bins(pon)
@@ -572,25 +574,25 @@ def main(
         sex=sex,
         cancer_genes=cancer_gene_set,
         is_exome=is_exome,
-        loh_regions_df=loh_regions_df,
+        loh_segments_df=loh_segments_df,
     )
 
     # ----------------------------
-    # Create per chunk table
+    # Create gene region table
     # ----------------------------
-    chunks_df = build_gene_chunk_table(
+    generegions_df = build_generegion_table(
         cnr_df=cnr_df,
         cns_df=cns_df,
         sex=sex,
         pon_df=pon_df,
         cancer_genes=cancer_gene_set,
-        loh_regions_df=loh_regions_df,
+        loh_segments_df=loh_segments_df,
     )
 
     # --- 1) PureCN summary (from purity_csv) ---
     purecn_summary_df = read_purecn_summary(purity_csv)
 
-    # --- 2) Extra QC / CNV metrics (DLR, PON spread, chunk stats) ---
+    # --- 2) Extra QC / CNV metrics (DLR, PON spread) ---
     qc_summary_df = compute_summary_metrics(
         cnr_df=cnr_df,
         pon_df=pon_df,
@@ -612,7 +614,7 @@ def main(
         cnr_df=cnr_df,
         vcf_path=vcf,
         segments_df=segments_df,
-        gchunk=chunks_df,
+        generegions_df=generegions_df,
         outdir=chr_plots_dir,
         case_id=case_id,
         pon_df=pon_df,
@@ -622,7 +624,7 @@ def main(
     )
 
     if is_exome:
-        chunks_df = chunks_df[chunks_df["is_cancer_gene"].fillna(False).astype(bool)]
+        generegions_df = generegions_df[generegions_df["is_cancer_gene"].fillna(False).astype(bool)]
 
     # ----------------------------
     # HTML report
@@ -631,11 +633,11 @@ def main(
 
     render_cnv_report_html(
         df_segments=segments_df,
-        df_chunk=chunks_df,  # optional
-        df_purecn_summary=purecn_summary_df,  # optional
-        df_qc_summary=qc_summary_df,  # optional
-        scatter_png=scatter_png_path,  # optional
-        diagram_png=diagram_png_path,  # optional
+        df_regions=generegions_df,
+        df_purecn_summary=purecn_summary_df,
+        df_qc_summary=qc_summary_df,
+        scatter_png=scatter_png_path,
+        diagram_png=diagram_png_path,
         chr_plots_dir=chr_plots_dir,
         out_html=out_html_path,
         title=f"CNV Report – {case_id}",

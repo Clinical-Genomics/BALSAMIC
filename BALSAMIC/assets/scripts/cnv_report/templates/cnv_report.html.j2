@@ -186,33 +186,33 @@
             </div>
             {{ segments_table_html | safe }}
         </div>
-        <h2>Chunk column glossary</h2>
-        <div class="note-box">Descriptions of columns shown in the chunk table. Use this as a quick reference.</div>
-        <button id="toggle-chunk-col-glossary" type="button" style="margin-top:8px;">Show chunk glossary</button>
-        <div id="chunk-col-glossary-container"
+        <h2>Gene region column glossary</h2>
+        <div class="note-box">Descriptions of columns shown in the gene region table. Use this as a quick reference.</div>
+        <button id="toggle-region-col-glossary" type="button" style="margin-top:8px;">Show gene region glossary</button>
+        <div id="region-col-glossary-container"
              style="display:none;
-                    margin-top:10px">{{ chunk_column_glossary_html | safe }}</div>
-        {# --------------------- Chunk section --------------------- #}
-        {% if has_chunk_table %}
-            <h2>Within-gene PON-driven chunks</h2>
+                    margin-top:10px">{{ region_column_glossary_html | safe }}</div>
+        {# --------------------- Region section --------------------- #}
+        {% if has_region_table %}
+            <h2>Within-gene PON-driven regions</h2>
             <div class="note-box">
-                These rows represent sub-gene chunks defined by PON-based deviation (log2 vs panel-of-normals),
-                for genes in the main table. Filters below apply only to this chunk-level table.
+                These rows represent sub-gene regions defined by PON-based deviation (log2 vs panel-of-normals),
+                for genes in the main table. Filters below apply only to this region-level table.
             </div>
-            <button id="toggle-chunk-table" type="button">Show chunk-level table</button>
-            <div id="chunk-table-container" style="display:none; margin-top:10px;">
+            <button id="toggle-region-table" type="button">Show region-level table</button>
+            <div id="region-table-container" style="display:none; margin-top:10px;">
                 <div class="controls">
                     <div class="control-group">
                         <label>
-                            <input type="checkbox" id="hide-non-cnv-chunk">
-                            Show only LOH / CNV chunks (loh_flag not NA or CNV call ≠ NEUTRAL)
+                            <input type="checkbox" id="hide-non-cnv-region">
+                            Show only LOH / CNV regions (loh_flag not NA or CNV call ≠ NEUTRAL)
                         </label>
                         <label style="margin-left:12px;">
-                            <input type="checkbox" id="only-pon-indication-chunk">
-                            Include PON-indicated chunks (pon_chunk_indication ≠ NEUTRAL)
+                            <input type="checkbox" id="only-pon-indication-region">
+                            Include PON-indicated regions (pon_region_indication ≠ NEUTRAL)
                         </label>
                         <label style="margin-left:12px;">
-                            <input type="checkbox" id="only-cancer-genes-chunk">
+                            <input type="checkbox" id="only-cancer-genes-region">
                             Show only cancer genes (is_cancer_gene TRUE)
                         </label>
                     </div>
@@ -220,16 +220,16 @@
                         <span class="control-label">Genomic range:</span>
                         <label style="margin-left:12px;">
                             Chr:
-                            <input type="text" id="range-chr-chunk" placeholder="1" style="width:60px;">
+                            <input type="text" id="range-chr-region" placeholder="1" style="width:60px;">
                         </label>
                         <label style="margin-left:12px;">
                             Start:
-                            <input type="number" id="range-start-chunk" min="0" step="1" placeholder="0">
+                            <input type="number" id="range-start-region" min="0" step="1" placeholder="0">
                         </label>
                         <label style="margin-left:12px;">
                             End:
                             <input type="number"
-                                   id="range-end-chunk"
+                                   id="range-end-region"
                                    min="0"
                                    step="1"
                                    placeholder="250000000">
@@ -238,37 +238,37 @@
                     <div class="control-group">
                         <label>
                             Min n.targets:
-                            <input type="number" id="min-targets-chunk" min="0" step="1" value="0">
+                            <input type="number" id="min-targets-region" min="0" step="1" value="0">
                         </label>
                     </div>
-                    <button id="copy-chunk-table" type="button">Copy visible rows</button>
+                    <button id="copy-region-table" type="button">Copy visible rows</button>
                     <div class="control-group">
                         <span class="control-label">Column detail:</span>
                         <label style="margin-left:12px;">
-                            <input type="checkbox" id="cols-qc-chunk">
+                            <input type="checkbox" id="cols-qc-region">
                             QC details
                         </label>
                         <label style="margin-left:12px;">
-                            <input type="checkbox" id="cols-pon-chunk">
+                            <input type="checkbox" id="cols-pon-region">
                             PON details
                         </label>
                         <label style="margin-left:12px;">
-                            <input type="checkbox" id="cols-cnvkit-extra-chunk">
+                            <input type="checkbox" id="cols-cnvkit-extra-region">
                             CNVkit extra
                         </label>
                         <label style="margin-left:12px;">
-                            <input type="checkbox" id="cols-purecn-extra-chunk">
+                            <input type="checkbox" id="cols-purecn-extra-region">
                             PureCN extra
                         </label>
                     </div>
                     <div class="control-group">
                         <label>
                             Gene filter (comma-separated gene.symbol list):
-                            <input type="text" id="gene-filter-chunk" placeholder="TP53,EGFR,MYC">
+                            <input type="text" id="gene-filter-region" placeholder="TP53,EGFR,MYC">
                         </label>
                     </div>
                 </div>
-                {{ chunk_table_html | safe }}
+                {{ region_table_html | safe }}
             </div>
         {% endif %}
         {# --------------------- Modal --------------------- #}
@@ -281,7 +281,7 @@
         <script>
   // Injected from Python (make them properties so JS can read them)
   globalThis.colIndexSegments  = {{ col_idx_segments_json | safe }};
-  globalThis.colIndexChunk = {{ col_idx_chunk_json | safe }};
+  globalThis.colIndexRegions = {{ col_idx_regions_json | safe }};
 
   {{ js_text | safe }}
         </script>

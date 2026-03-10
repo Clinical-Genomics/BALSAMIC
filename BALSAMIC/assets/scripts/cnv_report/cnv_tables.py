@@ -107,29 +107,29 @@ def _pon_direction(effect: float) -> str:
     return "neutral"
 
 
-def _pon_significance(z: float, *, noise_lt: float, borderline_lt: float) -> str:
-    """Map z-score to 'noise'/'borderline'/'significant' (or '' when missing)."""
+def _pon_signal(z: float, *, noise_lt: float, borderline_lt: float) -> str:
+    """Map z-score to 'noise'/'borderline'/'strong' (or '' when missing)."""
     if pd.isna(z):
         return ""
     if z < noise_lt:
         return "noise"
     if z < borderline_lt:
         return "borderline"
-    return "significant"
+    return "strong"
 
 
 def _pon_cnv_call_from_log2(
     *,
-    is_significant: bool,
+    is_strong: bool,
     mean_log2: float,
     gain_gt: float,
     loss_lt: float,
-    non_significant_value: str,
+    weak_value: str,
     neutral_value: str,
 ) -> str:
-    """Return AMPLIFICATION/DELETION/neutral/nonsignificant depending on thresholds."""
-    if not is_significant or pd.isna(mean_log2):
-        return non_significant_value
+    """Return AMPLIFICATION/DELETION/neutral/weak depending on thresholds."""
+    if not is_strong or pd.isna(mean_log2):
+        return weak_value
     if mean_log2 > gain_gt:
         return "GAIN"
     if mean_log2 < loss_lt:
@@ -286,7 +286,7 @@ def _add_exons_hit_column(
 '''
 
 ############################
-# CHUNK LEVEL
+# GENE REGION LEVEL
 ############################
 
 
@@ -458,14 +458,14 @@ def merge_cnr_with_pon(
     )
 
 
-def create_gene_chunks(cnr_df: pd.DataFrame, pon_df: pd.DataFrame | None = None):
+def create_generegions(cnr_df: pd.DataFrame, pon_df: pd.DataFrame | None = None):
     """
-    Always returns a gene/chunk table.
+    Always returns a gene/gene-region table.
 
     If pon_df is provided:
-      - run PON-based chunking (your existing logic)
+      - run PON-based subdividing into regions (your existing logic)
     If pon_df is None/empty:
-      - return one row per gene ("genelevel") without PON-derived chunking
+      - return one row per gene ("genelevel") without PON-derived gene regions
     """
 
     has_pon = pon_df is not None and not pon_df.empty
@@ -490,10 +490,10 @@ def create_gene_chunks(cnr_df: pd.DataFrame, pon_df: pd.DataFrame | None = None)
     )
 
     # ------------------------------------------------------------------
-    # If NO PON: do NOT assign chunks. Just one "chunk" per gene.
+    # If NO PON: do NOT assign gene regions. Just one "region" per gene.
     # ------------------------------------------------------------------
     if not has_pon:
-        bins["chunk_id"] = "genelevel"
+        bins["region_id"] = "genelevel"
 
         agg_dict: dict[str, list[str]] = {
             "start": ["min"],
@@ -503,10 +503,10 @@ def create_gene_chunks(cnr_df: pd.DataFrame, pon_df: pd.DataFrame | None = None)
             "pon_spread": ["mean"],
         }
 
-        chunks_df = bins.groupby(
-            ["chr", "gene.symbol", "chunk_id"], as_index=False
+        regions_df = bins.groupby(
+            ["chr", "gene.symbol", "region_id"], as_index=False
         ).agg(agg_dict)
-        chunks_df = _flatten_agg_columns(chunks_df).rename(
+        regions_df = _flatten_agg_columns(regions_df).rename(
             columns={
                 "start_min": "region_start",
                 "end_max": "region_end",
@@ -518,24 +518,24 @@ def create_gene_chunks(cnr_df: pd.DataFrame, pon_df: pd.DataFrame | None = None)
                 "pon_spread_mean": "pon_mean_spread",
             }
         )
-        chunks_df["n.targets"] = chunks_df["n_targets"]
+        regions_df["n.targets"] = regions_df["n_targets"]
 
         # PON-derived outputs: keep columns but make them empty/neutral
-        chunks_df["pon_chunk_effect"] = np.nan
-        chunks_df["pon_chunk_z"] = np.nan
-        chunks_df["pon_chunk_significance"] = ""
-        chunks_df["pon_chunk_indication"] = "NEUTRAL"
+        regions_df["pon_region_effect"] = np.nan
+        regions_df["pon_region_z"] = np.nan
+        regions_df["pon_region_signal"] = ""
+        regions_df["pon_region_indication"] = ""
 
-        return chunks_df
+        return regions_df
 
-    # CREATE INITIAL CHUNKS
+    # CREATE INITIAL REGIONS
     MIN_GENE_TARGETS = 8
     MIN_RUN_BINS = 4
     Z_BIN_THRESH = 1.5
     Z_RUN_THRESH = 3.0
     SMOOTH_WINDOW = 3
 
-    bins["chunk_id"] = "no_chunk"
+    bins["region_id"] = "no_region"
     next_id = 0
 
     def _run_z_for_indices(ix: list[int]) -> float:
@@ -557,7 +557,7 @@ def create_gene_chunks(cnr_df: pd.DataFrame, pon_df: pd.DataFrame | None = None)
             return np.nan
         return abs(mean_eff) / sigma_eff
 
-    def _assign_gene_chunks(df_gene: pd.DataFrame) -> None:
+    def _assign_gene_regions(df_gene: pd.DataFrame) -> None:
         nonlocal next_id
 
         if df_gene.shape[0] < MIN_GENE_TARGETS:
@@ -588,9 +588,9 @@ def create_gene_chunks(cnr_df: pd.DataFrame, pon_df: pd.DataFrame | None = None)
             rz = _run_z_for_indices(ix)
             if not np.isfinite(rz) or rz < Z_RUN_THRESH:
                 return
-            label = f"genechunk_{next_id}"
+            label = f"generegion_{next_id}"
             next_id += 1
-            bins.loc[ix, "chunk_id"] = label
+            bins.loc[ix, "region_id"] = label
 
         for i, z in zip(idxs, z_smooth):
             if not np.isfinite(z) or abs(z) < Z_BIN_THRESH:
@@ -613,9 +613,9 @@ def create_gene_chunks(cnr_df: pd.DataFrame, pon_df: pd.DataFrame | None = None)
             _finalize(run)
 
     for (_ch, _g), df_gene in bins.groupby(["chr", "gene.symbol"], sort=False):
-        _assign_gene_chunks(df_gene)
+        _assign_gene_regions(df_gene)
 
-    # MERGE ADJACENT CHUNKS
+    # MERGE ADJACENT REGIONS
 
     MAX_BRIDGE_BINS = 4
     BRIDGE_DELTA = 0.12
@@ -624,7 +624,7 @@ def create_gene_chunks(cnr_df: pd.DataFrame, pon_df: pd.DataFrame | None = None)
 
     def _gene_runs(df_gene: pd.DataFrame) -> list[dict]:
         eff = df_gene["log2"].to_numpy() - df_gene["pon_log2"].fillna(0.0).to_numpy()
-        labels = df_gene["chunk_id"].tolist()
+        labels = df_gene["region_id"].tolist()
 
         runs: list[dict] = []
         pos = [0]
@@ -644,7 +644,7 @@ def create_gene_chunks(cnr_df: pd.DataFrame, pon_df: pd.DataFrame | None = None)
             runs.append({"positions": pos, "indices": ix, "mean_eff": mean_eff})
         return runs, eff
 
-    def _cleanup_gene_chunks(df_gene: pd.DataFrame) -> None:
+    def _cleanup_gene_regions(df_gene: pd.DataFrame) -> None:
         if df_gene.empty or df_gene.shape[0] == 1:
             return
 
@@ -708,16 +708,16 @@ def create_gene_chunks(cnr_df: pd.DataFrame, pon_df: pd.DataFrame | None = None)
             i += 1
 
         for run_idx, run in enumerate(new_runs):
-            bins.loc[run["indices"], "chunk_id"] = f"genechunk_clean_{run_idx}"
+            bins.loc[run["indices"], "region_id"] = f"generegion_clean_{run_idx}"
 
     for (_ch, _g), df_gene in bins.groupby(["chr", "gene.symbol"], sort=False):
-        _cleanup_gene_chunks(df_gene)
+        _cleanup_gene_regions(df_gene)
 
     bins = bins.sort_values(["chr", "gene.symbol", "start"], kind="stable").reset_index(
         drop=True
     )
 
-    # Collapse to gene × chunk
+    # Collapse to gene × region
     agg_dict: dict[str, list[str]] = {
         "start": ["min"],
         "end": ["max"],
@@ -726,10 +726,10 @@ def create_gene_chunks(cnr_df: pd.DataFrame, pon_df: pd.DataFrame | None = None)
         "pon_spread": ["mean"],
     }
 
-    chunks_df = bins.groupby(["chr", "gene.symbol", "chunk_id"], as_index=False).agg(
+    regions_df = bins.groupby(["chr", "gene.symbol", "region_id"], as_index=False).agg(
         agg_dict
     )
-    chunks_df = _flatten_agg_columns(chunks_df).rename(
+    regions_df = _flatten_agg_columns(regions_df).rename(
         columns={
             "start_min": "region_start",
             "end_max": "region_end",
@@ -741,100 +741,118 @@ def create_gene_chunks(cnr_df: pd.DataFrame, pon_df: pd.DataFrame | None = None)
             "pon_spread_mean": "pon_mean_spread",
         }
     )
-    chunks_df["n.targets"] = chunks_df["n_targets"]
+    regions_df["n.targets"] = regions_df["n_targets"]
 
-    # PON deviation per chunk
-    MIN_CHUNK_TARGETS_FOR_CALL = 5
+    # PON deviation per gene region
+    MIN_REGION_TARGETS_FOR_CALL = 5
 
-    chunks_df["pon_chunk_effect"] = chunks_df["mean_log2"] - chunks_df["pon_mean_log2"]
+    regions_df["pon_region_effect"] = regions_df["mean_log2"] - regions_df["pon_mean_log2"]
 
-    # Compute z with min_n=5 so small chunks naturally become NaN/0 depending on _pon_abs_z
-    chunks_df["pon_chunk_z"] = chunks_df.apply(
+    # Compute z with min_n=5 so small regions naturally become NaN/0 depending on _pon_abs_z
+    regions_df["pon_region_z"] = regions_df.apply(
         lambda r: _pon_abs_z(
-            r["pon_chunk_effect"],
+            r["pon_region_effect"],
             r["pon_mean_spread"],
             r.get("n_targets", r.get("n.targets", np.nan)),
-            min_n=MIN_CHUNK_TARGETS_FOR_CALL,
+            min_n=MIN_REGION_TARGETS_FOR_CALL,
         ),
         axis=1,
     )
 
-    chunks_df["pon_chunk_direction"] = chunks_df["pon_chunk_effect"].apply(
+    regions_df["pon_region_direction"] = regions_df["pon_region_effect"].apply(
         _pon_direction
     )
 
-    chunks_df["pon_chunk_significance"] = chunks_df["pon_chunk_z"].apply(
-        lambda z: _pon_significance(z, noise_lt=2.0, borderline_lt=5.0)
+    regions_df["pon_region_signal"] = regions_df["pon_region_z"].apply(
+        lambda z: _pon_signal(z, noise_lt=2.0, borderline_lt=5.0)
     )
 
-    # Hard gate: never allow calls for chunks with too few targets
+    # Hard gate: never allow calls for regions with too few targets
     too_small = (
-        chunks_df["n_targets"].fillna(0).astype(int) < MIN_CHUNK_TARGETS_FOR_CALL
+        regions_df["n_targets"].fillna(0).astype(int) < MIN_REGION_TARGETS_FOR_CALL
     )
-    chunks_df.loc[
-        too_small, "pon_chunk_significance"
-    ] = "noise"  # or "not_significant" if that's what you use
-    chunks_df.loc[too_small, "pon_chunk_indication"] = "NEUTRAL"
+    regions_df.loc[
+        too_small, "pon_region_signal"
+    ] = ""  # or "not_significant" if that's what you use
+    regions_df.loc[too_small, "pon_region_indication"] = ""
 
-    # Only compute indication for eligible chunks
+    # Only compute indication for eligible pon regions
     eligible = ~too_small
-    chunks_df.loc[eligible, "pon_chunk_indication"] = chunks_df.loc[eligible].apply(
+    regions_df.loc[eligible, "pon_region_indication"] = regions_df.loc[eligible].apply(
         lambda r: _pon_cnv_call_from_log2(
-            is_significant=str(r.get("pon_chunk_significance", "")).strip().lower()
-            == "significant",
+            is_strong=str(r.get("pon_region_signal", "")).strip().lower()
+            == "strong",
             mean_log2=r.get("mean_log2", np.nan),
             gain_gt=0.07,
             loss_lt=-0.07,
-            non_significant_value="NEUTRAL",
+            weak_value="NEUTRAL",
             neutral_value="NEUTRAL",
         ),
         axis=1,
     )
 
-    return chunks_df
+    return regions_df
 
 
-def build_gene_chunk_table(
+def build_generegion_table(
     cnr_df: pd.DataFrame,
     cns_df: pd.DataFrame,
     sex: Gender,
     pon_df: pd.DataFrame | None = None,
     cancer_genes: set[str] | None = None,
-    loh_regions_df: pd.DataFrame | None = None,
+    loh_segments_df: pd.DataFrame | None = None,
 ) -> pd.DataFrame:
     """
     Build per-gene table always.
-    If pon_df exists -> chunked
-    Else -> one-row-per-gene 'genelevel' chunks.
+    If pon_df exists -> subdivided into regions based on PON
+    Else -> one-row-per-gene 'genelevel'.
     """
 
     cancer_genes = cancer_genes or set()
 
     # Always create something
-    chunks_df = create_gene_chunks(cnr_df=cnr_df, pon_df=pon_df)
+    regions_df = create_generegions(cnr_df=cnr_df, pon_df=pon_df)
 
     # Annotate with CNVkit segments
-    chunks_df = annotate_regions_with_cnvkit_segments(chunks_df, cns_df)
+    regions_df = annotate_regions_with_cnvkit_segments(regions_df, cns_df)
 
     # Attach PureCN LOHregions (optional)
-    if loh_regions_df is not None and not loh_regions_df.empty:
-        chunks_df = annotate_regions_with_purecn_lohregions(chunks_df, loh_regions_df)
+    if loh_segments_df is not None and not loh_segments_df.empty:
+        regions_df = annotate_regions_with_purecn_lohregions(regions_df, loh_segments_df)
 
-    chunks_df["is_cancer_gene"] = chunks_df["gene.symbol"].isin(cancer_genes)
+    regions_df["is_cancer_gene"] = regions_df["gene.symbol"].isin(cancer_genes)
 
     # CNV calls
-    chunks_df = add_cnv_calls_wide(chunks_df, sex=sex)
+    regions_df = add_cnv_calls_wide(regions_df, sex=sex)
 
     # Drop columns if present
     drop_cols = [
         c
-        for c in ["chunk_id", "n_targets", "pon_chunk_direction"]
-        if c in chunks_df.columns
+        for c in [
+            "region_id",
+            "n_targets",
+            "pon_region_direction",
+            "cnvkit_seg_start",
+            "cnvkit_seg_end",
+            "cnvkit_seg_log2",
+            "purecn_seg_start",
+            "purecn_seg_end",
+            "purecn_seg_mean_log2",
+            "purecn_num_snps",
+            "purecn_maf_observed",
+            "cnvkit_seg_cn1",
+            "cnvkit_seg_cn2",
+            "purecn_M",
+            "purecn_M_flagged",
+            "pon_region_effect",
+            "cnvkit_seg_depth"
+        ]
+        if c in regions_df.columns
     ]
     if drop_cols:
-        chunks_df = chunks_df.drop(columns=drop_cols)
+        regions_df = regions_df.drop(columns=drop_cols)
 
-    return finalize_table(chunks_df, GENE_TABLE_SPEC)
+    return finalize_table(regions_df, GENE_TABLE_SPEC)
 
 
 ############################
@@ -1052,7 +1070,7 @@ def build_segment_table(
     sex: Gender,
     cancer_genes: set[str],
     is_exome: bool,
-    loh_regions_df: pd.DataFrame | None = None,
+    loh_segments_df: pd.DataFrame | None = None,
 ) -> pd.DataFrame:
     """
     Build a unified segment table by stacking CNVkit and PureCN segments.
@@ -1088,8 +1106,8 @@ def build_segment_table(
     out_parts.append(cnv)
 
     # ---- PureCN ----
-    if loh_regions_df is not None and not loh_regions_df.empty:
-        pc = loh_regions_df.copy()
+    if loh_segments_df is not None and not loh_segments_df.empty:
+        pc = loh_segments_df.copy()
 
         pc = pc.rename(columns={"purecn_seg_start": "start"})
         pc = pc.rename(columns={"purecn_seg_end": "end"})
