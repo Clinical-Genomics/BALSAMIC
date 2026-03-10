@@ -44,9 +44,9 @@ SEGMENT_COLUMN_DESCRIPTIONS = {
     # --- Bin aggregation metrics ---
     "n.targets": "Number of target bins overlapping with CN segment.",
     "log2": "log2 copy-ratio from CNVkit or PureCN (not adjusted for purity or ploidy).",
-    "baf_maf": "Mean B-allele frequency (BAF) for the CNVkit segment / Observed minor allele frequency (MAF) in the PureCN segment.",
+    "baf_maf": "Mean B-allele frequency (BAF) for the CNVkit segment | Median observed minor allele frequency (MAF) of heterozygous SNPs in the PureCN segment.",
     "cnv_call": "CNV call from PureCN or CNVkit (AMPLIFICATION / DELETION / NEUTRAL) determined based on total copy-numbers predicted from each tool.",
-    "purecn_type": "PureCN call annotation string for the segment.",
+    "purecn_type": "PureCN LOH type if M = 0 (such as WHOLE ARM COPY-NEUTRAL LOH, COPY-NEUTRAL LOH)",
     # --- CNVkit segment details ---
     "cnvkit_seg_depth": "Mean sequencing read depth across all targets belonging to the CNVkit segment.",
     "cnvkit_adjusted_log2": "Segment-level log2 copy-ratio from CNVkit, adjusted for purity and ploidy.",
@@ -55,9 +55,9 @@ SEGMENT_COLUMN_DESCRIPTIONS = {
     "cnvkit_seg_cn2": "Estimated major allele copy number from CNVkit.",
     # --- PureCN segment details --
     "purecn_num_snps": "Number of SNPs used by PureCN in the segment.",
-    "purecn_C": "Total copy number estimate from PureCN.",
-    "purecn_M": "Minor allele copy number estimate from PureCN.",
-    "purecn_M_flagged": "True if PureCN flagged the minor allele estimate as unreliable or special case.",
+    "purecn_C": "Segment total copy number for segment from PureCN. (called using PureCN estimated purity and ploidy)",
+    "purecn_M": "Minor allele copy number from PureCN. (called using PureCN estimated purity and ploidy)",
+    "purecn_M_flagged": "True if PureCN flagged the minor allele estimate as unreliable (due to small number of variants or ambiguous call)",
 }
 
 GENE_REGION_COLUMN_DESCRIPTIONS = {
@@ -70,7 +70,7 @@ GENE_REGION_COLUMN_DESCRIPTIONS = {
     "gene.symbol": "HGNC gene symbol.",
     "is_cancer_gene": "True if the gene is included in the configured cancer gene set.",
     # --- Bin aggregation metrics ---
-    "n.targets": "Number of target bins contributing to this gene-level region.",
+    "n.targets": "Number of target bins contributing to this gene region. (genes may be split up across multiple rows if PON indicates the presence of within gene GAIN or LOSS)",
     "mean_log2": "Mean log2 copy-ratio across bins overlapping the gene region.",
     "min_log2": "Minimum log2 copy-ratio observed among bins in the gene region.",
     "max_log2": "Maximum log2 copy-ratio observed among bins in the gene region.",
@@ -79,25 +79,25 @@ GENE_REGION_COLUMN_DESCRIPTIONS = {
     "cnvkit_cnv_call": "Gene-level CNV classification derived from CNVkit segmentation (e.g., DELETION, AMPLIFICATION, NEUTRAL).",
     # --- PureCN gene-level call ---
     "purecn_cnv_call": "Gene-level CNV classification derived from PureCN.",
-    "purecn_type": "PureCN call annotation string for the overlapping segment; non-empty indicates LOH-type classification.",
+    "purecn_type": "PureCN LOH type if M = 0 (such as WHOLE ARM COPY-NEUTRAL LOH, COPY-NEUTRAL LOH)",
     # --- CNVkit segment details ---
     "cnvkit_seg_start": "Start coordinate (bp) of the overlapping CNVkit segment.",
     "cnvkit_seg_end": "End coordinate (bp) of the overlapping CNVkit segment.",
-    "cnvkit_seg_log2": "Segment-level log2 copy-ratio from CNVkit.",
+    "cnvkit_seg_log2": "Segment-level log2 copy-ratio from CNVkit. (adjusted based on PureCN estimated tumor purity)",
     "cnvkit_seg_raw_log2": "Raw (pre-adjustment) segment-level log2 copy-ratio from CNVkit.",
     "cnvkit_seg_baf": "Mean B-allele frequency (BAF) for the overlapping CNVkit segment.",
-    "cnvkit_seg_cn": "Total copy number estimate from CNVkit.",
-    "cnvkit_seg_cn1": "Estimated minor allele copy number from CNVkit.",
-    "cnvkit_seg_cn2": "Estimated major allele copy number from CNVkit.",
+    "cnvkit_seg_cn": "Total copy number estimate from CNVkit for segment. (based on PureCN estimated purity and ploidy)",
+    "cnvkit_seg_cn1": "Estimated minor allele copy number from CNVkit for segment. (based on PureCN estimated purity and ploidy)",
+    "cnvkit_seg_cn2": "Estimated major allele copy number from CNVkit for segment. (based on PureCN estimated purity and ploidy)",
     # --- PureCN segment details ---
     "purecn_seg_start": "Start coordinate (bp) of the overlapping PureCN segment.",
     "purecn_seg_end": "End coordinate (bp) of the overlapping PureCN segment.",
     "purecn_seg_mean_log2": "Segment-level log2 copy-ratio from PureCN.",
-    "purecn_num_snps": "Number of SNPs used by PureCN in the segment.",
-    "purecn_maf_observed": "Observed minor allele frequency (MAF) in the PureCN segment.",
-    "purecn_C": "Total copy number estimate from PureCN.",
-    "purecn_M": "Minor allele copy number estimate from PureCN.",
-    "purecn_M_flagged": "True if PureCN flagged the minor allele estimate as unreliable or special case.",
+    "purecn_num_snps": "Number of SNPs in this segment informative for LOH detection from PureCN.",
+    "purecn_maf_observed": "Median observed minor allele frequency (MAF) of heterozygous SNPs in the PureCN segment.",
+    "purecn_C": "Segment total copy number for segment from PureCN. (called using PureCN estimated purity and ploidy)",
+    "purecn_M": "Minor allele copy number from PureCN. (called using PureCN estimated purity and ploidy)",
+    "purecn_M_flagged": "True if PureCN flagged the minor allele estimate as unreliable (due to small number of variants or ambiguous call)",
     # --- Exon overlap ---
     "exons_overlapping_cnvkit_segment": "Number of exons overlapping the CNVkit segment for this gene.",
     "exons_overlapping_gene_region": "Number of exons overlapping the aggregated gene region.",
