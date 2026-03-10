@@ -54,7 +54,7 @@ SEGMENT_COLUMN_DESCRIPTIONS = {
     "cnvkit_seg_cn1": "Estimated minor allele copy number from CNVkit.",
     "cnvkit_seg_cn2": "Estimated major allele copy number from CNVkit.",
     # --- PureCN segment details --
-    "purecn_num_snps": "Number of SNPs used by PureCN in the segment.",
+    "purecn_num_snps": "Number of SNPs in this segment informative for LOH detection from PureCN.",
     "purecn_C": "Segment total copy number for segment from PureCN. (called using PureCN estimated purity and ploidy)",
     "purecn_M": "Minor allele copy number from PureCN. (called using PureCN estimated purity and ploidy)",
     "purecn_M_flagged": "True if PureCN flagged the minor allele estimate as unreliable (due to small number of variants or ambiguous call)",
@@ -92,7 +92,7 @@ GENE_REGION_COLUMN_DESCRIPTIONS = {
     # --- PureCN segment details ---
     "purecn_seg_start": "Start coordinate (bp) of the overlapping PureCN segment.",
     "purecn_seg_end": "End coordinate (bp) of the overlapping PureCN segment.",
-    "purecn_seg_mean_log2": "Segment-level log2 copy-ratio from PureCN.",
+    "purecn_seg_mean_log2": "Segment mean of copy number log2-ratios from PureCN (not adjusted for purity/ploidy).",
     "purecn_num_snps": "Number of SNPs in this segment informative for LOH detection from PureCN.",
     "purecn_maf_observed": "Median observed minor allele frequency (MAF) of heterozygous SNPs in the PureCN segment.",
     "purecn_C": "Segment total copy number for segment from PureCN. (called using PureCN estimated purity and ploidy)",
