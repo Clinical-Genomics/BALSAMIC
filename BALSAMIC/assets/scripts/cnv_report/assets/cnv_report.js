@@ -65,14 +65,18 @@
 
     // header row
     const headerCells = Array.from(table.tHead.rows[0].cells);
-    lines.push(colIdxs.map((i) => (headerCells[i]?.textContent ?? "").trim()).join("\t"));
+    lines.push(
+      colIdxs.map((i) => (headerCells[i]?.textContent ?? "").trim()).join("\t"),
+    );
 
     // visible body rows
     for (const row of Array.from(body.rows)) {
       if (row.style.display === "none") continue;
 
       const cells = Array.from(row.cells);
-      lines.push(colIdxs.map((i) => (cells[i]?.textContent ?? "").trim()).join("\t"));
+      lines.push(
+        colIdxs.map((i) => (cells[i]?.textContent ?? "").trim()).join("\t"),
+      );
     }
 
     return lines.join("\n");
@@ -143,7 +147,12 @@
     "cnvkit_seg_depth",
   ];
 
-  const COL_GROUP_PURECN_EXTRA = ["purecn_C", "purecn_M", "purecn_M_flagged", "purecn_num_snps"];
+  const COL_GROUP_PURECN_EXTRA = [
+    "purecn_C",
+    "purecn_M",
+    "purecn_M_flagged",
+    "purecn_num_snps",
+  ];
 
   const DEFAULT_GROUP_STATE = {
     "report-table": { qc: false, pon: false, cnvkit: false, purecn: false },
@@ -161,14 +170,17 @@
     const groupDefs = {
       qc: () => COL_GROUP_QC.filter((c) => c in colIndex),
       pon: () => {
-        const prefixCols = columnsMatchingPrefixes(colIndex, COL_GROUP_PON_PREFIXES);
+        const prefixCols = columnsMatchingPrefixes(
+          colIndex,
+          COL_GROUP_PON_PREFIXES,
+        );
         return unique([...prefixCols]);
       },
       cnvkit: () => COL_GROUP_CNVKIT_EXTRA.filter((c) => c in colIndex),
       purecn: () => COL_GROUP_PURECN_EXTRA.filter((c) => c in colIndex),
     };
 
-    return (groupDefs[groupName]?.() ?? []);
+    return groupDefs[groupName]?.() ?? [];
   }
 
   function setColumnVisibility(table, colIndex, colName, visible) {
@@ -208,7 +220,8 @@
 
     for (const [groupName, enabled] of groups) {
       const cols = getGroupColumns(colIndex, groupName);
-      for (const c of cols) setColumnVisibility(table, colIndex, c, Boolean(enabled));
+      for (const c of cols)
+        setColumnVisibility(table, colIndex, c, Boolean(enabled));
     }
   }
 
@@ -287,22 +300,22 @@
   }
 
   function rowHasCnvOrLoh(row, colIndex) {
-  // LOH for both tables: PureCN type present (non-empty)
-  const lohIdx = getIdx(colIndex, "PureCN segment LOH-type");
-  if (lohIdx !== -1 && isPresentText(textOf(row.cells[lohIdx]))) return true;
+    // LOH for both tables: PureCN type present (non-empty)
+    const lohIdx = getIdx(colIndex, "PureCN segment LOH-type");
+    if (lohIdx !== -1 && isPresentText(textOf(row.cells[lohIdx]))) return true;
 
-  // Segments table: unified call column
-  const cnvIdx = getIdx(colIndex, "cnv_call");
-  if (cnvIdx !== -1 && isNonNeutralCall(row.cells[cnvIdx])) return true;
+    // Segments table: unified call column
+    const cnvIdx = getIdx(colIndex, "cnv_call");
+    if (cnvIdx !== -1 && isNonNeutralCall(row.cells[cnvIdx])) return true;
 
-  // region table (or legacy): separate call columns
-  const cnvkitIdx = getIdx(colIndex, "CNVkit segment call");
-  const purecnIdx = getIdx(colIndex, "PureCN segment call");
-  if (cnvkitIdx !== -1 && isNonNeutralCall(row.cells[cnvkitIdx])) return true;
-  if (purecnIdx !== -1 && isNonNeutralCall(row.cells[purecnIdx])) return true;
+    // region table (or legacy): separate call columns
+    const cnvkitIdx = getIdx(colIndex, "CNVkit segment call");
+    const purecnIdx = getIdx(colIndex, "PureCN segment call");
+    if (cnvkitIdx !== -1 && isNonNeutralCall(row.cells[cnvkitIdx])) return true;
+    if (purecnIdx !== -1 && isNonNeutralCall(row.cells[purecnIdx])) return true;
 
-  return false;
-}
+    return false;
+  }
 
   function rowIsCancerGene(row, colIndex) {
     const idx = getIdx(colIndex, "is_cancer_gene");
@@ -321,7 +334,6 @@
     return true; // any non-neutral indication counts
   }
 
-
   function rowHasMinTargets(row, colIndex, minTargets) {
     if (!minTargets) return true;
     const idx = getIdx(colIndex, "n.targets");
@@ -335,31 +347,31 @@
   }
 
   function rowMatchesGeneList(row, colIndex, geneList) {
-  if (!geneList?.length) return true;
+    if (!geneList?.length) return true;
 
-  // prefer segment column if present
-  const idxList = getIdx(colIndex, "Gene");
-  if (idxList !== -1) {
-    const s = (row.cells[idxList]?.textContent ?? "").trim().toLowerCase();
-    if (!s) return false;
+    // prefer segment column if present
+    const idxList = getIdx(colIndex, "Gene");
+    if (idxList !== -1) {
+      const s = (row.cells[idxList]?.textContent ?? "").trim().toLowerCase();
+      if (!s) return false;
 
-    // "TP53,EGFR,MYC" -> ["tp53","egfr","myc"]
-    const genesInRow = s
-      .split(",")
-      .map((g) => g.trim().toLowerCase())
-      .filter(Boolean);
+      // "TP53,EGFR,MYC" -> ["tp53","egfr","myc"]
+      const genesInRow = s
+        .split(",")
+        .map((g) => g.trim().toLowerCase())
+        .filter(Boolean);
 
-    // any match is enough
-    return genesInRow.some((g) => geneList.includes(g));
+      // any match is enough
+      return genesInRow.some((g) => geneList.includes(g));
+    }
+
+    // fallback to old single-gene column
+    const idxOne = getIdx(colIndex, "Gene");
+    if (idxOne === -1) return true;
+
+    const gene = textOf(row.cells[idxOne]);
+    return geneList.includes(gene);
   }
-
-  // fallback to old single-gene column
-  const idxOne = getIdx(colIndex, "Gene");
-  if (idxOne === -1) return true;
-
-  const gene = textOf(row.cells[idxOne]);
-  return geneList.includes(gene);
-}
 
   function rowHasPonCnvCall(row, colIndex) {
     const idx = getIdx(colIndex, "pon_cnv_call");
@@ -379,11 +391,13 @@
 
       if (wantCnv || wantPonInd) {
         const matchCnv = wantCnv
-          ? (rowHasCnvOrLoh(row, colIndex) ||
-             (cfg.includePonCnv ? rowHasPonCnvCall(row, colIndex) : false))
+          ? rowHasCnvOrLoh(row, colIndex) ||
+            (cfg.includePonCnv ? rowHasPonCnvCall(row, colIndex) : false)
           : false;
 
-        const matchPonInd = wantPonInd ? rowHasPonIndication(row, colIndex) : false;
+        const matchPonInd = wantPonInd
+          ? rowHasPonIndication(row, colIndex)
+          : false;
 
         if (!matchCnv && !matchPonInd) return true;
       }
@@ -420,9 +434,9 @@
       isRegionTable: false,
       hideNonCnv: Boolean(c.hideNonCnv?.checked),
       includePonCnv: false,
-      onlyCancer: false,          // segment UI doesn’t have this right now
+      onlyCancer: false, // segment UI doesn’t have this right now
       geneList: parseGeneList(c.geneInput?.value),
-      minTargets: 0,              // segment UI doesn’t have this right now
+      minTargets: 0, // segment UI doesn’t have this right now
       range: {
         chr: c.rangeChr?.value ?? "",
         start: parseFloatSafe(c.rangeStart?.value),
@@ -473,7 +487,7 @@
       [controls.region.rangeEnd, "input"],
       [controls.region.onlyPonIndication, "change"],
     ],
-    applyFilter
+    applyFilter,
   );
 
   const copySegBtn = $("copy-segment-table");
@@ -497,9 +511,9 @@
   }
 
   function normChr(s) {
-  s = (s ?? "").trim().toLowerCase();
-  if (s.startsWith("chr")) s = s.slice(3);
-  return s;
+    s = (s ?? "").trim().toLowerCase();
+    if (s.startsWith("chr")) s = s.slice(3);
+    return s;
   }
 
   function parseFloatSafe(v) {
@@ -512,41 +526,47 @@
     const wantStart = range.start;
     const wantEnd = range.end;
 
-  // no range filter set
-  if (!wantChr && wantStart == null && wantEnd == null) return true;
+    // no range filter set
+    if (!wantChr && wantStart == null && wantEnd == null) return true;
 
-  // find columns
-  const chrIdx = getIdx(colIndex, "Chr");
-  const startIdx = getIdx(colIndex, "Start");
-  const endIdx = getIdx(colIndex, "End");
+    // find columns
+    const chrIdx = getIdx(colIndex, "Chr");
+    const startIdx = getIdx(colIndex, "Start");
+    const endIdx = getIdx(colIndex, "End");
 
-  if (chrIdx === -1 || startIdx === -1 || endIdx === -1) {
-    // can't apply range if columns aren't available
-    return true;
-  }
+    if (chrIdx === -1 || startIdx === -1 || endIdx === -1) {
+      // can't apply range if columns aren't available
+      return true;
+    }
 
-  const rowChr = normChr(textOf(row.cells[chrIdx]));
-  const rowStart = parseFloatSafe(textOf(row.cells[startIdx]));
-  const rowEnd = parseFloatSafe(textOf(row.cells[endIdx]));
+    const rowChr = normChr(textOf(row.cells[chrIdx]));
+    const rowStart = parseFloatSafe(textOf(row.cells[startIdx]));
+    const rowEnd = parseFloatSafe(textOf(row.cells[endIdx]));
 
-  if (!rowChr || rowStart == null || rowEnd == null) return true;
+    if (!rowChr || rowStart == null || rowEnd == null) return true;
 
-  // chr must match if specified
-  if (wantChr && rowChr !== wantChr) return false;
+    // chr must match if specified
+    if (wantChr && rowChr !== wantChr) return false;
 
-  // overlap check:
-  // keep row if it overlaps [wantStart, wantEnd]
-  const qStart = wantStart != null ? wantStart : -Infinity;
-  const qEnd = wantEnd != null ? wantEnd : Infinity;
+    // overlap check:
+    // keep row if it overlaps [wantStart, wantEnd]
+    const qStart = wantStart != null ? wantStart : -Infinity;
+    const qEnd = wantEnd != null ? wantEnd : Infinity;
 
-  return rowEnd >= qStart && rowStart <= qEnd;
+    return rowEnd >= qStart && rowStart <= qEnd;
   }
 
   // ---------------------------------------------------------------------------
   // Table show/hide toggles
   // ---------------------------------------------------------------------------
 
-  function hookShowHide(buttonId, containerId, initialVisible, textWhenVisible, textWhenHidden) {
+  function hookShowHide(
+    buttonId,
+    containerId,
+    initialVisible,
+    textWhenVisible,
+    textWhenHidden,
+  ) {
     const btn = $(buttonId);
     const container = $(containerId);
     if (!btn || !container) return;
@@ -567,7 +587,7 @@
     "segment-table-container",
     true,
     "Hide segment table",
-    "Show segment table"
+    "Show segment table",
   );
 
   hookShowHide(
@@ -575,7 +595,7 @@
     "region-table-container",
     false,
     "Hide region-level table",
-    "Show region-level table"
+    "Show region-level table",
   );
 
   hookShowHide(
@@ -583,7 +603,7 @@
     "seg-col-glossary-container",
     false,
     "Hide segment glossary",
-    "Show segment glossary"
+    "Show segment glossary",
   );
 
   hookShowHide(
@@ -591,7 +611,7 @@
     "region-col-glossary-container",
     false,
     "Hide region glossary",
-    "Show region glossary"
+    "Show region glossary",
   );
 
   // ---------------------------------------------------------------------------
