@@ -73,10 +73,11 @@ def _load_bins_tsv(
     Load CNVkit-style bin table (.cnr/.cnn).
 
     - Rename chromosome column -> CHR ("chr")
-    - Drop Antitarget bins and NA genes
+    - Drop Antitarget bins
     - Rename "-" -> "backbone"
+    - Split multi-gene bins
     - Apply optional column renames
-    - Select required out_cols (must all exist)
+    - Select required out_cols
     """
     df = pd.read_csv(
         path,
@@ -91,16 +92,20 @@ def _load_bins_tsv(
     # normalize chromosome column name
     df = df.rename(columns={chr_col: CHR})
 
-    # gene.symbol cleanup
-    gene = df[gene_col].astype("string")
-    mask_keep = gene.notna() & ~gene.isin(["Antitarget"])
-    df = df.loc[mask_keep].copy()
-    df["gene.symbol"] = gene.loc[mask_keep].replace("-", "backbone")
+    # drop Antitarget bins
+    df = df[df[gene_col] != "Antitarget"].copy()
 
-    # explode multi-gene bins
+    # normalize gene column
+    df["gene.symbol"] = (
+        df[gene_col]
+        .replace("-", "backbone")
+        .astype("string")
+    )
+
+    # Expand gene column into individual rows with one gene symbol per row
     df["gene.symbol"] = df["gene.symbol"].str.split(r"\s*,\s*", regex=True)
     df = df.explode("gene.symbol", ignore_index=True)
-    df["gene.symbol"] = df["gene.symbol"].astype("string").str.strip()
+    df["gene.symbol"] = df["gene.symbol"].str.strip()
 
     if rename is not None:
         df = df.rename(columns=dict(rename))
@@ -113,7 +118,7 @@ def _load_bins_tsv(
     )
 
     out_cols = list(out_cols)
-    df = coerce_columns(df, required=out_cols)  # nice error message
+    df = coerce_columns(df, required=out_cols)
     return df[out_cols].copy()
 
 
