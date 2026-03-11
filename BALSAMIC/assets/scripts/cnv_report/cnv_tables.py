@@ -781,16 +781,16 @@ def create_generegions(cnr_df: pd.DataFrame, pon_df: pd.DataFrame | None = None)
     # Only compute indication for eligible pon regions
     eligible = ~too_small
     regions_df.loc[eligible, "pon_region_indication"] = regions_df.loc[eligible].apply(
-    lambda r: _pon_cnv_call_from_effect(
-        is_strong=str(r.get("pon_region_signal", "")).strip().lower() == "strong",
-        effect_log2=r.get("pon_region_effect", np.nan),
-        gain_gt=0.07,
-        loss_lt=-0.07,
-        weak_value="NEUTRAL",
-        neutral_value="NEUTRAL",
-    ),
-    axis=1,
-)
+        lambda r: _pon_cnv_call_from_effect(
+            is_strong=str(r.get("pon_region_signal", "")).strip().lower() == "strong",
+            effect_log2=r.get("pon_region_effect", np.nan),
+            gain_gt=0.07,
+            loss_lt=-0.07,
+            weak_value="NEUTRAL",
+            neutral_value="NEUTRAL",
+        ),
+        axis=1,
+    )
 
     return regions_df
 

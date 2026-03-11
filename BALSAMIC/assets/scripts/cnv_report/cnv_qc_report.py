@@ -4,11 +4,12 @@ import base64
 import json
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Mapping, Any
+from typing import Any
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 import click
 import numpy as np
 import pandas as pd
+import re
 from datetime import date
 
 
@@ -53,125 +54,50 @@ def render_cnv_report_html(
     sample_sex: str,
 ) -> None:
     """
-    Render a standalone CNV QC HTML report using a Jinja2 template + embedded CSS/JS assets.
+    Render a standalone CNV QC HTML report using a Jinja2 template with embedded assets.
     """
     out_path = Path(out_html)
 
-    # ---- base64 URIs for genome-wide plots
     scatter_data_uri = _png_to_data_uri(scatter_png)
     diagram_data_uri = _png_to_data_uri(diagram_png)
 
-    # ---- CNV/LOH sets used to badge chromosome plots
     cnv_chr_set = _compute_cnv_sets(df_segments)
-
-    # ---- Collect chromosome plot cards only
     plot_groups = _collect_chr_plot_groups(
         chr_plots_dir=chr_plots_dir,
         cnv_chr_set=cnv_chr_set,
     )
 
-    # ---- PureCN summary table + warning state
-    purecn_summary_html = ""
-    purecn_failed = False
-    purecn_failed_warning_text = ""
+    (
+        purecn_summary_html,
+        purecn_failed,
+        purecn_failed_warning_text,
+    ) = _build_purecn_summary_html(df_purecn_summary)
+    qc_summary_html = _build_qc_summary_html(df_qc_summary)
 
-    if df_purecn_summary is not None and not df_purecn_summary.empty:
-        purecn_display = df_purecn_summary.copy()
-
-        failed_mask = pd.Series(False, index=purecn_display.index)
-        if "Comment" in purecn_display.columns:
-            failed_mask = (
-                purecn_display["Comment"]
-                .astype("string")
-                .str.contains("FAILED PURITY ESTIMATION", case=False, na=False)
-            )
-
-        purecn_failed = bool(failed_mask.any())
-
-        if purecn_failed:
-            if "Purity" in purecn_display.columns:
-                purecn_display.loc[failed_mask, "Purity"] = purecn_display.loc[
-                    failed_mask, "Purity"
-                ].map(lambda x: f"{x} (default fallback 20% purity)")
-
-            if "Ploidy" in purecn_display.columns:
-                purecn_display.loc[failed_mask, "Ploidy"] = purecn_display.loc[
-                    failed_mask, "Ploidy"
-                ].map(lambda x: f"{x} (default fallback 2 ploidy)")
-
-            purecn_failed_warning_text = PURECN_WARNING_TEXT
-
-        purecn_summary_html = purecn_display.to_html(
-            index=False,
-            border=0,
-            classes="dataframe",
-            table_id="purecn-summary-table",
-        )
-
-    # ---- QC summary table
-    qc_summary_html = ""
-    if df_qc_summary is not None and not df_qc_summary.empty:
-        qc_display = df_qc_summary.copy()
-        for col in qc_display.columns:
-            if np.issubdtype(qc_display[col].dtype, np.floating):
-                qc_display[col] = qc_display[col].round(3)
-        qc_summary_html = qc_display.to_html(
-            index=False, border=0, classes="dataframe", table_id="qc-summary-table"
-        )
-
-    # ---- Segment glossary table
-    segment_column_glossary_html = build_column_glossary_html(
-        table_df=df_segments,
-        spec=SEGMENT_TABLE_SPEC,
-        table_id="segment-column-glossary-table",
-    )
-
-    # ---- Gene region glossary table
-    region_column_glossary_html = build_column_glossary_html(
-        table_df=df_regions,
-        spec=GENE_TABLE_SPEC,
-        table_id="region-column-glossary-table",
-    )
-
-    df_segments_display = rename_for_display(df_segments, SEGMENT_TABLE_SPEC)
-    df_regions_display = rename_for_display(df_regions, GENE_TABLE_SPEC)
-
-    # ---- Segment table
-    segments_table_html = df_for_html(df_segments_display).to_html(
-        index=False,
-        border=0,
-        classes="dataframe",
+    (
+        df_segments_display,
+        segments_table_html,
+        segment_column_glossary_html,
+    ) = _build_display_table_html(
+        df_segments,
+        SEGMENT_TABLE_SPEC,
         table_id="report-table",
-        na_rep="",
     )
 
-    region_table_html = df_for_html(df_regions_display).to_html(
-        index=False,
-        border=0,
-        classes="dataframe",
+    (
+        df_regions_display,
+        region_table_html,
+        region_column_glossary_html,
+    ) = _build_display_table_html(
+        df_regions,
+        GENE_TABLE_SPEC,
         table_id="region-table",
-        na_rep="",
     )
 
-    col_idx_segments_json = json.dumps(
-        {name: idx for idx, name in enumerate(df_segments_display.columns)}
-    )
-    col_idx_regions_json = json.dumps(
-        {name: idx for idx, name in enumerate(df_regions_display.columns)}
-    )
+    col_idx_segments_json = _column_index_json(df_segments_display)
+    col_idx_regions_json = _column_index_json(df_regions_display)
 
-    # ---- Load template + assets
-    base_dir = Path(__file__).resolve().parent
-    template_dir = base_dir / "templates"
-    assets_dir = base_dir / "assets"
-
-    css_text = _read_text(assets_dir / "cnv_report.css")
-    js_text = _read_text(assets_dir / "cnv_report.js")
-
-    env = Environment(
-        loader=FileSystemLoader(str(template_dir)),
-        autoescape=select_autoescape(["html", "xml"]),
-    )
+    env, css_text, js_text = _load_report_template_assets()
     template = env.get_template("cnv_report.html.j2")
 
     html = template.render(
@@ -199,9 +125,137 @@ def render_cnv_report_html(
     out_path.write_text(html, encoding="utf-8")
 
 
-# =============================================================================
-# Helpers
-# =============================================================================
+def _load_report_template_assets() -> tuple[Environment, str, str]:
+    """
+    Load Jinja environment and embedded CSS/JS assets for the CNV report.
+    """
+    base_dir = Path(__file__).resolve().parent
+    template_dir = base_dir / "templates"
+    assets_dir = base_dir / "assets"
+
+    css_text = _read_text(assets_dir / "cnv_report.css")
+    js_text = _read_text(assets_dir / "cnv_report.js")
+
+    env = Environment(
+        loader=FileSystemLoader(str(template_dir)),
+        autoescape=select_autoescape(["html", "xml"]),
+    )
+    return env, css_text, js_text
+
+
+def _column_index_json(df: pd.DataFrame) -> str:
+    """
+    Return JSON mapping of display column name to column index.
+    """
+    return json.dumps({name: idx for idx, name in enumerate(df.columns)})
+
+
+def _build_display_table_html(
+    df: pd.DataFrame,
+    spec,
+    *,
+    table_id: str,
+) -> tuple[pd.DataFrame, str, str]:
+    """
+    Build display DataFrame, HTML table, and glossary HTML for one report table.
+
+    Returns
+    -------
+    display_df
+        Renamed/formatted DataFrame used for rendering.
+    table_html
+        HTML representation of the display DataFrame.
+    glossary_html
+        HTML glossary table for the display columns.
+    """
+    glossary_html = build_column_glossary_html(
+        table_df=df,
+        spec=spec,
+        table_id=f"{table_id}-column-glossary-table",
+    )
+
+    display_df = rename_for_display(df, spec)
+
+    table_html = df_for_html(display_df).to_html(
+        index=False,
+        border=0,
+        classes="dataframe",
+        table_id=table_id,
+        na_rep="",
+    )
+
+    return display_df, table_html, glossary_html
+
+
+def _build_qc_summary_html(df_qc_summary: pd.DataFrame | None) -> str:
+    """
+    Build QC summary HTML table.
+    """
+    if df_qc_summary is None or df_qc_summary.empty:
+        return ""
+
+    qc_display = df_qc_summary.copy()
+    for col in qc_display.columns:
+        if np.issubdtype(qc_display[col].dtype, np.floating):
+            qc_display[col] = qc_display[col].round(3)
+
+    return qc_display.to_html(
+        index=False,
+        border=0,
+        classes="dataframe",
+        table_id="qc-summary-table",
+    )
+
+
+def _build_purecn_summary_html(
+    df_purecn_summary: pd.DataFrame | None,
+) -> tuple[str, bool, str]:
+    """
+    Build PureCN summary HTML and failure warning state.
+
+    Returns
+    -------
+    purecn_summary_html
+        HTML table for the PureCN summary, or empty string if unavailable.
+    purecn_failed
+        True if a failed purity estimation was detected.
+    purecn_warning_text
+        Warning text to show in the report when PureCN failed.
+    """
+    if df_purecn_summary is None or df_purecn_summary.empty:
+        return "", False, ""
+
+    purecn_display = df_purecn_summary.copy()
+
+    failed_mask = pd.Series(False, index=purecn_display.index)
+    if "Comment" in purecn_display.columns:
+        failed_mask = (
+            purecn_display["Comment"]
+            .astype("string")
+            .str.contains("FAILED PURITY ESTIMATION", case=False, na=False)
+        )
+
+    purecn_failed = bool(failed_mask.any())
+    purecn_warning_text = PURECN_WARNING_TEXT if purecn_failed else ""
+
+    if purecn_failed:
+        if "Purity" in purecn_display.columns:
+            purecn_display.loc[failed_mask, "Purity"] = purecn_display.loc[
+                failed_mask, "Purity"
+            ].map(lambda x: f"{x} (default fallback 20% purity)")
+
+        if "Ploidy" in purecn_display.columns:
+            purecn_display.loc[failed_mask, "Ploidy"] = purecn_display.loc[
+                failed_mask, "Ploidy"
+            ].map(lambda x: f"{x} (default fallback 2 ploidy)")
+
+    purecn_summary_html = purecn_display.to_html(
+        index=False,
+        border=0,
+        classes="dataframe",
+        table_id="purecn-summary-table",
+    )
+    return purecn_summary_html, purecn_failed, purecn_warning_text
 
 
 def rename_for_display(df: pd.DataFrame, spec: TableSpec) -> pd.DataFrame:
@@ -252,22 +306,14 @@ def _chr_sort_key_from_stem(stem: str) -> tuple[int, int]:
 
 
 def _extract_chr_label_from_stem(stem: str) -> str:
-    chr_label = stem
-    if "chr" in stem:
-        chr_label = stem.split("chr", 1)[1]
-    if "_" in chr_label:
-        chr_label = chr_label.split("_", 1)[0]
-    return chr_label
+    m = re.search(r"chr([A-Za-z0-9]+)", stem)
+    return m.group(1) if m else stem
 
 
 def _as_upper_str(x: Any) -> str:
     if pd.isna(x):
         return ""
     return str(x).strip().upper()
-
-
-def _is_true_str(x: Any) -> bool:
-    return _as_upper_str(x) == "TRUE"
 
 
 def _is_amp_del(x: Any) -> bool:
@@ -338,6 +384,29 @@ def build_column_glossary_html(
 
 @dataclass(frozen=True)
 class PlotCard:
+    """
+    Data container for a single chromosome plot card used in the CNV report template.
+
+    Each instance represents one PNG plot and provides the minimal information
+    required by the Jinja2 template to render it in the chromosome plot grid.
+
+    Attributes
+    ----------
+    title
+        Human-readable title displayed above the plot (e.g. "Chr 12").
+
+    data_uri
+        Base64-encoded PNG embedded as a data URI so the HTML report is fully
+        self-contained.
+
+    stem
+        Original filename stem of the plot (used for stable IDs or debugging).
+
+    has_cnv
+        Whether the chromosome contains a detected CNV/LOH event. Used to
+        group plots into "with CNV" and "without CNV" sections in the report.
+    """
+
     title: str
     data_uri: str
     stem: str
@@ -356,8 +425,6 @@ def _collect_chr_plot_groups(
         "chr_with_cnv": [ {title, data_uri, stem, has_cnv}, ... ],
         "chr_no_cnv":   [ ... ],
       }
-
-    Only chromosome-level plots are scanned. Gene-zoom plots are ignored.
     """
     groups: dict[str, list[PlotCard]] = {
         "chr_with_cnv": [],
@@ -378,10 +445,6 @@ def _collect_chr_plot_groups(
 
     for png_file in png_files:
         stem = png_file.stem
-
-        # Ignore gene-zoom plots (anything with "_genes_" in the stem)
-        if "_genes_" in stem:
-            continue
 
         data_uri = _png_to_data_uri(png_file)
         if not data_uri:

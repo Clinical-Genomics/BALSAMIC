@@ -96,11 +96,7 @@ def _load_bins_tsv(
     df = df[df[gene_col] != "Antitarget"].copy()
 
     # normalize gene column
-    df["gene.symbol"] = (
-        df[gene_col]
-        .replace("-", "backbone")
-        .astype("string")
-    )
+    df["gene.symbol"] = df[gene_col].replace("-", "backbone").astype("string")
 
     # Expand gene column into individual rows with one gene symbol per row
     df["gene.symbol"] = df["gene.symbol"].str.split(r"\s*,\s*", regex=True)
