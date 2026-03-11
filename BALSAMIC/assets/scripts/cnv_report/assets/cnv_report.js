@@ -134,7 +134,6 @@
   const COL_GROUP_QC = ["depth_mean", "min_log2", "max_log2"];
 
   const COL_GROUP_PON_PREFIXES = ["pon_"];
-  const COL_GROUP_PON_EXPLICIT = [];
 
   const COL_GROUP_CNVKIT_EXTRA = [
     "cnvkit_adjusted_log2",
@@ -163,8 +162,7 @@
       qc: () => COL_GROUP_QC.filter((c) => c in colIndex),
       pon: () => {
         const prefixCols = columnsMatchingPrefixes(colIndex, COL_GROUP_PON_PREFIXES);
-        const explicitCols = COL_GROUP_PON_EXPLICIT.filter((c) => c in colIndex);
-        return unique([...prefixCols, ...explicitCols]);
+        return unique([...prefixCols]);
       },
       cnvkit: () => COL_GROUP_CNVKIT_EXTRA.filter((c) => c in colIndex),
       purecn: () => COL_GROUP_PURECN_EXTRA.filter((c) => c in colIndex),

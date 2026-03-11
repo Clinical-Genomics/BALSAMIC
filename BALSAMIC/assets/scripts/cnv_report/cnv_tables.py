@@ -118,21 +118,21 @@ def _pon_signal(z: float, *, noise_lt: float, borderline_lt: float) -> str:
     return "strong"
 
 
-def _pon_cnv_call_from_log2(
+def _pon_cnv_call_from_effect(
     *,
     is_strong: bool,
-    mean_log2: float,
+    effect_log2: float,
     gain_gt: float,
     loss_lt: float,
     weak_value: str,
     neutral_value: str,
 ) -> str:
-    """Return AMPLIFICATION/DELETION/neutral/weak depending on thresholds."""
-    if not is_strong or pd.isna(mean_log2):
+    """Return GAIN/LOSS/neutral/weak depending on deviation from PON baseline."""
+    if not is_strong or pd.isna(effect_log2):
         return weak_value
-    if mean_log2 > gain_gt:
+    if effect_log2 > gain_gt:
         return "GAIN"
-    if mean_log2 < loss_lt:
+    if effect_log2 < loss_lt:
         return "LOSS"
     return neutral_value
 
@@ -781,16 +781,16 @@ def create_generegions(cnr_df: pd.DataFrame, pon_df: pd.DataFrame | None = None)
     # Only compute indication for eligible pon regions
     eligible = ~too_small
     regions_df.loc[eligible, "pon_region_indication"] = regions_df.loc[eligible].apply(
-        lambda r: _pon_cnv_call_from_log2(
-            is_strong=str(r.get("pon_region_signal", "")).strip().lower() == "strong",
-            mean_log2=r.get("mean_log2", np.nan),
-            gain_gt=0.07,
-            loss_lt=-0.07,
-            weak_value="NEUTRAL",
-            neutral_value="NEUTRAL",
-        ),
-        axis=1,
-    )
+    lambda r: _pon_cnv_call_from_effect(
+        is_strong=str(r.get("pon_region_signal", "")).strip().lower() == "strong",
+        effect_log2=r.get("pon_region_effect", np.nan),
+        gain_gt=0.07,
+        loss_lt=-0.07,
+        weak_value="NEUTRAL",
+        neutral_value="NEUTRAL",
+    ),
+    axis=1,
+)
 
     return regions_df
 
