@@ -22,10 +22,20 @@
     </head>
     <body>
         <h1>{{ title }}</h1>
+
+        <p>
+        <strong>Report creation date: {{ creation_time }}</strong>
+        </p>
+
         <div class="report-meta">
             <span class="meta-label">Normalisation method</span>
             <span class="meta-value">{{ normalisation_method }}</span>
         </div>
+        <div class="report-sex-meta">
+            <span class="meta-label">Sample analysed as sex</span>
+            <span class="meta-value">{{ sample_sex }}</span>
+        </div>
+
         <h2>PureCN sample summary</h2>
 
         {% if purecn_failed %}

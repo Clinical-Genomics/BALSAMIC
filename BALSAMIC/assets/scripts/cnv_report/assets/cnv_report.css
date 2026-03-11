@@ -28,7 +28,15 @@ h1, h2, h3 {
   margin: 12px 0 18px 0;
   padding: 10px 14px;
   border-left: 4px solid #2b6cb0;
-  background-color: #ecfdf3;
+  background-color: #bef587;
+  font-size: 14px;
+}
+
+.report-sex-meta {
+  margin: 12px 0 18px 0;
+  padding: 10px 14px;
+  border-left: 4px solid #2b6cb0;
+  background-color: #f5cb87;
   font-size: 14px;
 }
 

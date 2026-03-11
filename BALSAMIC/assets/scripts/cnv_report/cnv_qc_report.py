@@ -9,6 +9,8 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 import click
 import numpy as np
 import pandas as pd
+from datetime import date
+
 
 from cnv_summary_metrics import read_purecn_summary, compute_summary_metrics
 from cnv_report_utils import pdf_first_page_to_png
@@ -48,6 +50,7 @@ def render_cnv_report_html(
     chr_plots_dir: str,
     title: str = "CNV Report",
     normalisation_method: str,
+    sample_sex: str,
 ) -> None:
     """
     Render a standalone CNV QC HTML report using a Jinja2 template + embedded CSS/JS assets.
@@ -174,6 +177,8 @@ def render_cnv_report_html(
     html = template.render(
         title=title,
         normalisation_method=normalisation_method,
+        sample_sex=sample_sex,
+        creation_time=date.today(),
         css_text=css_text,
         js_text=js_text,
         segment_column_glossary_html=segment_column_glossary_html,
@@ -650,6 +655,7 @@ def main(
         out_html=out_html_path,
         title=f"CNV Report – {case_id}",
         normalisation_method=normalisation_method,
+        sample_sex=sex,
     )
 
     click.echo(f"[CNV QC] Finished report for {case_id}: {out_html_path}")
