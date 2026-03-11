@@ -193,7 +193,9 @@
     // header
     for (const hr of Array.from(table.tHead?.rows ?? [])) {
       const cell = hr.cells?.[idx];
-      if (cell) cell.style.display = displayValue;
+      if (cell != null) {
+        cell.style.display = displayValue;
+      }
     }
 
     // body
@@ -225,8 +227,8 @@
     }
   }
 
-  function hookColumnGroupToggles() {
-    const toggleEls = {
+  function getColumnToggleElements() {
+    return {
       "report-table": {
         cnvkit: $("cols-cnvkit-extra-gene"),
         purecn: $("cols-purecn-extra-gene"),
@@ -238,38 +240,47 @@
         purecn: $("cols-purecn-extra-region"),
       },
     };
+  }
 
-    // apply defaults
+  function applyToggleDefaults(toggleEls) {
     for (const [tableId, toggles] of Object.entries(toggleEls)) {
       const defaults = DEFAULT_GROUP_STATE[tableId];
       if (!defaults) continue;
 
-      for (const [k, el] of Object.entries(toggles)) {
-        if (el) el.checked = Boolean(defaults[k]);
+      for (const [key, el] of Object.entries(toggles)) {
+        if (el) el.checked = Boolean(defaults[key]);
       }
     }
+  }
 
-    function applyAll() {
-      for (const [tableId, toggles] of Object.entries(toggleEls)) {
-        applyColumnGroupsForTable(tableId, {
-          qc: toggles.qc?.checked,
-          pon: toggles.pon?.checked,
-          cnvkit: toggles.cnvkit?.checked,
-          purecn: toggles.purecn?.checked,
-        });
-      }
+  function applyAllColumnGroups(toggleEls) {
+    for (const [tableId, toggles] of Object.entries(toggleEls)) {
+      applyColumnGroupsForTable(tableId, {
+        qc: toggles.qc?.checked,
+        pon: toggles.pon?.checked,
+        cnvkit: toggles.cnvkit?.checked,
+        purecn: toggles.purecn?.checked,
+      });
     }
+  }
 
-    applyAll();
-
-    // bind events
+  function collectToggleEvents(toggleEls) {
     const events = [];
     for (const toggles of Object.values(toggleEls)) {
       for (const el of Object.values(toggles)) {
         if (el) events.push([el, "change"]);
       }
     }
-    bindEvents(events, applyAll);
+    return events;
+  }
+
+  function hookColumnGroupToggles() {
+    const toggleEls = getColumnToggleElements();
+    applyToggleDefaults(toggleEls);
+    applyAllColumnGroups(toggleEls);
+    bindEvents(collectToggleEvents(toggleEls), () =>
+      applyAllColumnGroups(toggleEls),
+    );
   }
 
   // ---------------------------------------------------------------------------
@@ -380,40 +391,55 @@
     return v === "amplification" || v === "deletion";
   }
 
-  function shouldHideRow(row, colIndex, cfg) {
-    // apply genomic range filter
-    if (cfg.range && !rowInRange(row, colIndex, cfg.range)) return true;
+  function matchesRegionSignal(row, colIndex, cfg) {
+    const matchCnv =
+      rowHasCnvOrLoh(row, colIndex) ||
+      (cfg.includePonCnv && rowHasPonCnvCall(row, colIndex));
 
-    // Additive "OR" gate for region table:
-    if (cfg.isRegionTable) {
-      const wantCnv = Boolean(cfg.hideNonCnv);
-      const wantPonInd = Boolean(cfg.onlyPonIndication);
+    const matchPonInd = rowHasPonIndication(row, colIndex);
 
-      if (wantCnv || wantPonInd) {
-        const matchCnv = wantCnv
-          ? rowHasCnvOrLoh(row, colIndex) ||
-            (cfg.includePonCnv ? rowHasPonCnvCall(row, colIndex) : false)
-          : false;
-
-        const matchPonInd = wantPonInd
-          ? rowHasPonIndication(row, colIndex)
-          : false;
-
-        if (!matchCnv && !matchPonInd) return true;
-      }
-    } else {
-      if (cfg.hideNonCnv) {
-        const cnv = rowHasCnvOrLoh(row, colIndex);
-        const pon = cfg.includePonCnv ? rowHasPonCnvCall(row, colIndex) : false;
-        if (!cnv && !pon) return true;
-      }
+    if (cfg.hideNonCnv && cfg.onlyPonIndication) {
+      return matchCnv || matchPonInd;
     }
+    if (cfg.hideNonCnv) {
+      return matchCnv;
+    }
+    if (cfg.onlyPonIndication) {
+      return matchPonInd;
+    }
+    return true;
+  }
 
-    if (cfg.onlyCancer && !rowIsCancerGene(row, colIndex)) return true;
-    if (!rowHasMinTargets(row, colIndex, cfg.minTargets)) return true;
-    if (!rowMatchesGeneList(row, colIndex, cfg.geneList)) return true;
+  function matchesSegmentSignal(row, colIndex, cfg) {
+    if (!cfg.hideNonCnv) return true;
 
-    return false;
+    return (
+      rowHasCnvOrLoh(row, colIndex) ||
+      (cfg.includePonCnv && rowHasPonCnvCall(row, colIndex))
+    );
+  }
+
+  function matchesCommonFilters(row, colIndex, cfg) {
+    if (cfg.onlyCancer && !rowIsCancerGene(row, colIndex)) return false;
+    if (!rowHasMinTargets(row, colIndex, cfg.minTargets)) return false;
+    if (!rowMatchesGeneList(row, colIndex, cfg.geneList)) return false;
+    return true;
+  }
+
+  function matchesRow(row, colIndex, cfg) {
+    if (cfg.range && !rowInRange(row, colIndex, cfg.range)) return false;
+
+    const signalMatch = cfg.isRegionTable
+      ? matchesRegionSignal(row, colIndex, cfg)
+      : matchesSegmentSignal(row, colIndex, cfg);
+
+    if (!signalMatch) return false;
+
+    return matchesCommonFilters(row, colIndex, cfg);
+  }
+
+  function shouldHideRow(row, colIndex, cfg) {
+    return !matchesRow(row, colIndex, cfg);
   }
 
   function filterTable(tableId, table, cfg) {
@@ -642,7 +668,7 @@
 
   hookClickablePlots();
 
-  if (modalClose) modalClose.addEventListener("click", closeModal);
+  modalClose?.addEventListener("click", closeModal);
 
   if (modal) {
     modal.addEventListener("click", (event) => {
