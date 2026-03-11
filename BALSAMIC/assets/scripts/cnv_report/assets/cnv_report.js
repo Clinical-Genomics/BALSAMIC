@@ -10,7 +10,7 @@
   const isTruthyText = (v) => v === "true" || v === "1" || v === "yes";
 
   const parseIntSafe = (v) => {
-    const n = parseInt(v, 10);
+    const n = Number.parseInt(v, 10);
     return Number.isFinite(n) ? n : 0;
   };
 
