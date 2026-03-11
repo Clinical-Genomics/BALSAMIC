@@ -44,14 +44,14 @@ def _stable_gene_color_fn(cmap_name: str = "tab20"):
     """
     Deterministic gene → color mapping, stable across runs and machines.
 
-    Uses md5(gene_name) → integer → colormap index.
+    Uses sha256(gene_name) → integer → colormap index.
     """
     cmap = colormaps.get_cmap(cmap_name)
 
     def _stable_gene_color(gname: str):
         s = str(gname).encode("utf-8")
-        h = hashlib.md5(s).hexdigest()  # 32 hex chars
-        idx = int(h[:8], 16) % cmap.N  # use first 32 bits
+        h = hashlib.sha256(s).digest()
+        idx = int.from_bytes(h[:4], byteorder="big") % cmap.N
         return cmap(idx)
 
     return _stable_gene_color
