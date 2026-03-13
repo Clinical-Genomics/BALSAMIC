@@ -631,7 +631,6 @@ def main(
         pon_df = load_pon_bins(pon)
     cytoband_df = load_cytobands(cytoband)
 
-    # exon_map: Dict[Tuple[str, str], dict] = load_refgene_exons(refgene)
 
     # ----------------------------
     # Create segment table

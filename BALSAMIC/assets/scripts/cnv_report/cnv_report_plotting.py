@@ -132,25 +132,28 @@ def _draw_highlighted_bins(
     if "is_highlight_bin" not in bins.columns:
         return
 
-    hi_set = set(map(str, highlighted_genes))
-    if not hi_set:
+    highlight_set = set(map(str, highlighted_genes))
+    if not highlight_set:
         return
 
-    # Only consider bins that are flagged as highlighted (fast path)
-    b = bins[bins["is_highlight_bin"]].copy()
-    if b.empty:
+    # Pre-filter to bins that contain at least one highlighted gene.
+    # This avoids applying the per-bin gene inspection to all bins.
+    highlighted_bins = bins[bins["is_highlight_bin"]].copy()
+    if highlighted_bins.empty:
         return
 
-    def hi_genes_in_bin(glist) -> list[str]:
-        if not isinstance(glist, list) or not glist:
+    def highlighted_genes_in_bin(gene_list) -> list[str]:
+        if not isinstance(gene_list, list) or not gene_list:
             return []
         # only genes that are in highlighted set
-        return [g for g in glist if str(g) in hi_set]
+        return [gene for gene in gene_list if str(gene) in highlight_set]
 
-    b["hi_genes"] = b[genes_col].apply(hi_genes_in_bin)
+    highlighted_bins["hi_genes"] = highlighted_bins[genes_col].apply(highlighted_genes_in_bin)
 
-    single = b[b["hi_genes"].apply(len) == 1].copy()
-    multi = b[b["hi_genes"].apply(len) > 1].copy()
+    highlighted_bins["hi_count"] = highlighted_bins["hi_genes"].apply(len)
+
+    single = highlighted_bins[highlighted_bins["hi_count"] == 1].copy()
+    multi = highlighted_bins[highlighted_bins["hi_count"] > 1].copy()
 
     # --- single highlighted gene: color by that gene ---
     if not single.empty:
@@ -184,7 +187,7 @@ def _draw_highlighted_bins(
 
 def _draw_pon_bars(ax, sub: pd.DataFrame, x: pd.Series, y_clip: float):
     """
-    Draw PON noise bars around PON smoothed log2 baseline.
+    Draw PON noise bars around PON log2 baseline.
 
     Bar = PON mean ± PON spread.
     Clipped to plotting y-range.
@@ -227,7 +230,7 @@ def _draw_segments(
     Color by cnv_call:
       Amplification → red
       Deletion → royalblue
-      Otherwise → black
+      Neutral → black
 
     Caller style:
       CNVkit → solid, thicker
@@ -238,10 +241,10 @@ def _draw_segments(
 
     df = segs_chr.copy()
 
-    # Normalize caller values
+    # Standardise caller values
     df[caller_col] = df[caller_col].astype("string").fillna("").str.strip().str.upper()
 
-    # Normalize call values
+    # Standardise call values
     calls = df[call_col].astype("string").fillna("").str.strip().str.upper()
 
     # Compute colors vectorized
@@ -583,18 +586,18 @@ def _annotate_highlight_bins(
     out_col: str = "is_highlight_bin",
 ) -> pd.DataFrame:
     """
-    Add boolean out_col indicating whether any gene in bins[genes_col] is in highlighted_genes.
+    Add a boolean column indicating whether any gene in a bin
+    is in the highlighted gene set.
     """
-    hi = set(map(str, highlighted_genes))
+    highlighted = {str(gene) for gene in highlighted_genes}
 
-    def has_hi(glist) -> bool:
-        if not isinstance(glist, list) or not glist:
+    def contains_highlighted_gene(genes: list[str]) -> bool:
+        if not genes:
             return False
-        # intersection
-        return any((g in hi) for g in glist)
+        return any(gene in highlighted for gene in genes)
 
     out = bins.copy()
-    out[out_col] = out[genes_col].apply(has_hi)
+    out[out_col] = out[genes_col].apply(contains_highlighted_gene)
     return out
 
 

@@ -297,54 +297,6 @@ def load_cnvkit_segments_with_raw(
     return out
 
 
-def load_refgene_exons(refgene_path: str) -> Dict[Tuple[str, str], dict]:
-    """Load refgene and create an exon map from the longest transcript of a gene."""
-    cols = [
-        "gene_symbol",
-        "transcript",
-        "chrom",
-        "strand",
-        "txStart",
-        "txEnd",
-        "cdsStart",
-        "cdsEnd",
-        "exonCount",
-        "exonStarts",
-        "exonEnds",
-    ]
-    rg = pd.read_csv(refgene_path, sep="\t", header=None, names=cols)
-
-    rg["txStart"] = rg["txStart"].astype(int)
-    rg["txEnd"] = rg["txEnd"].astype(int)
-
-    exon_map: Dict[Tuple[str, str], dict] = {}
-
-    for (chrom, gene), sub in rg.groupby(["chrom", "gene_symbol"], sort=False):
-        sub = sub.copy()
-        sub["tx_len"] = sub["txEnd"] - sub["txStart"]
-        best = sub.loc[sub["tx_len"].idxmax()]
-
-        starts = [int(x) for x in str(best["exonStarts"]).split(",") if x != ""]
-        ends = [int(x) for x in str(best["exonEnds"]).split(",") if x != ""]
-        exons: List[Tuple[int, int]] = list(zip(starts, ends))
-        if not exons:
-            continue
-
-        exons.sort(key=lambda x: x[0])
-        if best["strand"] == "-":
-            exons = exons[::-1]
-
-        exon_map[(chrom, gene)] = {
-            "transcript": best["transcript"],
-            "strand": best["strand"],
-            "txStart": int(best["txStart"]),
-            "txEnd": int(best["txEnd"]),
-            "exons": exons,
-        }
-
-    return exon_map
-
-
 def load_cytobands(path: str) -> pd.DataFrame:
     """Load cytoband UCSC file; return normalized df with integer coords."""
     cols = ["chr", "chromStart", "chromEnd", "name", "gieStain"]
