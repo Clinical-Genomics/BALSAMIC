@@ -289,7 +289,7 @@ def _draw_generegion_pon_segments(
     chr_name: str,
     y_clip: float,
     highlight_only_cancer: bool,
-    gene_level: pd.DataFrame | None = None,
+    gene_summary: pd.DataFrame,
     min_gene_targets_cancer: int = 4,
     # column names (so you can change later without rewriting logic)
     start_col: str = "region_start",
@@ -339,10 +339,10 @@ def _draw_generegion_pon_segments(
     label_text = "PON-based gain/loss indicator"
     label_added = False
 
-    for _, crow in regions.iterrows():
-        xs = pos_to_xcoord(int(crow[start_col]))
-        xe = pos_to_xcoord(int(crow[end_col]))
-        y = float(np.clip(float(crow[y_col]), -y_clip, y_clip))
+    for _, region_row in regions.iterrows():
+        xs = pos_to_xcoord(int(region_row[start_col]))
+        xe = pos_to_xcoord(int(region_row[end_col]))
+        y = float(np.clip(float(region_row[y_col]), -y_clip, y_clip))
 
         line = ax.hlines(
             y,
@@ -359,29 +359,20 @@ def _draw_generegion_pon_segments(
         )
         label_added = True
 
-    # Genes represented (optional)
+    # Genes represented in PON regions
     pon_cnv_genes: set[str] = set()
-    if gene_col in regions.columns:
-        pon_cnv_genes = set(regions[gene_col].dropna().astype(str).tolist())
 
-    # Optional restriction for labeling
-    if (
-        highlight_only_cancer
-        and gene_level is not None
-        and not gene_level.empty
-        and pon_cnv_genes
-    ):
-        allowed = (
-            gene_level.loc[
-                (gene_level["chr"] == chr_name)
-                & (gene_level["is_cancer_gene"])
-                & (gene_level["total_targets"] >= min_gene_targets_cancer),
-                "gene.symbol",
-            ]
-            .dropna()
-            .astype(str)
-        )
-        pon_cnv_genes &= set(allowed.tolist())
+    if gene_col in regions.columns:
+        pon_cnv_genes = set(regions[gene_col].dropna().astype(str))
+
+    # Optionally restrict to cancer-highlight genes
+    if highlight_only_cancer and not gene_summary.empty:
+        allowed_genes = gene_summary.loc[(gene_summary["is_cancer_gene"])]
+
+        allowed_set = set(allowed_genes.dropna().astype(str))
+
+        # only keep pon_cnv_genes that are in cancer gene set
+        pon_cnv_genes = pon_cnv_genes & allowed_set
 
     return pon_cnv_genes, label_added
 
@@ -600,7 +591,7 @@ def compute_highlighted_genes_from_generegions(
 
     Returns:
       highlighted_genes: np.ndarray[str]
-      gene_level: per-gene summary (useful for debugging)
+      gene_summary: per-gene summary (useful for debugging)
     """
     df = generegions_df[
         generegions_df[chr_col].astype("string") == str(chr_name)
@@ -645,7 +636,7 @@ def compute_highlighted_genes_from_generegions(
     df["_has_loh"] = has_loh
     df["_has_cnv_or_loh"] = df["_has_cnv"] | df["_has_loh"]
 
-    gene_level = (
+    gene_summary = (
         df.groupby([chr_col, gene_col], as_index=False)
         .agg(
             total_targets=(targets_col, "sum"),
@@ -657,23 +648,25 @@ def compute_highlighted_genes_from_generegions(
         .copy()
     )
 
-    cancer_ok = gene_level["is_cancer_gene"] & (
-        gene_level["total_targets"] >= float(min_gene_targets_cancer)
+    cancer_ok = gene_summary["is_cancer_gene"] & (
+        gene_summary["total_targets"] >= float(min_gene_targets_cancer)
     )
 
     noncancer_ok = (
-        (~gene_level["is_cancer_gene"])
-        & gene_level["has_cnv_or_loh"]
-        & (gene_level["total_targets"] >= float(min_gene_targets))
+        (~gene_summary["is_cancer_gene"])
+        & gene_summary["has_cnv_or_loh"]
+        & (gene_summary["total_targets"] >= float(min_gene_targets))
     )
 
     highlight_mask = cancer_ok if highlight_only_cancer else (cancer_ok | noncancer_ok)
 
-    highlighted = gene_level.loc[highlight_mask, gene_col].astype(str).dropna().unique()
+    highlighted = (
+        gene_summary.loc[highlight_mask, gene_col].astype(str).dropna().unique()
+    )
     highlighted = np.array(sorted(set(highlighted) - {"backbone"}), dtype=object)
 
-    gene_level["highlight_gene"] = highlight_mask
-    return highlighted, gene_level
+    gene_summary["highlight_gene"] = highlight_mask
+    return highlighted, gene_summary
 
 
 def compute_gene_spans_from_generegions(
@@ -856,7 +849,7 @@ def plot_chromosomes(
     y_lim_chr = (-y_clip, y_clip)
 
     for chr_name in chr_order:
-        highlighted, gene_level = compute_highlighted_genes_from_generegions(
+        highlighted, gene_summary = compute_highlighted_genes_from_generegions(
             generegions_df,
             chr_name=chr_name,
             highlight_only_cancer=highlight_only_cancer,
@@ -965,7 +958,7 @@ def plot_chromosomes(
             chr_name=chr_name,
             y_clip=y_clip,
             highlight_only_cancer=highlight_only_cancer,
-            gene_level=gene_level,
+            gene_summary=gene_summary,
             min_gene_targets_cancer=MIN_GENE_TARGETS_CANCER,
         )
 
