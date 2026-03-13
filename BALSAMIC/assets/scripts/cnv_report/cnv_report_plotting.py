@@ -286,11 +286,9 @@ def _draw_generegion_pon_segments(
     generegions: pd.DataFrame,
     bins: pd.DataFrame,
     pos_to_xcoord: callable,
-    chr_name: str,
     y_clip: float,
     highlight_only_cancer: bool,
     gene_summary: pd.DataFrame,
-    min_gene_targets_cancer: int = 4,
     # column names (so you can change later without rewriting logic)
     start_col: str = "region_start",
     end_col: str = "region_end",
@@ -367,8 +365,10 @@ def _draw_generegion_pon_segments(
 
     # Optionally restrict to cancer-highlight genes
     if highlight_only_cancer and not gene_summary.empty:
-        allowed_genes = gene_summary.loc[(gene_summary["is_cancer_gene"])]
-
+        allowed_genes = gene_summary.loc[
+            gene_summary["is_cancer_gene"],
+            "gene.symbol",
+        ]
         allowed_set = set(allowed_genes.dropna().astype(str))
 
         # only keep pon_cnv_genes that are in cancer gene set
@@ -955,11 +955,9 @@ def plot_chromosomes(
             generegions=generegions,
             bins=bins,
             pos_to_xcoord=pos_to_xcoord,
-            chr_name=chr_name,
             y_clip=y_clip,
             highlight_only_cancer=highlight_only_cancer,
             gene_summary=gene_summary,
-            min_gene_targets_cancer=MIN_GENE_TARGETS_CANCER,
         )
 
         ax1.axhline(0, color="black", linewidth=0.8)
