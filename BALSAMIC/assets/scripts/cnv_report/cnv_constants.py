@@ -28,6 +28,7 @@ RENAME_COLS = {
     "purecn_type": "PureCN segment LOH-type",
     "gene.symbol": "Gene",
     "baf_maf": "BAF | MAF",
+    "segment_size": "Segment size (KB)"
 }
 
 pnp = "(adjusted for purity and ploidy estimated by PureCN)"
@@ -39,7 +40,7 @@ SEGMENT_COLUMN_DESCRIPTIONS = {
     "start": "Start coordinate (bp) of the CN segment.",
     "end": "End coordinate (bp) of the CN segment.",
     "cytoband": "Cytogenetic band annotation for the gene region.",
-    "segment_size": "Size of the segment: [end - start]",
+    "segment_size": "Size of the segment in KB: [end - start] / 1000",
     "caller": "The caller which determined the segment, CNVkit / PureCN",
     # --- Gene identity ---
     "gene.symbol": "HGNC gene symbols overlapping segment (minimum 2 probe targets required for a gene to be listed)",

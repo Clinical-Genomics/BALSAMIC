@@ -17,7 +17,7 @@ from matplotlib.patches import Patch
 from cnv_io import load_vcf_with_vaf
 
 
-def _pos_to_xcoord_fn(sub: pd.DataFrame) -> callable:
+def _pos_to_xcoord_fn(bins: pd.DataFrame) -> callable:
     """
     Build genomic position → pseudo-position mapping function.
 
@@ -26,8 +26,8 @@ def _pos_to_xcoord_fn(sub: pd.DataFrame) -> callable:
     Returned function is safe for out-of-range positions.
     """
 
-    bin_starts = sub["start"].to_numpy()
-    x_coords = sub["x_coord"].to_numpy()
+    bin_starts = bins["start"].to_numpy()
+    x_coords = bins["x_coord"].to_numpy()
 
     def pos_to_xcoord(pos: int) -> float:
         idx = np.searchsorted(bin_starts, pos, side="right") - 1
@@ -281,8 +281,8 @@ def _draw_segments(
 def _draw_generegion_pon_segments(
     ax,
     *,
-    g_regions_chr: pd.DataFrame,
-    sub: pd.DataFrame,
+    generegions: pd.DataFrame,
+    bins: pd.DataFrame,
     pos_to_xcoord: callable,
     chr_name: str,
     y_clip: float,
@@ -308,26 +308,26 @@ def _draw_generegion_pon_segments(
     """
     empty_result: tuple[set[str], bool] = (set(), False)
 
-    if g_regions_chr is None or g_regions_chr.empty or sub is None or sub.empty:
+    if generegions is None or generegions.empty or bins is None or bins.empty:
         return empty_result
 
     # If there's no PON info at all, do nothing.
-    has_ind = pon_ind_col in g_regions_chr.columns
-    has_sig = pon_sig_col in g_regions_chr.columns
+    has_ind = pon_ind_col in generegions.columns
+    has_sig = pon_sig_col in generegions.columns
     if not (has_ind or has_sig):
         return empty_result
 
     # Need coordinates + y column to draw
     required = {start_col, end_col, y_col}
-    missing_req = [c for c in required if c not in g_regions_chr.columns]
+    missing_req = [c for c in required if c not in generegions.columns]
     if missing_req:
         return empty_result
 
     # Span of plotted bins
-    span_start = int(pd.to_numeric(sub["start"], errors="coerce").min())
-    span_end = int(pd.to_numeric(sub["end"], errors="coerce").max())
+    span_start = int(pd.to_numeric(bins["start"], errors="coerce").min())
+    span_end = int(pd.to_numeric(bins["end"], errors="coerce").max())
 
-    regions = g_regions_chr.copy()
+    regions = generegions.copy()
 
     # numeric coords
     regions[start_col] = pd.to_numeric(regions[start_col], errors="coerce")
@@ -702,7 +702,7 @@ def compute_highlighted_genes_from_generegions(
 
 
 def compute_gene_spans_from_generegions(
-    g_regions_chr: pd.DataFrame,
+    generegions: pd.DataFrame,
     *,
     gene_col: str = "gene.symbol",
     start_col: str = "region_start",
@@ -713,10 +713,10 @@ def compute_gene_spans_from_generegions(
       region_start = min(region starts)
       region_end   = max(region ends)
     """
-    if g_regions_chr is None or g_regions_chr.empty:
+    if generegions is None or generegions.empty:
         return pd.DataFrame(columns=[gene_col, start_col, end_col])
 
-    spans = g_regions_chr[[gene_col, start_col, end_col]].copy()
+    spans = generegions[[gene_col, start_col, end_col]].copy()
     spans[gene_col] = spans[gene_col].astype("string").str.strip()
 
     spans[start_col] = pd.to_numeric(spans[start_col], errors="coerce")
@@ -895,7 +895,7 @@ def plot_chromosomes(
             continue
         chr_bins = chr_bins.sort_values("start", kind="stable")
 
-        g_regions_chr = generegions_df[generegions_df["chr"] == chr_name].copy()
+        generegions: pd.DataFrame = generegions_df[generegions_df["chr"] == chr_name].copy()
 
         gene_to_color = _make_gene_colors(highlighted)
 
@@ -982,8 +982,8 @@ def plot_chromosomes(
 
         pon_cnv_genes, _ = _draw_generegion_pon_segments(
             ax1,
-            g_regions_chr=g_regions_chr,
-            sub=bins,
+            generegions=generegions,
+            bins=bins,
             pos_to_xcoord=pos_to_xcoord,
             chr_name=chr_name,
             y_clip=y_clip,
@@ -1001,7 +1001,7 @@ def plot_chromosomes(
         ax1.set_title(title + "\n")
         main_leg = ax1.legend(loc="upper right", fontsize=8)
 
-        gene_spans_chr = compute_gene_spans_from_generegions(g_regions_chr)
+        gene_spans_chr = compute_gene_spans_from_generegions(generegions)
         label_genes = sorted(set(map(str, highlighted)))
         label_genes = [g for g in label_genes if g != "backbone"]
         if label_genes:
