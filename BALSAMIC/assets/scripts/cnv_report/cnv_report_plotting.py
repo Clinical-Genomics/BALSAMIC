@@ -148,7 +148,9 @@ def _draw_highlighted_bins(
         # only genes that are in highlighted set
         return [gene for gene in gene_list if str(gene) in highlight_set]
 
-    highlighted_bins["hi_genes"] = highlighted_bins[genes_col].apply(highlighted_genes_in_bin)
+    highlighted_bins["hi_genes"] = highlighted_bins[genes_col].apply(
+        highlighted_genes_in_bin
+    )
 
     highlighted_bins["hi_count"] = highlighted_bins["hi_genes"].apply(len)
 
@@ -317,46 +319,19 @@ def _draw_generegion_pon_segments(
     if not (has_ind or has_sig):
         return empty_result
 
-    # Need coordinates + y column to draw
-    required = {start_col, end_col, y_col}
-    missing_req = [c for c in required if c not in generegions.columns]
-    if missing_req:
-        return empty_result
-
-    # Span of plotted bins
-    span_start = int(pd.to_numeric(bins["start"], errors="coerce").min())
-    span_end = int(pd.to_numeric(bins["end"], errors="coerce").max())
-
     regions = generegions.copy()
-
-    # numeric coords
-    regions[start_col] = pd.to_numeric(regions[start_col], errors="coerce")
-    regions[end_col] = pd.to_numeric(regions[end_col], errors="coerce")
-    regions[y_col] = pd.to_numeric(regions[y_col], errors="coerce")
 
     regions = regions.dropna(subset=[start_col, end_col, y_col]).copy()
     if regions.empty:
         return empty_result
 
-    # overlap filter
-    regions = regions.loc[
-        (regions[end_col] >= span_start) & (regions[start_col] <= span_end)
-    ].copy()
-    if regions.empty:
-        return empty_result
+    # PON GAIN / LOSS signal filter (only strong signal)
 
-    # PON signal filter
-    keep_mask = pd.Series(False, index=regions.index)
+    ind = regions[pon_ind_col].astype("string").str.upper().isin({"GAIN", "LOSS"})
+    sig = regions[pon_sig_col].astype("string").str.lower().eq("strong")
 
-    if has_ind:
-        ind = regions[pon_ind_col].astype("string").fillna("").str.strip().str.upper()
-        keep_mask |= ind.isin({"GAIN", "LOSS"})
+    regions = regions[ind | sig].copy()
 
-    if has_sig:
-        sig = regions[pon_sig_col].astype("string").fillna("").str.strip().str.lower()
-        keep_mask |= sig.eq("strong")
-
-    regions = regions.loc[keep_mask].copy()
     if regions.empty:
         return empty_result
 
@@ -895,7 +870,9 @@ def plot_chromosomes(
             continue
         chr_bins = chr_bins.sort_values("start", kind="stable")
 
-        generegions: pd.DataFrame = generegions_df[generegions_df["chr"] == chr_name].copy()
+        generegions: pd.DataFrame = generegions_df[
+            generegions_df["chr"] == chr_name
+        ].copy()
 
         gene_to_color = _make_gene_colors(highlighted)
 

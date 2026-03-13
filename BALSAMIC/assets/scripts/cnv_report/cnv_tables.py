@@ -208,7 +208,6 @@ def add_cnv_calls_wide(
     return out
 
 
-
 ############################
 # GENE REGION LEVEL
 ############################

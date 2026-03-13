@@ -631,7 +631,6 @@ def main(
         pon_df = load_pon_bins(pon)
     cytoband_df = load_cytobands(cytoband)
 
-
     # ----------------------------
     # Create segment table
     # ----------------------------
