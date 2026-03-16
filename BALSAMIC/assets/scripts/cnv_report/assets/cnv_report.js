@@ -97,11 +97,14 @@
     ta.style.position = "fixed";
     ta.style.left = "-9999px";
     ta.style.top = "0";
+
     document.body.appendChild(ta);
     ta.focus();
     ta.select();
+
     document.execCommand("copy");
-    document.body.removeChild(ta);
+
+    ta.remove();
   }
 
   // ---------------------------------------------------------------------------
@@ -353,7 +356,7 @@
     const nText = textOf(row.cells[idx]);
     if (!nText) return true;
 
-    const nVal = parseFloat(nText);
+    const nVal = Number.parseFloat(nText);
     return Number.isNaN(nVal) ? true : nVal >= minTargets;
   }
 
@@ -543,7 +546,7 @@
   }
 
   function parseFloatSafe(v) {
-    const n = parseFloat(v);
+    const n = Number.parseFloat(v);
     return Number.isFinite(n) ? n : null;
   }
 
@@ -576,8 +579,8 @@
 
     // overlap check:
     // keep row if it overlaps [wantStart, wantEnd]
-    const qStart = wantStart != null ? wantStart : -Infinity;
-    const qEnd = wantEnd != null ? wantEnd : Infinity;
+    const qStart = wantStart ?? -Infinity;
+    const qEnd = wantEnd ?? Infinity;
 
     return rowEnd >= qStart && rowStart <= qEnd;
   }
