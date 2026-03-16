@@ -287,13 +287,10 @@ def _draw_generegion_pon_segments(
     bins: pd.DataFrame,
     pos_to_xcoord: callable,
     y_clip: float,
-    highlight_only_cancer: bool,
-    gene_summary: pd.DataFrame,
     # column names (so you can change later without rewriting logic)
     start_col: str = "region_start",
     end_col: str = "region_end",
     y_col: str = "mean_log2",
-    gene_col: str = "gene.symbol",
     pon_ind_col: str = "pon_region_indication",
     pon_sig_col: str = "pon_region_signal",
 ) -> tuple[set[str], bool]:
@@ -357,24 +354,7 @@ def _draw_generegion_pon_segments(
         )
         label_added = True
 
-    # Genes represented in PON regions
-    pon_cnv_genes: set[str] = set()
-
-    if gene_col in regions.columns:
-        pon_cnv_genes = set(regions[gene_col].dropna().astype(str))
-
-    # Optionally restrict to cancer-highlight genes
-    if highlight_only_cancer and not gene_summary.empty:
-        allowed_genes = gene_summary.loc[
-            gene_summary["is_cancer_gene"],
-            "gene.symbol",
-        ]
-        allowed_set = set(allowed_genes.dropna().astype(str))
-
-        # only keep pon_cnv_genes that are in cancer gene set
-        pon_cnv_genes = pon_cnv_genes & allowed_set
-
-    return pon_cnv_genes, label_added
+    return label_added
 
 
 def draw_gene_labels_from_spans(
@@ -950,7 +930,7 @@ def plot_chromosomes(
             label=f"log2 (median {window} bins)",
         )
 
-        pon_cnv_genes, _ = _draw_generegion_pon_segments(
+        _, _ = _draw_generegion_pon_segments(
             ax1,
             generegions=generegions,
             bins=bins,
@@ -970,8 +950,9 @@ def plot_chromosomes(
         main_leg = ax1.legend(loc="upper right", fontsize=8)
 
         gene_spans_chr = compute_gene_spans_from_generegions(generegions)
-        label_genes = sorted(set(map(str, highlighted)))
-        label_genes = [g for g in label_genes if g != "backbone"]
+        label_genes = set(map(str, highlighted))
+        label_genes.discard("backbone")
+        label_genes = sorted(label_genes)
         if label_genes:
             draw_gene_labels_from_spans(
                 ax1,
