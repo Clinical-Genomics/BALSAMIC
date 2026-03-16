@@ -469,19 +469,41 @@ def _compute_variable_width_bins(
 
     out = bins.copy()
 
+    # Determine whether a bin represents a backbone region
+    # (backbone bins contain the special gene label "backbone")
     def is_backbone(glist) -> bool:
         return isinstance(glist, list) and (backbone_label in glist)
 
+    # Mark backbone bins
     out["is_backbone_bin"] = out[genes_col].apply(is_backbone)
 
-    # Assign type to "Backbone" if is_backbone_bin is True, otherwise set to "Target"
+    # Classify bins for plotting (used later for coloring/background scatter)
     out["type"] = np.where(out["is_backbone_bin"], "Backbone", "Target")
 
+    # ------------------------------------------------------------------
+    # Assign visual width to each bin.
+    #
+    # Highlighted bins → full width (1.0) so important genes expand.
+    # Neutral targets  → compressed using neutral_target_factor.
+    # Backbone bins    → compressed further using backbone_factor.
+    # ------------------------------------------------------------------
     width = np.full(len(out), float(neutral_target_factor), dtype=float)
+
+    # Compress backbone bins
     width[out["is_backbone_bin"].to_numpy()] = float(backbone_factor)
+
+    # Expand bins that contain highlighted gene
     width[out["is_highlight_bin"].to_numpy()] = 1.0
 
+    # Store visual bin width
     out["bin_width"] = width
+
+    # ------------------------------------------------------------------
+    # Compute pseudo genomic x-coordinate for plotting.
+    #
+    # Bins are laid out sequentially according to their visual width.
+    # The coordinate represents the center of each bin.
+    # ------------------------------------------------------------------
     out["x_coord"] = np.cumsum(width) - (width / 2.0)
     return out
 
