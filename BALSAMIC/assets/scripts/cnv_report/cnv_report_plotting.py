@@ -927,7 +927,7 @@ def plot_chromosomes(
 
     outdir.mkdir(parents=True, exist_ok=True)
 
-    KEY = ("chr", "start", "end")
+    KEY = plot_config.key
 
     # --- collapse CNR to unique bins with gene list ---
     cnr_bins = _collapse_bins_to_unique(

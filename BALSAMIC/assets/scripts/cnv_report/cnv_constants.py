@@ -14,6 +14,7 @@ class ChromosomePlotConfig:
     log2_rolling_window: int = 5
     base_label_offset: float = 1.5
     y_abs_max: float = 3.0
+    key: tuple[str, str, str] = ("chr", "start", "end")
 
 
 PANEL_PLOT_CONFIG = ChromosomePlotConfig(
