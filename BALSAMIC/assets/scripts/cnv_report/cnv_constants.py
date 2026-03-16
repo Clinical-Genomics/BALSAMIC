@@ -4,20 +4,33 @@ from typing import Mapping, Sequence
 CHR = "chr"
 
 
-class cnvplotting:
-    """
-    CNVplotting constants
-    """
-    MIN_GENE_TARGETS = 4
-    MIN_GENE_TARGETS_CANCER = 4
+@dataclass(frozen=True)
+class ChromosomePlotConfig:
+    backbone_factor: float
+    neutral_target_factor: float
+    min_gene_targets: int
+    min_gene_targets_cancer: int
+    highlight_only_cancer: bool
+    log2_rolling_window: int = 5
+    base_label_offset: float = 1.5
+    y_abs_max: float = 3.0
 
-    BACKBONE_FACTOR: float = 0.4,
-    NEUTRAL_TARGET_FACTOR: float = 0.4,
 
+PANEL_PLOT_CONFIG = ChromosomePlotConfig(
+    backbone_factor=0.4,
+    neutral_target_factor=0.4,
+    min_gene_targets=2,
+    min_gene_targets_cancer=2,
+    highlight_only_cancer=False,
+)
 
-    LOG2_ROLLING_WINDOW: int = 5,
-    BASE_LABEL_OFFSET: float = 1.5,
-    Y_ABS_MAX: float = 3.0,
+EXOME_PLOT_CONFIG = ChromosomePlotConfig(
+    backbone_factor=0.07,
+    neutral_target_factor=0.07,
+    min_gene_targets=4,  # this will not be used as highlight cancer is True
+    min_gene_targets_cancer=4,
+    highlight_only_cancer=True,
+)
 
 
 @dataclass(frozen=True)

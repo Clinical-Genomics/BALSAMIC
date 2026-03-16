@@ -15,8 +15,7 @@ from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
 
 from cnv_io import load_vcf_with_vaf
-
-from cnv_constants import cnvplotting
+from cnv_constants import ChromosomePlotConfig
 
 
 def _pos_to_xcoord_fn(bins: pd.DataFrame) -> callable:
@@ -688,8 +687,8 @@ def compute_highlighted_genes_from_generegions(
     *,
     chr_name: str,
     highlight_only_cancer: bool,
-    min_gene_targets: int = cnvplotting.MIN_GENE_TARGETS,
-    min_gene_targets_cancer: int = cnvplotting.MIN_GENE_TARGETS_CANCER,
+    min_gene_targets: int,
+    min_gene_targets_cancer: int,
     chr_col: str = "chr",
     gene_col: str = "gene.symbol",
     targets_col: str = "n.targets",
@@ -902,13 +901,8 @@ def plot_chromosomes(
     generegions_df: pd.DataFrame,
     outdir: Path,
     case_id: str,
+    plot_config: ChromosomePlotConfig,
     pon_df: pd.DataFrame | None = None,
-    backbone_factor: float = cnvplotting.BACKBONE_FACTOR,
-    neutral_target_factor: float = cnvplotting.NEUTRAL_TARGET_FACTOR,
-    highlight_only_cancer: bool = False,
-    window: int = cnvplotting.LOG2_ROLLING_WINDOW,
-    base_label_offset: float = cnvplotting.BASE_LABEL_OFFSET,
-    y_abs_max: float = cnvplotting.Y_ABS_MAX,
 ) -> None:
     """
     Create one PNG per chromosome with:
@@ -921,10 +915,17 @@ def plot_chromosomes(
       - BAF from VCF
       - LOH highlighted regions in BAF plot (if PureCN results exist)
     """
-    outdir.mkdir(parents=True, exist_ok=True)
 
-    MIN_GENE_TARGETS = 4
-    MIN_GENE_TARGETS_CANCER = 4
+    backbone_factor = plot_config.backbone_factor
+    neutral_target_factor = plot_config.neutral_target_factor
+    highlight_only_cancer = plot_config.highlight_only_cancer
+    min_gene_targets = plot_config.min_gene_targets
+    min_gene_targets_cancer = plot_config.min_gene_targets_cancer
+    log2_rolling_window = plot_config.log2_rolling_window
+    base_label_offset = plot_config.base_label_offset
+    y_abs_max = plot_config.y_abs_max
+
+    outdir.mkdir(parents=True, exist_ok=True)
 
     KEY = ("chr", "start", "end")
 
@@ -978,8 +979,8 @@ def plot_chromosomes(
             generegions_df,
             chr_name=chr_name,
             highlight_only_cancer=highlight_only_cancer,
-            min_gene_targets=MIN_GENE_TARGETS,
-            min_gene_targets_cancer=MIN_GENE_TARGETS_CANCER,
+            min_gene_targets=min_gene_targets,
+            min_gene_targets_cancer=min_gene_targets_cancer,
         )
 
         # collapsed bin-level table for this chromosome
@@ -1018,7 +1019,9 @@ def plot_chromosomes(
             "x_coord", kind="stable"
         ).copy()
         x_coordinate_bins["log2_smooth"] = (
-            x_coordinate_bins["log2"].rolling(window=window, center=True).median()
+            x_coordinate_bins["log2"]
+            .rolling(window=log2_rolling_window, center=True)
+            .median()
         )
         x_coordinate_bins["log2_clipped"] = x_coordinate_bins["log2"].clip(
             -y_clip, y_clip
@@ -1080,7 +1083,7 @@ def plot_chromosomes(
             linewidth=1.5,
             alpha=0.9,
             color="tab:green",
-            label=f"log2 (median {window} bins)",
+            label=f"log2 (median {log2_rolling_window} bins)",
         )
 
         _draw_generegion_pon_segments(

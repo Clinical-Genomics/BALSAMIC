@@ -64,7 +64,6 @@ def detect_chr_col(df: pd.DataFrame, candidates: list[str]) -> str:
     raise ValueError(f"Could not find chromosome column among: {candidates}")
 
 
-
 def _left_merge_pon(cnr_bins: pd.DataFrame, pon_bins: pd.DataFrame) -> pd.DataFrame:
     """Left-merge PON columns onto bins by (chr,start,end)."""
     if pon_bins is None or pon_bins.empty:
