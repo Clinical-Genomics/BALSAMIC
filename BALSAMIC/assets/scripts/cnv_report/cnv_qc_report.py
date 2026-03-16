@@ -34,6 +34,7 @@ from cnv_constants import (
     SEGMENT_TABLE_SPEC,
     TableSpec,
     PURECN_WARNING_TEXT,
+    cnvplotting,
 )
 
 from BALSAMIC.constants.analysis import Gender, AnalysisType
@@ -672,8 +673,8 @@ def main(
     chr_plots_dir.mkdir(exist_ok=True, parents=True)
 
     # Different compression for exome vs panel
-    neutral_target_factor = 0.07 if is_exome else 0.4
-    backbone_factor = 0.07 if is_exome else 0.4
+    neutral_target_factor = 0.07 if is_exome else cnvplotting.NEUTRAL_TARGET_FACTOR
+    backbone_factor = 0.07 if is_exome else cnvplotting.BACKBONE_FACTOR
     highlight_only_cancer = True if is_exome else False
 
     # pon may be None; plot_chromosomes is written to handle that

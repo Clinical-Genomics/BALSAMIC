@@ -64,15 +64,6 @@ def detect_chr_col(df: pd.DataFrame, candidates: list[str]) -> str:
     raise ValueError(f"Could not find chromosome column among: {candidates}")
 
 
-def flatten_agg_columns(df: pd.DataFrame) -> pd.DataFrame:
-    """Flatten MultiIndex columns produced by pandas .agg()."""
-    df = df.copy()
-    df.columns = [
-        "_".join(col).strip("_") if isinstance(col, tuple) else col
-        for col in df.columns
-    ]
-    return df
-
 
 def _left_merge_pon(cnr_bins: pd.DataFrame, pon_bins: pd.DataFrame) -> pd.DataFrame:
     """Left-merge PON columns onto bins by (chr,start,end)."""

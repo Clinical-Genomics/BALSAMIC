@@ -4,6 +4,22 @@ from typing import Mapping, Sequence
 CHR = "chr"
 
 
+class cnvplotting:
+    """
+    CNVplotting constants
+    """
+    MIN_GENE_TARGETS = 4
+    MIN_GENE_TARGETS_CANCER = 4
+
+    BACKBONE_FACTOR: float = 0.4,
+    NEUTRAL_TARGET_FACTOR: float = 0.4,
+
+
+    LOG2_ROLLING_WINDOW: int = 5,
+    BASE_LABEL_OFFSET: float = 1.5,
+    Y_ABS_MAX: float = 3.0,
+
+
 @dataclass(frozen=True)
 class TableSpec:
     column_order: Sequence[str]

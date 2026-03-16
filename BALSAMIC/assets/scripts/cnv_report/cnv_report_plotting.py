@@ -16,6 +16,8 @@ from matplotlib.patches import Patch
 
 from cnv_io import load_vcf_with_vaf
 
+from cnv_constants import cnvplotting
+
 
 def _pos_to_xcoord_fn(bins: pd.DataFrame) -> callable:
     """
@@ -686,8 +688,8 @@ def compute_highlighted_genes_from_generegions(
     *,
     chr_name: str,
     highlight_only_cancer: bool,
-    min_gene_targets: int = 4,
-    min_gene_targets_cancer: int = 4,
+    min_gene_targets: int = cnvplotting.MIN_GENE_TARGETS,
+    min_gene_targets_cancer: int = cnvplotting.MIN_GENE_TARGETS_CANCER,
     chr_col: str = "chr",
     gene_col: str = "gene.symbol",
     targets_col: str = "n.targets",
@@ -901,21 +903,23 @@ def plot_chromosomes(
     outdir: Path,
     case_id: str,
     pon_df: pd.DataFrame | None = None,
-    backbone_factor: float = 0.4,
-    neutral_target_factor: float = 0.4,
+    backbone_factor: float = cnvplotting.BACKBONE_FACTOR,
+    neutral_target_factor: float = cnvplotting.NEUTRAL_TARGET_FACTOR,
     highlight_only_cancer: bool = False,
-    window: int = 5,
-    base_label_offset: float = 1.5,
-    y_abs_max: float = 3.0,
+    window: int = cnvplotting.LOG2_ROLLING_WINDOW,
+    base_label_offset: float = cnvplotting.BASE_LABEL_OFFSET,
+    y_abs_max: float = cnvplotting.Y_ABS_MAX,
 ) -> None:
     """
     Create one PNG per chromosome with:
-      - PON spread band (if available)
-      - smoothed log2 (CNR)
-      - segments from gene_seg_df
-      - PON CNV regions from generegion_df (if provided)
+      - PON spread bars (if PON is available)
+      - log2 bins (CNR) (limited to +/- y_abs_max in y-axis)
+      - log2 median over 5 rolling windows (CNR) (limited to +/- y_abs_max in y-axis)
+      - CNVkit and PureCN CNV segments from gene_seg_df (PureCN may be missing)
+      - PON CNV regions from generegion_df (if PON is used)
       - gene highlighting + labels
       - BAF from VCF
+      - LOH highlighted regions in BAF plot (if PureCN results exist)
     """
     outdir.mkdir(parents=True, exist_ok=True)
 
