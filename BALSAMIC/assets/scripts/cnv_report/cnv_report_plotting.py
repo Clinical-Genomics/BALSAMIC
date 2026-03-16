@@ -287,13 +287,12 @@ def _draw_generegion_pon_segments(
     bins: pd.DataFrame,
     pos_to_xcoord: callable,
     y_clip: float,
-    # column names (so you can change later without rewriting logic)
     start_col: str = "region_start",
     end_col: str = "region_end",
     y_col: str = "mean_log2",
     pon_ind_col: str = "pon_region_indication",
     pon_sig_col: str = "pon_region_signal",
-) -> tuple[set[str], bool]:
+) -> None:
     """
     Draw PON-driven region segments if (and only if) PON columns exist.
 
@@ -301,7 +300,7 @@ def _draw_generegion_pon_segments(
       - pon_region_indication in {"GAIN","LOSS"} OR
       - pon_region_signal == "strong"  (if that column exists)
 
-    Returns: (pon_cnv_genes, label_added)
+    Returns: None
     """
     empty_result: tuple[set[str], bool] = (set(), False)
 
@@ -354,8 +353,6 @@ def _draw_generegion_pon_segments(
         )
         label_added = True
 
-    return label_added
-
 
 def draw_gene_labels_from_spans(
     ax,
@@ -374,35 +371,41 @@ def draw_gene_labels_from_spans(
     if gene_spans is None or gene_spans.empty or not label_genes:
         return
 
-    # index for fast lookup
-    gs = gene_spans.copy()
-    gs[gene_col] = gs[gene_col].astype("string").str.strip()
-    gs = gs.set_index(gene_col, drop=True)
+    # Index spans by gene name for fast lookup
+    gene_spans_indexed = gene_spans.copy()
+    gene_spans_indexed[gene_col] = (
+        gene_spans_indexed[gene_col].astype("string").str.strip()
+    )
+    gene_spans_indexed = gene_spans_indexed.set_index(gene_col, drop=True)
 
-    for gname in label_genes:
-        gname = str(gname).strip()
-        if gname not in gs.index:
+    for gene_name in label_genes:
+        gene_name = str(gene_name).strip()
+
+        if gene_name not in gene_spans_indexed.index:
             continue
 
-        g_start = int(gs.at[gname, start_col])
-        g_end = int(gs.at[gname, end_col])
-        if g_end < g_start:
+        gene_start = int(gene_spans_indexed.at[gene_name, start_col])
+        gene_end = int(gene_spans_indexed.at[gene_name, end_col])
+
+        if gene_end < gene_start:
             continue
 
-        color = gene_to_color.get(gname) or stable_color_fn(gname)
+        color = gene_to_color.get(gene_name) or stable_color_fn(gene_name)
 
-        xs = pos_to_xcoord(g_start)
-        xe = pos_to_xcoord(g_end)
+        x_start = pos_to_xcoord(gene_start)
+        x_end = pos_to_xcoord(gene_end)
 
-        for xg in (xs, xe):
-            ax.axvline(xg, color=color, linewidth=1.0, alpha=0.95, zorder=4)
+        # draw vertical boundaries for gene span
+        for x_boundary in (x_start, x_end):
+            ax.axvline(x_boundary, color=color, linewidth=1.0, alpha=0.95, zorder=4)
 
-        x_mid = (xs + xe) / 2.0
+        x_midpoint = (x_start + x_end) / 2.0
         y_label = y_max - (base_label_offset * 0.5)
+
         ax.text(
-            x_mid,
+            x_midpoint,
             y_label,
-            gname,
+            gene_name,
             rotation=90,
             fontsize=9,
             ha="center",
@@ -930,7 +933,7 @@ def plot_chromosomes(
             label=f"log2 (median {window} bins)",
         )
 
-        _, _ = _draw_generegion_pon_segments(
+        _draw_generegion_pon_segments(
             ax1,
             generegions=generegions,
             bins=bins,
@@ -949,14 +952,14 @@ def plot_chromosomes(
         ax1.set_title(title + "\n")
         main_leg = ax1.legend(loc="upper right", fontsize=8)
 
-        gene_spans_chr = compute_gene_spans_from_generegions(generegions)
+        gene_spans = compute_gene_spans_from_generegions(generegions)
         label_genes = set(map(str, highlighted))
         label_genes.discard("backbone")
         label_genes = sorted(label_genes)
         if label_genes:
             draw_gene_labels_from_spans(
                 ax1,
-                gene_spans=gene_spans_chr,
+                gene_spans=gene_spans,
                 label_genes=label_genes,
                 gene_to_color=gene_to_color,
                 stable_color_fn=stable_color,
