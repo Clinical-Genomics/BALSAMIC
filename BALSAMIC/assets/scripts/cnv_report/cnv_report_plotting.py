@@ -522,7 +522,7 @@ def _collapse_bins_to_unique(
     - Aggregates gene symbols into a sorted unique list (column `out_gene_col`)
     - Aggregates requested value columns using `value_aggs` (default: "first")
 
-    Assumption: for a given bin, numeric values like log2/depth are identical across exploded rows.
+    Assumption: for a given bin, numeric values like log2/depth are identical across expanded rows.
     """
     if value_aggs is None:
         value_aggs = {}
@@ -596,8 +596,93 @@ def _annotate_highlight_bins(
     return out
 
 
+def _is_amp_del(series: pd.Series) -> pd.Series:
+    """Return True for AMPLIFICATION or DELETION calls."""
+    values = series.astype("string").fillna("").str.strip().str.upper()
+    return values.isin({"AMPLIFICATION", "DELETION"})
+
+
+def _has_loh_type(series: pd.Series) -> pd.Series:
+    """Return True if the annotation contains LOH."""
+    values = series.astype("string").fillna("").str.strip().str.upper()
+    return values.str.contains("LOH", regex=False)
+
+
+def _add_region_highlight_evidence(
+    regions: pd.DataFrame,
+    *,
+    cnvkit_call_col: str,
+    purecn_call_col: str,
+    purecn_type_col: str,
+) -> pd.DataFrame:
+    """
+    Add per-row evidence columns for CNV, LOH, and combined CNV/LOH.
+    """
+    out = regions.copy()
+
+    has_cnv = pd.Series(False, index=out.index)
+    has_cnv |= _is_amp_del(out[cnvkit_call_col])
+
+    if purecn_call_col in out.columns:
+        has_cnv |= _is_amp_del(out[purecn_call_col])
+
+    has_loh = pd.Series(False, index=out.index)
+    if purecn_type_col in out.columns:
+        has_loh |= _has_loh_type(out[purecn_type_col])
+
+    out["_has_cnv"] = has_cnv
+    out["_has_loh"] = has_loh
+    out["_has_cnv_or_loh"] = has_cnv | has_loh
+    return out
+
+
+def _summarize_gene_highlights(
+    regions: pd.DataFrame,
+    *,
+    chr_col: str,
+    gene_col: str,
+    targets_col: str,
+    cancer_col: str,
+    highlight_only_cancer: bool,
+    min_gene_targets: int,
+    min_gene_targets_cancer: int,
+) -> pd.DataFrame:
+    """
+    Collapse region-level evidence to one row per gene and compute highlight status.
+    """
+    gene_summary = (
+        regions.groupby([chr_col, gene_col], as_index=False)
+        .agg(
+            total_targets=(targets_col, "sum"),
+            is_cancer_gene=(cancer_col, "any"),
+            has_cnv=("_has_cnv", "any"),
+            has_loh=("_has_loh", "any"),
+            has_cnv_or_loh=("_has_cnv_or_loh", "any"),
+        )
+        .copy()
+    )
+
+    cancer_gene_selected = gene_summary["is_cancer_gene"] & (
+        gene_summary["total_targets"] >= float(min_gene_targets_cancer)
+    )
+
+    noncancer_gene_selected = (
+        (~gene_summary["is_cancer_gene"])
+        & gene_summary["has_cnv_or_loh"]
+        & (gene_summary["total_targets"] >= float(min_gene_targets))
+    )
+
+    gene_summary["highlight_gene"] = (
+        cancer_gene_selected
+        if highlight_only_cancer
+        else (cancer_gene_selected | noncancer_gene_selected)
+    )
+
+    return gene_summary
+
+
 def compute_highlighted_genes_from_generegions(
-    generegions_df: pd.DataFrame,
+    generegions_all_chromosomes_df: pd.DataFrame,
     *,
     chr_name: str,
     highlight_only_cancer: bool,
@@ -612,90 +697,63 @@ def compute_highlighted_genes_from_generegions(
     purecn_type_col: str = "purecn_type",
 ) -> tuple[np.ndarray, pd.DataFrame]:
     """
-    Decide which genes should be highlighted on a given chromosome using generegion-level annotations.
+    Decide which genes should be highlighted on one chromosome.
 
-    Highlighting evidence:
-      - CNV: cnvkit_cnv_call or purecn_cnv_call in {AMPLIFICATION, DELETION}
-      - LOH: purecn_type contains substring "LOH" (case-insensitive)
+    Highlight evidence:
+      - CNV: CNVkit or PureCN call is AMPLIFICATION or DELETION
+      - LOH: PureCN type contains LOH
+
+    Rules:
+      - Cancer genes are highlighted if they meet the cancer target threshold
+      - Non-cancer genes are highlighted only if they have CNV/LOH evidence
+        and meet the non-cancer target threshold
+      - If highlight_only_cancer is True, only the cancer-gene rule is used
 
     Returns:
-      highlighted_genes: np.ndarray[str]
-      gene_summary: per-gene summary (useful for debugging)
+      highlighted_genes:
+          Sorted numpy array of highlighted gene names
+      gene_summary:
+          Per-gene summary table with evidence columns and highlight flag
     """
-    df = generegions_df[
-        generegions_df[chr_col].astype("string") == str(chr_name)
+    generegions = generegions_all_chromosomes_df[
+        generegions_all_chromosomes_df[chr_col].astype("string") == str(chr_name)
     ].copy()
-    if df.empty:
+
+    generegions[gene_col] = generegions[gene_col].astype("string").str.strip()
+    generegions = generegions[
+        generegions[gene_col].notna() & generegions[gene_col].ne("")
+    ].copy()
+    generegions = generegions[generegions[gene_col].ne("backbone")].copy()
+
+    if generegions.empty:
         return np.array([], dtype=object), pd.DataFrame()
 
-    df[gene_col] = df[gene_col].astype("string").str.strip()
-    df = df[df[gene_col].notna() & df[gene_col].ne("")].copy()
-    df = df[df[gene_col].ne("backbone")].copy()
-
-    if targets_col in df.columns:
-        df[targets_col] = pd.to_numeric(df[targets_col], errors="coerce").fillna(0.0)
-    else:
-        df[targets_col] = 0.0
-
-    if cancer_col in df.columns:
-        df[cancer_col] = df[cancer_col].fillna(False).astype(bool)
-    else:
-        df[cancer_col] = False
-
-    def _is_amp_del(s: pd.Series) -> pd.Series:
-        v = s.astype("string").fillna("").str.strip().str.upper()
-        return v.isin({"AMPLIFICATION", "DELETION"})
-
-    def _has_loh_type(s: pd.Series) -> pd.Series:
-        v = s.astype("string").fillna("").str.strip().str.upper()
-        # "LOH", "LOH;...", "something LOH something"
-        return v.str.contains("LOH", regex=False)
-
-    has_cnv = pd.Series(False, index=df.index)
-    if cnvkit_call_col in df.columns:
-        has_cnv |= _is_amp_del(df[cnvkit_call_col])
-    if purecn_call_col in df.columns:
-        has_cnv |= _is_amp_del(df[purecn_call_col])
-
-    has_loh = pd.Series(False, index=df.index)
-    if purecn_type_col in df.columns:
-        has_loh |= _has_loh_type(df[purecn_type_col])
-
-    df["_has_cnv"] = has_cnv
-    df["_has_loh"] = has_loh
-    df["_has_cnv_or_loh"] = df["_has_cnv"] | df["_has_loh"]
-
-    gene_summary = (
-        df.groupby([chr_col, gene_col], as_index=False)
-        .agg(
-            total_targets=(targets_col, "sum"),
-            is_cancer_gene=(cancer_col, "any"),
-            has_cnv=("_has_cnv", "any"),
-            has_loh=("_has_loh", "any"),
-            has_cnv_or_loh=("_has_cnv_or_loh", "any"),
-        )
-        .copy()
+    generegions = _add_region_highlight_evidence(
+        generegions,
+        cnvkit_call_col=cnvkit_call_col,
+        purecn_call_col=purecn_call_col,
+        purecn_type_col=purecn_type_col,
     )
 
-    cancer_ok = gene_summary["is_cancer_gene"] & (
-        gene_summary["total_targets"] >= float(min_gene_targets_cancer)
+    gene_summary = _summarize_gene_highlights(
+        generegions,
+        chr_col=chr_col,
+        gene_col=gene_col,
+        targets_col=targets_col,
+        cancer_col=cancer_col,
+        highlight_only_cancer=highlight_only_cancer,
+        min_gene_targets=min_gene_targets,
+        min_gene_targets_cancer=min_gene_targets_cancer,
     )
 
-    noncancer_ok = (
-        (~gene_summary["is_cancer_gene"])
-        & gene_summary["has_cnv_or_loh"]
-        & (gene_summary["total_targets"] >= float(min_gene_targets))
+    highlighted_genes = gene_summary.loc[gene_summary["highlight_gene"], gene_col]
+    highlighted_genes = highlighted_genes.astype(str).dropna().unique()
+    highlighted_genes = np.array(
+        sorted(set(highlighted_genes) - {"backbone"}),
+        dtype=object,
     )
 
-    highlight_mask = cancer_ok if highlight_only_cancer else (cancer_ok | noncancer_ok)
-
-    highlighted = (
-        gene_summary.loc[highlight_mask, gene_col].astype(str).dropna().unique()
-    )
-    highlighted = np.array(sorted(set(highlighted) - {"backbone"}), dtype=object)
-
-    gene_summary["highlight_gene"] = highlight_mask
-    return highlighted, gene_summary
+    return highlighted_genes, gene_summary
 
 
 def compute_gene_spans_from_generegions(
@@ -803,7 +861,7 @@ def plot_chromosomes(
     cnr_df: pd.DataFrame,
     vcf_path: Path,
     segments_df: pd.DataFrame,
-    generegions_df: pd.DataFrame,
+    generegions_all_chromosomes_df: pd.DataFrame,
     outdir: Path,
     case_id: str,
     pon_df: pd.DataFrame | None = None,
@@ -877,7 +935,7 @@ def plot_chromosomes(
 
     for chr_name in chr_order:
         highlighted, gene_summary = compute_highlighted_genes_from_generegions(
-            generegions_df,
+            generegions_all_chromosomes_df,
             chr_name=chr_name,
             highlight_only_cancer=highlight_only_cancer,
             min_gene_targets=MIN_GENE_TARGETS,
@@ -892,8 +950,8 @@ def plot_chromosomes(
         if chr_bins.empty:
             continue
 
-        generegions: pd.DataFrame = generegions_df[
-            generegions_df["chr"] == chr_name
+        generegions: pd.DataFrame = generegions_all_chromosomes_df[
+            generegions_all_chromosomes_df["chr"] == chr_name
         ].copy()
 
         gene_to_color = _make_gene_colors(highlighted)
