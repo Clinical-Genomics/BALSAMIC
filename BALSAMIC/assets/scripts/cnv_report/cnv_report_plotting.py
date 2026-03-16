@@ -284,7 +284,6 @@ def _draw_generegion_pon_segments(
     ax,
     *,
     generegions: pd.DataFrame,
-    bins: pd.DataFrame,
     pos_to_xcoord: callable,
     y_clip: float,
     start_col: str = "region_start",
@@ -304,7 +303,7 @@ def _draw_generegion_pon_segments(
     """
     empty_result: tuple[set[str], bool] = (set(), False)
 
-    if generegions is None or generegions.empty or bins is None or bins.empty:
+    if generegions is None or generegions.empty:
         return empty_result
 
     # If there's no PON info at all, do nothing.
@@ -360,7 +359,6 @@ def draw_gene_labels_from_spans(
     gene_spans: pd.DataFrame,
     label_genes: list[str],
     gene_to_color: dict[str, tuple],
-    stable_color_fn: callable,
     pos_to_xcoord: callable,
     y_max: float,
     base_label_offset: float,
@@ -387,10 +385,7 @@ def draw_gene_labels_from_spans(
         gene_start = int(gene_spans_indexed.at[gene_name, start_col])
         gene_end = int(gene_spans_indexed.at[gene_name, end_col])
 
-        if gene_end < gene_start:
-            continue
-
-        color = gene_to_color.get(gene_name) or stable_color_fn(gene_name)
+        color = gene_to_color[gene_name]
 
         x_start = pos_to_xcoord(gene_start)
         x_end = pos_to_xcoord(gene_end)
@@ -433,7 +428,7 @@ def _plot_vaf_panel(ax, vaf_chr: pd.DataFrame):
     ax.set_ylabel("VAF")
 
 
-def _compute_variable_x_on_bins(
+def _compute_variable_width_bins(
     bins: pd.DataFrame,
     *,
     neutral_target_factor: float,
@@ -442,15 +437,44 @@ def _compute_variable_x_on_bins(
     genes_col: str = "genes",
 ) -> pd.DataFrame:
     """
-    Compute bin_width/x_coord/type on a collapsed bin table where `genes` is a list per bin,
-    and `is_highlight_bin` already exists.
+    Compute variable-width pseudo genomic coordinates for plotting bins.
+
+    This function converts genomic bins into a compressed plotting coordinate
+    system where different bin types occupy different visual widths.
+
+    The goal is to visually emphasize bins belonging to highlighted genes
+    while compressing neutral and backbone bins, allowing important regions
+    to appear larger in the plot without removing other bins.
+
+    Width assignment:
+        highlighted bins  → width = 1.0
+        neutral targets   → width = neutral_target_factor
+        backbone bins     → width = backbone_factor
+
+    Using these widths, the function computes a cumulative pseudo-position
+    (`x_coord`) representing the visual center of each bin. This coordinate
+    system is later used to map genomic positions to the plotting axis.
+
+    Requirements:
+        - `genes_col` contains a list of genes overlapping each bin
+        - `is_highlight_bin` column already exists
+
+    Returns:
+        DataFrame with added columns:
+            is_backbone_bin : bool
+            type            : {"Backbone","Target"}
+            bin_width       : visual bin width
+            x_coord         : pseudo-position used for plotting
     """
+
     out = bins.copy()
 
     def is_backbone(glist) -> bool:
         return isinstance(glist, list) and (backbone_label in glist)
 
     out["is_backbone_bin"] = out[genes_col].apply(is_backbone)
+
+    # Assign type to "Backbone" if is_backbone_bin is True, otherwise set to "Target"
     out["type"] = np.where(out["is_backbone_bin"], "Backbone", "Target")
 
     width = np.full(len(out), float(neutral_target_factor), dtype=float)
@@ -826,8 +850,6 @@ def plot_chromosomes(
 
     merged = merged[merged["chr"].isin(chr_order)].copy()
 
-    stable_color = _stable_gene_color_fn()
-
     y_clip = float(y_abs_max)
     y_lim_chr = (-y_clip, y_clip)
 
@@ -845,6 +867,8 @@ def plot_chromosomes(
         if chr_bins.empty:
             continue
         chr_bins = chr_bins.sort_values("start", kind="stable")
+        if chr_bins.empty:
+            continue
 
         generegions: pd.DataFrame = generegions_df[
             generegions_df["chr"] == chr_name
@@ -861,24 +885,30 @@ def plot_chromosomes(
         )
 
         # Compute variable x-coordinates on collapsed bins
-        bins = _compute_variable_x_on_bins(
+        x_coordinate_bins = _compute_variable_width_bins(
             chr_bins,
             neutral_target_factor=neutral_target_factor,
             backbone_factor=backbone_factor,
             backbone_label="backbone",
             genes_col="genes",
         )
-        if bins.empty:
-            continue
 
         # Smooth + clip on UNIQUE bins
-        bins = bins.sort_values("x_coord", kind="stable").copy()
-        bins["log2_smooth"] = bins["log2"].rolling(window=window, center=True).median()
-        bins["log2_clipped"] = bins["log2"].clip(-y_clip, y_clip)
-        bins["log2_smooth_clipped"] = bins["log2_smooth"].clip(-y_clip, y_clip)
+        x_coordinate_bins = x_coordinate_bins.sort_values(
+            "x_coord", kind="stable"
+        ).copy()
+        x_coordinate_bins["log2_smooth"] = (
+            x_coordinate_bins["log2"].rolling(window=window, center=True).median()
+        )
+        x_coordinate_bins["log2_clipped"] = x_coordinate_bins["log2"].clip(
+            -y_clip, y_clip
+        )
+        x_coordinate_bins["log2_smooth_clipped"] = x_coordinate_bins[
+            "log2_smooth"
+        ].clip(-y_clip, y_clip)
 
         # Map function should use UNIQUE bins (stable mapping)
-        pos_to_xcoord = _pos_to_xcoord_fn(bins)
+        pos_to_xcoord = _pos_to_xcoord_fn(x_coordinate_bins)
 
         # VAF chr
         vaf_chr = vcf[vcf["CHROM"] == chr_name].sort_values("POS").copy()
@@ -902,17 +932,17 @@ def plot_chromosomes(
             2, 1, figsize=(14, 6), sharex=True, gridspec_kw={"height_ratios": [2, 1]}
         )
 
-        x = bins["x_coord"]
+        x = x_coordinate_bins["x_coord"]
 
         # background should be BIN-LEVEL and exclude bins that have any highlighted gene
-        bg_bins = bins[~bins["is_highlight_bin"]].copy()
+        bg_bins = x_coordinate_bins[~x_coordinate_bins["is_highlight_bin"]].copy()
         _draw_background_bins(ax1, bg_bins, y_col="log2_clipped")
 
         # highlighted bins: one point per BIN, gene-colored if unique highlighted gene else neutral
         if highlighted.size > 0:
             _draw_highlighted_bins(
                 ax1,
-                bins=bins,
+                bins=x_coordinate_bins,
                 highlighted_genes=highlighted,
                 gene_to_color=gene_to_color,
                 genes_col="genes",
@@ -922,11 +952,11 @@ def plot_chromosomes(
         y_min, y_max = y_lim_chr
 
         if use_pon:
-            _draw_pon_bars(ax1, bins, x, y_clip=y_clip)
+            _draw_pon_bars(ax1, x_coordinate_bins, x, y_clip=y_clip)
 
         ax1.plot(
             x,
-            bins["log2_smooth_clipped"],
+            x_coordinate_bins["log2_smooth_clipped"],
             linewidth=1.5,
             alpha=0.9,
             color="tab:green",
@@ -936,11 +966,8 @@ def plot_chromosomes(
         _draw_generegion_pon_segments(
             ax1,
             generegions=generegions,
-            bins=bins,
             pos_to_xcoord=pos_to_xcoord,
             y_clip=y_clip,
-            highlight_only_cancer=highlight_only_cancer,
-            gene_summary=gene_summary,
         )
 
         ax1.axhline(0, color="black", linewidth=0.8)
@@ -962,7 +989,6 @@ def plot_chromosomes(
                 gene_spans=gene_spans,
                 label_genes=label_genes,
                 gene_to_color=gene_to_color,
-                stable_color_fn=stable_color,
                 pos_to_xcoord=pos_to_xcoord,
                 y_max=y_max,
                 base_label_offset=base_label_offset,
