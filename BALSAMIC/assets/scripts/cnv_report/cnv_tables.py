@@ -10,9 +10,10 @@ import pandas as pd
 # Local
 from BALSAMIC.constants.analysis import Gender
 from cnv_constants import TableSpec, GENE_TABLE_SPEC, SEGMENT_TABLE_SPEC
+from cnv_report_utils import chrom_sort_key
 
 
-def finalize_table(df: pd.DataFrame, spec: TableSpec) -> pd.DataFrame:
+def reorder_and_sort_table(df: pd.DataFrame, spec: TableSpec) -> pd.DataFrame:
     """
     Finalize a table based on a TableSpec: rename, reorder, round floats, stable-sort by interval.
     """
@@ -38,19 +39,6 @@ def finalize_table(df: pd.DataFrame, spec: TableSpec) -> pd.DataFrame:
     return out
 
 
-def _chrom_sort_key(chrom: str) -> tuple[int, int | str]:
-    """Stable sort key: autosomes numeric first, then X/Y, then other contigs."""
-    try:
-        return (0, int(chrom))
-    except ValueError:
-        c = str(chrom)
-        if c in ("X", "x"):
-            return (1, 23)
-        if c in ("Y", "y"):
-            return (1, 24)
-        return (2, c)
-
-
 def _stable_sort_by_chr_interval(
     df: pd.DataFrame,
     chr_col: str,
@@ -59,9 +47,9 @@ def _stable_sort_by_chr_interval(
     *,
     tmp_col: str = "chr_sort",
 ) -> pd.DataFrame:
-    """Stable-sort by (chr, start, end) using `_chrom_sort_key`."""
+    """Stable-sort by (chr, start, end) using `chrom_sort_key`."""
     df = df.copy()
-    df[tmp_col] = df[chr_col].map(_chrom_sort_key)
+    df[tmp_col] = df[chr_col].map(chrom_sort_key)
     df = df.sort_values(by=[tmp_col, start_col, end_col], kind="stable").drop(
         columns=[tmp_col]
     )
@@ -778,7 +766,7 @@ def build_generegion_table(
     if drop_cols:
         regions_df = regions_df.drop(columns=drop_cols)
 
-    return finalize_table(regions_df, GENE_TABLE_SPEC)
+    return reorder_and_sort_table(regions_df, GENE_TABLE_SPEC)
 
 
 ############################
@@ -1074,4 +1062,4 @@ def build_segment_table(
     segments["segment_size"] = round((segments["end"] - segments["start"]) / 1000, 2)
 
     segments = segments.drop(columns=["cnvkit_cnv_call", "purecn_cnv_call"])
-    return finalize_table(segments, SEGMENT_TABLE_SPEC)
+    return reorder_and_sort_table(segments, SEGMENT_TABLE_SPEC)

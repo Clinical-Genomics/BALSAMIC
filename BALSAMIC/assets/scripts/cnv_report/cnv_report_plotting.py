@@ -1014,11 +1014,11 @@ def plot_chromosomes(
             genes_col="genes",
         )
 
-        # Smooth + clip on UNIQUE bins
+        # Median log2 + clip on UNIQUE bins
         x_coordinate_bins = x_coordinate_bins.sort_values(
             "x_coord", kind="stable"
         ).copy()
-        x_coordinate_bins["log2_smooth"] = (
+        x_coordinate_bins["log2_median"] = (
             x_coordinate_bins["log2"]
             .rolling(window=log2_rolling_window, center=True)
             .median()
@@ -1026,8 +1026,8 @@ def plot_chromosomes(
         x_coordinate_bins["log2_clipped"] = x_coordinate_bins["log2"].clip(
             -y_clip, y_clip
         )
-        x_coordinate_bins["log2_smooth_clipped"] = x_coordinate_bins[
-            "log2_smooth"
+        x_coordinate_bins["log2_median_clipped"] = x_coordinate_bins[
+            "log2_median"
         ].clip(-y_clip, y_clip)
 
         # Map function should use UNIQUE bins (stable mapping)
@@ -1039,9 +1039,7 @@ def plot_chromosomes(
             vaf_chr["x_coord"] = vaf_chr["POS"].apply(lambda p: pos_to_xcoord(int(p)))
 
         # Segments from g_chr
-        segs_chr = segments_df[
-            segments_df["chr"].astype("string") == str(chr_name)
-        ].copy()
+        segs_chr = segments_df[segments_df["chr"] == str(chr_name)].copy()
         segs_chr["log2_clipped"] = segs_chr["log2"].clip(-y_clip, y_clip)
         if not segs_chr.empty:
             segs_chr = segs_chr.copy()
@@ -1079,7 +1077,7 @@ def plot_chromosomes(
 
         ax1.plot(
             x,
-            x_coordinate_bins["log2_smooth_clipped"],
+            x_coordinate_bins["log2_median_clipped"],
             linewidth=1.5,
             alpha=0.9,
             color="tab:green",

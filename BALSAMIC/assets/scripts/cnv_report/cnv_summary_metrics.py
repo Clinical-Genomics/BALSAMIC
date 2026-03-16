@@ -34,11 +34,15 @@ def compute_dlr_spread_from_cnr(
     """
     Compute a DLRSpread-like CNV noise metric from a CNVkit .cnr-style dataframe.
 
+    Uses unique physical bins only (chr/start/end), so expanded multi-gene bins
+    do not artificially inflate the number of adjacent differences.
+
     Steps:
-      - Keep Target bins only
+      - Keep non-Antitarget bins
       - Optionally exclude X/Y
+      - Collapse to unique genomic bins
       - Sort bins by chromosome and position
-      - Compute log2 differences between adjacent bins *within each chromosome*
+      - Compute log2 differences between adjacent bins within each chromosome
       - Return std(diff) / sqrt(2)
 
     Returns np.nan if too few usable bins/differences are available.
@@ -50,17 +54,21 @@ def compute_dlr_spread_from_cnr(
     if exclude_sex_chromosomes:
         df = df[~df["chr"].isin(["X", "Y"])].copy()
 
-    df = df.dropna(subset=["chr", "start", "log2"])
+    df = df.dropna(subset=["chr", "start", "end", "log2"])
     if df.empty:
         return float("nan")
 
+    # Use one row per physical bin to avoid duplicated rows from exploded genes
+    df = (
+        df.groupby(["chr", "start", "end"], as_index=False)
+        .agg(log2=("log2", "first"))
+        .copy()
+    )
+
     df["chr_sort"] = df["chr"].map(chrom_sort_key)
-    df = df.sort_values(["chr_sort", "start"], kind="stable")
+    df = df.sort_values(["chr_sort", "start", "end"], kind="stable")
 
     diffs = df.groupby("chr", sort=False)["log2"].diff().dropna().to_numpy()
-
-    if diffs.size < 2:
-        return float("nan")
 
     return float(np.nanstd(diffs) / math.sqrt(2))
 
