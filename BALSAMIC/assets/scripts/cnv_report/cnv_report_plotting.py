@@ -662,27 +662,27 @@ def _summarize_gene_highlights(
         .copy()
     )
 
-    cancer_gene_selected = gene_summary["is_cancer_gene"] & (
+    cancer_genes_selected = gene_summary["is_cancer_gene"] & (
         gene_summary["total_targets"] >= float(min_gene_targets_cancer)
     )
 
-    noncancer_gene_selected = (
+    noncancer_genes_selected = (
         (~gene_summary["is_cancer_gene"])
         & gene_summary["has_cnv_or_loh"]
         & (gene_summary["total_targets"] >= float(min_gene_targets))
     )
 
     gene_summary["highlight_gene"] = (
-        cancer_gene_selected
+        cancer_genes_selected
         if highlight_only_cancer
-        else (cancer_gene_selected | noncancer_gene_selected)
+        else (cancer_genes_selected | noncancer_genes_selected)
     )
 
     return gene_summary
 
 
 def compute_highlighted_genes_from_generegions(
-    generegions_all_chromosomes_df: pd.DataFrame,
+    generegions_df: pd.DataFrame,
     *,
     chr_name: str,
     highlight_only_cancer: bool,
@@ -715,14 +715,12 @@ def compute_highlighted_genes_from_generegions(
       gene_summary:
           Per-gene summary table with evidence columns and highlight flag
     """
-    generegions = generegions_all_chromosomes_df[
-        generegions_all_chromosomes_df[chr_col].astype("string") == str(chr_name)
+    # Chromosome filtering
+    generegions = generegions_df[
+        generegions_df[chr_col].astype("string") == str(chr_name)
     ].copy()
 
-    generegions[gene_col] = generegions[gene_col].astype("string").str.strip()
-    generegions = generegions[
-        generegions[gene_col].notna() & generegions[gene_col].ne("")
-    ].copy()
+    # Remove backbone
     generegions = generegions[generegions[gene_col].ne("backbone")].copy()
 
     if generegions.empty:
@@ -747,9 +745,10 @@ def compute_highlighted_genes_from_generegions(
     )
 
     highlighted_genes = gene_summary.loc[gene_summary["highlight_gene"], gene_col]
-    highlighted_genes = highlighted_genes.astype(str).dropna().unique()
     highlighted_genes = np.array(
-        sorted(set(highlighted_genes) - {"backbone"}),
+        sorted(
+            gene_summary.loc[gene_summary["highlight_gene"], gene_col].dropna().unique()
+        ),
         dtype=object,
     )
 
@@ -782,8 +781,6 @@ def compute_gene_spans_from_generegions(
         **{start_col: (start_col, "min"), end_col: (end_col, "max")}
     )
 
-    # ensure start <= end
-    gene_span = gene_span[gene_span[end_col] >= gene_span[start_col]].copy()
     return gene_span
 
 
@@ -797,26 +794,65 @@ def get_loh_segments_for_chr(
     end_col: str = "end",
     purecn_type_col: str = "purecn_type",
 ) -> pd.DataFrame:
-    df = segments_df.copy()
+    """
+    Extract LOH segments for a specific chromosome from a segment table.
 
-    df = df[df[chr_col].astype("string") == str(chr_name)]
-    if df.empty or purecn_type_col not in df.columns or caller_col not in df.columns:
-        return df.iloc[0:0].copy()
+    The function selects segments that:
+      - belong to the requested chromosome
+      - originate from the PureCN caller
+      - are annotated as LOH in the `purecn_type` column
+      - are not flagged as unreliable
 
-    is_purecn = df[caller_col].astype("string").str.upper().eq("PURECN")
+    Only the genomic interval columns (start, end) are returned, as these
+    are later used for visual highlighting of LOH regions (e.g. shading
+    on the VAF panel).
 
-    t = df[purecn_type_col].astype("string").fillna("").str.strip().str.upper()
-    is_loh = t.str.contains("LOH", regex=False)
+    Parameters
+    ----------
+    segments_df
+        DataFrame containing CNV/segment calls from one or more callers.
+    purecn_type_col
+        Column containing PureCN annotation strings (may contain "LOH").
 
-    # exclude unreliable LOH segments (determined by M.flagged)
-    is_reliable = ~t.str.contains("UNRELIABLE", regex=False)
+    Returns
+    -------
+    DataFrame
+        Sorted dataframe containing LOH segments with columns:
+            start, end
 
-    out = df.loc[is_purecn & is_loh & is_reliable, [start_col, end_col]].copy()
-    out[start_col] = pd.to_numeric(out[start_col], errors="coerce")
-    out[end_col] = pd.to_numeric(out[end_col], errors="coerce")
-    out = out.dropna(subset=[start_col, end_col])
-    out = out.sort_values(start_col, kind="stable")
-    return out
+        Empty dataframe if no valid LOH segments are found.
+    """
+
+    # Work on a copy to avoid modifying the input dataframe
+    segs_df = segments_df.copy()
+
+    # Filter to the requested chromosome
+    segs_df = segs_df[segs_df[chr_col] == str(chr_name)]
+
+    # If there is nothing left or PureCN column is missing,
+    # return an empty dataframe with the same structure
+    if segs_df.empty or purecn_type_col not in segs_df.columns:
+        return segs_df.iloc[0:0].copy()
+
+    # Identify segments originating from the PureCN caller
+    is_purecn = segs_df[caller_col].str.upper().eq("PURECN")
+
+    # Normalize PureCN type annotation
+    purecn_type = segs_df[purecn_type_col].fillna("").str.upper()
+
+    # LOH evidence: annotation contains "LOH"
+    is_loh = purecn_type.str.contains("LOH", regex=False)
+
+    # Exclude unreliable LOH segments (PureCN may mark some calls as unreliable)
+    is_reliable = ~purecn_type.str.contains("UNRELIABLE", regex=False)
+
+    # Select valid LOH segments and keep only genomic coordinates
+    loh_df = segs_df.loc[is_purecn & is_loh & is_reliable, [start_col, end_col]].copy()
+
+    # Sort segments along the chromosome
+    loh_df = loh_df.sort_values(start_col, kind="stable")
+
+    return loh_df
 
 
 def draw_loh_spans_on_vaf(
@@ -861,7 +897,7 @@ def plot_chromosomes(
     cnr_df: pd.DataFrame,
     vcf_path: Path,
     segments_df: pd.DataFrame,
-    generegions_all_chromosomes_df: pd.DataFrame,
+    generegions_df: pd.DataFrame,
     outdir: Path,
     case_id: str,
     pon_df: pd.DataFrame | None = None,
@@ -935,7 +971,7 @@ def plot_chromosomes(
 
     for chr_name in chr_order:
         highlighted, gene_summary = compute_highlighted_genes_from_generegions(
-            generegions_all_chromosomes_df,
+            generegions_df,
             chr_name=chr_name,
             highlight_only_cancer=highlight_only_cancer,
             min_gene_targets=MIN_GENE_TARGETS,
@@ -950,8 +986,8 @@ def plot_chromosomes(
         if chr_bins.empty:
             continue
 
-        generegions: pd.DataFrame = generegions_all_chromosomes_df[
-            generegions_all_chromosomes_df["chr"] == chr_name
+        generegions: pd.DataFrame = generegions_df[
+            generegions_df["chr"] == chr_name
         ].copy()
 
         gene_to_color = _make_gene_colors(highlighted)
@@ -1079,9 +1115,9 @@ def plot_chromosomes(
         _add_cnv_call_color_legend(ax1, segs_chr)  # red/blue/black
 
         ax1.add_artist(main_leg)
-        loh_chr = get_loh_segments_for_chr(segments_df, chr_name=chr_name)
+        loh_df = get_loh_segments_for_chr(segments_df, chr_name=chr_name)
         # draw shading behind points:
-        drew_loh = draw_loh_spans_on_vaf(ax2, loh_chr, pos_to_xcoord=pos_to_xcoord)
+        drew_loh = draw_loh_spans_on_vaf(ax2, loh_df, pos_to_xcoord=pos_to_xcoord)
 
         _plot_vaf_panel(ax2, vaf_chr)
 
