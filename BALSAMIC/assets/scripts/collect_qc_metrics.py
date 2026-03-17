@@ -55,13 +55,13 @@ def collect_qc_metrics(
     # MultiQC metrics
     metrics = get_multiqc_metrics(config, multiqc_data)
 
-    # Remove duplicate GC_DROPOUT from multiqc_picard_gcbias for WGS
+    # Remove GC_DROPOUT and AT_DROPOUT from multiqc_picard_gcbias
     metrics = [
         metric
         for metric in metrics
         if not (
-            metric.get("name") == "GC_DROPOUT"
-            and metric.get("step") == "multiqc_picard_gcbias"
+                metric.get("name") in {"GC_DROPOUT", "AT_DROPOUT"}
+                and metric.get("step") == "multiqc_picard_gcbias"
         )
     ]
 
