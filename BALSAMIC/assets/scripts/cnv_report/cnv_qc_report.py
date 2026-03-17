@@ -10,7 +10,7 @@ import click
 import numpy as np
 import pandas as pd
 import re
-from datetime import date
+from datetime import datetime
 
 
 from cnv_summary_metrics import read_purecn_summary, compute_summary_metrics
@@ -106,7 +106,7 @@ def render_cnv_report_html(
         title=title,
         normalisation_method=normalisation_method,
         sample_sex=sample_sex,
-        creation_time=date.today(),
+        creation_time=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         css_text=css_text,
         js_text=js_text,
         segment_column_glossary_html=segment_column_glossary_html,
