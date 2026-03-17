@@ -5,6 +5,24 @@ CHR = "chr"
 
 
 @dataclass(frozen=True)
+class GeneRegionConfig:
+    min_gene_targets: int = 8
+    min_run_bins: int = 4
+    z_bin_thresh: float = 1.5
+    z_run_thresh: float = 3.0
+    smooth_window: int = 3
+    max_bridge_bins: int = 4
+    bridge_delta: float = 0.12
+    small_seg_n: int = 3
+    merge_delta: float = 0.10
+    min_region_targets_for_call: int = 5
+    pon_signal_noise_lt: float = 2.0
+    pon_signal_borderline_lt: float = 5.0
+    pon_gain_gt: float = 0.07
+    pon_loss_lt: float = -0.07
+
+
+@dataclass(frozen=True)
 class ChromosomePlotConfig:
     backbone_factor: float
     neutral_target_factor: float

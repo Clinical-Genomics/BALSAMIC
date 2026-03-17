@@ -9,7 +9,12 @@ import pandas as pd
 
 # Local
 from BALSAMIC.constants.analysis import Gender
-from cnv_constants import TableSpec, GENE_TABLE_SPEC, SEGMENT_TABLE_SPEC
+from cnv_constants import (
+    TableSpec,
+    GENE_TABLE_SPEC,
+    SEGMENT_TABLE_SPEC,
+    GeneRegionConfig,
+)
 from cnv_report_utils import chrom_sort_key
 
 
@@ -369,266 +374,93 @@ def merge_cnr_with_pon(
     )
 
 
-def create_generegions(cnr_df: pd.DataFrame, pon_df: pd.DataFrame | None = None):
+def _prepare_generegion_bins(
+    cnr_df: pd.DataFrame,
+    pon_df: pd.DataFrame | None,
+    *,
+    key_cols: tuple[str, str, str, str] = ("chr", "start", "end", "gene.symbol"),
+) -> pd.DataFrame:
     """
-    Always returns a gene/gene-region table.
+    Prepare per-bin input table for gene-region construction.
 
-    If pon_df is provided:
-      - run PON-based subdividing into regions (your existing logic)
-    If pon_df is None/empty:
-      - return one row per gene ("genelevel") without PON-derived gene regions
+    If PON data is available, merge sample bins with matching PON bins on the
+    genomic bin key. If no PON is available, return the sample bins unchanged
+    but add empty PON columns so downstream code can use a uniform schema.
+
+    Parameters
+    ----------
+    cnr_df
+        Expanded sample bin table.
+    pon_df
+        Expanded PON bin table, or None.
+    key_cols
+        Columns used to match sample bins to PON bins.
+
+    Returns
+    -------
+    pd.DataFrame
+        Sorted bin table with guaranteed columns:
+            chr, gene.symbol, start, end, log2, pon_log2, pon_spread
     """
 
+    pon_cols = ["pon_log2", "pon_spread"]
     has_pon = pon_df is not None and not pon_df.empty
 
     if has_pon:
-        # --- your existing path ---
         bins = merge_cnr_with_pon(
             cnr_df=cnr_df,
             pon_df=pon_df,
-            key_cols=("chr", "start", "end", "gene.symbol"),
-            pon_cols=["pon_log2", "pon_spread"],
+            key_cols=key_cols,
+            pon_cols=pon_cols,
         )
     else:
-        # --- no PON: bins are just the sample bins ---
         bins = cnr_df.copy()
-        # Ensure columns exist so later code can be uniform
-        bins["pon_log2"] = np.nan
-        bins["pon_spread"] = np.nan
 
-    bins = bins.sort_values(["chr", "gene.symbol", "start"], kind="stable").reset_index(
-        drop=True
-    )
+        # Ensure downstream code can rely on these columns existing
+        if "pon_log2" not in bins.columns:
+            bins["pon_log2"] = np.nan
+        if "pon_spread" not in bins.columns:
+            bins["pon_spread"] = np.nan
 
-    # ------------------------------------------------------------------
-    # If NO PON: do NOT assign gene regions. Just one "region" per gene.
-    # ------------------------------------------------------------------
-    if not has_pon:
-        bins["region_id"] = "genelevel"
+    bins = bins.sort_values(
+        ["chr", "gene.symbol", "start"],
+        kind="stable",
+    ).reset_index(drop=True)
 
-        agg_dict: dict[str, list[str]] = {
-            "start": ["min"],
-            "end": ["max"],
-            "log2": ["count", "mean", "min", "max"],
-            "pon_log2": ["mean"],
-            "pon_spread": ["mean"],
-        }
+    return bins
 
-        regions_df = bins.groupby(
-            ["chr", "gene.symbol", "region_id"], as_index=False
-        ).agg(agg_dict)
-        regions_df = _flatten_agg_columns(regions_df).rename(
-            columns={
-                "start_min": "region_start",
-                "end_max": "region_end",
-                "log2_count": "n_targets",
-                "log2_mean": "mean_log2",
-                "log2_min": "min_log2",
-                "log2_max": "max_log2",
-                "pon_log2_mean": "pon_mean_log2",
-                "pon_spread_mean": "pon_mean_spread",
-            }
-        )
-        regions_df["n.targets"] = regions_df["n_targets"]
 
-        # PON-derived outputs: keep columns but make them empty/neutral
-        regions_df["pon_region_effect"] = np.nan
-        regions_df["pon_region_z"] = np.nan
-        regions_df["pon_region_signal"] = ""
-        regions_df["pon_region_indication"] = ""
+def _build_genelevel_regions_without_pon(bins: pd.DataFrame) -> pd.DataFrame:
+    """
+    Build one gene-level region per gene when no PON is available.
 
-        return regions_df
+    In the no-PON case, genes are not subdivided into multiple regions.
+    Instead, all bins belonging to the same gene are collapsed into a single
+    row spanning the full gene extent.
 
-    # CREATE INITIAL REGIONS
-    MIN_GENE_TARGETS = 8
-    MIN_RUN_BINS = 4
-    Z_BIN_THRESH = 1.5
-    Z_RUN_THRESH = 3.0
-    SMOOTH_WINDOW = 3
+    The returned table matches the usual gene-region schema as closely as
+    possible, but PON-derived columns are left empty or neutral.
 
-    bins["region_id"] = "no_region"
-    next_id = 0
+    Parameters
+    ----------
+    bins
+        Per-bin table containing at least:
+            chr, gene.symbol, start, end, log2, pon_log2, pon_spread
 
-    def _run_z_for_indices(ix: list[int]) -> float:
-        sub = bins.loc[ix]
-        eff = sub["log2"].to_numpy() - sub["pon_log2"].fillna(0.0).to_numpy()
-        if eff.size == 0:
-            return np.nan
-        mean_eff = float(np.nanmean(eff))
-        if not np.isfinite(mean_eff):
-            return np.nan
+    Returns
+    -------
+    pd.DataFrame
+        One row per gene with columns including:
+            chr, gene.symbol, region_id, region_start, region_end,
+            n_targets, mean_log2, min_log2, max_log2,
+            pon_mean_log2, pon_mean_spread,
+            n.targets,
+            pon_region_effect, pon_region_z,
+            pon_region_signal, pon_region_indication
+    """
+    gene_bins = bins.copy()
+    gene_bins["region_id"] = "genelevel"
 
-        sigma = sub["pon_spread"].fillna(0.0).to_numpy()
-        sigma_safe = np.where(sigma <= 0, 1e-3, sigma)
-        sigma_mean = float(np.nanmean(sigma_safe)) if sigma_safe.size else 1e-3
-
-        n = len(eff)
-        sigma_eff = sigma_mean / np.sqrt(float(n))
-        if sigma_eff <= 0:
-            return np.nan
-        return abs(mean_eff) / sigma_eff
-
-    def _assign_gene_regions(df_gene: pd.DataFrame) -> None:
-        nonlocal next_id
-
-        if df_gene.shape[0] < MIN_GENE_TARGETS:
-            return
-        if df_gene["pon_spread"].isna().all():
-            return
-
-        idxs = df_gene.index.to_numpy()
-        eff = df_gene["log2"].to_numpy() - df_gene["pon_log2"].fillna(0.0).to_numpy()
-        sigma = df_gene["pon_spread"].fillna(0.0).to_numpy()
-        sigma_safe = np.where(sigma <= 0, 1e-3, sigma)
-        z_raw = eff / sigma_safe
-
-        z_smooth = (
-            pd.Series(z_raw, index=df_gene.index)
-            .rolling(window=SMOOTH_WINDOW, center=True, min_periods=1)
-            .median()
-            .to_numpy()
-        )
-
-        run: list[int] = []
-        run_sign: int | None = None
-
-        def _finalize(ix: list[int]) -> None:
-            nonlocal next_id
-            if len(ix) < MIN_RUN_BINS:
-                return
-            rz = _run_z_for_indices(ix)
-            if not np.isfinite(rz) or rz < Z_RUN_THRESH:
-                return
-            label = f"generegion_{next_id}"
-            next_id += 1
-            bins.loc[ix, "region_id"] = label
-
-        for i, z in zip(idxs, z_smooth):
-            if not np.isfinite(z) or abs(z) < Z_BIN_THRESH:
-                if run:
-                    _finalize(run)
-                    run = []
-                    run_sign = None
-                continue
-
-            sgn = 1 if z > 0 else -1
-            if run_sign is None or sgn == run_sign:
-                run.append(i)
-                run_sign = sgn
-            else:
-                _finalize(run)
-                run = [i]
-                run_sign = sgn
-
-        if run:
-            _finalize(run)
-
-    for (_ch, _g), df_gene in bins.groupby(["chr", "gene.symbol"], sort=False):
-        _assign_gene_regions(df_gene)
-
-    # MERGE ADJACENT REGIONS
-
-    MAX_BRIDGE_BINS = 4
-    BRIDGE_DELTA = 0.12
-    SMALL_SEG_N = 3
-    MERGE_DELTA = 0.10
-
-    def _gene_runs(df_gene: pd.DataFrame) -> list[dict]:
-        eff = df_gene["log2"].to_numpy() - df_gene["pon_log2"].fillna(0.0).to_numpy()
-        labels = df_gene["region_id"].tolist()
-
-        runs: list[dict] = []
-        pos = [0]
-        cur = labels[0]
-        for i in range(1, len(labels)):
-            if labels[i] == cur:
-                pos.append(i)
-            else:
-                ix = df_gene.index[pos].tolist()
-                mean_eff = float(np.nanmean(eff[pos])) if pos else np.nan
-                runs.append({"positions": pos, "indices": ix, "mean_eff": mean_eff})
-                cur = labels[i]
-                pos = [i]
-        if pos:
-            ix = df_gene.index[pos].tolist()
-            mean_eff = float(np.nanmean(eff[pos])) if pos else np.nan
-            runs.append({"positions": pos, "indices": ix, "mean_eff": mean_eff})
-        return runs, eff
-
-    def _cleanup_gene_regions(df_gene: pd.DataFrame) -> None:
-        if df_gene.empty or df_gene.shape[0] == 1:
-            return
-
-        runs, eff_all = _gene_runs(df_gene)
-        if len(runs) <= 1:
-            return
-
-        new_runs: list[dict] = []
-        i = 0
-        while i < len(runs):
-            if i <= len(runs) - 3:
-                A, B, C = runs[i], runs[i + 1], runs[i + 2]
-                if (
-                    len(B["indices"]) <= MAX_BRIDGE_BINS
-                    and np.isfinite(A["mean_eff"])
-                    and np.isfinite(C["mean_eff"])
-                    and abs(A["mean_eff"] - C["mean_eff"]) <= BRIDGE_DELTA
-                ):
-                    merged_pos = A["positions"] + B["positions"] + C["positions"]
-                    merged_ix = A["indices"] + B["indices"] + C["indices"]
-                    merged_mean = (
-                        float(np.nanmean(eff_all[merged_pos])) if merged_pos else np.nan
-                    )
-                    new_runs.append(
-                        {
-                            "positions": merged_pos,
-                            "indices": merged_ix,
-                            "mean_eff": merged_mean,
-                        }
-                    )
-                    i += 3
-                    continue
-
-            r = runs[i]
-            if new_runs:
-                last = new_runs[-1]
-                if (
-                    np.isfinite(r["mean_eff"])
-                    and np.isfinite(last["mean_eff"])
-                    and abs(r["mean_eff"] - last["mean_eff"]) <= MERGE_DELTA
-                    and (
-                        len(r["indices"]) <= SMALL_SEG_N
-                        or len(last["indices"]) <= SMALL_SEG_N
-                    )
-                ):
-                    merged_pos = last["positions"] + r["positions"]
-                    merged_ix = last["indices"] + r["indices"]
-                    merged_mean = (
-                        float(np.nanmean(eff_all[merged_pos])) if merged_pos else np.nan
-                    )
-                    new_runs[-1] = {
-                        "positions": merged_pos,
-                        "indices": merged_ix,
-                        "mean_eff": merged_mean,
-                    }
-                else:
-                    new_runs.append(r)
-            else:
-                new_runs.append(r)
-
-            i += 1
-
-        for run_idx, run in enumerate(new_runs):
-            bins.loc[run["indices"], "region_id"] = f"generegion_clean_{run_idx}"
-
-    for (_ch, _g), df_gene in bins.groupby(["chr", "gene.symbol"], sort=False):
-        _cleanup_gene_regions(df_gene)
-
-    bins = bins.sort_values(["chr", "gene.symbol", "start"], kind="stable").reset_index(
-        drop=True
-    )
-
-    # Collapse to gene × region
     agg_dict: dict[str, list[str]] = {
         "start": ["min"],
         "end": ["max"],
@@ -637,9 +469,12 @@ def create_generegions(cnr_df: pd.DataFrame, pon_df: pd.DataFrame | None = None)
         "pon_spread": ["mean"],
     }
 
-    regions_df = bins.groupby(["chr", "gene.symbol", "region_id"], as_index=False).agg(
-        agg_dict
+    regions_df = (
+        gene_bins.groupby(["chr", "gene.symbol", "region_id"], as_index=False)
+        .agg(agg_dict)
+        .copy()
     )
+
     regions_df = _flatten_agg_columns(regions_df).rename(
         columns={
             "start_min": "region_start",
@@ -652,57 +487,542 @@ def create_generegions(cnr_df: pd.DataFrame, pon_df: pd.DataFrame | None = None)
             "pon_spread_mean": "pon_mean_spread",
         }
     )
+
+    # Keep both naming conventions for compatibility with downstream code
     regions_df["n.targets"] = regions_df["n_targets"]
 
-    # PON deviation per gene region
-    MIN_REGION_TARGETS_FOR_CALL = 5
+    # No PON-derived region calling is possible in this mode
+    regions_df["pon_region_effect"] = np.nan
+    regions_df["pon_region_z"] = np.nan
+    regions_df["pon_region_signal"] = ""
+    regions_df["pon_region_indication"] = ""
 
-    regions_df["pon_region_effect"] = (
-        regions_df["mean_log2"] - regions_df["pon_mean_log2"]
+    return regions_df
+
+
+def _assign_initial_gene_regions(
+    bins: pd.DataFrame,
+    *,
+    config: GeneRegionConfig,
+) -> pd.DataFrame:
+    """
+    Assign provisional gene-region IDs based on PON deviation runs.
+
+    For each gene, bins are scanned in genomic order and converted to a
+    per-bin z-like deviation score:
+
+        z_raw = (log2 - pon_log2) / pon_spread
+
+    The z-scores are median-smoothed, then consecutive bins are grouped
+    into runs when:
+      - abs(z_smooth) >= config.z_bin_thresh
+      - the sign of z_smooth stays constant within the run
+
+    A run is promoted to a provisional gene region only if:
+      - the gene has at least config.min_gene_targets bins
+      - PON spread is available for the gene
+      - the run contains at least config.min_run_bins bins
+      - the run-level aggregated z-score is at least config.z_run_thresh
+
+    Bins not assigned to any run keep the default region_id "no_region".
+
+    Parameters
+    ----------
+    bins
+        Per-bin table with at least:
+            chr, gene.symbol, start, log2, pon_log2, pon_spread
+    config
+        Thresholds controlling run detection and smoothing.
+
+    Returns
+    -------
+    pd.DataFrame
+        Copy of `bins` with a provisional `region_id` column added/updated.
+    """
+    out = bins.copy()
+    out["region_id"] = "no_region"
+
+    next_region_id = 0
+
+    def _run_abs_z(df_run: pd.DataFrame) -> float:
+        """
+        Compute absolute run-level z-score using mean effect and mean spread.
+        """
+        effect = df_run["log2"].to_numpy() - df_run["pon_log2"].fillna(0.0).to_numpy()
+        if effect.size == 0:
+            return np.nan
+
+        mean_effect = float(np.nanmean(effect))
+        if not np.isfinite(mean_effect):
+            return np.nan
+
+        spread = df_run["pon_spread"].fillna(0.0).to_numpy()
+        spread_safe = np.where(spread <= 0, 1e-3, spread)
+        mean_spread = float(np.nanmean(spread_safe)) if spread_safe.size else np.nan
+        if not np.isfinite(mean_spread) or mean_spread <= 0:
+            return np.nan
+
+        sigma_effect = mean_spread / np.sqrt(float(len(effect)))
+        if sigma_effect <= 0:
+            return np.nan
+
+        return abs(mean_effect) / sigma_effect
+
+    def _label_gene_runs(gene_bins: pd.DataFrame) -> None:
+        nonlocal next_region_id
+
+        if gene_bins.shape[0] < config.min_gene_targets:
+            return
+        if gene_bins["pon_spread"].isna().all():
+            return
+
+        gene_bins = gene_bins.sort_values("start", kind="stable")
+
+        bin_indices = gene_bins.index.to_numpy()
+
+        effect = (
+            gene_bins["log2"].to_numpy() - gene_bins["pon_log2"].fillna(0.0).to_numpy()
+        )
+        spread = gene_bins["pon_spread"].fillna(0.0).to_numpy()
+        spread_safe = np.where(spread <= 0, 1e-3, spread)
+
+        z_raw = effect / spread_safe
+
+        z_smooth = (
+            pd.Series(z_raw, index=gene_bins.index)
+            .rolling(
+                window=config.smooth_window,
+                center=True,
+                min_periods=1,
+            )
+            .median()
+            .to_numpy()
+        )
+
+        current_run: list[int] = []
+        current_sign: int | None = None
+
+        def _finalize_run(run_indices: list[int]) -> None:
+            nonlocal next_region_id
+
+            if len(run_indices) < config.min_run_bins:
+                return
+
+            df_run = out.loc[run_indices]
+            run_z = _run_abs_z(df_run)
+            if not np.isfinite(run_z) or run_z < config.z_run_thresh:
+                return
+
+            region_label = f"generegion_{next_region_id}"
+            next_region_id += 1
+            out.loc[run_indices, "region_id"] = region_label
+
+        for bin_index, z_value in zip(bin_indices, z_smooth):
+            if not np.isfinite(z_value) or abs(z_value) < config.z_bin_thresh:
+                if current_run:
+                    _finalize_run(current_run)
+                    current_run = []
+                    current_sign = None
+                continue
+
+            z_sign = 1 if z_value > 0 else -1
+
+            if current_sign is None or z_sign == current_sign:
+                current_run.append(bin_index)
+                current_sign = z_sign
+            else:
+                _finalize_run(current_run)
+                current_run = [bin_index]
+                current_sign = z_sign
+
+        if current_run:
+            _finalize_run(current_run)
+
+    for (_chrom, _gene), gene_bins in out.groupby(["chr", "gene.symbol"], sort=False):
+        _label_gene_runs(gene_bins)
+
+    return out
+
+
+def _merge_adjacent_gene_regions(
+    bins: pd.DataFrame,
+    *,
+    config: GeneRegionConfig,
+) -> pd.DataFrame:
+    """
+    Merge adjacent provisional gene regions within each gene.
+
+    This cleanup step operates after initial region assignment and reduces
+    fragmentation caused by short interruptions or very small neighboring runs.
+
+    Merge rules
+    -----------
+    1. Bridge merge (A-B-C):
+       Merge three consecutive runs when:
+         - the middle run has at most `config.max_bridge_bins` bins
+         - the outer runs have similar mean effect
+           (difference <= `config.bridge_delta`)
+
+    2. Small-run merge:
+       Merge a run with the previous run when:
+         - their mean effects are similar
+           (difference <= `config.merge_delta`)
+         - at least one of the two runs has at most `config.small_seg_n` bins
+
+    Effect is defined as:
+        log2 - pon_log2
+
+    Parameters
+    ----------
+    bins
+        Per-bin table with at least:
+            chr, gene.symbol, region_id, log2, pon_log2
+    config
+        Thresholds controlling cleanup and merging.
+
+    Returns
+    -------
+    pd.DataFrame
+        Copy of `bins` with cleaned `region_id` assignments.
+    """
+    out = bins.copy()
+
+    def _collect_gene_runs(gene_bins: pd.DataFrame) -> tuple[list[dict], np.ndarray]:
+        """
+        Convert consecutive identical region_id labels into run records.
+
+        Returns
+        -------
+        runs
+            List of dicts with:
+              - positions: positional indices within gene_bins
+              - indices: original dataframe row indices
+              - mean_eff: mean(log2 - pon_log2) over the run
+        eff_all
+            Per-bin effect array aligned to gene_bins row order.
+        """
+        effect_all = (
+            gene_bins["log2"].to_numpy() - gene_bins["pon_log2"].fillna(0.0).to_numpy()
+        )
+        region_labels = gene_bins["region_id"].tolist()
+
+        runs: list[dict] = []
+        current_positions = [0]
+        current_label = region_labels[0]
+
+        for pos in range(1, len(region_labels)):
+            if region_labels[pos] == current_label:
+                current_positions.append(pos)
+            else:
+                run_indices = gene_bins.index[current_positions].tolist()
+                mean_effect = (
+                    float(np.nanmean(effect_all[current_positions]))
+                    if current_positions
+                    else np.nan
+                )
+                runs.append(
+                    {
+                        "positions": current_positions,
+                        "indices": run_indices,
+                        "mean_eff": mean_effect,
+                    }
+                )
+                current_label = region_labels[pos]
+                current_positions = [pos]
+
+        if current_positions:
+            run_indices = gene_bins.index[current_positions].tolist()
+            mean_effect = (
+                float(np.nanmean(effect_all[current_positions]))
+                if current_positions
+                else np.nan
+            )
+            runs.append(
+                {
+                    "positions": current_positions,
+                    "indices": run_indices,
+                    "mean_eff": mean_effect,
+                }
+            )
+
+        return runs, effect_all
+
+    def _merge_gene_runs(gene_bins: pd.DataFrame) -> None:
+        """
+        Apply bridge-merge and small-run merge rules to one gene.
+        """
+        if gene_bins.empty or gene_bins.shape[0] <= 1:
+            return
+
+        gene_bins = gene_bins.sort_values("start", kind="stable")
+        runs, effect_all = _collect_gene_runs(gene_bins)
+
+        if len(runs) <= 1:
+            return
+
+        merged_runs: list[dict] = []
+        i = 0
+
+        while i < len(runs):
+            # --------------------------------------------------------------
+            # Bridge merge: A-B-C -> merge if B is short and A/C are similar
+            # --------------------------------------------------------------
+            if i <= len(runs) - 3:
+                run_a = runs[i]
+                run_b = runs[i + 1]
+                run_c = runs[i + 2]
+
+                if (
+                    len(run_b["indices"]) <= config.max_bridge_bins
+                    and np.isfinite(run_a["mean_eff"])
+                    and np.isfinite(run_c["mean_eff"])
+                    and abs(run_a["mean_eff"] - run_c["mean_eff"])
+                    <= config.bridge_delta
+                ):
+                    merged_positions = (
+                        run_a["positions"] + run_b["positions"] + run_c["positions"]
+                    )
+                    merged_indices = (
+                        run_a["indices"] + run_b["indices"] + run_c["indices"]
+                    )
+                    merged_mean_eff = (
+                        float(np.nanmean(effect_all[merged_positions]))
+                        if merged_positions
+                        else np.nan
+                    )
+
+                    merged_runs.append(
+                        {
+                            "positions": merged_positions,
+                            "indices": merged_indices,
+                            "mean_eff": merged_mean_eff,
+                        }
+                    )
+                    i += 3
+                    continue
+
+            # --------------------------------------------------------------
+            # Small-run merge: merge adjacent similar runs if one is small
+            # --------------------------------------------------------------
+            current_run = runs[i]
+
+            if merged_runs:
+                previous_run = merged_runs[-1]
+
+                should_merge = (
+                    np.isfinite(current_run["mean_eff"])
+                    and np.isfinite(previous_run["mean_eff"])
+                    and abs(current_run["mean_eff"] - previous_run["mean_eff"])
+                    <= config.merge_delta
+                    and (
+                        len(current_run["indices"]) <= config.small_seg_n
+                        or len(previous_run["indices"]) <= config.small_seg_n
+                    )
+                )
+
+                if should_merge:
+                    merged_positions = (
+                        previous_run["positions"] + current_run["positions"]
+                    )
+                    merged_indices = previous_run["indices"] + current_run["indices"]
+                    merged_mean_eff = (
+                        float(np.nanmean(effect_all[merged_positions]))
+                        if merged_positions
+                        else np.nan
+                    )
+
+                    merged_runs[-1] = {
+                        "positions": merged_positions,
+                        "indices": merged_indices,
+                        "mean_eff": merged_mean_eff,
+                    }
+                else:
+                    merged_runs.append(current_run)
+            else:
+                merged_runs.append(current_run)
+
+            i += 1
+
+        # Re-label cleaned runs within this gene
+        for run_idx, run in enumerate(merged_runs):
+            out.loc[run["indices"], "region_id"] = f"generegion_clean_{run_idx}"
+
+    for (_chrom, _gene), gene_bins in out.groupby(["chr", "gene.symbol"], sort=False):
+        _merge_gene_runs(gene_bins)
+
+    return out
+
+
+def _collapse_bins_to_gene_regions(bins: pd.DataFrame) -> pd.DataFrame:
+    """
+    Collapse region-labeled bins to one row per gene-region.
+
+    Each output row represents a contiguous gene region and summarizes:
+      - genomic span
+      - number of contributing bins/targets
+      - log2 distribution across bins
+      - mean PON baseline and spread
+
+    Parameters
+    ----------
+    bins
+        Per-bin table containing at least:
+            chr, gene.symbol, region_id, start, end, log2, pon_log2, pon_spread
+
+    Returns
+    -------
+    pd.DataFrame
+        One row per (chr, gene.symbol, region_id) with columns including:
+            region_start, region_end, n_targets, mean_log2,
+            min_log2, max_log2, pon_mean_log2, pon_mean_spread, n.targets
+    """
+    agg_dict: dict[str, list[str]] = {
+        "start": ["min"],
+        "end": ["max"],
+        "log2": ["count", "mean", "min", "max"],
+        "pon_log2": ["mean"],
+        "pon_spread": ["mean"],
+    }
+
+    regions_df = (
+        bins.groupby(["chr", "gene.symbol", "region_id"], as_index=False)
+        .agg(agg_dict)
+        .copy()
     )
 
-    # Compute z with min_n=5 so small regions naturally become NaN/0 depending on _pon_abs_z
-    regions_df["pon_region_z"] = regions_df.apply(
-        lambda r: _pon_abs_z(
-            r["pon_region_effect"],
-            r["pon_mean_spread"],
-            r.get("n_targets", r.get("n.targets", np.nan)),
-            min_n=MIN_REGION_TARGETS_FOR_CALL,
+    regions_df = _flatten_agg_columns(regions_df).rename(
+        columns={
+            "start_min": "region_start",
+            "end_max": "region_end",
+            "log2_count": "n_targets",
+            "log2_mean": "mean_log2",
+            "log2_min": "min_log2",
+            "log2_max": "max_log2",
+            "pon_log2_mean": "pon_mean_log2",
+            "pon_spread_mean": "pon_mean_spread",
+        }
+    )
+
+    # Keep compatibility with older downstream code using n.targets
+    regions_df["n.targets"] = regions_df["n_targets"]
+
+    return regions_df
+
+
+def _score_pon_regions(
+    regions_df: pd.DataFrame,
+    *,
+    config: GeneRegionConfig,
+) -> pd.DataFrame:
+    """
+    Compute PON-based effect, z-score, signal class, and CNV indication
+    for each gene-region.
+
+    Scoring is based on deviation from the PON baseline:
+
+        pon_region_effect = mean_log2 - pon_mean_log2
+
+    The absolute effect is converted into a z-like score using the mean
+    PON spread and the number of bins in the region. Regions with too few
+    targets are not eligible for PON-based calls.
+
+    Parameters
+    ----------
+    regions_df
+        Gene-region summary table produced by `_collapse_bins_to_gene_regions`.
+    config
+        Thresholds controlling region scoring and indication calls.
+
+    Returns
+    -------
+    pd.DataFrame
+        Copy of `regions_df` with added columns:
+            pon_region_effect
+            pon_region_z
+            pon_region_direction
+            pon_region_signal
+            pon_region_indication
+    """
+    out = regions_df.copy()
+
+    # Mean deviation from the PON baseline
+    out["pon_region_effect"] = out["mean_log2"] - out["pon_mean_log2"]
+
+    # Region-level z-score using target count as effective sample size
+    out["pon_region_z"] = out.apply(
+        lambda row: _pon_abs_z(
+            row["pon_region_effect"],
+            row["pon_mean_spread"],
+            row.get("n_targets", row.get("n.targets", np.nan)),
+            min_n=config.min_region_targets_for_call,
         ),
         axis=1,
     )
 
-    regions_df["pon_region_direction"] = regions_df["pon_region_effect"].apply(
-        _pon_direction
+    # Direction of deviation relative to PON baseline
+    out["pon_region_direction"] = out["pon_region_effect"].apply(_pon_direction)
+
+    # Qualitative signal class from z-score
+    out["pon_region_signal"] = out["pon_region_z"].apply(
+        lambda z: _pon_signal(
+            z,
+            noise_lt=config.pon_signal_noise_lt,
+            borderline_lt=config.pon_signal_borderline_lt,
+        )
     )
 
-    regions_df["pon_region_signal"] = regions_df["pon_region_z"].apply(
-        lambda z: _pon_signal(z, noise_lt=2.0, borderline_lt=5.0)
-    )
-
-    # Hard gate: never allow calls for regions with too few targets
+    # Hard gate: small regions are not eligible for PON-based interpretation
     too_small = (
-        regions_df["n_targets"].fillna(0).astype(int) < MIN_REGION_TARGETS_FOR_CALL
+        out["n_targets"].fillna(0).astype(int) < config.min_region_targets_for_call
     )
-    regions_df.loc[
-        too_small, "pon_region_signal"
-    ] = ""  # or "not_significant" if that's what you use
-    regions_df.loc[too_small, "pon_region_indication"] = ""
 
-    # Only compute indication for eligible pon regions
+    out.loc[too_small, "pon_region_signal"] = ""
+    out.loc[too_small, "pon_region_indication"] = ""
+
+    # Only eligible regions can receive a gain/loss indication
     eligible = ~too_small
-    regions_df.loc[eligible, "pon_region_indication"] = regions_df.loc[eligible].apply(
-        lambda r: _pon_cnv_call_from_effect(
-            is_strong=str(r.get("pon_region_signal", "")).strip().lower() == "strong",
-            effect_log2=r.get("pon_region_effect", np.nan),
-            gain_gt=0.07,
-            loss_lt=-0.07,
+    out.loc[eligible, "pon_region_indication"] = out.loc[eligible].apply(
+        lambda row: _pon_cnv_call_from_effect(
+            is_strong=str(row.get("pon_region_signal", "")).strip().lower() == "strong",
+            effect_log2=row.get("pon_region_effect", np.nan),
+            gain_gt=config.pon_gain_gt,
+            loss_lt=config.pon_loss_lt,
             weak_value="NEUTRAL",
             neutral_value="NEUTRAL",
         ),
         axis=1,
     )
 
+    return out
+
+
+def create_generegions(
+    cnr_df: pd.DataFrame,
+    pon_df: pd.DataFrame | None = None,
+    *,
+    config: GeneRegionConfig = GeneRegionConfig(),
+) -> pd.DataFrame:
+    """
+    Build gene-region summary table from CNR bins.
+
+    With PON:
+      - subdivide genes into PON-supported regions
+      - score each region relative to the PON baseline
+
+    Without PON:
+      - return one gene-level row per gene
+      - leave PON-derived outputs empty
+    """
+    bins = _prepare_generegion_bins(cnr_df=cnr_df, pon_df=pon_df)
+
+    if pon_df is None or pon_df.empty:
+        return _build_genelevel_regions_without_pon(bins)
+
+    bins = _assign_initial_gene_regions(bins, config=config)
+    bins = _merge_adjacent_gene_regions(bins, config=config)
+
+    regions_df = _collapse_bins_to_gene_regions(bins)
+    regions_df = _score_pon_regions(regions_df, config=config)
     return regions_df
 
 
@@ -722,7 +1042,7 @@ def build_generegion_table(
 
     cancer_genes = cancer_genes or set()
 
-    # Always create something
+    # If no PON exists, just merge CNR BINS per gene level
     regions_df = create_generegions(cnr_df=cnr_df, pon_df=pon_df)
 
     # Annotate with CNVkit segments
