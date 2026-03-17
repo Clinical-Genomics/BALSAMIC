@@ -13,7 +13,7 @@ Changed:
 * lower average quality filter for WGS TO TNscope calls to 10 https://github.com/Clinical-Genomics/BALSAMIC/pull/1644
 * increased runtime for a couple of small rules https://github.com/Clinical-Genomics/BALSAMIC/pull/1641
 * decreased memory for headjobs to 500mb https://github.com/Clinical-Genomics/BALSAMIC/pull/1641
-* change SOR filter threshold for wgs to to 4 https://github.com/Clinical-Genomics/BALSAMIC/pull/1659
+* change SOR filter threshold for wgs tumor only to 4 https://github.com/Clinical-Genomics/BALSAMIC/pull/1659
 
 Removed:
 ^^^^^^^^
