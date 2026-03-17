@@ -146,7 +146,7 @@ RENAME_COLS = {
     "pon_region_signal": "PON deviation signal",
     "cnvkit_cnv_call": "CNVkit segment call",
     "purecn_cnv_call": "PureCN segment call",
-    "purecn_type": "PureCN segment LOH-type",
+    "purecn_type": "PureCN LOH-type",
     "gene.symbol": "Gene",
     "baf_maf": "BAF | MAF",
     "segment_size": "Segment size (KB)",

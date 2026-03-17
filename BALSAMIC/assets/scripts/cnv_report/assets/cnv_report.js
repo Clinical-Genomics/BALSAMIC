@@ -492,6 +492,51 @@
     };
   }
 
+  function splitIntoChunks(arr, chunkSize) {
+    const chunks = [];
+    for (let i = 0; i < arr.length; i += chunkSize) {
+      chunks.push(arr.slice(i, i + chunkSize));
+    }
+    return chunks;
+  }
+
+  function formatGeneCellText(text, genesPerLine = 4) {
+    const genes = (text ?? "")
+      .split(",")
+      .map((g) => g.trim())
+      .filter(Boolean);
+
+    if (!genes.length) return "";
+
+    return splitIntoChunks(genes, genesPerLine)
+      .map((chunk) => chunk.join(", "))
+      .join("<br>");
+  }
+
+  function wrapGeneColumn(tableId, genesPerLine = 4) {
+    const table = getTable(tableId);
+    if (!table) return;
+
+    const body = table.tBodies?.[0];
+    if (!body) return;
+
+    const colIndex = getColIndex(tableId);
+    const geneIdx = getIdx(colIndex, "Gene");
+    if (geneIdx === -1) return;
+
+    for (const row of Array.from(body.rows)) {
+      const cell = row.cells?.[geneIdx];
+      if (!cell) continue;
+
+      // Preserve the original raw text once
+      if (!cell.dataset.rawGeneText) {
+        cell.dataset.rawGeneText = (cell.textContent ?? "").trim();
+      }
+
+      cell.innerHTML = formatGeneCellText(cell.dataset.rawGeneText, genesPerLine);
+    }
+  }
+
   function applyFilter() {
     filterTable("report-table", segTable, buildSegCfg());
     filterTable("region-table", regionTable, buildRegionCfg());
@@ -688,5 +733,6 @@
   // ---------------------------------------------------------------------------
 
   hookColumnGroupToggles();
+  wrapGeneColumn("report-table", 4);
   applyFilter();
 })();

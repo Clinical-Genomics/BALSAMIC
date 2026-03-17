@@ -222,3 +222,11 @@ table.dataframe tr:nth-child(even) {
 .control-label {
   font-weight: 600;
 }
+
+#report-table td {
+  vertical-align: top;
+}
+
+#report-table td {
+  white-space: normal;
+}
