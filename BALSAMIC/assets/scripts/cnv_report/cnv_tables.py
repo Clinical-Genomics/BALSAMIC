@@ -1124,6 +1124,7 @@ def build_generegion_table(
             "region_id",
             "pon_region_direction",
             "cnvkit_seg_depth",
+            "n_targets",
         ]
     )
 
