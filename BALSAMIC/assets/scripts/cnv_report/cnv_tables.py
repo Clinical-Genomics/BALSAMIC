@@ -506,88 +506,108 @@ def _assign_initial_gene_regions(
     config: GeneRegionConfig,
 ) -> pd.DataFrame:
     """
-    Assign provisional gene-region IDs based on PON deviation runs.
+    Assign provisional gene-region IDs based on runs of bins that deviate
+    consistently from the PON baseline.
 
-    For each gene, bins are scanned in genomic order and converted to a
-    per-bin z-like deviation score:
+    For each gene:
+      1. Compute per-bin effect = log2 - pon_log2
+      2. Convert to a per-bin z-like score using pon_spread
+      3. Smooth the z-scores across neighboring bins
+      4. Find consecutive runs of bins with:
+           - sufficiently large absolute z
+           - consistent sign (gain-like or loss-like)
+      5. Keep only runs that are large enough and strong enough overall
 
-        z_raw = (log2 - pon_log2) / pon_spread
-
-    The z-scores are median-smoothed, then consecutive bins are grouped
-    into runs when:
-      - abs(z_smooth) >= config.z_bin_thresh
-      - the sign of z_smooth stays constant within the run
-
-    A run is promoted to a provisional gene region only if:
-      - the gene has at least config.min_gene_targets bins
-      - PON spread is available for the gene
-      - the run contains at least config.min_run_bins bins
-      - the run-level aggregated z-score is at least config.z_run_thresh
-
-    Bins not assigned to any run keep the default region_id "no_region".
-
-    Parameters
-    ----------
-    bins
-        Per-bin table with at least:
-            chr, gene.symbol, start, log2, pon_log2, pon_spread
-    config
-        Thresholds controlling run detection and smoothing.
-
-    Returns
-    -------
-    pd.DataFrame
-        Copy of `bins` with a provisional `region_id` column added/updated.
+    Bins that do not belong to any qualifying run remain "no_region".
     """
+    # Work on a copy so the input dataframe is not modified in-place
     out = bins.copy()
+
+    # Default label for bins that do not end up in any provisional region
     out["region_id"] = "no_region"
 
+    # Global counter so each accepted run gets a unique provisional ID
     next_region_id = 0
 
     def _run_abs_z(df_run: pd.DataFrame) -> float:
         """
-        Compute absolute run-level z-score using mean effect and mean spread.
+        Compute a run-level absolute z-score.
+
+        This summarizes the full run, rather than judging bins one by one.
+        A run is strong when:
+          - its mean deviation from PON is large
+          - compared with its expected noise
+          - taking run length into account
         """
+        # Per-bin deviation from the PON baseline
         effect = df_run["log2"].to_numpy() - df_run["pon_log2"].fillna(0.0).to_numpy()
         if effect.size == 0:
             return np.nan
 
+        # Average deviation across the whole run
         mean_effect = float(np.nanmean(effect))
         if not np.isfinite(mean_effect):
             return np.nan
 
+        # Use the mean PON spread as a rough noise estimate for the run
         spread = df_run["pon_spread"].fillna(0.0).to_numpy()
+
+        # Avoid divide-by-zero for bins with zero or missing spread
         spread_safe = np.where(spread <= 0, 1e-3, spread)
+
         mean_spread = float(np.nanmean(spread_safe)) if spread_safe.size else np.nan
         if not np.isfinite(mean_spread) or mean_spread <= 0:
             return np.nan
 
+        # Standard error of the mean effect across the run
         sigma_effect = mean_spread / np.sqrt(float(len(effect)))
         if sigma_effect <= 0:
             return np.nan
 
+        # Absolute run-level z-score
         return abs(mean_effect) / sigma_effect
 
     def _label_gene_runs(gene_bins: pd.DataFrame) -> None:
+        """
+        Detect and label provisional regions within one gene.
+
+        This function scans bins in genomic order and accumulates runs of bins
+        whose smoothed z-scores are both:
+          - strong enough in magnitude
+          - consistent in direction (positive or negative)
+        """
         nonlocal next_region_id
 
+        # Skip tiny genes: too few bins to robustly call regions
         if gene_bins.shape[0] < config.min_gene_targets:
             return
+
+        # Skip genes where there is no usable PON spread at all
         if gene_bins["pon_spread"].isna().all():
             return
 
+        # Make sure bins are processed in genomic order
         gene_bins = gene_bins.sort_values("start", kind="stable")
 
+        # Preserve original dataframe indices so accepted runs can be written
+        # back into the full output table
         bin_indices = gene_bins.index.to_numpy()
 
+        # Per-bin effect relative to PON
         effect = (
             gene_bins["log2"].to_numpy() - gene_bins["pon_log2"].fillna(0.0).to_numpy()
         )
+
+        # Per-bin spread estimate from PON
         spread = gene_bins["pon_spread"].fillna(0.0).to_numpy()
+
+        # Avoid division by zero when spread is missing/zero
         spread_safe = np.where(spread <= 0, 1e-3, spread)
 
+        # Per-bin z-like deviation score
         z_raw = effect / spread_safe
 
+        # Smooth z across neighboring bins to reduce single-bin noise spikes
         z_smooth = (
             pd.Series(z_raw, index=gene_bins.index)
             .rolling(
@@ -599,25 +619,49 @@ def _assign_initial_gene_regions(
             .to_numpy()
         )
 
+        # Current candidate run of bins
         current_run: list[int] = []
+
+        # Sign of current run:
+        #   +1 for gain-like bins
+        #   -1 for loss-like bins
         current_sign: int | None = None
 
         def _finalize_run(run_indices: list[int]) -> None:
+            """
+            Decide whether the current candidate run is strong enough to keep.
+
+            A run is accepted only if:
+              - it contains enough bins
+              - its aggregated run-level z-score exceeds threshold
+            """
             nonlocal next_region_id
 
+            # Ignore short runs
             if len(run_indices) < config.min_run_bins:
                 return
 
+            # Re-evaluate the whole run as one region
             df_run = out.loc[run_indices]
             run_z = _run_abs_z(df_run)
+
+            # Ignore weak or invalid runs
             if not np.isfinite(run_z) or run_z < config.z_run_thresh:
                 return
 
+            # Assign a provisional region label to all bins in the run
             region_label = f"generegion_{next_region_id}"
             next_region_id += 1
             out.loc[run_indices, "region_id"] = region_label
 
+        # ------------------------------------------------------------------
+        # Main scan across bins:
+        # - bins with weak/invalid z break the current run
+        # - bins with strong z continue the run if the sign matches
+        # - sign changes force the current run to end and a new one to begin
+        # ------------------------------------------------------------------
         for bin_index, z_value in zip(bin_indices, z_smooth):
+            # Weak or invalid bins cannot belong to a provisional region
             if not np.isfinite(z_value) or abs(z_value) < config.z_bin_thresh:
                 if current_run:
                     _finalize_run(current_run)
@@ -625,19 +669,24 @@ def _assign_initial_gene_regions(
                     current_sign = None
                 continue
 
+            # Convert z sign into gain-like (+1) or loss-like (-1)
             z_sign = 1 if z_value > 0 else -1
 
+            # Start a new run, or extend the existing run if sign is consistent
             if current_sign is None or z_sign == current_sign:
                 current_run.append(bin_index)
                 current_sign = z_sign
             else:
+                # Sign flip: finalize old run, then start a new one
                 _finalize_run(current_run)
                 current_run = [bin_index]
                 current_sign = z_sign
 
+        # Final candidate run may still be open when loop ends
         if current_run:
             _finalize_run(current_run)
 
+    # Process each gene independently
     for (_chrom, _gene), gene_bins in out.groupby(["chr", "gene.symbol"], sort=False):
         _label_gene_runs(gene_bins)
 
@@ -815,8 +864,8 @@ def _merge_adjacent_gene_regions(
                     and abs(current_run["mean_eff"] - previous_run["mean_eff"])
                     <= config.merge_delta
                     and (
-                        len(current_run["indices"]) <= config.small_seg_n
-                        or len(previous_run["indices"]) <= config.small_seg_n
+                        len(current_run["indices"]) <= config.small_segment_max_bins
+                        or len(previous_run["indices"]) <= config.small_segment_max_bins
                     )
                 )
 

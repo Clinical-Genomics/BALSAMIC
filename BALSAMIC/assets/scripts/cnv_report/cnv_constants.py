@@ -6,19 +6,92 @@ CHR = "chr"
 
 @dataclass(frozen=True)
 class GeneRegionConfig:
+    # ------------------------------------------------------------------
+    # Initial gene-region detection
+    # ------------------------------------------------------------------
+
+    # Minimum number of bins required in a gene before attempting to
+    # detect internal gene regions. Very small genes are skipped because
+    # runs cannot be detected robustly.
     min_gene_targets: int = 8
+
+    # Minimum number of consecutive bins required to form a candidate run.
+    # Prevents short noisy stretches from becoming gene regions.
     min_run_bins: int = 4
+
+    # Minimum absolute per-bin z-score required for a bin to participate
+    # in a candidate run:
+    #
+    #     z = (log2 - pon_log2) / pon_spread
+    #
+    # Bins with |z| below this threshold break a run.
     z_bin_thresh: float = 1.5
+
+    # Minimum aggregated run-level z-score required to accept a candidate
+    # run as a provisional gene region. This summarizes the entire run
+    # using its mean deviation and expected noise.
     z_run_thresh: float = 3.0
+
+    # Median smoothing window applied to bin-level z-scores before run
+    # detection. Helps suppress isolated noisy bins that would otherwise
+    # split runs.
     smooth_window: int = 3
+
+    # ------------------------------------------------------------------
+    # Region cleanup / merging
+    # ------------------------------------------------------------------
+
+    # Maximum number of bins allowed in a "bridge" segment between two
+    # larger regions with similar effects. Used to merge patterns like:
+    #
+    #     strong run → small neutral gap → strong run
+    #
+    # when the gap is short enough.
     max_bridge_bins: int = 4
+
+    # Maximum difference in mean effect between two runs for them to be
+    # considered similar enough to merge across a bridge segment.
+    #
+    # Effect is defined as:
+    #
+    #     effect = log2 - pon_log2
     bridge_delta: float = 0.12
-    small_seg_n: int = 3
+
+    # Maximum size of a "small segment" that may be merged into an adjacent
+    # region when the effects are similar.
+    small_segment_max_bins: int = 5
+
+    # Maximum difference in mean effect between adjacent runs for them to
+    # be merged during cleanup.
     merge_delta: float = 0.10
+
+    # ------------------------------------------------------------------
+    # Region scoring and CNV indication
+    # ------------------------------------------------------------------
+
+    # Minimum number of bins required for a region to be eligible for
+    # PON-based statistical scoring and CNV indication.
+    #
+    # Regions smaller than this are treated as unreliable and will not
+    # produce gain/loss calls.
     min_region_targets_for_call: int = 5
+
+    # Lower threshold for classifying the PON z-score signal strength.
+    #
+    # z < noise_lt       → "noise"
+    # noise_lt ≤ z < borderline_lt → "borderline"
+    # z ≥ borderline_lt  → "strong"
     pon_signal_noise_lt: float = 2.0
+
+    # Upper threshold separating "borderline" from "strong" signals.
     pon_signal_borderline_lt: float = 5.0
+
+    # Log2 deviation threshold above which a region is interpreted as
+    # a gain when the signal is considered strong.
     pon_gain_gt: float = 0.07
+
+    # Log2 deviation threshold below which a region is interpreted as
+    # a loss when the signal is considered strong.
     pon_loss_lt: float = -0.07
 
 
