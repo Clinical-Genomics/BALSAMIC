@@ -1059,33 +1059,6 @@ def build_generegion_table(
     # CNV calls
     regions_df = add_cnv_calls_wide(regions_df, sex=sex)
 
-    # Drop columns if present
-    drop_cols = [
-        c
-        for c in [
-            "region_id",
-            "n_targets",
-            "pon_region_direction",
-            "cnvkit_seg_start",
-            "cnvkit_seg_end",
-            "cnvkit_seg_log2",
-            "purecn_seg_start",
-            "purecn_seg_end",
-            "purecn_seg_mean_log2",
-            "purecn_num_snps",
-            "purecn_maf_observed",
-            "cnvkit_seg_cn1",
-            "cnvkit_seg_cn2",
-            "purecn_M",
-            "purecn_M_flagged",
-            "pon_region_effect",
-            "cnvkit_seg_depth",
-        ]
-        if c in regions_df.columns
-    ]
-    if drop_cols:
-        regions_df = regions_df.drop(columns=drop_cols)
-
     return reorder_and_sort_table(regions_df, GENE_TABLE_SPEC)
 
 
