@@ -33,7 +33,7 @@ h1, h2, h3 {
 }
 
 .report-sex-meta {
-  margin: 12px 0 18px 0;
+  margin: 12px 0 18px;
   padding: 10px 14px;
   border-left: 4px solid #2b6cb0;
   background-color: #f5cb87;
