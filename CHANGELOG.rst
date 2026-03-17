@@ -21,6 +21,7 @@ Removed:
 
 Fixed:
 ^^^^^^
+* removed gcdropout gcbias metric from deliverables https://github.com/Clinical-Genomics/BALSAMIC/pull/1661
 
 [18.0.1]
 --------
