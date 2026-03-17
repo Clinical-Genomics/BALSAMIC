@@ -60,8 +60,8 @@ def collect_qc_metrics(
         metric
         for metric in metrics
         if not (
-                metric.get("name") in {"GC_DROPOUT", "AT_DROPOUT"}
-                and metric.get("step") == "multiqc_picard_gcbias"
+            metric.get("name") in {"GC_DROPOUT", "AT_DROPOUT"}
+            and metric.get("step") == "multiqc_picard_gcbias"
         )
     ]
 
