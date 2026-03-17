@@ -18,6 +18,7 @@ rule create_cnv_html_report:
         diagram = cnv_dir + "tumor.merged-diagram.pdf",
         scatter = cnv_dir + "tumor.merged-scatter.pdf",
         purity = cnv_dir+ "CNV.somatic." + config["analysis"]["case_id"] + ".purecn.purity.csv",
+        sex_prediction_json = qc_dir + "sex_prediction.json",
     output:
         cnv_report_html = cnv_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".report.html"
     benchmark:

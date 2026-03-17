@@ -127,7 +127,7 @@ def case_config(
     balsamic_cache: Path,
     cache_version: str,
     cadd_annotations: Path,
-    cancer_genelist: str,
+    cancer_genelist: str | None,
     cancer_germline_snv_observations: Path,
     cancer_somatic_snv_observations: Path,
     cancer_somatic_snv_panel_observations: Path,

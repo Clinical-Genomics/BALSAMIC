@@ -179,7 +179,7 @@ class AnalysisModel(BaseModel):
     pon_version: Optional[str] = None
     pon_workflow: Optional[PONWorkflow] = None
     rescue_snvs: Optional[Annotated[str, AfterValidator(is_file)]] = None
-    cancergenes: Annotated[str, AfterValidator(is_file)]
+    cancergenes: Optional[Annotated[str, AfterValidator(is_file)]] = None
 
     @field_validator("pon_version")
     def validate_pon_version(cls, pon_version: Optional[str]):
