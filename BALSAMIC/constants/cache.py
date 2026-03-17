@@ -118,13 +118,6 @@ REFERENCE_FILES: Dict[GenomeVersion, Dict[str, dict]] = {
             "file_name": "gnomad.genomes.r2.1.1.sites.vcf.bgz.tbi",
             "dir_name": "variants",
         },
-        "cosmic": {
-            "url": "https://cancer.sanger.ac.uk/cosmic/file_download/GRCh37/cosmic/v97/VCF/CosmicCodingMuts.vcf.gz",
-            "file_type": FileType.VCF,
-            "gzip": True,
-            "file_name": "cosmic_coding_muts_v97.vcf",
-            "dir_name": "variants",
-        },
         "wgs_calling_regions": {
             "url": "gs://gatk-legacy-bundles/b37/wgs_calling_regions.v1.interval_list",
             "file_type": FileType.TXT,
@@ -237,6 +230,13 @@ REFERENCE_FILES: Dict[GenomeVersion, Dict[str, dict]] = {
             "file_name": "hg19.simple_repeat.txt.gz",
             "dir_name": "variants",
         },
+        "cytoband_coordinates": {
+            "url": "https://hgdownload.cse.ucsc.edu/goldenpath/hg19/database/cytoBand.txt.gz",
+            "file_type": FileType.TSV,
+            "gzip": True,
+            "file_name": "cytoBand.txt",
+            "dir_name": "genome",
+        },
     },
     GenomeVersion.HG38: {
         "reference_genome": {
@@ -293,13 +293,6 @@ REFERENCE_FILES: Dict[GenomeVersion, Dict[str, dict]] = {
             "file_type": FileType.VCF,
             "gzip": False,
             "file_name": "gnomad.genomes.r2.1.1.sites.vcf.bgz.tbi",
-            "dir_name": "variants",
-        },
-        "cosmic": {
-            "url": "https://cancer.sanger.ac.uk/cosmic/file_download/GRCh38/cosmic/v97/VCF/CosmicCodingMuts.vcf.gz",
-            "file_type": FileType.VCF,
-            "gzip": True,
-            "file_name": "cosmic_coding_muts_v97.vcf",
             "dir_name": "variants",
         },
         "wgs_calling_regions": {

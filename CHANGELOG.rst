@@ -3,12 +3,21 @@
 
 Added:
 ^^^^^^
+* add AT_DROPOUT to all panel analyses QC deliverables https://github.com/Clinical-Genomics/BALSAMIC/pull/1646
+* add model validation for reference files in init command https://github.com/Clinical-Genomics/BALSAMIC/pull/1654
+* add automatic download of cytoband coordinates file via init command https://github.com/Clinical-Genomics/BALSAMIC/pull/1651
+* add argument for cosmic file https://github.com/Clinical-Genomics/BALSAMIC/pull/1656
 
 Changed:
 ^^^^^^^^
+* lower average quality filter for WGS TO TNscope calls to 10 https://github.com/Clinical-Genomics/BALSAMIC/pull/1644
+* increased runtime for a couple of small rules https://github.com/Clinical-Genomics/BALSAMIC/pull/1641
+* decreased memory for headjobs to 500mb https://github.com/Clinical-Genomics/BALSAMIC/pull/1641
+* change SOR filter threshold for wgs tumor only to 4 https://github.com/Clinical-Genomics/BALSAMIC/pull/1659
 
 Removed:
 ^^^^^^^^
+* removed cosmic file from init download https://github.com/Clinical-Genomics/BALSAMIC/pull/1656
 
 Fixed:
 ^^^^^^
