@@ -1472,6 +1472,8 @@ def config_case_cli_tga(
         sentieon_license,
         "--gnomad-min-af5",
         gens_min_5_af_gnomad_file,
+        "--cust-case-id",
+        "cust-casiid"
     ]
 
 

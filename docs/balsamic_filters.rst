@@ -708,7 +708,7 @@ The somatic variants in TNscope raw VCF file (`SNV.somatic.<CASE_ID>.tnscope.all
 
 ::
 
-    SOR < 3
+    SOR < 4
 
 Post-call Observation database Filters
 ********************************************
