@@ -77,59 +77,6 @@ def _flatten_agg_columns(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def _pon_abs_z(effect: float, spread: float, n_targets: float, *, min_n: int) -> float:
-    """Compute abs(effect) / (spread / sqrt(n)) with defensive checks."""
-    if pd.isna(effect) or pd.isna(spread) or spread <= 0:
-        return np.nan
-    if pd.isna(n_targets) or n_targets < min_n:
-        return np.nan
-    sigma_eff = spread / np.sqrt(float(n_targets))
-    if sigma_eff <= 0:
-        return np.nan
-    return abs(effect) / sigma_eff
-
-
-def _pon_direction(effect: float) -> str:
-    """Map effect sign to 'gain'/'loss'/'neutral' (or '' when missing)."""
-    if pd.isna(effect):
-        return ""
-    if effect > 0:
-        return "gain"
-    if effect < 0:
-        return "loss"
-    return "neutral"
-
-
-def _pon_signal(z: float, *, noise_lt: float, borderline_lt: float) -> str:
-    """Map z-score to 'noise'/'borderline'/'strong' (or '' when missing)."""
-    if pd.isna(z):
-        return ""
-    if z < noise_lt:
-        return "noise"
-    if z < borderline_lt:
-        return "borderline"
-    return "strong"
-
-
-def _pon_cnv_call_from_effect(
-    *,
-    is_strong: bool,
-    effect_log2: float,
-    gain_gt: float,
-    loss_lt: float,
-    weak_value: str,
-    neutral_value: str,
-) -> str:
-    """Return GAIN/LOSS/neutral/weak depending on deviation from PON baseline."""
-    if not is_strong or pd.isna(effect_log2):
-        return weak_value
-    if effect_log2 > gain_gt:
-        return "GAIN"
-    if effect_log2 < loss_lt:
-        return "LOSS"
-    return neutral_value
-
-
 def classify_cnv_from_total_cn_sex_aware(
     cn: float | int | None,
     chrom: str | int,
@@ -204,6 +151,59 @@ def add_cnv_calls_wide(
 ############################
 # GENE REGION LEVEL
 ############################
+
+
+def _pon_abs_z(effect: float, spread: float, n_targets: float, *, min_n: int) -> float:
+    """Compute abs(effect) / (spread / sqrt(n)) with defensive checks."""
+    if pd.isna(effect) or pd.isna(spread) or spread <= 0:
+        return np.nan
+    if pd.isna(n_targets) or n_targets < min_n:
+        return np.nan
+    sigma_eff = spread / np.sqrt(float(n_targets))
+    if sigma_eff <= 0:
+        return np.nan
+    return abs(effect) / sigma_eff
+
+
+def _pon_direction(effect: float) -> str:
+    """Map effect sign to 'gain'/'loss'/'neutral' (or '' when missing)."""
+    if pd.isna(effect):
+        return ""
+    if effect > 0:
+        return "gain"
+    if effect < 0:
+        return "loss"
+    return "neutral"
+
+
+def _pon_signal(z: float, *, noise_lt: float, borderline_lt: float) -> str:
+    """Map z-score to 'noise'/'borderline'/'strong' (or '' when missing)."""
+    if pd.isna(z):
+        return ""
+    if z < noise_lt:
+        return "noise"
+    if z < borderline_lt:
+        return "borderline"
+    return "strong"
+
+
+def _pon_cnv_call_from_effect(
+    *,
+    is_strong: bool,
+    effect_log2: float,
+    gain_gt: float,
+    loss_lt: float,
+    weak_value: str,
+    neutral_value: str,
+) -> str:
+    """Return GAIN/LOSS/neutral/weak depending on deviation from PON baseline."""
+    if not is_strong or pd.isna(effect_log2):
+        return weak_value
+    if effect_log2 > gain_gt:
+        return "GAIN"
+    if effect_log2 < loss_lt:
+        return "LOSS"
+    return neutral_value
 
 
 def annotate_regions_with_overlapping_segments(
@@ -1107,6 +1107,25 @@ def build_generegion_table(
 
     # CNV calls
     regions_df = add_cnv_calls_wide(regions_df, sex=sex)
+
+    # Remove columns
+    regions_df = regions_df.drop(
+        columns=[
+            "cnvkit_seg_start",
+            "cnvkit_seg_end",
+            "cnvkit_seg_log2",
+            "purecn_seg_start",
+            "purecn_seg_end",
+            "purecn_seg_mean_log2",
+            "purecn_seg_mean_log2",
+            "purecn_num_snps",
+            "purecn_maf_observed",
+            "purecn_M_flagged",
+            "region_id",
+            "pon_region_direction",
+            "cnvkit_seg_depth",
+        ]
+    )
 
     return reorder_and_sort_table(regions_df, GENE_TABLE_SPEC)
 
