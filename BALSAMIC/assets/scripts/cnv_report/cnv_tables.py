@@ -1043,8 +1043,6 @@ def build_generegion_table(
     regions_df = create_generegions(cnr_df=cnr_df, pon_df=pon_df)
 
     # Annotate with CNVkit segments
-    regions_df = annotate_regions_with_cnvkit_segments(regions_df, cns_df)
-
     regions_df = annotate_regions_with_overlapping_segments(
         regions_df,
         cns_df,
