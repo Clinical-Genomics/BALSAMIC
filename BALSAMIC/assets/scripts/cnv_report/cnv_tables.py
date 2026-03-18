@@ -1111,7 +1111,6 @@ def add_overlapping_genes_from_bins(
 
             # ------------------------------------------------------
             # (B) gene list = overlapping genes, excluding backbone,
-            #     keeping only genes with >= min_targets bins
             # ------------------------------------------------------
             genes_overlap = (
                 pd.Series(b_gene[:cut][mask], dtype="string").fillna("").astype(str)
@@ -1122,18 +1121,24 @@ def add_overlapping_genes_from_bins(
                 ~genes_overlap.str.strip().str.lower().eq("backbone")
             ]
 
+            # ------------------------------------------------------
+            # (C) If exome, also include only cancer genes
+            # ------------------------------------------------------
             if cancer_genes:
                 genes_overlap = genes_overlap[genes_overlap.isin(cancer_genes)]
 
             if genes_overlap.empty:
                 continue
 
-            counts = genes_overlap.value_counts(dropna=True)
-            counts = counts[counts >= min_targets]
-            if counts.empty:
+            # ------------------------------------------------------
+            # (D) Keep only genes above min number of targets
+            # ------------------------------------------------------
+            gene_bin_counts = genes_overlap.value_counts(dropna=True)
+            gene_bin_counts = gene_bin_counts[gene_bin_counts >= min_targets]
+            if gene_bin_counts.empty:
                 continue
 
-            gene_list = sorted(counts.index.astype(str).tolist())
+            gene_list = sorted(gene_bin_counts.index.astype(str).tolist())
             out.at[row_idx, genes_col] = ",".join(gene_list)
 
     return out
