@@ -18,16 +18,23 @@ from cnv_constants import (
 from cnv_report_utils import chrom_sort_key
 
 
-def reorder_and_sort_table(df: pd.DataFrame, spec: TableSpec) -> pd.DataFrame:
+def finalize_table(df: pd.DataFrame, spec: TableSpec) -> pd.DataFrame:
     """
-    Finalize a table based on a TableSpec: rename, reorder, round floats, stable-sort by interval.
+    Finalize a table according to a TableSpec.
+
+    Applies:
+      - preferred column ordering
+      - float rounding
+      - stable genomic sorting
     """
     out = df.copy()
 
-    # 1) Reorder columns (keep extras at end)
-    out = _reorder_columns(out, list(spec.column_order))
+    # Put preferred columns first, keep any extra columns at the end
+    preferred_present = [c for c in spec.column_order if c in out.columns]
+    remaining = [c for c in out.columns if c not in preferred_present]
+    out = out[preferred_present + remaining]
 
-    # 2) Round floats
+    # Round configured float columns
     existing_floats = [c for c in spec.float_columns if c in out.columns]
     if existing_floats:
         out[existing_floats] = (
@@ -36,45 +43,28 @@ def reorder_and_sort_table(df: pd.DataFrame, spec: TableSpec) -> pd.DataFrame:
             .round(spec.decimals)
         )
 
-    # 3) Sort
+    # Stable genomic sort if the required interval columns exist
     chr_col, start_col, end_col = spec.sort_keys
     if all(c in out.columns for c in (chr_col, start_col, end_col)):
-        out = _stable_sort_by_chr_interval(out, chr_col, start_col, end_col)
+        out = _sort_by_chr_interval(out, chr_col, start_col, end_col)
 
     return out
 
 
-def _stable_sort_by_chr_interval(
+def _sort_by_chr_interval(
     df: pd.DataFrame,
     chr_col: str,
     start_col: str,
     end_col: str,
-    *,
     tmp_col: str = "chr_sort",
 ) -> pd.DataFrame:
-    """Stable-sort by (chr, start, end) using `chrom_sort_key`."""
-    df = df.copy()
-    df[tmp_col] = df[chr_col].map(chrom_sort_key)
-    df = df.sort_values(by=[tmp_col, start_col, end_col], kind="stable").drop(
+    """Stable-sort rows by chromosome, start, and end."""
+    out = df.copy()
+    out[tmp_col] = out[chr_col].map(chrom_sort_key)
+    out = out.sort_values(by=[tmp_col, start_col, end_col], kind="stable").drop(
         columns=[tmp_col]
     )
-    return df
-
-
-def _reorder_columns(df: pd.DataFrame, preferred: list[str]) -> pd.DataFrame:
-    """Move preferred columns first (when present), preserving the rest."""
-    preferred_present = [c for c in preferred if c in df.columns]
-    return df[preferred_present + [c for c in df.columns if c not in preferred_present]]
-
-
-def _flatten_agg_columns(df: pd.DataFrame) -> pd.DataFrame:
-    """Flatten MultiIndex columns produced by pandas .agg()."""
-    df = df.copy()
-    df.columns = [
-        "_".join(col).strip("_") if isinstance(col, tuple) else col
-        for col in df.columns
-    ]
-    return df
+    return out
 
 
 def classify_cnv_from_total_cn_sex_aware(
@@ -95,55 +85,79 @@ def classify_cnv_from_total_cn_sex_aware(
         return ""
 
     if chrom.isdigit():
-        expected = 2
+        expected_cn = 2
     elif chrom.upper() == "X":
-        expected = 2 if sex == Gender.FEMALE else 1
+        expected_cn = 2 if sex == Gender.FEMALE else 1
     elif chrom.upper() == "Y":
-        expected = 1 if sex == Gender.MALE else 0
+        expected_cn = 1 if sex == Gender.MALE else 0
     else:
-        expected = 2
+        expected_cn = 2
 
-    cn_int = int(round(float(cn)))
-    exp_int = int(round(expected))
-
-    if cn_int < exp_int:
+    if cn < expected_cn:
         return "DELETION"
-    if cn_int > exp_int:
+    if cn > expected_cn:
         return "AMPLIFICATION"
     return "NEUTRAL"
 
 
-def add_cnv_calls_wide(
+def add_sex_aware_cnv_calls_from_total_cn(
     df: pd.DataFrame,
-    *,
     sex: Gender,
     chr_col: str = "chr",
-    cnvkit_total_cn_col: str = "cnvkit_seg_cn",
-    purecn_total_cn_col: str = "purecn_C",
-    out_cnvkit_col: str = "cnvkit_cnv_call",
-    out_purecn_col: str = "purecn_cnv_call",
 ) -> pd.DataFrame:
+    """
+    Add CNV gain/loss classifications derived from absolute copy number.
+
+    This function computes CNV calls separately for CNVkit and PureCN
+    segments using `classify_cnv_from_total_cn_sex_aware`, which interprets
+    copy number relative to the expected baseline for each chromosome and sex.
+
+    Baseline expectations:
+        autosomes (1–22): 2 copies
+        chromosome X:     2 copies (female) / 1 copy (male)
+        chromosome Y:     0 copies (female) / 1 copy (male)
+
+    If the required copy-number column exists, the function adds a new column
+    containing the derived CNV call for that caller.
+
+    Parameters
+    ----------
+    df
+        Input dataframe containing segment rows.
+    sex
+        Sample sex used for sex-chromosome baseline interpretation.
+
+
+    Returns
+    -------
+    pd.DataFrame
+        Copy of `df` with CNV classification columns added.
+    """
     out = df.copy()
 
-    # Always create output columns so downstream code can rely on them
+    # Column names
+    cnvkit_total_cn_col: str = "cnvkit_seg_cn"
+    purecn_total_cn_col: str = "purecn_C"
+    out_cnvkit_col: str = "cnvkit_cnv_call"
+    out_purecn_col: str = "purecn_cnv_call"
+
+    # Create output columns so downstream code can rely on their existence
     out[out_cnvkit_col] = pd.NA
     out[out_purecn_col] = pd.NA
 
-    if cnvkit_total_cn_col in out.columns:
-        out[out_cnvkit_col] = out.apply(
-            lambda r: classify_cnv_from_total_cn_sex_aware(
-                r[cnvkit_total_cn_col], r[chr_col], sex
-            ),
-            axis=1,
-        )
+    out[out_cnvkit_col] = out.apply(
+        lambda r: classify_cnv_from_total_cn_sex_aware(
+            r.get(cnvkit_total_cn_col), r[chr_col], sex
+        ),
+        axis=1,
+    )
 
-    if purecn_total_cn_col in out.columns:
-        out[out_purecn_col] = out.apply(
-            lambda r: classify_cnv_from_total_cn_sex_aware(
-                r[purecn_total_cn_col], r[chr_col], sex
-            ),
-            axis=1,
-        )
+    out[out_purecn_col] = out.apply(
+        lambda r: classify_cnv_from_total_cn_sex_aware(
+            r.get(purecn_total_cn_col), r[chr_col], sex
+        ),
+        axis=1,
+    )
 
     return out
 
@@ -374,6 +388,24 @@ def merge_cnr_with_pon(
     )
 
 
+def _aggregate_gene_regions(bins: pd.DataFrame) -> pd.DataFrame:
+    """Aggregate bin-level rows to one row per gene-region."""
+    return (
+        bins.groupby(["chr", "gene.symbol", "region_id"], as_index=False)
+        .agg(
+            region_start=("start", "min"),
+            region_end=("end", "max"),
+            n_targets=("log2", "count"),
+            mean_log2=("log2", "mean"),
+            min_log2=("log2", "min"),
+            max_log2=("log2", "max"),
+            pon_mean_log2=("pon_log2", "mean"),
+            pon_mean_spread=("pon_spread", "mean"),
+        )
+        .copy()
+    )
+
+
 def _prepare_generegion_bins(
     cnr_df: pd.DataFrame,
     pon_df: pd.DataFrame | None,
@@ -433,62 +465,12 @@ def _prepare_generegion_bins(
 def _build_genelevel_regions_without_pon(bins: pd.DataFrame) -> pd.DataFrame:
     """
     Build one gene-level region per gene when no PON is available.
-
-    In the no-PON case, genes are not subdivided into multiple regions.
-    Instead, all bins belonging to the same gene are collapsed into a single
-    row spanning the full gene extent.
-
-    The returned table matches the usual gene-region schema as closely as
-    possible, but PON-derived columns are left empty or neutral.
-
-    Parameters
-    ----------
-    bins
-        Per-bin table containing at least:
-            chr, gene.symbol, start, end, log2, pon_log2, pon_spread
-
-    Returns
-    -------
-    pd.DataFrame
-        One row per gene with columns including:
-            chr, gene.symbol, region_id, region_start, region_end,
-            n_targets, mean_log2, min_log2, max_log2,
-            pon_mean_log2, pon_mean_spread,
-            n.targets,
-            pon_region_effect, pon_region_z,
-            pon_region_signal, pon_region_indication
     """
     gene_bins = bins.copy()
     gene_bins["region_id"] = "genelevel"
 
-    agg_dict: dict[str, list[str]] = {
-        "start": ["min"],
-        "end": ["max"],
-        "log2": ["count", "mean", "min", "max"],
-        "pon_log2": ["mean"],
-        "pon_spread": ["mean"],
-    }
+    regions_df = _aggregate_gene_regions(gene_bins)
 
-    regions_df = (
-        gene_bins.groupby(["chr", "gene.symbol", "region_id"], as_index=False)
-        .agg(agg_dict)
-        .copy()
-    )
-
-    regions_df = _flatten_agg_columns(regions_df).rename(
-        columns={
-            "start_min": "region_start",
-            "end_max": "region_end",
-            "log2_count": "n_targets",
-            "log2_mean": "mean_log2",
-            "log2_min": "min_log2",
-            "log2_max": "max_log2",
-            "pon_log2_mean": "pon_mean_log2",
-            "pon_spread_mean": "pon_mean_spread",
-        }
-    )
-
-    # Keep both naming conventions for compatibility with downstream code
     regions_df["n.targets"] = regions_df["n_targets"]
 
     # No PON-derived region calling is possible in this mode
@@ -911,46 +893,8 @@ def _collapse_bins_to_gene_regions(bins: pd.DataFrame) -> pd.DataFrame:
       - number of contributing bins/targets
       - log2 distribution across bins
       - mean PON baseline and spread
-
-    Parameters
-    ----------
-    bins
-        Per-bin table containing at least:
-            chr, gene.symbol, region_id, start, end, log2, pon_log2, pon_spread
-
-    Returns
-    -------
-    pd.DataFrame
-        One row per (chr, gene.symbol, region_id) with columns including:
-            region_start, region_end, n_targets, mean_log2,
-            min_log2, max_log2, pon_mean_log2, pon_mean_spread, n.targets
     """
-    agg_dict: dict[str, list[str]] = {
-        "start": ["min"],
-        "end": ["max"],
-        "log2": ["count", "mean", "min", "max"],
-        "pon_log2": ["mean"],
-        "pon_spread": ["mean"],
-    }
-
-    regions_df = (
-        bins.groupby(["chr", "gene.symbol", "region_id"], as_index=False)
-        .agg(agg_dict)
-        .copy()
-    )
-
-    regions_df = _flatten_agg_columns(regions_df).rename(
-        columns={
-            "start_min": "region_start",
-            "end_max": "region_end",
-            "log2_count": "n_targets",
-            "log2_mean": "mean_log2",
-            "log2_min": "min_log2",
-            "log2_max": "max_log2",
-            "pon_log2_mean": "pon_mean_log2",
-            "pon_spread_mean": "pon_mean_spread",
-        }
-    )
+    regions_df = _aggregate_gene_regions(bins)
 
     # Keep compatibility with older downstream code using n.targets
     regions_df["n.targets"] = regions_df["n_targets"]
@@ -1106,7 +1050,7 @@ def build_generegion_table(
     regions_df["is_cancer_gene"] = regions_df["gene.symbol"].isin(cancer_genes)
 
     # CNV calls
-    regions_df = add_cnv_calls_wide(regions_df, sex=sex)
+    regions_df = add_sex_aware_cnv_calls_from_total_cn(regions_df, sex=sex)
 
     # Remove columns
     regions_df = regions_df.drop(
@@ -1125,10 +1069,11 @@ def build_generegion_table(
             "pon_region_direction",
             "cnvkit_seg_depth",
             "n_targets",
-        ]
+        ],
+        errors="ignore",
     )
 
-    return reorder_and_sort_table(regions_df, GENE_TABLE_SPEC)
+    return finalize_table(regions_df, GENE_TABLE_SPEC)
 
 
 ############################
@@ -1408,7 +1353,7 @@ def build_segment_table(
         cancer_genes=cancer_genes if is_exome else None,
         drop_genes={"backbone"},
     )
-    segments = add_cnv_calls_wide(
+    segments = add_sex_aware_cnv_calls_from_total_cn(
         segments, sex=sex
     )  # makes cnvkit_cnv_call and purecn_cnv_call
 
@@ -1424,4 +1369,4 @@ def build_segment_table(
     segments["segment_size"] = round((segments["end"] - segments["start"]) / 1000, 2)
 
     segments = segments.drop(columns=["cnvkit_cnv_call", "purecn_cnv_call"])
-    return reorder_and_sort_table(segments, SEGMENT_TABLE_SPEC)
+    return finalize_table(segments, SEGMENT_TABLE_SPEC)
