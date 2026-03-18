@@ -367,6 +367,43 @@ def draw_gene_labels_from_spans(
     start_col: str = "region_start",
     end_col: str = "region_end",
 ) -> None:
+    """
+    Draw labeled gene span markers on a chromosome plot.
+
+    For each gene in `label_genes`, this function:
+      - looks up the genomic start and end coordinates in `gene_spans`
+      - converts those genomic coordinates into pseudo-x plot coordinates
+      - draws vertical boundary lines at the gene start and end
+      - places the gene name as a vertical label centered between them
+
+    The function assumes that `gene_spans` contains one row per gene with
+    full-span coordinates, typically derived by collapsing gene-region rows
+    to the minimum start and maximum end per gene.
+
+    Parameters
+    ----------
+    ax
+        Matplotlib axis to draw on.
+    gene_spans
+        DataFrame containing one row per gene with span coordinates.
+    label_genes
+        List of gene names to label on the plot.
+    gene_to_color
+        Mapping from gene name to plotting color. Every gene in
+        `label_genes` is expected to exist in this dictionary.
+    pos_to_xcoord
+        Function mapping genomic position to pseudo-x coordinate in the plot.
+    y_max
+        Upper y-limit of the plotting panel.
+    base_label_offset
+        Vertical offset used to place labels slightly below the top of the
+        panel.
+
+    Returns
+    -------
+    None
+        Draws directly onto `ax`.
+    """
     if gene_spans is None or gene_spans.empty or not label_genes:
         return
 
