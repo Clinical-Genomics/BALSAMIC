@@ -454,39 +454,62 @@ def _assign_initial_gene_regions(
 
         This summarizes the full run, rather than judging bins one by one.
         A run is strong when:
-          - its mean deviation from PON is large
-          - compared with its expected noise
-          - taking run length into account
+          - its mean deviation from the PON baseline is large
+          - relative to the expected noise level
+          - and accounting for the number of bins in the run.
         """
+
+        # ---------------------------------------------------------
         # Per-bin deviation from the PON baseline
-        log2difference = (
-            df_run["log2"].to_numpy() - df_run["pon_log2"].fillna(0.0).to_numpy()
-        )
-        if log2difference.size == 0:
-            return np.nan
+        #
+        # For each bin:
+        #   log2difference = observed log2 - expected PON log2
+        # ---------------------------------------------------------
+        log2difference = df_run["log2"].to_numpy() - df_run["pon_log2"]
 
-        # Average deviation across the whole run
+        # ---------------------------------------------------------
+        # Mean signal across the entire run
+        #
+        # A real CNV should show a consistent deviation across
+        # multiple bins. We summarize the run by averaging the
+        # bin-level deviations.
+        # ---------------------------------------------------------
         mean_log2difference = float(np.nanmean(log2difference))
-        if not np.isfinite(mean_log2difference):
-            return np.nan
 
-        # Use the mean PON spread as a rough noise estimate for the run
-        spread = df_run["pon_spread"].fillna(0.0).to_numpy()
+        # ---------------------------------------------------------
+        # Estimate the noise level using the PON spread.
+        #
+        # PON spread approximates the expected variability for
+        # each bin. We average this across the run to obtain a
+        # rough noise estimate for the region.
+        # ---------------------------------------------------------
+        spread = df_run["pon_spread"]
+        spread_safe = np.where(spread <= 0, 0.0000001, spread)
 
-        # Avoid divide-by-zero for bins with zero or missing spread
-        spread_safe = np.where(spread <= 0, 1e-3, spread)
+        mean_spread = float(np.nanmean(spread_safe))
+        # ---------------------------------------------------------
+        # Standard error of the mean deviation
+        #
+        # The expected uncertainty of the run mean decreases with
+        # the number of bins:
+        #
+        #     run_std_error = spread / sqrt(n_bins)
+        #
+        # Longer runs therefore require smaller per-bin deviations
+        # to achieve a strong signal.
+        # ---------------------------------------------------------
+        run_std_error = mean_spread / np.sqrt(len(log2difference))
 
-        mean_spread = float(np.nanmean(spread_safe)) if spread_safe.size else np.nan
-        if not np.isfinite(mean_spread) or mean_spread <= 0:
-            return np.nan
-
-        # Standard error of the mean log2difference across the run
-        sigma_log2difference = mean_spread / np.sqrt(float(len(log2difference)))
-        if sigma_log2difference <= 0:
-            return np.nan
-
-        # Absolute run-level z-score
-        return abs(mean_log2difference) / sigma_log2difference
+        # ---------------------------------------------------------
+        # Absolute z-score for the run
+        #
+        # Measures how large the observed signal is relative to
+        # the expected noise.
+        #
+        # Absolute value is used so that amplifications and
+        # deletions are treated equally.
+        # ---------------------------------------------------------
+        return abs(mean_log2difference) / run_std_error
 
     def _label_gene_runs(gene_bins: pd.DataFrame) -> None:
         """
@@ -867,7 +890,7 @@ def _score_pon_regions(
         lambda row: _pon_abs_z(
             row["pon_region_log2_difference"],
             row["pon_mean_spread"],
-            row.get("n_targets", row.get("n.targets", np.nan)),
+            row.get("n.targets"),
             min_n=GeneRegionConfig.min_region_targets_for_call,
         ),
         axis=1,
@@ -889,7 +912,7 @@ def _score_pon_regions(
 
     # Hard gate: small regions are not eligible for PON-based interpretation
     too_small = (
-        out["n_targets"].fillna(0).astype(int)
+        out["n.targets"].fillna(0).astype(int)
         < GeneRegionConfig.min_region_targets_for_call
     )
 
@@ -1001,7 +1024,6 @@ def build_generegion_table(
             "region_id",
             "pon_region_direction",
             "cnvkit_seg_depth",
-            "n_targets",
         ],
         errors="ignore",
     )
