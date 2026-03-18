@@ -94,6 +94,15 @@ class GeneRegionConfig:
     # a loss when the signal is considered strong.
     pon_loss_lt: float = -0.07
 
+    # Neutral call string
+    pon_neutral_call = "NEUTRAL"
+
+    # Gain call string
+    pon_gain_call = "GAIN"
+
+    # Loss call string
+    pon_loss_call = "LOSS"
+
 
 @dataclass(frozen=True)
 class ChromosomePlotConfig:

@@ -167,25 +167,45 @@ def add_sex_aware_cnv_calls_from_total_cn(
 ############################
 
 
-def _pon_abs_z(effect: float, spread: float, n_targets: float, *, min_n: int) -> float:
-    """Compute abs(effect) / (spread / sqrt(n)) with defensive checks."""
-    if pd.isna(effect) or pd.isna(spread) or spread <= 0:
+def _pon_abs_z(
+    pon_region_log2_difference: float,
+    spread: float,
+    n_targets: float,
+    *,
+    min_n: int,
+) -> float:
+    """
+    Compute a PON-relative absolute z-like score for a region.
+
+    The score is defined as:
+
+        abs(pon_region_log2_difference) / (spread / sqrt(n_targets))
+
+    where:
+      - pon_region_log2_difference is the region's mean log2 deviation from
+        the PON baseline
+      - spread is the expected PON variation
+      - n_targets is the number of bins contributing to the region
+
+    Returns NaN when the input values are missing, the spread is not positive,
+    or the region is too small to score.
+    """
+    if pd.isna(pon_region_log2_difference) or pd.isna(spread) or spread <= 0:
         return np.nan
-    if pd.isna(n_targets) or n_targets < min_n:
+
+    if n_targets < min_n:
         return np.nan
-    sigma_eff = spread / np.sqrt(float(n_targets))
-    if sigma_eff <= 0:
-        return np.nan
-    return abs(effect) / sigma_eff
+
+    return abs(pon_region_log2_difference) / (spread / np.sqrt(float(n_targets)))
 
 
-def _pon_direction(effect: float) -> str:
-    """Map effect sign to 'gain'/'loss'/'neutral' (or '' when missing)."""
-    if pd.isna(effect):
+def _pon_direction(log2difference: float) -> str:
+    """Map log2difference sign to 'gain'/'loss'/'neutral' (or '' when missing)."""
+    if pd.isna(log2difference):
         return ""
-    if effect > 0:
+    if log2difference > 0:
         return "gain"
-    if effect < 0:
+    if log2difference < 0:
         return "loss"
     return "neutral"
 
@@ -201,23 +221,19 @@ def _pon_signal(z: float, *, noise_lt: float, borderline_lt: float) -> str:
     return "strong"
 
 
-def _pon_cnv_call_from_effect(
+def _pon_cnv_call_from_pon_log2_difference(
     *,
     is_strong: bool,
-    effect_log2: float,
-    gain_gt: float,
-    loss_lt: float,
-    weak_value: str,
-    neutral_value: str,
+    pon_region_log2_difference: float,
 ) -> str:
     """Return GAIN/LOSS/neutral/weak depending on deviation from PON baseline."""
-    if not is_strong or pd.isna(effect_log2):
-        return weak_value
-    if effect_log2 > gain_gt:
-        return "GAIN"
-    if effect_log2 < loss_lt:
-        return "LOSS"
-    return neutral_value
+    if not is_strong or pd.isna(pon_region_log2_difference):
+        return (GeneRegionConfig.pon_neutral_call,)
+    if pon_region_log2_difference > GeneRegionConfig.pon_gain_gt:
+        return GeneRegionConfig.pon_gain_call
+    if pon_region_log2_difference < GeneRegionConfig.pon_loss_lt:
+        return GeneRegionConfig.pon_loss_call
+    return (GeneRegionConfig.pon_neutral_call,)
 
 
 def annotate_regions_with_overlapping_segments(
@@ -474,7 +490,7 @@ def _build_genelevel_regions_without_pon(bins: pd.DataFrame) -> pd.DataFrame:
     regions_df["n.targets"] = regions_df["n_targets"]
 
     # No PON-derived region calling is possible in this mode
-    regions_df["pon_region_effect"] = np.nan
+    regions_df["pon_region_log2_difference"] = np.nan
     regions_df["pon_region_z"] = np.nan
     regions_df["pon_region_signal"] = ""
     regions_df["pon_region_indication"] = ""
@@ -492,7 +508,7 @@ def _assign_initial_gene_regions(
     consistently from the PON baseline.
 
     For each gene:
-      1. Compute per-bin effect = log2 - pon_log2
+      1. Compute per-bin log2difference = log2 - pon_log2
       2. Convert to a per-bin z-like score using pon_spread
       3. Smooth the z-scores across neighboring bins
       4. Find consecutive runs of bins with:
@@ -522,13 +538,15 @@ def _assign_initial_gene_regions(
           - taking run length into account
         """
         # Per-bin deviation from the PON baseline
-        effect = df_run["log2"].to_numpy() - df_run["pon_log2"].fillna(0.0).to_numpy()
-        if effect.size == 0:
+        log2difference = (
+            df_run["log2"].to_numpy() - df_run["pon_log2"].fillna(0.0).to_numpy()
+        )
+        if log2difference.size == 0:
             return np.nan
 
         # Average deviation across the whole run
-        mean_effect = float(np.nanmean(effect))
-        if not np.isfinite(mean_effect):
+        mean_log2difference = float(np.nanmean(log2difference))
+        if not np.isfinite(mean_log2difference):
             return np.nan
 
         # Use the mean PON spread as a rough noise estimate for the run
@@ -541,13 +559,13 @@ def _assign_initial_gene_regions(
         if not np.isfinite(mean_spread) or mean_spread <= 0:
             return np.nan
 
-        # Standard error of the mean effect across the run
-        sigma_effect = mean_spread / np.sqrt(float(len(effect)))
-        if sigma_effect <= 0:
+        # Standard error of the mean log2difference across the run
+        sigma_log2difference = mean_spread / np.sqrt(float(len(log2difference)))
+        if sigma_log2difference <= 0:
             return np.nan
 
         # Absolute run-level z-score
-        return abs(mean_effect) / sigma_effect
+        return abs(mean_log2difference) / sigma_log2difference
 
     def _label_gene_runs(gene_bins: pd.DataFrame) -> None:
         """
@@ -575,8 +593,8 @@ def _assign_initial_gene_regions(
         # back into the full output table
         bin_indices = gene_bins.index.to_numpy()
 
-        # Per-bin effect relative to PON
-        effect = (
+        # Per-bin log2 difference relative to PON
+        log2difference = (
             gene_bins["log2"].to_numpy() - gene_bins["pon_log2"].fillna(0.0).to_numpy()
         )
 
@@ -587,7 +605,7 @@ def _assign_initial_gene_regions(
         spread_safe = np.where(spread <= 0, 1e-3, spread)
 
         # Per-bin z-like deviation score
-        z_raw = effect / spread_safe
+        z_raw = log2difference / spread_safe
 
         # Smooth z across neighboring bins to reduce single-bin noise spikes
         z_smooth = (
@@ -691,16 +709,16 @@ def _merge_adjacent_gene_regions(
     1. Bridge merge (A-B-C):
        Merge three consecutive runs when:
          - the middle run has at most `config.max_bridge_bins` bins
-         - the outer runs have similar mean effect
+         - the outer runs have similar mean log2difference
            (difference <= `config.bridge_delta`)
 
     2. Small-run merge:
        Merge a run with the previous run when:
-         - their mean effects are similar
+         - their mean log2difference are similar
            (difference <= `config.merge_delta`)
          - at least one of the two runs has at most `config.small_seg_n` bins
 
-    Effect is defined as:
+    log2difference is defined as:
         log2 - pon_log2
 
     Parameters
@@ -728,11 +746,11 @@ def _merge_adjacent_gene_regions(
             List of dicts with:
               - positions: positional indices within gene_bins
               - indices: original dataframe row indices
-              - mean_eff: mean(log2 - pon_log2) over the run
-        eff_all
-            Per-bin effect array aligned to gene_bins row order.
+              - mean_log2diff: mean(log2 - pon_log2) over the run
+        log2difference_all
+            Per-bin log2difference array aligned to gene_bins row order.
         """
-        effect_all = (
+        log2difference_all = (
             gene_bins["log2"].to_numpy() - gene_bins["pon_log2"].fillna(0.0).to_numpy()
         )
         region_labels = gene_bins["region_id"].tolist()
@@ -746,8 +764,8 @@ def _merge_adjacent_gene_regions(
                 current_positions.append(pos)
             else:
                 run_indices = gene_bins.index[current_positions].tolist()
-                mean_effect = (
-                    float(np.nanmean(effect_all[current_positions]))
+                mean_log2difference = (
+                    float(np.nanmean(log2difference_all[current_positions]))
                     if current_positions
                     else np.nan
                 )
@@ -755,7 +773,7 @@ def _merge_adjacent_gene_regions(
                     {
                         "positions": current_positions,
                         "indices": run_indices,
-                        "mean_eff": mean_effect,
+                        "mean_log2diff": mean_log2difference,
                     }
                 )
                 current_label = region_labels[pos]
@@ -763,8 +781,8 @@ def _merge_adjacent_gene_regions(
 
         if current_positions:
             run_indices = gene_bins.index[current_positions].tolist()
-            mean_effect = (
-                float(np.nanmean(effect_all[current_positions]))
+            mean_log2difference = (
+                float(np.nanmean(log2difference_all[current_positions]))
                 if current_positions
                 else np.nan
             )
@@ -772,11 +790,11 @@ def _merge_adjacent_gene_regions(
                 {
                     "positions": current_positions,
                     "indices": run_indices,
-                    "mean_eff": mean_effect,
+                    "mean_log2diff": mean_log2difference,
                 }
             )
 
-        return runs, effect_all
+        return runs, log2difference_all
 
     def _merge_gene_runs(gene_bins: pd.DataFrame) -> None:
         """
@@ -786,7 +804,7 @@ def _merge_adjacent_gene_regions(
             return
 
         gene_bins = gene_bins.sort_values("start", kind="stable")
-        runs, effect_all = _collect_gene_runs(gene_bins)
+        runs, log2difference_all = _collect_gene_runs(gene_bins)
 
         if len(runs) <= 1:
             return
@@ -805,9 +823,9 @@ def _merge_adjacent_gene_regions(
 
                 if (
                     len(run_b["indices"]) <= config.max_bridge_bins
-                    and np.isfinite(run_a["mean_eff"])
-                    and np.isfinite(run_c["mean_eff"])
-                    and abs(run_a["mean_eff"] - run_c["mean_eff"])
+                    and np.isfinite(run_a["mean_log2diff"])
+                    and np.isfinite(run_c["mean_log2diff"])
+                    and abs(run_a["mean_log2diff"] - run_c["mean_log2diff"])
                     <= config.bridge_delta
                 ):
                     merged_positions = (
@@ -816,8 +834,8 @@ def _merge_adjacent_gene_regions(
                     merged_indices = (
                         run_a["indices"] + run_b["indices"] + run_c["indices"]
                     )
-                    merged_mean_eff = (
-                        float(np.nanmean(effect_all[merged_positions]))
+                    merged_mean_log2difference = (
+                        float(np.nanmean(log2difference_all[merged_positions]))
                         if merged_positions
                         else np.nan
                     )
@@ -826,7 +844,7 @@ def _merge_adjacent_gene_regions(
                         {
                             "positions": merged_positions,
                             "indices": merged_indices,
-                            "mean_eff": merged_mean_eff,
+                            "mean_log2diff": merged_mean_log2difference,
                         }
                     )
                     i += 3
@@ -841,9 +859,11 @@ def _merge_adjacent_gene_regions(
                 previous_run = merged_runs[-1]
 
                 should_merge = (
-                    np.isfinite(current_run["mean_eff"])
-                    and np.isfinite(previous_run["mean_eff"])
-                    and abs(current_run["mean_eff"] - previous_run["mean_eff"])
+                    np.isfinite(current_run["mean_log2diff"])
+                    and np.isfinite(previous_run["mean_log2diff"])
+                    and abs(
+                        current_run["mean_log2diff"] - previous_run["mean_log2diff"]
+                    )
                     <= config.merge_delta
                     and (
                         len(current_run["indices"]) <= config.small_segment_max_bins
@@ -856,8 +876,8 @@ def _merge_adjacent_gene_regions(
                         previous_run["positions"] + current_run["positions"]
                     )
                     merged_indices = previous_run["indices"] + current_run["indices"]
-                    merged_mean_eff = (
-                        float(np.nanmean(effect_all[merged_positions]))
+                    merged_mean_log2difference = (
+                        float(np.nanmean(log2difference_all[merged_positions]))
                         if merged_positions
                         else np.nan
                     )
@@ -865,7 +885,7 @@ def _merge_adjacent_gene_regions(
                     merged_runs[-1] = {
                         "positions": merged_positions,
                         "indices": merged_indices,
-                        "mean_eff": merged_mean_eff,
+                        "mean_log2diff": merged_mean_log2difference,
                     }
                 else:
                     merged_runs.append(current_run)
@@ -908,14 +928,14 @@ def _score_pon_regions(
     config: GeneRegionConfig,
 ) -> pd.DataFrame:
     """
-    Compute PON-based effect, z-score, signal class, and CNV indication
+    Compute PON-based log2 difference, z-score, signal class, and CNV indication
     for each gene-region.
 
     Scoring is based on deviation from the PON baseline:
 
-        pon_region_effect = mean_log2 - pon_mean_log2
+        pon_region_log2_difference = mean_log2 - pon_mean_log2
 
-    The absolute effect is converted into a z-like score using the mean
+    The absolute PON log2 difference is converted into a z-like score using the mean
     PON spread and the number of bins in the region. Regions with too few
     targets are not eligible for PON-based calls.
 
@@ -930,7 +950,7 @@ def _score_pon_regions(
     -------
     pd.DataFrame
         Copy of `regions_df` with added columns:
-            pon_region_effect
+            pon_region_log2_difference
             pon_region_z
             pon_region_direction
             pon_region_signal
@@ -939,12 +959,12 @@ def _score_pon_regions(
     out = regions_df.copy()
 
     # Mean deviation from the PON baseline
-    out["pon_region_effect"] = out["mean_log2"] - out["pon_mean_log2"]
+    out["pon_region_log2_difference"] = out["mean_log2"] - out["pon_mean_log2"]
 
     # Region-level z-score using target count as effective sample size
     out["pon_region_z"] = out.apply(
         lambda row: _pon_abs_z(
-            row["pon_region_effect"],
+            row["pon_region_log2_difference"],
             row["pon_mean_spread"],
             row.get("n_targets", row.get("n.targets", np.nan)),
             min_n=config.min_region_targets_for_call,
@@ -953,7 +973,9 @@ def _score_pon_regions(
     )
 
     # Direction of deviation relative to PON baseline
-    out["pon_region_direction"] = out["pon_region_effect"].apply(_pon_direction)
+    out["pon_region_direction"] = out["pon_region_log2_difference"].apply(
+        _pon_direction
+    )
 
     # Qualitative signal class from z-score
     out["pon_region_signal"] = out["pon_region_z"].apply(
@@ -975,13 +997,9 @@ def _score_pon_regions(
     # Only eligible regions can receive a gain/loss indication
     eligible = ~too_small
     out.loc[eligible, "pon_region_indication"] = out.loc[eligible].apply(
-        lambda row: _pon_cnv_call_from_effect(
+        lambda row: _pon_cnv_call_from_pon_log2_difference(
             is_strong=str(row.get("pon_region_signal", "")).strip().lower() == "strong",
-            effect_log2=row.get("pon_region_effect", np.nan),
-            gain_gt=config.pon_gain_gt,
-            loss_lt=config.pon_loss_lt,
-            weak_value="NEUTRAL",
-            neutral_value="NEUTRAL",
+            pon_region_log2_difference=row.get("pon_region_log2_difference", np.nan),
         ),
         axis=1,
     )
