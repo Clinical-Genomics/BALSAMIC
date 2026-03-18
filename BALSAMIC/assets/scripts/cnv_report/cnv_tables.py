@@ -956,8 +956,8 @@ def create_generegions(
       - leave PON-derived outputs empty
     """
     bins = annotate_cnr_bins_with_pon(
-            cnr_df=cnr_df,
-            pon_df=pon_df,
+        cnr_df=cnr_df,
+        pon_df=pon_df,
     )
 
     bins = _assign_initial_gene_regions(bins)
@@ -1044,6 +1044,7 @@ def build_generegion_table(
 # SEGMENT LEVEL
 ############################
 
+
 def add_overlapping_genes_from_bins(
     seg_df: pd.DataFrame,
     cnr_df: pd.DataFrame,
@@ -1074,7 +1075,6 @@ def add_overlapping_genes_from_bins(
 
     # Work per chromosome
     for chrom, seg_g in out.groupby("chr", sort=False):
-
         bins_g = cnr_df[cnr_df["chr"] == chrom].copy()
 
         bins_g = bins_g.sort_values("start", kind="stable").reset_index(drop=True)
