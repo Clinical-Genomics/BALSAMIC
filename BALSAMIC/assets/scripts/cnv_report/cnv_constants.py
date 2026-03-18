@@ -194,7 +194,7 @@ GENE_REGION_COLUMN_DESCRIPTIONS = {
     "gene.symbol": "HGNC gene symbol.",
     "is_cancer_gene": "True if the gene is included in the configured cancer gene set.",
     # --- Bin aggregation metrics ---
-    "n.targets": "Number of target bins contributing to this gene region. (genes may be split up across multiple rows if PON indicates the presence of within gene GAIN or LOSS)",
+    "n.targets": "Number of target bins in this gene region. Genes are split into multiple rows when log2 ratios relative to the PON suggest distinct within-gene copy number segments (GAIN or LOSS).",
     "mean_log2": f"Mean log2 copy number log2 ratio across bins overlapping the gene region. {not_pnp}",
     "min_log2": f"Minimum log2 copy number log2 ratio observed among bins in the gene region. {not_pnp}",
     "max_log2": f"Maximum log2 copy number log2-ratio observed among bins in the gene region. {not_pnp}",
