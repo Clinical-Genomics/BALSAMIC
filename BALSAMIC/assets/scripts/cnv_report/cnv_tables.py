@@ -352,7 +352,7 @@ def _pick_best_overlapping_segment(
 
 def annotate_cnr_bins_with_pon(
     cnr_df: pd.DataFrame,
-    pon_df: pd.DataFrame | None,
+    pon_df: pd.DataFrame,
 ) -> pd.DataFrame:
     """
     Attach selected PON columns to exploded CNR bins using exact bin-key matching.
@@ -365,13 +365,10 @@ def annotate_cnr_bins_with_pon(
     None, the filtered CNR table is returned unchanged.
     """
     cnr = cnr_df.copy()
-    pon = pon_df.copy() if pon_df is not None else None
+    pon = pon_df.copy()
 
     g_cnr = cnr["gene.symbol"]
     cnr = cnr.loc[g_cnr.ne("backbone")].copy()
-
-    if pon is None:
-        return cnr
 
     g_pon = pon["gene.symbol"].astype("string").str.strip()
     pon = pon.loc[g_pon.ne("backbone")].copy()
@@ -408,76 +405,31 @@ def _aggregate_gene_regions(bins: pd.DataFrame) -> pd.DataFrame:
     )
 
 
-def _prepare_generegion_bins(
-    cnr_df: pd.DataFrame,
-    pon_df: pd.DataFrame | None,
-    *,
-    key_cols: tuple[str, str, str, str] = ("chr", "start", "end", "gene.symbol"),
-) -> pd.DataFrame:
-    """
-    Prepare per-bin input table for gene-region construction.
-
-    If PON data is available, merge sample bins with matching PON bins on the
-    genomic bin key. If no PON is available, return the sample bins unchanged
-    but add empty PON columns so downstream code can use a uniform schema.
-
-    Parameters
-    ----------
-    cnr_df
-        Expanded sample bin table.
-    pon_df
-        Expanded PON bin table, or None.
-    key_cols
-        Columns used to match sample bins to PON bins.
-
-    Returns
-    -------
-    pd.DataFrame
-        Sorted bin table with guaranteed columns:
-            chr, gene.symbol, start, end, log2, pon_log2, pon_spread
-    """
-
-    has_pon = pon_df is not None and not pon_df.empty
-
-    if has_pon:
-        bins = annotate_cnr_bins_with_pon(
-            cnr_df=cnr_df,
-            pon_df=pon_df,
-            key_cols=key_cols,
+def _aggregate_gene_bins(bins: pd.DataFrame) -> pd.DataFrame:
+    """Aggregate bin-level rows to one row per gene-region."""
+    return (
+        bins.groupby(["chr", "gene.symbol"], as_index=False)
+        .agg(
+            region_start=("start", "min"),
+            region_end=("end", "max"),
+            n_targets=("log2", "count"),
+            mean_log2=("log2", "mean"),
+            min_log2=("log2", "min"),
+            max_log2=("log2", "max"),
         )
-    else:
-        bins = cnr_df.copy()
-
-        # Ensure downstream code can rely on these columns existing
-        if "pon_log2" not in bins.columns:
-            bins["pon_log2"] = np.nan
-        if "pon_spread" not in bins.columns:
-            bins["pon_spread"] = np.nan
-
-    bins = bins.sort_values(
-        ["chr", "gene.symbol", "start"],
-        kind="stable",
-    ).reset_index(drop=True)
-
-    return bins
+        .copy()
+    )
 
 
-def _build_genelevel_regions_without_pon(bins: pd.DataFrame) -> pd.DataFrame:
+def build_genelevel_regions_without_pon(bins: pd.DataFrame) -> pd.DataFrame:
     """
     Build one gene-level region per gene when no PON is available.
     """
     gene_bins = bins.copy()
-    gene_bins["region_id"] = "genelevel"
 
-    regions_df = _aggregate_gene_regions(gene_bins)
+    regions_df = _aggregate_gene_bins(gene_bins)
 
     regions_df["n.targets"] = regions_df["n_targets"]
-
-    # No PON-derived region calling is possible in this mode
-    regions_df["pon_region_log2_difference"] = np.nan
-    regions_df["pon_region_z"] = np.nan
-    regions_df["pon_region_signal"] = ""
-    regions_df["pon_region_indication"] = ""
 
     return regions_df
 
@@ -990,7 +942,7 @@ def _score_pon_regions(
 
 def create_generegions(
     cnr_df: pd.DataFrame,
-    pon_df: pd.DataFrame | None = None,
+    pon_df: pd.DataFrame,
 ) -> pd.DataFrame:
     """
     Build gene-region summary table from CNR bins.
@@ -1003,10 +955,10 @@ def create_generegions(
       - return one gene-level row per gene
       - leave PON-derived outputs empty
     """
-    bins = _prepare_generegion_bins(cnr_df=cnr_df, pon_df=pon_df)
-
-    if pon_df is None or pon_df.empty:
-        return _build_genelevel_regions_without_pon(bins)
+    bins = annotate_cnr_bins_with_pon(
+            cnr_df=cnr_df,
+            pon_df=pon_df,
+    )
 
     bins = _assign_initial_gene_regions(bins)
     bins = _merge_adjacent_gene_regions(bins)
@@ -1033,7 +985,10 @@ def build_generegion_table(
     cancer_genes = cancer_genes or set()
 
     # If no PON exists, just merge CNR BINS per gene level
-    regions_df = create_generegions(cnr_df=cnr_df, pon_df=pon_df)
+    if pon_df is None:
+        regions_df = build_genelevel_regions_without_pon(cnr_df)
+    else:
+        regions_df = create_generegions(cnr_df=cnr_df, pon_df=pon_df)
 
     # Annotate with CNVkit segments
     regions_df = annotate_regions_with_overlapping_segments(
@@ -1088,6 +1043,7 @@ def build_generegion_table(
 ############################
 # SEGMENT LEVEL
 ############################
+
 def add_overlapping_genes_from_bins(
     seg_df: pd.DataFrame,
     cnr_df: pd.DataFrame,
@@ -1096,48 +1052,21 @@ def add_overlapping_genes_from_bins(
     out_targets_col: str = "n.targets",
     min_targets: int = 2,
     cancer_genes: set[str] | None = None,
-    drop_genes: set[str] | None = None,
-    # which bins count as "targets" for n.targets
-    target_drop_genes: set[str] | None = None,
 ) -> pd.DataFrame:
     """
     For each segment row (chr/start/end), find overlapping CNVkit bins in cnr_df and:
-      1) add comma-separated gene list in `genes_col` (genes w/ >= min_targets bins)
-      2) add `out_targets_col` = number of UNIQUE overlapping *target* bins
+      1) add comma-separated gene list in `genes_col`
+      2) add `out_targets_col` = number of UNIQUE overlapping bins
 
-    Notes:
-      - cnr_df is typically exploded by gene.symbol, so `out_targets_col` counts unique bins
-        by (chr,start,end) to avoid overcounting.
-      - `drop_genes` affects the gene list.
-      - `target_drop_genes` affects counting targets (defaults to drop_genes if not provided).
+    Notes
+    -----
+    - `cnr_df` is typically exploded by gene.symbol, so `out_targets_col` counts
+      unique bins by (chr, start, end) to avoid overcounting.
+    - The gene list excludes "backbone".
+    - Only genes with at least `min_targets` overlapping bins are included.
+    - If `cancer_genes` is provided, only those genes are shown in the gene list.
     """
     out = seg_df.copy()
-
-    # Normalize segment types
-    out["chr"] = out["chr"].astype("string")
-    out["start"] = pd.to_numeric(out["start"], errors="coerce").astype("Int64")
-    out["end"] = pd.to_numeric(out["end"], errors="coerce").astype("Int64")
-
-    bins = cnr_df.copy()
-    bins["chr"] = bins["chr"].astype("string")
-    bins["start"] = pd.to_numeric(bins["start"], errors="coerce").astype("Int64")
-    bins["end"] = pd.to_numeric(bins["end"], errors="coerce").astype("Int64")
-    bins["gene.symbol"] = bins["gene.symbol"].astype("string")
-
-    # Drop unusable rows early
-    out = out.dropna(subset=["chr", "start", "end"]).copy()
-    bins = bins.dropna(subset=["chr", "start", "end", "gene.symbol"]).copy()
-
-    # normalize drop sets (lowercase)
-    drop_set: set[str] = set()
-    if drop_genes:
-        drop_set = {str(g).strip().lower() for g in drop_genes if str(g).strip()}
-
-    target_drop_set: set[str] = set(drop_set)
-    if target_drop_genes is not None:
-        target_drop_set = {
-            str(g).strip().lower() for g in target_drop_genes if str(g).strip()
-        }
 
     # Prepare output columns
     out[genes_col] = ""
@@ -1145,18 +1074,14 @@ def add_overlapping_genes_from_bins(
 
     # Work per chromosome
     for chrom, seg_g in out.groupby("chr", sort=False):
-        bins_g = bins[bins["chr"] == chrom].copy()
-        if bins_g.empty:
-            continue
+
+        bins_g = cnr_df[cnr_df["chr"] == chrom].copy()
 
         bins_g = bins_g.sort_values("start", kind="stable").reset_index(drop=True)
 
         b_start = bins_g["start"].to_numpy(dtype=np.int64, copy=False)
         b_end = bins_g["end"].to_numpy(dtype=np.int64, copy=False)
         b_gene = bins_g["gene.symbol"].to_numpy(dtype=object, copy=False)
-        # for unique-bin counting (avoid exploded overcount)
-        b_key_start = b_start
-        b_key_end = b_end
 
         seg_idx = seg_g.index.to_numpy()
         s_start = seg_g["start"].to_numpy(dtype=np.int64, copy=False)
@@ -1172,57 +1097,43 @@ def add_overlapping_genes_from_bins(
             if cut == 0:
                 continue
 
-            cand_ends = b_end[:cut]
-            mask = cand_ends > lo
+            mask = b_end[:cut] > lo
             if not np.any(mask):
                 continue
 
-            # ----------------------------
-            # (A) n.targets = unique bins overlapping, excluding backbone etc
-            # ----------------------------
+            # ------------------------------------------------------
+            # (A) n.targets = all UNIQUE overlapping bins in segment
+            # ------------------------------------------------------
+            starts = b_start[:cut][mask]
+            ends = b_end[:cut][mask]
+            uniq_bins = np.unique(np.stack([starts, ends], axis=1), axis=0)
+            out.at[row_idx, out_targets_col] = int(uniq_bins.shape[0])
+
+            # ------------------------------------------------------
+            # (B) gene list = overlapping genes, excluding backbone,
+            #     keeping only genes with >= min_targets bins
+            # ------------------------------------------------------
             genes_overlap = (
                 pd.Series(b_gene[:cut][mask], dtype="string").fillna("").astype(str)
             )
-            if target_drop_set:
-                keep_targets = (
-                    ~genes_overlap.str.strip().str.lower().isin(target_drop_set)
-                )
-            else:
-                keep_targets = genes_overlap.ne("")
+            genes_overlap = genes_overlap[genes_overlap.str.strip().ne("")]
 
-            if keep_targets.any():
-                # (A) n.targets = number of UNIQUE bins overlapping this segment (no exclusions)
-                starts = b_key_start[:cut][mask]
-                ends = b_key_end[:cut][mask]
-
-                # unique (start,end) pairs => unique bins
-                uniq = np.unique(np.stack([starts, ends], axis=1), axis=0)
-                out.at[row_idx, out_targets_col] = int(uniq.shape[0])
-
-            # ----------------------------
-            # (B) gene list (>= min_targets bins per gene) with optional cancer restriction
-            # ----------------------------
-            genes_for_list = genes_overlap
-
-            if drop_set:
-                genes_for_list = genes_for_list[
-                    ~genes_for_list.str.strip().str.lower().isin(drop_set)
-                ]
+            genes_overlap = genes_overlap[
+                ~genes_overlap.str.strip().str.lower().eq("backbone")
+            ]
 
             if cancer_genes:
-                cancer_set = {str(g).strip() for g in cancer_genes if str(g).strip()}
-                if cancer_set:
-                    genes_for_list = genes_for_list[genes_for_list.isin(cancer_set)]
+                genes_overlap = genes_overlap[genes_overlap.isin(cancer_genes)]
 
-            if genes_for_list.empty:
+            if genes_overlap.empty:
                 continue
 
-            vc = genes_for_list.value_counts(dropna=True)
-            vc = vc[vc >= min_targets]
-            if vc.empty:
+            counts = genes_overlap.value_counts(dropna=True)
+            counts = counts[counts >= min_targets]
+            if counts.empty:
                 continue
 
-            gene_list = sorted(vc.index.astype(str).tolist())
+            gene_list = sorted(counts.index.astype(str).tolist())
             out.at[row_idx, genes_col] = ",".join(gene_list)
 
     return out
@@ -1360,7 +1271,6 @@ def build_segment_table(
         genes_col="gene.symbol",
         min_targets=2,
         cancer_genes=cancer_genes if is_exome else None,
-        drop_genes={"backbone"},
     )
     segments = add_sex_aware_cnv_calls_from_total_cn(
         segments, sex=sex
