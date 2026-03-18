@@ -500,8 +500,6 @@ def _build_genelevel_regions_without_pon(bins: pd.DataFrame) -> pd.DataFrame:
 
 def _assign_initial_gene_regions(
     bins: pd.DataFrame,
-    *,
-    config: GeneRegionConfig,
 ) -> pd.DataFrame:
     """
     Assign provisional gene-region IDs based on runs of bins that deviate
@@ -579,7 +577,7 @@ def _assign_initial_gene_regions(
         nonlocal next_region_id
 
         # Skip tiny genes: too few bins to robustly call regions
-        if gene_bins.shape[0] < config.min_gene_targets:
+        if gene_bins.shape[0] < GeneRegionConfig.min_gene_targets:
             return
 
         # Skip genes where there is no usable PON spread at all
@@ -611,7 +609,7 @@ def _assign_initial_gene_regions(
         z_smooth = (
             pd.Series(z_raw, index=gene_bins.index)
             .rolling(
-                window=config.smooth_window,
+                window=GeneRegionConfig.smooth_window,
                 center=True,
                 min_periods=1,
             )
@@ -638,7 +636,7 @@ def _assign_initial_gene_regions(
             nonlocal next_region_id
 
             # Ignore short runs
-            if len(run_indices) < config.min_run_bins:
+            if len(run_indices) < GeneRegionConfig.min_run_bins:
                 return
 
             # Re-evaluate the whole run as one region
@@ -646,7 +644,7 @@ def _assign_initial_gene_regions(
             run_z = _run_abs_z(df_run)
 
             # Ignore weak or invalid runs
-            if not np.isfinite(run_z) or run_z < config.z_run_thresh:
+            if not np.isfinite(run_z) or run_z < GeneRegionConfig.z_run_thresh:
                 return
 
             # Assign a provisional region label to all bins in the run
@@ -662,7 +660,7 @@ def _assign_initial_gene_regions(
         # ------------------------------------------------------------------
         for bin_index, z_value in zip(bin_indices, z_smooth):
             # Weak or invalid bins cannot belong to a provisional region
-            if not np.isfinite(z_value) or abs(z_value) < config.z_bin_thresh:
+            if not np.isfinite(z_value) or abs(z_value) < GeneRegionConfig.z_bin_thresh:
                 if current_run:
                     _finalize_run(current_run)
                     current_run = []
@@ -695,8 +693,6 @@ def _assign_initial_gene_regions(
 
 def _merge_adjacent_gene_regions(
     bins: pd.DataFrame,
-    *,
-    config: GeneRegionConfig,
 ) -> pd.DataFrame:
     """
     Merge adjacent provisional gene regions within each gene.
@@ -822,11 +818,11 @@ def _merge_adjacent_gene_regions(
                 run_c = runs[i + 2]
 
                 if (
-                    len(run_b["indices"]) <= config.max_bridge_bins
+                    len(run_b["indices"]) <= GeneRegionConfig.max_bridge_bins
                     and np.isfinite(run_a["mean_log2diff"])
                     and np.isfinite(run_c["mean_log2diff"])
                     and abs(run_a["mean_log2diff"] - run_c["mean_log2diff"])
-                    <= config.bridge_delta
+                    <= GeneRegionConfig.bridge_delta
                 ):
                     merged_positions = (
                         run_a["positions"] + run_b["positions"] + run_c["positions"]
@@ -864,10 +860,12 @@ def _merge_adjacent_gene_regions(
                     and abs(
                         current_run["mean_log2diff"] - previous_run["mean_log2diff"]
                     )
-                    <= config.merge_delta
+                    <= GeneRegionConfig.merge_delta
                     and (
-                        len(current_run["indices"]) <= config.small_segment_max_bins
-                        or len(previous_run["indices"]) <= config.small_segment_max_bins
+                        len(current_run["indices"])
+                        <= GeneRegionConfig.small_segment_max_bins
+                        or len(previous_run["indices"])
+                        <= GeneRegionConfig.small_segment_max_bins
                     )
                 )
 
@@ -924,8 +922,6 @@ def _collapse_bins_to_gene_regions(bins: pd.DataFrame) -> pd.DataFrame:
 
 def _score_pon_regions(
     regions_df: pd.DataFrame,
-    *,
-    config: GeneRegionConfig,
 ) -> pd.DataFrame:
     """
     Compute PON-based log2 difference, z-score, signal class, and CNV indication
@@ -967,7 +963,7 @@ def _score_pon_regions(
             row["pon_region_log2_difference"],
             row["pon_mean_spread"],
             row.get("n_targets", row.get("n.targets", np.nan)),
-            min_n=config.min_region_targets_for_call,
+            min_n=GeneRegionConfig.min_region_targets_for_call,
         ),
         axis=1,
     )
@@ -981,14 +977,15 @@ def _score_pon_regions(
     out["pon_region_signal"] = out["pon_region_z"].apply(
         lambda z: _pon_signal(
             z,
-            noise_lt=config.pon_signal_noise_lt,
-            borderline_lt=config.pon_signal_borderline_lt,
+            noise_lt=GeneRegionConfig.pon_signal_noise_lt,
+            borderline_lt=GeneRegionConfig.pon_signal_borderline_lt,
         )
     )
 
     # Hard gate: small regions are not eligible for PON-based interpretation
     too_small = (
-        out["n_targets"].fillna(0).astype(int) < config.min_region_targets_for_call
+        out["n_targets"].fillna(0).astype(int)
+        < GeneRegionConfig.min_region_targets_for_call
     )
 
     out.loc[too_small, "pon_region_signal"] = ""
@@ -1010,8 +1007,6 @@ def _score_pon_regions(
 def create_generegions(
     cnr_df: pd.DataFrame,
     pon_df: pd.DataFrame | None = None,
-    *,
-    config: GeneRegionConfig = GeneRegionConfig(),
 ) -> pd.DataFrame:
     """
     Build gene-region summary table from CNR bins.
@@ -1029,11 +1024,11 @@ def create_generegions(
     if pon_df is None or pon_df.empty:
         return _build_genelevel_regions_without_pon(bins)
 
-    bins = _assign_initial_gene_regions(bins, config=config)
-    bins = _merge_adjacent_gene_regions(bins, config=config)
+    bins = _assign_initial_gene_regions(bins)
+    bins = _merge_adjacent_gene_regions(bins)
 
     regions_df = _collapse_bins_to_gene_regions(bins)
-    regions_df = _score_pon_regions(regions_df, config=config)
+    regions_df = _score_pon_regions(regions_df)
     return regions_df
 
 
