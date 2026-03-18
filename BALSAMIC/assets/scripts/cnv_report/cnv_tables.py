@@ -350,26 +350,24 @@ def _pick_best_overlapping_segment(
     return overlapping_segs.iloc[best_idx]
 
 
-def merge_cnr_with_pon(
+def annotate_cnr_bins_with_pon(
     cnr_df: pd.DataFrame,
     pon_df: pd.DataFrame | None,
-    *,
-    key_cols: tuple[str, str, str, str] = ("chr", "start", "end", "gene.symbol"),
-    pon_cols: list[str] | None = None,
 ) -> pd.DataFrame:
     """
-    Merge exploded CNR bins with exploded PON bins on (chr,start,end,gene.symbol).
+    Attach selected PON columns to exploded CNR bins using exact bin-key matching.
 
-    - Drops backbone rows from both.
-    - De-duplicates PON on the merge key to avoid many-to-many inflation.
-    - Keeps CNR rows even if PON is missing (left join).
+    Both inputs are expected to already be expanded on `gene.symbol`. Rows are
+    matched on `(chr, start, end, gene.symbol)`, and matching PON columns are
+    appended to the CNR rows.
 
-    If pon_cols is given, only those PON columns (plus the key) are merged in.
+    Backbone rows are removed from both inputs before matching. If `pon_df` is
+    None, the filtered CNR table is returned unchanged.
     """
     cnr = cnr_df.copy()
     pon = pon_df.copy() if pon_df is not None else None
 
-    g_cnr = cnr["gene.symbol"].astype("string").str.strip()
+    g_cnr = cnr["gene.symbol"]
     cnr = cnr.loc[g_cnr.ne("backbone")].copy()
 
     if pon is None:
@@ -378,20 +376,17 @@ def merge_cnr_with_pon(
     g_pon = pon["gene.symbol"].astype("string").str.strip()
     pon = pon.loc[g_pon.ne("backbone")].copy()
 
-    # Choose which PON columns to bring (prevents collisions like log2/depth/etc.)
-    key = list(key_cols)
-    if pon_cols is not None:
-        keep = [c for c in (key + pon_cols) if c in pon.columns]
-        pon = pon[keep].copy()
+    merge_columns = ["chr", "start", "end", "gene.symbol"]
+    pon_cols = ["pon_log2", "pon_spread"]
 
-    # Ensure PON is unique per key (critical for stable merge)
-    pon = pon.drop_duplicates(subset=key)
+    keep = [c for c in (merge_columns + pon_cols) if c in pon.columns]
+    pon = pon[keep].copy()
 
     return cnr.merge(
         pon,
         how="left",
-        on=key,
-        validate="many_to_one",  # cnr may repeat; pon must be unique per key
+        on=merge_columns,
+        validate="many_to_one",
     )
 
 
@@ -442,15 +437,13 @@ def _prepare_generegion_bins(
             chr, gene.symbol, start, end, log2, pon_log2, pon_spread
     """
 
-    pon_cols = ["pon_log2", "pon_spread"]
     has_pon = pon_df is not None and not pon_df.empty
 
     if has_pon:
-        bins = merge_cnr_with_pon(
+        bins = annotate_cnr_bins_with_pon(
             cnr_df=cnr_df,
             pon_df=pon_df,
             key_cols=key_cols,
-            pon_cols=pon_cols,
         )
     else:
         bins = cnr_df.copy()
