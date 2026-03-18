@@ -56,6 +56,7 @@ def collect_qc_metrics(
     metrics = get_multiqc_metrics(config, multiqc_data)
 
     # Remove GC_DROPOUT and AT_DROPOUT from multiqc_picard_gcbias
+    # reason: WGS produces this metric from two tools, and we prefer hsmetrics as we have more experience with it
     metrics = [
         metric
         for metric in metrics
