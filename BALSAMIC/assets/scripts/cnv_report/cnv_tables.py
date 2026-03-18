@@ -222,7 +222,6 @@ def _pon_signal(z: float, *, noise_lt: float, borderline_lt: float) -> str:
 
 
 def _pon_cnv_call_from_pon_log2_difference(
-    *,
     is_strong: bool,
     pon_region_log2_difference: float,
 ) -> str:
@@ -240,11 +239,6 @@ def annotate_regions_with_overlapping_segments(
     regions_df: pd.DataFrame,
     segs_df: pd.DataFrame,
     field_map: Mapping[str, str] | None = None,
-    *,
-    region_chr_col: str = "chr",
-    region_start_col: str = "region_start",
-    region_end_col: str = "region_end",
-    seg_chr_col: str = "chr",
     seg_start_col: str = "start",
     seg_end_col: str = "end",
 ) -> pd.DataFrame:
@@ -256,13 +250,18 @@ def annotate_regions_with_overlapping_segments(
     """
     out = regions_df.copy()
 
+    # Stable column names
+    region_chr_col: str = "chr"
+    region_start_col: str = "region_start"
+    region_end_col: str = "region_end"
+    seg_chr_col: str = "chr"
+
     # Keep only fields present in segs_df
     field_map = {src: dst for src, dst in field_map.items() if src in segs_df.columns}
 
-    # Per-chrom map for speed
+    # Per-chromosome lookup for repeated access inside the region loop
     segs_by_chr: dict[str, pd.DataFrame] = {
-        str(ch): df.reset_index(drop=True)
-        for ch, df in segs_df.groupby(seg_chr_col, sort=False)
+        str(ch): df for ch, df in segs_df.groupby(seg_chr_col, sort=False)
     }
 
     # Ensure destination columns exist
@@ -298,65 +297,57 @@ def _pick_best_overlapping_segment(
     segs_chr: pd.DataFrame,
     region_start: float,
     region_end: float,
-    *,
     seg_start_col: str = "start",
     seg_end_col: str = "end",
 ) -> pd.Series | None:
-    """Return the segment row (Series) with max bp overlap vs region, or None."""
+    """
+    Return the segment with the largest base-pair overlap with a region.
+
+    The function scans all segments on a chromosome and selects the one whose
+    genomic interval overlaps the region (region_start, region_end) by the
+    greatest number of base pairs.
+
+    Overlap length is computed as:
+
+        overlap = min(segment_end, region_end) - max(segment_start, region_start)
+
+    Only segments with positive overlap are considered.
+
+    Parameters
+    ----------
+    segs_chr
+        DataFrame containing segment intervals for a single chromosome.
+    region_start
+        Start coordinate of the region of interest.
+    region_end
+        End coordinate of the region of interest.
+    seg_start_col
+        Column name containing segment start coordinates.
+    seg_end_col
+        Column name containing segment end coordinates.
+
+    Returns
+    -------
+    pd.Series | None
+        The row corresponding to the segment with the largest overlap with the
+        region. Returns None if no segments overlap the region.
+    """
+
     if segs_chr is None or segs_chr.empty:
         return None
-    if pd.isna(region_start) or pd.isna(region_end):
-        return None
 
-    mask = (segs_chr[seg_end_col] > region_start) & (
+    overlaps = (segs_chr[seg_end_col] > region_start) & (
         segs_chr[seg_start_col] < region_end
     )
-    if not mask.any():
+    if not overlaps.any():
         return None
 
-    ssub = segs_chr.loc[mask]
-    ov0 = np.maximum(ssub[seg_start_col].to_numpy(), region_start)
-    ov1 = np.minimum(ssub[seg_end_col].to_numpy(), region_end)
-    best = int((ov1 - ov0).argmax())
-    return ssub.iloc[best]
-
-
-def annotate_regions_with_cnvkit_segments(
-    regions_df: pd.DataFrame,
-    cns_df: pd.DataFrame,
-    prefix: str = "cnvkit_",
-) -> pd.DataFrame:
-    seg_start = f"{prefix}seg_start"
-    seg_end = f"{prefix}seg_end"
-
-    field_map = {c: c for c in cns_df.columns if c.startswith(prefix)}
-
-    return annotate_regions_with_overlapping_segments(
-        regions_df,
-        cns_df,
-        field_map=field_map,
-        seg_start_col=seg_start,
-        seg_end_col=seg_end,
-    )
-
-
-def annotate_regions_with_purecn_lohregions(
-    regions_df: pd.DataFrame,
-    lohregions_df: pd.DataFrame,
-    prefix: str = "purecn_",
-) -> pd.DataFrame:
-    seg_start = f"{prefix}seg_start"
-    seg_end = f"{prefix}seg_end"
-
-    field_map = {c: c for c in lohregions_df.columns if c.startswith(prefix)}
-
-    return annotate_regions_with_overlapping_segments(
-        regions_df,
-        lohregions_df,
-        field_map=field_map,
-        seg_start_col=seg_start,
-        seg_end_col=seg_end,
-    )
+    overlapping_segs = segs_chr.loc[overlaps]
+    overlap_start = np.maximum(overlapping_segs[seg_start_col].to_numpy(), region_start)
+    overlap_end = np.minimum(overlapping_segs[seg_end_col].to_numpy(), region_end)
+    overlap_lengths = overlap_end - overlap_start
+    best_idx = int(overlap_lengths.argmax())
+    return overlapping_segs.iloc[best_idx]
 
 
 def merge_cnr_with_pon(
@@ -1054,10 +1045,24 @@ def build_generegion_table(
     # Annotate with CNVkit segments
     regions_df = annotate_regions_with_cnvkit_segments(regions_df, cns_df)
 
+    regions_df = annotate_regions_with_overlapping_segments(
+        regions_df,
+        cns_df,
+        field_map={c: c for c in cns_df.columns if c.startswith("cnvkit_")},
+        seg_start_col="cnvkit_seg_start",
+        seg_end_col="cnvkit_seg_end",
+    )
+
     # Attach PureCN LOHregions (optional)
     if loh_segments_df is not None and not loh_segments_df.empty:
-        regions_df = annotate_regions_with_purecn_lohregions(
-            regions_df, loh_segments_df
+        regions_df = annotate_regions_with_overlapping_segments(
+            regions_df,
+            loh_segments_df,
+            field_map={
+                c: c for c in loh_segments_df.columns if c.startswith("purecn_")
+            },
+            seg_start_col=f"purecn_seg_start",
+            seg_end_col=f"purecn_seg_end",
         )
 
     regions_df["is_cancer_gene"] = regions_df["gene.symbol"].isin(cancer_genes)
