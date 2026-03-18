@@ -394,7 +394,7 @@ def _aggregate_gene_regions(bins: pd.DataFrame) -> pd.DataFrame:
         .agg(
             region_start=("start", "min"),
             region_end=("end", "max"),
-            n_targets=("log2", "count"),
+            **{"n.targets": ("log2", "count")},
             mean_log2=("log2", "mean"),
             min_log2=("log2", "min"),
             max_log2=("log2", "max"),
@@ -412,26 +412,13 @@ def _aggregate_gene_bins(bins: pd.DataFrame) -> pd.DataFrame:
         .agg(
             region_start=("start", "min"),
             region_end=("end", "max"),
-            n_targets=("log2", "count"),
+            **{"n.targets": ("log2", "count")},
             mean_log2=("log2", "mean"),
             min_log2=("log2", "min"),
             max_log2=("log2", "max"),
         )
         .copy()
     )
-
-
-def build_genelevel_regions_without_pon(bins: pd.DataFrame) -> pd.DataFrame:
-    """
-    Build one gene-level region per gene when no PON is available.
-    """
-    gene_bins = bins.copy()
-
-    regions_df = _aggregate_gene_bins(gene_bins)
-
-    regions_df["n.targets"] = regions_df["n_targets"]
-
-    return regions_df
 
 
 def _assign_initial_gene_regions(
@@ -838,24 +825,6 @@ def _merge_adjacent_gene_regions(
     return out
 
 
-def _collapse_bins_to_gene_regions(bins: pd.DataFrame) -> pd.DataFrame:
-    """
-    Collapse region-labeled bins to one row per gene-region.
-
-    Each output row represents a contiguous gene region and summarizes:
-      - genomic span
-      - number of contributing bins/targets
-      - log2 distribution across bins
-      - mean PON baseline and spread
-    """
-    regions_df = _aggregate_gene_regions(bins)
-
-    # Keep compatibility with older downstream code using n.targets
-    regions_df["n.targets"] = regions_df["n_targets"]
-
-    return regions_df
-
-
 def _score_pon_regions(
     regions_df: pd.DataFrame,
 ) -> pd.DataFrame:
@@ -963,7 +932,7 @@ def create_generegions(
     bins = _assign_initial_gene_regions(bins)
     bins = _merge_adjacent_gene_regions(bins)
 
-    regions_df = _collapse_bins_to_gene_regions(bins)
+    regions_df = _aggregate_gene_regions(bins)
     regions_df = _score_pon_regions(regions_df)
     return regions_df
 
@@ -986,7 +955,7 @@ def build_generegion_table(
 
     # If no PON exists, just merge CNR BINS per gene level
     if pon_df is None:
-        regions_df = build_genelevel_regions_without_pon(cnr_df)
+        regions_df = _aggregate_gene_bins(cnr_df)
     else:
         regions_df = create_generegions(cnr_df=cnr_df, pon_df=pon_df)
 
