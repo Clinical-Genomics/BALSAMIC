@@ -196,8 +196,8 @@ GENE_REGION_COLUMN_DESCRIPTIONS = {
     # --- Bin aggregation metrics ---
     "n.targets": "Number of target bins in this gene region. Genes are split into multiple rows when log2 ratios relative to the PON suggest distinct within-gene copy number segments (GAIN or LOSS).",
     "mean_log2": f"Mean log2 copy number ratio across bins overlapping the gene region. {not_pnp}",
-    "min_log2": f"Minimum log2 copy number log2 ratio observed among bins in the gene region. {not_pnp}",
-    "max_log2": f"Maximum log2 copy number log2-ratio observed among bins in the gene region. {not_pnp}",
+    "min_log2": f"Minimum log2 copy number ratio observed among bins in the gene region. {not_pnp}",
+    "max_log2": f"Maximum log2 copy number ratio observed among bins in the gene region. {not_pnp}",
     "depth_mean": "Mean sequencing depth across bins in the gene region.",
     # --- CNVkit gene-level call ---
     "cnvkit_cnv_call": "Gene-level CNV classification derived from CNVkit segmentation (e.g., DELETION, AMPLIFICATION, NEUTRAL).",
