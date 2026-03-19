@@ -55,6 +55,17 @@ def collect_qc_metrics(
     # MultiQC metrics
     metrics = get_multiqc_metrics(config, multiqc_data)
 
+    # Remove GC_DROPOUT and AT_DROPOUT from multiqc_picard_gcbias
+    # reason: For WGS analyses this metric is produced from two tools (Sentieon GCBias, and Picard HsMetrics), and we prefer hsmetrics as we have more experience with it from panel data
+    metrics = [
+        metric
+        for metric in metrics
+        if not (
+            metric.get("name") in {"GC_DROPOUT", "AT_DROPOUT"}
+            and metric.get("step") == "multiqc_picard_gcbias"
+        )
+    ]
+
     # Number of variants
     for count in counts_path:
         metrics += get_variant_metrics(count)
