@@ -177,13 +177,13 @@ SEGMENT_COLUMN_DESCRIPTIONS = {
     # --- CNVkit segment details ---
     "cnvkit_seg_depth": "Mean sequencing read depth across all targets belonging to the CNVkit segment.",
     "cnvkit_adjusted_log2": f"Segment-level log2 copy-ratio from CNVkit. {pnp}",
-    "cnvkit_seg_cn": f"Total copy number estimate from CNVkit. {pnp}",
-    "cnvkit_seg_cn1": f"Estimated minor allele copy number from CNVkit. {pnp}",
-    "cnvkit_seg_cn2": f"Estimated major allele copy number from CNVkit. {pnp}",
+    "cnvkit_seg_cn": f"Total copy number estimate from CNVkit {pnp}.",
+    "cnvkit_seg_cn1": f"Estimated minor allele copy number from CNVkit {pnp}.",
+    "cnvkit_seg_cn2": f"Estimated major allele copy number from CNVkit {pnp}.",
     # --- PureCN segment details --
     "purecn_num_snps": "Number of SNPs in this segment informative for LOH detection from PureCN.",
-    "purecn_C": f"Segment total copy number for segment from PureCN. {pnp}",
-    "purecn_M": f"Minor allele copy number from PureCN. {pnp}",
+    "purecn_C": f"Total copy number for segment from PureCN {pnp}.",
+    "purecn_M": f"Minor allele copy number from PureCN {pnp}.",
     "purecn_M_flagged": "True if PureCN flagged the minor allele estimate as unreliable (due to small number of variants or ambiguous call)",
 }
 
