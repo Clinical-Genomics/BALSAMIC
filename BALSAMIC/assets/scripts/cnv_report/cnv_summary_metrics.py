@@ -14,7 +14,6 @@ def read_purecn_summary(purity_csv: str | Path | None) -> pd.DataFrame | None:
     """Read and return PureCN purity table"""
     df = pd.read_csv(purity_csv)
     wanted_cols = [
-        "Sampleid",
         "Purity",
         "Ploidy",
         "Sex",

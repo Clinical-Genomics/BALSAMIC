@@ -80,6 +80,11 @@ button {
   border-radius: var(--radius-sm);
 }
 
+.help-toggle-btn {
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+
 .warning-box {
   margin: var(--space-lg) 0;
   background: var(--warning-bg);

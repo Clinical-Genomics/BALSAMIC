@@ -164,7 +164,7 @@ SEGMENT_COLUMN_DESCRIPTIONS = {
     "start": "Start coordinate (bp) of the CN segment.",
     "end": "End coordinate (bp) of the CN segment.",
     "cytoband": "Cytogenetic band annotation for the gene region.",
-    "segment_size": "Size of the segment in KB: [end - start] / 1000",
+    "segment_size": "Size of the segment in Kbp.",
     "caller": "The caller which determined the segment, CNVkit / PureCN",
     # --- Gene identity ---
     GENE: "HGNC gene symbols overlapping segment (minimum 2 probe targets required for a gene to be listed)",
@@ -172,7 +172,7 @@ SEGMENT_COLUMN_DESCRIPTIONS = {
     TARGETS: "Number of target bins overlapping with CN segment.",
     "log2": f"log2 copy-ratio from CNVkit or PureCN. {not_pnp}",
     "baf_maf": "Mean B-allele frequency (BAF) for the CNVkit segment | Median observed minor allele frequency (MAF) of heterozygous SNPs in the PureCN segment.",
-    "cnv_call": f"CNV call from PureCN or CNVkit (AMPLIFICATION / DELETION / NEUTRAL) determined based on total copy-numbers predicted from each tool. {pnp}",
+    "cnv_call": f"CNV call from PureCN or CNVkit (AMPLIFICATION / DELETION / NEUTRAL) determined based on total copy-numbers predicted from each tool.",
     "purecn_type": "PureCN LOH type if M = 0 (such as WHOLE ARM COPY-NEUTRAL LOH, COPY-NEUTRAL LOH)",
     # --- CNVkit segment details ---
     "cnvkit_seg_depth": "Mean sequencing read depth across all targets belonging to the CNVkit segment.",

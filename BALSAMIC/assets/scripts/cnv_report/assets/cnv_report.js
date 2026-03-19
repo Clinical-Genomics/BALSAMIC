@@ -688,6 +688,23 @@
     "Show region glossary",
   );
 
+  hookShowHide(
+  "toggle-purecn-help",
+  "purecn-help-container",
+  false,
+  "Hide PureCN summary explanation",
+  "Show PureCN summary explanation",
+  );
+
+  hookShowHide(
+    "toggle-qc-help",
+    "qc-help-container",
+    false,
+    "Hide CNV / QC summary explanation",
+    "Show CNV / QC summary explanation",
+  );
+
+
   // ---------------------------------------------------------------------------
   // Plot modal viewer
   // ---------------------------------------------------------------------------

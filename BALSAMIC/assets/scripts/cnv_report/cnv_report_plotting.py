@@ -1109,7 +1109,7 @@ def plot_chromosomes(
 
         ax1.axhline(0, color="black", linewidth=0.8)
         ax1.set_ylim(*y_lim_chr)
-        ax1.set_ylabel("log2 / PON band")
+        ax1.set_ylabel("Log2 ratio")
 
         title_suffix = "log2 vs PON spread" if use_pon else "log2 (no PON available)"
         title = f"Chr {chr_name} – {title_suffix}: {case_id}"
