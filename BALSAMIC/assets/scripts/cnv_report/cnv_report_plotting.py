@@ -15,7 +15,7 @@ from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
 
 from cnv_io import load_vcf_with_vaf
-from cnv_constants import ChromosomePlotConfig
+from cnv_constants import ChromosomePlotConfig, CHR, GENE
 
 
 def _pos_to_xcoord_fn(bins: pd.DataFrame) -> callable:
@@ -363,7 +363,7 @@ def draw_gene_labels_from_spans(
     pos_to_xcoord: callable,
     y_max: float,
     base_label_offset: float,
-    gene_col: str = "gene.symbol",
+    gene_col: str = GENE,
     start_col: str = "region_start",
     end_col: str = "region_end",
 ) -> None:
@@ -549,8 +549,8 @@ def _compute_variable_width_bins(
 def _collapse_bins_to_unique(
     df: pd.DataFrame,
     *,
-    key_cols: tuple[str, str, str] = ("chr", "start", "end"),
-    gene_col: str = "gene.symbol",
+    key_cols: tuple[str, str, str] = (CHR, "start", "end"),
+    gene_col: str = GENE,
     value_aggs: dict[str, str] | None = None,
     out_gene_col: str = "genes",
 ) -> pd.DataFrame:
@@ -726,8 +726,8 @@ def compute_highlighted_genes_from_generegions(
     highlight_only_cancer: bool,
     min_gene_targets: int,
     min_gene_targets_cancer: int,
-    chr_col: str = "chr",
-    gene_col: str = "gene.symbol",
+    chr_col: str = CHR,
+    gene_col: str = GENE,
     targets_col: str = "n.targets",
     cancer_col: str = "is_cancer_gene",
     cnvkit_call_col: str = "cnvkit_cnv_call",
@@ -796,7 +796,7 @@ def compute_highlighted_genes_from_generegions(
 def compute_gene_spans_from_generegions(
     generegions: pd.DataFrame,
     *,
-    gene_col: str = "gene.symbol",
+    gene_col: str = GENE,
     start_col: str = "region_start",
     end_col: str = "region_end",
 ) -> pd.DataFrame:

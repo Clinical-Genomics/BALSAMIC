@@ -13,7 +13,8 @@ from cnv_constants import (
     TableSpec,
     GENE_TABLE_SPEC,
     SEGMENT_TABLE_SPEC,
-    GeneRegionConfig,
+    CHR,
+    GENE,
 )
 from cnv_report_utils import chrom_sort_key
 from cnv_create_generegions import create_generegions
@@ -104,7 +105,7 @@ def classify_cnv_from_total_cn_sex_aware(
 def add_sex_aware_cnv_calls_from_total_cn(
     df: pd.DataFrame,
     sex: Gender,
-    chr_col: str = "chr",
+    chr_col: str = CHR,
 ) -> pd.DataFrame:
     """
     Add CNV gain/loss classifications derived from absolute copy number.
@@ -184,7 +185,7 @@ def annotate_regions_with_overlapping_segments(
     out = regions_df.copy()
 
     # Stable column names
-    region_chr_col: str = "chr"
+    region_chr_col: str = CHR
     region_start_col: str = "region_start"
     region_end_col: str = "region_end"
     seg_chr_col: str = "chr"
@@ -286,7 +287,7 @@ def _pick_best_overlapping_segment(
 def aggregate_gene_bins(bins: pd.DataFrame) -> pd.DataFrame:
     """Aggregate bin-level rows to one row per gene-region."""
     return (
-        bins.groupby(["chr", "gene.symbol"], as_index=False)
+        bins.groupby([CHR, GENE], as_index=False)
         .agg(
             region_start=("start", "min"),
             region_end=("end", "max"),
@@ -342,7 +343,7 @@ def build_generegion_table(
             seg_end_col=f"purecn_seg_end",
         )
 
-    regions_df["is_cancer_gene"] = regions_df["gene.symbol"].isin(cancer_genes)
+    regions_df["is_cancer_gene"] = regions_df[GENE].isin(cancer_genes)
 
     # CNV calls
     regions_df = add_sex_aware_cnv_calls_from_total_cn(regions_df, sex=sex)
@@ -379,7 +380,7 @@ def add_overlapping_genes_from_bins(
     seg_df: pd.DataFrame,
     cnr_df: pd.DataFrame,
     *,
-    genes_col: str = "gene.symbol",
+    genes_col: str = GENE,
     out_targets_col: str = "n.targets",
     min_targets: int = 2,
     cancer_genes: set[str] | None = None,
@@ -404,14 +405,14 @@ def add_overlapping_genes_from_bins(
     out[out_targets_col] = 0
 
     # Work per chromosome
-    for chrom, seg_g in out.groupby("chr", sort=False):
-        bins_g = cnr_df[cnr_df["chr"] == chrom].copy()
+    for chrom, seg_g in out.groupby(CHR, sort=False):
+        bins_g = cnr_df[cnr_df[CHR] == chrom].copy()
 
         bins_g = bins_g.sort_values("start", kind="stable").reset_index(drop=True)
 
         b_start = bins_g["start"].to_numpy(dtype=np.int64, copy=False)
         b_end = bins_g["end"].to_numpy(dtype=np.int64, copy=False)
-        b_gene = bins_g["gene.symbol"].to_numpy(dtype=object, copy=False)
+        b_gene = bins_g[GENE].to_numpy(dtype=object, copy=False)
 
         seg_idx = seg_g.index.to_numpy()
         s_start = seg_g["start"].to_numpy(dtype=np.int64, copy=False)
@@ -478,10 +479,10 @@ def annotate_segments_with_cytoband(
     df_segments: pd.DataFrame,
     cyto: pd.DataFrame,
     *,
-    seg_chr_col: str = "chr",
+    seg_chr_col: str = CHR,
     seg_start_col: str = "start",
     seg_end_col: str = "end",
-    cyto_chr_col: str = "chr",
+    cyto_chr_col: str = CHR,
     cyto_start_col: str = "start_int",
     cyto_end_col: str = "end_int",
     cyto_name_col: str = "name",
@@ -596,14 +597,14 @@ def build_segment_table(
 
     segments = pd.concat(out_parts, axis=0, ignore_index=True, sort=False)
     segments = segments.sort_values(
-        ["chr", "start", "end", "caller"], kind="stable"
+        [CHR, "start", "end", "caller"], kind="stable"
     ).reset_index(drop=True)
 
     # Add overlapping genes (limit to cancer genes only if provided)
     segments = add_overlapping_genes_from_bins(
         segments,
         cnr_df,
-        genes_col="gene.symbol",
+        genes_col=GENE,
         min_targets=2,
         cancer_genes=cancer_genes if is_exome else None,
     )
