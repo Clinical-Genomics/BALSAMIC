@@ -1,5 +1,3 @@
-
-
 from __future__ import annotations
 
 import sys
@@ -20,6 +18,7 @@ sys.path.insert(0, str(CNV_REPORT_DIR))
 
 import cnv_report_plotting
 from cnv_qc_report import main
+
 
 def test_generate_report_smoke(tmp_path, monkeypatch):
     """
@@ -87,8 +86,7 @@ def test_generate_report_smoke(tmp_path, monkeypatch):
     # ------------------------------------------------------------------
     cytoband_path = tmp_path / "cytoband.tsv"
     cytoband_path.write_text(
-        "chr1\t0\t300000000\tp36.33\tgneg\n"
-        "chr2\t0\t300000000\tp25.3\tgneg\n"
+        "chr1\t0\t300000000\tp36.33\tgneg\n" "chr2\t0\t300000000\tp25.3\tgneg\n"
     )
 
     # ------------------------------------------------------------------
