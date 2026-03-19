@@ -2,6 +2,7 @@ from dataclasses import dataclass, field
 from typing import Mapping, Sequence
 
 CHR = "chr"
+GENE = "gene.symbol"
 
 
 @dataclass(frozen=True)
@@ -148,7 +149,7 @@ RENAME_COLS = {
     "cnvkit_cnv_call": "CNVkit segment call",
     "purecn_cnv_call": "PureCN segment call",
     "purecn_type": "PureCN LOH-type",
-    "gene.symbol": "Gene",
+    GENE: "Gene",
     "baf_maf": "BAF | MAF",
     "segment_size": "Segment size (KB)",
 }
@@ -165,7 +166,7 @@ SEGMENT_COLUMN_DESCRIPTIONS = {
     "segment_size": "Size of the segment in KB: [end - start] / 1000",
     "caller": "The caller which determined the segment, CNVkit / PureCN",
     # --- Gene identity ---
-    "gene.symbol": "HGNC gene symbols overlapping segment (minimum 2 probe targets required for a gene to be listed)",
+    GENE: "HGNC gene symbols overlapping segment (minimum 2 probe targets required for a gene to be listed)",
     # --- Bin aggregation metrics ---
     "n.targets": "Number of target bins overlapping with CN segment.",
     "log2": f"log2 copy-ratio from CNVkit or PureCN. {not_pnp}",
@@ -192,7 +193,7 @@ GENE_REGION_COLUMN_DESCRIPTIONS = {
     "region_end": "End coordinate (bp) of the aggregated gene region.",
     "cytoband": "Cytogenetic band annotation for the gene region.",
     # --- Gene identity ---
-    "gene.symbol": "HGNC gene symbol.",
+    GENE: "HGNC gene symbol.",
     "is_cancer_gene": "True if the gene is included in the configured cancer gene set.",
     # --- Bin aggregation metrics ---
     "n.targets": "Number of target bins in this gene region. Genes are split into multiple rows when log2 ratios relative to the PON suggest distinct within-gene copy number segments (GAIN or LOSS).",
@@ -258,7 +259,7 @@ SEGMENT_TABLE_SPEC = TableSpec(
         "purecn_M_flagged",
         "purecn_num_snps",
         "caller",
-        "gene.symbol",
+        GENE,
     ],
     float_columns=[
         "log2",
@@ -283,7 +284,7 @@ GENE_TABLE_SPEC = TableSpec(
         "region_start",
         "region_end",
         "cytoband",
-        "gene.symbol",
+        GENE,
         "n.targets",
         "mean_log2",
         "min_log2",

@@ -6,7 +6,7 @@ import pandas as pd
 from dataclasses import dataclass
 
 # Local
-from cnv_constants import GeneRegionConfig
+from cnv_constants import GeneRegionConfig, GENE, CHR
 
 
 ###############################
@@ -31,13 +31,13 @@ def annotate_cnr_bins_with_pon(
     cnr = cnr_df.copy()
     pon = pon_df.copy()
 
-    g_cnr = cnr["gene.symbol"]
+    g_cnr = cnr[GENE]
     cnr = cnr.loc[g_cnr.ne("backbone")].copy()
 
-    g_pon = pon["gene.symbol"].astype("string").str.strip()
+    g_pon = pon[GENE].astype("string").str.strip()
     pon = pon.loc[g_pon.ne("backbone")].copy()
 
-    merge_columns = ["chr", "start", "end", "gene.symbol"]
+    merge_columns = [CHR, "start", "end", GENE]
     pon_cols = ["pon_log2", "pon_spread"]
 
     keep = [c for c in (merge_columns + pon_cols) if c in pon.columns]
@@ -114,7 +114,7 @@ def _assign_initial_gene_regions(
     next_region_id = 0
 
     # Process one gene at a time so regions are only formed within genes
-    for (_chrom, _gene), gene_bins in out.groupby(["chr", "gene.symbol"], sort=False):
+    for (_chrom, _gene), gene_bins in out.groupby([CHR, GENE], sort=False):
         accepted_runs = _find_gene_runs(gene_bins)
 
         for run_indices in accepted_runs:
@@ -312,7 +312,7 @@ def _merge_adjacent_gene_regions(
     """
     out = bins.copy()
 
-    for (_chrom, _gene), gene_bins in out.groupby(["chr", "gene.symbol"], sort=False):
+    for (_chrom, _gene), gene_bins in out.groupby([CHR, GENE], sort=False):
         gene_bins = gene_bins.sort_values("start", kind="stable")
 
         # Merge gene runs per gene if appropriate
@@ -466,7 +466,7 @@ def _can_bridge_merge(run_a: GeneRun, run_b: GeneRun, run_c: GeneRun) -> bool:
 def _collapse_bins_into_assigned_gene_regions(bins: pd.DataFrame) -> pd.DataFrame:
     """Aggregate bin-level rows to one row per gene-region."""
     return (
-        bins.groupby(["chr", "gene.symbol", "region_id"], as_index=False)
+        bins.groupby([CHR, GENE, "region_id"], as_index=False)
         .agg(
             region_start=("start", "min"),
             region_end=("end", "max"),

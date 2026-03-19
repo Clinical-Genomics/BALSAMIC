@@ -2,16 +2,16 @@ from __future__ import annotations
 
 # Standard library
 from pathlib import Path
-from typing import Dict, List, Tuple, Mapping, Iterable, Sequence, Literal
+from typing import Mapping, Iterable, Sequence, Literal
 import math
-from dataclasses import dataclass
+
 
 # Third-party
 import pandas as pd
 from cyvcf2 import VCF
 
 
-from cnv_constants import CHR
+from cnv_constants import CHR, GENE
 
 
 def coerce_columns(
@@ -96,12 +96,12 @@ def _load_bins_tsv(
     df = df[df[gene_col] != "Antitarget"].copy()
 
     # normalize gene column
-    df["gene.symbol"] = df[gene_col].replace("-", "backbone").astype("string")
+    df[GENE] = df[gene_col].replace("-", "backbone").astype("string")
 
     # Expand gene column into individual rows with one gene symbol per row
-    df["gene.symbol"] = df["gene.symbol"].str.split(r"\s*,\s*", regex=True)
-    df = df.explode("gene.symbol", ignore_index=True)
-    df["gene.symbol"] = df["gene.symbol"].str.strip()
+    df[GENE] = df[GENE].str.split(r"\s*,\s*", regex=True)
+    df = df.explode(GENE, ignore_index=True)
+    df[GENE] = df[GENE].str.strip()
 
     if rename is not None:
         df = df.rename(columns=dict(rename))
@@ -110,7 +110,7 @@ def _load_bins_tsv(
         df,
         ints=("start", "end"),
         floats=("log2", "gc", "depth", "pon_log2", "pon_spread"),
-        strings=(CHR, "gene.symbol"),
+        strings=(CHR, GENE),
     )
 
     out_cols = list(out_cols)
@@ -121,7 +121,7 @@ def _load_bins_tsv(
 def load_cnr_bins(cnr_path: str) -> pd.DataFrame:
     return _load_bins_tsv(
         cnr_path,
-        out_cols=[CHR, "start", "end", "gene.symbol", "log2", "depth"],
+        out_cols=[CHR, "start", "end", GENE, "log2", "depth"],
     )
 
 
@@ -129,7 +129,7 @@ def load_pon_bins(pon_path: str) -> pd.DataFrame:
     return _load_bins_tsv(
         pon_path,
         rename={"log2": "pon_log2", "spread": "pon_spread"},
-        out_cols=[CHR, "start", "end", "pon_log2", "pon_spread", "gene.symbol", "gc"],
+        out_cols=[CHR, "start", "end", "pon_log2", "pon_spread", GENE, "gc"],
     )
 
 
