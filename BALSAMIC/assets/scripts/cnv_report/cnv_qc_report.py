@@ -516,12 +516,6 @@ def _collect_chr_plot_groups(
     help="VCF with germline variants for BAF.",
 )
 @click.option(
-    "--refgene",
-    type=click.Path(exists=True),
-    required=True,
-    help="refgene.flat file.",
-)
-@click.option(
     "--cytoband",
     type=click.Path(exists=True),
     required=True,
@@ -560,7 +554,7 @@ def _collect_chr_plot_groups(
 @click.option(
     "--cancer-genes",
     type=click.Path(exists=True),
-    required=False,
+    required=True,
     help="Cancer gene list TSV (OncoKB/CGC aggregate, optional).",
 )
 @click.option(
@@ -588,14 +582,13 @@ def main(
     cns_init: str,
     pon: str | None,
     vcf: str,
-    refgene: str,
     cytoband: str,
     case_id: str,
     cnvkit_scatter: str | None,
     cnvkit_diagram: str | None,
     output_file: str,
     purity_csv: str | None,
-    cancer_genes: str | None,
+    cancer_genes: str,
     is_exome: bool,
     sex: Gender,
     analysis_type: str,
@@ -709,7 +702,7 @@ def main(
             generegions_df["is_cancer_gene"].fillna(False).astype(bool)
         ]
 
-    if pon == None:
+    if pon is None:
         generegions_df = generegions_df.drop(
             columns=[c for c in generegions_df.columns if c.startswith("pon")]
         )

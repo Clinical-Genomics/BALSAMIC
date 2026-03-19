@@ -41,23 +41,6 @@ def _pos_to_xcoord_fn(bins: pd.DataFrame) -> callable:
     return pos_to_xcoord
 
 
-def _stable_gene_color_fn(cmap_name: str = "tab20"):
-    """
-    Deterministic gene → color mapping, stable across runs and machines.
-
-    Uses sha256(gene_name) → integer → colormap index.
-    """
-    cmap = colormaps.get_cmap(cmap_name)
-
-    def _stable_gene_color(gname: str):
-        s = str(gname).encode("utf-8")
-        h = hashlib.sha256(s).digest()
-        idx = int.from_bytes(h[:4], byteorder="big") % cmap.N
-        return cmap(idx)
-
-    return _stable_gene_color
-
-
 def _make_gene_colors(highlighted_genes: np.ndarray) -> dict[str, tuple]:
     """
     Create sequential colormap assignment for highlighted genes.
@@ -297,27 +280,26 @@ def _draw_generegion_pon_segments(
     Draw PON-driven region segments if (and only if) PON columns exist.
 
     Draw condition:
-      - pon_region_indication in {"GAIN","LOSS"} OR
+      - pon_region_indication in {"GAIN","LOSS"} AND
       - pon_region_signal == "strong"  (if that column exists)
 
     Returns: None
     """
-    empty_result: tuple[set[str], bool] = (set(), False)
 
     if generegions is None or generegions.empty:
-        return empty_result
+        return None
 
     # If there's no PON info at all, do nothing.
     has_ind = pon_ind_col in generegions.columns
     has_sig = pon_sig_col in generegions.columns
     if not (has_ind or has_sig):
-        return empty_result
+        return None
 
     regions = generegions.copy()
 
     regions = regions.dropna(subset=[start_col, end_col, y_col]).copy()
     if regions.empty:
-        return empty_result
+        return None
 
     # PON GAIN / LOSS signal filter (only strong signal)
 
@@ -327,7 +309,7 @@ def _draw_generegion_pon_segments(
     regions = regions[ind & sig].copy()
 
     if regions.empty:
-        return empty_result
+        return None
 
     # Draw
     label_text = "PON-based gain/loss indicator"
@@ -750,8 +732,6 @@ def compute_highlighted_genes_from_generegions(
     Returns:
       highlighted_genes:
           Sorted numpy array of highlighted gene names
-      gene_summary:
-          Per-gene summary table with evidence columns and highlight flag
     """
     # Chromosome filtering
     generegions = generegions_df[
@@ -782,7 +762,6 @@ def compute_highlighted_genes_from_generegions(
         min_gene_targets_cancer=min_gene_targets_cancer,
     )
 
-    highlighted_genes = gene_summary.loc[gene_summary["highlight_gene"], gene_col]
     highlighted_genes = np.array(
         sorted(
             gene_summary.loc[gene_summary["highlight_gene"], gene_col].dropna().unique()
@@ -790,7 +769,7 @@ def compute_highlighted_genes_from_generegions(
         dtype=object,
     )
 
-    return highlighted_genes, gene_summary
+    return highlighted_genes
 
 
 def compute_gene_spans_from_generegions(
@@ -1012,7 +991,7 @@ def plot_chromosomes(
     y_lim_chr = (-y_clip, y_clip)
 
     for chr_name in chr_order:
-        highlighted, gene_summary = compute_highlighted_genes_from_generegions(
+        highlighted = compute_highlighted_genes_from_generegions(
             generegions_df,
             chr_name=chr_name,
             highlight_only_cancer=highlight_only_cancer,

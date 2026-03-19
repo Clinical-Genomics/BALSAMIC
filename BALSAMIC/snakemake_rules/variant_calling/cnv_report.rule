@@ -10,7 +10,6 @@ def case_id_param(wildcards):
 
 rule create_cnv_html_report:
     input:
-        refgene_flat = refgene_flat,
         cnr = cnv_dir + "tumor.merged.cnr",
         cns = cnv_dir + "tumor.merged.cns",
         cns_init = cnv_dir + "tumor.initial.cns",
@@ -42,7 +41,6 @@ python {params.cnv_report_script} \
 --cns {input.cns} \
 --cns-init {input.cns_init} \
 --vcf {input.germline_vcf} \
---refgene {input.refgene_flat} \
 --cytoband {params.cytoband} \
 --cnvkit-scatter {input.scatter} \
 --cnvkit-diagram {input.diagram} \

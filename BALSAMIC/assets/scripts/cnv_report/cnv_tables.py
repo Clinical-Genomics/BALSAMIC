@@ -357,7 +357,6 @@ def build_generegion_table(
             "purecn_seg_start",
             "purecn_seg_end",
             "purecn_seg_mean_log2",
-            "purecn_seg_mean_log2",
             "purecn_num_snps",
             "purecn_maf_observed",
             "purecn_M_flagged",
