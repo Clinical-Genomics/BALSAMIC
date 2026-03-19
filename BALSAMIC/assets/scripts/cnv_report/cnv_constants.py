@@ -203,9 +203,9 @@ GENE_REGION_COLUMN_DESCRIPTIONS = {
     "max_log2": f"Maximum log2 copy number ratio observed among bins in the gene region {not_pnp}.",
     "depth_mean": "Mean sequencing depth across bins in the gene region.",
     # --- CNVkit gene-level call ---
-    "cnvkit_cnv_call": "Gene-level CNV classification derived from CNVkit segmentation (e.g., DELETION, AMPLIFICATION, NEUTRAL).",
+    "cnvkit_cnv_call": "CNV call from overlapping CNVkit segment (e.g., DELETION, AMPLIFICATION, NEUTRAL).",
     # --- PureCN gene-level call ---
-    "purecn_cnv_call": "Gene-level CNV classification derived from PureCN.",
+    "purecn_cnv_call": "CNV call from overlapping PureCN segment (e.g., DELETION, AMPLIFICATION, NEUTRAL).",
     "purecn_type": "PureCN LOH type if M = 0 (such as WHOLE ARM COPY-NEUTRAL LOH, COPY-NEUTRAL LOH)",
     # --- CNVkit segment details ---
     "cnvkit_seg_start": "Start coordinate (bp) of the overlapping CNVkit segment.",
