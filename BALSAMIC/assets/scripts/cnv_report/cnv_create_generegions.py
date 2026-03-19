@@ -330,6 +330,8 @@ def _merge_gene_runs_for_one_gene(gene_bins: pd.DataFrame) -> list[GeneRun]:
     Collect contiguous runs for one gene and merge them according to the
     bridge-merge and small-run merge rules.
     """
+
+    # Runs: list[GeneRun]
     runs, log2difference_all = _collect_gene_runs(gene_bins)
 
     if len(runs) <= 1:
@@ -343,6 +345,7 @@ def _merge_gene_runs_for_one_gene(gene_bins: pd.DataFrame) -> list[GeneRun]:
         # --------------------------------------------------------------
         # Bridge merge: A-B-C -> merge if B is short and A/C are similar
         # --------------------------------------------------------------
+        # Only do this if there are at least 3 runs left
         if i <= len(runs) - 3:
             run_a = runs[i]
             run_b = runs[i + 1]
@@ -376,32 +379,37 @@ def _merge_gene_runs_for_one_gene(gene_bins: pd.DataFrame) -> list[GeneRun]:
 
 def _collect_gene_runs(gene_bins: pd.DataFrame) -> tuple[list[GeneRun], np.ndarray]:
     """
-    Convert consecutive identical `region_id` labels into contiguous run records.
-
-    Returns
-    -------
-    runs
-        Ordered list of contiguous runs for this gene.
-    log2difference_all
-        Per-bin array of log2 - pon_log2 aligned to `gene_bins` row order.
+    Convert consecutive identical region_id labels into contiguous run records.
     """
     log2difference_all = gene_bins["log2"].to_numpy() - gene_bins["pon_log2"].to_numpy()
-    region_labels = gene_bins["region_id"].tolist()
+    # Example:
+    # ["regionA", "regionA", "regionA", "regionA", "no_region", "regionB", "regionB", "regionB", "regionB"]
+    bin_region_labels: list = gene_bins["region_id"].tolist()
 
     runs: list[GeneRun] = []
-    current_positions = [0]
-    current_label = region_labels[0]
+    n_rows = len(bin_region_labels)
 
-    for pos in range(1, len(region_labels)):
-        if region_labels[pos] == current_label:
-            current_positions.append(pos)
+    run_start = 0
+
+    for pos in range(1, n_rows):
+        previous_label = bin_region_labels[pos - 1]
+        current_label = bin_region_labels[pos]
+
+        # No new generegion yet: keep extending the current run
+        if current_label == previous_label:
             continue
 
-        runs.append(_build_run(gene_bins, current_positions, log2difference_all))
-        current_label = region_labels[pos]
-        current_positions = [pos]
+        # New generegion encountered: previous run spans run_start .. pos-1
+        run_positions = list(range(run_start, pos))
+        runs.append(_build_run(gene_bins, run_positions, log2difference_all))
 
-    runs.append(_build_run(gene_bins, current_positions, log2difference_all))
+        # New generegion run starts here
+        run_start = pos
+
+    # Add the final run
+    run_positions = list(range(run_start, n_rows))
+    runs.append(_build_run(gene_bins, run_positions, log2difference_all))
+
     return runs, log2difference_all
 
 
@@ -443,35 +451,49 @@ def _combine_runs(
 
 def _can_bridge_merge(run_a: GeneRun, run_b: GeneRun, run_c: GeneRun) -> bool:
     """
-    Return True if A-B-C should be merged as a bridge pattern.
+    Return True if the runs A-B-C should be merged as a bridge pattern.
 
-    The middle run must be short, and the two outer runs must have
-    similar mean log2difference.
+    Bridge merge occurs when:
+      - the middle run (B) is very short
+      - the outer runs (A and C) have similar mean log2difference
     """
-    return (
-        len(run_b.indices) <= GeneRegionConfig.max_bridge_bins
-        and np.isfinite(run_a.mean_log2diff)
-        and np.isfinite(run_c.mean_log2diff)
-        and abs(run_a.mean_log2diff - run_c.mean_log2diff)
-        <= GeneRegionConfig.bridge_delta
+
+    # Middle run must be small
+    middle_run_is_small = len(run_b.indices) <= GeneRegionConfig.max_bridge_bins
+
+    # Outer runs must have similar signal strength
+    outer_runs_are_similar = (
+        abs(run_a.mean_log2diff - run_c.mean_log2diff) <= GeneRegionConfig.bridge_delta
     )
+
+    return middle_run_is_small and outer_runs_are_similar
 
 
 def _can_small_merge(previous_run: GeneRun, current_run: GeneRun) -> bool:
     """
-    Return True if two adjacent runs should be merged because they are similar
-    and at least one of them is small.
+    Return True if two adjacent runs should be merged.
+
+    Two runs are merged when:
+      - both runs have valid mean log2difference values
+      - their signals are similar
+      - at least one of the runs is small
     """
-    return (
-        np.isfinite(previous_run.mean_log2diff)
-        and np.isfinite(current_run.mean_log2diff)
-        and abs(previous_run.mean_log2diff - current_run.mean_log2diff)
-        <= GeneRegionConfig.merge_delta
-        and (
-            len(previous_run.indices) <= GeneRegionConfig.small_segment_max_bins
-            or len(current_run.indices) <= GeneRegionConfig.small_segment_max_bins
-        )
+
+    # The runs must have similar signal strength
+    signal_difference = abs(previous_run.mean_log2diff - current_run.mean_log2diff)
+    signals_are_similar = signal_difference <= GeneRegionConfig.merge_delta
+
+    # At least one run must be small
+    previous_is_small = (
+        len(previous_run.indices) <= GeneRegionConfig.small_segment_max_bins
     )
+    current_is_small = (
+        len(current_run.indices) <= GeneRegionConfig.small_segment_max_bins
+    )
+
+    one_run_is_small = previous_is_small or current_is_small
+
+    return signals_are_similar and one_run_is_small
 
 
 ###################################################
