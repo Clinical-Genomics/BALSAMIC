@@ -328,7 +328,7 @@ def _merge_adjacent_gene_regions(
 def _merge_gene_runs_for_one_gene(gene_bins: pd.DataFrame) -> list[GeneRun]:
     """
     Collect contiguous runs for one gene and merge them according to the
-    bridge-merge and small-run merge rules.
+    bridge-merge rule.
     """
 
     # Runs: list[GeneRun]
@@ -346,7 +346,7 @@ def _merge_gene_runs_for_one_gene(gene_bins: pd.DataFrame) -> list[GeneRun]:
         # Bridge merge: A-B-C -> merge if B is short and A/C are similar
         # --------------------------------------------------------------
         # Only do this if there are at least 3 runs left
-        if i <= len(runs) - 3:
+        if i + 2 < len(runs):
             run_a = runs[i]
             run_b = runs[i + 1]
             run_c = runs[i + 2]
