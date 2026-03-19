@@ -358,20 +358,9 @@ def _merge_gene_runs_for_one_gene(gene_bins: pd.DataFrame) -> list[GeneRun]:
                 i += 3
                 continue
 
-        # --------------------------------------------------------------
-        # Otherwise, consider merging the current run with the previous
-        # merged run if they are similar and one of them is small.
-        # --------------------------------------------------------------
         current_run = runs[i]
 
-        if merged_runs and _can_small_merge(merged_runs[-1], current_run):
-            merged_runs[-1] = _combine_runs(
-                [merged_runs[-1], current_run],
-                log2difference_all,
-            )
-        else:
-            merged_runs.append(current_run)
-
+        merged_runs.append(current_run)
         i += 1
 
     return merged_runs
@@ -467,33 +456,6 @@ def _can_bridge_merge(run_a: GeneRun, run_b: GeneRun, run_c: GeneRun) -> bool:
     )
 
     return middle_run_is_small and outer_runs_are_similar
-
-
-def _can_small_merge(previous_run: GeneRun, current_run: GeneRun) -> bool:
-    """
-    Return True if two adjacent runs should be merged.
-
-    Two runs are merged when:
-      - both runs have valid mean log2difference values
-      - their signals are similar
-      - at least one of the runs is small
-    """
-
-    # The runs must have similar signal strength
-    signal_difference = abs(previous_run.mean_log2diff - current_run.mean_log2diff)
-    signals_are_similar = signal_difference <= GeneRegionConfig.merge_delta
-
-    # At least one run must be small
-    previous_is_small = (
-        len(previous_run.indices) <= GeneRegionConfig.small_segment_max_bins
-    )
-    current_is_small = (
-        len(current_run.indices) <= GeneRegionConfig.small_segment_max_bins
-    )
-
-    one_run_is_small = previous_is_small or current_is_small
-
-    return signals_are_similar and one_run_is_small
 
 
 ###################################################
