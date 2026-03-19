@@ -324,7 +324,7 @@ def _draw_generegion_pon_segments(
     ind = regions[pon_ind_col].astype("string").str.upper().isin({"GAIN", "LOSS"})
     sig = regions[pon_sig_col].astype("string").str.lower().eq("strong")
 
-    regions = regions[ind | sig].copy()
+    regions = regions[ind & sig].copy()
 
     if regions.empty:
         return empty_result
