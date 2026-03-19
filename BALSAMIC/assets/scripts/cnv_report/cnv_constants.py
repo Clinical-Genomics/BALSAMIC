@@ -155,7 +155,7 @@ RENAME_COLS = {
     "segment_size": "Segment size (KB)",
 }
 
-pnp = "(adjusted for purity and ploidy estimated by PureCN)"
+pnp = "(adjusted for purity and ploidy)"
 not_pnp = "(NOT adjusted for purity or ploidy)"
 
 SEGMENT_COLUMN_DESCRIPTIONS = {
