@@ -22,11 +22,9 @@
     </head>
     <body>
         <h1>{{ title }}</h1>
-
         <p>
-        <strong>Report creation time: {{ creation_time }}</strong>
+            <strong>Report creation time: {{ creation_time }}</strong>
         </p>
-
         <div class="report-meta">
             <span class="meta-label">Normalisation method</span>
             <span class="meta-value">{{ normalisation_method }}</span>
@@ -35,11 +33,10 @@
             <span class="meta-label">Sample analysed as</span>
             <span class="meta-value">{{ sample_sex }}</span>
         </div>
-
-      <h2>Report overview</h2>
-      <div id="report-description-container"
-           class="note-box"
-           style="margin-top:10px;">
+        <h2>Report overview</h2>
+        <div id="report-description-container"
+             class="note-box"
+             style="margin-top:10px">
             <p>
                 This report summarizes copy number variations (CNVs) and loss of heterozygosity (LOH) identified in the tumor sample.
                 The main results are based on CNVkit and PureCN.
@@ -52,24 +49,22 @@
                 Please refer to the section headings and description to determine the method(s) from which each result is derived.
             </p>
             <p>
-               Use the controls in the tables to filter by genomic region, gene list, cancer-gene status, CNV / LOH status, and additional detail columns.
+                Use the controls in the tables to filter by genomic region, gene list, cancer-gene status, CNV / LOH status, and additional detail columns.
             </p>
         </div>
-
         <h2>PureCN sample summary</h2>
-
         {% if purecn_failed %}
-          <div class="warning-box">
-            <strong>Warning:</strong>
-            {{ purecn_warning_text }}
-          </div>
+            <div class="warning-box">
+                <strong>Warning:</strong>
+                {{ purecn_warning_text }}
+            </div>
         {% endif %}
-
         {{ purecn_summary_html | safe }}
         <button id="toggle-purecn-help" type="button">Show PureCN summary explanation</button>
         <div id="purecn-help-container"
              class="note-box"
-             style="display:none; margin-top:10px;">
+             style="display:none;
+                    margin-top:10px">
             <p>
                 <strong>Purity:</strong>
                 Estimated Purity based on best fitting model.
@@ -95,12 +90,12 @@
                 Set to True if PureCN failed to find a reliable final purity and ploidy model for the sample.
             </p>
             <p>
-              <strong>Comment:</strong>
-              Quality control comment reported by PureCN, such as <em>Low purity</em> or
-              <em>Noisy log-ratio</em>. See Table 5 in the
-              <a href="https://mirror.accum.se/mirror/bioconductor.org/packages/3.21/bioc/vignettes/PureCN/inst/doc/PureCN.pdf" target="_blank" rel="noopener">
-                PureCN manual
-              </a>.
+                <strong>Comment:</strong>
+                Quality control comment reported by PureCN, such as <em>Low purity</em> or
+                <em>Noisy log-ratio</em>. See Table 5 in the
+                <a href="https://mirror.accum.se/mirror/bioconductor.org/packages/3.21/bioc/vignettes/PureCN/inst/doc/PureCN.pdf"
+                   target="_blank"
+                   rel="noopener">PureCN manual</a>.
             </p>
         </div>
         <h2>CNV / QC summary</h2>
@@ -108,7 +103,8 @@
         <button id="toggle-qc-help" type="button">Show CNV / QC summary explanation</button>
         <div id="qc-help-container"
              class="note-box"
-             style="display:none; margin-top:10px;">
+             style="display:none;
+                    margin-top:10px">
             <p>
                 <strong>Log2 noise (DLR-like):</strong>
                 Estimate of local CNV noise calculated from log2 differences between adjacent bins within each chromosome.
@@ -148,24 +144,16 @@
         {% if chr_with or chr_no %}
             <h2>Per-chromosome CNV plots</h2>
             <div class="note-box">
+                <p>These plots show log2 ratios, PON spread (if available), VAF and detected CNV segments for each chromosome.</p>
+                <p>Plots containing CNV or LOH regions are highlighted; click a plot to enlarge it.</p>
+                <p>Relevant genes within detected CNVs are highlighted:</p>
                 <p>
-                These plots show log2 ratios, PON spread (if available), VAF and detected CNV segments for each chromosome.
+                    <strong>panel data:</strong> all cancer-associated genes with >= 2 targets are highlighted by default, additional genes with >= 2 targets are highlighted if impacted by CNVs / LOH
                 </p>
                 <p>
-                Plots containing CNV or LOH regions are highlighted; click a plot to enlarge it.
+                    <strong>exome data:</strong> all cancer-associated genes with ≥4 targets are highlighted by default
                 </p>
-                <p>
-                Relevant genes within detected CNVs are highlighted:
-                </p>
-                <p>
-                <strong>panel data:</strong> all cancer-associated genes with >= 2 targets are highlighted by default, additional genes with >= 2 targets are highlighted if impacted by CNVs / LOH
-                </p>
-                <p>
-                <strong>exome data:</strong> all cancer-associated genes with ≥4 targets are highlighted by default
-                </p>
-                <p>
-                The y-axis is fixed between −3 and 3; values outside this range are truncated and will appear at these limits.
-                </p>
+                <p>The y-axis is fixed between −3 and 3; values outside this range are truncated and will appear at these limits.</p>
             </div>
             {% if chr_with %}
                 <h3>Chromosomes with CNV / LOH</h3>
@@ -184,9 +172,9 @@
         <h2>Segment column glossary</h2>
         <div class="note-box">Descriptions of columns shown in the segment table. Use this as a quick reference.</div>
         <button id="toggle-seg-col-glossary" type="button">Show segment column glossary</button>
-        <div id="seg-col-glossary-container"
-             style="display:none;
-                    margin-top:10px">{{ segment_column_glossary_html | safe }}</div>
+        <div id="seg-col-glossary-container" style="display:none; margin-top:10px">
+            {{ segment_column_glossary_html | safe }}
+        </div>
         {# --------------------- Segment table --------------------- #}
         <h1>CNV and LOH Segments from CNVkit and PureCN</h1>
         <button id="toggle-segment-table" type="button">Hide segment table</button>
@@ -245,83 +233,85 @@
              style="display:none;
                     margin-top:10px">{{ region_column_glossary_html | safe }}</div>
         {# --------------------- Region section --------------------- #}
-
-            <h2>Within-gene PON-driven regions</h2>
-            <div class="note-box">
-                These rows represent sub-gene regions with potential amplifications or deletions, identified by deviations in log2 ratios between the tumor sample and the PON.
-            </div>
-            <button id="toggle-region-table" type="button">Show region-level table</button>
-            <div id="region-table-container" style="display:none; margin-top:10px;">
-                <div class="controls">
-                    <div class="control-group">
-                        <label>
-                            <input type="checkbox" id="hide-non-cnv-region">
-                              Show only LOH / CNV regions (from CNVkit or PureCN)
-                        </label>
-                        <label style="margin-left:12px;">
-                            <input type="checkbox" id="only-pon-indication-region">
-                            Show only PON-indicated (GAIN/LOSS) regions
-                        </label>
-                        <label style="margin-left:12px;">
-                            <input type="checkbox" id="only-cancer-genes-region">
-                           Show only cancer-associated genes
-                        </label>
-                    </div>
-                    <div class="control-group">
-                        <span class="control-label">Genomic range:</span>
-                        <label style="margin-left:12px;">
-                            Chr:
-                            <input type="text" id="range-chr-region" placeholder="1" style="width:60px;">
-                        </label>
-                        <label style="margin-left:12px;">
-                            Start:
-                            <input type="number" id="range-start-region" min="0" step="1" placeholder="0">
-                        </label>
-                        <label style="margin-left:12px;">
-                            End:
-                            <input type="number"
-                                   id="range-end-region"
-                                   min="0"
-                                   step="1"
-                                   placeholder="250000000">
-                        </label>
-                    </div>
-                    <div class="control-group">
-                        <label>
-                            Minimum number of targets:
-                            <input type="number" id="min-targets-region" min="0" step="1" value="0">
-                        </label>
-                    </div>
-                    <button id="copy-region-table" type="button">Copy visible rows</button>
-                    <div class="control-group">
-                        <span class="control-label">Additional columns:</span>
-                        <label style="margin-left:12px;">
-                            <input type="checkbox" id="cols-qc-region">
-                            QC details
-                        </label>
-                        <label style="margin-left:12px;">
-                            <input type="checkbox" id="cols-pon-region">
-                            PON details
-                        </label>
-                        <label style="margin-left:12px;">
-                            <input type="checkbox" id="cols-cnvkit-extra-region">
-                            CNVkit extended output
-                        </label>
-                        <label style="margin-left:12px;">
-                            <input type="checkbox" id="cols-purecn-extra-region">
-                            PureCN extended output
-                        </label>
-                    </div>
-                    <div class="control-group">
-                        <label>
-                            Gene filter (comma-separated gene symbols):
-                            <input type="text" id="gene-filter-region" placeholder="TP53,EGFR,MYC">
-                        </label>
-                    </div>
+        <h2>Within-gene PON-driven regions</h2>
+        <div class="note-box">
+            These rows represent sub-gene regions with potential amplifications or deletions, identified by deviations in log2 ratios between the tumor sample and the PON.
+        </div>
+        <button id="toggle-region-table" type="button">Show region-level table</button>
+        <div id="region-table-container" style="display:none; margin-top:10px;">
+            <div class="controls">
+                <div class="control-group">
+                    <label>
+                        <input type="checkbox" id="hide-non-cnv-region">
+                        Show only LOH / CNV regions (from CNVkit or PureCN)
+                    </label>
+                    <label style="margin-left:12px;">
+                        <input type="checkbox" id="only-pon-indication-region">
+                        Show only PON-indicated (GAIN/LOSS) regions
+                    </label>
+                    <label style="margin-left:12px;">
+                        <input type="checkbox" id="only-cancer-genes-region">
+                        Show only cancer-associated genes
+                    </label>
                 </div>
-                {{ region_table_html | safe }}
+                <div class="control-group">
+                    <span class="control-label">Genomic range:</span>
+                    <label style="margin-left:12px;">
+                        Chr:
+                        <input type="text" id="range-chr-region" placeholder="1" style="width:60px;">
+                    </label>
+                    <label style="margin-left:12px;">
+                        Start:
+                        <input type="number"
+                               id="range-start-region"
+                               min="0"
+                               step="1"
+                               placeholder="0">
+                    </label>
+                    <label style="margin-left:12px;">
+                        End:
+                        <input type="number"
+                               id="range-end-region"
+                               min="0"
+                               step="1"
+                               placeholder="250000000">
+                    </label>
+                </div>
+                <div class="control-group">
+                    <label>
+                        Minimum number of targets:
+                        <input type="number" id="min-targets-region" min="0" step="1" value="0">
+                    </label>
+                </div>
+                <button id="copy-region-table" type="button">Copy visible rows</button>
+                <div class="control-group">
+                    <span class="control-label">Additional columns:</span>
+                    <label style="margin-left:12px;">
+                        <input type="checkbox" id="cols-qc-region">
+                        QC details
+                    </label>
+                    <label style="margin-left:12px;">
+                        <input type="checkbox" id="cols-pon-region">
+                        PON details
+                    </label>
+                    <label style="margin-left:12px;">
+                        <input type="checkbox" id="cols-cnvkit-extra-region">
+                        CNVkit extended output
+                    </label>
+                    <label style="margin-left:12px;">
+                        <input type="checkbox" id="cols-purecn-extra-region">
+                        PureCN extended output
+                    </label>
+                </div>
+                <div class="control-group">
+                    <label>
+                        Gene filter (comma-separated gene symbols):
+                        <input type="text" id="gene-filter-region" placeholder="TP53,EGFR,MYC">
+                    </label>
+                </div>
             </div>
-
+            {{ region_table_html | safe }}
+        </div>
         {# --------------------- Modal --------------------- #}
         <div id="plot-modal" class="modal-overlay">
             <div class="modal-content-wrapper">
