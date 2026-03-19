@@ -168,15 +168,16 @@
                 </div>
             {% endif %}
         {% endif %}
-        {# --------------------- Column glossary --------------------- #}
-        <h2>Segment column glossary</h2>
+        {# --------------------- Segment table --------------------- #}
+        <h1>CNV and LOH Segments from CNVkit and PureCN</h1>
+        <h2>Table column glossary</h2>
         <div class="note-box">Descriptions of columns shown in the segment table. Use this as a quick reference.</div>
         <button id="toggle-seg-col-glossary" type="button">Show segment column glossary</button>
         <div id="seg-col-glossary-container" style="display:none; margin-top:10px">
             {{ segment_column_glossary_html | safe }}
         </div>
-        {# --------------------- Segment table --------------------- #}
-        <h1>CNV and LOH Segments from CNVkit and PureCN</h1>
+        <p>
+        </p>
         <button id="toggle-segment-table" type="button">Hide segment table</button>
         <div id="segment-table-container" style="margin-top:10px;">
             <div class="controls">
@@ -226,16 +227,19 @@
             </div>
             {{ segments_table_html | safe }}
         </div>
-        <h2>Within-gene regions column glossary</h2>
+
+        {# --------------------- Region section --------------------- #}
+        <h2>Within-gene PON-driven regions</h2>
+
+        <h2>Table column glossary</h2>
         <div class="note-box">Descriptions of columns shown in the gene region table. Use this as a quick reference.</div>
         <button id="toggle-region-col-glossary" type="button" style="margin-top:8px;">Show gene region glossary</button>
         <div id="region-col-glossary-container"
              style="display:none;
                     margin-top:10px">{{ region_column_glossary_html | safe }}</div>
-        {# --------------------- Region section --------------------- #}
-        <h2>Within-gene PON-driven regions</h2>
+
         <div class="note-box">
-            These rows represent sub-gene regions with potential amplifications or deletions, identified by deviations in log2 ratios between the tumor sample and the PON.
+        Genes are split into multiple rows when log2 ratios relative to the PON suggest distinct within-gene copy number segments (GAIN or LOSS).
         </div>
         <button id="toggle-region-table" type="button">Show region-level table</button>
         <div id="region-table-container" style="display:none; margin-top:10px;">
