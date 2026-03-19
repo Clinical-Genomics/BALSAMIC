@@ -6,7 +6,7 @@ import pandas as pd
 from dataclasses import dataclass
 
 # Local
-from cnv_constants import GeneRegionConfig, GENE, CHR
+from cnv_constants import GeneRegionConfig, GENE, CHR, TARGETS
 
 
 ###############################
@@ -470,7 +470,7 @@ def _collapse_bins_into_assigned_gene_regions(bins: pd.DataFrame) -> pd.DataFram
         .agg(
             region_start=("start", "min"),
             region_end=("end", "max"),
-            **{"n.targets": ("log2", "count")},
+            **{TARGETS: ("log2", "count")},
             mean_log2=("log2", "mean"),
             min_log2=("log2", "min"),
             max_log2=("log2", "max"),
@@ -564,7 +564,7 @@ def _score_pon_regions(
         lambda row: _pon_abs_z(
             row["pon_region_log2_difference"],
             row["pon_mean_spread"],
-            row.get("n.targets"),
+            row.get(TARGETS),
             min_n=GeneRegionConfig.min_region_targets_for_call,
         ),
         axis=1,
@@ -586,7 +586,7 @@ def _score_pon_regions(
 
     # Hard gate: small regions are not eligible for PON-based interpretation
     too_small = (
-        out["n.targets"].fillna(0).astype(int)
+        out[TARGETS].fillna(0).astype(int)
         < GeneRegionConfig.min_region_targets_for_call
     )
 

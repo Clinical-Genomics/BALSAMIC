@@ -3,6 +3,7 @@ from typing import Mapping, Sequence
 
 CHR = "chr"
 GENE = "gene.symbol"
+TARGETS = "n.targets"
 
 
 @dataclass(frozen=True)
@@ -168,7 +169,7 @@ SEGMENT_COLUMN_DESCRIPTIONS = {
     # --- Gene identity ---
     GENE: "HGNC gene symbols overlapping segment (minimum 2 probe targets required for a gene to be listed)",
     # --- Bin aggregation metrics ---
-    "n.targets": "Number of target bins overlapping with CN segment.",
+    TARGETS: "Number of target bins overlapping with CN segment.",
     "log2": f"log2 copy-ratio from CNVkit or PureCN. {not_pnp}",
     "baf_maf": "Mean B-allele frequency (BAF) for the CNVkit segment | Median observed minor allele frequency (MAF) of heterozygous SNPs in the PureCN segment.",
     "cnv_call": f"CNV call from PureCN or CNVkit (AMPLIFICATION / DELETION / NEUTRAL) determined based on total copy-numbers predicted from each tool. {pnp}",
@@ -196,7 +197,7 @@ GENE_REGION_COLUMN_DESCRIPTIONS = {
     GENE: "HGNC gene symbol.",
     "is_cancer_gene": "True if the gene is included in the configured cancer gene set.",
     # --- Bin aggregation metrics ---
-    "n.targets": "Number of target bins in this gene region. Genes are split into multiple rows when log2 ratios relative to the PON suggest distinct within-gene copy number segments (GAIN or LOSS).",
+    TARGETS: "Number of target bins in this gene region. Genes are split into multiple rows when log2 ratios relative to the PON suggest distinct within-gene copy number segments (GAIN or LOSS).",
     "mean_log2": f"Mean log2 copy number ratio across bins overlapping the gene region. {not_pnp}",
     "min_log2": f"Minimum log2 copy number ratio observed among bins in the gene region. {not_pnp}",
     "max_log2": f"Maximum log2 copy number ratio observed among bins in the gene region. {not_pnp}",
@@ -247,7 +248,7 @@ SEGMENT_TABLE_SPEC = TableSpec(
         "purecn_type",
         "log2",
         "baf_maf",
-        "n.targets",
+        TARGETS,
         "segment_size",
         "cnvkit_adjusted_log2",
         "cnvkit_seg_cn",
@@ -285,7 +286,7 @@ GENE_TABLE_SPEC = TableSpec(
         "region_end",
         "cytoband",
         GENE,
-        "n.targets",
+        TARGETS,
         "mean_log2",
         "min_log2",
         "max_log2",
