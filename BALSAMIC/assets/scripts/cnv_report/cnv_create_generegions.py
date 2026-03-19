@@ -157,7 +157,7 @@ def _find_gene_runs(gene_bins: pd.DataFrame) -> list[list[int]]:
     for bin_index, z_value in zip(bin_indices, z_smooth):
         # Weak bins cannot belong to a candidate run.
         # They terminate any run currently in progress.
-        if not abs(z_value) < GeneRegionConfig.z_bin_thresh:
+        if abs(z_value) < GeneRegionConfig.z_bin_thresh:
             if _run_passes_thresholds(gene_bins, current_run):
                 accepted_runs.append(current_run.copy())
             current_run = []

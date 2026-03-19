@@ -415,6 +415,10 @@ class PlotCard:
     has_cnv: bool
 
 
+from pathlib import Path
+from typing import Any
+
+
 def _collect_chr_plot_groups(
     *,
     chr_plots_dir: str | Path | None,
@@ -428,38 +432,50 @@ def _collect_chr_plot_groups(
         "chr_no_cnv":   [ ... ],
       }
     """
-    groups: dict[str, list[PlotCard]] = {
+    empty_groups: dict[str, list[dict[str, Any]]] = {
         "chr_with_cnv": [],
         "chr_no_cnv": [],
     }
 
     if chr_plots_dir is None:
-        return {k: [] for k in groups}
+        return empty_groups
 
     qc_dir = Path(chr_plots_dir)
     if not qc_dir.is_dir():
-        return {k: [] for k in groups}
+        return empty_groups
+
+    groups: dict[str, list[PlotCard]] = {
+        "chr_with_cnv": [],
+        "chr_no_cnv": [],
+    }
 
     png_files = sorted(
-        list(qc_dir.glob("cnv_chr*segments.png")),
+        qc_dir.glob("cnv_chr*segments.png"),
         key=lambda p: _chr_sort_key_from_stem(p.stem),
     )
 
     for png_file in png_files:
         stem = png_file.stem
-
         data_uri = _png_to_data_uri(png_file)
         if not data_uri:
             continue
 
         chr_label = _extract_chr_label_from_stem(stem)
-        has_cnv = bool(chr_label in cnv_chr_set)
+        has_cnv = chr_label in cnv_chr_set
         title = f"Chr {chr_label}"
 
-        card = PlotCard(title=title, data_uri=data_uri, stem=stem, has_cnv=has_cnv)
-        (groups["chr_with_cnv"] if has_cnv else groups["chr_no_cnv"]).append(card)
+        card = PlotCard(
+            title=title,
+            data_uri=data_uri,
+            stem=stem,
+            has_cnv=has_cnv,
+        )
+        groups["chr_with_cnv" if has_cnv else "chr_no_cnv"].append(card)
 
-    return {k: [c.__dict__ for c in v] for k, v in groups.items()}
+    return {
+        group_name: [card.__dict__ for card in cards]
+        for group_name, cards in groups.items()
+    }
 
 
 @click.command()
