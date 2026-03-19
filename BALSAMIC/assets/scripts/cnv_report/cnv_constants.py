@@ -57,14 +57,6 @@ class GeneRegionConfig:
     #     effect = log2 - pon_log2
     bridge_delta: float = 0.12
 
-    # Maximum size of a "small segment" that may be merged into an adjacent
-    # region when the effects are similar.
-    small_segment_max_bins: int = 5
-
-    # Maximum difference in mean effect between adjacent runs for them to
-    # be merged during cleanup.
-    merge_delta: float = 0.10
-
     # ------------------------------------------------------------------
     # Region scoring and CNV indication
     # ------------------------------------------------------------------
