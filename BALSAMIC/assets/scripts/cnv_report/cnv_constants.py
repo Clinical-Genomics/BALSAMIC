@@ -11,7 +11,7 @@ class GeneRegionConfig:
     # ------------------------------------------------------------------
 
     # Minimum number of bins required in a gene before attempting to
-    # detect internal gene regions. Very small genes are skipped because
+    # detect internal gene regions. Genes with few targets are skipped because
     # runs cannot be detected robustly.
     min_gene_targets: int = 8
 
