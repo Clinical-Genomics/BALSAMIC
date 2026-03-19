@@ -206,14 +206,14 @@ GENE_REGION_COLUMN_DESCRIPTIONS = {
     "cnvkit_cnv_call": "CNV call from overlapping CNVkit segment (e.g., DELETION, AMPLIFICATION, NEUTRAL).",
     # --- PureCN gene-level call ---
     "purecn_cnv_call": "CNV call from overlapping PureCN segment (e.g., DELETION, AMPLIFICATION, NEUTRAL).",
-    "purecn_type": "PureCN LOH type if M = 0 (such as WHOLE ARM COPY-NEUTRAL LOH, COPY-NEUTRAL LOH)",
+    "purecn_type": "PureCN LOH type if M = 0 (such as WHOLE ARM COPY-NEUTRAL LOH, COPY-NEUTRAL LOH).",
     # --- CNVkit segment details ---
     "cnvkit_seg_start": "Start coordinate (bp) of the overlapping CNVkit segment.",
     "cnvkit_seg_end": "End coordinate (bp) of the overlapping CNVkit segment.",
     "cnvkit_adjusted_log2": f"Segment-level log2 copy-ratio from CNVkit {pnp}.",
     "cnvkit_seg_raw_log2": f"Raw segment-level log2 copy-ratio from CNVkit {not_pnp}.",
     "cnvkit_seg_baf": "Mean B-allele frequency (BAF) for the overlapping CNVkit segment.",
-    "cnvkit_seg_cn": f"Total copy number estimate for the overlapping CNVkit segment{pnp}.",
+    "cnvkit_seg_cn": f"Total copy number estimate for the overlapping CNVkit segment {pnp}.",
     "cnvkit_seg_cn1": f"Estimated minor allele copy number for the overlapping CNVkit segment {pnp}.",
     "cnvkit_seg_cn2": f"Estimated major allele copy number for the overlapping CNVkit segment {pnp}.",
     # --- PureCN segment details ---
@@ -224,10 +224,7 @@ GENE_REGION_COLUMN_DESCRIPTIONS = {
     "purecn_maf_observed": "Median observed minor allele frequency (MAF) of heterozygous SNPs for the overlapping PureCN segment.",
     "purecn_C": f"Total copy number for segment for the overlapping PureCN segment {pnp}.",
     "purecn_M": f"Minor allele copy number for the overlapping PureCN segment {pnp}.",
-    "purecn_M_flagged": "For the overlapping PureCN segment: True if PureCN flagged the minor allele estimate as unreliable (due to small number of variants or ambiguous call)",
-    # --- Exon overlap ---
-    "exons_overlapping_cnvkit_segment": "Number of exons overlapping the CNVkit segment for this gene.",
-    "exons_overlapping_gene_region": "Number of exons overlapping the aggregated gene region.",
+    "purecn_M_flagged": "For the overlapping PureCN segment: True if PureCN flagged the minor allele estimate as unreliable (due to small number of variants or ambiguous call).",
     # --- PON bin/region-level statistics ---
     "pon_mean_log2": "Mean PON log2 value across bins in the gene-region.",
     "pon_mean_spread": "Mean PON spread across bins in the gene-region.",
