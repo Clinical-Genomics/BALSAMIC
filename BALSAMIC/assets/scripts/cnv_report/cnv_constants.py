@@ -152,7 +152,7 @@ RENAME_COLS = {
     "purecn_type": "PureCN LOH-type",
     GENE: "Gene",
     "baf_maf": "BAF | MAF",
-    "segment_size": "Segment size (KB)",
+    "segment_size": "Segment size (Kbp)",
 }
 
 pnp = "(adjusted for purity and ploidy)"

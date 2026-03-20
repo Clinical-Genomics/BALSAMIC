@@ -620,7 +620,7 @@ def build_segment_table(
     segments.loc[mask_pc, "cnv_call"] = segments.loc[mask_pc, "purecn_cnv_call"]
 
     segments = annotate_segments_with_cytoband(segments, cytoband_df)
-    segments["segment_size"] = round((segments["end"] - segments["start"]) / 1000, 2)
+    segments["segment_size"] = round((segments["end"] - segments["start"]) / 1000)
 
     segments = segments.drop(columns=["cnvkit_cnv_call", "purecn_cnv_call"])
     return finalize_table(segments, SEGMENT_TABLE_SPEC)
