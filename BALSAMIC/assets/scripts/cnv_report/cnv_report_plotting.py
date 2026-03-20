@@ -742,7 +742,7 @@ def compute_highlighted_genes_from_generegions(
     generegions = generegions[generegions[gene_col].ne("backbone")].copy()
 
     if generegions.empty:
-        return np.array([], dtype=object), pd.DataFrame()
+        return np.array([], dtype=object)
 
     generegions = _add_region_highlight_evidence(
         generegions,
