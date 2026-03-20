@@ -7,6 +7,7 @@ Added:
 * add model validation for reference files in init command https://github.com/Clinical-Genomics/BALSAMIC/pull/1654
 * add automatic download of cytoband coordinates file via init command https://github.com/Clinical-Genomics/BALSAMIC/pull/1651
 * add argument for cosmic file https://github.com/Clinical-Genomics/BALSAMIC/pull/1656
+* add cnv report read-the-docs documentation https://github.com/Clinical-Genomics/BALSAMIC/pull/1665 
 
 Changed:
 ^^^^^^^^
