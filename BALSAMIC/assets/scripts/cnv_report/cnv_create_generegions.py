@@ -58,7 +58,7 @@ def annotate_cnr_bins_with_pon(
 
 def _pon_abs_z(
     pon_region_log2_difference: float,
-    spread: float,
+    pon_mean_spread: float,
     n_targets: float,
     *,
     min_n: int,
@@ -73,19 +73,19 @@ def _pon_abs_z(
     where:
       - pon_region_log2_difference is the region's mean log2 deviation from
         the PON baseline
-      - spread is the expected PON variation
+      - pon_mean_spread is the expected PON variation
       - n_targets is the number of bins contributing to the region
 
     Returns NaN when the input values are missing, the spread is not positive,
     or the region is too small to score.
     """
-    if pd.isna(pon_region_log2_difference) or pd.isna(spread) or spread <= 0:
+    if pd.isna(pon_region_log2_difference) or pd.isna(pon_mean_spread) or pon_mean_spread <= 0:
         return np.nan
 
     if n_targets < min_n:
         return np.nan
 
-    return abs(pon_region_log2_difference) / (spread / np.sqrt(float(n_targets)))
+    return abs(pon_region_log2_difference) / (pon_mean_spread / np.sqrt(float(n_targets)))
 
 
 def _assign_initial_gene_regions(
