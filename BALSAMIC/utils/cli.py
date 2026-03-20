@@ -423,7 +423,6 @@ def _run_rulegraph_cli(
         str(snakefile),
         "--quiet",
     ]
-    # print(" ".join(cmd))
     proc = subprocess.run(cmd, text=True, capture_output=True)
     raw = (proc.stdout or "") + ("\n" + proc.stderr if proc.stderr else "")
     dot = _extract_dot(raw)
