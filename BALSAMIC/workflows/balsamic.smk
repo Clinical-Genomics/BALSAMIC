@@ -460,11 +460,12 @@ analysis_specific_results.extend(
     )
 )
 
-# CNV report
-analysis_specific_results.append(cnv_dir + "CNV.somatic." + case_id + ".report.pdf"),
 
 # TGA specific files
 if config["analysis"]["sequencing_type"] != "wgs":
+    # CNV report
+    analysis_specific_results.append(cnv_dir + "CNV.somatic." + case_id + ".report.html")
+    analysis_specific_results.append(cnv_dir + "CNV.somatic." + case_id + ".report_deprecated.pdf"),
     # CNVkit
     analysis_specific_results.append(cnv_dir + "tumor.merged.cns")
     analysis_specific_results.extend(
@@ -491,6 +492,9 @@ if config["analysis"]["sequencing_type"] != "wgs":
                     var_caller=["tnscope_umi"],
                 )
             )
+else:
+    # CNV report (wgs)
+    analysis_specific_results.append(cnv_dir + "CNV.somatic." + case_id + ".report.pdf"),
 
 
 if (

@@ -232,4 +232,5 @@ DELIVERY_RULES: List[str] = [
     "msisensorpro_msi_tumor_normal",
     # CNV report
     "merge_cnv_pdf_reports",
+    "create_cnv_html_report",
 ]
