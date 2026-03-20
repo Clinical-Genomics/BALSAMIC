@@ -715,7 +715,7 @@ def compute_highlighted_genes_from_generegions(
     cnvkit_call_col: str = "cnvkit_cnv_call",
     purecn_call_col: str = "purecn_cnv_call",
     purecn_type_col: str = "purecn_type",
-) -> tuple[np.ndarray, pd.DataFrame]:
+) -> np.ndarray:
     """
     Decide which genes should be highlighted on one chromosome.
 
