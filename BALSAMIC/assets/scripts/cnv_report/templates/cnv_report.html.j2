@@ -144,16 +144,16 @@
         {% if chr_with or chr_no %}
             <h2>Per-chromosome CNV plots</h2>
             <div class="note-box">
-                <p>These plots show log2 ratios, PON spread (if available), VAF and detected CNV segments for each chromosome.</p>
-                <p>Plots containing CNV or LOH regions are highlighted; click a plot to enlarge it.</p>
-                <p>Relevant genes within detected CNVs are highlighted:</p>
+                <p>These plots show log2 ratios, PON spread (if available), VAF and detected CNV segments for each chromosome. Plots containing CNV or LOH regions are highlighted; click a plot to enlarge it.</p>
+                <p>The y-axis is fixed between −3 and 3; values outside this range are truncated and will appear at these limits.</p>
+                <p><strong>Pseudoposition:</strong> Bins are arranged in genomic order along the x-axis. The scale is non-linear, with bins within highlighted genes expanded and others compressed for visibility.</p>
+                <p><strong>Relevant genes within detected CNVs are highlighted:</strong></p>
                 <p>
-                    <em>Panel data:</em>Cancer-associated genes with ≥2 targets; other genes with ≥2 targets if affected by CNVs or LOH.
+                    <em>Panel data:</em> Cancer-associated genes with ≥2 targets; other genes with ≥2 targets if affected by CNVs or LOH.
                 </p>
                 <p>
                     <em>Exome data:</em> Cancer-associated genes with ≥4 targets
                 </p>
-                <p>The y-axis is fixed between −3 and 3; values outside this range are truncated and will appear at these limits.</p>
             </div>
             {% if chr_with %}
                 <h3>Chromosomes with CNV / LOH</h3>
