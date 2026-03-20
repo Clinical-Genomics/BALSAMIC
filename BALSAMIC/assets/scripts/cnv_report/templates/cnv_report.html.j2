@@ -170,9 +170,7 @@
         {% endif %}
         {# --------------------- Segment table --------------------- #}
         <h1>CNV and LOH Segments from CNVkit and PureCN</h1>
-        <h2>Table column glossary</h2>
-        <div class="note-box">Descriptions of columns shown in the segment table. Use this as a quick reference.</div>
-        <button id="toggle-seg-col-glossary" type="button">Show segment column glossary</button>
+        <button id="toggle-seg-col-glossary" type="button">Show table column glossary</button>
         <div id="seg-col-glossary-container" style="display:none; margin-top:10px">
             {{ segment_column_glossary_html | safe }}
         </div>
@@ -231,9 +229,7 @@
         {# --------------------- Region section --------------------- #}
         <h2>Within-gene PON-driven regions</h2>
 
-        <h2>Table column glossary</h2>
-        <div class="note-box">Descriptions of columns shown in the gene region table. Use this as a quick reference.</div>
-        <button id="toggle-region-col-glossary" type="button" style="margin-top:8px;">Show gene region glossary</button>
+        <button id="toggle-region-col-glossary" type="button" style="margin-top:8px;">Show table column glossary</button>
         <div id="region-col-glossary-container"
              style="display:none;
                     margin-top:10px">{{ region_column_glossary_html | safe }}</div>

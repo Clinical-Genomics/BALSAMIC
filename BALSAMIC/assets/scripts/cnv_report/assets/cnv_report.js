@@ -676,16 +676,16 @@
     "toggle-seg-col-glossary",
     "seg-col-glossary-container",
     false,
-    "Hide segment glossary",
-    "Show segment glossary",
+    "Hide table column glossary",
+    "Show table column glossary",
   );
 
   hookShowHide(
     "toggle-region-col-glossary",
     "region-col-glossary-container",
     false,
-    "Hide region glossary",
-    "Show region glossary",
+    "Hide table column glossary",
+    "Show table column glossary",
   );
 
   hookShowHide(
