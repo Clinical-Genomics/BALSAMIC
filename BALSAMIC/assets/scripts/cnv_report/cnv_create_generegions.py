@@ -79,13 +79,19 @@ def _pon_abs_z(
     Returns NaN when the input values are missing, the spread is not positive,
     or the region is too small to score.
     """
-    if pd.isna(pon_region_log2_difference) or pd.isna(pon_mean_spread) or pon_mean_spread <= 0:
+    if (
+        pd.isna(pon_region_log2_difference)
+        or pd.isna(pon_mean_spread)
+        or pon_mean_spread <= 0
+    ):
         return np.nan
 
     if n_targets < min_n:
         return np.nan
 
-    return abs(pon_region_log2_difference) / (pon_mean_spread / np.sqrt(float(n_targets)))
+    return abs(pon_region_log2_difference) / (
+        pon_mean_spread / np.sqrt(float(n_targets))
+    )
 
 
 def _assign_initial_gene_regions(
