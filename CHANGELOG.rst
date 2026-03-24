@@ -7,7 +7,7 @@ Added:
 * add model validation for reference files in init command https://github.com/Clinical-Genomics/BALSAMIC/pull/1654
 * add automatic download of cytoband coordinates file via init command https://github.com/Clinical-Genomics/BALSAMIC/pull/1651
 * add argument for cosmic file https://github.com/Clinical-Genomics/BALSAMIC/pull/1656
-* add new CNV html report https://github.com/Clinical-Genomics/BALSAMIC/pull/1648
+* add CNV interactive report for targeted analyses https://github.com/Clinical-Genomics/BALSAMIC/pull/1648
 * add cust-case-id to case config and CNV plots https://github.com/Clinical-Genomics/BALSAMIC/pull/1648
 * add cancer-genelist with cancer genes from custs and oncokb https://github.com/Clinical-Genomics/BALSAMIC/pull/1648
 * add bcftools split multialleles for DNAscope calls https://github.com/Clinical-Genomics/BALSAMIC/pull/1648

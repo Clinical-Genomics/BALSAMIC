@@ -19,7 +19,7 @@ rule create_cnv_html_report:
         purity = cnv_dir+ "CNV.somatic." + config["analysis"]["case_id"] + ".purecn.purity.csv",
         sex_prediction_json = qc_dir + "sex_prediction.json",
     output:
-        cnv_report_html = cnv_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".report.html"
+        cnv_report_html = cnv_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".interactive_report.html"
     benchmark:
         Path(benchmark_dir, "create_cnv_html_report.tsv").as_posix()
     params:

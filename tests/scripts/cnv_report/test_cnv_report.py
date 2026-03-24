@@ -193,7 +193,7 @@ def test_generate_report_no_pon(tmp_path, monkeypatch):
     vcf_path = tmp_path / "sample.vcf"
     vcf_path.write_text("##fileformat=VCFv4.2\n")
 
-    output_html = tmp_path / "report.html"
+    output_html = tmp_path / "interactive_report.html"
 
     runner = CliRunner()
     result = runner.invoke(
