@@ -5,7 +5,6 @@ from unittest import mock
 import graphviz
 
 from BALSAMIC.constants.constants import FileType
-from tests.conftest import MOCKED_OS_ENVIRON
 
 
 def test_tumor_normal_config(
@@ -46,7 +45,11 @@ def test_tumor_normal_config(
         ]
         + config_case_cli_tga,
     )
-
+    assert result.exit_code == 0, (
+        f"CLI failed with exit_code={result.exit_code}\n"
+        f"stdout/stderr:\n{result.output}\n"
+        f"exception: {result.exception}"
+    )
     # THEN a config should be created and exist
     assert result.exit_code == 0
     assert Path(

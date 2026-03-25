@@ -377,6 +377,7 @@ def reference():
         "cadd_snv": "variants/hg19.cadd_snv.tsv.gz",
         "cadd_annotations": "cadd/",
         "simple_repeat": "genome/simpleRepeat.txt.gz",
+        "cytoband_coordinates": "genome/cytoBand.txt",
     }
 
 
@@ -579,6 +580,14 @@ def pon_config_dict_w_singularity(
 def cadd_annotations(test_data_dir: str) -> str:
     """Return path for CADD annotations."""
     return Path(test_data_dir, "references", "cadd").as_posix()
+
+
+@pytest.fixture(scope="session")
+def cancer_genelist(test_data_dir: str) -> str:
+    """Return path for oncokb cancer genelist annotations."""
+    cancergenelist = Path(test_data_dir, "references", "cancerGeneList.tsv")
+    cancergenelist.touch()
+    return cancergenelist.as_posix()
 
 
 @pytest.fixture(scope="session")
@@ -1420,6 +1429,8 @@ def config_case_cli_wgs(
         gens_min_5_af_gnomad_file,
         "--gens-coverage-pon",
         gens_cov_pon_file,
+        "--cust-case-id",
+        "cust-casiid",
     ]
 
 
@@ -1439,6 +1450,7 @@ def config_case_cli_tga(
     sentieon_license: str,
     sentieon_install_dir: str,
     gens_min_5_af_gnomad_file: str,
+    cancer_genelist: str,
 ) -> List[str]:
     """Return common config case CLI."""
     return [
@@ -1446,6 +1458,8 @@ def config_case_cli_tga(
         balsamic_cache,
         "--background-variants",
         background_variant_file,
+        "--cancer-genelist",
+        cancer_genelist,
         "--cadd-annotations",
         cadd_annotations,
         "--cosmic",
@@ -1472,6 +1486,8 @@ def config_case_cli_tga(
         sentieon_license,
         "--gnomad-min-af5",
         gens_min_5_af_gnomad_file,
+        "--cust-case-id",
+        "cust-casiid",
     ]
 
 
