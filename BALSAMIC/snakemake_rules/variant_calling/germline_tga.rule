@@ -6,9 +6,9 @@ rule sentieon_DNAscope_tga:
         bam = lambda wildcards: config_model.get_final_bam_name(bam_dir = bam_dir, sample_type = wildcards.sample_type),
         ref = reference_genome,
         dbsnp = dbsnp,
-        interval = config["panel"]["capture_kit"]
+        interval = cnv_dir + "capture_kit_expanded_merged.bed"
     output:
-        vcf = vcf_dir + "SNV.germline.{sample_type}.dnascope.vcf.gz",
+        vcf = vcf_dir + "SNV.germline.{sample_type}.dnascope_multiallelic.vcf.gz",
     benchmark:
         Path(benchmark_dir, "sentieon_dnascope_{sample_type}.tsv").as_posix()
     params:
@@ -33,6 +33,28 @@ export SENTIEON_LICENSE={params.sentieon_lic};
 -d {input.dbsnp} {output.vcf};
 
 rm -rf {params.tmpdir};
+        """
+
+rule bcftools_normalise_dnascope:
+    input:
+        ref = reference_genome,
+        vcf = vcf_dir + "SNV.germline.{sample_type}.dnascope_multiallelic.vcf.gz",
+    output:
+        vcf_normalised = vcf_dir + "SNV.germline.{sample_type}.dnascope.vcf.gz",
+    benchmark:
+        Path(benchmark_dir,'bcftools_normalise_dnascope_{sample_type}_' + config["analysis"]["case_id"] + ".tsv").as_posix()
+    singularity:
+        Path(singularity_image,config["bioinfo_tools"].get("bcftools") + ".sif").as_posix()
+    params:
+        case_name=config["analysis"]["case_id"],
+    message:
+        "Normalising variants for DNAscope {params.case_name}"
+    shell:
+        """
+      bcftools norm --output-type u --multiallelics -both --check-ref s --fasta-ref {input.ref} {input.vcf} \
+      | bcftools norm -o {output.vcf_normalised} --output-type z --rm-dup none -
+
+      tabix -p vcf -f {output.vcf_normalised};
         """
 
 
