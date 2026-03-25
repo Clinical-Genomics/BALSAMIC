@@ -80,6 +80,7 @@ Genes are highlighted in chromosome plots to emphasize biologically and clinical
 **Panel analysis:**
 
 In panel-based analyses, genes are highlighted if they meet at least one of the following criteria:
+
 - Presence of CNV signal (amplification/deletion) or LOH when genes have >2 overlapping targets (probes in the panel design)
 - Cancer-associated genes with >2 overlapping targets
 
@@ -96,7 +97,7 @@ A predefined list determines which genes are considered cancer-associated and pr
 This list combines:
 
 - Cancer genes from OncoKB
-- Custom or panel-specific genes
+- Additional clinically relevant genes
 
 .. note::
 
