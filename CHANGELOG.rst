@@ -12,6 +12,7 @@ Added:
 * add cancer-genelist with cancer genes from custs and oncokb https://github.com/Clinical-Genomics/BALSAMIC/pull/1648
 * add bcftools split multialleles for DNAscope calls https://github.com/Clinical-Genomics/BALSAMIC/pull/1648
 * add germline vcf to create VAF plot in CNVkit scatter https://github.com/Clinical-Genomics/BALSAMIC/pull/1648
+* add cnv report read-the-docs documentation https://github.com/Clinical-Genomics/BALSAMIC/pull/1665 
 
 Changed:
 ^^^^^^^^
