@@ -43,6 +43,7 @@ METRICS: Dict[str, dict] = {
             "PCT_TARGET_BASES_500X": {"condition": {"norm": "gt", "threshold": 0.95}},
         },
         "gmsmyeloid": {
+            "GC_DROPOUT": {"condition": {"norm": "lt", "threshold": 3.00}},
             "PCT_TARGET_BASES_500X": {"condition": {"norm": "gt", "threshold": 0.95}},
         },
         "hdcfdna": {
