@@ -200,6 +200,20 @@ CNV calls are standardized:
    For **exome** this is further limited to only show cancer-associated genes
 
 
+PureCN purity and ploidy estimation
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+PureCN is used to estimate the purity and ploidy of the tumor sample, based on the evidence of CNVs and VAFs from supplied germline calls in the tumor sample.
+
+.. warning::
+
+   This estimation is not perfect, and can sometimes fail entirely.
+
+   Treat therefore the purity and ploidy estimation in the table at the top of the report as a possible solution, and not as the definitive truth.
+
+   When PureCN fails at finding any good purity and ploidy estimation it doesn't produce an output at all. In these cases the PureCN results will be absent from the report, and the log2-adjusted values from CNVkit will be based on a default of 20% purity and 2 ploidy.
+
+
 Sex-aware interpretation
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
