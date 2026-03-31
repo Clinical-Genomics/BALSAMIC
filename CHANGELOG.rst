@@ -26,6 +26,7 @@ Changed:
 Removed:
 ^^^^^^^^
 * removed cosmic file from init download https://github.com/Clinical-Genomics/BALSAMIC/pull/1656
+* cyvcf2 from docs installation https://github.com/Clinical-Genomics/BALSAMIC/pull/1669
 
 Fixed:
 ^^^^^^
