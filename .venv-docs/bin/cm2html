@@ -1,6 +1,0 @@
-#!/Users/mathiasjohansson/main_workdir/github/BALSAMIC_improve_cnv_report/BALSAMIC/.venv-docs/bin/python
-import sys
-from recommonmark.scripts import cm2html
-if __name__ == '__main__':
-    sys.argv[0] = sys.argv[0].removesuffix('.exe')
-    sys.exit(cm2html())
