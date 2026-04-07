@@ -8,7 +8,6 @@ Added:
 * add automatic download of cytoband coordinates file via init command https://github.com/Clinical-Genomics/BALSAMIC/pull/1651
 * add argument for cosmic file https://github.com/Clinical-Genomics/BALSAMIC/pull/1656
 * add CNV interactive report for targeted analyses https://github.com/Clinical-Genomics/BALSAMIC/pull/1648
-* add cust-case-id to case config and CNV plots https://github.com/Clinical-Genomics/BALSAMIC/pull/1648
 * add cancer-genelist with cancer genes from custs and oncokb https://github.com/Clinical-Genomics/BALSAMIC/pull/1648
 * add bcftools split multialleles for DNAscope calls https://github.com/Clinical-Genomics/BALSAMIC/pull/1648
 * add germline vcf to create VAF plot in CNVkit scatter https://github.com/Clinical-Genomics/BALSAMIC/pull/1648
@@ -22,7 +21,7 @@ Changed:
 * change SOR filter threshold for wgs tumor only to 4 https://github.com/Clinical-Genomics/BALSAMIC/pull/1659
 * changed DNAscope germline panel bedfile to padded bed https://github.com/Clinical-Genomics/BALSAMIC/pull/1659
 * changed GC dropout QC threshold for myeloid panel https://github.com/Clinical-Genomics/BALSAMIC/pull/1667
-* changed GC dropout QC threshold for lymphoid panel
+* changed GC dropout QC threshold for lymphoid panel https://github.com/Clinical-Genomics/BALSAMIC/pull/1666
 
 Removed:
 ^^^^^^^^
@@ -32,6 +31,7 @@ Removed:
 Fixed:
 ^^^^^^
 * removed gc_dropout and at_dropout gcbias metric from deliverables https://github.com/Clinical-Genomics/BALSAMIC/pull/1661
+* add cust-case-id to case config and CNV plots https://github.com/Clinical-Genomics/BALSAMIC/pull/1648 https://github.com/Clinical-Genomics/BALSAMIC/pull/1673
 
 [18.0.1]
 --------
