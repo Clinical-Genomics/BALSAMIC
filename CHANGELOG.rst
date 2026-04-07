@@ -22,7 +22,7 @@ Changed:
 * change SOR filter threshold for wgs tumor only to 4 https://github.com/Clinical-Genomics/BALSAMIC/pull/1659
 * changed DNAscope germline panel bedfile to padded bed https://github.com/Clinical-Genomics/BALSAMIC/pull/1659
 * changed GC dropout QC threshold for myeloid panel https://github.com/Clinical-Genomics/BALSAMIC/pull/1667
-* changed GC dropout QC threshold for lymphoid panel
+* changed GC dropout QC threshold for lymphoid panel https://github.com/Clinical-Genomics/BALSAMIC/pull/1666
 
 Removed:
 ^^^^^^^^
