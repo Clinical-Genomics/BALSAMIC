@@ -19,6 +19,7 @@
 
    balsamic_filters
    balsamic_sv_cnv
+   balsamic_cnv_report
    balsamic_annotation
    balsamic_pon
    balsamic_qc

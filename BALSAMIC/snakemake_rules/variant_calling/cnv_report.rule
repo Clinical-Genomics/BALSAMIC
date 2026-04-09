@@ -1,0 +1,55 @@
+
+def case_id_param(wildcards):
+    cust_case_id = config_model.analysis.cust_case_id
+    case_id = config_model.analysis.case_id
+
+    if cust_case_id:
+        return f"--case-id {cust_case_id}"
+    return f"--cust-case-id {case_id}"
+
+
+rule create_cnv_html_report:
+    input:
+        cnr = cnv_dir + "tumor.merged.cnr",
+        cns = cnv_dir + "tumor.merged.cns",
+        cns_init = cnv_dir + "tumor.initial.cns",
+        germline_vcf = vcf_dir + "SNV.germline.tumor.dnascope.vcf.gz",
+        diagram = cnv_dir + "tumor.merged-diagram.pdf",
+        scatter = cnv_dir + "tumor.merged-scatter.pdf",
+        purity = cnv_dir+ "CNV.somatic." + config["analysis"]["case_id"] + ".purecn.purity.csv",
+        sex_prediction_json = qc_dir + "sex_prediction.json",
+    output:
+        cnv_report_html = cnv_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".interactive_report.html"
+    benchmark:
+        Path(benchmark_dir, "create_cnv_html_report.tsv").as_posix()
+    params:
+        housekeeper_id = {"id": config["analysis"]["case_id"], "tags": "clinical"},
+        cnv_report_script = get_script_path("cnv_report/cnv_qc_report.py"),
+        pon_cnn = lambda wildcards, pon_cnn=pon_cnn: f"--pon {pon_cnn}" if pon_cnn else "",
+        gender = config_model.get_gender,
+        cytoband = cytoband,
+        is_exome = lambda wildcards, is_exome=config_model.panel.exome: "--is-exome" if is_exome else "",
+        cancergenes = config_model.analysis.cancergenes,
+        case_id = lambda wildcards, cust_case_id=config_model.analysis.cust_case_id: f"--case-id {cust_case_id}" if cust_case_id else f"--case-id {config_model.analysis.case_id}",
+        loh_regions = cnv_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".purecn.LOHregions.csv",
+        analysis_type = config["analysis"]["analysis_type"]
+    shell:
+        """
+python {params.cnv_report_script} \
+--loh-regions {params.loh_regions} \
+--cnr {input.cnr} \
+--cns {input.cns} \
+--cns-init {input.cns_init} \
+--vcf {input.germline_vcf} \
+--cytoband {params.cytoband} \
+--cnvkit-scatter {input.scatter} \
+--cnvkit-diagram {input.diagram} \
+--purity-csv {input.purity} \
+--output-file {output.cnv_report_html} \
+--cancer-genes {params.cancergenes} \
+--sex {params.gender} \
+--analysis-type {params.analysis_type} \
+{params.pon_cnn} \
+{params.is_exome} \
+{params.case_id}
+        """

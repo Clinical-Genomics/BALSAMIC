@@ -65,13 +65,13 @@ class SbatchSubmitter:
           - optional partition if `self.headjob_partition` is set
         """
         lines = [
-            "#!/bin/bash -l",
+            "#!/bin/bash",
             f"#SBATCH --account={self.account}",
             f"#SBATCH --job-name=BALSAMIC_snakemake_submit.{self.case_id}.%j",
             f"#SBATCH --output={self.log_path}/BALSAMIC_snakemake_submit.{self.case_id}.%j.out",
             f"#SBATCH --error={self.log_path}/BALSAMIC_snakemake_submit.{self.case_id}.%j.err",
             "#SBATCH --ntasks=1",
-            "#SBATCH --mem=5G",
+            "#SBATCH --mem=500M",
             f"#SBATCH --time={self.max_run_hours}:00:00",
             f"#SBATCH --qos={self.qos}",
             "#SBATCH --cpus-per-task=1",

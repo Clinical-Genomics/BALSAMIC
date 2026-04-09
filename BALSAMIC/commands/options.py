@@ -23,7 +23,6 @@ from BALSAMIC.constants.rules import DELIVERY_RULES
 from BALSAMIC.constants.paths import WORKFLOW_PROFILE, CACHE_PROFILE
 from BALSAMIC.utils.cli import (
     validate_cache_version,
-    validate_exome_option,
     validate_umi_min_reads,
 )
 
@@ -85,6 +84,13 @@ OPTION_CADD_ANNOTATIONS = click.option(
     help="Path of CADD annotations",
 )
 
+OPTION_CANCER_GENELIST = click.option(
+    "--cancer-genelist",
+    type=click.Path(exists=True, resolve_path=True),
+    required=False,
+    help="Tab-delimited file with cancer-genes downloaded from OncoKB",
+)
+
 OPTION_CANCER_GERMLINE_SNV_OBSERVATIONS = click.option(
     "--cancer-germline-snv-observations",
     type=click.Path(exists=True, resolve_path=True),
@@ -117,6 +123,12 @@ OPTION_CASE_ID = click.option(
     "--case-id",
     required=True,
     help="Sample ID for reporting, naming the analysis jobs, and analysis path",
+)
+
+OPTION_CUSTOMER_CASE_ID = click.option(
+    "--cust-case-id",
+    required=False,
+    help="Case ID from customer",
 )
 
 OPTION_CLINICAL_SNV_OBSERVATIONS = click.option(
@@ -202,12 +214,12 @@ OPTION_CLUSTER_QOS = click.option(
     help="QOS for cluster jobs",
 )
 
-OPTION_COSMIC_KEY = click.option(
+OPTION_COSMIC = click.option(
     "-c",
-    "--cosmic-key",
-    required=False,
-    type=click.STRING,
-    help="Cosmic DB authentication key",
+    "--cosmic",
+    required=True,
+    type=click.Path(exists=True, resolve_path=True),
+    help="Cosmic VCF path",
 )
 
 OPTION_DRAGEN = click.option(
@@ -222,7 +234,6 @@ OPTION_EXOME = click.option(
     is_flag=True,
     default=False,
     help="Assign exome parameters to TGA workflow",
-    callback=validate_exome_option,
 )
 
 OPTION_FASTQ_PATH = click.option(

@@ -1,3 +1,63 @@
+[19.0.0]
+-------
+
+Added:
+^^^^^^
+* add AT_DROPOUT to all panel analyses QC deliverables https://github.com/Clinical-Genomics/BALSAMIC/pull/1646
+* add model validation for reference files in init command https://github.com/Clinical-Genomics/BALSAMIC/pull/1654
+* add automatic download of cytoband coordinates file via init command https://github.com/Clinical-Genomics/BALSAMIC/pull/1651
+* add argument for cosmic file https://github.com/Clinical-Genomics/BALSAMIC/pull/1656
+* add CNV interactive report for targeted analyses https://github.com/Clinical-Genomics/BALSAMIC/pull/1648
+* add cancer-genelist with cancer genes from custs and oncokb https://github.com/Clinical-Genomics/BALSAMIC/pull/1648
+* add bcftools split multialleles for DNAscope calls https://github.com/Clinical-Genomics/BALSAMIC/pull/1648
+* add germline vcf to create VAF plot in CNVkit scatter https://github.com/Clinical-Genomics/BALSAMIC/pull/1648
+* add cnv report read-the-docs documentation https://github.com/Clinical-Genomics/BALSAMIC/pull/1665 https://github.com/Clinical-Genomics/BALSAMIC/pull/1670
+
+Changed:
+^^^^^^^^
+* lower average quality filter for WGS TO TNscope calls to 10 https://github.com/Clinical-Genomics/BALSAMIC/pull/1644
+* increased runtime for a couple of small rules https://github.com/Clinical-Genomics/BALSAMIC/pull/1641
+* decreased memory for headjobs to 500mb https://github.com/Clinical-Genomics/BALSAMIC/pull/1641
+* change SOR filter threshold for wgs tumor only to 4 https://github.com/Clinical-Genomics/BALSAMIC/pull/1659
+* changed DNAscope germline panel bedfile to padded bed https://github.com/Clinical-Genomics/BALSAMIC/pull/1659
+* changed GC dropout QC threshold for myeloid panel https://github.com/Clinical-Genomics/BALSAMIC/pull/1667
+* changed GC dropout QC threshold for lymphoid panel https://github.com/Clinical-Genomics/BALSAMIC/pull/1666
+
+Removed:
+^^^^^^^^
+* removed cosmic file from init download https://github.com/Clinical-Genomics/BALSAMIC/pull/1656
+* cyvcf2 from docs installation https://github.com/Clinical-Genomics/BALSAMIC/pull/1669
+
+Fixed:
+^^^^^^
+* removed gc_dropout and at_dropout gcbias metric from deliverables https://github.com/Clinical-Genomics/BALSAMIC/pull/1661
+* add cust-case-id to case config and CNV plots https://github.com/Clinical-Genomics/BALSAMIC/pull/1648 https://github.com/Clinical-Genomics/BALSAMIC/pull/1673
+
+[18.0.1]
+--------
+
+Added:
+^^^^^^
+
+Changed:
+^^^^^^^^
+* moved default resource allocation to snakemake command https://github.com/Clinical-Genomics/BALSAMIC/pull/1632
+* increased memory of samtools fixmate https://github.com/Clinical-Genomics/BALSAMIC/pull/1632
+* no rerun for rule all https://github.com/Clinical-Genomics/BALSAMIC/pull/1632
+* increased head-job runtime to 7 days https://github.com/Clinical-Genomics/BALSAMIC/pull/1632
+* improved information on failed job status https://github.com/Clinical-Genomics/BALSAMIC/pull/1636
+* scontrol replaced with sacct in jobstatus script https://github.com/Clinical-Genomics/BALSAMIC/pull/1636
+* add attempt mem bump to vep_somatic_research_sv https://github.com/Clinical-Genomics/BALSAMIC/pull/1632
+
+Removed:
+^^^^^^^^
+* exome argument panel bed callback function https://github.com/Clinical-Genomics/BALSAMIC/pull/1632
+* removed -l flag in head-job sbatch script https://github.com/Clinical-Genomics/BALSAMIC/pull/1632
+
+Fixed:
+^^^^^^
+
+
 [18.0.0]
 --------
 
@@ -18,6 +78,7 @@ Added:
 * ProbioC4 coverage QC threshold https://github.com/Clinical-Genomics/BALSAMIC/pull/1613
 * normal coverage GENS preprocessing https://github.com/Clinical-Genomics/BALSAMIC/pull/1621
 * normal coverage normalisation in CNVkit for tumor normal panel cases https://github.com/Clinical-Genomics/BALSAMIC/pull/1621
+
 
 Changed:
 ^^^^^^^^

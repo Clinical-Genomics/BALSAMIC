@@ -68,14 +68,14 @@ def test_metric_validation_fail(qc_extracted_metrics: dict):
 
     # GIVEN input attributes with a value that does not meet the filtering condition
     metrics: dict = copy.deepcopy(qc_extracted_metrics)
-    metrics[4]["value"] = 2.0  # GC_DROPOUT set to 2.0 (failing condition)
+    metrics[5]["value"] = 2.0  # GC_DROPOUT set to 2.0 (failing condition)
 
     # THEN check that the model filters the metric according to its norm
     with pytest.raises(ValueError) as val_exc:
         MetricValidation(metrics=metrics)
     assert (
-        f"QC metric {metrics[4]['name']}: {metrics[4]['value']} validation has failed. "
-        f"(Condition: {metrics[4]['condition']['norm']} {metrics[4]['condition']['threshold']}, ID: {metrics[4]['id']})"
+        f"QC metric {metrics[5]['name']}: {metrics[5]['value']} validation has failed. "
+        f"(Condition: {metrics[5]['condition']['norm']} {metrics[5]['condition']['threshold']}, ID: {metrics[5]['id']})"
         in str(val_exc.value)
     )
 
@@ -85,15 +85,15 @@ def test_multiple_metric_validation_fail(qc_extracted_metrics: dict):
 
     # GIVEN input attributes that does not meet the specified conditions
     metrics: dict = copy.deepcopy(qc_extracted_metrics)
-    metrics[4]["value"] = 2.0  # GC_DROPOUT set to 2.0 (failing condition)
-    metrics[8]["value"] = 0.5  # PCT_TARGET_BASES_500X set to 50% (failing condition)
+    metrics[5]["value"] = 2.0  # GC_DROPOUT set to 2.0 (failing condition)
+    metrics[9]["value"] = 0.5  # PCT_TARGET_BASES_500X set to 50% (failing condition)
 
     # THEN check that the model filters the metrics according to its norm
     with pytest.raises(ValueError) as val_exc:
         MetricValidation(metrics=metrics)
     assert "2 validation errors for MetricValidation" in str(val_exc.value)
-    assert metrics[4]["name"] in str(val_exc.value)
-    assert metrics[8]["name"] in str(val_exc.value)
+    assert metrics[5]["name"] in str(val_exc.value)
+    assert metrics[9]["name"] in str(val_exc.value)
 
 
 def test_sex_check_metric_is_only_warned(
@@ -134,10 +134,10 @@ def test_metric_validation_norm_fail(qc_extracted_metrics: dict):
 
     # GIVEN a metric with an incorrect norm attribute
     metrics: dict = copy.deepcopy(qc_extracted_metrics)
-    metrics[4]["condition"]["norm"] = "lower"
+    metrics[5]["condition"]["norm"] = "lower"
 
     # THEN model raises an error due to a non accepted norm
     try:
         MetricValidation(metrics=metrics)
     except ValueError as key_exc:
-        assert metrics[4]["condition"]["norm"] in str(key_exc)
+        assert metrics[5]["condition"]["norm"] in str(key_exc)

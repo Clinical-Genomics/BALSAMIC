@@ -1,0 +1,274 @@
+:root {
+  --font-sans: system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+
+  --text-muted: #666;
+  --border-light: #ddd;
+  --border-mid: #ccc;
+
+  --bg-soft: #fafafa;
+  --bg-table-head: #f4f4f4;
+  --bg-white: #fff;
+
+  --warning-bg: #fff4e5;
+  --warning-accent: #f59e0b;
+  --warning-strong: #92400e;
+
+  --note-bg: #f0f6ff;
+  --note-accent: #3b82f6;
+
+  --meta-accent: #2b6cb0;
+  --meta-report-bg: #dff3c9;
+  --meta-sex-bg: #fbe2c4;
+
+  --cnv-accent: #c0392b;
+
+  --radius-sm: 4px;
+  --space-xs: 6px;
+  --space-sm: 8px;
+  --space-md: 10px;
+  --space-lg: 12px;
+  --space-xl: 14px;
+  --space-2xl: 16px;
+  --space-page: 24px;
+}
+
+body {
+  margin: var(--space-page);
+  font-family: var(--font-sans);
+}
+
+h1,
+h2,
+h3,
+.meta-label,
+.control-label,
+.plot-title {
+  font-weight: 600;
+}
+
+label,
+input[type="text"],
+input[type="number"],
+button {
+  font-size: 13px;
+}
+
+input[type="text"],
+input[type="number"] {
+  padding: 4px 6px;
+}
+
+button {
+  padding: 4px 10px;
+  cursor: pointer;
+}
+
+.muted {
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+/* Shared info boxes */
+.warning-box,
+.note-box,
+.report-meta,
+.report-sex-meta {
+  padding: var(--space-md) var(--space-xl);
+  border-left: 4px solid;
+  border-radius: var(--radius-sm);
+}
+
+.help-toggle-btn {
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+
+.warning-box {
+  margin: var(--space-lg) 0;
+  background: var(--warning-bg);
+  border-left-color: var(--warning-accent);
+}
+
+.warning-box strong {
+  color: var(--warning-strong);
+}
+
+.note-box {
+  margin-top: var(--space-md);
+  background: var(--note-bg);
+  border-left-color: var(--note-accent);
+  font-size: 0.95rem;
+}
+
+.report-meta,
+.report-sex-meta {
+  margin: var(--space-lg) 0 18px;
+  font-size: 14px;
+  border-left-color: var(--meta-accent);
+}
+
+.report-meta {
+  background-color: var(--meta-report-bg);
+}
+
+.report-sex-meta {
+  background-color: var(--meta-sex-bg);
+}
+
+.meta-label {
+  margin-right: 6px;
+}
+
+.meta-value {
+  font-family: monospace;
+}
+
+.controls {
+  margin-bottom: var(--space-lg);
+  padding: var(--space-sm) var(--space-md);
+  border: 1px solid var(--border-light);
+  background: var(--bg-soft);
+}
+
+.control-group {
+  margin-bottom: var(--space-xs);
+}
+
+/* Tables */
+table.dataframe {
+  width: 100%;
+  margin-bottom: 16px;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+table.dataframe th,
+table.dataframe td {
+  padding: 6px 8px;
+  border: 1px solid var(--border-light);
+}
+
+table.dataframe th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  text-align: left;
+  background: var(--bg-table-head);
+}
+
+table.dataframe tr:nth-child(even) {
+  background: var(--bg-soft);
+}
+
+#report-table td {
+  vertical-align: top;
+  white-space: normal;
+}
+
+#column-glossary-table th:nth-child(1),
+#column-glossary-table td:nth-child(1) {
+  font-family: var(--font-mono);
+  white-space: nowrap;
+}
+
+#column-glossary-table td:nth-child(2) {
+  white-space: normal;
+}
+
+/* Plot cards */
+.plot-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2xl);
+  margin-top: var(--space-sm);
+}
+
+.plot-card {
+  flex: 0 0 320px;
+  max-width: 380px;
+  padding: var(--space-sm);
+  border: 1px solid var(--border-mid);
+  border-radius: var(--radius-sm);
+  background: var(--bg-white);
+}
+
+.plot-card-cnv {
+  border-color: var(--cnv-accent);
+  box-shadow: 0 0 4px rgba(192, 57, 43, 0.4);
+}
+
+.plot-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-xs);
+}
+
+.plot-title {
+  font-size: 14px;
+}
+
+.plot-badge {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 12px;
+  background: var(--cnv-accent);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* Genome-wide plot frames */
+.plot-frame {
+  width: 100%;
+  margin-top: var(--space-md);
+  padding: var(--space-md);
+  border: 1px solid var(--border-mid);
+}
+
+.plot-fullwidth {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  cursor: pointer;
+}
+
+/* Modal */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.85);
+}
+
+.modal-content-wrapper {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  max-width: 98vw;
+  max-height: 98vh;
+}
+
+.modal-image {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 98vw;
+  max-height: 98vh;
+  border-radius: var(--radius-sm);
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.7);
+}
+
+.modal-close {
+  position: absolute;
+  top: -32px;
+  right: 0;
+  cursor: pointer;
+  color: #fff;
+  font-size: 24px;
+  font-weight: 700;
+}

@@ -29,6 +29,7 @@ METRICS: Dict[str, dict] = {
             "MEAN_TARGET_COVERAGE": {"condition": None},
             "FOLD_80_BASE_PENALTY": {"condition": None},
             "PCT_OFF_BAIT": {"condition": None},
+            "AT_DROPOUT": {"condition": None},
             "GC_DROPOUT": {"condition": {"norm": "lt", "threshold": 1.00}},
         },
         "gicfdna": {
@@ -38,10 +39,11 @@ METRICS: Dict[str, dict] = {
             "PCT_TARGET_BASES_250X": {"condition": {"norm": "gt", "threshold": 0.95}},
         },
         "gmslymphoid": {
-            "GC_DROPOUT": {"condition": {"norm": "lt", "threshold": 2.00}},
+            "GC_DROPOUT": {"condition": {"norm": "lt", "threshold": 3.00}},
             "PCT_TARGET_BASES_500X": {"condition": {"norm": "gt", "threshold": 0.95}},
         },
         "gmsmyeloid": {
+            "GC_DROPOUT": {"condition": {"norm": "lt", "threshold": 3.00}},
             "PCT_TARGET_BASES_500X": {"condition": {"norm": "gt", "threshold": 0.95}},
         },
         "hdcfdna": {
