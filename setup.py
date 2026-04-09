@@ -124,7 +124,7 @@ extras = {
         "vcfpy==0.13.4",
     ],
     "dev": [
-        "black==23.7.0",
+        "black==26.3.1",
         "bump2version==1.0.1",
         "coveralls==3.3.1",
         "pytest==7.4.0",
