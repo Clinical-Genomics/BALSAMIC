@@ -11,6 +11,7 @@ from pydantic import (
     FilePath,
     field_validator,
     ValidationInfo,
+    ConfigDict,
 )
 
 from BALSAMIC.constants.cache import GenomeVersion, GRCHVersion
@@ -59,6 +60,8 @@ class References(BaseModel):
     refgene_sql: ReferenceUrl
     refgene_txt: ReferenceUrl
 
+    model_config = ConfigDict(extra="forbid")
+
     def get_reference_genome_file_paths(self) -> List[str]:
         """Return output reference genome files."""
         return [
@@ -106,7 +109,6 @@ class ReferencesHg(References):
         cadd_snv (ReferenceUrl)                 : CADD SNV annotation file.
         simple_repeat (ReferenceUrl)            : Simple repeats
         clinvar (ReferenceUrl)                  : ClinVar reference.
-        cosmic (ReferenceUrl)                   : COSMIC database's variants as VCF.
         dbsnp (ReferenceUrl)                    : dbSNP VCF file.
         delly_exclusion (ReferenceUrl)          : Genome exclusion regions.
         delly_mappability (ReferenceUrl)        : Genome mappability.
@@ -121,6 +123,7 @@ class ReferencesHg(References):
         somalier_sites (ReferenceUrl)           : Somalier sites VCF.
         vcf_1kg (ReferenceUrl)                  : 1000 Genome all SNPs.
         wgs_calling_regions (ReferenceUrl)      : WGS calling intervals.
+        cytoband_coordinates (ReferenceUrl) : Cytoband coordinates file.
     """
 
     access_regions: ReferenceUrl
@@ -129,7 +132,6 @@ class ReferencesHg(References):
     cadd_snv: ReferenceUrl
     simple_repeat: ReferenceUrl
     clinvar: ReferenceUrl
-    cosmic: ReferenceUrl
     dbsnp: ReferenceUrl
     delly_exclusion: ReferenceUrl
     delly_mappability: ReferenceUrl
@@ -144,6 +146,7 @@ class ReferencesHg(References):
     somalier_sites: ReferenceUrl
     vcf_1kg: ReferenceUrl
     wgs_calling_regions: ReferenceUrl
+    cytoband_coordinates: ReferenceUrl
 
     def get_cadd_snv_file_paths(self) -> List[str]:
         """Return CADD SNV reference output files."""
@@ -219,7 +222,6 @@ class AnalysisReferencesHg(AnalysisReferences):
         cadd_snv (FilePath)                  : CADD SNV annotation file.
         simple_repeat (FilePath)             : Simple repeats.
         clinvar (FilePath)                   : ClinVar reference.
-        cosmic (FilePath)                    : COSMIC database's variants as VCF.
         dbsnp (FilePath)                     : dbSNP VCF file.
         delly_exclusion (FilePath)           : Genome exclusion regions.
         delly_exclusion_converted (FilePath) : Genome exclusion regions without "chr" field.
@@ -233,6 +235,7 @@ class AnalysisReferencesHg(AnalysisReferences):
         vcf_1kg (FilePath)                   : 1000 Genome all SNPs.
         vep_dir (DirectoryPath)              : VEP annotations output directory.
         wgs_calling_regions (FilePath)       : WGS calling intervals.
+        cytoband_coordinates (FilePath)      : Cytoband coordinates file path.
     """
 
     access_regions: FilePath
@@ -241,7 +244,6 @@ class AnalysisReferencesHg(AnalysisReferences):
     cadd_snv: FilePath
     simple_repeat: FilePath
     clinvar: FilePath
-    cosmic: FilePath
     dbsnp: FilePath
     delly_exclusion: FilePath
     delly_exclusion_converted: FilePath
@@ -255,6 +257,7 @@ class AnalysisReferencesHg(AnalysisReferences):
     vcf_1kg: FilePath
     vep_dir: DirectoryPath
     wgs_calling_regions: FilePath
+    cytoband_coordinates: FilePath
 
 
 class CacheAnalysis(BaseModel):
@@ -274,18 +277,17 @@ class CacheConfig(BaseModel):
     Reference build configuration model.
 
     Attributes:
-        analysis (CacheAnalysis)                           : Reference analysis model.
-        references_dir (DirectoryPath)                     : Output directory for the downloaded reference.
-        containers_dir (Path)                              : Output directory for the downloaded singularity containers.
-        genome_dir (Path)                                  : Genome references output directory.
-        variants_dir (Path)                                : Variant references output directory.
-        vep_dir (Path)                                     : VEP annotations output directory.
-        genome_version (GenomeVersion)                     : Genome version associated with the balsamic cache.
-        cosmic_key (str, optional)                         : COSMIC database key.
-        bioinfo_tools (dict)                               : Dictionary of bioinformatics software and containers.
-        containers (Dict[str, str])                        : Dictionary linking container names and dockerhub images.
-        references (Union[ReferencesHg, ReferencesCanFam]) : Reference files model.
-        references_date (str)                              : Reference access date.
+        analysis (CacheAnalysis)                     : Reference analysis model.
+        references_dir (DirectoryPath)               : Output directory for the downloaded reference.
+        containers_dir (Path)                        : Output directory for the downloaded singularity containers.
+        genome_dir (Path)                            : Genome references output directory.
+        variants_dir (Path)                          : Variant references output directory.
+        vep_dir (Path)                               : VEP annotations output directory.
+        genome_version (GenomeVersion)               : Genome version associated with the balsamic cache.
+        bioinfo_tools (dict)                         : Dictionary of bioinformatics software and containers.
+        containers (Dict[str, str])                  : Dictionary linking container names and dockerhub images.
+        references (ReferencesHg | ReferencesCanFam) : Reference files model.
+        references_date (str)                        : Reference access date.
     """
 
     analysis: CacheAnalysis
@@ -295,10 +297,9 @@ class CacheConfig(BaseModel):
     variants_dir: Path
     vep_dir: Path
     genome_version: GenomeVersion
-    cosmic_key: Optional[str] = None
     bioinfo_tools: dict
     containers: Dict[str, str]
-    references: Union[ReferencesHg, ReferencesCanFam]
+    references: ReferencesHg | ReferencesCanFam
     references_date: str
 
     @field_validator("references")
@@ -318,9 +319,6 @@ class CacheConfig(BaseModel):
                 ).as_posix()
                 if reference
                 else None
-            )
-            reference.secret = (
-                info.data.get("cosmic_key") if "cosmic" in reference_key else None
             )
         return references
 
@@ -407,7 +405,6 @@ class CacheConfig(BaseModel):
             self.references.ascat_gc_correction.file_path,
             self.references.cadd_snv.file_path,
             self.references.simple_repeat.file_path,
-            f"{self.references.cosmic.file_path}.{FileType.GZ}",
             f"{self.references.dbsnp.file_path}.{FileType.GZ}",
             self.references.rank_score.file_path,
             f"{self.references.somalier_sites.file_path}.{FileType.GZ}",
@@ -420,6 +417,7 @@ class CacheConfig(BaseModel):
             *self.references.get_delly_file_paths(),
             *self.references.get_gnomad_file_paths(),
             self.vep_dir.as_posix(),
+            self.references.cytoband_coordinates.file_path,
         ]
         return reference_paths
 
@@ -443,7 +441,6 @@ class CacheConfig(BaseModel):
             cadd_snv=self.references.cadd_snv.file_path,
             simple_repeat=self.references.simple_repeat.file_path,
             clinvar=self.references.get_processed_clinvar_file_path(),
-            cosmic=f"{self.references.cosmic.file_path}.{FileType.GZ}",
             dbsnp=f"{self.references.dbsnp.file_path}.{FileType.GZ}",
             delly_exclusion=self.references.delly_exclusion.file_path,
             delly_exclusion_converted=self.references.get_delly_exclusion_converted_file_path(),
@@ -462,4 +459,5 @@ class CacheConfig(BaseModel):
             vcf_1kg=f"{self.references.vcf_1kg.file_path}.{FileType.GZ}",
             vep_dir=self.vep_dir.as_posix(),
             wgs_calling_regions=self.references.wgs_calling_regions.file_path,
+            cytoband_coordinates=self.references.cytoband_coordinates.file_path,
         )

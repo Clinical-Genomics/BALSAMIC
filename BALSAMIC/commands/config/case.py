@@ -17,11 +17,14 @@ from BALSAMIC.commands.options import (
     OPTION_BALSAMIC_CACHE,
     OPTION_CACHE_VERSION,
     OPTION_CADD_ANNOTATIONS,
+    OPTION_CANCER_GENELIST,
     OPTION_CANCER_GERMLINE_SNV_OBSERVATIONS,
     OPTION_CANCER_SOMATIC_SNV_OBSERVATIONS,
     OPTION_CANCER_SOMATIC_SNV_PANEL_OBSERVATIONS,
     OPTION_CANCER_SOMATIC_SV_OBSERVATIONS,
+    OPTION_COSMIC,
     OPTION_CASE_ID,
+    OPTION_CUSTOMER_CASE_ID,
     OPTION_CLINICAL_SNV_OBSERVATIONS,
     OPTION_CLINICAL_SV_OBSERVATIONS,
     OPTION_SOFT_FILTER_NORMAL,
@@ -85,11 +88,14 @@ LOG = logging.getLogger(__name__)
 @OPTION_BALSAMIC_CACHE
 @OPTION_CACHE_VERSION
 @OPTION_CADD_ANNOTATIONS
+@OPTION_CANCER_GENELIST
 @OPTION_CANCER_GERMLINE_SNV_OBSERVATIONS
 @OPTION_CANCER_SOMATIC_SNV_OBSERVATIONS
 @OPTION_CANCER_SOMATIC_SNV_PANEL_OBSERVATIONS
 @OPTION_CANCER_SOMATIC_SV_OBSERVATIONS
+@OPTION_COSMIC
 @OPTION_CASE_ID
+@OPTION_CUSTOMER_CASE_ID
 @OPTION_CLINICAL_SNV_OBSERVATIONS
 @OPTION_CLINICAL_SV_OBSERVATIONS
 @OPTION_SOFT_FILTER_NORMAL
@@ -121,11 +127,14 @@ def case_config(
     balsamic_cache: Path,
     cache_version: str,
     cadd_annotations: Path,
+    cancer_genelist: str | None,
     cancer_germline_snv_observations: Path,
     cancer_somatic_snv_observations: Path,
     cancer_somatic_snv_panel_observations: Path,
     cancer_somatic_sv_observations: Path,
+    cosmic: str,
     case_id: str,
+    cust_case_id: str,
     clinical_snv_observations: Path,
     clinical_sv_observations: Path,
     exome: bool,
@@ -171,6 +180,9 @@ def case_config(
         base_path=references_path,
         data=read_json(Path(references_path, f"reference.{FileType.JSON}").as_posix()),
     )
+
+    references.update({"cosmic": cosmic})
+
     cadd_annotations_path = {"cadd_annotations": cadd_annotations}
     if cadd_annotations:
         references.update(cadd_annotations_path)
@@ -244,6 +256,7 @@ def case_config(
         },
         analysis={
             "case_id": case_id,
+            "cust_case_id": cust_case_id,
             "soft_filter_normal": soft_filter_normal,
             "gender": gender,
             "analysis_dir": analysis_dir,
@@ -258,6 +271,7 @@ def case_config(
             "analysis_workflow": analysis_workflow,
             "config_creation_date": datetime.now().strftime("%Y-%m-%d %H:%M"),
             "rescue_snvs": rescue_snvs if rescue_snvs else RESCUE_SNVS.as_posix(),
+            "cancergenes": cancer_genelist,
         },
         custom_filters={"umi_min_reads": umi_min_reads if umi_min_reads else None},
         reference=references,

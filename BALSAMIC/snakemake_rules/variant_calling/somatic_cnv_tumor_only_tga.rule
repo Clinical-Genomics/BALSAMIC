@@ -88,10 +88,10 @@ rule purecn_call_CNV_research:
         sample_id = "TUMOR",
         genome = config["reference"]["genome_version"],
         purity_pdf = cnv_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".purecn.purity.pdf",
-        loh_regions = cnv_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".purecn.LOHregions.csv",
-        loh_genes = cnv_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".purecn.LOHgenes.csv",
         cnv_csv = cnv_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".purecn.cnv.csv",
         purecn_vcf = cnv_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".purecn.vcf.gz",
+        loh_regions = cnv_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".purecn.LOHregions.csv",
+        loh_genes = cnv_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".purecn.LOHgenes.csv",
     message:
         ("Computing tumor purity and ploidy values using PureCN for {params.case_name}")
     shell:
@@ -144,7 +144,7 @@ if [ "$exit_status" = "true" ]; then
     fi;
 else
 echo '"Sampleid","Purity","Ploidy","Sex","Contamination","Flagged","Failed","Curated","Comment"
-"tumor.initial",0.02,2,"?",0,FALSE,FALSE,FALSE,"FAILED PURITY ESTIMATION"' > {output.purecn_purity};
+"tumor.initial",0.2,2,"?",0,FALSE,FALSE,FALSE,"FAILED PURITY ESTIMATION"' > {output.purecn_purity};
 fi;
 
 rm -rf {params.tmpdir};
@@ -167,7 +167,7 @@ rule cnvkit_call_CNV_research:
         gene_metrics = cnv_dir + config["analysis"]["case_id"] + ".gene_metrics",
         vcf =  cnv_dir + "CNV.somatic." + config["analysis"]["case_id"] + ".cnvkit.vcf",
         diagram = cnv_dir + "tumor.merged-diagram.pdf",
-        scatter = cnv_dir + "tumor.merged-scatter.pdf",
+        scatter = cnv_dir + "tumor.merged-scatter.pdf"
     benchmark:
         Path(f"{benchmark_dir}/cnvkit_call_{config['analysis']['case_id']}.tsv").as_posix()
     singularity:
@@ -181,6 +181,7 @@ rule cnvkit_call_CNV_research:
         gender = config_model.get_gender,
         sample_id = "TUMOR",
         genome_version = config["reference"]["genome_version"],
+        cust_case_id = lambda wildcards, cust_case_id=config_model.analysis.cust_case_id: f"--title {cust_case_id}" if cust_case_id else "",
     message:
         ("Calling CNVs using CNVkit for {params.case_name}")
     shell:
@@ -200,13 +201,18 @@ cnvkit.py call {input.cns_initial} \
 
 # Plot bin-level log2 coverages and segmentation calls
 cnvkit.py scatter {input.cnr} \
+--vcf {input.snv_vcf} \
 --segment {output.cns} \
---output {output.scatter};
+--output {output.scatter} \
+-i TUMOR {params.cust_case_id} --fig-size 18 8 ;
 
 # Draw copy number (.cnr or .cns) on chromosomes as an ideogram
 cnvkit.py diagram {input.cnr} \
 --segment  {output.cns} \
---output {output.diagram};
+--gender {params.gender} \
+--min-probes 5 \
+--output {output.diagram} \
+{params.cust_case_id} ;
 
 # Identify targeted genes with copy number gain or loss
 cnvkit.py genemetrics {input.cnr} \

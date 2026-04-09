@@ -1,0 +1,330 @@
+{% macro plot_card(card) -%}
+    <div class="plot-card {{ 'plot-card-cnv' if card.has_cnv else 'plot-card-normal' }}">
+        <div class="plot-header">
+            <span class="plot-title">{{ card.title }}</span>
+            {% if card.has_cnv %}<span class="plot-badge">CNV</span>{% endif %}
+        </div>
+        <img src="{{ card.data_uri }}"
+             alt="QC plot {{ card.stem }}"
+             class="clickable-plot"
+             style="max-width:100%;
+                    height:auto;
+                    display:block;
+                    cursor:pointer" />
+    </div>
+{%- endmacro %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>{{ title }}</title>
+        <style>{{ css_text }}</style>
+    </head>
+    <body>
+        <h1>{{ title }}</h1>
+        <p>
+            <strong>Report creation time: {{ creation_time }}</strong>
+        </p>
+        <div class="report-meta">
+            <span class="meta-label">Normalisation method</span>
+            <span class="meta-value">{{ normalisation_method }}</span>
+        </div>
+        <div class="report-sex-meta">
+            <span class="meta-label">Sample analysed as</span>
+            <span class="meta-value">{{ sample_sex }}</span>
+        </div>
+        <h2>Report overview</h2>
+        <div id="report-description-container"
+             class="note-box"
+             style="margin-top:10px">
+            <p>
+                This report summarizes copy number variations (CNVs) and loss of heterozygosity (LOH) identified in the tumor sample.
+                The main results are based on CNVkit and PureCN.
+            </p>
+            <p>
+                An additional in-house method highlights potential CNV indications within genes based on deviations in log2 ratios between the tumor sample and the PON.
+                This method is not intended as a standalone CNV caller but is provided to support interpretation, particularly in small regions that may be missed by standard tools.
+            </p>
+            <p>
+                Please refer to the section headings and description to determine the method(s) from which each result is derived.
+            </p>
+            <p>
+                Use the controls in the tables to filter by genomic region, gene list, cancer-gene status, CNV / LOH status, and additional detail columns.
+            </p>
+        </div>
+        <h2>PureCN sample summary</h2>
+        {% if purecn_failed %}
+            <div class="warning-box">
+                <strong>Warning:</strong>
+                {{ purecn_warning_text }}
+            </div>
+        {% endif %}
+        {{ purecn_summary_html | safe }}
+        <button id="toggle-purecn-help" type="button">Show PureCN summary explanation</button>
+        <div id="purecn-help-container"
+             class="note-box"
+             style="display:none;
+                    margin-top:10px">
+            <p>
+                <strong>Purity:</strong>
+                Estimated Purity based on best fitting model.
+            </p>
+            <p>
+                <strong>Ploidy:</strong>
+                Estimated Ploidy based on best fitting model.
+            </p>
+            <p>
+                <strong>Sex:</strong>
+                Predicted Sex based on relative coverage of X and Y compared to autosomal chromosomes. (M = Male, F = Female)
+            </p>
+            <p>
+                <strong>Contamination:</strong>
+                Estimated sample cross-contamination.
+            </p>
+            <p>
+                <strong>Flagged:</strong>
+                Set to True if PureCN has flagged the analysis due to some quality control metric. See comment.
+            </p>
+            <p>
+                <strong>Failed:</strong>
+                Set to True if PureCN failed to find a reliable final purity and ploidy model for the sample.
+            </p>
+            <p>
+                <strong>Comment:</strong>
+                Quality control comment reported by PureCN, such as <em>Low purity</em> or
+                <em>Noisy log-ratio</em>. See Table 5 in the
+                <a href="https://mirror.accum.se/mirror/bioconductor.org/packages/3.21/bioc/vignettes/PureCN/inst/doc/PureCN.pdf"
+                   target="_blank"
+                   rel="noopener">PureCN manual</a>.
+            </p>
+        </div>
+        <h2>CNV / QC summary</h2>
+        {{ qc_summary_html | safe }}
+        <button id="toggle-qc-help" type="button">Show CNV / QC summary explanation</button>
+        <div id="qc-help-container"
+             class="note-box"
+             style="display:none;
+                    margin-top:10px">
+            <p>
+                <strong>Log2 noise (DLR-like):</strong>
+                Estimate of local CNV noise calculated from log2 differences between adjacent bins within each chromosome.
+            </p>
+            <p>
+                <strong>Targets total:</strong>
+                Total number of targets <em>(probes in panel design)</em>.
+            </p>
+            <p>
+                <strong>Targets filtered:</strong>
+                Number of targets filtered out due to quality issues such as extreme GC or high log2 spread in normal samples used to construct the PON. These are not used for CNV analyses.
+            </p>
+        </div>
+        {# --------------------- Genome-wide plots --------------------- #}
+        {% if scatter_data_uri or diagram_data_uri %}
+            <h2>Genome-wide CNVkit plots</h2>
+            {% if scatter_data_uri %}
+                <h3>CNVkit scatter</h3>
+                <div class="plot-frame">
+                    <img src="{{ scatter_data_uri }}"
+                         alt="CNVkit scatter"
+                         class="clickable-plot plot-fullwidth" />
+                </div>
+            {% endif %}
+            {% if diagram_data_uri %}
+                <h3>CNVkit diagram</h3>
+                <div class="plot-frame">
+                    <img src="{{ diagram_data_uri }}"
+                         alt="CNVkit diagram"
+                         class="clickable-plot plot-fullwidth" />
+                </div>
+            {% endif %}
+        {% endif %}
+        {# --------------------- Chromosome plots only --------------------- #}
+        {% set chr_with = plot_groups.get("chr_with_cnv", []) %}
+        {% set chr_no = plot_groups.get("chr_no_cnv", []) %}
+        {% if chr_with or chr_no %}
+            <h2>Per-chromosome CNV plots</h2>
+            <div class="note-box">
+                <p>These plots show log2 ratios, PON spread (if available), VAF and detected CNV segments for each chromosome. Plots containing CNV or LOH regions are highlighted; click a plot to enlarge it.</p>
+                <p>The y-axis is fixed between −3 and 3; values outside this range are truncated and will appear at these limits.</p>
+                <p><strong>Pseudoposition:</strong> Bins are arranged in genomic order along the x-axis. The scale is non-linear, with bins within highlighted genes expanded and others compressed for visibility.</p>
+                <p><strong>Relevant genes within detected CNVs are highlighted:</strong></p>
+                <p>
+                    <em>Panel data:</em> Cancer-associated genes with ≥2 targets; other genes with ≥2 targets if affected by CNVs or LOH.
+                </p>
+                <p>
+                    <em>Exome data:</em> Cancer-associated genes with ≥4 targets
+                </p>
+            </div>
+            {% if chr_with %}
+                <h3>Chromosomes with CNV / LOH</h3>
+                <div class="plot-grid">
+                    {% for card in chr_with %}{{ plot_card(card) }}{% endfor %}
+                </div>
+            {% endif %}
+            {% if chr_no %}
+                <h3>Chromosomes without CNV / LOH</h3>
+                <div class="plot-grid">
+                    {% for card in chr_no %}{{ plot_card(card) }}{% endfor %}
+                </div>
+            {% endif %}
+        {% endif %}
+        {# --------------------- Segment table --------------------- #}
+        <h1>CNV and LOH Segments from CNVkit and PureCN</h1>
+        <button id="toggle-seg-col-glossary" type="button">Show table column glossary</button>
+        <div id="seg-col-glossary-container" style="display:none; margin-top:10px">
+            {{ segment_column_glossary_html | safe }}
+        </div>
+        <p>
+        </p>
+        <button id="toggle-segment-table" type="button">Hide segment table</button>
+        <div id="segment-table-container" style="margin-top:10px;">
+            <div class="controls">
+                <div class="control-group">
+                    <label>
+                        <input type="checkbox" id="hide-non-cnv-seg" checked>
+                        Show only LOH / CNV segments (from CNVkit or PureCN)
+                    </label>
+                </div>
+                <div class="control-group">
+                    <span class="control-label">Genomic range:</span>
+                    <label style="margin-left:12px;">
+                        Chr:
+                        <input type="text" id="range-chr-seg" placeholder="1" style="width:60px;">
+                    </label>
+                    <label style="margin-left:12px;">
+                        Start:
+                        <input type="number" id="range-start-seg" min="0" step="1" placeholder="0">
+                    </label>
+                    <label style="margin-left:12px;">
+                        End:
+                        <input type="number"
+                               id="range-end-seg"
+                               min="0"
+                               step="1"
+                               placeholder="250000000">
+                    </label>
+                </div>
+                <div class="control-group">
+                    <span class="control-label">Additional columns:</span>
+                    <label style="margin-left:12px;">
+                        <input type="checkbox" id="cols-cnvkit-extra-gene">
+                        CNVkit extended output
+                    </label>
+                    <label style="margin-left:12px;">
+                        <input type="checkbox" id="cols-purecn-extra-gene">
+                        PureCN extended output
+                    </label>
+                </div>
+                <button id="copy-segment-table" type="button">Copy visible rows</button>
+                <div class="control-group">
+                    <label>
+                        Gene filter (comma-separated):
+                        <input type="text" id="gene-filter-seg" placeholder="TP53,EGFR,MYC">
+                    </label>
+                </div>
+            </div>
+            {{ segments_table_html | safe }}
+        </div>
+
+        {# --------------------- Region section --------------------- #}
+        <h2>Within-gene PON-driven regions</h2>
+
+        <button id="toggle-region-col-glossary" type="button" style="margin-top:8px;">Show table column glossary</button>
+        <div id="region-col-glossary-container"
+             style="display:none;
+                    margin-top:10px">{{ region_column_glossary_html | safe }}</div>
+
+        <div class="note-box">
+        Genes are split into multiple rows when log2 ratios relative to the PON suggest distinct within-gene copy number segments (GAIN or LOSS).
+        </div>
+        <button id="toggle-region-table" type="button">Show region-level table</button>
+        <div id="region-table-container" style="display:none; margin-top:10px;">
+            <div class="controls">
+                <div class="control-group">
+                    <label>
+                        <input type="checkbox" id="hide-non-cnv-region">
+                        Show only LOH / CNV regions (from CNVkit or PureCN)
+                    </label>
+                    <label style="margin-left:12px;">
+                        <input type="checkbox" id="only-pon-indication-region">
+                        Show only PON-indicated (GAIN/LOSS) regions
+                    </label>
+                    <label style="margin-left:12px;">
+                        <input type="checkbox" id="only-cancer-genes-region">
+                        Show only cancer-associated genes
+                    </label>
+                </div>
+                <div class="control-group">
+                    <span class="control-label">Genomic range:</span>
+                    <label style="margin-left:12px;">
+                        Chr:
+                        <input type="text" id="range-chr-region" placeholder="1" style="width:60px;">
+                    </label>
+                    <label style="margin-left:12px;">
+                        Start:
+                        <input type="number"
+                               id="range-start-region"
+                               min="0"
+                               step="1"
+                               placeholder="0">
+                    </label>
+                    <label style="margin-left:12px;">
+                        End:
+                        <input type="number"
+                               id="range-end-region"
+                               min="0"
+                               step="1"
+                               placeholder="250000000">
+                    </label>
+                </div>
+                <div class="control-group">
+                    <label>
+                        Minimum number of targets:
+                        <input type="number" id="min-targets-region" min="0" step="1" value="0">
+                    </label>
+                </div>
+                <button id="copy-region-table" type="button">Copy visible rows</button>
+                <div class="control-group">
+                    <span class="control-label">Additional columns:</span>
+                    <label style="margin-left:12px;">
+                        <input type="checkbox" id="cols-qc-region">
+                        QC details
+                    </label>
+                    <label style="margin-left:12px;">
+                        <input type="checkbox" id="cols-pon-region">
+                        PON details
+                    </label>
+                    <label style="margin-left:12px;">
+                        <input type="checkbox" id="cols-cnvkit-extra-region">
+                        CNVkit extended output
+                    </label>
+                    <label style="margin-left:12px;">
+                        <input type="checkbox" id="cols-purecn-extra-region">
+                        PureCN extended output
+                    </label>
+                </div>
+                <div class="control-group">
+                    <label>
+                        Gene filter (comma-separated gene symbols):
+                        <input type="text" id="gene-filter-region" placeholder="TP53,EGFR,MYC">
+                    </label>
+                </div>
+            </div>
+            {{ region_table_html | safe }}
+        </div>
+        {# --------------------- Modal --------------------- #}
+        <div id="plot-modal" class="modal-overlay">
+            <div class="modal-content-wrapper">
+                <span class="modal-close" id="plot-modal-close">&times;</span>
+                <img id="plot-modal-image" class="modal-image" src="" alt="Enlarged plot">
+            </div>
+        </div>
+        <script>
+  // Injected from Python (make them properties so JS can read them)
+  globalThis.colIndexSegments  = {{ col_idx_segments_json | safe }};
+  globalThis.colIndexRegions = {{ col_idx_regions_json | safe }};
+
+  {{ js_text | safe }}
+        </script>
+    </body>
+</html>

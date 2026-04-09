@@ -175,6 +175,7 @@ delly_exclusion_converted = config_model.reference["delly_exclusion_converted"].
 delly_mappability = config_model.reference["delly_mappability"].file.as_posix()
 access_regions = config_model.reference["access_regions"].file.as_posix()
 genome_chrom_size = config_model.reference["genome_chrom_size"].file.as_posix()
+cytoband = config_model.reference["cytoband_coordinates"].file.as_posix()
 
 # vcfanno SV annotations
 
@@ -464,6 +465,8 @@ analysis_specific_results.append(cnv_dir + "CNV.somatic." + case_id + ".report.p
 
 # TGA specific files
 if config["analysis"]["sequencing_type"] != "wgs":
+    # CNV report
+    analysis_specific_results.append(cnv_dir + "CNV.somatic." + case_id + ".interactive_report.html")
     # CNVkit
     analysis_specific_results.append(cnv_dir + "tumor.merged.cns")
     analysis_specific_results.extend(

@@ -6,7 +6,7 @@ import sys
 import shlex
 from datetime import datetime
 from pathlib import Path
-from typing import List, Optional, Union
+from typing import List, Optional, Dict
 
 import click
 
@@ -18,7 +18,6 @@ from BALSAMIC.commands.options import (
     OPTION_MAX_RUN_HOURS,
     OPTION_CACHE_PROFILE,
     OPTION_CLUSTER_QOS,
-    OPTION_COSMIC_KEY,
     OPTION_FORCE_ALL,
     OPTION_GENOME_VERSION,
     OPTION_OUT_DIR,
@@ -57,7 +56,6 @@ LOG = logging.getLogger(__name__)
 @OPTION_MAX_RUN_HOURS
 @OPTION_CACHE_PROFILE
 @OPTION_CLUSTER_QOS
-@OPTION_COSMIC_KEY
 @OPTION_FORCE_ALL
 @OPTION_GENOME_VERSION
 @OPTION_QUIET
@@ -71,7 +69,6 @@ def initialize(
     context: click.Context,
     account: Optional[str],
     cache_version: str,
-    cosmic_key: str,
     force_all: bool,
     genome_version: GenomeVersion,
     out_dir: str,
@@ -98,12 +95,6 @@ def initialize(
         LOG.error("A cluster account is required for cluster run mode")
         raise click.Abort()
 
-    if genome_version in [GenomeVersion.HG19, GenomeVersion.HG38] and not cosmic_key:
-        LOG.error(
-            f"No COSMIC authentication key specified. It is required when using {genome_version} reference"
-        )
-        raise click.Abort()
-
     out_dir: Path = Path(out_dir, cache_version).absolute()
     references_dir: Path = Path(out_dir, genome_version)
     genome_dir = Path(references_dir, "genome")
@@ -116,7 +107,13 @@ def initialize(
     for dir_path in [references_dir, log_dir, script_dir]:
         dir_path.mkdir(parents=True, exist_ok=True)
 
-    references: Union[ReferencesHg, ReferencesCanFam] = REFERENCE_FILES[genome_version]
+    references_dict: Dict[str, dict] = REFERENCE_FILES[genome_version]
+
+    if genome_version == GenomeVersion.CanFam3:
+        references: ReferencesCanFam = ReferencesCanFam.model_validate(references_dict)
+    else:
+        references: ReferencesHg = ReferencesHg.model_validate(references_dict)
+
     cache_config: CacheConfig = CacheConfig(
         analysis={"case_id": f"reference.{genome_version}.{cache_version}"},
         references_dir=references_dir.as_posix(),
@@ -125,7 +122,6 @@ def initialize(
         vep_dir=vep_dir.as_posix(),
         containers_dir=containers_dir.as_posix(),
         genome_version=genome_version,
-        cosmic_key=cosmic_key,
         bioinfo_tools=BIOINFO_TOOL_ENV,
         containers=get_containers(cache_version),
         references=references,
