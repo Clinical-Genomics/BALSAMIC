@@ -118,7 +118,7 @@ requirements: List[str] = [
 
 extras = {
     "test": [
-        "pytest==7.4.0",
+        "pytest==9.0.3",
         "pytest-cov==4.1.0",
         "pysam==0.23.0",
         "vcfpy==0.13.4",
@@ -127,7 +127,7 @@ extras = {
         "black==23.7.0",
         "bump2version==1.0.1",
         "coveralls==3.3.1",
-        "pytest==7.4.0",
+        "pytest==9.0.3",
         "pytest-cov==4.1.0",
         "vcfpy==0.13.4",
     ],
