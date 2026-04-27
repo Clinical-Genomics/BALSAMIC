@@ -98,7 +98,7 @@ REFERENCE_FILES: Dict[GenomeVersion, Dict[str, dict]] = {
             "dir_name": "variants",
         },
         "vcf_1kg": {
-            "url": "gs://genomics-public-data/ftp-trace.ncbi.nih.gov/1000genomes/ftp/release/20130502/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5a.20130502.sites.vcf.gz",
+            "url": "https://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5c.20130502.sites.vcf.gz",
             "file_type": FileType.VCF,
             "gzip": True,
             "file_name": "1k_genome_wgs_p1_v3_all_sites.vcf",
