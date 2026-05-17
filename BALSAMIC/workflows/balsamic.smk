@@ -493,6 +493,20 @@ if config["analysis"]["sequencing_type"] != "wgs":
                 )
             )
 
+if sequencing_type == SequencingType.WGS:
+    # IGV files for CNV analysis
+    analysis_specific_results.extend(
+        expand(
+            cnv_dir + "SNV.germline.{sample}.dnascope_gnomad_af5.bedgraph",
+            sample=sample_names,
+        )
+    )
+    analysis_specific_results.extend(
+        expand(
+            cnv_dir + "{sample}.denoisedCR.binned.bedgraph",
+            sample=sample_names,
+        )
+    )
 
 if (
     config["analysis"]["sequencing_type"] == "wgs"

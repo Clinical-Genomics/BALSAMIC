@@ -121,6 +121,9 @@ WORKFLOW_PARAMS = {
     "bed_pre_processing": {
         "minimum_region_size": 100,
     },
+    "igv_cnr_binning": {
+        "bins_per_window": 5,
+    },
     "common": {
         "header_per_lane": "'@RG\\tID:{fastq_pattern}\\tSM:{sample_type}\\tPL:ILLUMINAi'",
         "header_per_sample": "'@RG\\tID:{sample}\\tSM:{sample_type}\\tPL:ILLUMINAi'",
