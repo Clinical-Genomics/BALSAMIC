@@ -104,11 +104,12 @@ Table of potentially affected steps in storage, clinical delivery, and upload of
 
 <!--
 For each affected workflow above, verify that all required files are stored, delivered and uploaded.
-If none are affected, this step can be ignored. 
-
-To find which files should be delivered per workflow you can consult a sheet in the Balsamic/validations directory on the CG drive, called "Files to be delivered to Caesar for Balsamic".
+If none are affected, this step can be ignored.
 -->
 
+**Finding which files to deliver to Ceasar**
+
+To find which files should be delivered per workflow you can consult a sheet in the Balsamic/validations directory on the CG drive, called "Files to be delivered to Caesar for Balsamic".
 
 | Case ID        | Analysis type       | Storage status | Delivery status | Upload  status | 
 |----------------|---------------------|----------------|----------------|----------------|
