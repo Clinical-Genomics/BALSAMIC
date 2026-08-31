@@ -98,7 +98,7 @@ REFERENCE_FILES: Dict[GenomeVersion, Dict[str, dict]] = {
             "dir_name": "variants",
         },
         "vcf_1kg": {
-            "url": "gs://genomics-public-data/ftp-trace.ncbi.nih.gov/1000genomes/ftp/release/20130502/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5a.20130502.sites.vcf.gz",
+            "url": "https://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5c.20130502.sites.vcf.gz",
             "file_type": FileType.VCF,
             "gzip": True,
             "file_name": "1k_genome_wgs_p1_v3_all_sites.vcf",
@@ -116,13 +116,6 @@ REFERENCE_FILES: Dict[GenomeVersion, Dict[str, dict]] = {
             "file_type": FileType.VCF,
             "gzip": False,
             "file_name": "gnomad.genomes.r2.1.1.sites.vcf.bgz.tbi",
-            "dir_name": "variants",
-        },
-        "cosmic": {
-            "url": "https://cancer.sanger.ac.uk/cosmic/file_download/GRCh37/cosmic/v97/VCF/CosmicCodingMuts.vcf.gz",
-            "file_type": FileType.VCF,
-            "gzip": True,
-            "file_name": "cosmic_coding_muts_v97.vcf",
             "dir_name": "variants",
         },
         "wgs_calling_regions": {
@@ -237,6 +230,13 @@ REFERENCE_FILES: Dict[GenomeVersion, Dict[str, dict]] = {
             "file_name": "hg19.simple_repeat.txt.gz",
             "dir_name": "variants",
         },
+        "cytoband_coordinates": {
+            "url": "https://hgdownload.cse.ucsc.edu/goldenpath/hg19/database/cytoBand.txt.gz",
+            "file_type": FileType.TSV,
+            "gzip": True,
+            "file_name": "cytoBand.txt",
+            "dir_name": "genome",
+        },
     },
     GenomeVersion.HG38: {
         "reference_genome": {
@@ -293,13 +293,6 @@ REFERENCE_FILES: Dict[GenomeVersion, Dict[str, dict]] = {
             "file_type": FileType.VCF,
             "gzip": False,
             "file_name": "gnomad.genomes.r2.1.1.sites.vcf.bgz.tbi",
-            "dir_name": "variants",
-        },
-        "cosmic": {
-            "url": "https://cancer.sanger.ac.uk/cosmic/file_download/GRCh38/cosmic/v97/VCF/CosmicCodingMuts.vcf.gz",
-            "file_type": FileType.VCF,
-            "gzip": True,
-            "file_name": "cosmic_coding_muts_v97.vcf",
             "dir_name": "variants",
         },
         "wgs_calling_regions": {

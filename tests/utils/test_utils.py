@@ -514,7 +514,7 @@ def test_read_yaml(metrics_yaml_path):
     """Test data extraction from a saved YAML file."""
 
     # GIVEN an expected output
-    n_metrics = 12  # Number of expected metric
+    n_metrics = 13  # Number of expected metric
 
     dropout_metric = {
         "header": None,

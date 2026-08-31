@@ -1,6 +1,3 @@
-"""Rules for merging PDF reports."""
-
-
 rule merge_cnv_pdf_reports:
     """Rule for merging CNV PDF reports."""
     input:

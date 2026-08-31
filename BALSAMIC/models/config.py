@@ -161,6 +161,7 @@ class AnalysisModel(BaseModel):
     """
 
     case_id: str
+    cust_case_id: Optional[str] = None
     soft_filter_normal: Optional[bool] = False
     analysis_type: AnalysisType
     gender: Optional[Gender] = None
@@ -178,6 +179,7 @@ class AnalysisModel(BaseModel):
     pon_version: Optional[str] = None
     pon_workflow: Optional[PONWorkflow] = None
     rescue_snvs: Optional[Annotated[str, AfterValidator(is_file)]] = None
+    cancergenes: Optional[Annotated[str, AfterValidator(is_file)]] = None
 
     @field_validator("pon_version")
     def validate_pon_version(cls, pon_version: Optional[str]):

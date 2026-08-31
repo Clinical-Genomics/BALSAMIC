@@ -357,7 +357,6 @@ def reference():
         "known_indel_1kg": "variants/1kg_known_indels_b37.vcf.gz",
         "mills_1kg": "variants/mills_1kg_index.vcf.gz",
         "gnomad_variant": "variants/gnomad.genomes.r2.1.1.sites.vcf.bgz",
-        "cosmic": "variants/cosmic_coding_muts_v89.vcf.gz",
         "vep_dir": "vep/",
         "refgene_flat": "genome/refseq.flat",
         "refgene_txt": "genome/refGene.txt",
@@ -378,6 +377,7 @@ def reference():
         "cadd_snv": "variants/hg19.cadd_snv.tsv.gz",
         "cadd_annotations": "cadd/",
         "simple_repeat": "genome/simpleRepeat.txt.gz",
+        "cytoband_coordinates": "genome/cytoBand.txt",
     }
 
 
@@ -580,6 +580,14 @@ def pon_config_dict_w_singularity(
 def cadd_annotations(test_data_dir: str) -> str:
     """Return path for CADD annotations."""
     return Path(test_data_dir, "references", "cadd").as_posix()
+
+
+@pytest.fixture(scope="session")
+def cancer_genelist(test_data_dir: str) -> str:
+    """Return path for oncokb cancer genelist annotations."""
+    cancergenelist = Path(test_data_dir, "references", "cancerGeneList.tsv")
+    cancergenelist.touch()
+    return cancergenelist.as_posix()
 
 
 @pytest.fixture(scope="session")
@@ -1373,6 +1381,7 @@ def config_case_cli_wgs(
     balsamic_cache: str,
     background_variant_file: str,
     cadd_annotations: str,
+    cosmic_file: str,
     swegen_snv_frequency_path: str,
     swegen_sv_frequency_path: str,
     clinical_snv_observations_path: str,
@@ -1398,6 +1407,8 @@ def config_case_cli_wgs(
         swegen_snv_frequency_path,
         "--swegen-sv",
         swegen_sv_frequency_path,
+        "--cosmic",
+        cosmic_file,
         "--clinical-snv-observations",
         clinical_snv_observations_path,
         "--clinical-sv-observations",
@@ -1418,6 +1429,8 @@ def config_case_cli_wgs(
         gens_min_5_af_gnomad_file,
         "--gens-coverage-pon",
         gens_cov_pon_file,
+        "--cust-case-id",
+        "cust-casiid",
     ]
 
 
@@ -1426,6 +1439,7 @@ def config_case_cli_tga(
     balsamic_cache: str,
     background_variant_file: str,
     cadd_annotations: str,
+    cosmic_file: str,
     swegen_snv_frequency_path: str,
     swegen_sv_frequency_path: str,
     clinical_snv_observations_path: str,
@@ -1436,6 +1450,7 @@ def config_case_cli_tga(
     sentieon_license: str,
     sentieon_install_dir: str,
     gens_min_5_af_gnomad_file: str,
+    cancer_genelist: str,
 ) -> List[str]:
     """Return common config case CLI."""
     return [
@@ -1443,8 +1458,12 @@ def config_case_cli_tga(
         balsamic_cache,
         "--background-variants",
         background_variant_file,
+        "--cancer-genelist",
+        cancer_genelist,
         "--cadd-annotations",
         cadd_annotations,
+        "--cosmic",
+        cosmic_file,
         "--swegen-snv",
         swegen_snv_frequency_path,
         "--swegen-sv",
@@ -1467,6 +1486,8 @@ def config_case_cli_tga(
         sentieon_license,
         "--gnomad-min-af5",
         gens_min_5_af_gnomad_file,
+        "--cust-case-id",
+        "cust-casiid",
     ]
 
 
@@ -2177,12 +2198,6 @@ def fixture_timestamp_now() -> datetime:
     return datetime.now()
 
 
-@pytest.fixture(scope="session", name="cosmic_key")
-def fixture_cosmic_key() -> str:
-    """Return a mocked COSMIC key."""
-    return "ZW1haWxAZXhhbXBsZS5jb206bXljb3NtaWNwYXNzd29yZAo="
-
-
 @pytest.fixture(scope="session", name="develop_containers")
 def fixture_develop_containers() -> Dict[str, str]:
     """Return a dictionary of docker hub containers for develop branch."""
@@ -2211,7 +2226,6 @@ def fixture_develop_containers() -> Dict[str, str]:
 def fixture_cache_config_data(
     cache_analysis: CacheAnalysis,
     develop_containers: Dict[str, str],
-    cosmic_key: str,
     timestamp_now: datetime,
     session_tmp_path: Path,
 ) -> Dict[str, Any]:
@@ -2225,7 +2239,6 @@ def fixture_cache_config_data(
         "vep_dir": session_tmp_path,
         "containers_dir": session_tmp_path,
         "genome_version": GenomeVersion.HG19,
-        "cosmic_key": cosmic_key,
         "bioinfo_tools": BIOINFO_TOOL_ENV,
         "containers": develop_containers,
         "references": REFERENCE_FILES[GenomeVersion.HG19],
@@ -2321,9 +2334,8 @@ def fixture_clinvar_file(session_tmp_path: Path) -> Path:
 @pytest.fixture(scope="session", name="cosmic_file")
 def fixture_cosmic_file(session_tmp_path: Path) -> Path:
     """Return dummy cosmic file."""
-    cosmic_file: Path = Path(
-        session_tmp_path, "variants", "cosmic_coding_muts_v97.vcf.gz"
-    )
+    cosmic_file: Path = session_tmp_path / "cosmic_coding_muts_v97.vcf.gz"
+    cosmic_file.parent.mkdir(parents=True, exist_ok=True)
     cosmic_file.touch()
     return cosmic_file
 
@@ -2390,7 +2402,6 @@ def fixture_analysis_references_hg_data(
     analysis_references_data: Dict[str, Path],
     delly_exclusion_converted_file: Path,
     clinvar_processed: Path,
-    cosmic_file: Path,
     dbsnp_file: Path,
     hc_vcf_1kg_file: Path,
     known_indel_1kg_file: Path,
@@ -2408,7 +2419,6 @@ def fixture_analysis_references_hg_data(
         "cadd_snv": Path(cache_config.references.cadd_snv.file_path),
         "simple_repeat": Path(cache_config.references.simple_repeat.file_path),
         "clinvar": clinvar_processed,
-        "cosmic": cosmic_file,
         "dbsnp": dbsnp_file,
         "delly_exclusion": Path(cache_config.references.delly_exclusion.file_path),
         "delly_exclusion_converted": delly_exclusion_converted_file,
@@ -2423,6 +2433,9 @@ def fixture_analysis_references_hg_data(
         "vep_dir": cache_config.references_dir,
         "wgs_calling_regions": Path(
             cache_config.references.wgs_calling_regions.file_path
+        ),
+        "cytoband_coordinates": Path(
+            cache_config.references.cytoband_coordinates.file_path
         ),
     }
     analysis_references_hg_data.update(analysis_references_data)
@@ -2453,7 +2466,8 @@ def fixture_reference_file(session_tmp_path: Path) -> Path:
 
 @pytest.fixture(scope="session", name="reference_url_data")
 def fixture_reference_url_data(
-    reference_url: Url, reference_file: Path, cosmic_key: str
+    reference_url: Url,
+    reference_file: Path,
 ) -> Dict[str, Any]:
     """return reference url model data."""
     return {
@@ -2463,7 +2477,6 @@ def fixture_reference_url_data(
         "file_name": "reference.vcf",
         "dir_name": "variants",
         "file_path": reference_file.as_posix(),
-        "secret": cosmic_key,
     }
 
 

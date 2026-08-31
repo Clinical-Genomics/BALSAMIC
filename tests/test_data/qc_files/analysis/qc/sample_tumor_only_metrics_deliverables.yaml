@@ -29,6 +29,13 @@
 - header: null
   id: ACC1
   input: ACC1.dedup.realign.hsmetric
+  name: AT_DROPOUT
+  step: multiqc_picard_HsMetrics
+  value: 6.093115
+  condition: null
+- header: null
+  id: ACC1
+  input: ACC1.dedup.realign.hsmetric
   name: GC_DROPOUT
   step: multiqc_picard_HsMetrics
   value: 0.027402

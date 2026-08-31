@@ -106,7 +106,7 @@ def test_reference_url(reference_url_data: Dict[str, Any]):
     model: ReferenceUrl = ReferenceUrl(**reference_url_data)
 
     # THEN the model should have been correctly built
-    assert model.model_dump() == reference_url_data
+    assert model.model_dump(exclude_none=True) == reference_url_data
 
 
 def test_reference_url_empty():
@@ -405,24 +405,6 @@ def test_cache_config_empty_file_path(cache_config_data: Dict[str, dict]):
         assert reference[1].file_path
 
 
-def test_cache_config_empty_cosmic_key(
-    cache_config_data: Dict[str, dict], cosmic_key: str
-):
-    """Test cache config model reference validation method and cosmic key assignment."""
-
-    # GIVEN a cache config model data with empty cosmic keys
-
-    # WHEN initialising the model
-    model: CacheConfig = CacheConfig(**cache_config_data)
-
-    # THEN a cosmic key should only have been assigned to a cosmic reference file
-    for reference in model.references:
-        if reference[0] == "cosmic":
-            assert reference[1].secret == cosmic_key
-            continue
-        assert reference[1].secret is None
-
-
 def test_get_grch_version(cache_config: CacheConfig):
     """Test extraction of the GRCH format version having a specific genome version."""
 
@@ -524,11 +506,9 @@ def test_get_reference_file_paths_by_compression(cache_config: CacheConfig):
     )
 
     # THEN the expected reference path should be returned
-    assert len(reference_paths) == 11
     for reference in [
         cache_config.references.ascat_gc_correction.file_path,
         cache_config.references.clinvar.file_path,
-        cache_config.references.cosmic.file_path,
         cache_config.references.dbsnp.file_path,
         cache_config.references.hc_vcf_1kg.file_path,
         cache_config.references.known_indel_1kg.file_path,
@@ -537,6 +517,7 @@ def test_get_reference_file_paths_by_compression(cache_config: CacheConfig):
         cache_config.references.refgene_txt.file_path,
         cache_config.references.somalier_sites.file_path,
         cache_config.references.vcf_1kg.file_path,
+        cache_config.references.cytoband_coordinates.file_path,
     ]:
         assert reference in reference_paths
 
@@ -550,7 +531,7 @@ def test_get_compressed_indexed_vcf_paths(cache_config: CacheConfig):
     compressed_indexed_vcfs: List[str] = cache_config.get_compressed_indexed_vcf_paths()
 
     # THEN the indexed VCFs should be returned
-    assert len(compressed_indexed_vcfs) == 8
+    assert len(compressed_indexed_vcfs) == 7
     for reference in [
         cache_config.references.dbsnp.file_path,
         cache_config.references.vcf_1kg.file_path,
@@ -559,7 +540,6 @@ def test_get_compressed_indexed_vcf_paths(cache_config: CacheConfig):
         cache_config.references.clinvar.file_path,
         cache_config.references.somalier_sites.file_path,
         cache_config.references.hc_vcf_1kg.file_path,
-        cache_config.references.cosmic.file_path,
     ]:
         assert f"{reference}.{FileType.GZ}.{FileType.TBI}" in compressed_indexed_vcfs
 
@@ -587,7 +567,20 @@ def test_get_reference_output_paths(cache_config: CacheConfig):
     reference_output_paths: List[str] = cache_config.get_reference_output_paths()
 
     # THEN all the reference paths should be returned
-    assert len(reference_output_paths) == 46
+    assert len(reference_output_paths) == 45
+
+
+def test_get_reference_output_paths_canfam(cache_config: CacheConfig):
+    """Test get reference list to be downloaded."""
+
+    # GIVEN a cache config model with genome_version = CanFam3
+    cache_config.genome_version = GenomeVersion.CanFam3
+
+    # WHEN retrieving the reference output paths
+    reference_output_paths: List[str] = cache_config.get_reference_output_paths()
+
+    # THEN all the reference paths should be returned
+    assert len(reference_output_paths) == 12
 
 
 def test_get_analysis_references_hg(
