@@ -13,17 +13,14 @@ rule fastqc:
         Path(singularity_image, config["bioinfo_tools"].get("fastqc") + ".sif").as_posix()
     params:
         fastqc_dir = fastqc_dir,
-        fastq_file_name = "{fastq_file_names}",
-        tmpdir = tempfile.mkdtemp(prefix=tmp_dir)
+        fastq_file_name = "{fastq_file_names}"
     message:
         "Running FastQC on {params.fastq_file_name}"
     shell:
         """
-export TMPDIR={params.tmpdir};
-    
-fastqc --threads {threads} {input.fastq} \
---dir {params.tmpdir} \
---outdir {params.fastqc_dir};
+export TMPDIR="${{TMPDIR:-/tmp}}";
 
-rm -rf {params.tmpdir}
+fastqc --threads {threads} {input.fastq} \
+--dir "$TMPDIR" \
+--outdir {params.fastqc_dir};
         """
