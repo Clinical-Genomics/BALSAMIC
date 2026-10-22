@@ -288,16 +288,19 @@ rule bcftools_sort_cnvkitCNV_research:
     message:
         ("Sorting CNVs using bcftools for {params.case_name}")
     shell:
-        """
-        bcftools sort \
-            -O z \
-            -o {output.vcf} \
-            --temp-dir {params.tmpdir} \
-            {input.vcf};
+      """
+bgzip -f -k -l 9 {input.vcf};
 
-        tabix -p vcf -f {output.vcf};
+tabix -p vcf -f {input.vcf}.gz;
 
-        echo -e \"{params.tumor}\\tTUMOR\" > {output.namemap}; 
+bcftools sort \
+-o {output.vcf} \
+--temp-dir {params.tmpdir} \
+-O z {input.vcf}.gz;
 
-        rm -rf {params.tmpdir};
-        """
+tabix -p vcf -f {output.vcf};
+
+echo -e \"{params.tumor}\\tTUMOR\" > {output.namemap}; 
+
+rm -rf {params.tmpdir};
+      """
