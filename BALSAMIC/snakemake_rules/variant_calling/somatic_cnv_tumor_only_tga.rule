@@ -297,7 +297,7 @@ rule bcftools_sort_cnvkitCNV_research:
 
         tabix -p vcf -f {output.vcf};
 
-        echo -e "{params.tumor}\\tTUMOR\\n{params.normal}\\tNORMAL" > {output.namemap};
+        echo -e \"{params.tumor}\\tTUMOR\" > {output.namemap}; 
 
         rm -rf {params.tmpdir};
         """
