@@ -12,7 +12,6 @@ Removed:
 
 Fixed:
 ^^^^^^
-* added "-f" flag to bgzip for cnvkit to overwrite existing bgzipped file https://github.com/Clinical-Genomics/BALSAMIC/pull/1679
 
 [19.0.0]
 -------
