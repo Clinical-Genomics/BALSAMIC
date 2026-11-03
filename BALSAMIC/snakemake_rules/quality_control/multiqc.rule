@@ -94,13 +94,6 @@ else:
         multiqc_input.extend(expand(qc_dir + "fastp/normal.{sample}_qualitytrim_fastp.json",sample=normal_sample))
         multiqc_input.extend(expand(qc_dir + "fastp/normal.{sample}_qualitytrim_fastp.html",sample=normal_sample))
 
-    # sambamba metrics
-    multiqc_input.extend(expand(qc_dir + "tumor.{sample}.cov.bed", sample=tumor_sample))
-    multiqc_input.extend(expand(qc_dir + "tumor.{sample}.exon.cov.bed", sample=tumor_sample))
-    if config['analysis']['analysis_type'] == "paired":
-        multiqc_input.extend(expand(qc_dir + "normal.{sample}.cov.bed",sample=normal_sample))
-        multiqc_input.extend(expand(qc_dir + "normal.{sample}.exon.cov.bed",sample=normal_sample))
-
     # mosdepth metrics
     mosdepth_metrics_wildcard = ["mosdepth.global.dist.txt", "mosdepth.region.dist.txt",
                                  "mosdepth.summary.txt", "per-base.bed.gz", "regions.bed.gz"]
