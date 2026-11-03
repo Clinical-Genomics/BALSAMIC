@@ -69,7 +69,5 @@ python {params.rescue_script} --vcf {params.tmpdir}/clinical.filtered.pass_befor
 
 bcftools view --threads {threads} --exclude '{params.hard_filters}' -O z -o {output.vcf_pass_tnscope} {params.tmpdir}/clinical.filtered.pass_after_rescue.vcf;
 
-tabix -p vcf -f {output.vcf_pass_tnscope};
-
 bcftools +counts {output.vcf_pass_tnscope} > {output.bcftools_counts_clinical};
     """

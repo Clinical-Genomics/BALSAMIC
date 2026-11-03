@@ -2,9 +2,37 @@
 # coding: utf-8
 # Somatic SNV annotation module.
 
+rule snv_gnomad_annotation_and_filtration:
+  input:
+    vcf_snv_research = vcf_dir + "SNV.somatic.{case_name}.{var_caller}.research.vcf.gz",
+  output:
+    research_gnomadfiltered = vcf_dir + "SNV.somatic.{case_name}.{var_caller}.research_gnomadfiltered.vcf.gz",
+    vcfanno_gnomad_annotation_toml = vcf_dir + "SNV.somatic.{case_name}.{var_caller}.vcfanno_gnomadsnv.toml"
+  benchmark:
+    Path(benchmark_dir, "snv_gnomad_annotation_and_filtration.{case_name}.{var_caller}.tsv").as_posix()
+  singularity:
+    Path(singularity_image, config["bioinfo_tools"].get("ensembl-vep") + ".sif").as_posix()
+  params:
+    pop_freq = get_tag_and_filtername(snv_post_quality_filters, "gnomad_hard_threshold"),
+    gnomad_annotation = config_model.retrieve_annotations_toml(category=AnnotationCategory.POST_QUALITY),
+    tmpdir = tempfile.mkdtemp(prefix=tmp_dir)
+  message:
+    "Annotating and filtering based on gnomad frequencies on SNVs and INDELs"
+  shell:
+        """
+echo \'{params.gnomad_annotation}\' > {output.vcfanno_gnomad_annotation_toml};
+
+vcfanno -p {threads} {output.vcfanno_gnomad_annotation_toml} {input.vcf_snv_research} \
+| bcftools view --threads {threads} -O z -o {params.tmpdir}/SNV.somatic.research.gnomad_annotated.vcf.gz ;
+
+bcftools filter --threads {threads} --include 'INFO/GNOMADAF_popmax <= {params.pop_freq[0]} || INFO/GNOMADAF_popmax == \".\"' -O z -o {output.research_gnomadfiltered} {params.tmpdir}/SNV.somatic.research.gnomad_annotated.vcf.gz
+
+tabix -p vcf -f {output.research_gnomadfiltered};
+        """
+
 rule bcftools_get_somaticINDEL_research:
   input:
-    vcf_research = vcf_dir + "SNV.somatic.{case_name}.{var_caller}.research.vcf.gz",
+    vcf_research = vcf_dir + "SNV.somatic.{case_name}.{var_caller}.research_gnomadfiltered.vcf.gz",
   output:
     vcf_indel_research = vcf_dir + "SNV.somatic.{case_name}.{var_caller}.indel.research.vcf.gz",
   benchmark:
@@ -43,7 +71,7 @@ CADD.sh -g GRCh37 -o {output.cadd_indel_research} {input.vcf_indel_research}
 
 rule bcftools_annotate_somaticINDEL_research:
   input:
-    vcf_research = vcf_dir + "SNV.somatic.{case_name}.{var_caller}.research.vcf.gz",
+    vcf_research = vcf_dir + "SNV.somatic.{case_name}.{var_caller}.research_gnomadfiltered.vcf.gz",
     cadd_indel_research = vep_dir + "SNV.somatic.{case_name}.{var_caller}.cadd_indel.research.tsv.gz",
   output:
     vcf_indel_research = vep_dir + "SNV.somatic.{case_name}.{var_caller}.cadd_indel.research.vcf.gz",
