@@ -11,7 +11,7 @@ Adapter sequences are trimmed using fastp v0.23.2 :superscript:`3` and then UMI 
 Trimmed reads were mapped to the reference genome hg19 using sentieon-tools :superscript:`15`.
 The resulting BAM is quality controlled using samtools v1.15.1 :superscript:`26`, and AlignmentStat, InsertSizeMetricAlgo, GCBias, MeanQualityByCycle, QualDistribution and BaseDistributionByCycle from sentieon-tools :superscript:`15`.
 Duplicate reads are collapsed using the UMI function in Dedup from sentieon-tools :superscript:`15`, and invalid mates are corrected with tools collate and fixmate from samtools v1.15.1 :superscript:`26`.
-Coverage metrics are collected from the final BAM using Sambamba v0.8.2 :superscript:`27`, Mosdepth v0.3.3 :superscript:`28` and CollectHsMetrics from Picard tools v2.27.1 :superscript:`6`.
+Coverage metrics are collected from the final BAM using Mosdepth v0.3.3 :superscript:`28` and CollectHsMetrics from Picard tools v2.27.1 :superscript:`6`.
 Results of the quality controlled steps were summarized by MultiQC v1.31 :superscript:`7`.
 Small somatic mutations (SNVs and INDELs) and SVs were called using VarDict 2019.06.04 :superscript:`8` and Sentieon TNscope :superscript:`16` and normalised using bcftools norm before being filtered using the criteria (*MQ >= 30, DP >= 50 (20 for exome-samples), VD >= 5, Minimum AF >= 0.005, Maximum AF < 1, GNOMADAF_popmax <= 0.005, swegen AF < 0.01*) and then merged using a custom python script.
 Only those variants that fulfilled the filtering criteria and scored as `PASS` in the VCF file were reported.

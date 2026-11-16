@@ -54,7 +54,6 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
         "qc": [
             "snakemake_rules/quality_control/fastp_tga.rule",
             "snakemake_rules/quality_control/picard.rule",
-            "snakemake_rules/quality_control/sambamba_depth.rule",
             "snakemake_rules/quality_control/mosdepth.rule",
             "snakemake_rules/concatenation/concatenation.rule",
             "snakemake_rules/umi/qc_umi.rule",
@@ -90,7 +89,6 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
         "qc": [
             "snakemake_rules/quality_control/fastp_tga.rule",
             "snakemake_rules/quality_control/picard.rule",
-            "snakemake_rules/quality_control/sambamba_depth.rule",
             "snakemake_rules/quality_control/mosdepth.rule",
             "snakemake_rules/umi/qc_umi.rule",
             "snakemake_rules/quality_control/somalier.rule",

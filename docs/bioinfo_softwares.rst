@@ -106,12 +106,6 @@ picard
 :Article: `-`
 :Version: `2.27.1`
 
-sambamba
-~~~~~~~~
-:Source code: `GitHub` `<https://github.com/biod/sambamba>`_
-:Article: `Bioinformatics` `<https://pubmed.ncbi.nlm.nih.gov/25697820/>`_
-:Version: `0.8.2`
-
 samtools
 ~~~~~~~~
 :Source code: `GitHub` `<https://github.com/samtools/samtools>`_

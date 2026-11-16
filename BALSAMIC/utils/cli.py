@@ -323,7 +323,7 @@ def get_fastq_info(sample_name: str, fastq_path: str) -> Dict[str, FastqInfoMode
         LOG.error(error_message)
         raise BalsamicError(error_message)
 
-    return fastq_dict
+    return dict(sorted(fastq_dict.items()))
 
 
 def get_sample_list(
