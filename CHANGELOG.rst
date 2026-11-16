@@ -3,6 +3,7 @@
 
 Added:
 ^^^^^^
+* added sorting of fastqpair dictionary in case config https://github.com/Clinical-Genomics/BALSAMIC/pull/1683
 
 Changed:
 ^^^^^^^^
