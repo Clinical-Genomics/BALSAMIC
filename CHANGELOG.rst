@@ -3,6 +3,7 @@
 
 Added:
 ^^^^^^
+* added sorting of fastqpair dictionary in case config
 
 Changed:
 ^^^^^^^^
