@@ -178,6 +178,16 @@ class BEDPreProcessingParams(BaseModel):
     minimum_region_size: int
 
 
+class IGVCNRBinning(BaseModel):
+    """This class defines the params settings used as constants in IGV CNR binning rules.
+
+    Attributes:
+       bins_per_window: int (required); number of adjacent bins to merge by average into a window
+    """
+
+    bins_per_window: int
+
+
 class ParamsVardict(BaseModel):
     """This class defines the params settings used as constants in vardict rule.
 
@@ -202,6 +212,7 @@ class BalsamicWorkflowConfig(BaseModel):
     Attributes:
         common: global params defined across all rules in balsamic workflow
         bam_post_processing: params used in bam post-processing rules
+        igv_cnr_binning: params used in igv cnr binning script
         manta: params used in the manta rules
         mosdepth: params used in mosdepth rule
         umicommon: global params defined across specific rules in UMI workflow
@@ -218,6 +229,7 @@ class BalsamicWorkflowConfig(BaseModel):
 
     bam_post_processing: BAMPostProcessingParams
     bed_pre_processing: BEDPreProcessingParams
+    igv_cnr_binning: IGVCNRBinning
     common: ParamsCommon
     insert_size_metrics: ParamsInsertSizeMetrics
     manta: ParamsManta

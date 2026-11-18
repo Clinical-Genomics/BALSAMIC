@@ -10,6 +10,12 @@ set-resources:
   all:
     runtime: 60
     mem_mb: 4000
+  baf_igv_bedgraphs:
+    runtime: 60
+    mem_mb: 7000
+  cnr_binning_igv_bedgraphs:
+    runtime: 60
+    mem_mb: 7000
   post_process_tnscope_info_fields_wgs:
     runtime: 60
     mem_mb: min(230000, 5000 * attempt)
@@ -503,6 +509,8 @@ set-resources:
     runtime: 800
 
 set-threads:
+  baf_igv_bedgraphs: 2
+  cnr_binning_igv_bedgraphs: 2
   create_final_vcf_namemap: 2
   post_process_tnscope_info_fields_wgs: 1
   post_process_tnscope_info_fields_tga: 1

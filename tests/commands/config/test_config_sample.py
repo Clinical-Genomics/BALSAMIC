@@ -446,9 +446,9 @@ def test_missing_gens_arguments_tga(
     sentieon_install_dir: str,
     cosmic_file: str,
 ):
-    """Test balsamic config case without required GENS arguments."""
+    """Test balsamic tga config case without GENS arguments."""
 
-    # GIVEN CLI arguments including optional GENS input-files
+    # GIVEN CLI arguments without optional GENS input-files
 
     # WHEN invoking the config case command
     result = invoke_cli(
@@ -461,6 +461,8 @@ def test_missing_gens_arguments_tga(
             analysis_dir,
             "--fastq-path",
             fastq_dir_tumor_only,
+            "-p",
+            panel_bed_file,
             "--balsamic-cache",
             balsamic_cache,
             "--tumor-sample-name",

@@ -1,0 +1,37 @@
+
+rule baf_igv_bedgraphs:
+    input:
+        gnomad_af5_vcf=cnv_dir + "SNV.germline.{sample}.dnascope_gnomad_af5.vcf.gz",
+    output:
+        gnomad_af5_bedgraph=cnv_dir + "SNV.germline.{sample}.dnascope_gnomad_af5.bedgraph",
+    benchmark:
+        Path(benchmark_dir,"baf_igv_bedgraphs_{sample}.tsv").as_posix()
+    params:
+        igv_baf_script = get_script_path("igv_baf_bedgraph.py"),
+        housekeeper_id = {"id": "{sample}","tags": "cnv"},
+        sample_id = "{sample}",
+    message:
+        "Converting the forced DNAscope calls on gnomad positions to bedgraph for viewing in IGV, for sample {params.sample_id}."
+    shell:
+        """
+python {params.igv_baf_script} {input.gnomad_af5_vcf} {output.gnomad_af5_bedgraph} --track-name {params.sample_id}_gnomad_af5 ; 
+        """
+
+rule cnr_binning_igv_bedgraphs:
+    input:
+        denoised_cr=cnv_dir + "{sample}.denoisedCR.tsv"
+    output:
+        denoised_cr_bedgraph=cnv_dir + "{sample}.denoisedCR.binned.bedgraph"
+    benchmark:
+        Path(benchmark_dir,"cnr_binning_igv_bedgraphs_{sample}.tsv").as_posix()
+    params:
+        igv_cnr_script = get_script_path("igv_cnr_binning_bedgraph.py"),
+        housekeeper_id = {"id": "{sample}","tags": "cnv"},
+        bins_per_window = params.igv_cnr_binning.bins_per_window,
+        sample_id= "{sample}",
+    message:
+        "Converting the noise corrected collect read counts to bedgraph for viewing in IGV, and binning {params.bins_per_window} adjacent regions, for sample {params.sample_id}"
+    shell:
+        """
+python {params.igv_cnr_script} --track-name {params.sample_id}_denoisedCR --bins-per-window {params.bins_per_window} {input.denoised_cr} {output.denoised_cr_bedgraph} ; 
+        """

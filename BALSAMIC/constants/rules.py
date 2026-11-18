@@ -135,6 +135,7 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
         ],
         "varcall": [
             "snakemake_rules/variant_calling/germline_wgs.rule",
+            "snakemake_rules/variant_calling/igv_files.rule",
             "snakemake_rules/variant_calling/sentieon_t_varcall_wgs.rule",
             "snakemake_rules/variant_calling/somatic_sv_tumor_only_wgs.rule",
             "snakemake_rules/dragen_suite/dragen_dna.rule",
@@ -157,6 +158,7 @@ SNAKEMAKE_RULES: Dict[str, Dict[str, list]] = {
         ],
         "varcall": [
             "snakemake_rules/variant_calling/germline_wgs.rule",
+            "snakemake_rules/variant_calling/igv_files.rule",
             "snakemake_rules/variant_calling/sentieon_tn_varcall_wgs.rule",
             "snakemake_rules/variant_calling/somatic_sv_tumor_normal_wgs.rule",
             "snakemake_rules/variant_calling/somatic_sv_postprocess_and_filter_tumor_normal.rule",
@@ -213,6 +215,8 @@ DELIVERY_RULES: List[str] = [
     "tiddit_sv_tumor_normal_wgs",
     "tiddit_sv_tumor_only_wgs",
     # CNVs
+    "baf_igv_bedgraphs",
+    "cnr_binning_igv_bedgraphs",
     "delly_cnv_tumor_only",
     "delly_cnv_tumor_normal",
     "delly_cnv_tumor_normal_wgs",
